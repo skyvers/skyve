@@ -22,9 +22,9 @@ import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
 
 public class ReportTemplateExtension extends ReportTemplate {
-
 	private static final long serialVersionUID = -7147172221052954971L;
-	private static final CronDefinition cronDefinition = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
+
+	private static final CronDefinition CRON_DEFINITION = CronDefinitionBuilder.instanceDefinitionFor(CronType.QUARTZ);
 
 	private static final String DEFAULT_RECORD_DATASET_NAME = "records";
 	private static final String DEFAULT_TITLE_DATASET_NAME = "title";
@@ -48,7 +48,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 	@Override
 	public String getScheduleDescription() {
 		try {
-			return CronDescriptor.instance().describe(new CronParser(cronDefinition).parse(getCronExpression()));
+			return CronDescriptor.instance().describe(new CronParser(CRON_DEFINITION).parse(getCronExpression()));
 		} catch (@SuppressWarnings("unused") Exception e) {
 			return null;
 		}
