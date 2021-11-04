@@ -38,8 +38,8 @@
 	},
 	// File upload settings
 	// If null or not specified,
-	// 	the whitelistRegex values default to a blacklist = (.*\\/|.*\\\\)?.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)).+$
-	//		(note that Skyve will do case insensitive matching with the whitelistRegex patterns)
+	// 	the whitelistRegex values default to a blacklist = ^.+\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)
+	//		(note that Skyve will do case insensitive multi-line matching with the whitelistRegex patterns)
 	// 	the maximum sizes default to 10MB
 	"uploads": {
 		"file": {
@@ -55,7 +55,7 @@
 			"maximumSizeMB": null
 		},
 		"bizport": {
-			// This defaults to (.*\\/|.*\\\\)?.+\\.(XLS|XLSX)$
+			// This defaults to ^.+\.(XLS|XLSX)$
 			"whitelistRegex": null,
 			"maximumSizeMB": null
 		}
@@ -213,8 +213,10 @@
 		"uid": null, 
 		// Mail server password
 		"pwd": null, 
-		// Extra Java Mail properties { "k.e.y" : "value"}
+		// Extra Java Mail properties {"k.e.y": "value"}
 		"properties": null,
+		// Extra Java Mail headers {"name": "value"}
+		"headers": null,
 		// Sender header value
 		"sender": "mailer@skyve.org", 
 		// Set true so emails are never sent, they are logged

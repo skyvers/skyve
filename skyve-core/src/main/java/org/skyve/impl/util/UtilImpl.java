@@ -202,6 +202,8 @@ public class UtilImpl {
 	public static String SMTP_PWD = null;
 	// Extra java mail properties
 	public static Map<String, String> SMTP_PROPERTIES = null;
+	// Extra java mail headers
+	public static Map<String, String> SMTP_HEADERS = null;
 	public static String SMTP_SENDER = null;
 	// used to intercept all email and send to this test email account
 	public static String SMTP_TEST_RECIPIENT = null;
