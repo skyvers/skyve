@@ -189,6 +189,10 @@
 			<id>skyve</id>
 			<url>https://repo.skyve.org/repository/skyve/</url>
 		</repository>
+		<repository>
+			<id>jaspersoft-third-party</id>
+			<url>https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
+		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -469,18 +473,14 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xhtmlrenderer</groupId>
-				<artifactId>flying-saucer-core</artifactId>
-				<version>${flying-saucer.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xhtmlrenderer</groupId>
 				<artifactId>flying-saucer-pdf</artifactId>
 				<version>${flying-saucer.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xhtmlrenderer</groupId>
-				<artifactId>flying-saucer-swt</artifactId>
-				<version>${flying-saucer.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.lowagie</groupId>
+						<artifactId>itext</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.cronutils</groupId>
