@@ -100,7 +100,7 @@ public class UtilImpl {
 	public static String CONTENT_SERVER_ARGS = null;
 
 	// Allowed file upload file names - default is a blacklist of harmful "executable" files
-	public static String UPLOADS_FILE_WHITELIST_REGEX = "(.*\\/|.*\\\\)?.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)).+$";
+	public static String UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
 	
 	// Max file upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = 10;
@@ -118,7 +118,7 @@ public class UtilImpl {
 	public static int UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 
 	// Allowed bizport upload file names - default is a XLS and XLSX files
-	public static String UPLOADS_BIZPORT_WHITELIST_REGEX = "(.*\\/|.*\\\\)?.+\\.(XLS|XLSX)$";
+	public static String UPLOADS_BIZPORT_WHITELIST_REGEX = "^.+\\.(XLS|XLSX)$";
 	
 	// Max bizport upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;

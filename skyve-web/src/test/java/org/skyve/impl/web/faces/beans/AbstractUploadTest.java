@@ -74,30 +74,44 @@ public class AbstractUploadTest {
 		Assert.assertFalse(content.validFile(file.test(".exe", 10485760), fc)); // exe is blocked
 		Assert.assertFalse(content.validFile(file.test("test.bas", 10485760), fc)); // bas is blocked
 		Assert.assertFalse(content.validFile(file.test("test.exe", 10485760), fc)); // exe is blocked
+		Assert.assertFalse(content.validFile(file.test("test.js", 10485760), fc)); // js is blocked
+		Assert.assertTrue(content.validFile(file.test("test.json", 10485760), fc)); // json is not blocked
 
 		Assert.assertTrue(content.validFile(file.test("test/test.txt", 0), fc));
 		Assert.assertFalse(content.validFile(file.test("test/test.exe", 0), fc)); // exe is blocked
 		Assert.assertFalse(content.validFile(file.test("test/.htaccess", 0), fc)); // starts with .
+		Assert.assertFalse(content.validFile(file.test("test/test.js", 0), fc)); // js is blocked
+		Assert.assertTrue(content.validFile(file.test("test/test.json", 0), fc)); // json is not blocked
 
 		Assert.assertTrue(content.validFile(file.test("/Users/test/test.txt", 0), fc));
 		Assert.assertFalse(content.validFile(file.test("/Users/test/test.exe", 0), fc)); // exe is blocked
 		Assert.assertFalse(content.validFile(file.test("/Users/test/.htaccess", 0), fc)); // starts with .
+		Assert.assertFalse(content.validFile(file.test("/Users/test/test.js", 0), fc)); // js is blocked
+		Assert.assertTrue(content.validFile(file.test("/Users/test/test.json", 0), fc)); // json is not blocked
 
 		Assert.assertTrue(content.validFile(file.test("C:/test.txt", 0), fc));
 		Assert.assertFalse(content.validFile(file.test("C:/test.exe", 0), fc)); // exe is blocked
 		Assert.assertFalse(content.validFile(file.test("C:/test/.htaccess", 0), fc)); // starts with .
+		Assert.assertFalse(content.validFile(file.test("C:/test.js", 0), fc)); // js is blocked
+		Assert.assertTrue(content.validFile(file.test("C:/test.json", 0), fc)); // json is not blocked
 
 		Assert.assertTrue(content.validFile(file.test("/C:/test/test.txt", 0), fc));
 		Assert.assertFalse(content.validFile(file.test("/C:/test/test.exe", 0), fc)); // exe is blocked
 		Assert.assertFalse(content.validFile(file.test("/C:/test/.htaccess", 0), fc)); // starts with .
+		Assert.assertFalse(content.validFile(file.test("C:/test/test.js", 0), fc)); // js is blocked
+		Assert.assertTrue(content.validFile(file.test("C:/test/test.json", 0), fc)); // json is not blocked
 
 		Assert.assertTrue(content.validFile(file.test("C:\\test.txt", 0), fc));
 		Assert.assertFalse(content.validFile(file.test("C:\\test.exe", 0), fc)); // exe is blocked
 		Assert.assertFalse(content.validFile(file.test("C:\\.htaccess", 0), fc)); // starts with .
+		Assert.assertFalse(content.validFile(file.test("C:\\test.js", 0), fc)); // js is blocked
+		Assert.assertTrue(content.validFile(file.test("C:\\test.json", 0), fc)); // json is not blocked
 
 		Assert.assertTrue(content.validFile(file.test("C:\\test\\test.txt", 0), fc));
 		Assert.assertFalse(content.validFile(file.test("C:\\test\\test.exe", 0), fc)); // exe is blocked
 		Assert.assertFalse(content.validFile(file.test("C:\\test\\.htaccess", 0), fc)); // starts with .
+		Assert.assertFalse(content.validFile(file.test("C:\\test\\test.js", 0), fc)); // js is blocked
+		Assert.assertTrue(content.validFile(file.test("C:\\test\\test.json", 0), fc)); // json is not blocked
 	}
 	
 	@Test
@@ -109,37 +123,44 @@ public class AbstractUploadTest {
 		Assert.assertFalse(bizport.validFile(file.test("test.xls", 10485761), fc)); // too big
 		Assert.assertTrue(bizport.validFile(file.test("test.xlsx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("test.txt", 0), fc));
+		Assert.assertFalse(bizport.validFile(file.test("test.xlsxx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test(".htaccess", 0), fc)); // starts with .
 		Assert.assertFalse(bizport.validFile(file.test(".exe", 0), fc)); // exe is blocked
 
 		Assert.assertTrue(bizport.validFile(file.test("test/test.xls", 0), fc));
 		Assert.assertTrue(bizport.validFile(file.test("test/test.xlsx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("test/test.txt", 0), fc));
+		Assert.assertFalse(bizport.validFile(file.test("test/test.xlsxx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("test/.htaccess", 0), fc)); // starts with .
 
 		Assert.assertTrue(bizport.validFile(file.test("/Users/test/test.xls", 0), fc));
 		Assert.assertTrue(bizport.validFile(file.test("/Users/test/test.xlsx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("/Users/test/test.txt", 0), fc));
+		Assert.assertFalse(bizport.validFile(file.test("/Users/test/test.xlsxx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("/Users/test/.htaccess", 0), fc)); // starts with .
 
 		Assert.assertTrue(bizport.validFile(file.test("C:/test.xls", 0), fc));
 		Assert.assertTrue(bizport.validFile(file.test("C:/test.xlsx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("C:/test.txt", 0), fc));
+		Assert.assertFalse(bizport.validFile(file.test("C:/test.xlsxx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("C:/test/.htaccess", 0), fc)); // starts with .
 
 		Assert.assertTrue(bizport.validFile(file.test("/C:/test/test.xls", 0), fc));
 		Assert.assertTrue(bizport.validFile(file.test("/C:/test/test.xlsx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("/C:/test/test.txt", 0), fc));
+		Assert.assertFalse(bizport.validFile(file.test("/C:/test/test.xlsxx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("/C:/test/.htaccess", 0), fc)); // starts with .
 
 		Assert.assertTrue(bizport.validFile(file.test("C:\\test.xls", 0), fc));
 		Assert.assertTrue(bizport.validFile(file.test("C:\\test.xlsx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("C:\\test.txt", 0), fc));
+		Assert.assertFalse(bizport.validFile(file.test("C:\\\\test.xlsxx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("C:\\.htaccess", 0), fc)); // starts with .
 
 		Assert.assertTrue(bizport.validFile(file.test("C:\\test\\test.xls", 0), fc));
 		Assert.assertTrue(bizport.validFile(file.test("C:\\test\\test.xlsx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("C:\\test\\test.txt", 0), fc));
+		Assert.assertFalse(bizport.validFile(file.test("C:\\test\\test.xlsxx", 0), fc));
 		Assert.assertFalse(bizport.validFile(file.test("C:\\test\\.htaccess", 0), fc)); // starts with .
 	}
 }

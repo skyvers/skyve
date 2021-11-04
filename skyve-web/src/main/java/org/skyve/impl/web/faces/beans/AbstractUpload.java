@@ -66,13 +66,17 @@ public abstract class AbstractUpload extends Localisable {
 
 		String name = file.getFileName();
 		// NB PatternSyntaxException is caught in SkyveContextListener at startup
-		if ((name != null) &&
-				(whitelistRegex != null) && 
-				(! Pattern.compile(whitelistRegex, Pattern.CASE_INSENSITIVE).matcher(name).matches())) {
-			UtilImpl.LOGGER.warning("FileUpload - Filename " + name + " does not match " + whitelistRegex);
-			FacesMessage msg = new FacesMessage("Failure", "Filename " + name + " is not allowed");
-			fc.addMessage(null, msg);
-			return false;
+		if (name != null) {
+			if (((whitelistRegex != null) && 
+					// Check whitelist regex if defined
+					(! Pattern.compile(whitelistRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE).matcher(name).matches())) ||
+					// Always disallow files starting with .
+					name.matches("^((.*\\/)+\\..*|\\..*|(.*\\\\)+\\..*)$")) {
+				UtilImpl.LOGGER.warning("FileUpload - Filename " + name + " does not match " + whitelistRegex);
+				FacesMessage msg = new FacesMessage("Failure", "Filename " + name + " is not allowed");
+				fc.addMessage(null, msg);
+				return false;
+			}
 		}
 		
 		return true;
