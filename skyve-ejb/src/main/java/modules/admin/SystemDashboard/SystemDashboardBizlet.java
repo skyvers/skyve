@@ -6,6 +6,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.util.Util;
 
 import modules.admin.Configuration.ConfigurationExtension;
+import modules.admin.Configuration.DiskSpaceSummary;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Generic;
 import modules.admin.domain.SystemDashboard;
@@ -81,9 +82,9 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 		ConfigurationExtension config = Configuration.newInstance();
 		// current available disk space 
 		Generic availableDiskSpace = Generic.newInstance();
-		Generic diskSpaceSummary = config.diskSpaceSummary();
+		DiskSpaceSummary diskSpaceSummary = new DiskSpaceSummary();
 		availableDiskSpace.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.availableDiskSpaceMB")));
-		availableDiskSpace.setText5001(formatStringValueHTML(Long.toString(diskSpaceSummary.getLongInteger1()), ""));
+		availableDiskSpace.setText5001(formatStringValueHTML(Long.toString(diskSpaceSummary.getTotalAvailable()), ""));
 		bean.getStatus().add(availableDiskSpace);
 		
 		// self registration activated
