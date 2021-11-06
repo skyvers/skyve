@@ -72,7 +72,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		Object componentBuilder = null;
 		try {
-			componentBuilder = loader.loadClass(componentBuilderClass).newInstance();
+			componentBuilder = loader.loadClass(componentBuilderClass).getConstructor().newInstance();
 		}
 		catch (Exception e) {
 			bean.trapException(e);
@@ -81,7 +81,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 		}
 		Object layoutBuilder = null;
 		try {
-			layoutBuilder = loader.loadClass(layoutBuilderClass).newInstance();
+			layoutBuilder = loader.loadClass(layoutBuilderClass).getConstructor().newInstance();
 		}
 		catch (Exception e) {
 			bean.trapException(e);
