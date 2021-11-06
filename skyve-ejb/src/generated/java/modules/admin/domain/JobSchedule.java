@@ -1219,7 +1219,7 @@ public abstract class JobSchedule extends AbstractPersistentBean {
 	/**
 	 * Schedule
 	 **/
-	private transient String scheduleString;
+	private String scheduleString;
 
 	@Override
 	@XmlTransient
@@ -3945,5 +3945,100 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	 */
 	public boolean isNotScheduledImmediately() {
 		return (! isScheduledImmediately());
+	}
+
+	/**
+	 * True when Selected Days.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelectedDays() {
+		return ("X".equals(getAllDays()));
+	}
+
+	/**
+	 * {@link #isSelectedDays} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelectedDays() {
+		return (! isSelectedDays());
+	}
+
+	/**
+	 * True when Selected Hours.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelectedHours() {
+		return ("X".equals(getAllHours()));
+	}
+
+	/**
+	 * {@link #isSelectedHours} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelectedHours() {
+		return (! isSelectedHours());
+	}
+
+	/**
+	 * True when Selected Minutes.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelectedMinutes() {
+		return ("X".equals(getAllMinutes()));
+	}
+
+	/**
+	 * {@link #isSelectedMinutes} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelectedMinutes() {
+		return (! isSelectedMinutes());
+	}
+
+	/**
+	 * True when Selected Months.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelectedMonths() {
+		return ("X".equals(getAllMonths()));
+	}
+
+	/**
+	 * {@link #isSelectedMonths} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelectedMonths() {
+		return (! isSelectedMonths());
+	}
+
+	/**
+	 * True when Selected Weekdays.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSelectedWeekdays() {
+		return ("X".equals(getAllWeekdays()));
+	}
+
+	/**
+	 * {@link #isSelectedWeekdays} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSelectedWeekdays() {
+		return (! isSelectedWeekdays());
 	}
 }

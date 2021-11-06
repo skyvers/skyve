@@ -479,7 +479,6 @@
 		<!-- transient fields -->
 		<memo name="scheduleString" persistent="false">
 			<displayName>Schedule</displayName>
-			<transient>true</transient>
 		</memo>
 	</attributes>
 	<conditions>
