@@ -19,6 +19,7 @@ public final class DiskSpaceSummary {
 	private long totalAvailable;
 	private long totalSpace;
 	private long totalAvailableLevel;
+	private String htmlSummary;
 
 	/**
 	 * Determines disk usage.
@@ -69,18 +70,21 @@ public final class DiskSpaceSummary {
 	}
 
 	/**
-	 * Creates a HTML snippit (2 paragraphs describing disk usage)
+	 * Returns a HTML snippit (2 paragraphs describing disk usage)
 	 * @return	The HTML.
 	 */
-	public String createHTMLSummary() {
-		StringBuilder result = new StringBuilder(128);
-		
-		result.append("<p><strong>Summary</strong></p>");
-		NumberFormat nf = NumberFormat.getNumberInstance();
-		result.append("<p>Total=").append(nf.format(totalSpace));
-		result.append("MB, Available=").append(nf.format(totalAvailable));
-		result.append("MB, Available Percentage=").append(totalAvailableLevel).append("%</p>");
-		
-		return result.toString();
+	public String getHTMLSummary() {
+		if (htmlSummary == null) {
+			StringBuilder result = new StringBuilder(128);
+			
+			result.append("<p><strong>Summary</strong></p>");
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			result.append("<p>Total=").append(nf.format(totalSpace));
+			result.append("MB, Available=").append(nf.format(totalAvailable));
+			result.append("MB, Available Percentage=").append(totalAvailableLevel).append("%</p>");
+			
+			htmlSummary = result.toString();
+		}
+		return htmlSummary;
 	}
 }

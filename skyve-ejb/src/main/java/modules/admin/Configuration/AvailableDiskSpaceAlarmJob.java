@@ -40,7 +40,7 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 		// evaluate whether alarm should be sent
 		ConfigurationExtension configuration = Configuration.newInstance();
 		DiskSpaceSummary diskSpaceSummary = new DiskSpaceSummary();
-		String htmlSummary = diskSpaceSummary.createHTMLSummary();
+		String htmlSummary = diskSpaceSummary.getHTMLSummary();
 		log.add(htmlSummary);
 
 		Integer percentageLevel = configuration.getAvailableDiskSpaceAlarmLevelPercentage();
