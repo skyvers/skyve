@@ -18,7 +18,7 @@ import modules.admin.ModulesUtil;
 public final class DiskSpaceSummary {
 	private long totalAvailable;
 	private long totalSpace;
-	private long totalDiskUsageLevel;
+	private long totalAvailableLevel;
 
 	/**
 	 * Determines disk usage.
@@ -44,7 +44,7 @@ public final class DiskSpaceSummary {
 				e.printStackTrace();
 			}
 		}
-		this.totalDiskUsageLevel = (100 * totalAvailable / totalSpace);
+		this.totalAvailableLevel = (100 * totalAvailable / totalSpace);
 	}
 
 	/**
@@ -62,10 +62,10 @@ public final class DiskSpaceSummary {
 	}
 
 	/**
-	 * Total disk usage as a percentage.
+	 * Total disk free as a percentage.
 	 */
-	public long getTotalDiskUsageLevel() {
-		return totalDiskUsageLevel;
+	public long getTotalAvailableLevel() {
+		return totalAvailableLevel;
 	}
 
 	/**
@@ -79,7 +79,7 @@ public final class DiskSpaceSummary {
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		result.append("<p>Total=").append(nf.format(totalSpace));
 		result.append("MB, Available=").append(nf.format(totalAvailable));
-		result.append("MB, Available Percentage=").append(totalDiskUsageLevel).append("%</p>");
+		result.append("MB, Available Percentage=").append(totalAvailableLevel).append("%</p>");
 		
 		return result.toString();
 	}

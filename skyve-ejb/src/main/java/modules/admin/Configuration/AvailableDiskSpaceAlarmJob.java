@@ -50,7 +50,7 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 		if (percentageLevel == null) {
 			percentageLevel = DEFAULT_AVAILABLE_DISK_SPACE_ALARM_LEVEL_PERCENTAGE;
 		}
-		if ((diskSpaceSummary.getTotalDiskUsageLevel() <= percentageLevel.longValue()) ||
+		if ((diskSpaceSummary.getTotalAvailableLevel() <= percentageLevel.longValue()) ||
 				(levelMB != null && (diskSpaceSummary.getTotalAvailable() <= levelMB.longValue()))) {
 			Communication communication = CommunicationUtil.initialiseSystemCommunication(AVAILABLE_DISK_SPACE_ALARM_NOFITICATION, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO, null, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY);
 			Generic generic = Generic.newInstance();
