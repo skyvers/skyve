@@ -12,7 +12,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.view.TextOutput;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"binding", 
@@ -23,10 +22,8 @@ import org.skyve.metadata.view.TextOutput;
 							"filterOperator", 
 							"filterExpression",
 							"pixelWidth",
-							"alignment",
-							"escape",
-							"sanitise"})
-public abstract class MetaDataQueryColumnMetaData implements MetaData, TextOutput {
+							"alignment"})
+public abstract class MetaDataQueryColumnMetaData implements MetaData {
 	private static final long serialVersionUID = 7831641243591117311L;
 
 	// The name of the property within the bean list. Can be null.
@@ -56,12 +53,6 @@ public abstract class MetaDataQueryColumnMetaData implements MetaData, TextOutpu
 	// If defined, the overridden column alignment
 	private HorizontalAlignment alignment;
 	
-	// Escape syntax relating to the view technology - <, > etc for HTML
-	private Boolean escape;
-	
-	// Sanitise expressions relating to the view technology - <script> for HTML (to prevent XSS)
-	private Sanitisation sanitise;
-
 	public String getName() {
 		return name;
 	}
@@ -142,25 +133,5 @@ public abstract class MetaDataQueryColumnMetaData implements MetaData, TextOutpu
 	@XmlAttribute
 	public void setAlignment(HorizontalAlignment alignment) {
 		this.alignment = alignment;
-	}
-	
-	@Override
-	public Boolean getEscape() {
-		return escape;
-	}
-
-	@XmlAttribute
-	public void setEscape(Boolean escape) {
-		this.escape = escape;
-	}
-
-	@Override
-	public Sanitisation getSanitise() {
-		return sanitise;
-	}
-
-	@XmlAttribute
-	public void setSanitise(Sanitisation sanitise) {
-		this.sanitise = sanitise;
 	}
 }

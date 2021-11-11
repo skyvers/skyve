@@ -99,9 +99,7 @@
 			<![CDATA[
 				if(view) {
 					view.opened = function(data) {
-						SKYVE.Util.loadJS('pages/js/styleOutput.js?v=' + SKYVE.Util.v, function() {
-							styleOutput(v1, 'template', 'application/xml');
-						});
+						isc.BizUtil.createCodeMirror(v1, 'template', 'application/xml');
 					};
 				}
 			]]>

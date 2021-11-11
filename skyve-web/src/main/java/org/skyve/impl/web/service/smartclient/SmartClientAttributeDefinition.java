@@ -576,28 +576,25 @@ public class SmartClientAttributeDefinition {
             	result.append(",formatCellValue:function(v){return isc.GeometryItem.format(v)}");
 			}
 			else if ("image".equals(type)) { // content thumbnail column
-            	result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
+				String wpx = (pixelWidth == null) ? 
+								((pixelHeight == null) ? "64" : pixelHeight.toString()) :
+								pixelWidth.toString();
+				String hpx = (pixelHeight == null) ? 
+								((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
+								pixelHeight.toString();
+				result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
             	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
         		result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
-        		result.append("&_w=").append((pixelWidth == null) ? 
-												((pixelHeight == null) ? "64" : pixelHeight.toString()) :
-												pixelWidth.toString());
-        		result.append("&_h=").append((pixelHeight == null) ? 
-												((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
-												pixelHeight.toString());
-        		result.append("\"/></a>'}if(rec && rec.bizId){return '");
+        		result.append("&_w=").append(wpx).append("&_h=").append(hpx);
+        		result.append("\" style=\"width:").append(wpx).append("px;height:").append(hpx);
+        		result.append("px:object-fit:contain\"/></a>'}if(rec && rec.bizId){return '");
         		if (emptyThumbnailRelativeFile == null) {
         			result.append("'}");
         		}
         		else {
         			result.append("<img src=\"resources?_n=").append(emptyThumbnailRelativeFile);
 	            	result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+");
-            		result.append("'&_w=").append((pixelWidth == null) ? 
-													((pixelHeight == null) ? "64" : pixelHeight.toString()) :
-													pixelWidth.toString());
-            		result.append("&_h=").append((pixelHeight == null) ? 
-													((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
-													pixelHeight.toString());
+            		result.append("'&_w=").append(wpx).append("&_h=").append(hpx);
         			result.append("\"'}");
         		}
         		result.append("return ''}");

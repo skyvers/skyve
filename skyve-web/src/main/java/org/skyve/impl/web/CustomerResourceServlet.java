@@ -21,7 +21,6 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.DownloadAreaType;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -33,9 +32,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 		
 public class CustomerResourceServlet extends HttpServlet {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 1L;
 
 	protected final class Resource {
@@ -82,7 +78,7 @@ public class CustomerResourceServlet extends HttpServlet {
 						image = new Thumbnail(file, imageWidth, imageHeight);
 					}
 					else { // full content
-						image = new Thumbnail(ImageUtil.image(file));
+						image = new Thumbnail(file);
 					}
 				}
 				else if (content != null) {
@@ -90,7 +86,7 @@ public class CustomerResourceServlet extends HttpServlet {
 						image = new Thumbnail(content, imageWidth, imageHeight);
 					}
 					else { // full content
-						image = new Thumbnail(content.getContentBytes());
+						image = new Thumbnail(content);
 					}
 				}
 			}

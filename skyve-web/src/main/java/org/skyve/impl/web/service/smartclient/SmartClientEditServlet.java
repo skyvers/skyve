@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.security.SecureRandom;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -29,6 +28,7 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
@@ -36,6 +36,9 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -763,7 +766,7 @@ public class SmartClientEditServlet extends HttpServlet {
      */
     public static SortedMap<String, Object> collectRequestParameters(HttpServletRequest request) {
     	SortedMap<String, Object> result = new TreeMap<>();
-		Enumeration<String> names = request.getParameterNames();
+		java.util.Enumeration<String> names = request.getParameterNames();
 		while (names.hasMoreElements()) {
 			String name = names.nextElement();
 			if (SmartClientListServlet.ISC_META_DATA_PREFIX.equals(name) || 
@@ -824,30 +827,53 @@ public class SmartClientEditServlet extends HttpServlet {
 				if (newParameterNamesToBindings.containsKey(parameterBinding)) {
 	    			Object parameterValue = parameters.get(parameterBinding);
 	    			if (parameterValue != null) {
-		    			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
+	    	    		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
 																				processModule, 
 																				processDocument, 
 																				parameterBinding);
 		    			if (target != null) {
 		    				Attribute attribute = target.getAttribute();
-		    				if ((attribute instanceof Association) && (parameterValue instanceof String)) {
-		    					// find the existing bean with retrieve
-		    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
-																										attribute.getName());
-		    					Bean parameterBean = persistence.retrieve(referenceDocument, 
-																			(String) parameterValue);
-		    					// NB parameterBean can be null if it wasn't found in the retrieve above
-		    					if (parameterBean != null) {
-			    					if (! user.canReadBean(parameterBean.getBizId(), 
-			    											parameterBean.getBizModule(), 
-			    											parameterBean.getBizDocument(), 
-			    											parameterBean.getBizCustomer(), 
-			    											parameterBean.getBizDataGroupId(),
-			    											parameterBean.getBizUserId())) {
-			    						throw new SecurityException("this data", user.getName());
+		    				if (attribute != null) {
+			    				if ((attribute instanceof Association) && (parameterValue instanceof String)) {
+			    					// find the existing bean with retrieve
+			    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
+																											attribute.getName());
+			    					Bean parameterBean = persistence.retrieve(referenceDocument, 
+																				(String) parameterValue);
+			    					// NB parameterBean can be null if it wasn't found in the retrieve above
+			    					if (parameterBean != null) {
+				    					if (! user.canReadBean(parameterBean.getBizId(), 
+				    											parameterBean.getBizModule(), 
+				    											parameterBean.getBizDocument(), 
+				    											parameterBean.getBizCustomer(), 
+				    											parameterBean.getBizDataGroupId(),
+				    											parameterBean.getBizUserId())) {
+				    						throw new SecurityException("this data", user.getName());
+				    					}
 			    					}
-		    					}
-		    					parameterValue = parameterBean;
+			    					parameterValue = parameterBean;
+			    				}
+			    				else {
+				    				// Determine the type and converter of the parameter
+				    				Converter<?> converter = null;
+				    	    		Class<?> type = String.class;
+
+				    	    		if (attribute instanceof Enumeration) {
+										type = AbstractRepository.get().getEnum((Enumeration) attribute);
+									}
+									else if (attribute instanceof Field) {
+										type = attribute.getAttributeType().getImplementingType();
+									}
+
+				    	    		if (attribute instanceof ConvertableField) {
+										ConvertableField field = (ConvertableField) attribute;
+										converter = field.getConverterForCustomer(customer);
+									}
+				    	    		
+				    	    		if (type != null) {
+				    	    			parameterValue = BindUtil.fromString(customer, converter, type, parameterValue.toString(), false);
+				    	    		}
+			    				}
 		    				}
 		    			}
 	    			}

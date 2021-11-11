@@ -1279,7 +1279,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
         // Write out getLazyDataModel call as the value
         StringBuilder modelExpression = new StringBuilder(128);
 		modelExpression.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
-		if (model instanceof DocumentQueryListModel) {
+		if (grid.getQueryName() != null) {
 			modelExpression.append(drivingDocumentName).append("','").append(modelName).append("',null,");
 		}
 		else {
@@ -1300,10 +1300,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					String binding = param.getValueBinding();
 					String value = param.getValue();
 
-					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
+					createUrlParams.append('&').append(name).append('=');
 					modelExpression.append("['").append(name).append("','");
 					modelExpression.append(param.getOperator()).append("','");
 					if (binding != null) {
+						createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
 						Attribute targetAttribute = null;
 						try {
 							if (owningDocument != null) {
@@ -1324,7 +1325,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 						modelExpression.append('{').append(binding).append("}'],");
 					}
 					else {
-						createUrlParams.append(binding).append("']}");
+						createUrlParams.append(value);
 						modelExpression.append(value).append("'],");
 					}
 				}
@@ -1578,23 +1579,27 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 					String empty = "''";
 					if (emptyThumbnailRelativeFile != null) {
-						empty = String.format("'<img src=\"resources?_n=%s'.concat('&_doc=').concat(row['%s']).concat('.').concat(row['%s']).concat('&_w=%s&_h=%s\"/>')",
+						empty = String.format("'<img src=\"resources?_n=%s'.concat('&_doc=').concat(row['%s']).concat('.').concat(row['%s']).concat('&_w=%s&_h=%s\" style=\"width:%spx;height:%spx;object-fit:contain\"/>')",
 												emptyThumbnailRelativeFile,
 												Bean.MODULE_KEY,
 												Bean.DOCUMENT_KEY,
 												width,
+												height,
+												width,
 												height);
 					}
-					value = String.format("#{(empty row['%s']) ? %s : '<a href=\"'.concat(%s).concat('\" target=\"_blank\"><img src=\"').concat(%s).concat('&_w=%s&_h=%s\"/></a>')}",
+					value = String.format("#{(empty row['%s']) ? %s : '<a href=\"'.concat(%s).concat('\" style=\"border:0\" target=\"_blank\"><img src=\"').concat(%s).concat('&_w=%s&_h=%s\" style=\"width:%spx;height:%spx;object-fit:contain\"/></a>')}",
 											binding,
 											empty,
 											href,
 											href,
 					                		width,
-					                		height);
+					                		height,
+						            		width,
+						            		height);
 				}
 				else if (DisplayType.link.equals(display)) {
-					value = String.format("#{(empty row['%s']) ? '' : '<a href=\"'.concat(%s).concat('\" target=\"_blank\">Content</a>')}",
+					value = String.format("#{(empty row['%s']) ? '' : '<a href=\"'.concat(%s).concat('\" style=\"border:0\" target=\"_blank\">Content</a>')}",
 											binding,
 											href);
 

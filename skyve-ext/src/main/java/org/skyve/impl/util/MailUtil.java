@@ -166,6 +166,11 @@ public class MailUtil {
 		multipart.addBodyPart(messageBodyPart);
 
 		// add headers
+		if (UtilImpl.SMTP_HEADERS != null) {
+			for (Entry<String, String> entry : UtilImpl.SMTP_HEADERS.entrySet()) {
+				message.setHeader(entry.getKey(), entry.getValue());
+			}
+		}
 		if (headers != null) {
 			for (Entry<String, String> header : headers.entrySet()) {
 				message.setHeader(header.getKey(), header.getValue());

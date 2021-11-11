@@ -501,6 +501,17 @@ public class SkyveContextListener implements ServletContextListener {
 				}
 			}
 		}
+		Map<String, Object> smtpHeaders = getObject("smtp", "headers", smtp, false);
+		if (smtpHeaders != null) {
+			UtilImpl.SMTP_HEADERS = new TreeMap<>();
+			for (Entry<String, Object> entry : smtpHeaders.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if ((key != null) && (value != null)) {
+					UtilImpl.SMTP_HEADERS.put(key, value.toString());
+				}
+			}
+		}
 		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, true);
 		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
 		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", smtp);

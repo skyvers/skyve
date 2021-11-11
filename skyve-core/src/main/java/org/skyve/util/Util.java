@@ -329,14 +329,16 @@ public class Util {
 	 */
 	public static String getDocumentAnchorUrl(String bizModule, String bizDocument, String bizId, boolean targetNewWindow, String anchorMarkup) {
 		StringBuilder result = new StringBuilder(128);
-		
-		result.append("<a href='").append(getDocumentUrl(bizModule, bizDocument, bizId));
-		 if(targetNewWindow) {
-	        	result.append(" target='_blank'");
-        }
-        result.append(">");
-        result.append(anchorMarkup).append("</a>");		
-		
+
+		result.append("<a href=\"").append(getDocumentUrl(bizModule, bizDocument, bizId));
+		if (targetNewWindow) {
+			result.append("\" target=\"_blank\">");
+		}
+		else {
+			result.append("\">");
+		}
+		result.append(anchorMarkup).append("</a>");
+
 		return result.toString();
 	}
 
@@ -391,11 +393,11 @@ public class Util {
     public static String getContentImageUrl(String bizModule, String bizDocument, String binding, String contentId, int width, int height) {
     	StringBuilder result = new StringBuilder(128);
     	
-    	result.append("<img src='");
+    	result.append("<img src=\"");
     	result.append(getContentUrl(bizModule, bizDocument, binding, contentId));
     	result.append("&_w=").append(width);
     	result.append("&_h=").append(height);
-    	result.append("'/>");
+    	result.append("\"/>");
         
     	return result.toString();
     }
@@ -413,14 +415,15 @@ public class Util {
 	 */	
     public static String getContentAnchorUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, String anchorMarkup) {
         String contentUrl = getContentUrl(bizModule, bizDocument, binding, contentId);
-        
         StringBuilder result = new StringBuilder(128);
         
-        result.append("<a href='").append(contentUrl).append("'");
-        if(targetNewWindow) {
-        	result.append(" target='_blank'");
+        result.append("<a href=\"").append(contentUrl);
+        if (targetNewWindow) {
+        	result.append("\" target=\"_blank\">");
         }
-        result.append(">");
+        else {
+            result.append("\">");
+        }
         result.append(anchorMarkup).append("</a>");
         
         return result.toString();

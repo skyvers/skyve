@@ -372,15 +372,6 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 							column.setPixelWidth(repositoryColumn.getPixelWidth());
 							column.setAlignment(repositoryColumn.getAlignment());
 
-							Boolean escape = repositoryColumn.getEscape();
-							if (escape != null) {
-								column.setEscape(escape.booleanValue());
-							}
-							Sanitisation sanitise = repositoryColumn.getSanitise();
-							if (sanitise != null) {
-								column.setSanitise(sanitise);
-							}
-							
 							if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
 								Boolean projected = projectedRepositoryColumn.getProjected();
 								if (projected != null) {
@@ -397,6 +388,14 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 								Boolean editable = projectedRepositoryColumn.getEditable();
 								if (editable != null) {
 									projectedColumn.setEditable(editable.booleanValue());
+								}
+								Boolean escape = projectedRepositoryColumn.getEscape();
+								if (escape != null) {
+									projectedColumn.setEscape(escape.booleanValue());
+								}
+								Sanitisation sanitise = projectedRepositoryColumn.getSanitise();
+								if (sanitise != null) {
+									projectedColumn.setSanitise(sanitise);
 								}
 							}
 							else if ((contentColumn != null) && (contentRepositoryColumn != null)) {

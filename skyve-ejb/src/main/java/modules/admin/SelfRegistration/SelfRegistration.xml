@@ -26,14 +26,6 @@
             <displayName>admin.selfRegistration.loginMessage.displayName</displayName>
             <length>2000</length>
         </text>
-       <!--  <boolean name="registrationEmailWasSent">
-            <documentation>
-                <![CDATA[
-                    Indicates if an email was sent to the public user or not.
-                ]]>
-            </documentation>
-            <displayName>Registration Email Was Sent</displayName>
-        </boolean> -->
         <dateTime name="registrationDate">
             <documentation>The date and time that this self registration was completed.</documentation>
             <displayName>admin.selfRegistration.registrationDate.displayName</displayName>

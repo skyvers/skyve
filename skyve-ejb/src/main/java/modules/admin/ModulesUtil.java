@@ -734,10 +734,15 @@ public class ModulesUtil {
 			qN.getFilter().addEquals(DocumentNumber.documentNamePropertyName, documentName);
 			qN.getFilter().addEquals(DocumentNumber.sequenceNamePropertyName, fieldName);
 
-			//temporarily escalate access to the Document Number sequences
-			CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			List<DocumentNumber> num = qN.beanResults();
-			CORE.getPersistence().resetDocumentPermissionScopes();
+			// temporarily escalate access to the Document Number sequences
+			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+			List<DocumentNumber> num = null; 
+			try {
+				num = qN.beanResults();
+			}
+			finally {
+				pers.resetDocumentPermissionScopes();
+			}
 			
 			if (num.isEmpty()) {
 

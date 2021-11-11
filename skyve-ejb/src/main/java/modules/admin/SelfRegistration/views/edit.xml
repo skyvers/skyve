@@ -15,7 +15,7 @@
 			<blurb escape="false">
 				<![CDATA[
 					<div style="width:100%;text-align:center">
-						<strong style="margin: 2px auto;">{i18n:admin.selfRegistration.existingUserSignIn}<a href="{loginUrl}">{i18n:page.login.submit.label}</a>.</strong>
+						<strong style="margin: 2px auto;">{i18n:admin.selfRegistration.existingUserSignIn} <a href="{loginUrl}">{i18n:page.login.submit.label}</a>.</strong>
 					</div>
 				]]>
 			</blurb>

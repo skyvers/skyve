@@ -55,15 +55,25 @@ public class Thumbnail {
 	private String cacheKey;
 		
 	/**
-	 * Bytes constructor (with no mime type set)
-	 * @param bytes
+	 * File constructor
+	 * @param file	The image file.
 	 */
-	public Thumbnail(byte[] bytes) {
-		this.bytes = bytes;
+	public Thumbnail(File file) throws IOException {
+		bytes = ImageUtil.image(file);
+		mimeType = MimeType.fromFileName(file.getName());
 	}
-	
+
 	/**
-	 * File constructor.
+	 * Content constructor
+	 * @param content	The attachment.
+	 */
+	public Thumbnail(AttachmentContent content) throws IOException {
+		bytes = content.getContentBytes();
+		mimeType = content.getMimeType();
+	}
+
+	/**
+	 * Thumbnail File constructor.
 	 * This generates a thumb nail of the given width and height from an image file.
 	 * This method is thread safe.
 	 * The memory usage is constrained by the UtilImpl.THUMBNAIL_CONCURRENT_THREADS setting and
@@ -106,7 +116,7 @@ public class Thumbnail {
 	}
 	
 	/**
-	 * Content constructor.
+	 * Thumbnail Content constructor.
 	 * This generates a thumb nail of the given width and height from an attachment content.
 	 * This method is thread safe.
 	 * The memory usage is constrained by the UtilImpl.THUMBNAIL_CONCURRENT_THREADS setting and
@@ -142,7 +152,6 @@ public class Thumbnail {
 		finally {
 			CONCURRENT.remove(cacheKey);
 		}
-		
 	}
 	
 	/**
@@ -162,6 +171,14 @@ public class Thumbnail {
 	}
 	
 	private void process(String fileName, InputStream is, int width, int height) throws IOException {
+		// Return an SVG file directly, no need to make a Thumbnail
+		// SVG files in an <img/> or as a background image in CSS do not run script tags in browsers.
+		if (MimeType.svg == MimeType.fromFileName(fileName)) {
+			bytes = ImageUtil.image(is);
+			mimeType = MimeType.svg;
+			return;
+		}
+
 		File folder = null;
 		File pngFile = null;
 		// Look for the thumb nail file if we are using file storage

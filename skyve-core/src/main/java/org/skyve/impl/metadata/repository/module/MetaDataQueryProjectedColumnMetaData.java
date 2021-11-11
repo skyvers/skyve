@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.view.TextOutput;
 
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "column")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
@@ -16,8 +17,10 @@ import org.skyve.impl.util.XMLMetaData;
 							"expression",
 							"sortable", 
 							"filterable", 
-							"editable"})
-public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMetaData {
+							"editable",
+							"escape",
+							"sanitise"})
+public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMetaData implements TextOutput {
 	private static final long serialVersionUID = 7831641243591117311L;
 
 	// Indicates whether the column is selected - appears in the projection.
@@ -34,6 +37,12 @@ public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMet
 
 	// Indicates if the user can edit the values in this column in list view
 	private Boolean editable;
+
+	// Escape syntax relating to the view technology - <, > etc for HTML
+	private Boolean escape;
+	
+	// Sanitise expressions relating to the view technology - <script> for HTML (to prevent XSS)
+	private Sanitisation sanitise;
 
 	public Boolean getProjected() {
 		return projected;
@@ -79,5 +88,25 @@ public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMet
 	@XmlAttribute
 	public void setEditable(Boolean editable) {
 		this.editable = editable;
+	}
+	
+	@Override
+	public Boolean getEscape() {
+		return escape;
+	}
+
+	@XmlAttribute
+	public void setEscape(Boolean escape) {
+		this.escape = escape;
+	}
+
+	@Override
+	public Sanitisation getSanitise() {
+		return sanitise;
+	}
+
+	@XmlAttribute
+	public void setSanitise(Sanitisation sanitise) {
+		this.sanitise = sanitise;
 	}
 }

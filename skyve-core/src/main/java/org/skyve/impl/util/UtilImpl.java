@@ -61,8 +61,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "41";
-	public static final String SKYVE_VERSION = "8.0.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "42";
+	public static final String SKYVE_VERSION = "8.1.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
@@ -100,7 +100,7 @@ public class UtilImpl {
 	public static String CONTENT_SERVER_ARGS = null;
 
 	// Allowed file upload file names - default is a blacklist of harmful "executable" files
-	public static String UPLOADS_FILE_WHITELIST_REGEX = "(.*\\/|.*\\\\)?.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)).+$";
+	public static String UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
 	
 	// Max file upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_FILE_MAXIMUM_SIZE_IN_MB = 10;
@@ -118,7 +118,7 @@ public class UtilImpl {
 	public static int UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 
 	// Allowed bizport upload file names - default is a XLS and XLSX files
-	public static String UPLOADS_BIZPORT_WHITELIST_REGEX = "(.*\\/|.*\\\\)?.+\\.(XLS|XLSX)$";
+	public static String UPLOADS_BIZPORT_WHITELIST_REGEX = "^.+\\.(XLS|XLSX)$";
 	
 	// Max bizport upload size - default is 10MB the same as wildfly default
 	public static int UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB = UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
@@ -202,6 +202,8 @@ public class UtilImpl {
 	public static String SMTP_PWD = null;
 	// Extra java mail properties
 	public static Map<String, String> SMTP_PROPERTIES = null;
+	// Extra java mail headers
+	public static Map<String, String> SMTP_HEADERS = null;
 	public static String SMTP_SENDER = null;
 	// used to intercept all email and send to this test email account
 	public static String SMTP_TEST_RECIPIENT = null;

@@ -205,5 +205,10 @@
 			<renderer-type>org.primefaces.component.TabViewRenderer</renderer-type>
 			<renderer-class>org.skyve.impl.web.faces.renderers.TabViewRenderer</renderer-class>
 		</renderer>
+		<renderer>
+			<component-family>org.primefaces.component</component-family>
+			<renderer-type>org.primefaces.component.CommandButtonRenderer</renderer-type>
+			<renderer-class>org.primefaces.extensions.renderer.CommandButtonSingleClickRenderer</renderer-class>
+		</renderer>
 	</render-kit>
 </faces-config>

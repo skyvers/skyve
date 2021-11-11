@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                                            
+                                                                        
     
     
     
@@ -13,8 +13,14 @@
     
     
     
-    <wb-module deploy-name="skyve-ear-8.0.0-SNAPSHOT">
-                                                                                                                        
+    
+    
+    
+    <wb-module deploy-name="skyve-ear-8.1.0-SNAPSHOT">
+                                                                                                                                                
+        
+        
+        
         
         
         
@@ -29,7 +35,10 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                                                        
+                                                                                                                                                
+        
+        
+        
         
         
         
@@ -50,10 +59,10 @@
         <dependent-module archiveName="skyve.war" deploy-path="/" handle="module:/resource/skyve-war/skyve-war">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-ext-8.0.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
+        <dependent-module archiveName="skyve-ext-8.1.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-core-8.0.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
+        <dependent-module archiveName="skyve-core-8.1.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="commons-beanutils-1.9.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar">
@@ -323,9 +332,6 @@
         <dependent-module archiveName="freemarker-2.3.29.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/freemarker/freemarker/2.3.29/freemarker-2.3.29.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="flying-saucer-core-9.1.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/xhtmlrenderer/flying-saucer-core/9.1.18/flying-saucer-core-9.1.18.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="flying-saucer-pdf-9.1.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/xhtmlrenderer/flying-saucer-pdf/9.1.18/flying-saucer-pdf-9.1.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -341,7 +347,7 @@
         <dependent-module archiveName="bcprov-jdk14-1.60.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/bouncycastle/bcprov-jdk14/1.60/bcprov-jdk14-1.60.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="flying-saucer-swt-9.1.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/xhtmlrenderer/flying-saucer-swt/9.1.18/flying-saucer-swt-9.1.18.jar">
+        <dependent-module archiveName="flying-saucer-core-9.1.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/xhtmlrenderer/flying-saucer-core/9.1.18/flying-saucer-core-9.1.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="cron-utils-9.1.3.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/cronutils/cron-utils/9.1.3/cron-utils-9.1.3.jar">
@@ -428,7 +434,10 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                                                                    
+                                                                                                                                            
+    
+    
+    
     
     
     
@@ -443,7 +452,10 @@
     
     
     </wb-module>
-                                                        
+                                                                    
+
+
+
 
 
 

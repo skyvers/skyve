@@ -18,6 +18,8 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
+import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
+import org.skyve.impl.metadata.repository.customer.HTMLResourcesMetaData;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
@@ -527,6 +529,30 @@ public class XMLMetaDataTest {
 
 		assertThat("XML should not contain 'jobs'", result.contains("<jobs"), is(false));
 		assertThat("XML should not contain 'queries'", result.contains("<queries"), is(false));
+	}
+
+	@Test
+	@SuppressWarnings({ "boxing", "static-method" })
+	public void testMarshalCustomerRemovesEmptyChildElements() throws Exception {
+		// setup the test data
+		CustomerMetaData customer = new CustomerMetaData();
+		customer.setName("test");
+		customer.setDefaultDateConverter(ConverterName.DD_MMM_YYYY);
+		customer.setDefaultDateTimeConverter(ConverterName.DD_MMM_YYYY_HH24_MI);
+		customer.setDefaultTimeConverter(ConverterName.HH24_MI);
+		customer.setDefaultTimestampConverter(ConverterName.DD_MMM_YYYY_HH24_MI_SS);
+		customer.setHtmlResources(new HTMLResourcesMetaData());
+		
+		// call the method under test
+		String result = XMLMetaData.marshalCustomer(customer);
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		// System.out.println(result);
+
+		assertThat(result.contains("name=\"test\""), is(true));
+		assertThat("XML should not contain 'interceptors'", result.contains("<interceptors"), is(false));
+		assertThat("XML should not contain 'observers'", result.contains("<observers"), is(false));
 	}
 
 	private static AssociationImpl createAssociation() {

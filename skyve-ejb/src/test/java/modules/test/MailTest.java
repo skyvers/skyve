@@ -2,6 +2,7 @@ package modules.test;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.AfterClass;
@@ -25,6 +26,8 @@ public class MailTest extends AbstractH2Test {
 	public static final String EMAIL7 = "email7@skyve.org";
 	public static final String SUBJECT = "SUBJECT";
 	public static final String BODY = "BODY";
+	public static final String POSTMARK_HEADER_NAME = "X-PM-Message-Stream";
+	public static final String POSTMARK_HEADER_VALUE = "outbound";
 
 	private static boolean bogusSend = false;
 	private static String testRecipient = null;
@@ -37,12 +40,16 @@ public class MailTest extends AbstractH2Test {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = false;
 		testRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
 		UtilImpl.SMTP_TEST_RECIPIENT = null;
+		UtilImpl.SMTP_HEADERS = new TreeMap<>();
+		// This is the real postmark header just for shits and gigs.
+		UtilImpl.SMTP_HEADERS.put("X-PM-Message-Stream", "outbound");
 	}
 
 	@AfterClass
 	public static void afterClass() {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = bogusSend;
 		UtilImpl.SMTP_TEST_RECIPIENT = testRecipient;
+		UtilImpl.SMTP_HEADERS = null;
 	}
 	
 	@Test
@@ -65,6 +72,17 @@ public class MailTest extends AbstractH2Test {
 			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY).unsent(), baos);
 			String email = baos.toString(Util.UTF8);
 			Assert.assertTrue("No unsent header", email.contains("X-Unsent"));
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testJSONHeader() throws Exception {
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
+			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY), baos);
+			String email = baos.toString(Util.UTF8);
+			Assert.assertTrue("No postmark header", email.contains(POSTMARK_HEADER_NAME));
+			Assert.assertTrue("No postmark header", email.contains(POSTMARK_HEADER_VALUE));
 		}
 	}
 

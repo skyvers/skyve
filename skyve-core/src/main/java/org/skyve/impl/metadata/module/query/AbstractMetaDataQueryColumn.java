@@ -4,7 +4,6 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
-import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn {
 	private static final long serialVersionUID = 5165779649604451833L;
@@ -26,10 +25,6 @@ public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn
 	private Integer pixelWidth;
 	
 	private HorizontalAlignment alignment;
-
-	private boolean escape = true;
-	
-	private Sanitisation sanitise = Sanitisation.relaxed;
 	
 	@Override
 	public String getName() {
@@ -110,23 +105,5 @@ public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn
 
 	public void setAlignment(HorizontalAlignment alignment) {
 		this.alignment = alignment;
-	}
-
-	@Override
-	public boolean isEscape() {
-		return escape;
-	}
-
-	public void setEscape(boolean escape) {
-		this.escape = escape;
-	}
-
-	@Override
-	public Sanitisation getSanitise() {
-		return sanitise;
-	}
-
-	public void setSanitise(Sanitisation sanitise) {
-		this.sanitise = sanitise;
 	}
 }
