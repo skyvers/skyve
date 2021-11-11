@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.naming.InitialContext;
@@ -20,6 +21,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -73,6 +75,32 @@ public class SkyveSpringSecurity {
 	
 	public UserDetailsService jdbcUserDetailsService() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
+			private String skyveUserQuery;
+			
+			// Set the skyve query
+			{
+				// Don't include bizCustomer in the where clause if single customer to allow for better data store index usage.
+				String whereClause = "where userName = ?";
+				if (UtilImpl.CUSTOMER == null) { // multi-tennant
+					whereClause = "where bizCustomer = ? and userName = ?";
+				}
+					
+				SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
+				RDBMS rdbms = dialect.getRDBMS();
+
+				if (RDBMS.h2.equals(rdbms)) {
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+				}
+				else if (RDBMS.mysql.equals(rdbms)) {
+					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+				}
+				else if (RDBMS.sqlserver.equals(rdbms)) {
+					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+				}
+				else if (RDBMS.postgresql.equals(rdbms)) {
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+				}
+			}
 			
 			// return the user just queried (with all the expiration details queried too)
 			@Override
@@ -83,10 +111,19 @@ public class SkyveSpringSecurity {
 			}
 			
 			@Override
-			protected List<UserDetails> loadUsersByUsername(String username) {
+			protected List<UserDetails> loadUsersByUsername(String springUsername) {
+				String customerName = null;
+				String userName = springUsername;
+				int slashIndex = userName.indexOf('/');
+				if (slashIndex > 0) {
+					customerName = userName.substring(0, slashIndex);
+					userName = userName.substring(slashIndex + 1);
+				}
+				
 				return getJdbcTemplate().query(
-						getUsersByUsernameQuery(),
-						new String[] {username},
+						skyveUserQuery,
+						// 2 params for multi-tennant
+						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, userName} : new String[] {userName},
 						new RowMapper<UserDetails>() {
 							@Override
 							public UserDetails mapRow(ResultSet rs, int rowNum)
@@ -115,7 +152,7 @@ public class SkyveSpringSecurity {
 												secondsRemaining++;
 											}
 											locked = true;
-											UtilImpl.LOGGER.warning("Account " + username + " is locked for another " + secondsRemaining + " seconds");
+											UtilImpl.LOGGER.warning("Account " + springUsername + " is locked for another " + secondsRemaining + " seconds");
 										}
 									}
 								}
@@ -130,31 +167,23 @@ public class SkyveSpringSecurity {
 							}
 						});
 			}
+			
+			@Override
+			protected List<GrantedAuthority> loadUserAuthorities(String username) {
+				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
+			}
+
+			@Override
+			protected List<GrantedAuthority> loadGroupAuthorities(String username) {
+				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
+			}
 		};
 		
-		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
-		RDBMS rdbms = dialect.getRDBMS();
-		if (RDBMS.h2.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
-			result.setAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
-			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
-		}
-		else if (RDBMS.mysql.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?");
-			result.setAuthoritiesByUsernameQuery("select concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?");
-			result.setGroupAuthoritiesByUsernameQuery("select concat(bizCustomer, '/', userName), concat(bizCustomer, '/', userName), 'NoAuth' from ADM_SecurityUser where concat(bizCustomer, '/', userName) = ?");
-			
-		}
-		else if (RDBMS.sqlserver.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
-			result.setAuthoritiesByUsernameQuery("select bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
-			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer + '/' + userName, bizCustomer + '/' + userName, 'NoAuth' from ADM_SecurityUser where bizCustomer + '/' + userName = ?");
-		}
-		else if (RDBMS.postgresql.equals(rdbms)) {
-			result.setUsersByUsernameQuery("select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
-			result.setAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
-			result.setGroupAuthoritiesByUsernameQuery("select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?");
-		}
+		// These 3 queries only allow for 1 username JDBC parameter value, so we wont use them,
+		result.setUsersByUsernameQuery(null);
+		result.setAuthoritiesByUsernameQuery(null);
+		result.setGroupAuthoritiesByUsernameQuery(null);
+
 		result.setDataSource(dataSource());
 		result.setRolePrefix("none");
 		return result;
@@ -188,7 +217,7 @@ public class SkyveSpringSecurity {
 		return ClientRegistration.withRegistrationId("google")
 									.clientId(UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID)
 									.clientSecret(UtilImpl.AUTHENTICATION_GOOGLE_SECRET)
-									.clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 									.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
 									.scope("openid", "profile", "email", "address", "phone")
@@ -209,7 +238,7 @@ public class SkyveSpringSecurity {
 		return ClientRegistration.withRegistrationId("facebook")
 									.clientId(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID)
 									.clientSecret(UtilImpl.AUTHENTICATION_FACEBOOK_SECRET)
-									.clientAuthenticationMethod(ClientAuthenticationMethod.POST)
+									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 									.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
 									.scope("public_profile", "email")
@@ -229,7 +258,7 @@ public class SkyveSpringSecurity {
 		return ClientRegistration.withRegistrationId("github")
 									.clientId(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID)
 									.clientSecret(UtilImpl.AUTHENTICATION_GITHUB_SECRET)
-									.clientAuthenticationMethod(ClientAuthenticationMethod.BASIC)
+									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 									.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
 									.scope("read:user")
