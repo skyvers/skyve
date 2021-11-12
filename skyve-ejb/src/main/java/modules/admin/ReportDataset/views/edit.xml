@@ -49,7 +49,7 @@
 	        		<spacer/>
 	        	</item>
 	        	<item>
-	        		<blurb visible="typeClass">
+	        		<blurb visible="typeClass" escape="false">
 	        			<![CDATA[
 	        				<span style="font-size: 90%; color: #444;">
 	        					{i18n:admin.reportDataset.edit.typeClass.hint}
