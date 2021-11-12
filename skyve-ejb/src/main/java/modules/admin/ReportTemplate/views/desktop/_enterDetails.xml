@@ -31,7 +31,7 @@
 				<spacer/>
 			</item>
 			<item>
-				<blurb>
+				<blurb escape="false">
 					<![CDATA[
 						 <span style="line-height: 1.5">
 							 {i18n:admin.reportTemplate.edit.reportTypeHint}
