@@ -36,8 +36,6 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
-RUn this test - fails on second save.
-Try to minimize the amount of dynamic persistence processing
 	@Test
 	public void testPersistenceOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);

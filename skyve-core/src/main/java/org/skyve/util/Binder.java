@@ -12,6 +12,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
@@ -308,6 +309,48 @@ public class Binder {
 		return BindUtil.isImplicit(attributeName);
 	}
 	
+	/**
+	 * Determine if the attribute is dynamic or not.
+	 * Fields can be set as dynamic, References are dynamic if they point to a dynamic document.
+	 * If the owning document is dynamic then all its fields are dynamic.
+	 * 
+	 * @param customer	The current customer.
+	 * @param module	The module of the owning document.
+	 * @param document	The owning document.
+	 * @param attribute	The attribute to check.
+	 * @return	true if dynamic, otherwise false
+	 */
+	public static boolean isDynamic(Customer customer, Module module, Document document, Attribute attribute) {
+		return BindUtil.isDynamic(customer, module, document, attribute);
+	}
+	
+	/**
+	 * Determine if the attribute is dynamic or not.
+	 * Fields can be set as dynamic, References are dynamic if they point to a dynamic document.
+	 * This does not take into account if the owning document is dynamic.
+	 * 
+	 * @param customer	The current customer.
+	 * @param module	The module of the owning document.
+	 * @param attribute	The attribute to check.
+	 * @return	true if dynamic, otherwise false
+	 */
+	public static boolean isDynamic(Customer customer, Module module, Attribute attribute) {
+		return BindUtil.isDynamic(customer, module, attribute);
+	}
+	
+	/**
+	 * A relation is dynamic if it points to a dynamic document.
+	 * This does not take into account if the owning document is dynamic.
+	 * 
+	 * @param customer	The current customer.
+	 * @param module	The module of the owning document.
+	 * @param relation	The relation to check.
+	 * @return	true if dynamic, otherwise false
+	 */
+	public static boolean isDynamic(Customer customer, Module module, Relation relation) {
+		return BindUtil.isDynamic(customer, module, relation);
+	}
+
 	/**
 	 * 
 	 * @param user

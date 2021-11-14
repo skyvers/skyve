@@ -1442,6 +1442,40 @@ public final class BindUtil {
 					PersistentBean.FLAG_COMMENT_NAME.equals(attributeName));
 	}
 	
+	
+	/**
+	 * See Binder.isDynamic().
+	 */
+	public static boolean isDynamic(Customer customer, Module module, Document document, Attribute attribute) {
+		boolean result = document.isDynamic();
+		if (! result) {
+			result = isDynamic(customer, module, attribute);
+		}
+		return result;
+	}
+	
+	/**
+	 * See Binder.isDynamic().
+	 */
+	public static boolean isDynamic(Customer customer, Module module, Attribute attribute) {
+		if (attribute instanceof Field) {
+			return ((Field) attribute).isDynamic();
+		}
+		if (attribute instanceof Relation) {
+			return isDynamic(customer, module, (Relation) attribute);
+		}
+		return false;
+	}
+	
+	/**
+	 * See Binder.isDynamic().
+	 */
+	public static boolean isDynamic(Customer customer, Module module, Relation relation) {
+		String dn = relation.getDocumentName();
+		Document rd = module.getDocument(customer, dn);
+		return rd.isDynamic();
+	}
+	
 	// NB properties must be a sorted map to ensure that the shortest properties
 	// are processed first - ie User.contact is populated before User.contact.firstName,
 	// otherwise the firstName new value will be tromped...

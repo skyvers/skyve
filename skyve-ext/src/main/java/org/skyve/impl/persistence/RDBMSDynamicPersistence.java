@@ -18,6 +18,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -49,6 +50,10 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	
 	@Override
 	public void persist(Customer customer, Module module, Document document, PersistentBean bean) {
+		if (bean.isPersisted()) {
+			delete(customer, document, bean, true);
+		}
+
 		new BeanVisitor(false, false, true) {
 			@Override
 			protected boolean accept(String binding,
@@ -86,13 +91,12 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				}
 			}
 			else if (a instanceof Reference) {
+				Reference r = (Reference) a;
 				if (! dynamicAttribute) {
-					String dn = ((Reference) a).getDocumentName();
-					Document rd = m.getDocument(c, dn);
-					dynamicAttribute = rd.isDynamic();
+					dynamicAttribute = BindUtil.isDynamic(c, m, r);
 				}
 				if (dynamicAttribute) {
-					dynamicReferences.add((Reference) a);
+					dynamicReferences.add(r);
 				}
 			}
 		}
@@ -193,6 +197,10 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	
 	@Override
 	public void delete(Customer customer, Document document, PersistentBean bean) {
+		delete(customer, document, bean, false);
+	}
+	
+	private void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
 		final Set<String> bizIdsToDelete = new TreeSet<>();
 		
 		new BeanVisitor(false, false, true) {
@@ -206,16 +214,23 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				if (owningRelation == null) {
 					bizIdsToDelete.add(visitedBean.getBizId());
 				}
-				else if (owningRelation instanceof Collection) {
-					// cascade
-					if (((Collection) owningRelation).getType() != CollectionType.aggregation) {
+				else {
+					if (beforeSave) {
 						bizIdsToDelete.add(visitedBean.getBizId());
 					}
-				}
-				else if (owningRelation instanceof Association) {
-					// cascade
-					if (((Association) owningRelation).getType() != AssociationType.aggregation) {
-						bizIdsToDelete.add(visitedBean.getBizId());
+					else {
+						if (owningRelation instanceof Collection) {
+							// cascade
+							if (((Collection) owningRelation).getType() != CollectionType.aggregation) {
+								bizIdsToDelete.add(visitedBean.getBizId());
+							}
+						}
+						else if (owningRelation instanceof Association) {
+							// cascade
+							if (((Association) owningRelation).getType() != AssociationType.aggregation) {
+								bizIdsToDelete.add(visitedBean.getBizId());
+							}
+						}
 					}
 				}
 				

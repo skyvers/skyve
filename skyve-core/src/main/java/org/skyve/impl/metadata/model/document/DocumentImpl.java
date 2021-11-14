@@ -273,16 +273,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		Module m = customer.getModule(getOwningModuleName());
 
 		getAllAttributes().forEach(a -> {
-			if (a instanceof Field) {
-				if (((Field) a).isDynamic()) {
-					bean.setDynamic(a.getName(), dynamicDefaultValue(a));
-				}
-			}
-			else if (a instanceof Relation) {
-				Document d = m.getDocument(customer, ((Relation) a).getDocumentName());
-				if (d.isDynamic()) {
-					bean.setDynamic(a.getName(), dynamicDefaultValue(a));
-				}
+			if (BindUtil.isDynamic(customer, m, this, a)) {
+				bean.setDynamic(a.getName(), dynamicDefaultValue(a));
 			}
 		});
 	}

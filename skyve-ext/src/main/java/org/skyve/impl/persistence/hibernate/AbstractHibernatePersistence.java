@@ -1282,9 +1282,12 @@ t.printStackTrace();
 										Document owningDocument,
 										Relation owningRelation,
 										Bean unmergedPart) {
-				
 				// Replace any bean that has been persisted by reachability but is the old unpersisted/detached version
-				if (unmergedPart.isPersisted()) {
+				Bean mergedPart = (owningRelation == null) ? mergedBean : (Bean) BindUtil.get(mergedBean, binding);
+				if (mergedPart == null) { // when a dynamic relation encountered and not persisted
+					BindUtil.set(mergedBean, binding, unmergedPart);
+				}
+				else if (mergedPart.isPersisted()) {
 					if ((owningRelation != null) && (unmergedPart == unmergedBean) && (unmergedPart != mergedBean)) {
 						BindUtil.set(mergedBean, binding, mergedBean);
 					}
@@ -1302,11 +1305,7 @@ t.printStackTrace();
 					return false;
 				}
 				
-				Bean mergedPart = (owningRelation == null) ? mergedBean : (Bean) BindUtil.get(mergedBean, binding);
-				if (mergedPart == null) { // when a dynamic relation encountered and not persisted
-					BindUtil.set(mergedBean, binding, unmergedPart);
-				}
-				else {
+				if (mergedPart != null) {
 					// Reinstate any "biz" attributes lost when detached or persisted for the first time (some "biz" attributes are not used when embedded)
 					String bizCustomer = mergedPart.getBizCustomer();
 					if (bizCustomer == null) {
@@ -1334,9 +1333,12 @@ t.printStackTrace();
 					}
 					
 					// Reinstate the transient attributes in the mergedBean from the unmerged bean lost when detached or persisted for the first time.
+					Module module = customer.getModule(document.getOwningModuleName());
 					for (Attribute attribute : document.getAllAttributes()) {
 						String attributeName = attribute.getName();
-						if ((! attribute.isPersistent()) && (! Bean.BIZ_KEY.equals(attributeName))) {
+						
+						boolean dynamic = BindUtil.isDynamic(customer, module, document, attribute);
+						if ((dynamic || (! attribute.isPersistent())) && (! Bean.BIZ_KEY.equals(attributeName))) {
 							if (attribute instanceof Collection) {
 								@SuppressWarnings("unchecked")
 								List<Bean> mergedCollection = (List<Bean>) BindUtil.get(mergedPart, attributeName);
@@ -1364,9 +1366,6 @@ t.printStackTrace();
 		
 		// Flush dynamic domain
 		if (document.getPersistent() != null) { // persistent
-			if (mergedBean.isPersisted()) {
-				dynamicPersistence.delete(customer, document, mergedBean);
-			}
 			dynamicPersistence.persist(customer, customer.getModule(document.getOwningModuleName()), document, mergedBean);
 		}
 	}
