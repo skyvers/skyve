@@ -16,7 +16,7 @@ public class LocalSecureRepository extends LocalDesignRepository {
 			throw new IllegalStateException("No-one is logged in - cannot retrieve the skyve user.");
 		}
 
-		UserImpl result = AbstractRepository.setCustomerAndUserFromPrincipal(userPrincipal);
+		UserImpl result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
 
 		resetUserPermissions(result);
 		

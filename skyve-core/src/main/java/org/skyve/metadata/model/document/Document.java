@@ -5,10 +5,19 @@ import java.util.Set;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.controller.BizExportAction;
+import org.skyve.metadata.controller.BizImportAction;
+import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.metadata.controller.ServerSideAction;
+import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.model.chart.ChartModel;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.map.MapModel;
 
 /**
  * 
@@ -143,4 +152,16 @@ public interface Document extends Model {
 	 * @return
 	 */
 	public String getDocumentation();
+	
+	public <T extends Bean> Bizlet<T> getBizlet(Customer customer);
+	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime);
+	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime);
+	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime);
+	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime);
+
+	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime);
+	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime);
+	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime);
+	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime);
+	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime);
 }

@@ -10,7 +10,7 @@ import org.skyve.CORE;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.util.UtilImpl;
@@ -18,6 +18,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -40,7 +41,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		bean.setSailTestStrategy(SailTestStrategy.None);
 
 		// Set module name to the first non-admin module found
-		AbstractRepository r = AbstractRepository.get();
+		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		for (String moduleName : r.getAllVanillaModuleNames()) {
 			if (! ControlPanel.MODULE_NAME.equals(moduleName)) {
 				bean.setSailModuleName(moduleName);
@@ -126,7 +127,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
-			AbstractRepository rep = AbstractRepository.get();
+			ProvidedRepository rep = ProvidedRepositoryFactory.get();
 			for (String cus : rep.getAllCustomerNames()) {
 				result.add(new DomainValue(cus));
 			}
@@ -135,7 +136,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		}
 		else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
-			AbstractRepository r = AbstractRepository.get();
+			ProvidedRepository r = ProvidedRepositoryFactory.get();
 			for (String moduleName : r.getAllVanillaModuleNames()) {
 					result.add(new DomainValue(moduleName));
 			}

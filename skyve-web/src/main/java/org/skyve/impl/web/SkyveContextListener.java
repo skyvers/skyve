@@ -32,7 +32,7 @@ import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -41,6 +41,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 
@@ -107,7 +108,7 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new FacesException(e);
 			}
 
-			AbstractRepository repository = AbstractRepository.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			for (String customerName : repository.getAllCustomerNames()) {
 				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 				internalCustomer.notifyStartup();
@@ -448,15 +449,15 @@ public class SkyveContextListener implements ServletContextListener {
 
 		// NB Need the repository set before setting persistence
 		UtilImpl.SKYVE_REPOSITORY_CLASS = getString("factories", "repositoryClass", factories, false);
-		if (AbstractRepository.get() == null) {
+		if (ProvidedRepositoryFactory.get() == null) {
 			if (UtilImpl.SKYVE_REPOSITORY_CLASS == null) {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
-				AbstractRepository.set(new LocalSecureRepository());
+				ProvidedRepositoryFactory.set(new LocalSecureRepository());
 			}
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
-					AbstractRepository.set((AbstractRepository) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS).getDeclaredConstructor().newInstance());
+					ProvidedRepositoryFactory.set((ProvidedRepository) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS).getDeclaredConstructor().newInstance());
 				}
 				catch (Exception e) {
 					throw new IllegalStateException("Could not create factories.repositoryClass " + UtilImpl.SKYVE_REPOSITORY_CLASS, e);
@@ -672,7 +673,7 @@ public class SkyveContextListener implements ServletContextListener {
 				try {
 					try {
 						try {
-							AbstractRepository repository = AbstractRepository.get();
+							ProvidedRepository repository = ProvidedRepositoryFactory.get();
 							for (String customerName : repository.getAllCustomerNames()) {
 								CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 								internalCustomer.notifyShutdown();

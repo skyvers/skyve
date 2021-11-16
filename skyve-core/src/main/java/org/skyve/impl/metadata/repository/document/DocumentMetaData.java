@@ -58,7 +58,6 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.UtilImpl;
@@ -76,6 +75,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "document")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
@@ -300,7 +300,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@Override
-	public org.skyve.metadata.model.document.Document convert(String metaDataName, AbstractRepository repository) {
+	public org.skyve.metadata.model.document.Document convert(String metaDataName, ProvidedRepository repository) {
 		DocumentImpl result = new DocumentImpl(repository);
 
 		// Set document metadata

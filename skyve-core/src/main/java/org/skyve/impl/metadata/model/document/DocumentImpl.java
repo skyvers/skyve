@@ -27,11 +27,16 @@ import org.skyve.impl.metadata.flow.Flow;
 import org.skyve.impl.metadata.model.ModelImpl;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Text;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.BizExportAction;
+import org.skyve.metadata.controller.BizImportAction;
+import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.metadata.controller.ServerSideAction;
+import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -49,9 +54,14 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.chart.ChartModel;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.map.MapModel;
 
 public final class DocumentImpl extends ModelImpl implements Document {
 	private static final long serialVersionUID = 9091172268741052691L;
@@ -103,10 +113,16 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	private String documentation;
 	
-	private transient AbstractRepository repository;
+	private transient ProvidedRepository repository;
 	
-	public DocumentImpl(AbstractRepository repository) {
+	public DocumentImpl(ProvidedRepository repository) {
 		this.repository = repository;
+	}
+	
+	// Required for Serialization
+	// NB This class should never be serialized.
+	public DocumentImpl() {
+		repository = ProvidedRepositoryFactory.get();
 	}
 
 	@Override
@@ -172,11 +188,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 		}
 		catch (@SuppressWarnings("unused") ClassNotFoundException e) {
-			if (packagePath.startsWith(repository.CUSTOMERS_NAME)) {
+			if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
 				// Look for an extension first and if not found look for a base class
 				try {
 					className.setLength(0);
-					className.append(packagePath).append(repository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
+					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
 					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 				}
 				catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no extension class
@@ -188,7 +204,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 					catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
 						// Look for the base class in the modules area
 						className.setLength(0);
-						className.append(repository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(repository.DOMAIN_NAME).append('.').append(documentName);
+						className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
 						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 					}
 				}
@@ -196,7 +212,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			else {
 				// Look for base class and if abstract, look for an extension
 				className.setLength(0);
-				className.append(packagePath).append(repository.DOMAIN_NAME).append('.').append(documentName);
+				className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
 				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 				if (Modifier.isAbstract(result.getModifiers())) {
 					className.append("Ext");
@@ -486,10 +502,57 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
+	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
 		return isDynamic() ? null : repository.getBizlet(customer, this, true);
 	}
 
+	@Override
+	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
+		return repository.getComparisonModel(customer, this, modelName, runtime);
+	}
+	
+	@Override
+	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
+		return repository.getMapModel(customer, this, modelName, runtime);
+	}
+
+	@Override
+	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
+		return repository.getChartModel(customer, this, modelName, runtime);
+	}
+
+	@Override
+	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
+		return repository.getListModel(customer, this, modelName, runtime);
+	}
+	
+	@Override
+	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime) {
+		return repository.getServerSideAction(customer, this, className, runtime);
+	}
+
+	@Override
+	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
+		return repository.getBizExportAction(customer, this, className, runtime);
+	}
+
+	@Override
+	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
+		return repository.getBizImportAction(customer, this, className, runtime);
+	}
+
+	@Override
+	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
+		return repository.getDownloadAction(customer, this, className, runtime);
+	}
+
+	@Override
+	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
+		return repository.getUploadAction(customer, this, className, runtime);
+	}
+
+	
 	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
 																DomainType domainType,
 																Attribute attribute,

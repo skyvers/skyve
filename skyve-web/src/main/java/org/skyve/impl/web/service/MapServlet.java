@@ -28,7 +28,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.map.DocumentQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
@@ -166,8 +165,7 @@ public class MapServlet extends HttpServlet {
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
-		Repository repository = CORE.getRepository();
-		MapModel<Bean> model = repository.getMapModel(customer, document, request.getParameter(AbstractWebContext.MODEL_NAME), true);
+		MapModel<Bean> model = document.getMapModel(customer, request.getParameter(AbstractWebContext.MODEL_NAME), true);
 		model.setBean(bean);
 		
 		MapResult result = model.getResult(mapBounds(request));

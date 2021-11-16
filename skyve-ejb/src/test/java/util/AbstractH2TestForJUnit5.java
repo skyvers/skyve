@@ -14,7 +14,7 @@ import org.skyve.EXT;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -96,7 +96,7 @@ public class AbstractH2TestForJUnit5 {
         UtilImpl.QUERY_TRACE = false;
 		UtilImpl.JOB_SCHEDULER = false;
 
-        AbstractRepository.set(new LocalDesignRepository());
+        ProvidedRepositoryFactory.set(new LocalDesignRepository());
 
         final SuperUser user = new SuperUser();
         user.setCustomerName(CUSTOMER);

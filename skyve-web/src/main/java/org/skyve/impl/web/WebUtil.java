@@ -21,7 +21,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -33,6 +33,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -58,7 +59,7 @@ public class WebUtil {
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
 		if ((user != null) && (userPrincipal != null)) {
-			UserImpl principalUser = AbstractRepository.setCustomerAndUserFromPrincipal(userPrincipal);
+			UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
 			if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
 					user.getName().equals(principalUser.getName()))) {
 				user = null;
@@ -68,7 +69,7 @@ public class WebUtil {
 		if (user == null) {
 			// This can happen using SSO when the session expires as the servlets are not protected by normal Java EE security
 			if (userPrincipal != null) {
-				user = AbstractRepository.get().retrieveUser(userPrincipal);
+				user = ProvidedRepositoryFactory.get().retrieveUser(userPrincipal);
 				if (user == null) {
 					throw new IllegalStateException("WebUtil: Cannot get the user " + userPrincipal);
 				}
@@ -219,13 +220,12 @@ public class WebUtil {
 		BindUtil.set(bean, SQLMetaDataUtil.OLD_PASSWORD_PROPERTY_NAME, oldPassword);
 		BindUtil.set(bean, SQLMetaDataUtil.NEW_PASSWORD_PROPERTY_NAME, newPassword);
 		BindUtil.set(bean, SQLMetaDataUtil.CONFIRM_PASSWORD_PROPERTY_NAME, confirmPassword);
-		AbstractRepository r = AbstractRepository.get();
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user); // user has not been set as this is called directly from changePassword.jsp
 		persistence.begin();
 		try {
-			r.getServerSideAction(c, changePassword, SQLMetaDataUtil.MAKE_PASSWORD_CHANGE_ACTION_NAME, true).execute(bean, null);
+			changePassword.getServerSideAction(c, SQLMetaDataUtil.MAKE_PASSWORD_CHANGE_ACTION_NAME, true).execute(bean, null);
 		}
 		catch (ValidationException e) {
 			persistence.rollback();
@@ -265,7 +265,7 @@ public class WebUtil {
 			
 			// set reset password token for all users with the same email address across all customers
 			List<PersistentBean> users = q.beanResults();
-			if(!users.isEmpty()) {
+			if(! users.isEmpty()) {
 				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
 				for(PersistentBean user: users) {
@@ -369,7 +369,7 @@ public class WebUtil {
 						customerName = rs.getString(1);
 						userName = rs.getString(2);
 
-						AbstractRepository r = AbstractRepository.get();
+						Repository r = CORE.getRepository();
 						org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
 						errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
 					}
@@ -390,7 +390,7 @@ public class WebUtil {
 		
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Bizlet<Bean> bizlet = AbstractRepository.get().getBizlet(customer, referenceDocument, true);
+		Bizlet<Bean> bizlet = referenceDocument.getBizlet(customer);
 		if (bizlet != null) {
 			try {
 				result = bizlet.resolve(bizId, conversationBean, webContext);
@@ -455,17 +455,18 @@ public class WebUtil {
 		Document selfRegistration = admin.getDocument(cust, SQLMetaDataUtil.SELF_REGISTRATION_DOCUMENT_NAME);
 		Bean bean = selfRegistration.newInstance(CORE.getUser());
 		BindUtil.set(bean, Binder.createCompoundBinding(SQLMetaDataUtil.USER_PROPERTY_NAME, Bean.DOCUMENT_ID), userBizId);
-		AbstractRepository r = AbstractRepository.get();
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(CORE.getUser()); // user has not been set as this is called directly from changePassword.jsp
 		persistence.begin();
 		try {
-			r.getServerSideAction(cust, selfRegistration, SQLMetaDataUtil.RESEND_ACTIVATION_ACTION_NAME, true).execute(bean, null);
-		} catch (Exception e) {
+			selfRegistration.getServerSideAction(cust, SQLMetaDataUtil.RESEND_ACTIVATION_ACTION_NAME, true).execute(bean, null);
+		}
+		catch (Exception e) {
 			persistence.rollback();
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 			persistence.commit(true);
 		}
 	}

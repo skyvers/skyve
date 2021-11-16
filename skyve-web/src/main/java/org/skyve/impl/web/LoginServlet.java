@@ -9,9 +9,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
@@ -67,7 +68,7 @@ public class LoginServlet extends HttpServlet {
 
 		String servletPath = request.getServletPath();
 		try {
-			AbstractRepository repository = AbstractRepository.get();
+			Repository repository = CORE.getRepository();
 
 			if (LOGIN_PATH.equals(servletPath)) {
 				String url = "/pages/login.jsp";

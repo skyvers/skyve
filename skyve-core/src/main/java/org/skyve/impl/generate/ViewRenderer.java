@@ -3,7 +3,6 @@ package org.skyve.impl.generate;
 import java.util.List;
 import java.util.Stack;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
@@ -960,7 +959,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		if ((queryName == null) && (modelName != null)) {
 			currentListWidgetModelName = modelName;
 			currentListWidgetModelDocumentName = document.getName();
-			currentListWidgetModel = CORE.getRepository().getListModel(customer, document, currentListWidgetModelName, true);
+			currentListWidgetModel = document.getListModel(customer, currentListWidgetModelName, true);
 			currentListWidgetDrivingDocument = currentListWidgetModel.getDrivingDocument();
 			currentListWidgetAggregateQuery = false;
 		}

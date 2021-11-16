@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.repository.view.actions.AddAction;
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
@@ -170,7 +169,7 @@ public class ActionImpl implements Action {
 			throw new IllegalStateException("The ActionConfig " + getName() + " is an implicit action.");
 		}
 
-		return AbstractRepository.get().getServerSideAction(customer, document, resourceName, true);
+		return document.getServerSideAction(customer, resourceName, true);
 	}
 
 	@Override

@@ -35,7 +35,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
@@ -164,8 +163,7 @@ public class ChartServlet extends HttpServlet {
 										(ChartBuilderMetaData) view.getInlineModel(Integer.parseInt(modelName)) :
 										null;
 		if (builder == null) {
-			Repository repository = CORE.getRepository();
-			ChartModel<Bean> model = repository.getChartModel(customer, document, modelName, true);
+			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);
 			data = model.getChartData();
 		}

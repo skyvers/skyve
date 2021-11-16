@@ -8,7 +8,6 @@ import javax.faces.context.FacesContext;
 
 import org.skyve.CORE;
 import org.skyve.impl.domain.messages.SecurityException;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -16,6 +15,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
@@ -186,7 +186,7 @@ public abstract class Harness extends Localisable {
 								}
 							}
 							else {
-								if (CORE.getRepository().getListModel(customer, d, queryNameParameter, false) == null) {
+								if (d.getListModel(customer, queryNameParameter, false) == null) {
 									throw new MetaDataException("Model name " + queryNameParameter + " does not exist for module " + bizModuleParameter);
 								}
 							}
@@ -240,7 +240,7 @@ public abstract class Harness extends Localisable {
 	@SuppressWarnings("static-method")
 	public void setUser(String customerName, String userName) {
 		User user = null;
-		AbstractRepository repository = AbstractRepository.get();
+		Repository repository = CORE.getRepository();
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		if (ec.getUserPrincipal() == null) { // not logged in
 			user = repository.retrieveUser(new StringBuilder(64).append(customerName).append('/').append(userName).toString());

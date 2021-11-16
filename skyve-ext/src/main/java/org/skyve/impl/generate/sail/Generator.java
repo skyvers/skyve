@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -72,7 +72,7 @@ System.out.println(visitModules(args[0]));
 												UserAgentType userAgentType,
 												TestStrategy testStrategy)
 	throws Exception {
-		CORE.getRepository().resetMenus(user);
+		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
 		List<Automation> result = new ArrayList<>();
@@ -127,7 +127,7 @@ System.out.println(visitModules(args[0]));
 										UserAgentType userAgentType,
 										TestStrategy testStrategy)
 	throws Exception {
-		CORE.getRepository().resetMenus(user);
+		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
 		
@@ -198,7 +198,7 @@ System.out.println(visitModules(args[0]));
 							d = m.getDocument(c, documentName);
 							if (modelName != null) {
 								navigate.setModelName(modelName);
-								ListModel<?> model = CORE.getRepository().getListModel(c, d, modelName, true);
+								ListModel<?> model = d.getListModel(c, modelName, true);
 								d = model.getDrivingDocument();
 							}
 						}

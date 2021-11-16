@@ -14,7 +14,7 @@ import javax.swing.AbstractAction;
 import org.apache.commons.codec.binary.Base64;
 import java.util.UUID;
 import org.skyve.domain.types.OptimisticLock;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -55,7 +55,7 @@ class CreateAction extends AbstractAction {
 			UtilImpl.DDL_SYNC = true;
 //			UtilImpl.APPS_JAR_DIRECTORY = "/C:/_/skyve/skyve-ee/javaee/skyve.ear/apps.jar/";
 			
-			AbstractRepository.set(new LocalDesignRepository());
+			ProvidedRepositoryFactory.set(new LocalDesignRepository());
 			SuperUser user = new SuperUser();
 			user.setCustomerName(panel.getCustomer());
 			user.setName(panel.getUser());

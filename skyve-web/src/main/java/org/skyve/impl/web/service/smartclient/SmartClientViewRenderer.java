@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
@@ -115,9 +114,9 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
-import org.skyve.util.Binder.TargetMetaData;
 
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
@@ -2937,7 +2936,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
-		ListModel<Bean> model = CORE.getRepository().getListModel(customer, owningDocument, modelName, true);
+		ListModel<Bean> model = owningDocument.getListModel(customer, modelName, true);
 		Document drivingDocument = model.getDrivingDocument();
 		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
 

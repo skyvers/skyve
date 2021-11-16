@@ -23,14 +23,13 @@ import org.skyve.impl.generate.jasperreports.DesignSpecification;
 import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
 import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.report.jasperreports.JasperReportUtil;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ColumnAlignment;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportColumn;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportStyle;
 import org.skyve.impl.report.jasperreports.SkyveDataSource;
-import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
@@ -40,6 +39,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -329,7 +329,6 @@ public class ReportServlet extends HttpServlet {
 			try {
 				User user = persistence.getUser();
 				Customer customer = user.getCustomer();
-				AbstractRepository repository = AbstractRepository.get();
 
 				String valuesParam = request.getParameter("values");
 				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info(valuesParam);
@@ -353,7 +352,7 @@ public class ReportServlet extends HttpServlet {
 					String documentName = documentOrQueryOrModelName.substring(0, __Index);
 					Document document = module.getDocument(customer, documentName);
 					String modelName = documentOrQueryOrModelName.substring(__Index + 2);
-					model = repository.getListModel(customer, document, modelName, true);
+					model = document.getListModel(customer, modelName, true);
 
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
@@ -458,8 +457,8 @@ public class ReportServlet extends HttpServlet {
 
 					Map<String, Object> params = new TreeMap<>();
 					StringBuilder sb = new StringBuilder(256);
-					sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
-					sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);
+					sb.append(UtilImpl.getAbsoluteBasePath()).append(ProvidedRepository.CUSTOMERS_NAMESPACE);
+					sb.append(customer.getName()).append('/').append(ProvidedRepository.RESOURCES_NAMESPACE);
 					params.put("RESOURCE_DIR", sb.toString());
 					params.put("TITLE", model.getLocalisedDescription());
 

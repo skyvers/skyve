@@ -81,7 +81,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -113,6 +113,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.BizQLDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
@@ -300,7 +301,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 		sources.addAnnotatedClass(AbstractPersistentBean.class);
 
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		if (UtilImpl.USING_JPA) {
 			// cfg.configure("bizhub", null);
 			// emf = javax.persistence.Persistence.createEntityManagerFactory("bizhub");
@@ -311,9 +312,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			for (String moduleName : repository.getAllVanillaModuleNames()) {
 				// repository.REPOSITORY_DIRECTORY
 				sb.setLength(0);
-				sb.append(repository.MODULES_NAME).append('/');
+				sb.append(ProvidedRepository.MODULES_NAME).append('/');
 				sb.append(moduleName).append('/');
-				sb.append(repository.DOMAIN_NAME).append('/');
+				sb.append(ProvidedRepository.DOMAIN_NAME).append('/');
 				sb.append(moduleName).append("_orm.hbm.xml");
 				String mappingPath = sb.toString();
 
@@ -326,8 +327,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			// Check for customer overridden ORMs
 			for (String customerName : repository.getAllCustomerNames()) {
 				sb.setLength(0);
-				sb.append(repository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
-				sb.append(repository.MODULES_NAME).append("/orm.hbm.xml");
+				sb.append(ProvidedRepository.CUSTOMERS_NAMESPACE).append(customerName).append('/');
+				sb.append(ProvidedRepository.MODULES_NAME).append("/orm.hbm.xml");
 				String ormResourcePath = sb.toString();
 				
 				File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
@@ -504,7 +505,7 @@ t.printStackTrace();
 	@Override
 	public void setDocumentPermissionScopes(DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -528,7 +529,7 @@ t.printStackTrace();
 	@Override
 	public void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
 //		String userDataGroupId = user.getDataGroupId();
 //		if (Util.SECURITY_TRACE) {
@@ -564,7 +565,7 @@ t.printStackTrace();
 	 */
 	private void setFilters(Document document, DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		String userDataGroupId = user.getDataGroupId();
 		Customer customer = user.getCustomer();
 		String moduleName = document.getOwningModuleName();

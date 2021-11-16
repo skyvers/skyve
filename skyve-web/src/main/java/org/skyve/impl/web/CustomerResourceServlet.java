@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
@@ -18,13 +19,13 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.DownloadAreaType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Thumbnail;
@@ -225,7 +226,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					}
 				} 
 				else if (DownloadAreaType.resources.toString().equals(resourceArea)) {
-					AbstractRepository repository = AbstractRepository.get();
+					Repository repository = CORE.getRepository();
 					File tempFile = repository.findResourceFile(resourceFileName, customerName, moduleName);
 					if (tempFile.exists()) {
 						file = tempFile;

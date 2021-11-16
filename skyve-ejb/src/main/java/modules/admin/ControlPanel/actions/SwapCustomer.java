@@ -2,7 +2,7 @@ package modules.admin.ControlPanel.actions;
 
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
@@ -32,7 +32,7 @@ public class SwapCustomer implements ServerSideAction<ControlPanelExtension> {
 			UserImpl user = (UserImpl) CORE.getPersistence().getUser();
 			user.setCustomerName(customer);
 			user.clearModuleMenus();
-			AbstractRepository.get().resetMenus(user);
+			ProvidedRepositoryFactory.get().resetMenus(user);
 		}
 		catch (Exception e) {
 			bean.trapException(e);

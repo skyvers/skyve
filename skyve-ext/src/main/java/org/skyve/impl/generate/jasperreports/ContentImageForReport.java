@@ -6,7 +6,6 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.metadata.customer.Customer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +50,9 @@ public class ContentImageForReport {
 
 	public static BufferedImage customerLogo(int imageWidth, int imageHeight) throws Exception {
 		final Customer customer = CORE.getCustomer();
-		final AbstractRepository repository = AbstractRepository.get();
-		final File logo = repository.findResourceFile(customer.getUiResources().getLogoRelativeFileName(), customer.getName(), null);
+		final File logo = CORE.getRepository().findResourceFile(customer.getUiResources().getLogoRelativeFileName(),
+																	customer.getName(),
+																	null);
 
 		return Thumbnails.of(logo)
 				.width(imageWidth)

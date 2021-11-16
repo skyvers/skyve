@@ -28,7 +28,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -40,6 +40,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.BackgroundTask;
@@ -71,7 +72,7 @@ public class QuartzJobScheduler implements JobScheduler {
 
 		try {
 			// Add metadata jobs
-			AbstractRepository repository = AbstractRepository.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			for (String moduleName : repository.getAllVanillaModuleNames()) {
 				Module module = repository.getModule(null, moduleName);
 				addJobs(module);

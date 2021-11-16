@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.SortedMap;
 
 import org.skyve.impl.metadata.model.document.CollectionImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -85,7 +85,7 @@ public class CORE {
 	 * @return The repository.
 	 */
 	public static Repository getRepository() {
-		return AbstractRepository.get();
+		return ProvidedRepositoryFactory.get();
 	}
 	
 	/**

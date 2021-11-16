@@ -11,7 +11,6 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -211,7 +210,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 
 				Class<?> type = null;
 				if (attribute instanceof Enumeration) {
-					type = AbstractRepository.get().getEnum((Enumeration) attribute);
+					type = ((Enumeration) attribute).getEnum();
 				}
 				else {
 					type = attribute.getAttributeType().getImplementingType();
@@ -260,7 +259,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				if (attribute != null) {
 					Class<?> type = null;
 					if (attribute instanceof Enumeration) {
-						type = AbstractRepository.get().getEnum((Enumeration) attribute);
+						type = ((Enumeration) attribute).getEnum();
 					}
 					else {
 						type = attribute.getAttributeType().getImplementingType();

@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.DomainGenerator;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
@@ -20,6 +20,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "enum")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
@@ -78,6 +79,8 @@ public class Enumeration extends ConstrainableField {
 	
 	public Enumeration() {
 		setAttributeType(AttributeType.enumeration);
+		// This class should never be Serialized, setRepository() is call on DocumentMetaData.convert()
+		repository = ProvidedRepositoryFactory.get();
 	}
 	
 	// The generated enum type name if the name determined is not appropriate
@@ -90,10 +93,10 @@ public class Enumeration extends ConstrainableField {
 	private String attributeRef;
 	private Document owningDocument;
 	
-	private transient AbstractRepository repository;
+	private transient ProvidedRepository repository;
 	
 	@XmlTransient
-	public void setRepository(AbstractRepository repository) {
+	public void setRepository(ProvidedRepository repository) {
 		this.repository = repository;
 	}
 	
@@ -213,5 +216,48 @@ public class Enumeration extends ConstrainableField {
 		}
 		
 		return result;
+	}
+	
+	public Class<org.skyve.domain.types.Enumeration> getEnum() {
+		String fullyQualifiedEnumName = null;
+
+		// NB Needs a method call to resolve the target
+		final String enumClassName = getImplementingEnumClassName();
+		if (enumClassName != null) { // hand-coded enum implementation
+			fullyQualifiedEnumName = enumClassName;
+		}
+		else { // generated implementation
+			// No enum overriding, but there might be referencing
+			String encapulatingClassName = getEncapsulatingClassName();
+			fullyQualifiedEnumName = new StringBuilder(64).append(encapulatingClassName).append('$').append(toJavaIdentifier()).toString();
+		}
+		
+		try {
+			@SuppressWarnings("unchecked")
+			Class<org.skyve.domain.types.Enumeration> result = (Class<org.skyve.domain.types.Enumeration>) Class.forName(fullyQualifiedEnumName, true, Thread.currentThread().getContextClassLoader());
+			return result;
+		}
+		catch (Exception e) {
+			throw new MetaDataException("A problem was encountered loading enum " + fullyQualifiedEnumName, e);
+		}
+	}
+	
+	public String getEncapsulatingClassName() {
+		StringBuilder result = new StringBuilder(64);
+		
+		result.append(ProvidedRepository.MODULES_NAME).append('.');
+		String moduleName = getModuleRef();
+		if (moduleName == null) {
+			moduleName = getOwningDocument().getOwningModuleName();
+		}
+		result.append(moduleName).append('.');
+		result.append(ProvidedRepository.DOMAIN_NAME).append('.');
+		String documentName = getDocumentRef();
+		if (documentName == null) {
+			documentName = getOwningDocument().getName();
+		}
+		result.append(documentName);
+
+		return result.toString();
 	}
 }

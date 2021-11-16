@@ -148,7 +148,7 @@ public class ReactNativeRouter {
 					component.setModel(itemModule,
 										itemDocument,
 										modelName,
-										CORE.getRepository().getListModel(c, itemDocument, modelName, false));
+										itemDocument.getListModel(c, modelName, false));
 				}
 				else if (item.getQueryName() != null) { // query driven
 					component.setQuery(menuModule,

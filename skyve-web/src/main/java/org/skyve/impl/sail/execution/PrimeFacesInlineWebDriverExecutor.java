@@ -663,7 +663,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				}
 				else {
 					Document d = m.getDocument(c, context.getDocumentName());
-					ListModel<Bean> lm = CORE.getRepository().getListModel(c, d, key, true);
+					ListModel<Bean> lm = d.getListModel(c, key, true);
 					if (lm != null) {
 						d = lm.getDrivingDocument();
 						result.setModuleName(d.getOwningModuleName());

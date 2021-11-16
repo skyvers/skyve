@@ -13,7 +13,6 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -288,7 +287,7 @@ public final class StandardGenerator {
 
 				if (DomainType.constant.equals(attribute.getDomainType())) {
 					if (bizlet == null) {
-						bizlet = AbstractRepository.get().getBizlet(customer, currentDocument, true);
+						bizlet = currentDocument.getBizlet(customer);
 					}
 					if (bizlet == null) { // metadata has an error
 						bizlet = new Bizlet<>() {

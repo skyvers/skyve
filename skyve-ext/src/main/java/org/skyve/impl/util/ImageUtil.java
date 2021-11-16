@@ -24,8 +24,9 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.io.FilenameUtils;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.CORE;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
+import org.skyve.metadata.repository.Repository;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 
@@ -104,7 +105,7 @@ public class ImageUtil {
 	// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-ee/src/skyve/resources/files/
 	public static byte[] svg(String fileName, int imageWidth, int imageHeight) throws IOException {
 		String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
-		AbstractRepository repository = AbstractRepository.get();
+		Repository repository = CORE.getRepository();
 		File svgFile = null;
 		if (suffix == null) {
 			svgFile = repository.findResourceFile("files/blank.svg", null, null);

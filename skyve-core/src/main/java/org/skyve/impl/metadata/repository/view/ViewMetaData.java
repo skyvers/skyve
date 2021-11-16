@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
@@ -25,6 +24,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View.ViewParameter;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "view")
@@ -177,7 +177,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 	}
 
 	@Override
-	public ViewImpl convert(String metaDataName, AbstractRepository repository) {
+	public ViewImpl convert(String metaDataName, ProvidedRepository repository) {
 		ViewImpl result = new ViewImpl();
 		String value = getTitle();
 		if (value == null) {

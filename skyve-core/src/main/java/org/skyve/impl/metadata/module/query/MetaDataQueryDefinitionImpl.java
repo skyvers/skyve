@@ -19,7 +19,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
@@ -64,17 +63,6 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	private String filterClause;
 
 	private List<MetaDataQueryColumn> columns = new ArrayList<>();
-
-	private transient AbstractRepository repository;
-	
-	public MetaDataQueryDefinitionImpl(AbstractRepository repository) {
-		this.repository = repository;
-	}
-
-	// Required for Serialization
-	public MetaDataQueryDefinitionImpl() {
-		this.repository = AbstractRepository.get();
-	}
 
 	@Override
 	public Module getDocumentModule(Customer customer) {
@@ -482,7 +470,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 							Class<?> type = String.class;
 							if (attribute != null) {
 								if (attribute instanceof Enumeration) {
-									type = repository.getEnum((Enumeration) attribute);
+									type = ((Enumeration) attribute).getEnum();
 								}
 								else if (attribute.getAttributeType() != null) {
 									type = attribute.getAttributeType().getImplementingType();

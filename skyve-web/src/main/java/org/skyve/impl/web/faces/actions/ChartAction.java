@@ -68,7 +68,7 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 		org.skyve.metadata.view.model.chart.ChartModel<Bean> chartModel = null;
 		if (model instanceof String) {
-			chartModel = CORE.getRepository().getChartModel(customer, targetDocument, (String) model, true);
+			chartModel = targetDocument.getChartModel(customer, (String) model, true);
 		}
 		else {
 			chartModel = new MetaDataChartModel((ChartBuilderMetaData) model);

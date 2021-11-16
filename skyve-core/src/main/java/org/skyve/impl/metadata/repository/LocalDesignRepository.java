@@ -2,14 +2,12 @@ package org.skyve.impl.metadata.repository;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SkyveException;
-import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -81,13 +79,7 @@ import org.skyve.util.Binder.TargetMetaData;
  * 
  * @author Mike
  */
-public class LocalDesignRepository extends AbstractRepository {
-	/**
-	 * The cache. MetaData File Location -> MetaData
-	 */
-	private Map<String, MetaData> cache = new HashMap<>();
-
-	
+public class LocalDesignRepository extends FileSystemRepository {
 	public LocalDesignRepository() {
 		super();
 	}
@@ -98,36 +90,6 @@ public class LocalDesignRepository extends AbstractRepository {
 
 	public LocalDesignRepository(String absolutePath, boolean loadClasses) {
 		super(absolutePath, loadClasses);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	protected <T extends MetaData> T get(String name) {
-		return (T) cache.get(name);
-	}
-
-	/**
-	 * Cache a piece of named metadata.
-	 * 
-	 * @param name The name of the metadata
-	 * @param metaData The metadata.
-	 */
-	@Override
-	protected void put(String name, MetaData metaData) {
-		MetaData oldMetaData = cache.put(name, metaData);
-		if (oldMetaData != null) {
-			throw new MetaDataException("NAME CLASH - " + name + " is already used for " + oldMetaData);
-		}
-	}
-
-	@Override
-	public void evictCachedMetaData(Customer customer) {
-		// TODO evict for a certain customer needs attention
-		super.evictCachedMetaData(customer);
-
-		if (customer == null) {
-			cache = new HashMap<>();
-		}
 	}
 
 	@Override
@@ -690,33 +652,6 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	
-	@Override
-	@SuppressWarnings("unchecked")
-	public Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration) {
-		String fullyQualifiedEnumName = null;
-
-		String implementingEnumClassName = enumeration.getImplementingEnumClassName();
-		if (implementingEnumClassName != null) { // hand-coded enum implementation
-			fullyQualifiedEnumName = implementingEnumClassName;
-		}
-		else { // generated implementation
-			// No enum overriding, but there might be referencing
-			String encapulatingClasNameForEnumeration = getEncapsulatingClassNameForEnumeration(enumeration);
-	
-			StringBuilder sb = new StringBuilder(64);
-			sb.append(encapulatingClasNameForEnumeration);
-			sb.append('$').append(enumeration.toJavaIdentifier());
-			fullyQualifiedEnumName= sb.toString();
-		}
-		
-		try {
-			return (Class<Enumeration>) Class.forName(fullyQualifiedEnumName, true, Thread.currentThread().getContextClassLoader());
-		}
-		catch (Exception e) {
-			throw new MetaDataException("A problem was encountered loading enum " + fullyQualifiedEnumName.toString(), e);
-		}
-	}
-
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
 		StringBuilder fullyQualifiedImageName = new StringBuilder(128);

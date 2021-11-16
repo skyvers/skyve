@@ -28,7 +28,6 @@ import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -114,7 +113,6 @@ public class BizportImport extends AbstractUpload {
 		// NB Persistence has been set with the restore processing inside the SkyvePhaseListener
 		Persistence persistence = CORE.getPersistence();
 		try {
-			AbstractRepository repository = AbstractRepository.get();
 			User user = persistence.getUser();
 			Customer customer = user.getCustomer();
 
@@ -132,7 +130,7 @@ public class BizportImport extends AbstractUpload {
 			if (! user.canExecuteAction(document, action)) {
 				throw new SecurityException(action, user.getName());
 			}
-			BizImportAction bizPortAction = repository.getBizImportAction(customer, document, action, true);
+			BizImportAction bizPortAction = document.getBizImportAction(customer, action, true);
 
 			UploadException exception = new UploadException();
 			try {

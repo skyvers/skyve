@@ -32,7 +32,7 @@ public class PopulateAction extends FacesAction<Void> {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(bizModule);
 			Document d = m.getDocument(c, bizDocument);
-			ListModel<Bean> lm = CORE.getRepository().getListModel(c, d, queryName, true);
+			ListModel<Bean> lm = d.getListModel(c, queryName, true);
 			facesView.setTitle(lm.getLocalisedDescription());
 			facesView.setModelName(queryName);
 			facesView.setQueryNameParameter(null);

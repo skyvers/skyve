@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
 import org.primefaces.PrimeFaces;
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -13,7 +12,6 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -64,8 +62,7 @@ public class ExecuteDownloadAction<T extends Bean> extends FacesAction<Void> {
 		if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
 			WebContext webContext = facesView.getWebContext();
 
-			Repository r = CORE.getRepository();
-			DownloadAction<Bean> downloadAction = r.getDownloadAction(customer, targetDocument, resourceName, true);
+			DownloadAction<Bean> downloadAction = targetDocument.getDownloadAction(customer, resourceName, true);
 			downloadAction.prepare(targetBean, webContext);
 			
 			String url = WebUtil.getDownloadActionUrl(actionName,

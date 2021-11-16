@@ -9,7 +9,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
@@ -19,6 +18,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -192,14 +192,14 @@ public abstract class DomainGenerator {
 
 	protected DialectOptions dialectOptions = DialectOptions.H2_NO_INDEXES;
 
-	protected AbstractRepository repository;
+	protected ProvidedRepository repository;
 	
 	protected Map<Path, CharSequence> generation = new TreeMap<>();
 	
 	protected DomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
-								AbstractRepository repository,
+								ProvidedRepository repository,
 								DialectOptions dialectOptions,
 								String srcPath,
 								String generatedSrcPath,
@@ -261,7 +261,7 @@ public abstract class DomainGenerator {
 	public static final DomainGenerator newDomainGenerator(boolean write,
 															boolean debug,
 															boolean multiTenant,
-															AbstractRepository repository,
+															ProvidedRepository repository,
 															DialectOptions dialectOptions,
 															String srcPath,
 															String generatedSrcPath,
@@ -311,7 +311,7 @@ public abstract class DomainGenerator {
 			UtilImpl.XML_TRACE = true;
 		}
 		
-		AbstractRepository repository = new LocalDesignRepository();
+		ProvidedRepository repository = new LocalDesignRepository();
 		DomainGenerator jenny = newDomainGenerator(true, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
 
 		// generate for all customers

@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -26,11 +25,12 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 public final class JPADomainGenerator extends DomainGenerator {
 	JPADomainGenerator(boolean debug,
 						boolean multiTenant,
-						AbstractRepository repository,
+						ProvidedRepository repository,
 						DialectOptions dialectOptions,
 						String srcPath,
 						String generatedSrcPath,
@@ -55,9 +55,9 @@ public final class JPADomainGenerator extends DomainGenerator {
 					if (// ((ref.getRelatedTo() != null) ||
 							ref.getOwningModuleName().equals(module.getName()))// )
 					{
-						String packagePath = repository.MODULES_NAMESPACE + 
+						String packagePath = ProvidedRepository.MODULES_NAMESPACE + 
 												module.getName() + '/' +
-												repository.DOMAIN_NAME;
+												ProvidedRepository.DOMAIN_NAME;
 						File domainFolder = new File(srcPath + packagePath + '/');
 						domainFolder.delete();
 						domainFolder.mkdir();

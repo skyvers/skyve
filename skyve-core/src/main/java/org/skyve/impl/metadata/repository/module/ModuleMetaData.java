@@ -26,7 +26,6 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
@@ -39,6 +38,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
@@ -152,7 +152,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@Override
-	public Module convert(String metaDataName, AbstractRepository repository) {
+	public Module convert(String metaDataName, ProvidedRepository repository) {
 		ModuleImpl result = new ModuleImpl(repository);
 
 		String value = getName();
@@ -270,7 +270,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				}
 				else if (queryMetaData instanceof MetaDataQueryMetaData) {
 					MetaDataQueryMetaData documentQueryMetaData = (MetaDataQueryMetaData) queryMetaData;
-					MetaDataQueryDefinitionImpl documentQueryImpl = new MetaDataQueryDefinitionImpl(repository);
+					MetaDataQueryDefinitionImpl documentQueryImpl = new MetaDataQueryDefinitionImpl();
 					populateQueryProperties(queryMetaData,
 												documentQueryImpl,
 												metaDataName,

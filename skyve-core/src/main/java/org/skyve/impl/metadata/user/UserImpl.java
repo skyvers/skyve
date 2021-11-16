@@ -10,7 +10,7 @@ import java.util.TreeSet;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -208,7 +208,7 @@ public class UserImpl implements User {
 
 	@Override
 	public Customer getCustomer() {
-		return AbstractRepository.get().getCustomer(customerName);
+		return ProvidedRepositoryFactory.get().getCustomer(customerName);
 	}
 
 	@Override

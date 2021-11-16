@@ -15,13 +15,14 @@ import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.SkyveException;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
@@ -78,7 +79,7 @@ public class SQLMetaDataUtil {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
-			AbstractRepository repository = AbstractRepository.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			Module admin = repository.getModule(customer, ADMIN_MODULE_NAME);
 			String ADM_SecurityUser = admin.getDocument(customer, USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			String ADM_SecurityUserRole = admin.getDocument(customer, USER_ROLE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
@@ -231,7 +232,7 @@ public class SQLMetaDataUtil {
 		// Principal -> User
 		Map<String, User> users = new TreeMap<>();
 		
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Module admin = repository.getModule(null, "admin");
 		String ADM_JobSchedule = admin.getDocument(null, "JobSchedule").getPersistent().getPersistentIdentifier();
 		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
@@ -276,7 +277,7 @@ public class SQLMetaDataUtil {
 		// Principal -> User
 		Map<String, User> users = new TreeMap<>();
 
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Module admin = repository.getModule(null, "admin");
 		String ADM_ReportTemplate = admin.getDocument(null, "ReportTemplate").getPersistent().getPersistentIdentifier();
 		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();

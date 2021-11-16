@@ -105,6 +105,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.View.ViewParameter;
@@ -118,7 +119,7 @@ import org.skyve.util.Binder.TargetMetaData;
 
 // TODO check suggestion attributes on text fields etc
 class ViewValidator extends ViewVisitor {
-	private AbstractRepository repository;
+	private ProvidedRepository repository;
 	
 	private String viewIdentifier;
 	private String uxui;
@@ -128,7 +129,7 @@ class ViewValidator extends ViewVisitor {
 	private String dataWidgetBinding;
 	
 	ViewValidator(ViewImpl view, 
-					AbstractRepository repository, 
+					ProvidedRepository repository, 
 					CustomerImpl customer, 
 					DocumentImpl document, 
 					String uxui) {

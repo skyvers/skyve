@@ -28,9 +28,9 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
-import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -39,7 +39,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -69,8 +68,8 @@ import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
-import org.skyve.web.UserAgentType;
 import org.skyve.util.Util;
+import org.skyve.web.UserAgentType;
 
 public class SmartClientEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -859,7 +858,7 @@ public class SmartClientEditServlet extends HttpServlet {
 				    	    		Class<?> type = String.class;
 
 				    	    		if (attribute instanceof Enumeration) {
-										type = AbstractRepository.get().getEnum((Enumeration) attribute);
+										type = ((Enumeration) attribute).getEnum();
 									}
 									else if (attribute instanceof Field) {
 										type = attribute.getAttributeType().getImplementingType();
@@ -942,13 +941,12 @@ public class SmartClientEditServlet extends HttpServlet {
 				// execute an action
 				ServerSideAction<Bean> serverSideAction = null;
 				DownloadAction<Bean> downloadAction = null;
-				AbstractRepository repository = AbstractRepository.get();
 				try {
-					serverSideAction = repository.getServerSideAction(customer, processDocument, mutableCustomActionName, true);
+					serverSideAction = processDocument.getServerSideAction(customer, mutableCustomActionName, true);
 				}
 				catch (@SuppressWarnings("unused") MetaDataException | ClassCastException e) {
 					try {
-						downloadAction = repository.getDownloadAction(customer, processDocument, mutableCustomActionName, true);
+						downloadAction = processDocument.getDownloadAction(customer, mutableCustomActionName, true);
 					}
 					catch (@SuppressWarnings("unused") MetaDataException | ClassCastException e1) {
 						throw new MetaDataException("Could not find " + mutableCustomActionName + " in document " + 

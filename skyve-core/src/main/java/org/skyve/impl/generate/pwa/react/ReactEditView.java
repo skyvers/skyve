@@ -9,7 +9,6 @@ import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -27,10 +26,9 @@ public class ReactEditView extends ReactComponent {
 	public void setViews(Module module, Document document) {
 		this.module = module;
 		this.document = document;
-		Repository r = CORE.getRepository();
 		Customer c = CORE.getCustomer();
-        editView = r.getView(generator.uxui, c, document, ViewType.edit.toString());
-        createView = r.getView(generator.uxui, c, document, ViewType.create.toString());
+        editView = document.getView(generator.uxui, c, ViewType.edit.toString());
+        createView = document.getView(generator.uxui, c, ViewType.create.toString());
  	}
 
 	@Override

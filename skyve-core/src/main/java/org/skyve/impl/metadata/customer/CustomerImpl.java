@@ -21,7 +21,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Download;
@@ -47,6 +47,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.WebContext;
 
@@ -135,11 +136,17 @@ public class CustomerImpl implements Customer {
 	 */
 	private Map<String, List<DomainValue>> domainValueCache = new TreeMap<>();
 
-
-	private transient AbstractRepository repository;
+	private transient ProvidedRepository repository;
 	
-	public CustomerImpl(AbstractRepository repository) {
+	public CustomerImpl(ProvidedRepository repository) {
 		this.repository = repository;
+	}
+
+	// Required for Serialization
+	// NB This class should never be serialized.
+	//    See AbstractPersistence.customer (commented out) and UserImpl.getCustomer()
+	public CustomerImpl() {
+		this.repository = ProvidedRepositoryFactory.get();
 	}
 
 	@Override
@@ -481,7 +488,7 @@ public class CustomerImpl implements Customer {
 					domainValueCache.put(key, result);
 				}
 				if ((result == null) && (attribute instanceof Enumeration)) {
-					Class<org.skyve.domain.types.Enumeration> domainEnum = repository.getEnum((Enumeration) attribute);
+					Class<org.skyve.domain.types.Enumeration> domainEnum = ((Enumeration) attribute).getEnum();
 					result = (List<DomainValue>) domainEnum.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
 					domainValueCache.put(key, result);
 				}

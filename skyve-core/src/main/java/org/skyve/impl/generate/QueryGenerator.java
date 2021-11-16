@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.module.BizQLMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryColumnMetaData;
@@ -28,6 +28,7 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 
 public class QueryGenerator {
 	private QueryGenerator() {
@@ -142,8 +143,8 @@ public class QueryGenerator {
 			System.exit(1);
 		}
 
-		AbstractRepository.set(new LocalDesignRepository());
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepositoryFactory.set(new LocalDesignRepository());
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Customer customer = repository.getCustomer(customerName);
 		Module module = repository.getModule(customer, moduleName);
 		File file = new File("./generatedQueries.xml");

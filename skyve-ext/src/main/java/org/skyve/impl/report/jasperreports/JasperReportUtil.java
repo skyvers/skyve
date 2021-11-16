@@ -10,7 +10,7 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ReportParameters;
 import org.skyve.impl.util.UtilImpl;
@@ -19,6 +19,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -252,15 +253,15 @@ public final class JasperReportUtil {
 										Document document,
 										String reportName,
 										Map<String, Object> parameters) {
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		String result = repository.getReportFileName(customer, document, reportName);
 		StringBuilder sb = new StringBuilder(256);
-		sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
-		sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);
+		sb.append(UtilImpl.getAbsoluteBasePath()).append(ProvidedRepository.CUSTOMERS_NAMESPACE);
+		sb.append(customer.getName()).append('/').append(ProvidedRepository.RESOURCES_NAMESPACE);
 		parameters.put("RESOURCE_DIR", sb.toString());
 		sb.setLength(0);
-		sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.MODULES_NAMESPACE);
-		sb.append(document.getOwningModuleName()).append('/').append(repository.RESOURCES_NAMESPACE);
+		sb.append(UtilImpl.getAbsoluteBasePath()).append(ProvidedRepository.MODULES_NAMESPACE);
+		sb.append(document.getOwningModuleName()).append('/').append(ProvidedRepository.RESOURCES_NAMESPACE);
 		parameters.put("MODULE_RESOURCE_DIR", sb.toString());
 		int lastFileSeparator = result.lastIndexOf('/');
 		parameters.put("SUBREPORT_DIR", result.substring(0, lastFileSeparator + 1));

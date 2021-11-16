@@ -25,7 +25,6 @@ import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
@@ -143,7 +142,6 @@ public class View extends HtmlPanelGroup {
     	Customer customer = user.getCustomer();
         Module module = customer.getModule(moduleName);
         Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);
-        Repository repository = CORE.getRepository();
 
         componentBuilder.setManagedBeanName(managedBeanName);
     	componentBuilder.setProcess(process);
@@ -155,7 +153,7 @@ public class View extends HtmlPanelGroup {
     	layoutBuilder.setUserAgentType(userAgentType);
 
     	FacesViewRenderer fvr = null;
-        org.skyve.metadata.view.View view = repository.getView(uxui, customer, document, ViewType.edit.toString());
+        org.skyve.metadata.view.View view = document.getView(uxui, customer, ViewType.edit.toString());
         if (view != null) {
         	fvr = new FacesViewRenderer(user,
 										module, 
@@ -167,7 +165,7 @@ public class View extends HtmlPanelGroup {
         	fvr.visit();
             result.add(fvr.getFacesView());
         }
-        view = repository.getView(uxui, customer, document, ViewType.create.toString());
+        view = document.getView(uxui, customer, ViewType.create.toString());
         if (view != null) {
         	fvr = new FacesViewRenderer(user,
                                           module, 

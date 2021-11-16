@@ -42,7 +42,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 
 public class RDBMSDynamicPersistence implements DynamicPersistence {
-	private AbstractHibernatePersistence persistence =  null;
+	private static final long serialVersionUID = -6445760028486705253L;
+
+	private transient AbstractHibernatePersistence persistence = null;
 	
 	public RDBMSDynamicPersistence(AbstractHibernatePersistence persistence) {
 		this.persistence = persistence;

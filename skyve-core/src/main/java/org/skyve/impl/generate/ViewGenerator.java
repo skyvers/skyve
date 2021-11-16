@@ -13,7 +13,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Geometry;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.view.Actions;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
@@ -59,6 +58,7 @@ import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
@@ -70,9 +70,9 @@ public class ViewGenerator {
 	private static final Integer FOUR = Integer.valueOf(4);
 	private static final Integer TWELVE = Integer.valueOf(12);
 	
-	private AbstractRepository repository;
+	private ProvidedRepository repository;
 	
-	public ViewGenerator(AbstractRepository repository) {
+	public ViewGenerator(ProvidedRepository repository) {
 		this.repository = repository;
 	}
 
@@ -602,7 +602,7 @@ public class ViewGenerator {
 		}
 
 		
-		AbstractRepository repository = new LocalDesignRepository();
+		ProvidedRepository repository = new LocalDesignRepository();
 		Customer customer = repository.getCustomer(customerName);
 
 		// If the module and/or document was not specified, we will just generate all edit views.

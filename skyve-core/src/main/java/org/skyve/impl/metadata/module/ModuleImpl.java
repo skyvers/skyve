@@ -16,7 +16,7 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.metadata.MetaDataException;
@@ -35,6 +35,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -72,15 +73,16 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private String documentation; 
 
-	private transient AbstractRepository repository;
+	private transient ProvidedRepository repository;
 	
-	public ModuleImpl(AbstractRepository repository) {
+	public ModuleImpl(ProvidedRepository repository) {
 		this.repository = repository;
 	}
 
 	// Required for Serialization
+	// NB Module should never be serialized.
 	public ModuleImpl() {
-		this.repository = AbstractRepository.get();
+		this.repository = ProvidedRepositoryFactory.get();
 	}
 
 	@Override
@@ -140,7 +142,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				if ((persistent == null) || (persistent.getName() == null)) {
 					throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
 				}
-				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl(repository);
+				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
 
 				String queryTitle = "All " + document.getLocalisedPluralAlias();
 				query.setDescription(queryTitle);

@@ -11,7 +11,6 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
@@ -123,7 +122,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             	if (code != null) {
 	            	if (targetAttribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
 	            		if (type == null) {
-	            			type = AbstractRepository.get().getEnum((org.skyve.impl.metadata.model.document.field.Enumeration) targetAttribute); 
+	            			type = ((org.skyve.impl.metadata.model.document.field.Enumeration) targetAttribute).getEnum(); 
 	            		}
             			value = Binder.convert(type, code);
             		}

@@ -9,7 +9,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.DocumentPrivilege;
@@ -33,6 +33,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
@@ -602,11 +603,11 @@ public class DoctorUtil {
 	
 	public static void main(String[] args)
 	throws Exception {
-		AbstractRepository.set(new LocalDesignRepository());
-		AbstractRepository repository = AbstractRepository.get();
+		ProvidedRepositoryFactory.set(new LocalDesignRepository());
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		
 		Customer customer = repository.getCustomer(args[1]);
-		try (PrintStream overview = new PrintStream(new FileOutputStream(String.format("%s%soverview.html", args[0], repository.MODULES_NAMESPACE)))) {
+		try (PrintStream overview = new PrintStream(new FileOutputStream(String.format("%s%soverview.html", args[0], ProvidedRepository.MODULES_NAMESPACE)))) {
 			overview.println("<!DOCTYPE html>");
 			overview.println("<html>");
 			overview.println("<head>");
@@ -626,9 +627,9 @@ public class DoctorUtil {
 				overview.println("</a><br/>");
 
 				try (PrintStream ps = new PrintStream(new FileOutputStream(args[0] + 
-																			repository.MODULES_NAMESPACE + 
+																			ProvidedRepository.MODULES_NAMESPACE + 
 																			module.getName() + '/' + 
-																			repository.DOMAIN_NAME + 
+																			ProvidedRepository.DOMAIN_NAME + 
 																			"/package.html"))) {
 					ps.println("<html><head/><body>");
 					ps.append("<p>").append((module.getDocumentation() != null) ? module.getDocumentation() : module.getLocalisedTitle()).append("</p><style>");

@@ -17,7 +17,6 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.model.document.Document;
@@ -26,9 +25,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
 public class BizportExportServlet extends HttpServlet {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -53,7 +49,6 @@ public class BizportExportServlet extends HttpServlet {
 						}
 						persistence.setUser(user);
 	
-						AbstractRepository repository = AbstractRepository.get();
 						CustomerImpl customer = (CustomerImpl) user.getCustomer();
 			
 						String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
@@ -68,10 +63,7 @@ public class BizportExportServlet extends HttpServlet {
 							throw new SecurityException(resourceName, user.getName());
 						}
 	
-						BizExportAction bizPortAction = repository.getBizExportAction(customer, 
-																						document, 
-																						resourceName,
-																						true);
+						BizExportAction bizPortAction = document.getBizExportAction(customer, resourceName, true);
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	
 						boolean vetoed = customer.interceptBeforeBizExportAction(document, resourceName, webContext);

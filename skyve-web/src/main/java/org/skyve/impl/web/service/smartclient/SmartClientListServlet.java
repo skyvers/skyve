@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.locationtech.jts.geom.Geometry;
-import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -37,12 +36,10 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.SortParameterImpl;
-import org.skyve.web.SortParameter;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -52,9 +49,9 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
@@ -67,6 +64,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+import org.skyve.web.SortParameter;
 
 /**
  * Service for list views.
@@ -174,7 +172,7 @@ public class SmartClientListServlet extends HttpServlet {
 						// model type of request
 						if (dataSource.contains("__")) {
 							drivingDocument = module.getDocument(customer, tokens[1]);
-							model = CORE.getRepository().getListModel(customer, drivingDocument, tokens[3], true);
+							model = drivingDocument.getListModel(customer, tokens[3], true);
 							if (model == null) {
 								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
 							}
@@ -568,7 +566,7 @@ public class SmartClientListServlet extends HttpServlet {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
 					if (attribute instanceof Enumeration) {
-						type = AbstractRepository.get().getEnum((Enumeration) attribute);
+						type = ((Enumeration) attribute).getEnum();
 						equalsOperatorRequired = true;
 					}
 					else {
@@ -733,7 +731,7 @@ public class SmartClientListServlet extends HttpServlet {
 	    				Attribute attribute = target.getAttribute();
 	    				if (attribute != null) {
 							if (attribute instanceof Enumeration) {
-								type = AbstractRepository.get().getEnum((Enumeration) attribute);
+								type = ((Enumeration) attribute).getEnum();
 								filterOperator = transformWildcardFilterOperator(filterOperator);
 							}
 							else {

@@ -17,7 +17,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -280,7 +279,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
 					if (attribute instanceof Enumeration) {
-						type = AbstractRepository.get().getEnum((Enumeration) attribute);
+						type = ((Enumeration) attribute).getEnum();
 					}
 					else if (attribute instanceof Field) {
 						type = attribute.getAttributeType().getImplementingType();

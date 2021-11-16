@@ -1,5 +1,6 @@
 package org.skyve.persistence;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import org.skyve.CORE;
@@ -13,7 +14,7 @@ import org.skyve.metadata.module.Module;
 /**
  * Implemented for various types of data stores that can support dynamic domain persistence.
  */
-public interface DynamicPersistence {
+public interface DynamicPersistence extends Serializable {
 	/**
 	 * Convenience persist.
 	 */

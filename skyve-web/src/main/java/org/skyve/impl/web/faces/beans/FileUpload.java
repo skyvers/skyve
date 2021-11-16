@@ -27,7 +27,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
@@ -115,7 +114,6 @@ public class FileUpload extends AbstractUpload {
 		// NB Persistence has been set with the restore processing inside the SkyvePhaseListener
 		Persistence persistence = CORE.getPersistence();
 		try {
-			AbstractRepository repository = AbstractRepository.get();
 			User user = persistence.getUser();
 			CustomerImpl customer = (CustomerImpl) user.getCustomer();
 	
@@ -133,10 +131,7 @@ public class FileUpload extends AbstractUpload {
 			if (! user.canExecuteAction(document, action)) {
 				throw new SecurityException(action, user.getName());
 			}
-			UploadAction<Bean> uploadAction = repository.getUploadAction(customer, 
-																			document, 
-																			action,
-																			true);
+			UploadAction<Bean> uploadAction = document.getUploadAction(customer, action, true);
 			UploadException exception = new UploadException();
 			MimeType mimeType = null;
 			try {

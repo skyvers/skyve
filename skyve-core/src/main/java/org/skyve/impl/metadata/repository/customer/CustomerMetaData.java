@@ -17,7 +17,6 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.XMLMetaData;
@@ -25,6 +24,7 @@ import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 
 // TODO Populate defaultActions property in customer returned by convert
@@ -184,7 +184,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@Override
-	public CustomerImpl convert(String metaDataName, AbstractRepository repository) {
+	public CustomerImpl convert(String metaDataName, ProvidedRepository repository) {
 		CustomerImpl result = new CustomerImpl(repository);
 		String value = getName();
 		if (value == null) {

@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageException;
@@ -262,7 +261,7 @@ public class SmartClientTagServlet extends HttpServlet {
 			String documentName = documentOrQueryOrModelName.substring(0, __Index);
 			Document document = module.getDocument(customer, documentName);
 			String modelName = documentOrQueryOrModelName.substring(__Index + 2);
-			model = CORE.getRepository().getListModel(customer, document, modelName, true);
+			model = document.getListModel(customer, modelName, true);
 			model.setBean(bean);
 			drivingDocument = model.getDrivingDocument();
 		}

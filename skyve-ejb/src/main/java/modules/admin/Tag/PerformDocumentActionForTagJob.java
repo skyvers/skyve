@@ -16,7 +16,6 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.tag.TagManager;
@@ -53,15 +52,13 @@ public class PerformDocumentActionForTagJob extends Job {
 			Document document = module.getDocument(customer, tag.getActionDocumentName());
 
 			// get action from actionname
-			Repository rep = CORE.getRepository();
-
 			ServerSideAction<Bean> act = null;
 			EvictOption evict = tag.getEvictOption();
 			
 
 			// retrieve action for non-default actions only
 			if (!TagDefaultAction.isDefaultTagAction(tag.getDocumentAction())) {
-				act = rep.getServerSideAction(customer, document, tag.getDocumentAction(), true);
+				act = document.getServerSideAction(customer, tag.getDocumentAction(), true);
 			}
 
 			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getActionModuleName(), tag.getActionDocumentName());

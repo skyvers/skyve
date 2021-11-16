@@ -21,7 +21,6 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
@@ -58,7 +57,6 @@ public class DownloadServlet extends HttpServlet {
 						}
 						persistence.setUser(user);
 	
-						AbstractRepository repository = AbstractRepository.get();
 						CustomerImpl customer = (CustomerImpl) user.getCustomer();
 			
 						String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
@@ -71,10 +69,7 @@ public class DownloadServlet extends HttpServlet {
 						if (! user.canExecuteAction(document, resourceName)) {
 							throw new SecurityException(resourceName, user.getName());
 						}
-						DownloadAction<Bean> downloadAction = repository.getDownloadAction(customer, 
-																							document, 
-																							resourceName,
-																							true);
+						DownloadAction<Bean> downloadAction = document.getDownloadAction(customer, resourceName, true);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 			        	
 						boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, webContext);

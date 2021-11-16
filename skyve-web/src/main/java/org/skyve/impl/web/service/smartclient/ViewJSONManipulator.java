@@ -13,7 +13,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -114,6 +114,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Disableable;
@@ -1853,7 +1854,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 			Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
 
 			try {
-				AbstractRepository repository = AbstractRepository.get();
+				ProvidedRepository repository = ProvidedRepositoryFactory.get();
 				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, 
 																					document,
 																					comparison.getModelName(),

@@ -7,7 +7,6 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
@@ -103,11 +102,10 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 			drivingDocument = m.getDocument(c, m.getMetaDataQuery(queryName).getDocumentName());
 		}
 		else if (documentName != null) {
-			Repository r = CORE.getRepository();
 			drivingDocument = m.getDocument(c, documentName);
 
 			if (modelName != null) {
-				ListModel<Bean> model = r.getListModel(c, drivingDocument, modelName, false);
+				ListModel<Bean> model = drivingDocument.getListModel(c, modelName, false);
 				drivingDocument = model.getDrivingDocument();
 			}
 		}

@@ -26,7 +26,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -70,7 +70,7 @@ final class BackupUtil {
 												databaseDialect);
 		UtilImpl.DDL_SYNC = false;
 		
-		AbstractRepository.set(new LocalDesignRepository());
+		ProvidedRepositoryFactory.set(new LocalDesignRepository());
 		SuperUser user = new SuperUser();
 		user.setCustomerName(customerName);
 		user.setName("backup");

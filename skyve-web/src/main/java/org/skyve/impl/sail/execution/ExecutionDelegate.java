@@ -11,7 +11,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -44,7 +43,7 @@ public class ExecutionDelegate {
 		else if (documentName != null) {
 			Document d = m.getDocument(c, documentName);
 			if (modelName != null) {
-				d = CORE.getRepository().getListModel(c, d, modelName, false).getDrivingDocument();
+				d = d.getListModel(c, modelName, false).getDrivingDocument();
 			}
 			else {
 				push.setQueryName(documentName);
@@ -88,7 +87,6 @@ public class ExecutionDelegate {
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
 		Document d = m.getDocument(c, documentName);
-		Repository r = CORE.getRepository();
 		
 		Bean bean = null;
 		String fixture = testDataEnter.getFixture();
@@ -99,7 +97,7 @@ public class ExecutionDelegate {
 			bean = new DataBuilder().fixture(fixture).build(d);
 		}
 		
-        ViewImpl view = (ViewImpl) r.getView(context.getUxui(), c, d, context.getViewType().toString());
+        ViewImpl view = (ViewImpl) d.getView(context.getUxui(), c, context.getViewType().toString());
 		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor((CustomerImpl) c,
 																			(ModuleImpl) m,
 																			(DocumentImpl) d,

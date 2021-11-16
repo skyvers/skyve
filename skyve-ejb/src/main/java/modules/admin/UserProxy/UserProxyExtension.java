@@ -1,7 +1,9 @@
 package modules.admin.UserProxy;
 
+import java.sql.Connection;
+
 import org.skyve.CORE;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
@@ -21,9 +23,11 @@ public class UserProxyExtension extends UserProxy {
 		UserImpl metaDataUser = null;
 		if(isPersisted()) {
 			// Populate the user using the persistence connection since it might have just been inserted and not committed yet
-			metaDataUser = AbstractRepository.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
+			metaDataUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
 			metaDataUser.clearAllPermissionsAndMenus();
-			SQLMetaDataUtil.populateUser(metaDataUser, ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection());
+			@SuppressWarnings("resource")
+			Connection connection = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
+			SQLMetaDataUtil.populateUser(metaDataUser, connection);
 		}
 		
 		return metaDataUser;

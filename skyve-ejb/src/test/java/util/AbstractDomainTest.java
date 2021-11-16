@@ -14,7 +14,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -67,7 +66,8 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 		try {
 			CORE.getPersistence().save(b2);
-		} catch (UniqueConstraintViolationException ucve) {
+		}
+		catch (@SuppressWarnings("unused") UniqueConstraintViolationException ucve) {
 			// try get a new bean2
 			b2 = getBean();
 			CORE.getPersistence().save(b2);
@@ -242,7 +242,8 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 				// verify the results
 				assertThat("Error updating " + attributeToUpdate.getName(), Binder.get(uResult, attributeToUpdate.getName()),
 						is(not(originalValue)));
-			} catch (UniqueConstraintViolationException ucve) {
+			}
+			catch (@SuppressWarnings("unused") UniqueConstraintViolationException ucve) {
 				// skip - factory did not generate unique input
 			}
 
@@ -264,7 +265,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Module module = customer.getModule(getBean().getBizModule());
 		Document document = module.getDocument(customer, getBean().getBizDocument());
 
-		return AbstractRepository.get().getBizlet(customer, document, true);
+		return document.getBizlet(customer);
 	}
 
 	private Attribute getRandomAttribute(T bean) {

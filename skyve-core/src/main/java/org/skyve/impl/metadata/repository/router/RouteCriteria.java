@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
@@ -13,6 +13,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
@@ -103,7 +104,7 @@ public class RouteCriteria implements MetaData {
 			if (documentName == null) {
 				throw new IllegalStateException("RouteCriteria - Set documentName before calling canonicalise()");
 			}
-			AbstractRepository r = AbstractRepository.get();
+			ProvidedRepository r = ProvidedRepositoryFactory.get();
 			Customer c = (customer == null) ? ((customerName != null) ? r.getCustomer(customerName) : null) : customer;
 			Module m = r.getModule(c, moduleName);
 			Document d = r.getDocument(c, m, documentName);
