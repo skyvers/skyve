@@ -81,6 +81,7 @@
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.1.18</flying-saucer.version>
 		<freemarker.version>2.3.29</freemarker.version>
+		<cronutils.version>9.1.6</cronutils.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -485,7 +486,7 @@
 			<dependency>
 				<groupId>com.cronutils</groupId>
 				<artifactId>cron-utils</artifactId>
-				<version>9.1.3</version>
+				<version>${cronutils.version}</version>
 			</dependency>
 
 			<!-- Test dependencies -->
