@@ -9,8 +9,7 @@ The following Skyve versions are currently being supported with security updates
 | 8.x.x   | :white_check_mark: |
 | 7.x.x   | :white_check_mark: |
 | 6.0.x   | :white_check_mark: |
-| 5.0.1   | :white_check_mark: |
-| 5.0.0   | :x:                |
+| 5.0.x   | :x:                |
 | < 5.0   | :x:                |
 
 ## Reporting a Vulnerability
