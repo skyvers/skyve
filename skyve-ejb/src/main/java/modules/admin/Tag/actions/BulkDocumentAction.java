@@ -21,7 +21,7 @@ public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
-	 * Update the payment batch details.
+	 * Perform an action in bulk.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension tag, WebContext webContext)

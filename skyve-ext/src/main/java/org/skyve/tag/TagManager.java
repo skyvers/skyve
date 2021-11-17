@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.persistence.AutoClosingIterable;
 
 public interface TagManager {
 	/**
@@ -144,5 +145,5 @@ public interface TagManager {
 	 *         cache so beware.
 	 * @throws Exception
 	 */
-	Iterable<Bean> iterate(String tagId) throws Exception;
+	AutoClosingIterable<Bean> iterate(String tagId) throws Exception;
 }

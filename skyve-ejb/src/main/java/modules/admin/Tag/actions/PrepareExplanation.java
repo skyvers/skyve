@@ -10,7 +10,7 @@ public class PrepareExplanation implements ServerSideAction<TagExtension> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
-	 * Update the payment batch details.
+	 * Describe the set operation currently configured.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext) throws Exception {

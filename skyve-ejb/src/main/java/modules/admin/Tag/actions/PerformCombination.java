@@ -14,11 +14,10 @@ public class PerformCombination implements ServerSideAction<TagExtension> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
-	 * Update the payment batch details.
+	 * Combine 2 tags with a set operator.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext) throws Exception {
-
 		if (bean.getCombinationsOperator() == null) {
 			throw new ValidationException(new Message(Tag.combinationsOperatorPropertyName, "You have not set an operator."));
 		}

@@ -8,29 +8,29 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.persistence.AutoClosingIterable;
 
-class TaggedIterable implements Iterable<Bean> {
-	private Iterator<Bean> taggedIterator;
+class TaggedIterable implements AutoClosingIterable<Bean> {
+	private AutoClosingIterable<Bean> tagIterable;
 	
-	TaggedIterable(Iterator<Bean> taggedIterator) {
-		this.taggedIterator = taggedIterator;
+	TaggedIterable(AutoClosingIterable<Bean> tagIterable) {
+		this.tagIterable = tagIterable;
 	}
 
 	private static class TaggedIterator implements Iterator<Bean> {
-		private Iterator<Bean> taggedIterator;
+		private Iterator<Bean> tagIterator;
 		
 		private Bean nextBean;
 		
-		private TaggedIterator(Iterator<Bean> taggedIterator) {
-			this.taggedIterator = taggedIterator;
+		private TaggedIterator(Iterator<Bean> tagIterator) {
+			this.tagIterator = tagIterator;
 		}
 		
 		@Override
 		public boolean hasNext() {
-			boolean result = taggedIterator.hasNext();
+			boolean result = tagIterator.hasNext();
 			if (result) {
-
-				Bean tagged = taggedIterator.next();
+				Bean tagged = tagIterator.next();
 				nextBean = null;
 
 				String taggedModule = null;
@@ -78,6 +78,11 @@ class TaggedIterable implements Iterable<Bean> {
 	
 	@Override
 	public Iterator<Bean> iterator() {
-		return new TaggedIterator(taggedIterator);
+		return new TaggedIterator(tagIterable.iterator());
+	}
+	
+	@Override
+	public void close() throws Exception {
+		tagIterable.close();
 	}
 }

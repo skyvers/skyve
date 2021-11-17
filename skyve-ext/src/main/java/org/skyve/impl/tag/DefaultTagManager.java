@@ -1,7 +1,6 @@
 package org.skyve.impl.tag;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.skyve.domain.Bean;
@@ -12,10 +11,11 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
@@ -214,7 +214,8 @@ public class DefaultTagManager implements TagManager {
 	}
 
 	@Override
-	public Iterable<Bean> iterate(String tagId) throws Exception {
+	@SuppressWarnings("resource")
+	public AutoClosingIterable<Bean> iterate(String tagId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		BizQL query = persistence.newBizQL(String.format("select bean.%s as %s, " + 
@@ -239,8 +240,7 @@ public class DefaultTagManager implements TagManager {
 		query.putParameter(Bean.DOCUMENT_ID, tagId);
 		query.putParameter(Bean.USER_ID, user.getId());
 
-		@SuppressWarnings("resource")
-		Iterator<Bean> i = query.projectedIterable().iterator();
+		AutoClosingIterable<Bean> i = query.projectedIterable();
 		return new TaggedIterable(i);
 	}
 }

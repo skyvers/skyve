@@ -12,7 +12,7 @@ public class Clear implements ServerSideAction<TagExtension> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
-	 * Update the payment batch details.
+	 * Clear tagged values.
 	 */
 	@Override
 	public ServerSideActionResult<TagExtension> execute(TagExtension bean, WebContext webContext)

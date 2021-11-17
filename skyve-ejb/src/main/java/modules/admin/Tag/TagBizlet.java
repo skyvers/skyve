@@ -14,6 +14,7 @@ import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
@@ -173,8 +174,10 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			// add tagged items from object tag to subject tag
 			// TagManager function deals with duplicates
 			TagManager tm = EXT.getTagManager();
-			for (Bean bean : tm.iterate(object.getBizId())) {
-				tm.tag(subject.getBizId(), bean);
+			try (AutoClosingIterable<Bean> i = tm.iterate(object.getBizId())) {
+				for (Bean bean : i) {
+					tm.tag(subject.getBizId(), bean);
+				}
 			}
 			subject.setUploadTagged(Long.valueOf(subject.countDocument(subject.getUploadModuleName(), subject.getUploadDocumentName())));
 			subject.setTotalTagged(Long.valueOf(subject.count()));
@@ -226,9 +229,11 @@ public class TagBizlet extends Bizlet<TagExtension> {
 	public static void except(TagExtension subject, TagExtension object) throws Exception {
 		if (subject != null && object != null) {
 			TagManager tm = EXT.getTagManager();
-			for (Bean bean : tm.iterate(object.getBizId())) {
-				// TagManager method handles if this bean was not tagged
-				tm.untag(subject.getBizId(), bean);
+			try (AutoClosingIterable<Bean> i = tm.iterate(object.getBizId())) {
+				for (Bean bean : i) {
+					// TagManager method handles if this bean was not tagged
+					tm.untag(subject.getBizId(), bean);
+				}
 			}
 			subject.setUploadTagged(Long.valueOf(subject.countDocument(subject.getUploadModuleName(), subject.getUploadDocumentName())));
 			subject.setTotalTagged(Long.valueOf(subject.count()));
@@ -253,10 +258,12 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			Document document = module.getDocument(customer, documentName);
 
 			if (tag != null) {
-				for (Bean bean : EXT.getTagManager().iterate(tag.getBizId())) {
-					if (bean != null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())) {
-						// need to check that this is only done for documents of the selected type
-						beans.add(bean);
+				try (AutoClosingIterable<Bean> i = EXT.getTagManager().iterate(tag.getBizId())) {
+					for (Bean bean : i) {
+						if (bean != null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())) {
+							// need to check that this is only done for documents of the selected type
+							beans.add(bean);
+						}
 					}
 				}
 			}
