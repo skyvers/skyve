@@ -100,34 +100,26 @@ public class LocalDesignRepository extends FileSystemRepository {
 			result = get(routerKey);
 		}
 		if (result == null) {
-			synchronized (this) {
-				// check again in case this thread was stalled by another in the same spot
+			try {
+				final List<Router> routers = new ArrayList<>();
+				final Router globalRouter = getGlobalRouter();
+				if (globalRouter != null) {
+					routers.add(globalRouter);
+				}
+				routers.addAll(getModuleRouters());
+				if (routers.isEmpty()) {
+					throw new RuntimeException("No routers found.");
+				}
+
+				result = new RouterMerger().mergeRouters(routers);
+				result = result.convert(ROUTER_NAME, this);
+
 				if (! UtilImpl.DEV_MODE) {
-					result = get(routerKey);
+					put(routerKey, result);
 				}
-				if (result == null) {
-					try {
-						final List<Router> routers = new ArrayList<>();
-						final Router globalRouter = getGlobalRouter();
-						if (globalRouter != null) {
-							routers.add(globalRouter);
-						}
-						routers.addAll(getModuleRouters());
-						if (routers.isEmpty()) {
-							throw new RuntimeException("No routers found.");
-						}
-
-						result = new RouterMerger().mergeRouters(routers);
-						result = result.convert(ROUTER_NAME, this);
-
-						if (! UtilImpl.DEV_MODE) {
-							put(routerKey, result);
-						}
-					}
-					catch (Exception e) {
-						throw new MetaDataException(e);
-					}
-				}
+			}
+			catch (Exception e) {
+				throw new MetaDataException(e);
 			}
 		}
 		
@@ -170,31 +162,25 @@ public class LocalDesignRepository extends FileSystemRepository {
 		String customerKey = CUSTOMERS_NAMESPACE + customerName;
 		Customer result = get(customerKey);
 		if (result == null) {
-			synchronized (this) {
-				// check again in case this thread was stalled by another in the same spot
-				result = get(customerKey);
-				if (result == null) {
-					try {
-						StringBuilder sb = new StringBuilder(256);
-						sb.append(absolutePath);
-						sb.append(CUSTOMERS_NAMESPACE);
-						sb.append(customerName).append('/').append(customerName).append(".xml");
-						CustomerMetaData customer = XMLMetaData.unmarshalCustomer(sb.toString());
-						if (! customerName.equals(customer.getName())) {
-							throw new MetaDataException("Customer is defined with file name of " + sb.toString() + 
-															" but the name attribute is " + customer.getName());
-						}
-						result = customer.convert(customerName, this);
-						populateVTable((CustomerImpl) result);
-						put(customerKey, result);
-					}
-					catch (SkyveException e) {
-						throw e;
-					}
-					catch (Exception e) {
-						throw new MetaDataException(e);
-					}
+			try {
+				StringBuilder sb = new StringBuilder(256);
+				sb.append(absolutePath);
+				sb.append(CUSTOMERS_NAMESPACE);
+				sb.append(customerName).append('/').append(customerName).append(".xml");
+				CustomerMetaData customer = XMLMetaData.unmarshalCustomer(sb.toString());
+				if (! customerName.equals(customer.getName())) {
+					throw new MetaDataException("Customer is defined with file name of " + sb.toString() + 
+													" but the name attribute is " + customer.getName());
 				}
+				result = customer.convert(customerName, this);
+				populateVTable((CustomerImpl) result);
+				put(customerKey, result);
+			}
+			catch (SkyveException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				throw new MetaDataException(e);
 			}
 		}
 
@@ -303,9 +289,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		StringBuilder sb = new StringBuilder(256);
 		Map<String, String> vtable = customer.getVTable();
 		
-		File customerModuleDirectory = new File(absolutePath + moduleLocation);
-		if (customerModuleDirectory.exists() && customerModuleDirectory.isDirectory()) {
-			for (File moduleFile : customerModuleDirectory.listFiles()) {
+		File moduleDirectory = new File(absolutePath + moduleLocation);
+		if (moduleDirectory.exists() && moduleDirectory.isDirectory()) {
+			for (File moduleFile : moduleDirectory.listFiles()) {
 				String moduleFileName = moduleFile.getName();
 				if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module file name = " + moduleFileName);
 
@@ -353,18 +339,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 										String actionLocation = sb.toString();
 										if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(fullyQualifiedActionName).append(" -> ").append(actionLocation).toString());
 										vtable.put(fullyQualifiedActionName, actionLocation);
-									}
-								}
-								else if (actionFileName.equals(ACTIONS_NAME + ".xml")) {
-									String fullyQualifiedActionConfigsName = fullyQualifiedDocumentName + ".actionconfigs";
-									if (! vtable.containsKey(fullyQualifiedActionConfigsName)) {
-										sb.setLength(0);
-										sb.append(moduleLocation).append(moduleFileName).append('/');
-										sb.append(ACTIONS_NAMESPACE).append(ACTIONS_NAME);
-										String actionConfigsLocation = sb.toString();
-
-										if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("ActionConfigs ").append(fullyQualifiedActionConfigsName).append(" -> ").append(actionConfigsLocation).toString());
-										vtable.put(fullyQualifiedActionConfigsName, actionConfigsLocation);
 									}
 								}
 							}
@@ -511,33 +485,27 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 		Module result = get(moduleLocation);
 		if (result == null) {
-			synchronized (this) {
-				// check again in case this thread was stalled by another in the same spot
-				result = get(moduleLocation);
-				if (result == null) {
-					try {
-						StringBuilder sb = new StringBuilder(256);
-						sb.append(absolutePath);
-						sb.append(moduleLocation).append('/');
-						sb.append(moduleName).append(".xml");
-						ModuleMetaData module = XMLMetaData.unmarshalModule(sb.toString());
-						if (! moduleName.equals(module.getName())) {
-							throw new MetaDataException("Module is defined with file name of " + sb.toString() + 
-															" but the name attribute is " + module.getName());
-						}
-						
-						sb.setLength(0);
-						sb.append(moduleName).append(" (").append((customer == null) ? "null" : customer.getName()).append(')');
-						result = module.convert(sb.toString(), this);
-						put(moduleLocation, result);
-					}
-					catch (SkyveException e) {
-						throw e;
-					}
-					catch (Exception e) {
-						throw new MetaDataException(e);
-					}
+			try {
+				StringBuilder sb = new StringBuilder(256);
+				sb.append(absolutePath);
+				sb.append(moduleLocation).append('/');
+				sb.append(moduleName).append(".xml");
+				ModuleMetaData module = XMLMetaData.unmarshalModule(sb.toString());
+				if (! moduleName.equals(module.getName())) {
+					throw new MetaDataException("Module is defined with file name of " + sb.toString() + 
+													" but the name attribute is " + module.getName());
 				}
+				
+				sb.setLength(0);
+				sb.append(moduleName).append(" (").append((customer == null) ? "null" : customer.getName()).append(')');
+				result = module.convert(sb.toString(), this);
+				put(moduleLocation, result);
+			}
+			catch (SkyveException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				throw new MetaDataException(e);
 			}
 		}
 
@@ -572,71 +540,65 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		Document result = get(documentLocation);
 		if (result == null) {
-			synchronized (this) {
-				// check again in case this thread was stalled by another in the same spot
-				result = get(documentLocation);
-				if (result == null) {
-					try {
-						DocumentImpl internalResult = null;
-						sb.setLength(0);
-						sb.append(absolutePath);
-						sb.append(documentLocation).append('/');
-						sb.append(documentName).append(".xml");
-						DocumentMetaData document = XMLMetaData.unmarshalDocument(sb.toString());
-						if (! documentName.equals(document.getName())) {
-							throw new MetaDataException("Document is defined with file name of " + sb.toString() + 
-															" but the name attribute is " + document.getName());
+			try {
+				DocumentImpl internalResult = null;
+				sb.setLength(0);
+				sb.append(absolutePath);
+				sb.append(documentLocation).append('/');
+				sb.append(documentName).append(".xml");
+				DocumentMetaData document = XMLMetaData.unmarshalDocument(sb.toString());
+				if (! documentName.equals(document.getName())) {
+					throw new MetaDataException("Document is defined with file name of " + sb.toString() + 
+													" but the name attribute is " + document.getName());
+				}
+
+				sb.setLength(0);
+				sb.append(module.getName()).append('.').append(documentName);
+				sb.append(" (").append((customer == null) ? "null" : customer.getName()).append(')');
+				result = document.convert(sb.toString(), this);
+				internalResult = (DocumentImpl) result;
+				internalResult.setOwningModuleName(documentModuleName);
+
+				// check each document reference query name links to a module query
+				for (String referenceName : result.getReferenceNames()) {
+					String queryName = result.getReferenceByName(referenceName).getQueryName();
+					Module documentModule = getModule(customer, documentModuleName);
+					if ((queryName != null) && (documentModule.getMetaDataQuery(queryName) == null)) {
+						StringBuilder mde = new StringBuilder(documentName);
+						mde.append(" : The reference ");
+						mde.append(referenceName);
+						mde.append(" has a query ");
+						mde.append(queryName);
+						mde.append(" that does not exist in module ");
+						if (customer != null) {
+							mde.append(customer.getName());
+							mde.append(".");
 						}
-
-						sb.setLength(0);
-						sb.append(module.getName()).append('.').append(documentName);
-						sb.append(" (").append((customer == null) ? "null" : customer.getName()).append(')');
-						result = document.convert(sb.toString(), this);
-						internalResult = (DocumentImpl) result;
-						internalResult.setOwningModuleName(documentModuleName);
-
-						// check each document reference query name links to a module query
-						for (String referenceName : result.getReferenceNames()) {
-							String queryName = result.getReferenceByName(referenceName).getQueryName();
-							Module documentModule = getModule(customer, documentModuleName);
-							if ((queryName != null) && (documentModule.getMetaDataQuery(queryName) == null)) {
-								StringBuilder mde = new StringBuilder(documentName);
-								mde.append(" : The reference ");
-								mde.append(referenceName);
-								mde.append(" has a query ");
-								mde.append(queryName);
-								mde.append(" that does not exist in module ");
-								if (customer != null) {
-									mde.append(customer.getName());
-									mde.append(".");
-								}
-								mde.append(documentModuleName);
-								
-								throw new MetaDataException(mde.toString());
-							}
-						}
-
-						// Add actions in privileges to the document to enable good view generation
-						for (Role role : module.getRoles()) {
-							for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
-								if (privilege instanceof ActionPrivilege) {
-									ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
-									if (actionPrivilege.getDocumentName().equals(result.getName())) {
-										internalResult.getDefinedActionNames().add(actionPrivilege.getName());
-									}
-								}
-							}
-						}
-
-						put(documentLocation, result);
-					} // try (populate Metadata)
-					catch (MetaDataException e) {
-						throw e;
-					}
-					catch (Exception e) {
-						throw new MetaDataException(e);
+						mde.append(documentModuleName);
+						
+						throw new MetaDataException(mde.toString());
 					}
 				}
+
+				// Add actions in privileges to the document to enable good view generation
+				for (Role role : module.getRoles()) {
+					for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
+						if (privilege instanceof ActionPrivilege) {
+							ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
+							if (actionPrivilege.getDocumentName().equals(result.getName())) {
+								internalResult.getDefinedActionNames().add(actionPrivilege.getName());
+							}
+						}
+					}
+				}
+
+				put(documentLocation, result);
+			} // try (populate Metadata)
+			catch (MetaDataException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				throw new MetaDataException(e);
 			}
 		} // if (cache entry not created yet)
 
@@ -685,38 +647,30 @@ public class LocalDesignRepository extends FileSystemRepository {
 				result = get(viewLocation);
 			}
 			if (result == null) {
-				synchronized (this) {
-					// check again in case this thread was stalled by another in the same spot
-					if (! UtilImpl.DEV_MODE) {
-						result = get(viewLocation);
+				try {
+					sb.setLength(0);
+					sb.append(absolutePath);
+					sb.append(viewLocation).append(".xml");
+					ViewMetaData view = XMLMetaData.unmarshalView(sb.toString());
+					if (! name.equals(view.getName())) {
+						throw new MetaDataException("View is defined with file name of " + sb.toString() + 
+														" but the name attribute is " + view.getName());
 					}
-					if (result == null) {
-						try {
-							sb.setLength(0);
-							sb.append(absolutePath);
-							sb.append(viewLocation).append(".xml");
-							ViewMetaData view = XMLMetaData.unmarshalView(sb.toString());
-							if (! name.equals(view.getName())) {
-								throw new MetaDataException("View is defined with file name of " + sb.toString() + 
-																" but the name attribute is " + view.getName());
-							}
 
-							sb.setLength(0);
-							sb.append(document.getOwningModuleName()).append('.').append(document.getName());
-							sb.append('.').append(name).append(" (").append(customer.getName()).append(')');
-							result = view.convert(sb.toString(), this);
-							result.resolve(uxui, customer, document);
-							if (! UtilImpl.DEV_MODE) {
-								put(viewLocation, result);
-							}
-						}
-						catch (SkyveException e) {
-							throw e;
-						}
-						catch (Exception e) {
-							throw new MetaDataException(e);
-						}
+					sb.setLength(0);
+					sb.append(document.getOwningModuleName()).append('.').append(document.getName());
+					sb.append('.').append(name).append(" (").append(customer.getName()).append(')');
+					result = view.convert(sb.toString(), this);
+					result.resolve(uxui, customer, document);
+					if (! UtilImpl.DEV_MODE) {
+						put(viewLocation, result);
 					}
+				}
+				catch (SkyveException e) {
+					throw e;
+				}
+				catch (Exception e) {
+					throw new MetaDataException(e);
 				}
 			}
 		}

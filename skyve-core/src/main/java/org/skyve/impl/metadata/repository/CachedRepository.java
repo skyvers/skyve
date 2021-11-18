@@ -1,7 +1,6 @@
 package org.skyve.impl.metadata.repository;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
@@ -10,9 +9,10 @@ import org.skyve.metadata.customer.Customer;
 public abstract class CachedRepository extends ProvidedRepositoryFactory {
 	/**
 	 * The cache.
-	 * MetaData namespace and name -> MetaData
+	 * MetaData namespace and name -> MetaData.
+	 * Thread-safe and performant for mostly-read operations.
 	 */
-	private Map<String, MetaData> cache = new HashMap<>();
+	private ConcurrentHashMap<String, MetaData> cache = new ConcurrentHashMap<>();
 
 	@SuppressWarnings("unchecked")
 	protected <T extends MetaData> T get(String name) {
@@ -35,7 +35,7 @@ public abstract class CachedRepository extends ProvidedRepositoryFactory {
 	@Override
 	public void evictCachedMetaData(Customer customer) {
 		if (customer == null) {
-			cache = new HashMap<>();
+			cache.clear();
 		}
 	}
 }
