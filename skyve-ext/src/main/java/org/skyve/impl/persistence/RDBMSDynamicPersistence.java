@@ -44,7 +44,9 @@ import org.skyve.util.JSON;
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
 
-	private transient AbstractHibernatePersistence persistence = null;
+	// This is serialized as part of the conversation but of course this reference is the 
+	// a reference already being serialized so this doesn't matter much to the size
+	private AbstractHibernatePersistence persistence = null;
 	
 	public RDBMSDynamicPersistence(AbstractHibernatePersistence persistence) {
 		this.persistence = persistence;

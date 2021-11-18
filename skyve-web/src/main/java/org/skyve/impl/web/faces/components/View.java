@@ -165,8 +165,9 @@ public class View extends HtmlPanelGroup {
         	fvr.visit();
             result.add(fvr.getFacesView());
         }
+        // Get the create view and add (so long as we didn't get the edit view back)
         view = document.getView(uxui, customer, ViewType.create.toString());
-        if (view != null) {
+        if ((view != null) && ViewType.create.toString().equals(view.getName())) {
         	fvr = new FacesViewRenderer(user,
                                           module, 
                                           document,
