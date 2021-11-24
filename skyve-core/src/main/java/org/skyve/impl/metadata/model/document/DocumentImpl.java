@@ -174,35 +174,44 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		
 		Class<T> result = null;
 		
+		String customerName = customer.getName();
 		String documentName = getName();
-		String packagePath = ((CustomerImpl) customer).getVTable().get(getOwningModuleName() + '.' + documentName);
-		packagePath = packagePath.replace('/', '.');
-		int lastDotIndex = packagePath.lastIndexOf('.');
-		packagePath = packagePath.substring(0, lastDotIndex + 1);
 
-		StringBuilder className = new StringBuilder(128);
-		
-		// Look for a hand-crafted extension first
-		try {
-			className.append(packagePath).append(documentName).append('.').append(documentName).append("Extension");
-			result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+		StringBuilder key = new StringBuilder(128).append(ProvidedRepository.MODULES_NAMESPACE).append(getOwningModuleName()).append('/').append(documentName);
+		String packagePath = repository.vtable(customerName, key.toString());
+		if (packagePath == null) {
+			throw new ClassNotFoundException(key + " not found in the repository vtable");
 		}
-		catch (@SuppressWarnings("unused") ClassNotFoundException e) {
+		
+		// Look for a hand-crafted extension first (in module or as a customer override)
+		key.append('/').append(documentName).append("Extension");
+		String extensionKey = repository.vtable(customerName, key.toString());
+		if (extensionKey != null) {
+			result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(extensionKey.replace('/', '.'));
+		}
+		else {
+			// Convert the vtable key to a package path
+			packagePath = packagePath.replace('/', '.');
+			int lastDotIndex = packagePath.lastIndexOf('.');
+			packagePath = packagePath.substring(0, lastDotIndex + 1);
+
+			StringBuilder className = new StringBuilder(128);
+
 			if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
-				// Look for an extension first and if not found look for a base class
+				// Look for an override first and if not found look for a domain class
 				try {
 					className.setLength(0);
 					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
 					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 				}
-				catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no extension class
-					// Look for the base class in the customer area
+				catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no override class
+					// Look for the domain class in the customer area
 					try {
 						className.setLength(className.length() - 3); // remove "Ext"
 						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 					}
-					catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
-						// Look for the base class in the modules area
+					catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
+						// Look for the domain class in the modules area
 						className.setLength(0);
 						className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
 						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
@@ -210,17 +219,22 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				}
 			}
 			else {
-				// Look for base class and if abstract, look for an extension
+				// Look for domain class and if abstract, look for an override
 				className.setLength(0);
 				className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
 				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 				if (Modifier.isAbstract(result.getModifiers())) {
 					className.append("Ext");
-					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+					try {
+						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+					}
+					catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
+						// stick with the domain class
+					}
 				}
 			}
 		}
-	
+		
 		return result;
 	}
 

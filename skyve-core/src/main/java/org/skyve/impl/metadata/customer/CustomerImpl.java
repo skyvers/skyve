@@ -115,12 +115,6 @@ public class CustomerImpl implements Customer {
 	private String primeFacesChartPostProcessorClassName;
 	
 	/**
-	 * vtable == fullyQualifiedName -> location 
-	 * (later will be - customer defined = TRUE, otherwise FALSE)
-	 */
-	private Map<String, String> vtable = new TreeMap<>();
-
-	/**
 	 * "<module.document>" -> exported reference
 	 */
 	private Map<String, List<ExportedReference>> exportedReferences = new TreeMap<>();
@@ -225,10 +219,6 @@ public class CustomerImpl implements Customer {
 	 */
 	public void setDefaultTimestampConverter(Converter<Timestamp> defaultTimestampConverter) {
 		this.defaultTimestampConverter = defaultTimestampConverter;
-	}
-
-	public Map<String, String> getVTable() {
-		return vtable;
 	}
 
 	public Map<String, Action> getDefaultActions() {
@@ -360,7 +350,11 @@ public class CustomerImpl implements Customer {
 		this.primeFacesChartPostProcessorClassName = UtilImpl.processStringValue(primeFacesChartPostProcessorClassName);
 	}
 	
+	@Override
 	public void determineDependencies() {
+		derivations.clear();
+		exportedReferences.clear();
+		
 		for (Module module : getModules()) {
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				DocumentRef documentRef = module.getDocumentRefs().get(documentName);

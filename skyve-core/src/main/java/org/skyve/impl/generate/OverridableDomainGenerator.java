@@ -212,9 +212,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							}
 
 							String documentName = document.getName();
-							String modoc = new StringBuilder(64).append(moduleName).append('.').append(documentName).toString();
-							String documentPackagePath = ((CustomerImpl) customer).getVTable().get(modoc);
-							if (documentPackagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
+							String key = new StringBuilder(64).append(ProvidedRepository.MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).toString();
+							String newKey = repository.vtable(customerName, key);
+							if ((newKey != null) && newKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
 								populatePropertyLengths(customer, module, document, null);
 
 								// Refine the moduleDocumentProperties, if the vanilla class exists
@@ -542,10 +542,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 					
 					String documentName = document.getName();
-					String modoc = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
-					String documentPackagePath = ((CustomerImpl) customer).getVTable().get(modoc);
-
-					if ((documentClasses != null) && documentPackagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
+					String key = new StringBuilder(64).append(ProvidedRepository.MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).toString();
+					String documentPackagePath = repository.vtable(customer.getName(), key);
+					if ((documentClasses != null) && (documentPackagePath != null) && documentPackagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
 						// this is either an override or a totally new document.
 						// for an override, baseDocumentName != null
 						// for a new document definition, baseDocumentName == null
@@ -1728,9 +1727,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String moduleName = module.getName();
 		String documentName = document.getName();
 		String moduleDotDocument = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
+		String key = new StringBuilder(64).append(ProvidedRepository.MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).toString();
 		String packagePathPrefix = ProvidedRepository.MODULES_NAMESPACE;
 		// if customer defined document
-		if (internalCustomer.getVTable().get(moduleDotDocument).startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
+		String newKey = repository.vtable(customer.getName(), key);
+		if ((newKey != null) && newKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
 			// this is either an override or a totally new document.
 			// for an override, baseDocumentName != null
 			// for a new document definition, baseDocumentName == null

@@ -2,6 +2,9 @@ package org.skyve.metadata.repository;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -26,7 +29,7 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
-public interface ProvidedRepository extends Repository {
+public interface ProvidedRepository extends CachedRepository {
 	final String ROUTER_NAME = "router";
 	final String ROUTER_NAMESPACE = ROUTER_NAME + '/';
 	final String CUSTOMERS_NAME = "customers";
@@ -45,8 +48,6 @@ public interface ProvidedRepository extends Repository {
 	final String IMAGES_NAMESPACE = IMAGES_NAME + '/';
 	final String REPORTS_NAME = "reports";
 	final String REPORTS_NAMESPACE = REPORTS_NAME + '/';
-	final String QUERIES_NAME = "queries";
-	final String QUERIES_NAMESPACE = QUERIES_NAME + '/';
 	final String DOMAIN_NAME = "domain";
 	final String DOMAIN_NAMESPACE = DOMAIN_NAME + '/';
 
@@ -85,6 +86,10 @@ public interface ProvidedRepository extends Repository {
 	 * @return
 	 */
 	View getView(String uxui, Customer customer, Document document, String name);
+
+	boolean getUseScaffoldedViews();
+	
+	@Nullable String vtable(@Nonnull String customerName, @Nonnull String key);
 
 	<T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime);
 
@@ -146,7 +151,7 @@ public interface ProvidedRepository extends Repository {
 	 */
 	String getReportFileName(Customer customer, Document document, String reportName);
 	
-	Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName);
+	@Nullable Class<?> getJavaClass(@Nonnull Customer customer, @Nonnull String fullyQualifiedJavaCodeName);
 	
 	/**
 	 * Overridden to return a UserImpl in this interface.

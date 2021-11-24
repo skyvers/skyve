@@ -25,7 +25,7 @@ public class AssociationAutoCompleteConverter implements Converter {
     	
     	final String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
-            result = new FacesAction<Object>() {
+            result = new FacesAction<>() {
 				@Override
 				public Object callback() throws Exception {
 		            int pos = processedValue.indexOf('.');

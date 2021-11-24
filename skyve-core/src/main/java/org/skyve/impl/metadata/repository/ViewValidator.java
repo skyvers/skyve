@@ -398,11 +398,12 @@ class ViewValidator extends ViewVisitor {
 	private void validateListModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
-				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
-				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
-				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
-					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				StringBuilder key = new StringBuilder(128);
+				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
+				key.append(document.getName()).append('/');
+				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
+				if (repository.getJavaClass(customer, key.toString()) == null) {
+					throw new MetaDataException(key + " not found.");
 				}
 			}
 			catch (Exception e) { // NB could be class cast problems
@@ -414,11 +415,12 @@ class ViewValidator extends ViewVisitor {
 	private void validateMapModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
-				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
-				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
-				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
-					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				StringBuilder key = new StringBuilder(128);
+				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
+				key.append(document.getName()).append('/');
+				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
+				if (repository.getJavaClass(customer, key.toString()) == null) {
+					throw new MetaDataException(key + " not found.");
 				}
 			}
 			catch (Exception e) { // NB could be class cast problems
@@ -430,11 +432,12 @@ class ViewValidator extends ViewVisitor {
 	private void validateChartModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
-				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
-				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
-				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
-					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				StringBuilder key = new StringBuilder(128);
+				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
+				key.append(document.getName()).append('/');
+				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
+				if (repository.getJavaClass(customer, key.toString()) == null) {
+					throw new MetaDataException(key + " not found.");
 				}
 			}
 			catch (Exception e) { // NB could be class cast problems
@@ -446,11 +449,12 @@ class ViewValidator extends ViewVisitor {
 	private void validateComparisonModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
-				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
-				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
-				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
-				if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
-					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				StringBuilder key = new StringBuilder(128);
+				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
+				key.append(document.getName()).append('/');
+				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
+				if (repository.getJavaClass(customer, key.toString()) == null) {
+					throw new MetaDataException(key + " not found.");
 				}
 			}
 			catch (Exception e) { // NB could be class cast problems
@@ -1959,12 +1963,12 @@ class ViewValidator extends ViewVisitor {
 		if (ImplicitActionName.Print.toString().equals(resourceName)) {
 			throw new MetaDataException("Name clash: Action " + resourceName + " is an implicit action name and cannot be used.");
 		}
-		String fullyQualifiedJavaCodeName = String.format("%s.%s.actions.%s", 
-															document.getOwningModuleName(),
-															document.getName(),
-															resourceName);
-		if (repository.getJavaClass(customer, fullyQualifiedJavaCodeName) == null) {
-			throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+		StringBuilder key = new StringBuilder(128);
+		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
+		key.append(document.getName()).append('/');
+		key.append(ProvidedRepository.ACTIONS_NAMESPACE).append(resourceName);
+		if (repository.getJavaClass(customer, key.toString()) == null) {
+			throw new MetaDataException(key + " not found.");
 		}
 	}
 	

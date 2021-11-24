@@ -136,4 +136,9 @@ public class CustomerInjectable implements Customer {
 	throws Exception {
 		return CORE.getCustomer().getConstantDomainValues(bizlet, moduleName, documentName, attribute);
 	}
+	
+	@Override
+	public void determineDependencies() {
+		CORE.getCustomer().determineDependencies();
+	}
 }

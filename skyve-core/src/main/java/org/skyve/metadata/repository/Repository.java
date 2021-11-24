@@ -11,12 +11,6 @@ import org.skyve.metadata.user.User;
  */
 public interface Repository {
 	/**
-	 * 
-	 * @param customer if <code>null</code>, the entire repository goes.
-	 */
-	void evictCachedMetaData(Customer customer);
-	
-	/**
 	 * Check in customer module folder, check in module folder, check in customer images folder, check in images folder.
 	 * 
 	 * @param imagePath The relative path to the image

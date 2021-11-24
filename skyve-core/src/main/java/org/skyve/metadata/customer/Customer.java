@@ -129,4 +129,9 @@ public interface Customer extends NamedMetaData {
 																		String documentName, 
 																		Attribute attribute)
 	throws Exception;
+	
+	/**
+	 * Initialize the dependencies on this customer given their modules and overrides.
+	 */
+	public void determineDependencies();
 }

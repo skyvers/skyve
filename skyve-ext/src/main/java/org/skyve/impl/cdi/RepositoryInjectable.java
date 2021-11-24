@@ -21,11 +21,6 @@ public class RepositoryInjectable implements Repository, Serializable {
 	private static final long serialVersionUID = -2932762525201765101L;
 
 	@Override
-	public void evictCachedMetaData(Customer customer) {
-		CORE.getRepository().evictCachedMetaData(customer);
-	}
-
-	@Override
 	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
 		return CORE.getRepository().findResourceFile(resourcePath, customerName, moduleName);
 	}

@@ -188,4 +188,14 @@ public class NoOpProvidedRepository implements ProvidedRepository {
 	public Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName) {
 		return null;
 	}
+
+	@Override
+	public String vtable(String customerName, String key) {
+		return null;
+	}
+	
+	@Override
+	public boolean getUseScaffoldedViews() {
+		return false;
+	}
 }

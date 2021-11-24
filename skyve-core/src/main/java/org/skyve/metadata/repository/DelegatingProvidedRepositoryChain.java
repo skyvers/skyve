@@ -24,10 +24,10 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
-public class DelegatingRepositoryProviderChain implements ProvidedRepository {
+public class DelegatingProvidedRepositoryChain implements ProvidedRepository {
 	private ProvidedRepository[] delegates;
 	
-	public DelegatingRepositoryProviderChain(ProvidedRepository... delegates) {
+	public DelegatingProvidedRepositoryChain(ProvidedRepository... delegates) {
 		this.delegates = delegates;
 	}
 
@@ -355,13 +355,35 @@ public class DelegatingRepositoryProviderChain implements ProvidedRepository {
 	}
 	
 	@Override
-	public Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName) {
+	public Class<?> getJavaClass(Customer customer, String key) {
 		for (ProvidedRepository delegate : delegates) {
-			Class<?> result = delegate.getJavaClass(customer, fullyQualifiedJavaCodeName);
+			Class<?> result = delegate.getJavaClass(customer, key);
 			if (result != null) {
 				return result;
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	public String vtable(String customerName, String key) {
+		for (ProvidedRepository delegate : delegates) {
+			String result = delegate.vtable(customerName, key);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean getUseScaffoldedViews() {
+		for (ProvidedRepository delegate : delegates) {
+			boolean use = delegate.getUseScaffoldedViews();
+			if (use) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

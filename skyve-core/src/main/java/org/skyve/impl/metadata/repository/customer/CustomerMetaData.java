@@ -315,7 +315,9 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 
 		result.setJFreeChartPostProcessorClassName(fullyQualifiedJFreeChartPostProcessorClassName);
 		result.setPrimeFacesChartPostProcessorClassName(fullyQualifiedPrimeFacesChartPostProcessorClassName);
-
+		
+		result.determineDependencies();
+		
 		return result;
 	}
 }

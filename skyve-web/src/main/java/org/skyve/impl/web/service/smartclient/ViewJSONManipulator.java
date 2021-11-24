@@ -157,6 +157,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 		@Override
 		public void processDefaultListViewReference(DefaultListViewReference reference) {
+			// TODO implement this sometime
 		}
 
 		@Override
@@ -188,6 +189,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 		@Override
 		public void processQueryListViewReference(QueryListViewReference reference) {
+			// TODO implement this sometime
 		}
 
 		@Override
@@ -416,7 +418,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 					// not an attribute
 				}
 				if ((attribute != null) && (attribute.getDomainType() != null)) {
-					value = value.toString();
+					@SuppressWarnings("null") // value can't null if it is an instance of boolean or number
+					String newValue = value.toString();
+					value = newValue;
 				}
 			}
 			toAddTo.put(BindUtil.sanitiseBinding(binding), value);

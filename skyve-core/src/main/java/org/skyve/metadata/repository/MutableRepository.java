@@ -19,6 +19,8 @@ public interface MutableRepository {
 	@Nonnull Module addModule(@Nonnull ModuleMetaData module);
 	@Nonnull Document addDocument(@Nonnull Customer customer, @Nonnull Module module, @Nonnull DocumentMetaData document);
 	@Nonnull Document addDocument(@Nonnull Module module, @Nonnull DocumentMetaData document);
-	@Nonnull View addView(@Nonnull String uxui, @Nonnull Customer customer, @Nonnull Document document, @Nonnull ViewMetaData view); 
+	@Nonnull View addView(@Nonnull Customer customer, @Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view); 
 	@Nonnull View addView(@Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view); 
+	@Nonnull View addView(@Nonnull Customer customer, @Nonnull Document document, @Nonnull ViewMetaData view); 
+	@Nonnull View addView(@Nonnull Document document, @Nonnull ViewMetaData view); 
 }
