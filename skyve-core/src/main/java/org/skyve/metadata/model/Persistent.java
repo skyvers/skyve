@@ -28,6 +28,10 @@ public class Persistent extends NamedMetaData {
 	private String discriminator;
 	private String cacheName;
 	
+	public Persistent() {
+		// nothing to see here
+	}
+	
     public String getSchema() {
         return schema;
     }

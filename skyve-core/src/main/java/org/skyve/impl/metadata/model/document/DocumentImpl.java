@@ -259,6 +259,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			p.put(Bean.CUSTOMER_NAME, null);
 			p.put(Bean.DATA_GROUP_ID, null);
 			p.put(Bean.USER_ID, null);
+			// Default created conditions if its not overridden
+			if (getCondition(Bean.CREATED_KEY) == null) {
+				p.put(Bean.CREATED_KEY, Boolean.TRUE);
+				p.put(Bean.NOT_CREATED_KEY, Boolean.FALSE);
+			}
 			
 			// PersistentBean
 			Persistent persistent = getPersistent();

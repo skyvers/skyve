@@ -25,6 +25,7 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 	
 	private String documentName;
 	private String referenceName;
+
 	/**
 	 * This is only used during domain generation - tests at runtime use the cardinality attribute.
 	 */

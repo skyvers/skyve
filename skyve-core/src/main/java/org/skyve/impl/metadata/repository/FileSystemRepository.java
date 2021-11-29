@@ -319,8 +319,8 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(absolutePath);
 		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-		final Router globalRouter = XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
-		return globalRouter.convert(ROUTER_NAME, this);
+		final Router globalRouter = XMLMetaData.unmarshalRouter(sb.toString());
+		return globalRouter.convert(ROUTER_NAME, getDelegator());
 	}
 
 	/**
@@ -338,8 +338,8 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				sb.append(absolutePath);
 				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
 				if (new File(sb.toString()).exists()) {
-					final Router moduleRouter = XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
-					result.add(moduleRouter.convert(ROUTER_NAME, this));
+					final Router moduleRouter = XMLMetaData.unmarshalRouter(sb.toString());
+					result.add(moduleRouter.convert(ROUTER_NAME, getDelegator()));
 				}
 				sb.setLength(0);
 			}
@@ -350,8 +350,8 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(absolutePath);
 			sb.append(MODULES_NAMESPACE).append(moduleName).append("/").append(ROUTER_NAME).append(".xml");
 			if (new File(sb.toString()).exists()) {
-				final Router moduleRouter = XMLMetaData.unmarshalRouter(sb.toString()).convert(ROUTER_NAME, this);
-				result.add(moduleRouter.convert(ROUTER_NAME, this));
+				final Router moduleRouter = XMLMetaData.unmarshalRouter(sb.toString());
+				result.add(moduleRouter.convert(ROUTER_NAME, getDelegator()));
 			}
 			sb.setLength(0);
 		}

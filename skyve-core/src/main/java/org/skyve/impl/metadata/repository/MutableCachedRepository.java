@@ -31,7 +31,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
-public abstract class MutableCachedRepository extends ProvidedRepositoryFactory implements MutableRepository, OnDemandRepository {
+public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate implements MutableRepository, OnDemandRepository {
 	/**
 	 * The cache.
 	 * MetaData namespace and name -> MetaData.
@@ -85,14 +85,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			Optional<MetaData> o = cache.get(ROUTER_KEY);
 			if ((o != null) && o.isEmpty()) { // not a cache miss
 				result = loadRouter();
-				result = result.convert(ROUTER_NAME, this);
+				result = result.convert(ROUTER_NAME, getDelegator());
 			}
 		}
 		else {
 			Optional<MetaData> o = cache.computeIfPresent(ROUTER_KEY, (k, v) -> {
 				if (v.isEmpty()) {
 					Router router = loadRouter();
-					router = router.convert(ROUTER_NAME, this);
+					router = router.convert(ROUTER_NAME, getDelegator());
 					return Optional.of(router);
 				}
 				return v;
@@ -107,7 +107,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	
 	@Override
 	public Router setRouter(Router router) {
-		Router result = router.convert(ROUTER_NAME, this);
+		Router result = router.convert(ROUTER_NAME, getDelegator());
 		// Ignore dev mode flag here as we need to seed the cache in this method.
 		cache.put(ROUTER_KEY, Optional.of(result));
 		return result;
@@ -119,7 +119,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		Optional<MetaData> o = cache.computeIfPresent(customerKey, (k, v) -> {
 			if (v.isEmpty()) {
 				CustomerMetaData customerMetaData = loadCustomer(customerName);
-				Customer customer = customerMetaData.convert(customerName, this);
+				Customer customer = customerMetaData.convert(customerName, getDelegator());
 				return Optional.of(customer);
 			}
 			return v;
@@ -130,7 +130,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	@Override
 	public Customer addCustomer(CustomerMetaData customer) {
 		String customerName = customer.getName();
-		Customer result = customer.convert(customerName, this);
+		Customer result = customer.convert(customerName, getDelegator());
 		cache.put(CUSTOMERS_NAMESPACE + customerName, Optional.of(result));
 		return result;
 	}
@@ -181,7 +181,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		else {
 			metaDataName = moduleName;
 		}
-		return module.convert(metaDataName, this);
+		return module.convert(metaDataName, getDelegator());
 	}
 	
 	@Override
@@ -259,7 +259,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		if (customerName != null) {
 			metaDataName.append(" (").append(customerName).append(')');
 		}
-		Document result = document.convert(metaDataName.toString(), this);
+		Document result = document.convert(metaDataName.toString(), getDelegator());
 		
 		DocumentImpl internalResult = (DocumentImpl) result;
 		internalResult.setOwningModuleName(moduleName);
@@ -440,7 +440,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			metaDataName.append(" (").append(customerName).append(')');
 		}
 		
-		ViewImpl result = view.convert(metaDataName.toString(), this);
+		ViewImpl result = view.convert(metaDataName.toString(), getDelegator());
 		result.resolve(uxui, customer, document);
 		return result;
 	}

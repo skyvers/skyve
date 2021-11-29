@@ -67,6 +67,9 @@ public class JobMetaDataImpl extends NamedMetaData implements JobMetaData {
 		return owningModuleName;
 	}
 
+	/**
+	 * This is called in convert method.
+	 */
 	@XmlTransient
 	public void setOwningModuleName(String owningModuleName) {
 		this.owningModuleName = owningModuleName;

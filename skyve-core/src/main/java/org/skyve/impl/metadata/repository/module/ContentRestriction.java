@@ -37,6 +37,9 @@ public class ContentRestriction implements MetaData {
 		return documentName;
 	}
 
+	/**
+	 * This is called by convert
+	 */
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}

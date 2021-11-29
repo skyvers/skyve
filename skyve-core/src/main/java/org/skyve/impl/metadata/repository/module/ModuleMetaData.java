@@ -415,8 +415,6 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 							documentQueryImpl.getColumns().add(column);
 						}
 					}
-
-					// TODO querylet processing query.setQuerylet();
 				}
 			}
 		}

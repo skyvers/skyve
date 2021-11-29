@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.controller.BizExportAction;
@@ -24,11 +25,14 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
-public class DelegatingProvidedRepositoryChain implements ProvidedRepository {
-	private ProvidedRepository[] delegates;
+public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegate {
+	protected ProvidedRepository[] delegates;
 	
 	public DelegatingProvidedRepositoryChain(ProvidedRepository... delegates) {
 		this.delegates = delegates;
+		for (ProvidedRepository delegate : delegates) {
+			delegate.setDelegator(this);
+		}
 	}
 
 	@Override

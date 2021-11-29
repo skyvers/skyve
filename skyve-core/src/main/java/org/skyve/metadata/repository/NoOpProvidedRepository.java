@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.controller.BizExportAction;
@@ -23,7 +24,7 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
-public class NoOpProvidedRepository implements ProvidedRepository {
+public class NoOpProvidedRepository extends ProvidedRepositoryDelegate {
 	@Override
 	public void evictCachedMetaData(Customer customer) {
 		// do nothing
