@@ -7,14 +7,18 @@ import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
 public class FluentCollection extends FluentReference<FluentCollection> {
-	private CollectionImpl collection = new CollectionImpl();
+	private CollectionImpl collection = null;
 	
 	public FluentCollection() {
-		// nothing to see
+		collection = new CollectionImpl();
 	}
 
-	public FluentCollection(Collection collection) {
-		super(collection);
+	public FluentCollection(CollectionImpl collection) {
+		this.collection = collection;
+	}
+
+	public FluentCollection from(@SuppressWarnings("hiding") Collection collection) {
+		super.from(collection);
 		type(collection.getType());
 		ordered(Boolean.TRUE.equals(collection.getOrdered()));
 		minCardinality(collection.getMinCardinality().intValue());
@@ -27,12 +31,13 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 		cacheName(collection.getCacheName());
 
 		for (Ordering ordering : collection.getOrdering()) {
-			addOrdering(new FluentCollectionOrdering(ordering));
+			addOrdering(new FluentCollectionOrdering().from(ordering));
 		}
 		
 		for (UniqueConstraint constraint : collection.getUniqueConstraints()) {
-			addUniqueConstraint(new FluentCollectionUniqueConstraint(constraint));
+			addUniqueConstraint(new FluentCollectionUniqueConstraint().from(constraint));
 		}
+		return this;
 	}
 	
 	public FluentCollection type(CollectionType type) {

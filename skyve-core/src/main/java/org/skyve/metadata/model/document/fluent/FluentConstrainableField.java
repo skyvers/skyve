@@ -8,9 +8,11 @@ abstract class FluentConstrainableField<T extends FluentConstrainableField<T>> e
 		// nothing to see
 	}
 	
-	protected FluentConstrainableField(ConstrainableField field) {
-		super(field);
+	@SuppressWarnings("unchecked")
+	protected T from(ConstrainableField field) {
+		super.from(field);
 		domainType(field.getDomainType());
+		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")

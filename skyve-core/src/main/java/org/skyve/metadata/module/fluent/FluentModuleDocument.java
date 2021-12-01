@@ -4,16 +4,21 @@ import org.skyve.impl.metadata.repository.module.ModuleDocument;
 import org.skyve.metadata.module.Module.DocumentRef;
 
 public class FluentModuleDocument {
-	private ModuleDocument document = new ModuleDocument();
+	private ModuleDocument document = null;
 	
 	public FluentModuleDocument() {
-		// nothing to see
+		document = new ModuleDocument();
 	}
 
-	public FluentModuleDocument(String documentName, DocumentRef ref) {
+	public FluentModuleDocument(ModuleDocument document) {
+		this.document = document;
+	}
+
+	public FluentModuleDocument from(String documentName, DocumentRef ref) {
 		moduleRef(ref.getReferencedModuleName());
 		ref(documentName);
 		defaultQueryName(ref.getDefaultQueryName());
+		return this;
 	}
 	
 	public FluentModuleDocument moduleRef(String moduleName) {

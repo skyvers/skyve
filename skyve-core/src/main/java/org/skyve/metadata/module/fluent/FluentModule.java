@@ -3,6 +3,7 @@ package org.skyve.metadata.module.fluent;
 import java.util.Map.Entry;
 
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
+import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -14,13 +15,17 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
 public class FluentModule {
-	private ModuleMetaData module = new ModuleMetaData();
+	private ModuleMetaData module = null;
 	
 	public FluentModule() {
-		// nothing to see here
+		module = new ModuleMetaData();
 	}
-	
-	public FluentModule(Module module) {
+
+	public FluentModule(ModuleMetaData module) {
+		this.module = module;
+	}
+
+	public FluentModule from(@SuppressWarnings("hiding") Module module) {
 		name(module.getName());
 		title(module.getTitle());
 		documentation(module.getDocumentation());
@@ -30,34 +35,36 @@ public class FluentModule {
 
 		// Populate Jobs
 		for (JobMetaData job : module.getJobs()) {
-			addJob(new FluentJob(job));
+			addJob(new FluentJob().from(job));
 		}
 		
 		// Populate document refs
 		for (Entry<String, DocumentRef> ref : module.getDocumentRefs().entrySet()) {
-			addDocument(new FluentModuleDocument(ref.getKey(), ref.getValue()));
+			addDocument(new FluentModuleDocument().from(ref.getKey(), ref.getValue()));
 		}
 		
 		// Populate queries
 		for (QueryDefinition query : module.getMetadataQueries()) {
 			if (query instanceof MetaDataQueryDefinition) {
-				addMetaDataQuery(new FluentMetaDataQuery((MetaDataQueryDefinition) query));
+				addMetaDataQuery(new FluentMetaDataQuery().from((MetaDataQueryDefinition) query));
 			}
 			else if (query instanceof SQLDefinition) {
-				addSQL(new FluentSQL((SQLDefinition) query));
+				addSQL(new FluentSQL().from((SQLDefinition) query));
 			}
 			else {
-				addBizQL(new FluentBizQL((BizQLDefinition) query));
+				addBizQL(new FluentBizQL().from((BizQLDefinition) query));
 			}
 		}
 		
 		// Populate Roles
 		for (Role role : module.getRoles()) {
-			addRole(new FluentModuleRole(role));
+			addRole(new FluentModuleRole().from(role));
 		}
 
 		// Populate the menu
-		menu(new FluentMenu(module.getMenu()));
+		menu(new FluentMenu().from(module.getMenu()));
+		
+		return this;
 	}
 	
 	public FluentModule name(String name) {
@@ -118,6 +125,14 @@ public class FluentModule {
 	public FluentModule addRole(FluentModuleRole role) {
 		module.getRoles().add(role.get());
 		return this;
+	}
+	
+	public FluentModuleRole getRole(String name) {
+		ModuleRoleMetaData role = module.getRoles().stream().filter(r -> r.getName().equals(name)).findAny().orElse(null);
+		if (role != null) {
+			return new FluentModuleRole(role);
+		}
+		return null;
 	}
 	
 	public FluentModule menu(FluentMenu menu) {

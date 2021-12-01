@@ -3,14 +3,19 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Colour;
 
 public class FluentColour extends FluentConvertableField<FluentColour> {
-	private Colour colour = new Colour();
+	private Colour colour = null;
 	
 	public FluentColour() {
-		// nothing to see
+		colour = new Colour();
 	}
 
 	public FluentColour(Colour colour) {
-		super(colour);
+		this.colour = colour;
+	}
+
+	public FluentColour from(@SuppressWarnings("hiding") Colour colour) {
+		super.from(colour);
+		return this;
 	}
 	
 	@Override

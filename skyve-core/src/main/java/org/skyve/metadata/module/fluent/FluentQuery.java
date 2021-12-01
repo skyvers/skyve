@@ -8,7 +8,7 @@ abstract class FluentQuery<T extends FluentQuery<T>> {
 		// nothing to see
 	}
 
-	protected FluentQuery(QueryDefinition query) {
+	protected void from(QueryDefinition query) {
 		name(query.getName());
 		description(query.getDescription());
 		documentation(query.getDocumentation());

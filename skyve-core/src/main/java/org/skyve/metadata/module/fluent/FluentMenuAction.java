@@ -9,9 +9,11 @@ abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 		// nothing to see here
 	}
 
-	protected FluentMenuAction(MenuItem item) {
+	@SuppressWarnings("unchecked")
+	protected T from(MenuItem item) {
 		name(item.getName());
 		item.getUxUis().forEach(u -> addUxUi(u));
+		return (T) this;
 	}
 	
 	@SuppressWarnings("unchecked")

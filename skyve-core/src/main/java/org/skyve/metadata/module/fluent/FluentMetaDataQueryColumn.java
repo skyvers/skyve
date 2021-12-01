@@ -11,7 +11,8 @@ abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryColumn<T>>
 		// nothing to see here
 	}
 	
-	protected FluentMetaDataQueryColumn(MetaDataQueryColumn column) {
+	@SuppressWarnings("unchecked")
+	protected T from(MetaDataQueryColumn column) {
 		name(column.getName());
 		binding(column.getBinding());
 		displayName(column.getDisplayName());
@@ -24,6 +25,7 @@ abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryColumn<T>>
 			pixelWidth(i.intValue());
 		}
 		alignment(column.getAlignment());
+		return (T) this;
 	}
 	
 	@SuppressWarnings("unchecked")

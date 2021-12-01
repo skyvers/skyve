@@ -8,11 +8,13 @@ public abstract class FluentReference<T extends FluentReference<T>> extends Flue
 		// nothing to see
 	}
 
-	protected FluentReference(Reference reference) {
-		super(reference);
+	@SuppressWarnings("unchecked")
+	protected T from(Reference reference) {
+		super.from(reference);
 		persistent(reference.isPersistent());
 		documentName(reference.getDocumentName());
 		queryName(reference.getQueryName());
+		return (T) this;
 	}
 	
 	@SuppressWarnings("unchecked")

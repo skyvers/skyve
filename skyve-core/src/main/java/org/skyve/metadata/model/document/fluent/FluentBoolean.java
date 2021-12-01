@@ -3,14 +3,19 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Boolean;
 
 public class FluentBoolean extends FluentConvertableField<FluentBoolean> {
-	private Boolean bool = new Boolean();
+	private Boolean bool = null;
 	
 	public FluentBoolean() {
-		// nothing to see
+		bool = new Boolean();
 	}
 	
 	public FluentBoolean(Boolean bool) {
-		super(bool);
+		this.bool = bool;
+	}
+
+	public FluentBoolean from(@SuppressWarnings("hiding") Boolean bool) {
+		super.from(bool);
+		return this;
 	}
 	
 	@Override

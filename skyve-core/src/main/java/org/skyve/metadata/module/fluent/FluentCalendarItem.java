@@ -3,19 +3,24 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.CalendarItem;
 
 public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
-	private CalendarItem item = new CalendarItem();
+	private CalendarItem item = null;
 	
 	public FluentCalendarItem() {
-		// nothing to see
+		item = new CalendarItem();
 	}
 
-	public FluentCalendarItem(org.skyve.impl.metadata.module.menu.CalendarItem item) {
-		super();
+	public FluentCalendarItem(CalendarItem item) {
+		this.item = item;
+	}
+
+	public FluentCalendarItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.CalendarItem item) {
+		super.from(item);
 		documentName(item.getDocumentName());
 		queryName(item.getQueryName());
 		modelName(item.getModelName());
 		startBinding(item.getStartBinding());
 		endBinding(item.getEndBinding());
+		return this;
 	}
 	
 	public FluentCalendarItem documentName(String documentName) {

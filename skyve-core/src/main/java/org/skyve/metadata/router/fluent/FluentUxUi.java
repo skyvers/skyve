@@ -3,15 +3,20 @@ package org.skyve.metadata.router.fluent;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 
 public class FluentUxUi {
-	private UxUiMetadata uxui = new UxUiMetadata();
+	private UxUiMetadata uxui = null;
 	
 	public FluentUxUi() {
-		// nothing to see
+		uxui = new UxUiMetadata();
 	}
 
 	public FluentUxUi(UxUiMetadata uxui) {
+		this.uxui = uxui;
+	}
+
+	public FluentUxUi from(@SuppressWarnings("hiding") UxUiMetadata uxui) {
 		name(uxui.getName());
-		uxui.getRoutes().forEach(r -> addRoute(new FluentRoute(r)));
+		uxui.getRoutes().forEach(r -> addRoute(new FluentRoute().from(r)));
+		return this;
 	}
 	
 	public FluentUxUi name(String name) {

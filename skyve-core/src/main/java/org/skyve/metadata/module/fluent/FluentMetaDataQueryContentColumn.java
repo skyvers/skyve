@@ -5,20 +5,25 @@ import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaD
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 
 public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<FluentMetaDataQueryContentColumn> {
-	private MetaDataQueryContentColumnMetaData column = new MetaDataQueryContentColumnMetaData();
+	private MetaDataQueryContentColumnMetaData column = null;
 	
 	public FluentMetaDataQueryContentColumn() {
-		// nothing to see
+		column = new MetaDataQueryContentColumnMetaData();
 	}
+	
+	public FluentMetaDataQueryContentColumn(MetaDataQueryContentColumnMetaData column) {
+		this.column = column;
+	}	
 
-	public FluentMetaDataQueryContentColumn(MetaDataQueryContentColumn column) {
-		super(column);
+	public FluentMetaDataQueryContentColumn from(@SuppressWarnings("hiding") MetaDataQueryContentColumn column) {
+		super.from(column);
 		display(column.getDisplay());
 		Integer i = column.getPixelHeight();
 		if (i != null) {
 			pixelHeight(i.intValue());
 		}
 		emptyThumbnailRelativeFile(column.getEmptyThumbnailRelativeFile());
+		return this;
 	}
 	
 	public FluentMetaDataQueryContentColumn display(DisplayType display) {

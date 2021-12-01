@@ -3,16 +3,21 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 
 public class FluentEnumeratedValue {
-	private EnumeratedValue value = new EnumeratedValue();
+	private EnumeratedValue value = null;
 	
 	public FluentEnumeratedValue() {
-		// nothing to see
+		value = new EnumeratedValue();
 	}
 	
 	public FluentEnumeratedValue(EnumeratedValue value) {
+		this.value = value;
+	}
+
+	public FluentEnumeratedValue from(@SuppressWarnings("hiding") EnumeratedValue value) {
 		name(value.getName());
 		code(value.getCode());
 		description(value.getDescription());
+		return this;
 	}	
 	
 	public FluentEnumeratedValue name(String name) {

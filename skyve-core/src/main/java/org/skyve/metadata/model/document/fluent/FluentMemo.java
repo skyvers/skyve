@@ -3,14 +3,19 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Memo;
 
 public class FluentMemo extends FluentConstrainableField<FluentMemo> {
-	private Memo memo = new Memo();
+	private Memo memo = null;
 	
 	public FluentMemo() {
-		// nothing to see
+		memo = new Memo();
 	}
 	
 	public FluentMemo(Memo memo) {
-		super(memo);
+		this.memo = memo;
+	}
+
+	public FluentMemo from(@SuppressWarnings("hiding") Memo memo) {
+		super.from(memo);
+		return this;
 	}
 	
 	@Override

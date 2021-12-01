@@ -4,19 +4,24 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 
 public class FluentPersistent {
-	Persistent persistent = new Persistent();
+	Persistent persistent = null;
 	
 	public FluentPersistent() {
-		// nothing to see
+		persistent = new Persistent();
+	}
+	
+	public FluentPersistent(Persistent persistent) {
+		this.persistent = persistent;
 	}
 
-	public FluentPersistent(Persistent persistent) {
+	public FluentPersistent from(@SuppressWarnings("hiding") Persistent persistent) {
 		name(persistent.getName());
 		schema(persistent.getSchema());
 		catalog(persistent.getCatalog());
 		strategy(persistent.getStrategy());
 		discriminator(persistent.getDiscriminator());
 		cacheName(persistent.getCacheName());
+		return this;
 	}
 	
 	public FluentPersistent name(String name) {

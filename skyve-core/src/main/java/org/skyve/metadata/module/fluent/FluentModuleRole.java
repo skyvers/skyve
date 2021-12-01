@@ -13,13 +13,17 @@ import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.metadata.user.Role;
 
 public class FluentModuleRole {
-	private ModuleRoleMetaData role = new ModuleRoleMetaData();
+	private ModuleRoleMetaData role = null;
 	
 	public FluentModuleRole() {
-		// nothing to see
+		this.role = new ModuleRoleMetaData();
 	}
 	
-	public FluentModuleRole(Role role) {
+	public FluentModuleRole(ModuleRoleMetaData role) {
+		this.role = role;
+	}
+	
+	public FluentModuleRole from(@SuppressWarnings("hiding") Role role) {
 		name(role.getName());
 		description(role.getDescription());
 		documentation(role.getDocumentation());
@@ -48,6 +52,8 @@ public class FluentModuleRole {
 		}
 		
 		map.values().forEach(p -> addPrivilege(p));
+		
+		return this;
 	}
 	
 	public FluentModuleRole name(String name) {

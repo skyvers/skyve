@@ -4,17 +4,22 @@ import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.metadata.module.JobMetaData;
 
 public class FluentJob {
-	private JobMetaDataImpl job = new JobMetaDataImpl();
+	private JobMetaDataImpl job = null;
 	
 	public FluentJob() {
-		// nothing to see
+		job = new JobMetaDataImpl();
 	}
 
-	public FluentJob(JobMetaData job) {
+	public FluentJob(JobMetaDataImpl job) {
+		this.job = job;
+	}
+
+	public FluentJob from(@SuppressWarnings("hiding") JobMetaData job) {
 		name(job.getName());
 		displayName(job.getDisplayName());
 		description(job.getDescription());
 		className(job.getClassName());
+		return this;
 	}
 	
 	public FluentJob name(String name) {

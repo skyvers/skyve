@@ -7,14 +7,18 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 
 public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
-	private MetaDataQueryMetaData query = new MetaDataQueryMetaData();
+	private MetaDataQueryMetaData query = null;
 	
 	public FluentMetaDataQuery() {
-		// nothing to see
+		query = new MetaDataQueryMetaData();
 	}
 	
-	public FluentMetaDataQuery(MetaDataQueryDefinition query) {
-		super(query);
+	public FluentMetaDataQuery(MetaDataQueryMetaData query) {
+		this.query = query;
+	}
+	
+	public FluentMetaDataQuery from(@SuppressWarnings("hiding") MetaDataQueryDefinition query) {
+		super.from(query);
 		documentName(query.getDocumentName());
 		polymorphic(Boolean.TRUE.equals(query.getPolymorphic()) ? true : false);
 		aggregate(query.isAggregate());
@@ -23,12 +27,13 @@ public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
 		
 		for (MetaDataQueryColumn column : query.getColumns()) {
 			if (column instanceof MetaDataQueryProjectedColumn) {
-				addProjectedColumn(new FluentMetaDataQueryProjectedColumn((MetaDataQueryProjectedColumn) column));
+				addProjectedColumn(new FluentMetaDataQueryProjectedColumn().from((MetaDataQueryProjectedColumn) column));
 			}
 			else {
-				addContentColumn(new FluentMetaDataQueryContentColumn((MetaDataQueryContentColumn) column));
+				addContentColumn(new FluentMetaDataQueryContentColumn().from((MetaDataQueryContentColumn) column));
 			}
 		}
+		return this;
 	}
 	
 	public FluentMetaDataQuery documentName(String documentName) {

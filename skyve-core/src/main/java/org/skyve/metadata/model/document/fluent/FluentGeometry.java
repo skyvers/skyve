@@ -3,14 +3,19 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 
 public class FluentGeometry extends FluentField<FluentGeometry> {
-	private Geometry geometry = new Geometry();
+	private Geometry geometry = null;
 	
 	public FluentGeometry() {
-		// nothing to see
+		geometry = new Geometry();
 	}
 
 	public FluentGeometry(Geometry geometry) {
-		super(geometry);
+		this.geometry = geometry;
+	}
+
+	public FluentGeometry from(@SuppressWarnings("hiding") Geometry geometry) {
+		super.from(geometry);
+		return this;
 	}
 	
 	@Override

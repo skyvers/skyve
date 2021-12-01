@@ -4,15 +4,20 @@ import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 
 public class FluentDateTime extends FluentConvertableField<FluentDateTime> {
-	private DateTime dateTime = new DateTime();
+	private DateTime dateTime = null;
 	
 	public FluentDateTime() {
-		// nothing to see
+		dateTime = new DateTime();
 	}
 
 	public FluentDateTime(DateTime dateTime) {
-		super(dateTime);
+		this.dateTime = dateTime;
+	}
+
+	public FluentDateTime from(@SuppressWarnings("hiding") DateTime dateTime) {
+		super.from(dateTime);
 		validator(dateTime.getValidator());
+		return this;
 	}
 	
 	public FluentDateTime validator(DateValidator validator) {

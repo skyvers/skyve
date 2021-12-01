@@ -4,16 +4,21 @@ import org.skyve.impl.metadata.repository.customer.LoginResourcesMetaData;
 import org.skyve.metadata.customer.LoginResources;
 
 public class FluentLoginResources {
-	private LoginResourcesMetaData resources = new LoginResourcesMetaData();
+	private LoginResourcesMetaData resources = null;
 	
 	public FluentLoginResources() {
-		// nothing to see here
+		resources = new LoginResourcesMetaData();
+	}
+
+	public FluentLoginResources(LoginResourcesMetaData resources) {
+		this.resources = resources;
 	}
 	
-	public FluentLoginResources(LoginResources resources) {
+	public FluentLoginResources from(@SuppressWarnings("hiding") LoginResources resources) {
 		loginPageURL(resources.getLoginPageURL());
 		loggedOutPageURL(resources.getLoggedOutPageURL());
 		smartClientjavascriptURL(resources.getSmartClientJavascriptURL());
+		return this;
 	}
 	
 	public FluentLoginResources loginPageURL(String url) {

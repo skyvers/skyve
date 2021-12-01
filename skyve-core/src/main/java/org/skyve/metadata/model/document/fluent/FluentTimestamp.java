@@ -4,15 +4,20 @@ import org.skyve.impl.metadata.model.document.field.Timestamp;
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 
 public class FluentTimestamp extends FluentConvertableField<FluentTimestamp> {
-	private Timestamp timestamp = new Timestamp();
+	private Timestamp timestamp = null;
 	
 	public FluentTimestamp() {
-		// nothing to see
+		timestamp = new Timestamp();
 	}
-	
+
 	public FluentTimestamp(Timestamp timestamp) {
-		super(timestamp);
+		this.timestamp = timestamp;
+	}
+
+	public FluentTimestamp from(@SuppressWarnings("hiding") Timestamp timestamp) {
+		super.from(timestamp);
 		validator(timestamp.getValidator());
+		return this;
 	}
 	
 	public FluentTimestamp validator(DateValidator validator) {

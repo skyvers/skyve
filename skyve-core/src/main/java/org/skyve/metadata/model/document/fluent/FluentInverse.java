@@ -6,11 +6,14 @@ abstract class FluentInverse<T extends FluentInverse<T>> extends FluentAttribute
 	protected FluentInverse() {
 		// nothing to see
 	}
-	protected FluentInverse(AbstractInverse inverse) {
-		super(inverse);
+	
+	@SuppressWarnings("unchecked")
+	protected T from(AbstractInverse inverse) {
+		super.from(inverse);
 		documentName(inverse.getDocumentName());
 		referenceName(inverse.getReferenceName());
 		cascade(Boolean.TRUE.equals(inverse.getCascade()));
+		return (T) this;
 	}
 	
 	@SuppressWarnings("unchecked")

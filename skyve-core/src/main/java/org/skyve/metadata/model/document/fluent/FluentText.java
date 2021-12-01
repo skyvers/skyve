@@ -5,23 +5,28 @@ import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 
 public class FluentText extends FluentConvertableField<FluentText> {
-	private Text text = new Text();
+	private Text text = null;
 	
 	public FluentText() {
-		// nothing to see
+		text = new Text();
 	}
 	
 	public FluentText(Text text) {
-		super(text);
+		this.text = text;
+	}
+
+	public FluentText from(@SuppressWarnings("hiding") Text text) {
+		super.from(text);
 		length(text.getLength());
 		TextFormat format = text.getFormat();
 		if (format != null) {
-			format(new FluentTextFormat(format));
+			format(new FluentTextFormat().from(format));
 		}
 		TextValidator validator = text.getValidator();
 		if (validator != null) {
-			validator(new FluentTextValidator(validator));
+			validator(new FluentTextValidator().from(validator));
 		}
+		return this;
 	}
 	
 	public FluentText length(int length) {

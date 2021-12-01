@@ -3,15 +3,20 @@ package org.skyve.metadata.router.fluent;
 import org.skyve.impl.metadata.repository.router.Route;
 
 public class FluentRoute {
-	private Route route = new Route();
+	private Route route = null;
 	
 	public FluentRoute() {
-		// nothing to see
+		route = new Route();
 	}
 
 	public FluentRoute(Route route) {
+		this.route = route;
+	}
+
+	public FluentRoute from(@SuppressWarnings("hiding") Route route) {
 		outcomeUrl(route.getOutcomeUrl());
-		route.getCriteria().forEach(c -> addCriteria(new FluentRouteCriteria(c)));
+		route.getCriteria().forEach(c -> addCriteria(new FluentRouteCriteria().from(c)));
+		return this;
 	}
 	
 	public FluentRoute outcomeUrl(String outcomeUrl) {

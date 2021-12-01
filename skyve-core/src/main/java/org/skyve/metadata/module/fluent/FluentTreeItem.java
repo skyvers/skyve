@@ -3,18 +3,23 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.TreeItem;
 
 public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
-	private TreeItem item = new TreeItem();
+	private TreeItem item = null;
 	
 	public FluentTreeItem() {
-		// nothing to see
+		item = new TreeItem();
 	}
 
-	public FluentTreeItem(org.skyve.impl.metadata.module.menu.TreeItem item) {
-		super(item);
+	public FluentTreeItem(TreeItem item) {
+		this.item = item;
+	}
+
+	public FluentTreeItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.TreeItem item) {
+		super.from(item);
 		documentName(item.getDocumentName());
 		queryName(item.getQueryName());
 		modelName(item.getModelName());
 		autoPopulate(item.isAutoPopulate());
+		return this;
 	}
 	
 	public FluentTreeItem documentName(String documentName) {

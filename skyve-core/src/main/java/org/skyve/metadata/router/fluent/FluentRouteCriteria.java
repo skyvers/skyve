@@ -5,13 +5,17 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
 public class FluentRouteCriteria {
-	private RouteCriteria criteria = new RouteCriteria();
+	private RouteCriteria criteria = null;
 	
 	public FluentRouteCriteria() {
-		// nothing to see
+		criteria = new RouteCriteria();
 	}
-	
+
 	public FluentRouteCriteria(RouteCriteria criteria) {
+		this.criteria = criteria;
+	}
+
+	public FluentRouteCriteria from(@SuppressWarnings("hiding") RouteCriteria criteria) {
 		viewType(criteria.getViewType());
 		webAction(criteria.getWebAction());
 		moduleName(criteria.getModuleName());
@@ -20,6 +24,7 @@ public class FluentRouteCriteria {
 		customerName(criteria.getCustomerName());
 		dataGroupId(criteria.getDataGroupId());
 		userId(criteria.getUserId());
+		return this;
 	}	
 	
 	public FluentRouteCriteria viewType(ViewType viewType) {

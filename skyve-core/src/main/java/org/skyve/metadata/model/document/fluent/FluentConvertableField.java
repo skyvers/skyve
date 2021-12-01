@@ -8,9 +8,11 @@ abstract class FluentConvertableField<T extends FluentConvertableField<T>> exten
 		// nothing to see
 	}
 	
-	protected FluentConvertableField(ConvertableField field) {
-		super(field);
+	@SuppressWarnings("unchecked")
+	protected T from(ConvertableField field) {
+		super.from(field);
 		converterName(field.getConverterName());
+		return (T) this;
 	}
 	
 	@SuppressWarnings("unchecked")

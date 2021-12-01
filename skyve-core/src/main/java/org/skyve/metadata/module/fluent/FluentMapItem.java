@@ -3,14 +3,18 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.MapItem;
 
 public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
-	private MapItem item = new MapItem();
+	private MapItem item = null;
 	
 	public FluentMapItem() {
-		// nothing to see
+		item = new MapItem();
 	}
 
-	public FluentMapItem(org.skyve.impl.metadata.module.menu.MapItem item) {
-		super(item);
+	public FluentMapItem(MapItem item) {
+		this.item = item;
+	}
+
+	public FluentMapItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.MapItem item) {
+		super.from(item);
 		documentName(item.getName());
 		queryName(item.getQueryName());
 		modelName(item.getModelName());
@@ -23,6 +27,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 		if (b != null) {
 			showRefreshControls(b.booleanValue());
 		}
+		return this;
 	}
 	
 	public FluentMapItem documentName(String documentName) {

@@ -4,14 +4,18 @@ import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 
 public class FluentEnumeration extends FluentConstrainableField<FluentEnumeration> {
-	private Enumeration enumeration = new Enumeration();
+	private Enumeration enumeration = null;
 	
 	public FluentEnumeration() {
-		// nothing to see
+		enumeration = new Enumeration();
 	}
 
 	public FluentEnumeration(Enumeration enumeration) {
-		super(enumeration);
+		this.enumeration = enumeration;
+	}
+
+	public FluentEnumeration from(@SuppressWarnings("hiding") Enumeration enumeration) {
+		super.from(enumeration);
 		typeName(enumeration.getTypeName());
 		implementingEnumClassName(enumeration.getImplementingEnumClassName());
 		moduleRef(enumeration.getModuleRef());
@@ -19,8 +23,10 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 		attributeRef(enumeration.getAttributeRef());
 		
 		for (EnumeratedValue value : enumeration.getValues()) {
-			addValue(new FluentEnumeratedValue(value));
+			addValue(new FluentEnumeratedValue().from(value));
 		}
+		
+		return this;
 	}
 	
 	public FluentEnumeration typeName(String typeName) {

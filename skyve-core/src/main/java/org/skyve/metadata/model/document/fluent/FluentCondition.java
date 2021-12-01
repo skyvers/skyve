@@ -5,18 +5,23 @@ import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Condition;
 
 public class FluentCondition {
-	private ConditionMetaData condition = new ConditionMetaData();
+	private ConditionMetaData condition = null;
 	
 	public FluentCondition() {
-		// nothing to see
+		condition = new ConditionMetaData();
 	}
 
-	public FluentCondition(String conditionName, Condition condition) {
+	public FluentCondition(ConditionMetaData condition) {
+		this.condition = condition;
+	}
+
+	public FluentCondition from(String conditionName, @SuppressWarnings("hiding") Condition condition) {
 		name(conditionName);
 		documentation(condition.getDocumentation());
 		description(condition.getDescription());
 		expression(condition.getExpression());
 		usage(condition.getUsage());
+		return this;
 	}
 	
 	public FluentCondition name(String name) {

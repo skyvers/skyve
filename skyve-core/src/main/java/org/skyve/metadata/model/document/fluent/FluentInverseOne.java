@@ -4,14 +4,19 @@ import org.skyve.impl.metadata.model.document.AbstractInverse;
 import org.skyve.impl.metadata.model.document.InverseOne;
 
 public class FluentInverseOne extends FluentInverse<FluentInverseOne> {
-	private InverseOne inverse = new InverseOne();
+	private InverseOne inverse = null;
 	
 	public FluentInverseOne() {
-		// nothing to see
+		inverse = new InverseOne();
 	}
 
 	public FluentInverseOne(InverseOne inverse) {
-		super(inverse);
+		this.inverse = inverse;
+	}
+
+	public FluentInverseOne from(@SuppressWarnings("hiding") InverseOne inverse) {
+		super.from(inverse);
+		return this;
 	}
 	
 	@Override

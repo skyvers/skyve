@@ -9,9 +9,12 @@ abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAct
 		// nothing to see
 	}
 	
-	protected FluentMenuItem(MenuItem item) {
-		super(item);
+	@Override
+	@SuppressWarnings("unchecked")
+	protected T from(MenuItem item) {
+		super.from(item);
 		item.getRoleNames().forEach(r -> addRole(r));
+		return (T) this;
 	}
 	
 	@SuppressWarnings("unchecked")

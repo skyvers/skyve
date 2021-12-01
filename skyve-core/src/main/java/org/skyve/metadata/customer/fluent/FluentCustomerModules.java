@@ -7,17 +7,22 @@ import org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData;
 import org.skyve.metadata.module.Module;
 
 public class FluentCustomerModules {
-	private CustomerModulesMetaData modules = new CustomerModulesMetaData();
+	private CustomerModulesMetaData modules = null;
 	
 	public FluentCustomerModules() {
-		// nothing to see here
+		modules = new CustomerModulesMetaData();
 	}
 	
-	public FluentCustomerModules(List<Module> customerModules, Module homeModule) {
+	public FluentCustomerModules(CustomerModulesMetaData modules) {
+		this.modules = modules;
+	}
+	
+	public FluentCustomerModules from(List<Module> customerModules, Module homeModule) {
 		homeModule(homeModule.getName());
 		for (Module module : customerModules) {
 			addModule(module.getName());
 		}
+		return this;
 	}
 	
 	public FluentCustomerModules homeModule(String moduleName) {

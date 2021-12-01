@@ -11,39 +11,44 @@ import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 
 public class FluentMenu {
-	private Menu menu = new Menu();
+	private Menu menu = null;
 	
 	public FluentMenu() {
-		// nothing to see
+		menu = new Menu();
 	}
-	
-	public FluentMenu(org.skyve.metadata.module.menu.Menu menu) {
+
+	public FluentMenu(Menu menu) {
+		this.menu = menu;
+	}
+
+	public FluentMenu from(@SuppressWarnings("hiding") org.skyve.metadata.module.menu.Menu menu) {
 		for (MenuItem item :  menu.getItems()) {
 			if (item instanceof ListItem) {
-				addListItem(new FluentListItem((ListItem) item));
+				addListItem(new FluentListItem().from((ListItem) item));
 			}
 			else if (item instanceof EditItem) {
-				addEditItem(new FluentEditItem((EditItem) item));
+				addEditItem(new FluentEditItem().from((EditItem) item));
 			}
 			else if (item instanceof MenuGroup) {
-				addGroup(new FluentMenuGroup((MenuGroup) item));
+				addGroup(new FluentMenuGroup().from((MenuGroup) item));
 			}
 			else if (item instanceof MapItem) {
-				addMapItem(new FluentMapItem((MapItem) item));
+				addMapItem(new FluentMapItem().from((MapItem) item));
 			}
 			else if (item instanceof TreeItem) {
-				addTreeItem(new FluentTreeItem((TreeItem) item));
+				addTreeItem(new FluentTreeItem().from((TreeItem) item));
 			}
 			else if (item instanceof CalendarItem) {
-				addCalendarItem(new FluentCalendarItem((CalendarItem) item));
+				addCalendarItem(new FluentCalendarItem().from((CalendarItem) item));
 			}
 			else if (item instanceof LinkItem) {
-				addLinkItem(new FluentLinkItem((LinkItem) item));
+				addLinkItem(new FluentLinkItem().from((LinkItem) item));
 			}
 			else {
 				throw new IllegalStateException(item + " not catered for");
 			}
 		}
+		return this;
 	}
 	
 	public FluentMenu addGroup(FluentMenuGroup group) {

@@ -34,13 +34,17 @@ import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
 public class FluentDocument {
-	private DocumentMetaData document = new DocumentMetaData();
+	private DocumentMetaData document = null;
 	
 	public FluentDocument() {
-		// nothing to see
+		document = new DocumentMetaData();
 	}
 
-	public FluentDocument(Document document) {
+	public FluentDocument(DocumentMetaData document) {
+		this.document = document;
+	}
+
+	public FluentDocument from(@SuppressWarnings("hiding") Document document) {
 		DocumentImpl impl = (DocumentImpl) document;
 		name(document.getName());
 		abstractDocument(document.isAbstract());
@@ -60,7 +64,7 @@ public class FluentDocument {
 		
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
-			persistent(new FluentPersistent(persistent));
+			persistent(new FluentPersistent().from(persistent));
 		}
 		
 		dynamic(document.isDynamic());
@@ -81,73 +85,73 @@ public class FluentDocument {
 		// Populate attributes
 		for (Attribute attribute : document.getAttributes()) {
 			if (attribute instanceof Text) {
-				addText(new FluentText((Text) attribute));
+				addText(new FluentText().from((Text) attribute));
 			}
 			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Boolean) {
-				addBoolean(new FluentBoolean((org.skyve.impl.metadata.model.document.field.Boolean) attribute));
+				addBoolean(new FluentBoolean().from((org.skyve.impl.metadata.model.document.field.Boolean) attribute));
 			}
 			else if (attribute instanceof Enumeration) {
-				addEnumeration(new FluentEnumeration((Enumeration) attribute));
+				addEnumeration(new FluentEnumeration().from((Enumeration) attribute));
 			}
 			else if (attribute instanceof Memo) {
-				addMemo(new FluentMemo((Memo) attribute));
+				addMemo(new FluentMemo().from((Memo) attribute));
 			}
 			else if (attribute instanceof Date) {
-				addDate(new FluentDate((Date) attribute));
+				addDate(new FluentDate().from((Date) attribute));
 			}
 			else if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer) {
-				addInteger(new FluentInteger((org.skyve.impl.metadata.model.document.field.Integer) attribute));
+				addInteger(new FluentInteger().from((org.skyve.impl.metadata.model.document.field.Integer) attribute));
 			}
 			else if (attribute instanceof Association) {
-				addAssociation(new FluentAssociation((Association) attribute));
+				addAssociation(new FluentAssociation().from((Association) attribute));
 			}
 			else if (attribute instanceof Collection) {
-				addCollection(new FluentCollection((Collection) attribute));
+				addCollection(new FluentCollection().from((Collection) attribute));
 			}
 			else if (attribute instanceof LongInteger) {
-				addLongInteger(new FluentLongInteger((LongInteger) attribute));
+				addLongInteger(new FluentLongInteger().from((LongInteger) attribute));
 			}
 			else if (attribute instanceof Decimal2) {
-				addDecimal2(new FluentDecimal2((Decimal2) attribute));
+				addDecimal2(new FluentDecimal2().from((Decimal2) attribute));
 			}
 			else if (attribute instanceof Decimal5) {
-				addDecimal5(new FluentDecimal5((Decimal5) attribute));
+				addDecimal5(new FluentDecimal5().from((Decimal5) attribute));
 			}
 			else if (attribute instanceof Decimal10) {
-				addDecimal10(new FluentDecimal10((Decimal10) attribute));
+				addDecimal10(new FluentDecimal10().from((Decimal10) attribute));
 			}
 			else if (attribute instanceof Time) {
-				addTime(new FluentTime((Time) attribute));
+				addTime(new FluentTime().from((Time) attribute));
 			}
 			else if (attribute instanceof DateTime) {
-				addDateTime(new FluentDateTime((DateTime) attribute));
+				addDateTime(new FluentDateTime().from((DateTime) attribute));
 			}
 			else if (attribute instanceof Timestamp) {
-				addTimestamp(new FluentTimestamp((Timestamp) attribute));
+				addTimestamp(new FluentTimestamp().from((Timestamp) attribute));
 			}
 			else if (attribute instanceof Markup) {
-				addMarkup(new FluentMarkup((Markup) attribute));
+				addMarkup(new FluentMarkup().from((Markup) attribute));
 			}
 			else if (attribute instanceof Colour) {
-				addColour(new FluentColour((Colour) attribute));
+				addColour(new FluentColour().from((Colour) attribute));
 			}
 			else if (attribute instanceof Content) {
-				addContent(new FluentContent((Content) attribute));
+				addContent(new FluentContent().from((Content) attribute));
 			}
 			else if (attribute instanceof Image) {
-				addImage(new FluentImage((Image) attribute));
+				addImage(new FluentImage().from((Image) attribute));
 			}
 			else if (attribute instanceof Geometry) {
-				addGeometry(new FluentGeometry((Geometry) attribute));
+				addGeometry(new FluentGeometry().from((Geometry) attribute));
 			}
 			else if (attribute instanceof Id) {
-				addId(new FluentId((Id) attribute));
+				addId(new FluentId().from((Id) attribute));
 			}
 			else if (attribute instanceof InverseOne) {
-				addInverseOne(new FluentInverseOne((InverseOne) attribute));
+				addInverseOne(new FluentInverseOne().from((InverseOne) attribute));
 			}
 			else if (attribute instanceof InverseMany) {
-				addInverseMany(new FluentInverseMany((InverseMany) attribute));
+				addInverseMany(new FluentInverseMany().from((InverseMany) attribute));
 			}
 			else {
 				throw new IllegalStateException(attribute + " not catered for");
@@ -157,13 +161,15 @@ public class FluentDocument {
 		// Populate Conditions
 		for (String conditionName : document.getConditionNames()) {
 			Condition condition = document.getCondition(conditionName);
-			addCondition(new FluentCondition(conditionName, condition));
+			addCondition(new FluentCondition().from(conditionName, condition));
 		}
 		
 		// Populate Unique Constraints
 		for (UniqueConstraint constraint : document.getUniqueConstraints()) {
-			addUniqueConstraint(new FluentDocumentUniqueConstraint(constraint));
+			addUniqueConstraint(new FluentDocumentUniqueConstraint().from(constraint));
 		}
+		
+		return this;
 	}
 
 	public FluentDocument name(String name) {

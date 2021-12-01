@@ -5,18 +5,23 @@ import org.skyve.impl.metadata.repository.document.UniqueConstraint;
 import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 
 public class FluentDocumentUniqueConstraint {
-	private UniqueConstraint constraint = new UniqueConstraint();
+	private UniqueConstraint constraint = null;
 	
 	public FluentDocumentUniqueConstraint() {
-		// nothing to see
+		constraint = new UniqueConstraint();
 	}
 
-	public FluentDocumentUniqueConstraint(org.skyve.metadata.model.document.UniqueConstraint constraint) {
+	public FluentDocumentUniqueConstraint(UniqueConstraint constraint) {
+		this.constraint = constraint;
+	}
+
+	public FluentDocumentUniqueConstraint from(@SuppressWarnings("hiding") org.skyve.metadata.model.document.UniqueConstraint constraint) {
 		name(constraint.getName());
 		description(constraint.getDescription());
 		scope(constraint.getScope());
 		message(constraint.getMessage());
 		constraint.getFieldNames().forEach(c -> addFieldName(c));
+		return this;
 	}
 	
 	public FluentDocumentUniqueConstraint name(String name) {

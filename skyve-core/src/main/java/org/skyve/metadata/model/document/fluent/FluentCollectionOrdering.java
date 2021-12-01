@@ -5,15 +5,20 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Collection.Ordering;
 
 public class FluentCollectionOrdering {
-	private OrderingImpl ordering = new OrderingImpl();
+	private OrderingImpl ordering = null;
 	
 	public FluentCollectionOrdering() {
-		// nothing to see
+		ordering = new OrderingImpl();
 	}
 	
-	public FluentCollectionOrdering(Ordering ordering) {
+	public FluentCollectionOrdering(OrderingImpl ordering) {
+		this.ordering = ordering;
+	}
+
+	public FluentCollectionOrdering from(@SuppressWarnings("hiding") Ordering ordering) {
 		by(ordering.getBy());
 		sort(ordering.getSort());
+		return this;
 	}	
 	
 	public FluentCollectionOrdering by(String by) {

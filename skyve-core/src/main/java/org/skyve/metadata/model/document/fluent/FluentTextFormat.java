@@ -4,15 +4,20 @@ import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 
 public class FluentTextFormat {
-	private TextFormat format = new TextFormat();
+	private TextFormat format = null;
 	
 	public FluentTextFormat() {
-		// nothing to see
+		format = new TextFormat();
 	}
-	
+
 	public FluentTextFormat(TextFormat format) {
+		this.format = format;
+	}
+
+	public FluentTextFormat from(@SuppressWarnings("hiding") TextFormat format) {
 		mask(format.getMask());
 		textCase(format.getCase());
+		return this;
 	}
 	
 	public FluentTextFormat mask(String mask) {

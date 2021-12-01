@@ -4,15 +4,20 @@ import org.skyve.impl.metadata.model.document.field.Integer;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 
 public class FluentInteger extends FluentConvertableField<FluentInteger> {
-	private Integer integer = new Integer();
+	private Integer integer = null;
 	
 	public FluentInteger() {
-		// nothing to see
+		integer = new Integer();
 	}
 
 	public FluentInteger(Integer integer) {
-		super(integer);
+		this.integer = integer;
+	}
+
+	public FluentInteger from(@SuppressWarnings("hiding") Integer integer) {
+		super.from(integer);
 		validator(integer.getValidator());
+		return this;
 	}
 	
 	public FluentInteger validator(IntegerValidator validator) {

@@ -6,14 +6,18 @@ import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColumn<FluentMetaDataQueryProjectedColumn> {
-	private MetaDataQueryProjectedColumnMetaData column = new MetaDataQueryProjectedColumnMetaData();
+	private MetaDataQueryProjectedColumnMetaData column = null;
 	
 	public FluentMetaDataQueryProjectedColumn() {
-		// nothing to see
+		column = new MetaDataQueryProjectedColumnMetaData();
 	}
 
-	public FluentMetaDataQueryProjectedColumn(MetaDataQueryProjectedColumn column) {
-		super(column);
+	public FluentMetaDataQueryProjectedColumn(MetaDataQueryProjectedColumnMetaData column) {
+		this.column = column;
+	}
+
+	public FluentMetaDataQueryProjectedColumn from(@SuppressWarnings("hiding") MetaDataQueryProjectedColumn column) {
+		super.from(column);
 		projected(column.isProjected());
 		expression(column.getExpression());
 		sortable(column.isSortable());
@@ -21,6 +25,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 		editable(column.isEditable());
 		escape(column.isEscape());
 		sanitise(column.getSanitise());
+		return this;
 	}
 	
 	public FluentMetaDataQueryProjectedColumn projected(boolean projected) {

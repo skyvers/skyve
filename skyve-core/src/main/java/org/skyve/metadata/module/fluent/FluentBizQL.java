@@ -4,15 +4,20 @@ import org.skyve.impl.metadata.repository.module.BizQLMetaData;
 import org.skyve.metadata.module.query.BizQLDefinition;
 
 public class FluentBizQL extends FluentQuery<FluentBizQL> {
-	private BizQLMetaData bizql = new BizQLMetaData();
+	private BizQLMetaData bizql = null;
 	
 	public FluentBizQL() {
-		// nothing to see
+		bizql = new BizQLMetaData();
 	}
 	
-	public FluentBizQL(BizQLDefinition bizql) {
-		super(bizql);
+	public FluentBizQL(BizQLMetaData bizql) {
+		this.bizql = bizql;
+	}
+	
+	public FluentBizQL from(@SuppressWarnings("hiding") BizQLDefinition bizql) {
+		super.from(bizql);
 		query(bizql.getQuery());
+		return this;
 	}
 	
 	public FluentBizQL query(String query) {

@@ -11,20 +11,24 @@ import org.skyve.metadata.customer.InterceptorMetaData;
 import org.skyve.metadata.customer.ObserverMetaData;
 
 public class FluentCustomer {
-	private CustomerMetaData customer = new CustomerMetaData();
+	private CustomerMetaData customer = null;
 	
 	public FluentCustomer() {
-		// nothing to see
+		customer = new CustomerMetaData();
 	}
 	
-	public FluentCustomer(Customer customer) {
+	public FluentCustomer(CustomerMetaData customer) {
+		this.customer = customer;
+	}
+
+	public FluentCustomer from(@SuppressWarnings("hiding") Customer customer) {
 		name(customer.getName());
 		language(customer.getLanguageTag());
 
 		// Populate resources
 		logoRelativeFileName(customer.getUiResources().getLogoRelativeFileName());
 		cssRelativeFileName(customer.getHtmlResources().getCssRelativeFileName());
-		loginResource(new FluentLoginResources(customer.getLoginResources()));
+		loginResource(new FluentLoginResources().from(customer.getLoginResources()));
 
 		// Populate default converters
 		defaultDateConverter(ConverterName.valueOf(customer.getDefaultDateConverter()));
@@ -33,10 +37,10 @@ public class FluentCustomer {
 		defaultTimestampConverter(ConverterName.valueOf(customer.getDefaultTimestampConverter()));
 
 		// Populate module names
-		modules(new FluentCustomerModules(customer.getModules(), customer.getHomeModule()));
+		modules(new FluentCustomerModules().from(customer.getModules(), customer.getHomeModule()));
 
 		// Populate Roles
-		roles(new FluentCustomerRoles(customer.getRoles(), customer.isAllowModuleRoles()));
+		roles(new FluentCustomerRoles().from(customer.getRoles(), customer.isAllowModuleRoles()));
 
 		// Populate Interceptors
 		for (InterceptorMetaData interceptor : customer.getInterceptors()) {
@@ -51,6 +55,8 @@ public class FluentCustomer {
 		// Populate Chart Processors
 		jFreeChartPostProcessorClassName(customer.getJFreeChartPostProcessorClassName());
 		primeFacesChartPostProcessorClassName(customer.getPrimeFacesChartPostProcessorClassName());
+		
+		return this;
 	}
 	
 	public FluentCustomer name(String name) {
@@ -125,7 +131,7 @@ public class FluentCustomer {
 		customer.setRoles(roles.get());
 		return this;
 	}
-	
+
 	public FluentCustomer jFreeChartPostProcessorClassName(String fullyQualifiedClassName) {
 		customer.setJFreeChartPostProcessorClassName(fullyQualifiedClassName);
 		return this;

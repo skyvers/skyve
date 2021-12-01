@@ -5,18 +5,23 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
 
 public class FluentAssociation extends FluentReference<FluentAssociation> {
-	private AssociationImpl association = new AssociationImpl();
+	private AssociationImpl association = null;
 	
 	public FluentAssociation() {
-		// nothing to see
+		association = new AssociationImpl();
+	}
+	
+	public FluentAssociation(AssociationImpl association) {
+		this.association = association;
 	}
 
-	public FluentAssociation(Association association) {
-		super(association);
+	public FluentAssociation from(@SuppressWarnings("hiding") Association association) {
+		super.from(association);
 		required(association.isRequired());
 		type(association.getType());
 		embeddedColumnsPrefix(association.getEmbeddedColumnsPrefix());
 		databaseIndex(! Boolean.FALSE.equals(association.getDatabaseIndex()));
+		return this;
 	}
 	
 	public FluentAssociation required(boolean required) {

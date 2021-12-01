@@ -8,13 +8,15 @@ abstract class FluentField<T extends FluentField<T>> extends FluentAttribute<T> 
 		// nothing to see
 	}
 	
-	protected FluentField(Field field) {
-		super(field);
+	@SuppressWarnings("unchecked")
+	protected T from(Field field) {
+		super.from(field);
 		required(field.isRequired());
 		persistent(field.isPersistent());
 		dynamic(field.isDynamic());
 		index(field.getIndex());
 		defaultValue(field.getDefaultValue());
+		return (T) this;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -5,20 +5,25 @@ import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.metadata.customer.CustomerRole;
 
 public class FluentCustomerRole {
-	private CustomerRoleMetaData role = new CustomerRoleMetaData();
+	private CustomerRoleMetaData role = null;
 	
 	public FluentCustomerRole() {
-		// nothing to see
+		role = new CustomerRoleMetaData();
 	}
 	
-	public FluentCustomerRole(CustomerRole role) {
+	public FluentCustomerRole(CustomerRoleMetaData role) {
+		this.role = role;
+	}
+
+	public FluentCustomerRole from(@SuppressWarnings("hiding") CustomerRole role) {
 		name(role.getName());
 		description(role.getDescription());
 		documentation(role.getDocumentation());
 		
 		for (CustomerModuleRoleMetaData moduleRole : ((CustomerRoleMetaData) role).getRoles()) {
-			addRole(new FluentCustomerModuleRole(moduleRole));
+			addRole(new FluentCustomerModuleRole().from(moduleRole));
 		}
+		return this;
 	}
 	
 	public FluentCustomerRole name(String name) {

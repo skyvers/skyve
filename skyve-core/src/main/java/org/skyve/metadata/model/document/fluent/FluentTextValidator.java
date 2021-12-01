@@ -4,16 +4,21 @@ import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 
 public class FluentTextValidator {
-	private TextValidator validator = new TextValidator();
+	private TextValidator validator = null;
 	
 	public FluentTextValidator() {
-		// nothing to see
+		validator = new TextValidator();
 	}
 
 	public FluentTextValidator(TextValidator validator) {
+		this.validator = validator;
+	}
+
+	public FluentTextValidator from(@SuppressWarnings("hiding") TextValidator validator) {
 		type(validator.getType());
 		regularExpression(validator.getRegularExpression());
 		validationMessage(validator.getValidationMessage());
+		return this;
 	}
 	
 	public FluentTextValidator type(ValidatorType type) {

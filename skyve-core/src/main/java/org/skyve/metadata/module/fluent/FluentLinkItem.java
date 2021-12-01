@@ -3,15 +3,20 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.LinkItem;
 
 public class FluentLinkItem extends FluentMenuItem<FluentLinkItem> {
-	private LinkItem item = new LinkItem();
+	private LinkItem item = null;
 	
 	public FluentLinkItem() {
-		// nothing to see
+		item = new LinkItem();
 	}
 
-	public FluentLinkItem(org.skyve.impl.metadata.module.menu.LinkItem item) {
-		super(item);
+	public FluentLinkItem(LinkItem item) {
+		this.item = item;
+	}
+
+	public FluentLinkItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.LinkItem item) {
+		super.from(item);
 		href(item.getHref());
+		return this;
 	}
 	
 	public FluentLinkItem href(String href) {

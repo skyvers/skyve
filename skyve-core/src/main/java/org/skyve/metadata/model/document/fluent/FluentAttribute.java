@@ -9,7 +9,8 @@ abstract class FluentAttribute<T extends FluentAttribute<T>> {
 		// nothing to see
 	}
 
-	protected FluentAttribute(Attribute attribute) {
+	@SuppressWarnings("unchecked")
+	protected T from(Attribute attribute) {
 		audited(attribute.isAudited());
 		deprecated(attribute.isDeprecated());
 // TODO		attribute.setDefaultInputWidget(null);
@@ -21,6 +22,7 @@ abstract class FluentAttribute<T extends FluentAttribute<T>> {
 		trackChanges(attribute.isTrackChanges());
 		transientAttribute(attribute.isTransient());
 		usage(attribute.getUsage());
+		return (T) this;
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -3,14 +3,19 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Image;
 
 public class FluentImage extends FluentConstrainableField<FluentImage> {
-	private Image image = new Image();
+	private Image image = null;
 	
 	public FluentImage() {
-		// nothing to see
+		image = new Image();
 	}
 
 	public FluentImage(Image image) {
-		super(image);
+		this.image = image;
+	}
+
+	public FluentImage from(@SuppressWarnings("hiding") Image image) {
+		super.from(image);
+		return this;
 	}
 	
 	@Override

@@ -3,14 +3,19 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Markup;
 
 public class FluentMarkup extends FluentConstrainableField<FluentMarkup> {
-	private Markup markup = new Markup();
+	private Markup markup = null;
 	
 	public FluentMarkup() {
-		// nothing to see
+		markup = new Markup();
 	}
 
 	public FluentMarkup(Markup markup) {
-		super(markup);
+		this.markup = markup;
+	}
+
+	public FluentMarkup from(@SuppressWarnings("hiding") Markup markup) {
+		super.from(markup);
+		return this;
 	}
 	
 	@Override

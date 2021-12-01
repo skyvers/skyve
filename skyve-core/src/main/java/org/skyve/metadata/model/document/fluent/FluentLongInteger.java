@@ -4,15 +4,20 @@ import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 
 public class FluentLongInteger extends FluentConvertableField<FluentLongInteger> {
-	private LongInteger longInteger = new LongInteger();
+	private LongInteger longInteger = null;
 	
 	public FluentLongInteger() {
-		// nothing to see
+		longInteger = new LongInteger();
 	}
-	
-	public FluentLongInteger(LongInteger longInteger) {
-		super(longInteger);
+
+	public FluentLongInteger(LongInteger integer) {
+		this.longInteger = integer;
+	}
+
+	public FluentLongInteger from(@SuppressWarnings("hiding") LongInteger longInteger) {
+		super.from(longInteger);
 		validator(longInteger.getValidator());
+		return this;
 	}
 	
 	public FluentLongInteger validator(LongValidator validator) {
