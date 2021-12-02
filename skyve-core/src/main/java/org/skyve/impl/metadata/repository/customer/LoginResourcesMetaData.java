@@ -41,7 +41,7 @@ public class LoginResourcesMetaData implements LoginResources {
 	}
 	
 	@XmlAttribute(name = "smartClientJavascript")
-	public void setSmartClientjavascriptURL(String smartClientJavascriptURL) {
+	public void setSmartClientJavascriptURL(String smartClientJavascriptURL) {
 		this.smartClientJavascriptURL = UtilImpl.processStringValue(smartClientJavascriptURL);
 	}
 }

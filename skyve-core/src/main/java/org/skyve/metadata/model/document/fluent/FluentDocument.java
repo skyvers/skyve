@@ -58,7 +58,10 @@ public class FluentDocument {
 		String parentDocumentName = document.getParentDocumentName();
 		if (parentDocumentName != null) {
 			FluentParentDocument parent = new FluentParentDocument().parentDocumentName(parentDocumentName);
-			parent.databaseIndex(! Boolean.FALSE.equals(impl.getParentDatabaseIndex()));
+			Boolean b = impl.getParentDatabaseIndex();
+			if (b != null) {
+				parent.databaseIndex(b.booleanValue());
+			}
 			parentDocument(parent);
 		}
 		
@@ -92,6 +95,9 @@ public class FluentDocument {
 			}
 			else if (attribute instanceof Enumeration) {
 				addEnumeration(new FluentEnumeration().from((Enumeration) attribute));
+			}
+			else if (attribute instanceof Markup) {
+				addMarkup(new FluentMarkup().from((Markup) attribute));
 			}
 			else if (attribute instanceof Memo) {
 				addMemo(new FluentMemo().from((Memo) attribute));
@@ -128,9 +134,6 @@ public class FluentDocument {
 			}
 			else if (attribute instanceof Timestamp) {
 				addTimestamp(new FluentTimestamp().from((Timestamp) attribute));
-			}
-			else if (attribute instanceof Markup) {
-				addMarkup(new FluentMarkup().from((Markup) attribute));
 			}
 			else if (attribute instanceof Colour) {
 				addColour(new FluentColour().from((Colour) attribute));

@@ -15,7 +15,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 
 	public FluentMapItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.MapItem item) {
 		super.from(item);
-		documentName(item.getName());
+		documentName(item.getDocumentName());
 		queryName(item.getQueryName());
 		modelName(item.getModelName());
 		geometryBinding(item.getGeometryBinding());

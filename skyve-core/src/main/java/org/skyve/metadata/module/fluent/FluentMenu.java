@@ -23,20 +23,20 @@ public class FluentMenu {
 
 	public FluentMenu from(@SuppressWarnings("hiding") org.skyve.metadata.module.menu.Menu menu) {
 		for (MenuItem item :  menu.getItems()) {
-			if (item instanceof ListItem) {
-				addListItem(new FluentListItem().from((ListItem) item));
-			}
-			else if (item instanceof EditItem) {
+			if (item instanceof EditItem) {
 				addEditItem(new FluentEditItem().from((EditItem) item));
+			}
+			else if (item instanceof TreeItem) {
+				addTreeItem(new FluentTreeItem().from((TreeItem) item));
+			}
+			else if (item instanceof ListItem) {
+				addListItem(new FluentListItem().from((ListItem) item));
 			}
 			else if (item instanceof MenuGroup) {
 				addGroup(new FluentMenuGroup().from((MenuGroup) item));
 			}
 			else if (item instanceof MapItem) {
 				addMapItem(new FluentMapItem().from((MapItem) item));
-			}
-			else if (item instanceof TreeItem) {
-				addTreeItem(new FluentTreeItem().from((TreeItem) item));
 			}
 			else if (item instanceof CalendarItem) {
 				addCalendarItem(new FluentCalendarItem().from((CalendarItem) item));
