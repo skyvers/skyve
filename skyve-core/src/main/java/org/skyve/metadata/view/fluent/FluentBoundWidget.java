@@ -2,8 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 
-abstract class FluentBound<T extends FluentBound<T>>  extends FluentWidget {
-	protected FluentBound() {
+abstract class FluentBoundWidget<T extends FluentBoundWidget<T>>  extends FluentWidget {
+	protected FluentBoundWidget() {
 		// nothing to see
 	}
 	

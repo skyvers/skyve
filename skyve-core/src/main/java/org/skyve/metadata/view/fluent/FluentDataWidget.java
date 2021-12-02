@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 
-abstract class FluentDataWidget<T extends FluentDataWidget<T>> extends FluentBound<T> implements FluentRelativeSize<T> {
+abstract class FluentDataWidget<T extends FluentDataWidget<T>> extends FluentBoundWidget<T> implements FluentRelativeSize<T> {
 	protected FluentDataWidget() {
 		// nothing to see
 	}

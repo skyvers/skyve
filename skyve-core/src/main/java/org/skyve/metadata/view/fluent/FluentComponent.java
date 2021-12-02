@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.component.Component;
 
-public class FluentComponent extends FluentBound<FluentComponent> {
+public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	private Component component = null;
 	
 	public FluentComponent() {

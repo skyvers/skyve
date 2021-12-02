@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 
-public class FluentDefaultWidget extends FluentBound<FluentDefaultWidget> {
+public class FluentDefaultWidget extends FluentBoundWidget<FluentDefaultWidget> {
 	private DefaultWidget widget = null;
 	
 	public FluentDefaultWidget() {

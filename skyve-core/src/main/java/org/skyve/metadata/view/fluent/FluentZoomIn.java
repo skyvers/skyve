@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 
-public class FluentZoomIn extends FluentBound<FluentZoomIn> {
+public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn> {
 	private ZoomIn zoom = null;
 	
 	public FluentZoomIn() {
