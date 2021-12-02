@@ -9,6 +9,7 @@ abstract class FluentInputWidget<T extends FluentInputWidget<T>>  extends Fluent
 	
 	@SuppressWarnings("unchecked")
 	protected T from(InputWidget input) {
+		super.from(input);
 		disabledConditionName(input.getDisabledConditionName());
 		invisibleConditionName(input.getInvisibleConditionName());
 		return (T) this;

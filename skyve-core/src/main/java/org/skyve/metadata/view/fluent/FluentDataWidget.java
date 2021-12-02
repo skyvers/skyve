@@ -9,6 +9,7 @@ abstract class FluentDataWidget<T extends FluentDataWidget<T>> extends FluentBou
 	
 	@SuppressWarnings("unchecked")
 	protected T from(AbstractDataWidget data) {
+		super.from(data);
 		widgetId(data.getWidgetId());
 		title(data.getTitle());
 		relativeSize(data, this);

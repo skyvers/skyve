@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 
-public class FluentCombo extends FluentWidget {
+public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> {
 	private Combo combo = null;
 	
 	public FluentCombo() {
@@ -14,6 +14,7 @@ public class FluentCombo extends FluentWidget {
 	}
 
 	public FluentCombo from(@SuppressWarnings("hiding") Combo combo) {
+		super.from(combo);
 		return this;
 	}
 

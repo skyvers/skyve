@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 
-public class FluentRadio extends FluentWidget {
+public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> {
 	private Radio radio = null;
 	
 	public FluentRadio() {
@@ -14,6 +14,7 @@ public class FluentRadio extends FluentWidget {
 	}
 
 	public FluentRadio from(@SuppressWarnings("hiding") Radio radio) {
+		super.from(radio);
 		return this;
 	}
 

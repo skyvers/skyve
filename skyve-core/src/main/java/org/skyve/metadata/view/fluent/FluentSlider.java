@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 
-public class FluentSlider extends FluentWidget {
+public class FluentSlider extends FluentChangeableInputWidget<FluentSlider> {
 	private Slider slider = null;
 	
 	public FluentSlider() {
@@ -14,6 +14,7 @@ public class FluentSlider extends FluentWidget {
 	}
 
 	public FluentSlider from(@SuppressWarnings("hiding") Slider slider) {
+		super.from(slider);
 		return this;
 	}
 

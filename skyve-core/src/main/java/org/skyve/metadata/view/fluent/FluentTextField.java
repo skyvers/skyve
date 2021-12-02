@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 
-public class FluentTextField extends FluentWidget {
+public class FluentTextField extends FluentChangeableInputWidget<FluentTextField> {
 	private TextField text = null;
 	
 	public FluentTextField() {
@@ -14,6 +14,7 @@ public class FluentTextField extends FluentWidget {
 	}
 
 	public FluentTextField from(@SuppressWarnings("hiding") TextField text) {
+		super.from(text);
 		return this;
 	}
 

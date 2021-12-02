@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 
-public class FluentCheckMembership extends FluentWidget {
+public class FluentCheckMembership extends FluentChangeableInputWidget<FluentCheckMembership> {
 	private CheckMembership check = null;
 	
 	public FluentCheckMembership() {
@@ -14,6 +14,7 @@ public class FluentCheckMembership extends FluentWidget {
 	}
 
 	public FluentCheckMembership from(@SuppressWarnings("hiding") CheckMembership check) {
+		super.from(check);
 		return this;
 	}
 

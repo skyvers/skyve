@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 
-public class FluentTextArea extends FluentWidget {
+public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> {
 	private TextArea text = null;
 	
 	public FluentTextArea() {
@@ -14,6 +14,7 @@ public class FluentTextArea extends FluentWidget {
 	}
 
 	public FluentTextArea from(@SuppressWarnings("hiding") TextArea text) {
+		super.from(text);
 		return this;
 	}
 

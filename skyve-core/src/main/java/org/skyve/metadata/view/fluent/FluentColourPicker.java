@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 
-public class FluentColourPicker extends FluentWidget {
+public class FluentColourPicker extends FluentChangeableInputWidget<FluentColourPicker> {
 	private ColourPicker colour = null;
 	
 	public FluentColourPicker() {
@@ -13,7 +13,8 @@ public class FluentColourPicker extends FluentWidget {
 		this.colour = colour;
 	}
 
-	public FluentColourPicker from(ColourPicker colour) {
+	public FluentColourPicker from(@SuppressWarnings("hiding") ColourPicker colour) {
+		super.from(colour);
 		return this;
 	}
 	
