@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 
-public class FluentContentImage extends FluentWidget {
+public class FluentContentImage extends FluentInputWidget<FluentContentImage> {
 	private ContentImage image = null;
 	
 	public FluentContentImage() {
@@ -14,6 +14,7 @@ public class FluentContentImage extends FluentWidget {
 	}
 
 	public FluentContentImage from(@SuppressWarnings("hiding") ContentImage image) {
+		super.from(image);
 		return this;
 	}
 

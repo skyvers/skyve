@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 
-public class FluentHTML extends FluentWidget {
+public class FluentHTML extends FluentInputWidget<FluentHTML> {
 	private HTML html = null;
 	
 	public FluentHTML() {
@@ -14,6 +14,7 @@ public class FluentHTML extends FluentWidget {
 	}
 
 	public FluentHTML from(@SuppressWarnings("hiding") HTML html) {
+		super.from(html);
 		return this;
 	}
 

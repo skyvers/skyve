@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 
-public class FluentLookupDescription extends FluentWidget {
+public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescription> {
 	private LookupDescription lookup = null;
 	
 	public FluentLookupDescription() {
@@ -14,6 +14,7 @@ public class FluentLookupDescription extends FluentWidget {
 	}
 
 	public FluentLookupDescription from(@SuppressWarnings("hiding") LookupDescription lookup) {
+		super.from(lookup);
 		return this;
 	}
 

@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 
-public class FluentGeometryMap extends FluentWidget {
+public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> {
 	private GeometryMap map = null;
 	
 	public FluentGeometryMap() {
@@ -14,6 +14,7 @@ public class FluentGeometryMap extends FluentWidget {
 	}
 
 	public FluentGeometryMap from(@SuppressWarnings("hiding") GeometryMap map) {
+		super.from(map);
 		return this;
 	}
 

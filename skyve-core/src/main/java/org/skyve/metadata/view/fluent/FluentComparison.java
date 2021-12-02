@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 
-public class FluentComparison extends FluentWidget {
+public class FluentComparison extends FluentInputWidget<FluentComparison> {
 	private Comparison comparison = null;
 
 	public FluentComparison() {
@@ -14,6 +14,7 @@ public class FluentComparison extends FluentWidget {
 	}
 
 	public FluentComparison from(@SuppressWarnings("hiding") Comparison comparison) {
+		super.from(comparison);
 		return this;
 	}
 

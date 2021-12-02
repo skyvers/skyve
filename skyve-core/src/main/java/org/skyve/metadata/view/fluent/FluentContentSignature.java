@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
-public class FluentContentSignature extends FluentWidget {
+public class FluentContentSignature extends FluentInputWidget<FluentContentSignature> {
 	private ContentSignature signature = null;
 	
 	public FluentContentSignature() {
@@ -14,6 +14,7 @@ public class FluentContentSignature extends FluentWidget {
 	}
 
 	public FluentContentSignature from(@SuppressWarnings("hiding") ContentSignature signature) {
+		super.from(signature);
 		return this;
 	}
 
