@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
 
-public class FluentProgressBar extends FluentWidget {
+public class FluentProgressBar extends FluentBound<FluentProgressBar> {
 	private ProgressBar bar = null;
 	
 	public FluentProgressBar() {
@@ -14,6 +14,7 @@ public class FluentProgressBar extends FluentWidget {
 	}
 
 	public FluentProgressBar from(@SuppressWarnings("hiding") ProgressBar bar) {
+		super.from(bar);
 		return this;
 	}
 	

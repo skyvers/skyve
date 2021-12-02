@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 
-public class FluentDefaultWidget extends FluentWidget {
+public class FluentDefaultWidget extends FluentBound<FluentDefaultWidget> {
 	private DefaultWidget widget = null;
 	
 	public FluentDefaultWidget() {
@@ -14,6 +14,7 @@ public class FluentDefaultWidget extends FluentWidget {
 	}
 	
 	public FluentDefaultWidget from(@SuppressWarnings("hiding") DefaultWidget widget) {
+		super.from(widget);
 		return this;
 	}
 	
