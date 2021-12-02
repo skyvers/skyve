@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 
-public class FluentDataRepeater extends FluentWidget {
+public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	private DataRepeater data = null;
 	
 	public FluentDataRepeater() {
@@ -14,6 +14,7 @@ public class FluentDataRepeater extends FluentWidget {
 	}
 
 	public FluentDataRepeater from(@SuppressWarnings("hiding") DataRepeater data) {
+		super.from(data);
 		return this;
 	}
 
