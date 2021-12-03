@@ -167,27 +167,28 @@ public final class BindUtil {
 		return bound;
 	}
 	
-	public static boolean messageExpressionsAreValid(Customer customer, Module module, Document document, String message) {
-		boolean valid = true;
+	public static String validateMessageExpressions(Customer customer, Module module, Document document, String message) {
+		String error = null;
 		
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
-		while (valid && (openCurlyBraceIndex >= 0)) {
+		while ((error == null) && (openCurlyBraceIndex >= 0)) {
 			if ((openCurlyBraceIndex == 0) || // first char is '{' 
 					// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
 					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
 
 				int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
 				if (closedCurlyBraceIndex < 0) {
-					valid = false;
+					error = "Opening '{' with no closing '}'";
 				}
 				else {
-					String binding = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
-					if (binding.isEmpty()) {
-						valid = false;
+					String expression = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
+					expression = expression.trim();
+					if (expression.isEmpty()) {
+						error = "Expression is empty";
 					}
 					else {
-						valid = ExpressionEvaluator.validate(binding, customer, module, document);
+						error = ExpressionEvaluator.validate(expression, customer, module, document);
 						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 					}
 				}
@@ -198,7 +199,7 @@ public final class BindUtil {
 			}
 		}
 
-		return valid;
+		return error;
 	}
 	
 	/**

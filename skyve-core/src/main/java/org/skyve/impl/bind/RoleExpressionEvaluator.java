@@ -24,7 +24,10 @@ class RoleExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public boolean validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
-		return (expression.indexOf('.') > 0);
+	public String validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
+		if (expression.indexOf('.') <= 0) {
+			return "Role " + expression + " needs to be in the format <module>.<role>";
+		}
+		return null;
 	}
 }

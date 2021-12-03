@@ -345,9 +345,10 @@ class ViewValidator extends ViewVisitor {
 					testModule = customer.getModule(testDocument.getOwningModuleName());
 				}
 			}
-			if (! BindUtil.messageExpressionsAreValid(customer, testModule, testDocument, message)) {
+			String error = BindUtil.validateMessageExpressions(customer, testModule, testDocument, message);
+			if (error != null) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-												" has " + description + " containing malformed binding expressions.");
+												" has " + description + " containing malformed binding expressions: " + error);
 			}
 		}
 	}

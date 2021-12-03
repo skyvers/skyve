@@ -22,20 +22,26 @@ abstract class AttributeExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	public boolean validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
-		boolean valid = true;
+	public String validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
+		String error = null;
 		
 		try {
 			// Check the binding in this bean
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, expression);
 			if (target == null) {
-				valid = false;
+				error = "Binding " + expression + " does not resolve to a document attribute.";
 			}
 		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			valid = false;
+		catch (Exception e) {
+			error = e.getMessage();
+			if (error == null) {
+				error = "Binding " + expression + " does not resolve to a document attribute.";
+			}
+			else {
+				error = "Binding " + expression + " does not resolve to a document attribute: " + error;
+			}
 		}
 
-		return valid;
+		return error;
 	}
 }
