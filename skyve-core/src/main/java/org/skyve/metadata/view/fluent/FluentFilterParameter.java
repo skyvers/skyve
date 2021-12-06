@@ -15,11 +15,11 @@ public class FluentFilterParameter {
 		this.filterParameter = filterParameter;
 	}
 
-	public FluentFilterParameter from(@SuppressWarnings("hiding") FilterParameter parameter) {
-		filterBinding(parameter.getFilterBinding());
-		value(parameter.getValue());
-		valueBinding(parameter.getValueBinding());
-		operator(parameter.getOperator());
+	public FluentFilterParameter from(@SuppressWarnings("hiding") FilterParameter filterParameter) {
+		filterBinding(filterParameter.getFilterBinding());
+		value(filterParameter.getValue());
+		valueBinding(filterParameter.getValueBinding());
+		operator(filterParameter.getOperator());
 		return this;
 	}
 

@@ -23,9 +23,15 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 		absoluteSize(label, this);
 
 		invisibleConditionName(label.getInvisibleConditionName());
-		formatted(label.getFormatted());
+		Boolean b = label.getFormatted();
+		if (b != null) {
+			formatted(b.booleanValue());
+		}
 		textAlignment(label.getTextAlignment());
-		escape(label.getEscape());
+		b = label.getEscape();
+		if (b != null) {
+			escape(b.booleanValue());
+		}
 		sanitise(label.getSanitise());
 
 		super.from(label);

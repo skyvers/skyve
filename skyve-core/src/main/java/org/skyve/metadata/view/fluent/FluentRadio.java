@@ -14,8 +14,10 @@ public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> implem
 	}
 
 	public FluentRadio from(@SuppressWarnings("hiding") Radio radio) {
-
-		vertical(radio.getVertical());
+		Boolean b = radio.getVertical();
+		if (b != null) {
+			vertical(b.booleanValue());
+		}
 
 		absoluteWidth(radio, this);
 

@@ -23,7 +23,10 @@ public class FluentView extends FluentContainer<FluentView> {
 		documentation(view.getDocumentation());
 		helpRelativeFileName(view.getHelpRelativeFileName());
 		helpURL(view.getHelpURL());
-		refreshTimeInSeconds(view.getRefreshTimeInSeconds());
+		Integer i = view.getRefreshTimeInSeconds();
+		if (i != null) {
+			refreshTimeInSeconds(i.intValue());
+		}
 		refreshConditionName(view.getRefreshConditionName());
 		refreshActionName(view.getRefreshActionName());
 

@@ -18,8 +18,14 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 
 		modelName(map.getModelName());
 		loading(map.getLoading());
-		refreshTimeInSeconds(map.getRefreshTimeInSeconds());
-		showRefreshControls(map.getShowRefreshControls());
+		Integer i = map.getRefreshTimeInSeconds();
+		if (i != null) {
+			refreshTimeInSeconds(i.intValue());
+		}
+		Boolean b = map.getShowRefreshControls();
+		if (b != null) {
+			showRefreshControls(b.booleanValue());
+		}
 		invisibleConditionName(map.getInvisibleConditionName());
 
 		relativeSize(map, this);

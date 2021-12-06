@@ -23,7 +23,10 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 
 		invisibleConditionName(blurb.getInvisibleConditionName());
 		textAlignment(blurb.getTextAlignment());
-		escape(blurb.getEscape());
+		Boolean b = blurb.getEscape();
+		if (b != null) {
+			escape(b.booleanValue());
+		}
 		sanitise(blurb.getSanitise());
 
 		return this;
@@ -34,13 +37,15 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 		return this;
 	}
 
+	@Override
 	public FluentBlurb pixelWidth(int pixelWidth) {
-		blurb.setPixelWidth(pixelWidth);
+		blurb.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
 
+	@Override
 	public FluentBlurb pixelHeight(int pixelHeight) {
-		blurb.setPixelHeight(pixelHeight);
+		blurb.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
 

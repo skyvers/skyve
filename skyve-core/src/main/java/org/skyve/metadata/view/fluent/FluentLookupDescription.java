@@ -21,7 +21,10 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 		disableAddConditionName(lookup.getDisableAddConditionName());
 		disableClearConditionName(lookup.getDisableClearConditionName());
 		disablePickConditionName(lookup.getDisablePickConditionName());
-		editable(lookup.getEditable());
+		Boolean b = lookup.getEditable();
+		if (b != null) {
+			editable(b.booleanValue());
+		}
 
 		absoluteWidth(lookup, this);
 
@@ -31,9 +34,9 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 		lookup.getPickedActions().forEach(p -> addPickedAction(FluentEventAction.from(p)));
 
 		lookup.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
-
 		lookup.getFilterParameters().forEach(f -> addFilterParameter(new FluentFilterParameter().from(f)));
 		lookup.getDropDownColumns().forEach(d -> addDropDownColumn(new FluentLookupDescriptionColumn().from(d)));
+
 		super.from(lookup);
 		return this;
 	}

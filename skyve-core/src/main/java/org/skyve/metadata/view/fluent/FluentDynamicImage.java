@@ -15,8 +15,14 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 
 	public FluentDynamicImage from(@SuppressWarnings("hiding") DynamicImage image) {
 		name(image.getName());
-		imageInitialPixelWidth(image.getImageInitialPixelWidth());
-		imageInitialPixelHeight(image.getImageInitialPixelHeight());
+		Integer i = image.getImageInitialPixelWidth();
+		if (i != null) {
+			imageInitialPixelWidth(i.intValue());
+		}
+		i = image.getImageInitialPixelHeight();
+		if (i != null) {
+			imageInitialPixelHeight(i.intValue());
+		}
 
 		relativeSize(image, this);
 
@@ -127,5 +133,4 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	public DynamicImage get() {
 		return image;
 	}
-
 }

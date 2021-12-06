@@ -2,8 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 
-public class FluentSpinner extends FluentTextField { // FluentChangeableInputWidget<FluentSpinner> implements
-														// FluentAbsoluteWidth<FluentSpinner> {
+public class FluentSpinner extends FluentTextField {
 	private Spinner spinner = null;
 
 	public FluentSpinner() {
@@ -15,9 +14,18 @@ public class FluentSpinner extends FluentTextField { // FluentChangeableInputWid
 	}
 
 	public FluentSpinner from(@SuppressWarnings("hiding") Spinner spinner) {
-		min(spinner.getMin());
-		max(spinner.getMax());
-		step(spinner.getStep());
+		Double d = spinner.getMin();
+		if (d != null) {
+			min(d.doubleValue());
+		}
+		d = spinner.getMax();
+		if (d != null) {
+			max(d.doubleValue());
+		}
+		d = spinner.getStep();
+		if (d != null) {
+			step(d.doubleValue());
+		}
 
 		super.from(spinner);
 		return this;

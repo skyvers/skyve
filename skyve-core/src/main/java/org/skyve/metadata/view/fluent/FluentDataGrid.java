@@ -1,6 +1,8 @@
 package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 
 public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	private DataGrid grid = null;
@@ -20,17 +22,48 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		disableZoomConditionName(grid.getDisableZoomConditionName());
 		disableEditConditionName(grid.getDisableEditConditionName());
 		disableRemoveConditionName(grid.getDisableRemoveConditionName());
-		showAdd(grid.getShowAdd());
-		showEdit(grid.getShowEdit());
-		showZoom(grid.getShowZoom());
-		showRemove(grid.getShowRemove());
-		showDeselect(grid.getShowDeselect());
+		Boolean b = grid.getShowAdd();
+		if (b != null) {
+			showAdd(b.booleanValue());
+		}
+		b = grid.getShowEdit();
+		if (b != null) {
+			showEdit(b.booleanValue());
+		}
+		b = grid.getShowZoom();
+		if (b != null) {
+			showZoom(b.booleanValue());
+		}
+		b = grid.getShowRemove();
+		if (b != null) {
+			showRemove(b.booleanValue());
+		}
+		b = grid.getShowDeselect();
+		if (b != null) {
+			showDeselect(b.booleanValue());
+		}
 		selectedIdBinding(grid.getSelectedIdBinding());
-		inline(grid.getInline());
-		editable(grid.getEditable());
-		wordWrap(grid.getWordWrap());
+		b = grid.getInline();
+		if (b != null) {
+			inline(b.booleanValue());
+		}
+		b = grid.getEditable();
+		if (b != null) {
+			editable(b.booleanValue());
+		}
+		b = grid.getWordWrap();
+		if (b != null) {
+			wordWrap(b.booleanValue());
+		}
 
-		grid.getColumns().forEach(c -> addColumn(new FluentDataGridContainerColumn().from(c)));
+		for (DataGridColumn column : grid.getColumns()) {
+			if (column instanceof DataGridBoundColumn) {
+				addBoundColumn(new FluentDataGridBoundColumn().from(column));
+			}
+			else {
+				addContainerColumn(new FluentDataGridContainerColumn().from(column));
+			}
+		}
 
 		grid.getAddedActions().forEach(a -> addAddedAction(FluentEventAction.from(a)));
 
@@ -114,7 +147,12 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		return this;
 	}
 
-	public FluentDataGrid addColumn(FluentDataGridContainerColumn column) {
+	public FluentDataGrid addBoundColumn(FluentDataGridBoundColumn column) {
+		grid.getColumns().add(column.get());
+		return this;
+	}
+
+	public FluentDataGrid addContainerColumn(FluentDataGridContainerColumn column) {
 		grid.getColumns().add(column.get());
 		return this;
 	}

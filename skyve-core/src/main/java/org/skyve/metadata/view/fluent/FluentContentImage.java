@@ -14,8 +14,10 @@ public class FluentContentImage extends FluentInputWidget<FluentContentImage> im
 	}
 
 	public FluentContentImage from(@SuppressWarnings("hiding") ContentImage image) {
-
-		editable(image.getEditable());
+		Boolean b = image.getEditable();
+		if (b != null) {
+			editable(b.booleanValue());
+		}
 
 		relativeSize(image, this);
 

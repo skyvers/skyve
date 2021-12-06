@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 
-public class FluentTreeGrid extends FluentWidget {
+public class FluentTreeGrid extends FluentListGrid {
 	private TreeGrid grid = null;
 
 	public FluentTreeGrid() {
@@ -14,6 +14,7 @@ public class FluentTreeGrid extends FluentWidget {
 	}
 
 	public FluentTreeGrid from(@SuppressWarnings("hiding") TreeGrid grid) {
+		super.from(grid);
 		rootIdBinding(grid.getRootIdBinding());
 		return this;
 	}

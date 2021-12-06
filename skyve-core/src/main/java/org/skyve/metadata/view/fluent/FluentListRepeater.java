@@ -14,9 +14,14 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	}
 
 	public FluentListRepeater from(@SuppressWarnings("hiding") ListRepeater list) {
-
-		showColumnHeaders(list.getShowColumnHeaders());
-		showGrid(list.getShowGrid());
+		Boolean b = list.getShowColumnHeaders();
+		if (b != null) {
+			showColumnHeaders(b.booleanValue());
+		}
+		b = list.getShowGrid();
+		if (b != null) {
+			showGrid(b.booleanValue());
+		}
 
 		title(list.getTitle());
 		queryName(list.getQueryName());
@@ -160,5 +165,4 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	public ListRepeater get() {
 		return list;
 	}
-
 }

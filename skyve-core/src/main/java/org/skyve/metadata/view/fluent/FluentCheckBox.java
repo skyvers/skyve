@@ -14,8 +14,10 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	}
 
 	public FluentCheckBox from(@SuppressWarnings("hiding") CheckBox check) {
-
-		triState(check.getTriState());
+		Boolean b = check.getTriState();
+		if (b != null) {
+			triState(b.booleanValue());
+		}
 
 		absoluteSize(check, this);
 

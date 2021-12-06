@@ -15,11 +15,14 @@ public class FluentLookupDescriptionColumn {
 
 	public FluentLookupDescriptionColumn from(@SuppressWarnings("hiding") LookupDescriptionColumn column) {
 		name(column.getName());
-		filterable(column.getFilterable());
+		Boolean b = column.getFilterable();
+		if (b != null) {
+			filterable(b.booleanValue());
+		}
 		return this;
 	}
 
-	public FluentLookupDescriptionColumn filterable(Boolean filterable) {
+	public FluentLookupDescriptionColumn filterable(boolean filterable) {
 		column.setFilterable(filterable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}

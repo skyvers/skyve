@@ -45,5 +45,4 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	public HTML get() {
 		return html;
 	}
-
 }

@@ -18,9 +18,18 @@ public class FluentDialogButton extends FluentWidget {
 		displayName(button.getDisplayName());
 		dialogName(button.getDialogName());
 		command(button.getCommand());
-		dialogHeight(button.getDialogHeight());
-		dialogWidth(button.getDialogWidth());
-		modalDialog(button.isModalDialog());
+		Integer i = button.getDialogHeight();
+		if (i != null) {
+			dialogHeight(i.intValue());
+		}
+		i = button.getDialogWidth();
+		if (i != null) {
+			dialogWidth(i.intValue());
+		}
+		Boolean b = button.isModalDialog();
+		if (b != null) {
+			modalDialog(b.booleanValue());
+		}
 		invisibleConditionName(button.getInvisibleConditionName());
 		disabledConditionName(button.getDisabledConditionName());
 
@@ -75,6 +84,7 @@ public class FluentDialogButton extends FluentWidget {
 		button.getParameters().add(parameter.get());
 		return this;
 	}
+	
 	@Override
 	public DialogButton get() {
 		return button;

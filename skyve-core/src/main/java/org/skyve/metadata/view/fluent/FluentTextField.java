@@ -16,7 +16,10 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	}
 
 	public FluentTextField from(@SuppressWarnings("hiding") TextField text) {
-		editable(text.getEditable());
+		Boolean b = text.getEditable();
+		if (b != null) {
+			editable(b.booleanValue());
+		}
 		keyboardType(text.getKeyboardType());
 		complete(text.getComplete());
 

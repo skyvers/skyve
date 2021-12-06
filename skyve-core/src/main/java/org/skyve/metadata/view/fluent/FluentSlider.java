@@ -15,11 +15,26 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	}
 
 	public FluentSlider from(@SuppressWarnings("hiding") Slider slider) {
-		min(slider.getMin());
-		max(slider.getMax());
-		numberOfDiscreteValues(slider.getNumberOfDiscreteValues());
-		roundingPrecision(slider.getRoundingPrecision());
-		vertical(slider.getVertical());
+		Double d = slider.getMin();
+		if (d != null) {
+			min(d.doubleValue());
+		}
+		d = slider.getMax();
+		if (d != null) {
+			max(d.doubleValue());
+		}
+		Integer i = slider.getNumberOfDiscreteValues();
+		if (i != null) {
+			numberOfDiscreteValues(i.intValue());
+		}
+		i = slider.getRoundingPrecision();
+		if (i != null) {
+			roundingPrecision(i.intValue());
+		}
+		Boolean b = slider.getVertical();
+		if (b != null) {
+			vertical(b.booleanValue());
+		}
 
 		absoluteSize(slider, this);
 

@@ -16,7 +16,10 @@ public class FluentContentLink extends FluentInputWidget<FluentContentLink> impl
 	public FluentContentLink from(@SuppressWarnings("hiding") ContentLink link) {
 
 		value(link.getValue());
-		editable(link.getEditable());
+		Boolean b = link.getEditable();
+		if (b != null) {
+			editable(b.booleanValue());
+		}
 
 		absoluteWidth(link, this);
 

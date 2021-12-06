@@ -19,18 +19,54 @@ public class FluentListGrid extends FluentWidget {
 		disableZoomConditionName(grid.getDisableZoomConditionName());
 		disableEditConditionName(grid.getDisableEditConditionName());
 		disableRemoveConditionName(grid.getDisableRemoveConditionName());
-		showAdd(grid.getShowAdd());
-		showEdit(grid.getShowEdit());
-		showZoom(grid.getShowZoom());
-		showRemove(grid.getShowRemove());
-		showDeselect(grid.getShowDeselect());
-		showExport(grid.getShowExport());
-		showChart(grid.getShowChart());
-		showFilter(grid.getShowFilter());
-		showSummary(grid.getShowSummary());
-		showSnap(grid.getShowSnap());
-		showTag(grid.getShowTag());
-		autoPopulate(grid.getAutoPopulate());
+		Boolean b = grid.getShowAdd();
+		if (b != null) {
+			showAdd(b.booleanValue());
+		}
+		b = grid.getShowEdit();
+		if (b != null) {
+			showEdit(b.booleanValue());
+		}
+		b = grid.getShowZoom();
+		if (b != null) {
+			showZoom(b.booleanValue());
+		}
+		b = grid.getShowRemove();
+		if (b != null) {
+			showRemove(b.booleanValue());
+		}
+		b = grid.getShowDeselect();
+		if (b != null) {
+			showDeselect(b.booleanValue());
+		}
+		b = grid.getShowExport();
+		if (b != null) {
+			showExport(b.booleanValue());
+		}
+		b = grid.getShowChart();
+		if (b != null) {
+			showChart(b.booleanValue());
+		}
+		b = grid.getShowFilter();
+		if (b != null) {
+			showFilter(b.booleanValue());
+		}
+		b = grid.getShowSummary();
+		if (b != null) {
+			showSummary(b.booleanValue());
+		}
+		b = grid.getShowSnap();
+		if (b != null) {
+			showSnap(b.booleanValue());
+		}
+		b = grid.getShowTag();
+		if (b != null) {
+			showTag(b.booleanValue());
+		}
+		b = grid.getAutoPopulate();
+		if (b != null) {
+			autoPopulate(b.booleanValue());
+		}
 		continueConversation(grid.getContinueConversation());
 		selectedIdBinding(grid.getSelectedIdBinding());
 
@@ -134,7 +170,7 @@ public class FluentListGrid extends FluentWidget {
 	}
 
 	public FluentListGrid continueConversation(boolean continueConversation) {
-		grid.setContinueConversation(continueConversation ? Boolean.TRUE : Boolean.FALSE);
+		grid.setContinueConversation(continueConversation);
 		return this;
 	}
 

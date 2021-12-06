@@ -18,7 +18,10 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 		relativeSize(comparison, this);
 
 		modelName(comparison.getModelName());
-		editable(comparison.getEditable());
+		Boolean b = comparison.getEditable();
+		if (b != null) {
+			editable(b.booleanValue());
+		}
 
 		super.from(comparison);
 		return this;

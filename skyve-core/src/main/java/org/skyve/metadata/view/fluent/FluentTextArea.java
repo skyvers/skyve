@@ -15,10 +15,19 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	}
 
 	public FluentTextArea from(@SuppressWarnings("hiding") TextArea text) {
-		wordWrap(text.getWordWrap());
-		editable(text.getEditable());
+		Boolean b = text.getWordWrap();
+		if (b != null) {
+			wordWrap(b.booleanValue());
+		}
+		b = text.getEditable();
+		if (b != null) {
+			editable(b.booleanValue());
+		}
 
-		minPixelHeight(text.getMinPixelHeight());
+		Integer i = text.getMinPixelHeight();
+		if (i != null) {
+			minPixelHeight(i.intValue());
+		}
 
 		keyboardType(text.getKeyboardType());
 
