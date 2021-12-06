@@ -8,7 +8,29 @@ abstract class FluentEventAction {
 	}
 
 	protected static FluentEventAction from(EventAction action) {
-/* TODO implement the below classes
+/* TODO uncomment this if
+		if (action instanceof RerenderEventAction) {
+			new FluentRerenderEventAction().from((RerenderEventAction) action);
+		}
+		else if (action instanceof ServerSideActionEventAction) {
+			new FluentServerSideActionEventAction().from((ServerSideActionEventAction) action);
+		}
+		else if (action instanceof SetDisabledEventAction) {
+			new SetDisabledEventAction().from((SetDisabledEventAction) action);
+		}
+		else if (action instanceof SetInvisibleEventAction) {
+			new SetInvisibleEventAction().from((SetInvisibleEventAction) action);
+		}
+		else if (action instanceof ToggleDisabledEventAction) {
+			new ToggleDisabledEventAction().from((ToggleDisabledEventAction) action);
+		}
+		else if (action instanceof ToggleVisibilityEventAction) {
+			new ToggleVisibilityEventAction().from((ToggleVisibilityEventAction) action);
+		}
+		else {
+			throw new IllegalArgumentException(action + " is not catered for");
+		}
+and TODO implement the below classes
 RerenderEventAction
 ServerSideActionEventAction
 SetDisabledEventAction
