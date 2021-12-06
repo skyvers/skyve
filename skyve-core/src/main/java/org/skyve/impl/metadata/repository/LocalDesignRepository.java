@@ -415,8 +415,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		Module module = getModule(customer, document.getOwningModuleName());
 		String bizKeyExpression = document.getBizKeyExpression();
 		if (bizKeyExpression != null) {
-			if (! BindUtil.messageExpressionsAreValid(customer, module, document, bizKeyExpression)) {
-				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier);
+			String error = BindUtil.validateMessageExpressions(customer, module, document, bizKeyExpression);
+			if (error != null) {
+				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier + ": " + error);
 			}
 		}
 		
@@ -530,9 +531,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 			Module owningModule = getModule(customer, document.getOwningModuleName());
 			for (UniqueConstraint constraint : constraints) {
 				String message = constraint.getMessage();
-				if (! BindUtil.messageExpressionsAreValid(customer, owningModule, document, message)) {
+				String error = BindUtil.validateMessageExpressions(customer, owningModule, document, message);
+				if (error != null) {
 					throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
-							constraint.getName() + " in document " + documentIdentifier);
+													constraint.getName() + " in document " + documentIdentifier + ": " + error);
 				}
 			}
 		}

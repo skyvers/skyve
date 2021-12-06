@@ -37,9 +37,10 @@ public abstract class ExpressionEvaluator {
 	
 	static {
 		evaluators.put(BindingExpressionEvaluator.PREFIX, DEFAULT_EVALUATOR);
+		evaluators.put(ELExpressionEvaluator.BIZEL_PREFIX, new ELExpressionEvaluator(true));
+		evaluators.put(ELExpressionEvaluator.EL_PREFIX, new ELExpressionEvaluator(false));
 		evaluators.put(DisplayNameExpressionEvaluator.PREFIX, new DisplayNameExpressionEvaluator());
 		evaluators.put(DescriptionExpressionEvaluator.PREFIX, new DescriptionExpressionEvaluator());
-		evaluators.put(ELExpressionEvaluator.PREFIX, new ELExpressionEvaluator());
 		evaluators.put(I18NExpressionEvaluator.PREFIX, new I18NExpressionEvaluator());
 		evaluators.put(RoleExpressionEvaluator.PREFIX, new RoleExpressionEvaluator());
 		evaluators.put(StashExpressionEvaluator.PREFIX, new StashExpressionEvaluator());
@@ -62,11 +63,24 @@ public abstract class ExpressionEvaluator {
 		return process(expression, bean, false);
 	}
 
-	public static boolean validate(String expression) {
+	/**
+	 * Validate an expression
+	 * @param expression
+	 * @return	null if valid or the error message if not.
+	 */
+	public static String validate(String expression) {
 		return validate(expression, null, null, null);
 	}
-	
-	public static boolean validate(String expression, Customer customer, Module module, Document document) {
+
+	/**
+	 * Validate an expression.
+	 * @param expression
+	 * @param customer
+	 * @param module
+	 * @param document
+	 * @return	null if valid or the error message if not.
+	 */
+	public static String validate(String expression, Customer customer, Module module, Document document) {
 		int colonIndex = expression.indexOf(':');
 		if (colonIndex < 0) {
 			String expressionWithoutPrefix = expression.trim();
@@ -82,7 +96,7 @@ public abstract class ExpressionEvaluator {
 					DATETIME_EXPRESSION.equals(expressionWithoutPrefix) ||
 					TIMESTAMP_EXPRESSION.equals(expressionWithoutPrefix) ||
 					URL_EXPRESSION.equals(expressionWithoutPrefix)) {
-				return true;
+				return null; // this is valid
 			}
 
 			return DEFAULT_EVALUATOR.validateWithoutPrefix(expressionWithoutPrefix, customer, module, document);
@@ -199,5 +213,5 @@ public abstract class ExpressionEvaluator {
 	
 	public abstract String formatWithoutPrefix(String expression, Bean bean);
 	public abstract Object evaluateWithoutPrefix(String expression, Bean bean);
-	public abstract boolean validateWithoutPrefix(String expression, Customer customer, Module module, Document document);
+	public abstract String validateWithoutPrefix(String expression, Customer customer, Module module, Document document);
 }
