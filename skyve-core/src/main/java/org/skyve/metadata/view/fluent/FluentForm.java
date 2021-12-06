@@ -5,48 +5,49 @@ import org.skyve.impl.metadata.view.container.form.Form;
 
 public class FluentForm extends FluentWidget implements FluentRelativeSize<FluentForm> {
 	private Form form = null;
-	
+
 	public FluentForm() {
 		this.form = new Form();
 	}
-	
+
 	public FluentForm(Form form) {
 		this.form = form;
 	}
-	
+
 	public FluentForm from(@SuppressWarnings("hiding") Form form) {
 		widgetId(form.getWidgetId());
 		border(Boolean.TRUE.equals(form.getBorder()));
 		borderTitle(form.getBorderTitle());
 
 		relativeSize(form, this);
-		
+
 		labelDefaultHorizontalAlignment(form.getLabelDefaultHorizontalAlignment());
 
 		disabledConditionName(form.getDisabledConditionName());
 		invisibleConditionName(form.getInvisibleConditionName());
-		
+
 		form.getColumns().forEach(c -> addColumn(new FluentFormColumn().from(c)));
+
 		form.getRows().forEach(r -> addRow(new FluentFormRow().from(r)));
-		
+
 		return this;
 	}
-	
+
 	public FluentForm widgetId(String widgetId) {
 		form.setWidgetId(widgetId);
 		return this;
 	}
-	
+
 	public FluentForm border(boolean border) {
 		form.setBorder(border ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
-	
+
 	public FluentForm borderTitle(String borderTitle) {
 		form.setBorderTitle(borderTitle);
 		return this;
 	}
-	
+
 	@Override
 	public FluentForm pixelWidth(int pixelWidth) {
 		form.setPixelWidth(Integer.valueOf(pixelWidth));
@@ -64,13 +65,13 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		form.setSm(Integer.valueOf(sm));
 		return this;
 	}
-	
+
 	@Override
 	public FluentForm md(int md) {
 		form.setMd(Integer.valueOf(md));
 		return this;
 	}
-	
+
 	@Override
 	public FluentForm lg(int lg) {
 		form.setLg(Integer.valueOf(lg));
@@ -124,7 +125,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		form.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
-	
+
 	public FluentForm labelDefaultHorizontalAlignment(HorizontalAlignment alignment) {
 		form.setLabelDefaultHorizontalAlignment(alignment);
 		return this;
@@ -144,12 +145,12 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		form.getColumns().add(column.get());
 		return this;
 	}
-	
+
 	public FluentForm addRow(FluentFormRow row) {
 		form.getRows().add(row.get());
 		return this;
 	}
-	
+
 	@Override
 	public Form get() {
 		return form;

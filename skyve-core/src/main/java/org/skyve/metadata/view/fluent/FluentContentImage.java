@@ -23,8 +23,8 @@ public class FluentContentImage extends FluentInputWidget<FluentContentImage> im
 		return this;
 	}
 
-	public FluentContentImage editable(Boolean editable) {
-		image.setEditable(editable);
+	public FluentContentImage editable(boolean editable) {
+		image.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

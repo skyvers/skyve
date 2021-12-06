@@ -5,11 +5,11 @@ import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
 public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 		implements FluentAbsoluteSize<FluentProgressBar>, FluentConstrainableSize<FluentProgressBar> {
 	private ProgressBar bar = null;
-	
+
 	public FluentProgressBar() {
 		bar = new ProgressBar();
 	}
-	
+
 	public FluentProgressBar(ProgressBar bar) {
 		this.bar = bar;
 	}
@@ -19,12 +19,13 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 		invisibleConditionName(bar.getInvisibleConditionName());
 
 		absoluteSize(bar, this);
+
 		constrainableSize(bar, this);
 
 		super.from(bar);
 		return this;
 	}
-	
+
 	public FluentProgressBar invisibleConditionName(String invisibleConditionName) {
 		bar.setInvisibleConditionName(invisibleConditionName);
 		return this;

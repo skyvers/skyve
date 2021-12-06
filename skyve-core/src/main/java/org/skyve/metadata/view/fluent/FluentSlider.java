@@ -22,6 +22,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 		vertical(slider.getVertical());
 
 		absoluteSize(slider, this);
+
 		constrainableHeight(slider, this);
 
 		super.from(slider);

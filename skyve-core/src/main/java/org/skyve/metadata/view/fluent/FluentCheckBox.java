@@ -35,8 +35,8 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 		return this;
 	}
 
-	public FluentCheckBox triState(Boolean triState) {
-		check.setTriState(triState);
+	public FluentCheckBox triState(boolean triState) {
+		check.setTriState(triState ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

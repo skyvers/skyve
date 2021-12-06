@@ -30,11 +30,14 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		editable(grid.getEditable());
 		wordWrap(grid.getWordWrap());
 
-		// grid.getColumns().forEach(c -> addColumn(FluentDataGridColumn.from(c)));
+		grid.getColumns().forEach(c -> addColumn(new FluentDataGridContainerColumn().from(c)));
 
 		grid.getAddedActions().forEach(a -> addAddedAction(FluentEventAction.from(a)));
+
 		grid.getEditedActions().forEach(e -> addEditedAction(FluentEventAction.from(e)));
+
 		grid.getRemovedActions().forEach(r -> addRemovedAction(FluentEventAction.from(r)));
+
 		grid.getSelectedActions().forEach(s -> addSelectedAction(FluentEventAction.from(s)));
 
 		super.from(grid);
@@ -66,28 +69,28 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		return this;
 	}
 
-	public FluentDataGrid showAdd(Boolean showAdd) {
-		grid.setShowAdd(showAdd);
+	public FluentDataGrid showAdd(boolean showAdd) {
+		grid.setShowAdd(showAdd ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
-	public FluentDataGrid showZoom(Boolean showZoom) {
-		grid.setShowZoom(showZoom);
+	public FluentDataGrid showZoom(boolean showZoom) {
+		grid.setShowZoom(showZoom ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
-	public FluentDataGrid showEdit(Boolean showEdit) {
-		grid.setShowEdit(Boolean.valueOf(showEdit));
+	public FluentDataGrid showEdit(boolean showEdit) {
+		grid.setShowEdit(showEdit ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
-	public FluentDataGrid showRemove(Boolean showRemove) {
-		grid.setShowRemove(showRemove);
+	public FluentDataGrid showRemove(boolean showRemove) {
+		grid.setShowRemove(showRemove ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
-	public FluentDataGrid showDeselect(Boolean showDeselect) {
-		grid.setShowDeselect(showDeselect);
+	public FluentDataGrid showDeselect(boolean showDeselect) {
+		grid.setShowDeselect(showDeselect ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
@@ -96,25 +99,25 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		return this;
 	}
 
-	public FluentDataGrid inline(Boolean inline) {
-		grid.setInline(inline);
+	public FluentDataGrid inline(boolean inline) {
+		grid.setInline(inline ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
-	public FluentDataGrid editable(Boolean editable) {
-		grid.setEditable(editable);
+	public FluentDataGrid editable(boolean editable) {
+		grid.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
-	public FluentDataGrid wordWrap(Boolean wordWrap) {
-		grid.setWordWrap(wordWrap);
+	public FluentDataGrid wordWrap(boolean wordWrap) {
+		grid.setWordWrap(wordWrap ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
-	// public FluentDataGrid addColumn( FluentDataGridColumn column) {
-	// grid.getColumns().add(column.get());
-	// return this;
-	// }
+	public FluentDataGrid addColumn(FluentDataGridContainerColumn column) {
+		grid.getColumns().add(column.get());
+		return this;
+	}
 
 	public FluentDataGrid addAddedAction(FluentEventAction action) {
 		grid.getAddedActions().add(action.get());

@@ -20,6 +20,7 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 		sanitise(text.getSanitise());
 
 		absoluteSize(text, this);
+
 		constrainableHeight(text, this);
 
 		super.from(text);

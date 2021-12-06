@@ -6,15 +6,15 @@ import org.skyve.metadata.view.View;
 
 public class FluentView extends FluentContainer<FluentView> {
 	private ViewMetaData view = null;
-	
+
 	public FluentView() {
 		view = new ViewMetaData();
 	}
-	
+
 	public FluentView(ViewMetaData view) {
 		this.view = view;
 	}
-	
+
 	public FluentView from(@SuppressWarnings("hiding") View view) {
 		name(view.getName());
 		title(view.getTitle());
@@ -26,15 +26,16 @@ public class FluentView extends FluentContainer<FluentView> {
 		refreshTimeInSeconds(view.getRefreshTimeInSeconds());
 		refreshConditionName(view.getRefreshConditionName());
 		refreshActionName(view.getRefreshActionName());
-		
+
 		actions(new FluentActions().from(view.getActionsWidgetId(), view.getActions()));
+
 		view.getParameters().forEach(p -> addParameter(new FluentViewParameter().from(p)));
 
 		super.from(((ViewImpl) view));
-		
+
 		return this;
 	}
-	
+
 	public FluentView name(String name) {
 		view.setName(name);
 		return this;
@@ -49,7 +50,7 @@ public class FluentView extends FluentContainer<FluentView> {
 		view.setIconStyleClass(iconStyleClass);
 		return this;
 	}
-	
+
 	public FluentView icon32x32RelativeFileName(String icon32x32RelativeFileName) {
 		view.setIcon32x32RelativeFileName(icon32x32RelativeFileName);
 		return this;
@@ -70,8 +71,8 @@ public class FluentView extends FluentContainer<FluentView> {
 		return this;
 	}
 
-	public FluentView refreshTimeInSeconds(Integer refreshTimeInSeconds) {
-		view.setRefreshTimeInSeconds(refreshTimeInSeconds);
+	public FluentView refreshTimeInSeconds(int refreshTimeInSeconds) {
+		view.setRefreshTimeInSeconds(Integer.valueOf(refreshTimeInSeconds));
 		return this;
 	}
 
@@ -89,7 +90,7 @@ public class FluentView extends FluentContainer<FluentView> {
 		view.setActions(actions.get());
 		return this;
 	}
-	
+
 	public FluentView addParameter(FluentViewParameter parameter) {
 		view.getParameters().add(parameter.get());
 		return this;

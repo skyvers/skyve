@@ -14,9 +14,12 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	}
 
 	public FluentComparison from(@SuppressWarnings("hiding") Comparison comparison) {
+
 		relativeSize(comparison, this);
+
 		modelName(comparison.getModelName());
 		editable(comparison.getEditable());
+
 		super.from(comparison);
 		return this;
 	}
@@ -26,8 +29,8 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 		return this;
 	}
 
-	public FluentComparison editable(Boolean editable) {
-		comparison.setEditable(editable);
+	public FluentComparison editable(boolean editable) {
+		comparison.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

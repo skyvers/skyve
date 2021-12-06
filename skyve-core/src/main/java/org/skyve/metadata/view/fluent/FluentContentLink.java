@@ -14,6 +14,7 @@ public class FluentContentLink extends FluentInputWidget<FluentContentLink> impl
 	}
 
 	public FluentContentLink from(@SuppressWarnings("hiding") ContentLink link) {
+
 		value(link.getValue());
 		editable(link.getEditable());
 
@@ -30,8 +31,8 @@ public class FluentContentLink extends FluentInputWidget<FluentContentLink> impl
 		return this;
 	}
 
-	public FluentContentLink editable(Boolean editable) {
-		link.setEditable(editable);
+	public FluentContentLink editable(boolean editable) {
+		link.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

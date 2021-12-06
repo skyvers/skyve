@@ -17,6 +17,8 @@ public class FluentInject extends FluentWidget {
 
 		script(inject.getScript());
 
+		inject.getBindings().forEach(b -> addBinding(new FluentInjectBinding().from(b)));
+
 		return this;
 	}
 
@@ -25,9 +27,11 @@ public class FluentInject extends FluentWidget {
 		return this;
 	}
 
-	// public FluentInject addBinding(FluentInjectBinding binding) {
-	// inject.getBindings().add(binding.get());
-	// }
+	public FluentInject addBinding(FluentInjectBinding binding) {
+		inject.getBindings().add(binding.get());
+		return this;
+	}
+
 	@Override
 	public Inject get() {
 		return inject;

@@ -6,7 +6,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class FluentLabel extends FluentBoundWidget<FluentLabel> implements FluentAbsoluteSize<FluentLabel> {
 	private Label label = null;
-	
+
 	public FluentLabel() {
 		label = new Label();
 	}
@@ -14,7 +14,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	public FluentLabel(Label label) {
 		this.label = label;
 	}
-	
+
 	public FluentLabel from(@SuppressWarnings("hiding") Label label) {
 
 		value(label.getValue());
@@ -47,8 +47,8 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 		return this;
 	}
 
-	public FluentLabel formatted(Boolean formatted) {
-		label.setFormatted(formatted);
+	public FluentLabel formatted(boolean formatted) {
+		label.setFormatted(formatted ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
@@ -57,8 +57,8 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 		return this;
 	}
 
-	public FluentLabel escape(Boolean escape) {
-		label.setEscape(escape);
+	public FluentLabel escape(boolean escape) {
+		label.setEscape(escape ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
@@ -66,6 +66,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 		label.setSanitise(sanitise);
 		return this;
 	}
+
 	@Override
 	public FluentLabel pixelWidth(int width) {
 		label.setPixelWidth(Integer.valueOf(width));

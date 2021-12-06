@@ -44,21 +44,20 @@ public class FluentDialogButton extends FluentWidget {
 		return this;
 	}
 
-	// private Integer dialogWidth = Integer.valueOf(800);
+
 	public FluentDialogButton dialogWidth(int dialogWidth) {
 		button.setDialogWidth(Integer.valueOf(dialogWidth));
 		return this;
 	}
 
-	// private Integer dialogHeight = Integer.valueOf(630);
+
 	public FluentDialogButton dialogHeight(int dialogHeight) {
 		button.setDialogHeight(Integer.valueOf(dialogHeight));
 		return this;
 	}
 
-	// private Boolean modalDialog = Boolean.FALSE;
-	public FluentDialogButton modalDialog(Boolean modalDialog) {
-		button.setModalDialog(modalDialog);
+	public FluentDialogButton modalDialog(boolean modalDialog) {
+		button.setModalDialog(modalDialog ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

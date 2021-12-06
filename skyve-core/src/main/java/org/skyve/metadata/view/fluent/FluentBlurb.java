@@ -6,22 +6,26 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<FluentBlurb> {
 	private Blurb blurb = null;
-		
+
 	public FluentBlurb() {
 		blurb = new Blurb();
 	}
-	
+
 	public FluentBlurb(Blurb blurb) {
 		this.blurb = blurb;
 	}
-	
+
 	public FluentBlurb from(@SuppressWarnings("hiding") Blurb blurb) {
+
 		markup(blurb.getMarkup());
+
 		absoluteSize(blurb, this);
+
 		invisibleConditionName(blurb.getInvisibleConditionName());
 		textAlignment(blurb.getTextAlignment());
 		escape(blurb.getEscape());
 		sanitise(blurb.getSanitise());
+
 		return this;
 	}
 
@@ -50,8 +54,8 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 		return this;
 	}
 
-	public FluentBlurb escape(Boolean escape) {
-		blurb.setEscape(escape);
+	public FluentBlurb escape(boolean escape) {
+		blurb.setEscape(escape ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
@@ -59,6 +63,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 		blurb.setSanitise(sanitise);
 		return this;
 	}
+
 	@Override
 	public Blurb get() {
 		return blurb;

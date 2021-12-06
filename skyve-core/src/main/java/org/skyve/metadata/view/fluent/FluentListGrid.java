@@ -34,9 +34,11 @@ public class FluentListGrid extends FluentWidget {
 		continueConversation(grid.getContinueConversation());
 		selectedIdBinding(grid.getSelectedIdBinding());
 
-		grid.getEditedActions().forEach(c -> addEditedAction(FluentEventAction.from(c)));
-		grid.getRemovedActions().forEach(c -> addRemovedAction(FluentEventAction.from(c)));
-		grid.getSelectedActions().forEach(c -> addSelectedAction(FluentEventAction.from(c)));
+		grid.getEditedActions().forEach(e -> addEditedAction(FluentEventAction.from(e)));
+
+		grid.getRemovedActions().forEach(r -> addRemovedAction(FluentEventAction.from(r)));
+
+		grid.getSelectedActions().forEach(s -> addSelectedAction(FluentEventAction.from(s)));
 
 		return this;
 	}

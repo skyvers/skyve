@@ -14,8 +14,11 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	}
 	
 	public FluentStaticImage from(@SuppressWarnings("hiding") StaticImage image) {
+
 		relativeFile(image.getRelativeFile());
+
 		relativeSize(image, this);
+
 		invisibleConditionName(image.getInvisibleConditionName());
 		
 		return this;

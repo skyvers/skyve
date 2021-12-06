@@ -14,8 +14,12 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	}
 
 	public FluentDataRepeater from(@SuppressWarnings("hiding") DataRepeater data) {
+
 		showColumnHeaders(data.getShowColumnHeaders());
 		showGrid(data.getShowGrid());
+
+		data.getColumns().forEach(c -> addColumn(new FluentDataGridContainerColumn().from(c)));
+
 		super.from(data);
 		return this;
 	}
@@ -30,6 +34,10 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 		return this;
 	}
 
+	public FluentDataRepeater addColumn(FluentDataGridContainerColumn column) {
+		data.getColumns().add(column.get());
+		return this;
+	}
 	@Override
 	public DataRepeater get() {
 		return data;

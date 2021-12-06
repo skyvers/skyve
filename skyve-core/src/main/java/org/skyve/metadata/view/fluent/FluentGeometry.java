@@ -15,8 +15,11 @@ public class FluentGeometry extends FluentChangeableInputWidget<FluentGeometry> 
 	}
 
 	public FluentGeometry from(@SuppressWarnings("hiding") Geometry geometry) {
+
 		type(geometry.getType());
+
 		absoluteWidth(geometry, this);
+
 		super.from(geometry);
 		return this;
 	}
