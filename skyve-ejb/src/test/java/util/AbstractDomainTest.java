@@ -191,7 +191,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		assertThat(result.getBizId(), is(notNullValue()));
 	}
 
-	@Timeout(15)
+	@Timeout(30)
 	@Test
 	public void testUpdate() throws Exception {
 		// create the test data
