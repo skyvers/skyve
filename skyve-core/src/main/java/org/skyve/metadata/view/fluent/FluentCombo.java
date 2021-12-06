@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 
-public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> {
+public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implements FluentAbsoluteWidth<FluentCombo> {
 	private Combo combo = null;
 	
 	public FluentCombo() {
@@ -14,7 +14,17 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> {
 	}
 
 	public FluentCombo from(@SuppressWarnings("hiding") Combo combo) {
+
+		absoluteWidth(combo, this);
+
 		super.from(combo);
+		return this;
+	}
+
+
+	@Override
+	public FluentCombo pixelWidth(int width) {
+		combo.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
 
@@ -22,4 +32,5 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> {
 	public Combo get() {
 		return combo;
 	}
+
 }

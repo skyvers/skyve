@@ -16,9 +16,12 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	}
 	
 	public FluentButton from(@SuppressWarnings("hiding") Button button) {
+
 		actionName(button.getActionName());
+
 		absoluteSize(button, this);
 		constrainableHeight(button, this);
+
 		show(button.getShow());
 		return this;
 	}

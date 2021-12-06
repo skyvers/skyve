@@ -14,7 +14,19 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	}
 
 	public FluentDataRepeater from(@SuppressWarnings("hiding") DataRepeater data) {
+		showColumnHeaders(data.getShowColumnHeaders());
+		showGrid(data.getShowGrid());
 		super.from(data);
+		return this;
+	}
+
+	public FluentDataRepeater showColumnHeaders(Boolean showColumnHeaders) {
+		data.setShowColumnHeaders(showColumnHeaders);
+		return this;
+	}
+
+	public FluentDataRepeater showGrid(Boolean showGrid) {
+		data.setShowGrid(showGrid);
 		return this;
 	}
 
