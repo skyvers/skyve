@@ -58,6 +58,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
@@ -92,7 +93,7 @@ public final class BindUtil {
 				if (closedCurlyBraceIndex < openCurlyBraceIndex) {
 					throw new MetaDataException('[' + message + "] does not have a matching '}' for the '{' at position " + (openCurlyBraceIndex + 1));
 				}
-				String expression = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
+				String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
 				boolean success = false;
 				Exception cause = null;
 				for (Bean bean : beans) {
@@ -125,7 +126,7 @@ public final class BindUtil {
 				
 				if (! success) {
 					StringBuilder exMessage = new StringBuilder();
-					exMessage.append("Expression {").append(expression).append("} cannot be evaluated against bean");
+					exMessage.append("Expression ").append(expression).append(" cannot be evaluated against bean");
 					if (beans.length > 1) {
 						exMessage.append("s");
 					}
@@ -135,7 +136,7 @@ public final class BindUtil {
 						Bean bean = beans[offset];
 						exMessage.append(bean.getBizDocument());
 						
-						if (offset - 1 < beans.length) {
+						if ((offset - 1) < beans.length) {
 							exMessage.append(", ");
 						}
 					}
@@ -155,16 +156,23 @@ public final class BindUtil {
 		return result.toString().replace("\\}", "}"); // remove any escaped closing curly braces now
 	}
 
-	public static boolean messageIsBound(String message) {
-		boolean bound = false;
-		int openCurlyBraceIndex = message.indexOf('{');
-		while ((! bound) && openCurlyBraceIndex >= 0) {
-			bound = (openCurlyBraceIndex == 0) || // first char is '{' 
+	public static boolean containsSkyveExpressions(String display) {
+		boolean result = false;
+		int openCurlyBraceIndex = display.indexOf('{');
+		while ((! result) && openCurlyBraceIndex >= 0) {
+			result = (openCurlyBraceIndex == 0) || // first char is '{' 
 						// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
-						((openCurlyBraceIndex > 0) && (message.charAt(openCurlyBraceIndex - 1) != '\\'));
+						((openCurlyBraceIndex > 0) && (display.charAt(openCurlyBraceIndex - 1) != '\\'));
 		}
 		
-		return bound;
+		return result;
+	}
+	
+	public static boolean isSkyveExpression(String expression) {
+		int length = expression.length();
+		return ((length > 1) && 
+					(expression.charAt(0) == '{') && 
+					(expression.charAt(length - 1) == '}'));
 	}
 	
 	public static String validateMessageExpressions(Customer customer, Module module, Document document, String message) {
@@ -226,6 +234,50 @@ public final class BindUtil {
 			}
 		}
 		return result.toString();
+	}
+
+	public static boolean evaluateCondition(Bean bean, String condition) {
+		boolean result = false;
+
+		if (String.valueOf(true).equals(condition)) {
+			result = true;
+		}
+		else if (! String.valueOf(false).equals(condition)) {
+			try {
+				if (BindUtil.isSkyveExpression(condition)) {
+					result = Boolean.TRUE.equals(ExpressionEvaluator.evaluate(condition, bean));
+				}
+				else {
+					boolean negated = false;
+					String conditionName = condition;
+					if (condition.startsWith("not")) {
+						conditionName = Introspector.decapitalize(condition.substring(3));
+						negated = true;
+					}
+					Customer c = CORE.getCustomer();
+					Module m = c.getModule(bean.getBizModule());
+					Document d = m.getDocument(c, bean.getBizDocument());
+					Condition condish = d.getCondition(conditionName);
+					String expression = condish.getExpression();
+					if (BindUtil.isSkyveExpression(expression)) {
+						if (negated) {
+							result = Boolean.FALSE.equals(ExpressionEvaluator.evaluate(expression, bean));
+						}
+						else {
+							result = Boolean.TRUE.equals(ExpressionEvaluator.evaluate(expression, bean));
+						}
+					}
+					else {
+						result = (Boolean.TRUE.equals(BindUtil.get(bean, condition)));
+					}
+				}
+			}
+			catch (Exception e) {
+				throw new MetaDataException("Condition " + bean.getBizModule() + "." + bean.getBizDocument() + "." + condition + " is not valid", e);
+			}
+		}
+
+		return result;
 	}
 
 	public static String negateCondition(String condition) {

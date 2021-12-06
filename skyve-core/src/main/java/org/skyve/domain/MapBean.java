@@ -5,9 +5,14 @@ import java.util.TreeMap;
 
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.LazyDynaMap;
+import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractBean;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Condition;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 
 public class MapBean extends LazyDynaMap implements Bean {
 	private static final long serialVersionUID = 1L;
@@ -163,35 +168,45 @@ public class MapBean extends LazyDynaMap implements Bean {
 				else if (Bean.NOT_PERSISTED_KEY.equals(binding)) {
 					result = AbstractPersistence.get().isPersisted(this) ? Boolean.FALSE : Boolean.TRUE;
 				}
-				else if (Bean.CREATED_KEY.equals(binding)) {
-					// TODO evaluate the condition when EL is added
-					result = Boolean.FALSE;
-				}
-				else if (Bean.NOT_CREATED_KEY.equals(binding)) {
-					// TODO evaluate the condition when EL is added
-					result = Boolean.TRUE;
-				}
 				else {
-					// Check if there is any part of the compound binding present as a dyna property (largest binding first)
 					int dotIndex = binding.lastIndexOf('.');
-					while (dotIndex > 0) { // compound binding
-						String bindingPart = binding.substring(0, dotIndex);
-						if (isDynaProperty(bindingPart)) {
-							try {
-								bean = (Bean) values.get(bindingPart);
-								if (bean != null) {
-									result = BindUtil.get(bean, binding.substring(dotIndex + 1));
-								}
-								break;
-							}
-							catch (Exception e) {
-								throw new IllegalArgumentException("Binding does not exist - " + binding, e);
-							}
+					if (dotIndex < 0) {
+						// check if a condition exists
+						Customer c = CORE.getCustomer();
+						Module m = c.getModule(getBizModule());
+						Document d = m.getDocument(c, getBizDocument());
+						Condition condition = d.getCondition(binding);
+						if (condition != null) {
+							result = Boolean.valueOf(BindUtil.evaluateCondition(this, condition.getExpression()));
 						}
-						dotIndex = bindingPart.lastIndexOf('.');
+						else if (Bean.CREATED_KEY.equals(binding)) { // default created condition value
+							result = Boolean.TRUE;
+						}
+						else if (Bean.NOT_CREATED_KEY.equals(binding)) { // default notCreated condition value
+							result = Boolean.FALSE;
+						}
 					}
-					if (dotIndex < 0) { // simple binding
-						throw new IllegalArgumentException("Binding does not exist - " + binding);
+					else {
+						// Check if there is any part of the compound binding present as a dyna property (largest binding first)
+						while (dotIndex > 0) { // compound binding
+							String bindingPart = binding.substring(0, dotIndex);
+							if (isDynaProperty(bindingPart)) {
+								try {
+									bean = (Bean) values.get(bindingPart);
+									if (bean != null) {
+										result = BindUtil.get(bean, binding.substring(dotIndex + 1));
+									}
+									break;
+								}
+								catch (Exception e) {
+									throw new IllegalArgumentException("Binding does not exist - " + binding, e);
+								}
+							}
+							dotIndex = bindingPart.lastIndexOf('.');
+						}
+						if (dotIndex < 0) { // simple binding
+							throw new IllegalArgumentException("Binding does not exist - " + binding);
+						}
 					}
 				}
 			}

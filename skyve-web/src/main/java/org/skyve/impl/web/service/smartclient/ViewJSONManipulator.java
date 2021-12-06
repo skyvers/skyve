@@ -837,12 +837,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		boolean result = true;
 
 		if (conditionName != null) {
-			if ("true".equals(conditionName)) {
-				result = false;
-			}
-			else if (! "false".equals(conditionName)) {
-				result = ! bean.evaluateCondition(conditionName);
-			}
+			result = ! bean.evaluateCondition(conditionName);
 		}
 		
 		return result;
@@ -1179,7 +1174,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		else {
 			String markup = blurb.getLocalisedMarkup();
-			if (BindUtil.messageIsBound(markup)) { // has a binding expression
+			if (BindUtil.containsSkyveExpressions(markup)) { // has a binding expression
 				if (parentVisible && visible(blurb)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
@@ -1230,7 +1225,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		else {
 			String value = label.getLocalisedValue();
-			boolean boundValue = (value != null) && BindUtil.messageIsBound(value);
+			boolean boundValue = (value != null) && BindUtil.containsSkyveExpressions(value);
 			if (boundValue) { // has a binding expression
 				if (parentVisible && visible(label)) {
 					if ((! forApply) || 

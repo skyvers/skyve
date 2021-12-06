@@ -17,17 +17,18 @@ import org.skyve.metadata.module.Module;
 
 class ELExpressionEvaluator extends ExpressionEvaluator {
 	static final String EL_PREFIX = "el";
-	static final String BIZEL_PREFIX = "bizel";
+	static final String RTEL_PREFIX = "rtel";
 	
-	private boolean typeSafe = false;
+	private boolean typesafe = false;
 	
-	public ELExpressionEvaluator(boolean typeSafe) {
-		this.typeSafe = typeSafe;
+	public ELExpressionEvaluator(boolean typesafe) {
+		this.typesafe = typesafe;
 	}
 
 	@Override
 	public Object evaluateWithoutPrefix(String expression, Bean bean) {
 		ELProcessor elp = new ELProcessor();
+		elp.getELManager().addELResolver(new BindingELResolver());
 		elp.defineBean("bean", bean);
 		elp.defineBean("user", CORE.getUser());
 		elp.defineBean("stash", CORE.getStash());
@@ -48,30 +49,32 @@ class ELExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	public String validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
 		String result = null;
-		try {
-			ELProcessor elp = new ELProcessor();
-			elp.getELManager().addELResolver(new ValidationELResolver(customer));
-			// type-safe (bizel) start with the document, otherwise start with Object.class
-			if (document != null) {
-				elp.defineBean("bean", typeSafe ? document : Object.class);
+
+		if (typesafe) {
+			try {
+				ELProcessor elp = new ELProcessor();
+				elp.getELManager().addELResolver(new ValidationELResolver(customer));
+				// type-safe (el) starts with the document, if no document, no bean defined in the context
+				if (document != null) {
+					elp.defineBean("bean", document);
+				}
+				elp.defineBean("user", UserImpl.class);
+				elp.defineBean("stash", Map.class);
+				elp.defineBean(DATE_EXPRESSION, new DateOnly());
+				elp.defineBean(TIME_EXPRESSION, new TimeOnly());
+				elp.defineBean(DATETIME_EXPRESSION, new DateTime());
+				elp.defineBean(TIMESTAMP_EXPRESSION, new Timestamp());
+				elp.eval(expression);
 			}
-			else {
-				elp.defineBean("bean", Object.class);
+			catch (Exception e) {
+				e.printStackTrace();
+				result = e.getMessage();
+				if (result == null) {
+					result = expression + " is malformed and caused an exception " + e.getClass();
+				}
 			}
-			elp.defineBean("user", UserImpl.class);
-			elp.defineBean("stash", Map.class);
-			elp.defineBean(DATE_EXPRESSION, DateOnly.class);
-			elp.defineBean(TIME_EXPRESSION, TimeOnly.class);
-			elp.defineBean(DATETIME_EXPRESSION, DateTime.class);
-			elp.defineBean(TIMESTAMP_EXPRESSION, Timestamp.class);
-			elp.eval(expression);
 		}
-		catch (Exception e) {
-			result = e.getMessage();
-			if (result == null) {
-				result = expression + " is malformed and caused an exception " + e.getClass();
-			}
-		}
+		
 		return result;
 	}
 }

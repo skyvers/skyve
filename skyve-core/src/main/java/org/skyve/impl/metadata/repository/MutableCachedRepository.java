@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.bind.ExpressionEvaluator;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -22,6 +24,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -212,15 +215,15 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		Document result = null;
 		if (customer != null) {
 			// get customer overridden
-			result = getDocumentInternal(customer, module, documentName);
+			result = getDocumentInternal(true, customer, module, documentName);
 		}
 		if (result == null) { // not overridden
-			result = getDocumentInternal(null, module, documentName);
+			result = getDocumentInternal(false, customer, module, documentName);
 		}
 		return result;
 	}
 
-	private Document getDocumentInternal(Customer customer, Module module, String documentName) {
+	private Document getDocumentInternal(boolean customerOverride, Customer customer, Module module, String documentName) {
 		DocumentRef ref = module.getDocumentRefs().get(documentName);
 		if (ref == null) {
 			throw new IllegalArgumentException(documentName + " does not exist for this module - " + module.getName());
@@ -229,16 +232,18 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 
 		final String customerName = (customer == null) ? null : customer.getName();
 		StringBuilder documentKey = new StringBuilder(64);
-		if (customerName != null) {
+		if (customerOverride) {
 			documentKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 		}
 		documentKey.append(MODULES_NAMESPACE).append(documentModuleName).append('/').append(documentName);
 		
 		Optional<MetaData> result = cache.computeIfPresent(documentKey.toString(), (k, v) -> {
 			if (v.isEmpty()) {
-				DocumentMetaData documentMetaData = loadDocument(customerName, documentModuleName, documentName);
+				DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null,
+																	documentModuleName,
+																	documentName);
 				Module documentModule = getModule(customer, documentModuleName);
-				Document document = this.convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
+				Document document = this.convertDocument(customerName, customer, documentModuleName, documentModule, documentName, documentMetaData);
 				return Optional.of(document);
 			}
 			return v;
@@ -250,6 +255,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 
 	private Document convertDocument(String customerName,
+										Customer customer,
 										String moduleName,
 										Module module,
 										String documentName,
@@ -296,6 +302,21 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			}
 		}
 		
+		// Check expression conditions
+		for (String conditionName : result.getConditionNames()) {
+			Condition condition = result.getCondition(conditionName);
+			String expression = condition.getExpression();
+			if (BindUtil.isSkyveExpression(expression)) {
+				String error = ExpressionEvaluator.validate(expression.substring(1, expression.length() - 1),
+																customer,
+																module,
+																result);
+				if (error != null) {
+					throw new MetaDataException("Condition " + conditionName + " in document " + documentName + " with expression " + expression + " has an error : " + error);
+				}
+			}
+		}
+		
 		return result;
 	}
 	
@@ -304,7 +325,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String customerName = customer.getName();
 		String moduleName = module.getName();
 		String documentName = document.getName();
-		Document result = convertDocument(customerName, moduleName, module, documentName, document);
+		Document result = convertDocument(customerName, customer, moduleName, module, documentName, document);
 		
 		StringBuilder documentKey = new StringBuilder(64);
 		documentKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(MODULES_NAMESPACE).append(moduleName).append('/').append(documentName);
@@ -317,7 +338,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	public Document addDocument(Module module, DocumentMetaData document) {
 		String moduleName = module.getName();
 		String documentName = document.getName();
-		Document result = convertDocument(null, moduleName, module, documentName, document);
+		Document result = convertDocument(null, null, moduleName, module, documentName, document);
 		
 		StringBuilder documentKey = new StringBuilder(64);
 		documentKey.append(MODULES_NAMESPACE).append(moduleName).append('/').append(documentName);

@@ -892,7 +892,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String binding = label.getBinding();
 
 		// does the value have binding expressions in them? - (?s) means multiline match
-		boolean dynamic = (label.getValue() != null) && BindUtil.messageIsBound(value); 
+		boolean dynamic = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value); 
 		if (dynamic) {
 			binding = "_" + formatCounter++; // _1, _2 and so on
 		}
@@ -921,7 +921,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderLabel(String value, Label label) {
 		// does the value have binding expressions in them? - (?s) means mutliline match
-		boolean dynamic = (label.getValue() != null) && BindUtil.messageIsBound(value); 
+		boolean dynamic = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value); 
 		if (dynamic) {
 			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
 											"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");

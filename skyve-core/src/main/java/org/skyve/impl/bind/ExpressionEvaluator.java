@@ -37,14 +37,14 @@ public abstract class ExpressionEvaluator {
 	
 	static {
 		evaluators.put(BindingExpressionEvaluator.PREFIX, DEFAULT_EVALUATOR);
-		evaluators.put(ELExpressionEvaluator.BIZEL_PREFIX, new ELExpressionEvaluator(true));
-		evaluators.put(ELExpressionEvaluator.EL_PREFIX, new ELExpressionEvaluator(false));
+		evaluators.put(ELExpressionEvaluator.EL_PREFIX, new ELExpressionEvaluator(true));
 		evaluators.put(DisplayNameExpressionEvaluator.PREFIX, new DisplayNameExpressionEvaluator());
 		evaluators.put(DescriptionExpressionEvaluator.PREFIX, new DescriptionExpressionEvaluator());
 		evaluators.put(I18NExpressionEvaluator.PREFIX, new I18NExpressionEvaluator());
 		evaluators.put(RoleExpressionEvaluator.PREFIX, new RoleExpressionEvaluator());
 		evaluators.put(StashExpressionEvaluator.PREFIX, new StashExpressionEvaluator());
 		evaluators.put(UserAttributesExpressionEvaluator.PREFIX, new UserAttributesExpressionEvaluator());
+		evaluators.put(ELExpressionEvaluator.RTEL_PREFIX, new ELExpressionEvaluator(false));
 	}
 	
 	public static String format(String expression) {
@@ -116,7 +116,8 @@ public abstract class ExpressionEvaluator {
 	private static Object process(String expression, Bean bean, boolean format) {
 		int colonIndex = expression.indexOf(':');
 		if (colonIndex < 0) {
-			String expressionWithoutPrefix = expression.trim();
+			// Remove {} and trim.
+			String expressionWithoutPrefix = expression.substring(1, expression.length() - 1).trim();
 
 			if (USER_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getName();
@@ -200,8 +201,8 @@ public abstract class ExpressionEvaluator {
 							DEFAULT_EVALUATOR.evaluateWithoutPrefix(expressionWithoutPrefix, bean);
 		}
 		
-		String prefix = expression.substring(0, colonIndex).trim();
-		String expressionWithoutPrefix = expression.substring(colonIndex + 1).trim();
+		String prefix = expression.substring(1, colonIndex).trim();
+		String expressionWithoutPrefix = expression.substring(colonIndex + 1, expression.length() - 1).trim();
 
 		ExpressionEvaluator eval = evaluators.get(prefix);
 		if (eval == null) {

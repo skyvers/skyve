@@ -33,6 +33,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
@@ -3406,9 +3407,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String methodName = new StringBuilder(64).append("is")
 																.append(Character.toUpperCase(conditionName.charAt(0)))
 																.append(conditionName.substring(1)).toString();
-					methods.append("\n\tpublic boolean ").append(methodName).append("() {")
-							.append("\n\t\treturn (").append(condition.getExpression()).append(");")
-							.append("\n\t}\n\n");
+					String expression = condition.getExpression();
+					methods.append("\n\tpublic boolean ").append(methodName).append("() {");
+					if (BindUtil.isSkyveExpression(expression)) {
+						imports.add("org.skyve.impl.bind.ExpressionEvaluator");
+						methods.append("\n\t\treturn Boolean.TRUE.equals(ExpressionEvaluator.evaluate(\"");
+						methods.append(expression);
+						methods.append("\", this));");
+					}
+					else {
+						methods.append("\n\t\treturn (").append(expression).append(");");
+					}
+					methods.append("\n\t}\n\n");
 
 					methods.append("\t/**")
 							.append("\n\t * {@link #").append(methodName).append("} negation.")

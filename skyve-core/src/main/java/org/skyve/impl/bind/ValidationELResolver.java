@@ -4,8 +4,11 @@ import java.beans.FeatureDescriptor;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +20,15 @@ import javax.el.MethodNotFoundException;
 import javax.el.PropertyNotFoundException;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Decimal10;
+import org.skyve.domain.types.Decimal2;
+import org.skyve.domain.types.Decimal5;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
 import org.skyve.metadata.customer.Customer;
@@ -42,13 +54,45 @@ class ValidationELResolver extends ELResolver {
 	
 	private Customer customer;
 	
+	private static final Map<Class<?>, Object> TERMINATING_MOCKS = new HashMap<>();
+	static {
+		TERMINATING_MOCKS.put(Boolean.class, Boolean.TRUE);
+		
+		TERMINATING_MOCKS.put(Byte.class, Byte.valueOf((byte) 1));
+		TERMINATING_MOCKS.put(Short.class, Short.valueOf((short) 1));
+		TERMINATING_MOCKS.put(Integer.class, Integer.valueOf(1));
+		TERMINATING_MOCKS.put(Long.class,  Long.valueOf(1L));
+		TERMINATING_MOCKS.put(Float.class, Float.valueOf(1.0F));
+		TERMINATING_MOCKS.put(Double.class, Double.valueOf(1.0F));
+		TERMINATING_MOCKS.put(BigInteger.class, BigInteger.valueOf(1L));
+		TERMINATING_MOCKS.put(BigDecimal.class, BigDecimal.valueOf(1.0));
+		TERMINATING_MOCKS.put(Decimal2.class, new Decimal2(1.0));
+		TERMINATING_MOCKS.put(Decimal5.class, new Decimal5(1.0));
+		TERMINATING_MOCKS.put(Decimal10.class, new Decimal10(1.0));
+		
+		TERMINATING_MOCKS.put(String.class, "");
+		TERMINATING_MOCKS.put(Character.class, Character.valueOf('\0'));
+
+		TERMINATING_MOCKS.put(Date.class, new Date());
+		TERMINATING_MOCKS.put(DateOnly.class, new DateOnly());
+		TERMINATING_MOCKS.put(TimeOnly.class, new TimeOnly());
+		TERMINATING_MOCKS.put(DateTime.class, new DateTime());
+		TERMINATING_MOCKS.put(Timestamp.class, new Timestamp());
+		
+		TERMINATING_MOCKS.put(Geometry.class, new GeometryFactory().createPoint());
+	}
+	
 	ValidationELResolver(Customer customer) {
 		this.customer = customer;
+	}
+	
+	private static Object mock(Class<?> type) {
+		Object mock = TERMINATING_MOCKS.get(type);
+		return (mock == null) ? type : mock;
 	}
 
 	@Override
 	public Class<?> getType(ELContext context, Object base, Object property) {
-		System.out.println("getType " + base + ", " + property);
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			context.setPropertyResolved(true);
@@ -58,7 +102,6 @@ class ValidationELResolver extends ELResolver {
 
 	@Override
 	public Object getValue(ELContext context, Object base, Object property) {
-		System.out.println("getValue " + base + ", " + property);
 		Object value = getClassOrDocument(base, property);
 		if (value != null) {
 			context.setPropertyResolved(base, property);
@@ -68,7 +111,6 @@ class ValidationELResolver extends ELResolver {
 	
 	@Override
 	public void setValue(ELContext context, Object base, Object property, Object val) {
-		System.out.println("setValue " + base + ", " + property + ", " + val);
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			if (val == null) {
@@ -107,7 +149,6 @@ class ValidationELResolver extends ELResolver {
 	 * @return Document, List or Class
 	 */
 	private Object getClassOrDocument(Object base, Object property) {
-		System.out.println("getValue " + base + ", " + property);
 		Object object = base;
 		final String propertyName = (String) property;
 
@@ -130,7 +171,7 @@ class ValidationELResolver extends ELResolver {
 			while (currentDocument != null) {
 				// Conditions are boolean type
 				if (currentDocument.getCondition(propertyName) != null) {
-					return Boolean.TYPE;
+					return Boolean.TRUE;
 				}
 
 				Attribute attribute = currentDocument.getAttribute(propertyName);
@@ -147,7 +188,7 @@ class ValidationELResolver extends ELResolver {
 						return relationDocument;
 					}
 					// Every other attribute is a scalar type
-					return attribute.getAttributeType().getImplementingType();
+					return mock(attribute.getAttributeType().getImplementingType());
 				}
 				
 				// Get super-document if applicable
@@ -178,7 +219,7 @@ class ValidationELResolver extends ELResolver {
 			}
 			else if (type.isArray()) {
 				checkInteger(property);
-				return type.getComponentType();
+				return mock(type.getComponentType());
 			}
 			else if (List.class.isAssignableFrom(type)) {
 				checkInteger(property);
@@ -190,10 +231,10 @@ class ValidationELResolver extends ELResolver {
 			else { // try a bean property
 				for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(type)) {
 					if (descriptor.getName().equals(propertyName)) {
-						return descriptor.getPropertyType();
+						return mock(descriptor.getPropertyType());
 					}
 				}
-				throw new PropertyNotFoundException("Property " + propertyName + " on " + base + " is not public");
+				throw new PropertyNotFoundException("Property " + propertyName + " on " + base + " does not exist");
 			}
 		}
 		
@@ -225,7 +266,6 @@ class ValidationELResolver extends ELResolver {
 	
 	@Override
 	public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
-		System.out.println("invoke " + base + ", " + method + ", " + paramTypes + ", " + params);
 		Class<?> type = null;
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(base, method);
@@ -276,8 +316,6 @@ class ValidationELResolver extends ELResolver {
 
 	@Override
 	public boolean isReadOnly(ELContext context, Object base, Object property) {
-		System.out.println("isReadOnly " + base + ", " + property);
-
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(true);
 			return false;
@@ -363,8 +401,6 @@ class ValidationELResolver extends ELResolver {
 
 	@Override
 	public Class<?> getCommonPropertyType(ELContext context, Object base) {
-		System.out.println("getCommonPropertyType " + base);
-
 		if (base instanceof DocumentImpl) {
 			return Object.class;
 		}

@@ -182,17 +182,8 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	@Override
-	public boolean evaluateCondition(String conditionName) {
-		boolean result = false;
-
-		try {
-			result = (Boolean.TRUE.equals(BindUtil.get(this, conditionName)));
-		}
-		catch (Exception e) {
-			throw new MetaDataException("Condition " + this.getBizDocument()+"."+ conditionName + " is not valid", e);
-		}
-
-		return result;
+	public boolean evaluateCondition(String condition) {
+		return BindUtil.evaluateCondition(this, condition);
 	}
 
 	public boolean isUserInOwningModuleRole(String roleName) {
