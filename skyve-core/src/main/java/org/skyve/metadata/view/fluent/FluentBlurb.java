@@ -29,6 +29,12 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 		}
 		sanitise(blurb.getSanitise());
 
+		blurb.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		return this;
+	}
+
+	public FluentBlurb putProperty(String k, String v) {
+		blurb.getProperties().put(k, v);
 		return this;
 	}
 

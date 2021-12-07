@@ -35,14 +35,15 @@ abstract class FluentAction<T extends FluentAction<T>> {
 		confirmationText(action.getConfirmationText());
 		disabledConditionName(action.getDisabledConditionName());
 		invisibleConditionName(action.getInvisibleConditionName());
+		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return (T) this;
 	}
-	
+
 	public static <T extends FluentAction<T>> T from(Action action) {
 		ActionMetaData a = ((ActionImpl) action).toRepositoryAction();
 		return from(a);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static <T extends FluentAction<T>> T from(ActionMetaData action) {
 		if (action instanceof DefaultsAction) {
@@ -95,13 +96,13 @@ abstract class FluentAction<T extends FluentAction<T>> {
 		}
 		throw new IllegalStateException(action + " not catered for");
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public T name(String name) {
 		get().setName(name);
 		return (T) this;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public T displayName(String displayName) {
 		get().setDisplayName(displayName);
@@ -113,7 +114,7 @@ abstract class FluentAction<T extends FluentAction<T>> {
 		get().setToolTip(toolTip);
 		return (T) this;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public T relativeIconFileName(String relativeIconFileName) {
 		get().setRelativeIconFileName(relativeIconFileName);
@@ -141,6 +142,12 @@ abstract class FluentAction<T extends FluentAction<T>> {
 	@SuppressWarnings("unchecked")
 	public T invisibleConditionName(String invisibleConditionName) {
 		get().setInvisibleConditionName(invisibleConditionName);
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T putProperty(String k, String v) {
+		get().getProperties().put(k, v);
 		return (T) this;
 	}
 
