@@ -125,7 +125,7 @@
 		<text name="passwordAccountLockoutDuration" audited="false" persistent="false" trackChanges="false" usage="view">
 			<documentation>Read from the application JSON file set at system startup.</documentation>
 			<displayName>admin.configuration.passwordAccountLockoutDuration.displayName</displayName>
-			<description>admin.configuration.passwordAccoutnLockoutDuration.description</description>
+			<description>admin.configuration.passwordAccountLockoutDuration.description</description>
 			<length>20</length>
 		</text>
 		<association name="emailToContact" type="aggregation" persistent="false">
