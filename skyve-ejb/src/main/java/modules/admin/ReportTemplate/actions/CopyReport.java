@@ -52,6 +52,7 @@ public class CopyReport implements ServerSideAction<ReportTemplate> {
 		}
 		
 		//return the new report
+		newReport = CORE.getPersistence().save(newReport);
 		return new ServerSideActionResult<>(newReport);
 	}
 
