@@ -10,6 +10,7 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -47,7 +48,11 @@ class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public String validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
+	public String validateWithoutPrefix(String expression,
+											Class<?> returnType,
+											Customer customer,
+											Module module,
+											Document document) {
 		String result = null;
 
 		if (typesafe) {
@@ -64,7 +69,23 @@ class ELExpressionEvaluator extends ExpressionEvaluator {
 				elp.defineBean(TIME_EXPRESSION, new TimeOnly());
 				elp.defineBean(DATETIME_EXPRESSION, new DateTime());
 				elp.defineBean(TIMESTAMP_EXPRESSION, new Timestamp());
-				elp.eval(expression);
+				Object evaluation = elp.eval(expression);
+				if (returnType != null) {
+					Class<?> type = null;
+					if (evaluation instanceof DocumentImpl) {
+						type = ((DocumentImpl) evaluation).getBeanClass(customer);
+					}
+					else if (evaluation instanceof Class<?>) {
+						type = (Class<?>) evaluation;
+					}
+					else if (evaluation != null) {
+						type = evaluation.getClass();
+					}
+					if ((type != null) && (! returnType.isAssignableFrom(type))) {
+						result = expression + " returns an instance of type " + type +
+								" that is incompatible with required return type of " + returnType;
+					}
+				}
 			}
 			catch (Exception e) {
 				e.printStackTrace();

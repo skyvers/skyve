@@ -307,7 +307,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			Condition condition = result.getCondition(conditionName);
 			String expression = condition.getExpression();
 			if (BindUtil.isSkyveExpression(expression)) {
-				String error = ExpressionEvaluator.validate(expression.substring(1, expression.length() - 1),
+				String error = ExpressionEvaluator.validate(expression,
+																Boolean.class,
 																customer,
 																module,
 																result);

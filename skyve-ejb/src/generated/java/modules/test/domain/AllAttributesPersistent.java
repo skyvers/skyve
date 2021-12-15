@@ -878,4 +878,23 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;
 	}
+
+	/**
+	 * condition
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCondition() {
+		return (true);
+	}
+
+	/**
+	 * {@link #isCondition} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCondition() {
+		return (! isCondition());
+	}
 }

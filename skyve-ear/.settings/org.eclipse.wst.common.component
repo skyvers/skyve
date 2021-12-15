@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                                                            
+                                                                                
+    
     
     
     
@@ -18,7 +19,8 @@
     
     
     <wb-module deploy-name="skyve-ear-8.1.0-SNAPSHOT">
-                                                                                                                                                        
+                                                                                                                                                                
+        
         
         
         
@@ -37,7 +39,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                                                                                        
+                                                                                                                                                                
+        
         
         
         
@@ -437,7 +440,8 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                                                                                                    
+                                                                                                                                                            
+    
     
     
     
@@ -456,7 +460,8 @@
     
     
     </wb-module>
-                                                                        
+                                                                            
+
 
 
 

@@ -20,7 +20,11 @@ class StashExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public String validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
+	public String validateWithoutPrefix(String expression,
+											Class<?> returnType,
+											Customer customer,
+											Module module,
+											Document document) {
 		return null; // any key is valid
 	}
 }

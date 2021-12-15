@@ -234,7 +234,7 @@ class ValidationELResolver extends ELResolver {
 						return mock(descriptor.getPropertyType());
 					}
 				}
-				throw new PropertyNotFoundException("Property " + propertyName + " on " + base + " does not exist");
+				throw new PropertyNotFoundException("Property " + propertyName + " on " + type + " does not exist");
 			}
 		}
 		

@@ -190,13 +190,12 @@ public final class BindUtil {
 					error = "Opening '{' with no closing '}'";
 				}
 				else {
-					String expression = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
-					expression = expression.trim();
-					if (expression.isEmpty()) {
+					String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
+					if (expression.length() == 2) {
 						error = "Expression is empty";
 					}
 					else {
-						error = ExpressionEvaluator.validate(expression, customer, module, document);
+						error = ExpressionEvaluator.validate(expression, null, customer, module, document);
 						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 					}
 				}
@@ -1495,6 +1494,43 @@ public final class BindUtil {
 					PersistentBean.FLAG_COMMENT_NAME.equals(attributeName));
 	}
 	
+	/**
+	 * Return the implicit attribute type if the attributeName given is for an implicit attribute. 
+	 */
+	public static final Class<?> implicitAttributeType(String attributeName) {
+		if (HierarchicalBean.PARENT_ID.equals(attributeName) ||
+				Bean.DOCUMENT_ID.equals(attributeName) ||
+				Bean.CUSTOMER_NAME.equals(attributeName) ||
+				Bean.DATA_GROUP_ID.equals(attributeName) ||
+				Bean.USER_ID.equals(attributeName) ||
+				Bean.BIZ_KEY.equals(attributeName) ||
+				Bean.MODULE_KEY.equals(attributeName) ||
+				Bean.DOCUMENT_KEY.equals(attributeName) ||
+				PersistentBean.FLAG_COMMENT_NAME.equals(attributeName)) {
+			return String.class;
+		}
+		else if (ChildBean.PARENT_NAME.equals(attributeName)) {
+			return Bean.class;
+		}
+		else if (Bean.ORDINAL_NAME.equals(attributeName) ||
+					PersistentBean.VERSION_NAME.equals(attributeName)) {
+			return Integer.class;
+		}
+		else if (Bean.CREATED_KEY.equals(attributeName) ||
+					Bean.NOT_CREATED_KEY.equals(attributeName) ||
+					Bean.PERSISTED_KEY.equals(attributeName) ||
+					Bean.NOT_PERSISTED_KEY.equals(attributeName) ||
+					Bean.CHANGED_KEY.equals(attributeName) ||
+					Bean.NOT_CHANGED_KEY.equals(attributeName) ||
+					PersistentBean.TAGGED_NAME.equals(attributeName)) {
+			return Boolean.class;
+		}
+		else if (PersistentBean.LOCK_NAME.equals(attributeName)) {
+			return OptimisticLock.class;
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * See Binder.isDynamic().
@@ -1792,6 +1828,7 @@ public final class BindUtil {
 	 * 			The document is never null whereas the attribute can be null if'
 	 * 			the binding expression ultimately resolves to an implicit attribute
 	 * 			like bizKey or bizId or the like.
+	 * @throws	MetaDataException if the binding is malformed or cannot be resolved.
 	 */
 	public static TargetMetaData getMetaDataForBinding(Customer customer, 
 														Module module, 

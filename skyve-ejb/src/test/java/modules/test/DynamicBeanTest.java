@@ -189,7 +189,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	}
 	
 	@Test
-	public void testBenVisitorWithDynamicAttributes() throws Exception {
+	public void testBeanVisitorWithDynamicAttributes() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
 		testBeanVisitor(adapd, bean);
 	}

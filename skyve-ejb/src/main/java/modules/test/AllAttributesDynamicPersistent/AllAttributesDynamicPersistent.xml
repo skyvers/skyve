@@ -137,4 +137,13 @@
 			<defaultValue>2021-10-21T07:48:29Z</defaultValue>
 		</timestamp>
 	</attributes>
+	<conditions>
+		<condition name="condition" usage="domain">
+			<expression>
+				<![CDATA[
+					{el:not empty bean.text and bean.longInteger < 0}
+				]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

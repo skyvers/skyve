@@ -5,6 +5,7 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder.TargetMetaData;
 
@@ -22,23 +23,84 @@ abstract class AttributeExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	public String validateWithoutPrefix(String expression, Customer customer, Module module, Document document) {
+	public String validateWithoutPrefix(String expression,
+											Class<?> returnType,
+											Customer customer,
+											Module module,
+											Document document) {
+		if (customer == null) {
+			throw new IllegalArgumentException("customer can't be null for a binding expression");
+		}
+		if (module == null) {
+			throw new IllegalArgumentException("module can't be null for a binding expression");
+		}
+		if (document == null) {
+			throw new IllegalArgumentException("document can't be null for a binding expression");
+		}
+
 		String error = null;
-		
-		try {
-			// Check the binding in this bean
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, expression);
-			if (target == null) {
-				error = "Binding " + expression + " does not resolve to a document attribute.";
+
+		Document contextDocument = document;
+		String ultimateBinding = expression;
+		int lastDotIndex = expression.lastIndexOf('.');
+		if (lastDotIndex > 0) {
+			String penultimateBinding = expression.substring(0, lastDotIndex);
+			ultimateBinding = expression.substring(lastDotIndex + 1);
+			try {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
+				if (target == null) {
+					error = "Binding " + penultimateBinding + " does not resolve to a relation.";
+				}
+				else {
+					Attribute relation = target.getAttribute();
+					if (relation instanceof Relation) {
+						String contentDocumentName = ((Relation) relation).getDocumentName();
+						contextDocument = module.getDocument(customer, contentDocumentName);
+					}
+					else {
+						error = "Binding " + penultimateBinding + " does not resolve to a relation.";
+					}
+				}
+			}
+			catch (Exception e) {
+				error = e.getMessage();
+				if (error == null) {
+					error = "Binding " + penultimateBinding + " does not resolve to a document attribute.";
+				}
+				else {
+					error = "Binding " + penultimateBinding + " does not resolve to a document attribute: " + error;
+				}
 			}
 		}
-		catch (Exception e) {
-			error = e.getMessage();
-			if (error == null) {
-				error = "Binding " + expression + " does not resolve to a document attribute.";
+		
+		Attribute attribute = contextDocument.getAttribute(ultimateBinding);
+		if (attribute == null) {
+			if (contextDocument.getCondition(ultimateBinding) != null) {
+				if ((returnType != null) && (! returnType.isAssignableFrom(Boolean.class))) {
+					error = "Binding " + expression + " resolves to a boolean condition that is incompatible with required type of " + returnType;
+				}
 			}
 			else {
-				error = "Binding " + expression + " does not resolve to a document attribute: " + error;
+				Class<?> implicitClass = BindUtil.implicitAttributeType(ultimateBinding);
+				if (implicitClass != null) {
+					if ((returnType != null) && (! returnType.isAssignableFrom(implicitClass))) {
+						error = "Binding " + expression + " resolves to implicit attribute " + ultimateBinding + 
+									" of type " + implicitClass + 
+									" that is incompatible with required type of " + returnType;
+					}
+				}
+				else {
+					error = "Binding " + expression + " does not resolve to a document attribute, condition or an implicit attribute.";
+				}
+			}
+		}
+		else {
+			if (returnType != null) {
+				Class<?> attributeClass = attribute.getAttributeType().getImplementingType();
+				if (! returnType.isAssignableFrom(attributeClass)) {
+					error = "Binding " + expression + " resolves to an attribute of type " + attributeClass + 
+								" that is incompatible with required type of " + returnType;
+				}
 			}
 		}
 

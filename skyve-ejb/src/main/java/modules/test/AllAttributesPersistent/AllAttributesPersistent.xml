@@ -93,4 +93,13 @@
 			<displayName>Timestamp</displayName>
 		</timestamp>
 	</attributes>
+	<conditions>
+		<condition name="condition">
+			<expression>
+				<![CDATA[
+					true
+				]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

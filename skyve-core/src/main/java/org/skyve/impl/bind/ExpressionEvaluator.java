@@ -3,6 +3,9 @@ package org.skyve.impl.bind;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
@@ -31,7 +34,7 @@ public abstract class ExpressionEvaluator {
 	private static Map<String, ExpressionEvaluator> evaluators = new TreeMap<>();
 	private static final ExpressionEvaluator DEFAULT_EVALUATOR = new BindingExpressionEvaluator();
 	
-	public static void register(String evaluatorPrefix, ExpressionEvaluator evaluator) {
+	public static void register(@Nonnull String evaluatorPrefix, @Nonnull ExpressionEvaluator evaluator) {
 		evaluators.put(evaluatorPrefix, evaluator);
 	}
 	
@@ -47,43 +50,59 @@ public abstract class ExpressionEvaluator {
 		evaluators.put(ELExpressionEvaluator.RTEL_PREFIX, new ELExpressionEvaluator(false));
 	}
 	
-	public static String format(String expression) {
+	public static @Nonnull String format(@Nonnull String expression) {
 		return format(expression, null);
 	}
 	
-	public static String format(String expression, Bean bean) {
+	public static @Nonnull String format(@Nonnull String expression, @Nullable Bean bean) {
 		return (String) process(expression, bean, true);
 	}
 	
-	public static Object evaluate(String expression) {
+	public static @Nullable Object evaluate(@Nonnull String expression) {
 		return evaluate(expression, null);
 	}
 	
-	public static Object evaluate(String expression, Bean bean) {
+	public static @Nullable Object evaluate(@Nonnull String expression, @Nullable Bean bean) {
 		return process(expression, bean, false);
 	}
 
 	/**
 	 * Validate an expression
 	 * @param expression
+	 * @param returnType A return type to assert.
 	 * @return	null if valid or the error message if not.
 	 */
-	public static String validate(String expression) {
-		return validate(expression, null, null, null);
+	public static @Nullable String validate(@Nonnull String expression) {
+		return validate(expression, null, null, null, null);
+	}
+
+	/**
+	 * Validate an expression
+	 * @param expression
+	 * @param returnType A return type to assert.
+	 * @return	null if valid or the error message if not.
+	 */
+	public static @Nullable String validate(@Nonnull String expression, @Nullable Class<?> returnType) {
+		return validate(expression, returnType, null, null, null);
 	}
 
 	/**
 	 * Validate an expression.
 	 * @param expression
+	 * @param returnType A return type to assert.
 	 * @param customer
 	 * @param module
 	 * @param document
 	 * @return	null if valid or the error message if not.
 	 */
-	public static String validate(String expression, Customer customer, Module module, Document document) {
+	public static @Nullable String validate(@Nonnull String expression,
+												@Nullable Class<?> returnType,
+												@Nullable Customer customer,
+												@Nullable Module module,
+												@Nullable Document document) {
 		int colonIndex = expression.indexOf(':');
 		if (colonIndex < 0) {
-			String expressionWithoutPrefix = expression.trim();
+			String expressionWithoutPrefix = expression.substring(1, expression.length() - 1).trim();
 
 			if (USER_EXPRESSION.equals(expressionWithoutPrefix) ||
 					USERID_EXPRESSION.equals(expressionWithoutPrefix) ||
@@ -99,18 +118,22 @@ public abstract class ExpressionEvaluator {
 				return null; // this is valid
 			}
 
-			return DEFAULT_EVALUATOR.validateWithoutPrefix(expressionWithoutPrefix, customer, module, document);
+			return DEFAULT_EVALUATOR.validateWithoutPrefix(expressionWithoutPrefix,
+															returnType,
+															customer,
+															module,
+															document);
 		}
 		
-		String prefix = expression.substring(0, colonIndex).trim();
-		String expressionWithoutPrefix = expression.substring(colonIndex + 1).trim();
+		String prefix = expression.substring(1, colonIndex).trim();
+		String expressionWithoutPrefix = expression.substring(colonIndex + 1, expression.length() - 1).trim();
 
 		ExpressionEvaluator eval = evaluators.get(prefix);
 		if (eval == null) {
 			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
 		}
 		
-		return eval.validateWithoutPrefix(expressionWithoutPrefix, customer, module, document);
+		return eval.validateWithoutPrefix(expressionWithoutPrefix, returnType, customer, module, document);
 	}
 	
 	private static Object process(String expression, Bean bean, boolean format) {
@@ -212,7 +235,11 @@ public abstract class ExpressionEvaluator {
 		return format ? eval.formatWithoutPrefix(expressionWithoutPrefix, bean) : eval.evaluateWithoutPrefix(expressionWithoutPrefix, bean);
 	}
 	
-	public abstract String formatWithoutPrefix(String expression, Bean bean);
-	public abstract Object evaluateWithoutPrefix(String expression, Bean bean);
-	public abstract String validateWithoutPrefix(String expression, Customer customer, Module module, Document document);
+	public abstract @Nonnull String formatWithoutPrefix(@Nonnull String expression, @Nullable Bean bean);
+	public abstract @Nullable Object evaluateWithoutPrefix(@Nonnull String expression, @Nullable Bean bean);
+	public abstract @Nullable String validateWithoutPrefix(@Nonnull String expression,
+															@Nullable Class<?> returnType,
+															@Nullable Customer customer,
+															@Nullable Module module,
+															@Nullable Document document);
 }
