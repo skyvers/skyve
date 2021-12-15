@@ -329,7 +329,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	}
 
 	public static void validateGroups(User user, ValidationException e) {
-		if (user.getRoles().isEmpty() && user.getGroups().isEmpty()) {
+		if (!Boolean.TRUE.equals(user.getInactive()) && user.getRoles().isEmpty() && user.getGroups().isEmpty()) {
 			e.getMessages().add(new Message("At least 1 role or group is required to enable correct login for this user."));
 		}
 	}

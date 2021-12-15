@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.customer.Customer;
@@ -24,7 +24,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.util.test.TestUtil;
 
-public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
+public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2TestForJUnit5 {
 
 	protected abstract T getBean() throws Exception;
 
@@ -63,15 +63,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		int beanCount = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults().size();
 
 		CORE.getPersistence().save(b1);
-
-		try {
-			CORE.getPersistence().save(b2);
-		}
-		catch (@SuppressWarnings("unused") UniqueConstraintViolationException ucve) {
-			// try get a new bean2
-			b2 = getBean();
-			CORE.getPersistence().save(b2);
-		}
+		CORE.getPersistence().save(b2);
 
 		// perform the method under test
 		List<T> results = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults();
@@ -120,7 +112,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			try {
 				getBizlet().getConstantDomainValues(attribute.getName());
 			} catch (@SuppressWarnings("unused") ValidationException e) {
-				// pass - action handled incorrect input
+				// pass - bizlet validated incorrect input
 			}
 		}
 	}
@@ -149,7 +141,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			try {
 				getBizlet().getDynamicDomainValues(attribute.getName(), getBean());
 			} catch (@SuppressWarnings("unused") ValidationException e) {
-				// pass - action handled incorrect input
+				// pass - bizlet validated incorrect input
 			}
 		}
 	}
@@ -178,7 +170,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			try {
 				getBizlet().getVariantDomainValues(attribute.getName());
 			} catch (@SuppressWarnings("unused") ValidationException e) {
-				// pass - action handled incorrect input
+				// pass - bizlet validated incorrect input
 			}
 		}
 	}
@@ -202,6 +194,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 	}
 
 	@Test
+	@Timeout(30)
 	@SuppressWarnings("boxing")
 	public void testUpdate() throws Exception {
 		// create the test data
@@ -236,17 +229,11 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 				return;
 			}
 			
-			try {
-				T uResult = CORE.getPersistence().save(result);
+			T uResult = CORE.getPersistence().save(result);
 
-				// verify the results
-				assertThat("Error updating " + attributeToUpdate.getName(), Binder.get(uResult, attributeToUpdate.getName()),
+			// verify the results
+			assertThat("Error updating " + attributeToUpdate.getName(), Binder.get(uResult, attributeToUpdate.getName()),
 						is(not(originalValue)));
-			}
-			catch (@SuppressWarnings("unused") UniqueConstraintViolationException ucve) {
-				// skip - factory did not generate unique input
-			}
-
 		} else {
 			Util.LOGGER.fine(String.format("Skipping update test for %s, no scalar attribute found", bean.getBizDocument()));
 		}

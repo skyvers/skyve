@@ -34,7 +34,7 @@ import modules.admin.domain.User;
 public class AbstractH2TestForJUnit5 {
     protected static final String USER = "TestUser";
     protected static final String PASSWORD = "TestPassword0!";
-	protected static final String CUSTOMER = "skyve";
+	protected static final String CUSTOMER = "bizhub";
 
     private static final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
     private static final String DB_DRIVER = "org.h2.Driver";

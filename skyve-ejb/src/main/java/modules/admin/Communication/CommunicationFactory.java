@@ -13,7 +13,8 @@ import modules.admin.Communication.actions.TestSend;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Tag;
 
-@SkyveFactory(excludedActions = { CreateFiles.class, GetCount.class, GetResults.class, SendNow.class, TestSend.class })
+@SkyveFactory(testDomain = false, excludedActions = {
+		CreateFiles.class, GetCount.class, GetResults.class, SendNow.class, TestSend.class })
 public class CommunicationFactory {
 
 	@SkyveFixture(types = FixtureType.crud)

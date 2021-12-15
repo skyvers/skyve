@@ -1,5 +1,6 @@
 package modules.admin.ReportTemplate.actions;
 
+import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.Util;
@@ -52,6 +53,7 @@ public class CopyReport implements ServerSideAction<ReportTemplate> {
 		}
 		
 		//return the new report
+		newReport = CORE.getPersistence().save(newReport);
 		return new ServerSideActionResult<>(newReport);
 	}
 
