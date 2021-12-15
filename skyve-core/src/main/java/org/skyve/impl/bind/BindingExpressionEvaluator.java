@@ -3,7 +3,7 @@ package org.skyve.impl.bind;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 
-class BindingExpressionEvaluator extends AttributeExpressionEvaluator {
+class BindingExpressionEvaluator extends MetaDataExpressionEvaluator {
 	static final String PREFIX = "bean";
 	
 	@Override

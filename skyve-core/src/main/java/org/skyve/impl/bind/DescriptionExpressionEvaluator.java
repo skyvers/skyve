@@ -3,7 +3,7 @@ package org.skyve.impl.bind;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute;
 
-class DescriptionExpressionEvaluator extends AttributeExpressionEvaluator {
+class DescriptionExpressionEvaluator extends MetaDataExpressionEvaluator {
 	static final String PREFIX = "desc";
 	
 	@Override
