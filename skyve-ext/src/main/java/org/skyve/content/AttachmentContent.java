@@ -44,7 +44,7 @@ public class AttachmentContent extends Content {
 		}
 		this.attributeName = attributeName;
 		this.fileName = fileName;
-		if (fileName == null) {
+		if (this.fileName == null) {
 			if (contentType != null) {
 				MimeType mimeType = MimeType.fromContentType(contentType);
 				if (mimeType != null) {
@@ -60,13 +60,13 @@ public class AttachmentContent extends Content {
 		}
 		else {
 			// remove the path
-			this.fileName = FilenameUtils.getName(fileName);
+			this.fileName = FilenameUtils.getName(this.fileName);
 			// remove any invalid chars on all OSs (restricted by windows)
 			this.fileName = this.fileName.replaceAll("[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", "").trim();
 		}
 		this.contentType = contentType;
 		if ((this.fileName != null) && (this.contentType == null)) {
-			MimeType mimeType = MimeType.fromFileName(fileName);
+			MimeType mimeType = MimeType.fromFileName(this.fileName);
 			if (mimeType != null) {
 				this.contentType = mimeType.toString();
 			}
