@@ -307,6 +307,7 @@ public class BindTests extends AbstractSkyveTest {
 		Binder.set(bean, AllAttributesPersistent.textPropertyName, "Test");
 		
 		Assert.assertEquals("Test", Binder.formatMessage("{text}", bean));
+		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{condition}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{bean:text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
 		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.condition}", bean));
