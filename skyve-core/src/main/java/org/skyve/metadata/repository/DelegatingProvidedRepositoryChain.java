@@ -26,12 +26,36 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
 public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegate {
-	protected ProvidedRepository[] delegates;
+	protected List<ProvidedRepository> delegates;
 	
 	public DelegatingProvidedRepositoryChain(ProvidedRepository... delegates) {
-		this.delegates = delegates;
+		this.delegates = new ArrayList<>(delegates.length);
 		for (ProvidedRepository delegate : delegates) {
+			addDelegate(delegate);
+		}
+	}
+
+	public synchronized void addDelegate(ProvidedRepository delegate) {
+		if (delegates.add(delegate)) {
 			delegate.setDelegator(this);
+		}
+	}
+
+	public synchronized void addDelegate(int index, ProvidedRepository delegate) {
+		delegates.add(index, delegate);
+		delegate.setDelegator(this);
+	}
+
+	public synchronized void removeDelegate(ProvidedRepository delegate) {
+		if (delegates.remove(delegate)) {
+			delegate.setDelegator(null);
+		}
+	}
+
+	public synchronized void removeDelegate(int index) {
+		ProvidedRepository delegate = delegates.remove(index);
+		if (delegate != null) {
+			delegate.setDelegator(null);
 		}
 	}
 

@@ -33,7 +33,7 @@ import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.metadata.repository.LocalSecureRepository;
+import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
@@ -452,7 +452,7 @@ public class SkyveContextListener implements ServletContextListener {
 		if (ProvidedRepositoryFactory.get() == null) {
 			if (UtilImpl.SKYVE_REPOSITORY_CLASS == null) {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
-				ProvidedRepositoryFactory.set(new LocalSecureRepository());
+				ProvidedRepositoryFactory.set(new DefaultRepository());
 			}
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
