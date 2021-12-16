@@ -207,7 +207,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Minumum Password Length
+	 * Minimum Password Length
 	 * <br/>
 	 * The minimum number of characters for new passwords
 	 **/
@@ -360,7 +360,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/**
 	 * Account Lockout Duration
 	 * <br/>
-	 * admin.configuration.passwordAccoutnLockoutDuration.description
+	 * Number of seconds per failed sign in attempt to lock the account for. This only applies if an account lockout is set.
 	 * <br/>
 	 * Read from the application JSON file set at system startup.
 	 **/
