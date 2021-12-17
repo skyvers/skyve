@@ -203,7 +203,7 @@ final class BackupUtil {
 
 	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
-		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
+		if ((! document.isDynamic()) && (persistent != null) && (persistent.getName() != null)) { // static persistent document
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			Table table = tables.get(persistentIdentifier);
 			if (table == null) {
@@ -221,8 +221,8 @@ final class BackupUtil {
 					if (referencePersistent != null) {
 						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer,
 																													reference.getDocumentName());
-						// Add joining table for collections
-						if (reference.isCollection()) {
+						// Add joining table for collections pointing to static documents
+						if (reference.isCollection() && (! referencedDocument.isDynamic())) {
 							// child collections have no joining table
 							if (! CollectionType.child.equals(reference.getType())) {
 								String referenceFieldName = reference.getReferenceFieldName();

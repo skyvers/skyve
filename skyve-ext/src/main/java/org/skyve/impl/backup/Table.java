@@ -89,23 +89,30 @@ class Table {
 					Association association = (Association) attribute;
 					Customer c = AbstractPersistence.get().getUser().getCustomer();
 					Document referencedDocument = c.getModule(document.getOwningModuleName()).getDocument(c, association.getDocumentName());
-					Persistent referencedPersistent = referencedDocument.getPersistent();
-					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
-						fields.put(attributeName + "_type", AttributeType.text);
+					if (! referencedDocument.isDynamic()) {
+						Persistent referencedPersistent = referencedDocument.getPersistent();
+						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+							fields.put(attributeName + "_type", AttributeType.text);
+						}
+						
+						fields.put(attributeName + "_id", attribute.getAttributeType());
 					}
-					
-					fields.put(attributeName + "_id", attribute.getAttributeType());
 				}
 				else if ((! AttributeType.collection.equals(attributeType)) && 
 							(! AttributeType.inverseOne.equals(attributeType)) &&
 							(! AttributeType.inverseMany.equals(attributeType))) {
+					boolean dynamic = false;
 					if (attribute instanceof Field) {
-						IndexType indexType = ((Field) attribute).getIndex();
+						Field field = (Field) attribute;
+						dynamic = field.isDynamic();
+						IndexType indexType = field.getIndex();
 						if (indexType != null) {
 							indexes.put(attributeName, indexType);
 						}
 					}
-					fields.put(attributeName, attributeType);
+					if (! dynamic) {
+						fields.put(attributeName, attributeType);
+					}
 				}
 			}
 		}
