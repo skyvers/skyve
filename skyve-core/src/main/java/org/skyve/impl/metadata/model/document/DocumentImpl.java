@@ -25,6 +25,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.flow.Flow;
 import org.skyve.impl.metadata.model.ModelImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -62,6 +63,7 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.util.ExpressionEvaluator;
 
 public final class DocumentImpl extends ModelImpl implements Document {
 	private static final long serialVersionUID = 9091172268741052691L;
@@ -282,12 +284,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				}
 			}
 			
-			getAllAttributes().forEach(a -> p.put(a.getName(), dynamicDefaultValue(a)));
+			getAllAttributes().forEach(a -> p.put(a.getName(), null));
 
 			@SuppressWarnings("unchecked")
 			T t = (persistent == null) ?
 					(T) new MapBean(getOwningModuleName(), getName(), p) :
 					(T) new PersistentMapBean(getOwningModuleName(), getName(), p);
+
+			getAllAttributes().forEach(a -> t.setDynamic(a.getName(), dynamicDefaultValue(a, t)));
+
 			result = t;
 		}
 		else {
@@ -304,19 +309,46 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 		getAllAttributes().forEach(a -> {
 			if (BindUtil.isDynamic(customer, m, this, a)) {
-				bean.setDynamic(a.getName(), dynamicDefaultValue(a));
+				bean.setDynamic(a.getName(), dynamicDefaultValue(a, bean));
 			}
 		});
 	}
 	
-	private static Object dynamicDefaultValue(Attribute attribute) {
+	private static Object dynamicDefaultValue(Attribute attribute, Bean bean) {
 		Object result = null;
 		
 		if (attribute instanceof Field) {
 			Field field = (Field) attribute;
 			String defaultValue = field.getDefaultValue();
 			if (defaultValue != null) {
-				result = BindUtil.fromString(null, null, attribute.getAttributeType().getImplementingType(), defaultValue, true);
+				Class<?> implementingType = attribute.getAttributeType().getImplementingType();
+				if (String.class.equals(implementingType)) {
+					if (BindUtil.containsSkyveExpressions(defaultValue)) {
+						result = BindUtil.formatMessage(defaultValue, bean);
+					}
+					else {
+						// NB Take care of escaped {
+						result = defaultValue.replace("\\{", "{");
+					}
+				}
+				else {
+					if (BindUtil.isSkyveExpression(defaultValue)) {
+						result = ExpressionEvaluator.evaluate(defaultValue, bean);
+					}
+					else {
+						Class<?> type = attribute.getAttributeType().getImplementingType();
+
+						// Cater where a dynamic enum references a generated one, otherwise it stays a string
+						if (attribute instanceof Enumeration) {
+							Enumeration enumeration = (Enumeration) attribute;
+							if (! enumeration.getTarget().isDynamic()) {
+								type = enumeration.getEnum();
+							}
+						}
+
+						result = BindUtil.fromString(null, null, type, defaultValue, true);
+					}					
+				}
 			}
 		}
 		else if ((attribute instanceof Collection) || (attribute instanceof InverseMany)) {

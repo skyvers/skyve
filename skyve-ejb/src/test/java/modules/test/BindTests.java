@@ -6,20 +6,24 @@ import java.util.TreeMap;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentMapBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Decimal10;
+import org.skyve.domain.types.Decimal2;
+import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.bind.ExpressionEvaluator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.Binder;
+import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.OWASP;
 import org.skyve.util.Time;
 import org.skyve.util.Util;
@@ -30,6 +34,7 @@ import modules.admin.domain.Snapshot;
 import modules.admin.domain.User;
 import modules.admin.domain.UserRole;
 import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.AllAttributesPersistent.Enum3;
 
 public class BindTests extends AbstractSkyveTest {
 	@Test
@@ -287,18 +292,21 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("", Binder.formatMessage("{el:stash['nothing']}", bean));
 		Assert.assertEquals("", Binder.formatMessage("{el:user.attributes['nothing']}", bean));
 
-		Assert.assertEquals(currentDate, Binder.formatMessage("{el:DATE}", bean));
-		Assert.assertEquals(tomorrowsDate, Binder.formatMessage("{el:DATE.setLocalDate(DATE.toLocalDate().plusDays(1))}", bean));
-		Assert.assertEquals(currentTime, Binder.formatMessage("{el:TIME}", bean));
-		Assert.assertEquals(currentDateTime, Binder.formatMessage("{el:DATETIME}", bean));
-		Assert.assertEquals(currentTimestamp, Binder.formatMessage("{el:TIMESTAMP}", bean));
-
 		Assert.assertEquals("some.non-existent.key", Binder.formatMessage("{i18n:some.non-existent.key}", bean));
 		Assert.assertEquals("Yes", Binder.formatMessage("{role:admin.BasicUser}", bean));
 		Assert.assertEquals("Stash", Binder.formatMessage("{stash:text}", bean));
 		Assert.assertEquals("", Binder.formatMessage("{stash:nothing}", bean));
 		Assert.assertEquals("Attribute", Binder.formatMessage("{user:text}", bean));
 		Assert.assertEquals("", Binder.formatMessage("{user:nothing}", bean));
+		
+		// Test functions and imports
+		Assert.assertEquals(currentDate, Binder.formatMessage("{el:newDateOnly()}", bean));
+		Assert.assertEquals(tomorrowsDate, Binder.formatMessage("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", bean));
+		Assert.assertEquals(currentTime, Binder.formatMessage("{el:newTimeOnly()}", bean));
+		Assert.assertEquals(currentDateTime, Binder.formatMessage("{el:newDateTime()}", bean));
+		Assert.assertEquals(currentTimestamp, Binder.formatMessage("{el:newTimestamp()}", bean));
+		Assert.assertEquals("0.00", Binder.formatMessage("{el:Decimal2.ZERO}", bean));
+		Assert.assertEquals("100.00", Binder.formatMessage("{el:newDecimal2(100)}", bean));
 	}
 	
 	@Test
@@ -311,7 +319,49 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("Test", Binder.formatMessage("{bean:text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
 		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.condition}", bean));
+		
+		bean = aadpd.newInstance(u);
+		System.out.println(bean);
+		System.out.println();
 	}
+	
+	@Test
+	public void testDynamicDefaults() throws Exception {
+		Bean bean = aadpd.newInstance(u);
+		Assert.assertEquals(Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
+		Assert.assertEquals("#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName));
+		Assert.assertEquals(new DateOnly("2021-10-21"), Binder.get(bean, AllAttributesPersistent.datePropertyName));
+		Assert.assertEquals(new DateTime("2021-10-21T07:48:29Z"), Binder.get(bean, AllAttributesPersistent.dateTimePropertyName));
+		Assert.assertEquals(new Decimal10(100.1234567899), Binder.get(bean, AllAttributesPersistent.decimal10PropertyName));
+		Assert.assertEquals(new Decimal2(100.12), Binder.get(bean, AllAttributesPersistent.decimal2PropertyName));
+		Assert.assertEquals(new Decimal5(100.12345), Binder.get(bean, AllAttributesPersistent.decimal5PropertyName));
+		// NB This can't be a real enum value coz there is no generated class
+		Assert.assertEquals("one", Binder.get(bean, AllAttributesPersistent.enum3PropertyName));
+		// NB This is a real enum value coz its a dynamic reference to a generated class
+		Assert.assertEquals(Enum3.one, Binder.get(bean, "enum3Reference"));
+		Assert.assertEquals(new WKTReader().read("POINT(0 0)"), Binder.get(bean, AllAttributesPersistent.geometryPropertyName));
+		Assert.assertEquals("1234567890", Binder.get(bean, AllAttributesPersistent.idPropertyName));
+		Assert.assertEquals(Integer.valueOf(123), Binder.get(bean,  AllAttributesPersistent.normalIntegerPropertyName));
+		Assert.assertEquals(Long.valueOf(123), Binder.get(bean,  AllAttributesPersistent.longIntegerPropertyName));
+		Assert.assertEquals("<h1>Markup</h1>", Binder.get(bean, AllAttributesPersistent.markupPropertyName));
+		Assert.assertEquals("Memo", Binder.get(bean, AllAttributesPersistent.memoPropertyName));
+		Assert.assertEquals("Text", Binder.get(bean, AllAttributesPersistent.textPropertyName));
+		Assert.assertEquals(new TimeOnly("07:51:26"), Binder.get(bean, AllAttributesPersistent.timePropertyName));
+		Assert.assertEquals(new Timestamp("2021-10-21T07:48:29Z"), Binder.get(bean, AllAttributesPersistent.timestampPropertyName));
+		
+		bean = aapd.newInstance(u);
+		Assert.assertEquals(Boolean.FALSE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
+		Assert.assertEquals("#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName));
+		Assert.assertEquals(new DateOnly(), Binder.get(bean, AllAttributesPersistent.datePropertyName));
+		Assert.assertEquals(new DateTime(), Binder.get(bean, AllAttributesPersistent.dateTimePropertyName));
+		Assert.assertEquals(Decimal10.ZERO, Binder.get(bean, AllAttributesPersistent.decimal10PropertyName));
+		Assert.assertEquals(Decimal2.ZERO, Binder.get(bean, AllAttributesPersistent.decimal2PropertyName));
+		Assert.assertEquals(Decimal5.ZERO, Binder.get(bean, AllAttributesPersistent.decimal5PropertyName));
+		Assert.assertEquals(Enum3.one, Binder.get(bean, AllAttributesPersistent.enum3PropertyName));
+		Assert.assertEquals(new WKTReader().read("POINT(0 0)"), Binder.get(bean, AllAttributesPersistent.geometryPropertyName));
+		Assert.assertEquals("Test POINT (0 0)", Binder.get(bean, AllAttributesPersistent.memoPropertyName));
+	}
+	
 	
 	@Test
 	public void testExpressionValidation() throws Exception {
@@ -346,16 +396,6 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['nothing']}"));
 		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:user.attributes['nothing']}"));
 		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:user.attributes['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:DATE}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:DATE}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:DATE.setLocalDate(DATE.toLocalDate().plusDays(1))}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:DATE.setLocalDate(DATE.toLocalDate().plusDays(1))}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:TIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:TIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:DATETIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:DATETIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:TIMESTAMP}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:TIMESTAMP}"));
 		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{i18n:some.non-existent.key}"));
 		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{role:admin.BasicUser}"));
 		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{stash:text}"));
@@ -401,6 +441,21 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(ExpressionEvaluator.validate("{date}", DateOnly.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{condition}", Boolean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation.condition}", Boolean.class, c, m, aapd));
+
+		// Test functions
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateOnly()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateOnly()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newTimeOnly()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newTimeOnly()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateTime()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateTime()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newTimestamp()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newTimestamp()}"));
+		
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:Decimal2.ZERO}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDecimal2(100)}"));
 	}
 	
 	/**

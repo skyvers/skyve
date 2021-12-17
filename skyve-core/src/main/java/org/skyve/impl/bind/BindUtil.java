@@ -69,6 +69,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.ExpressionEvaluator;
 
 /**
  * Provides utilities for getting and setting simple and compound bean properties.
@@ -159,10 +160,11 @@ public final class BindUtil {
 	public static boolean containsSkyveExpressions(String display) {
 		boolean result = false;
 		int openCurlyBraceIndex = display.indexOf('{');
-		while ((! result) && openCurlyBraceIndex >= 0) {
+		while ((! result) && (openCurlyBraceIndex >= 0)) {
 			result = (openCurlyBraceIndex == 0) || // first char is '{' 
 						// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
 						((openCurlyBraceIndex > 0) && (display.charAt(openCurlyBraceIndex - 1) != '\\'));
+			openCurlyBraceIndex = display.indexOf("{", openCurlyBraceIndex + 1);			
 		}
 		
 		return result;

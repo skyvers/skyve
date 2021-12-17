@@ -4,10 +4,11 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
 
-class I18NExpressionEvaluator extends ExpressionEvaluator {
-	static final String PREFIX = "i18n";
+public class I18NExpressionEvaluator extends ExpressionEvaluator {
+	public static final String PREFIX = "i18n";
 	
 	@Override
 	public Object evaluateWithoutPrefix(String expression, Bean bean) {

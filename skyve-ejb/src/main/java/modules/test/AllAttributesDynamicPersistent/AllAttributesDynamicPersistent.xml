@@ -85,6 +85,10 @@
 				<value code="three" />
 			</values>
 		</enum>
+		<enum name="enum3Reference" documentRef="AllAttributesPersistent" attributeRef="enum3">
+			<displayName>Enum 3 Reference</displayName>
+			<defaultValue>one</defaultValue>
+		</enum>
 		<geometry name="geometry">
 			<displayName>Geometry</displayName>
 			<defaultValue>POINT(0 0)</defaultValue>

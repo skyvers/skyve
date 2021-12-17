@@ -3,8 +3,8 @@ package org.skyve.impl.bind;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 
-class BindingExpressionEvaluator extends MetaDataExpressionEvaluator {
-	static final String PREFIX = "bean";
+public class BindingExpressionEvaluator extends MetaDataExpressionEvaluator {
+	public static final String PREFIX = "bean";
 	
 	@Override
 	public Object evaluateWithoutPrefix(String expression, Bean bean) {

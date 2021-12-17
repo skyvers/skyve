@@ -1,4 +1,4 @@
-package org.skyve.impl.bind;
+package org.skyve.util;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,10 +13,18 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.bind.BindingExpressionEvaluator;
+import org.skyve.impl.bind.DescriptionExpressionEvaluator;
+import org.skyve.impl.bind.DisplayNameExpressionEvaluator;
+import org.skyve.impl.bind.ELExpressionEvaluator;
+import org.skyve.impl.bind.I18NExpressionEvaluator;
+import org.skyve.impl.bind.RoleExpressionEvaluator;
+import org.skyve.impl.bind.StashExpressionEvaluator;
+import org.skyve.impl.bind.UserAttributesExpressionEvaluator;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.util.Util;
 
 public abstract class ExpressionEvaluator {
 	public static final String USER_EXPRESSION = "USER";

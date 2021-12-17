@@ -3,8 +3,8 @@ package org.skyve.impl.bind;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute;
 
-class DisplayNameExpressionEvaluator extends MetaDataExpressionEvaluator {
-	static final String PREFIX = "disp";
+public class DisplayNameExpressionEvaluator extends MetaDataExpressionEvaluator {
+	public static final String PREFIX = "disp";
 	
 	@Override
 	public Object evaluateWithoutPrefix(String expression, Bean bean) {

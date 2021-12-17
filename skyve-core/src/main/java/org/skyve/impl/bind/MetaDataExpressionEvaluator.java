@@ -10,6 +10,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.ExpressionEvaluator;
 
 abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	@SuppressWarnings("static-method")

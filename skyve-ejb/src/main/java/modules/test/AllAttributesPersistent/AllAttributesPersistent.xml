@@ -27,6 +27,7 @@
 		</association>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>
+			<defaultValue>{el:false}</defaultValue>
 		</boolean>
 		<collection name="aggregatedCollection" type="aggregation">
 			<displayName>Aggregated Collection</displayName>
@@ -35,24 +36,31 @@
 		</collection>
 		<colour name="colour">
 			<displayName>Colour</displayName>
+			<defaultValue>{el:'#000000'}</defaultValue>
 		</colour>
 		<date name="date">
 			<displayName>Date</displayName>
+			<defaultValue>{el:newDateOnly()}</defaultValue>
 		</date>
 		<dateTime name="dateTime">
 			<displayName>Date Time</displayName>
+			<defaultValue>{el:newDateTime()}</defaultValue>
 		</dateTime>
 		<decimal10 name="decimal10">
 			<displayName>Decimal 10</displayName>
+			<defaultValue>{el:Decimal10.ZERO}</defaultValue>
 		</decimal10>
 		<decimal2 name="decimal2">
 			<displayName>Decimal 2</displayName>
+			<defaultValue>{el:Decimal2.ZERO}</defaultValue>
 		</decimal2>
 		<decimal5 name="decimal5">
 			<displayName>Decimal 5</displayName>
+			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
 		</decimal5>
 		<enum name="enum3">
 			<displayName>Enum 3</displayName>
+			<defaultValue>one</defaultValue>
 			<values>
 				<value code="one" />
 				<value code="two" />
@@ -61,6 +69,7 @@
 		</enum>
 		<geometry name="geometry">
 			<displayName>Geometry</displayName>
+			<defaultValue>{el:newGeometry('POINT(0 0)')}</defaultValue>
 		</geometry>
 		<id name="id">
 			<displayName>Id</displayName>
@@ -81,6 +90,7 @@
 		</markup>
 		<memo name="memo">
 			<displayName>Memo</displayName>
+			<defaultValue>Test {el:newGeometry('POINT(0 0)')}</defaultValue>
 		</memo>
 		<text name="text" required="true">
 			<displayName>Text</displayName>

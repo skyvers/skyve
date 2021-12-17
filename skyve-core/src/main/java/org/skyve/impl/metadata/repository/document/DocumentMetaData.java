@@ -485,15 +485,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 					}
 
-					String defaultValue = field.getDefaultValue();
-					if (defaultValue != null) {
-						try {
-							BindUtil.fromString(null, null, implementingType, defaultValue, true);
-						} 
-						catch (@SuppressWarnings("unused") Exception e) {
-							throw new MetaDataException(metaDataName + " : The default value of " + defaultValue + " for field " + field.getName() + " is not coercible to type " + type + ".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
-						}
-					}
+					// NB Default values & bizKey expressions are checked in LocalDesignRepository where we have access to the document
 
 					DateValidator dateValidator = null;
 					DecimalValidator decimalValidator = null;

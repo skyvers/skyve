@@ -5,9 +5,10 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.util.ExpressionEvaluator;
 
-class RoleExpressionEvaluator extends ExpressionEvaluator {
-	static final String PREFIX = "role";
+public class RoleExpressionEvaluator extends ExpressionEvaluator {
+	public static final String PREFIX = "role";
 	
 	@Override
 	public Object evaluateWithoutPrefix(String expression, Bean bean) {

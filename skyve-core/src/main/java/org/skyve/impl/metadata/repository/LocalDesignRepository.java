@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
 import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
@@ -48,6 +49,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.ExpressionEvaluator;
 
 /**
  * Do not instantiate directly, use CORE.getRepository().
@@ -411,7 +413,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 		}
 		
-		// Check the bizKey expression bindings, if defined
+		// Check the bizKey expression, if defined
 		Module module = getModule(customer, document.getOwningModuleName());
 		String bizKeyExpression = document.getBizKeyExpression();
 		if (bizKeyExpression != null) {
@@ -421,7 +423,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 		}
 		
-
 		// If document has a parentDocument defined, ensure that it exists in the document's module.
 		try {
 			document.getParentDocument(customer);
@@ -440,7 +441,43 @@ public class LocalDesignRepository extends FileSystemRepository {
 			// TODO for all composition collections (ie reference a document that has a parentDocument = to this one) - no queryName is defined on the collection.
 			// TODO for all aggregation collections (ie reference a document that has does not have a parentDocument = to this one {or parentDocument is not defined}) - a queryName must be defined on the collection.
 
-			if (attribute instanceof Reference) {
+			if (attribute instanceof Field) {
+				// Check the default value expressions, if defined
+				String defaultValue = ((Field) attribute).getDefaultValue();
+				if (defaultValue != null) {
+					Class<?> implementingType = attribute.getAttributeType().getImplementingType();
+					if (String.class.equals(implementingType)) {
+						if (BindUtil.containsSkyveExpressions(defaultValue)) {
+							String error = BindUtil.validateMessageExpressions(customer, module, document, defaultValue);
+							if (error != null) {
+								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
+																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
+							}
+						}
+						// NB nothing to do here as its a string already
+					}
+					else {
+						if (BindUtil.isSkyveExpression(defaultValue)) {
+							String error = ExpressionEvaluator.validate(defaultValue, implementingType, customer, module, document);
+							if (error != null) {
+								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
+																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
+							}
+						}
+						else {
+							try {
+								BindUtil.fromString(null, null, implementingType, defaultValue, true);
+							} 
+							catch (@SuppressWarnings("unused") Exception e) {
+								throw new MetaDataException("The default value " + defaultValue + " for attribute " + 
+																module.getName() + '.' + document.getName() + '.' + attribute.getName() + " is not coercible to type " + implementingType + 
+																".  Date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
+							}
+						}
+					}
+				}
+			}
+			else if (attribute instanceof Reference) {
 				Reference reference = (Reference) attribute;
 				// Check the document points to a document that exists within this module
 				String targetDocumentName = reference.getDocumentName();

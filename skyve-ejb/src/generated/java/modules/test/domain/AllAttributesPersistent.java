@@ -31,6 +31,8 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.impl.domain.types.jaxb.TimeOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Binder;
+import org.skyve.util.ExpressionEvaluator;
 
 /**
  * All Persistent
@@ -221,7 +223,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	/**
 	 * Boolean Flag
 	 **/
-	private Boolean booleanFlag;
+	private Boolean booleanFlag = (Boolean) ExpressionEvaluator.evaluate("{el:false}", this);
 
 	/**
 	 * Aggregated Collection
@@ -231,42 +233,42 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	/**
 	 * Colour
 	 **/
-	private String colour;
+	private String colour = Binder.formatMessage("{el:'#000000'}", this);
 
 	/**
 	 * Date
 	 **/
-	private DateOnly date;
+	private DateOnly date = (DateOnly) ExpressionEvaluator.evaluate("{el:newDateOnly()}", this);
 
 	/**
 	 * Date Time
 	 **/
-	private DateTime dateTime;
+	private DateTime dateTime = (DateTime) ExpressionEvaluator.evaluate("{el:newDateTime()}", this);
 
 	/**
 	 * Decimal 10
 	 **/
-	private Decimal10 decimal10;
+	private Decimal10 decimal10 = (Decimal10) ExpressionEvaluator.evaluate("{el:Decimal10.ZERO}", this);
 
 	/**
 	 * Decimal 2
 	 **/
-	private Decimal2 decimal2;
+	private Decimal2 decimal2 = (Decimal2) ExpressionEvaluator.evaluate("{el:Decimal2.ZERO}", this);
 
 	/**
 	 * Decimal 5
 	 **/
-	private Decimal5 decimal5;
+	private Decimal5 decimal5 = (Decimal5) ExpressionEvaluator.evaluate("{el:Decimal5.ZERO}", this);
 
 	/**
 	 * Enum 3
 	 **/
-	private Enum3 enum3;
+	private Enum3 enum3 = Enum3.one;
 
 	/**
 	 * Geometry
 	 **/
-	private Geometry geometry;
+	private Geometry geometry = (Geometry) ExpressionEvaluator.evaluate("{el:newGeometry('POINT(0 0)')}", this);
 
 	/**
 	 * Id
@@ -296,7 +298,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	/**
 	 * Memo
 	 **/
-	private String memo;
+	private String memo = Binder.formatMessage("Test {el:newGeometry('POINT(0 0)')}", this);
 
 	/**
 	 * Text

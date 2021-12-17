@@ -3066,6 +3066,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// Generate imports
 
 				AttributeType type = attribute.getAttributeType();
+				Class<?> implementingType = type.getImplementingType();
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 				String propertySimpleClassName = null;
 				if (attribute instanceof Enumeration) {
@@ -3141,9 +3142,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					continue;
 				}
 				else {
-					Class<?> propertyClass = type.getImplementingType();
-					String propertyClassName = propertyClass.getName();
-					propertySimpleClassName = propertyClass.getSimpleName();
+					String propertyClassName = implementingType.getName();
+					propertySimpleClassName = implementingType.getSimpleName();
 
 					if (! propertyClassName.startsWith("java.lang")) {
 						imports.add(propertyClassName);
@@ -3164,24 +3164,36 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// add attribute definition / default value if required
 				String defaultValue = ((Field) attribute).getDefaultValue();
 				if (defaultValue != null) {
-					if (AttributeType.bool.equals(type) ||
-							AttributeType.integer.equals(type) ||
-							AttributeType.longInteger.equals(type)) {
-						attributes.append(" = ").append(propertySimpleClassName).append(".valueOf(");
-						attributes.append(defaultValue).append(')');
-					}
-					else if (AttributeType.colour.equals(type) ||
-								AttributeType.markup.equals(type) ||
-								AttributeType.memo.equals(type) ||
-								AttributeType.text.equals(type)) {
-						attributes.append(" = \"").append(defaultValue).append('"');
-					}
-					else if (AttributeType.enumeration.equals(type)) {
-						attributes.append(" = ").append(propertySimpleClassName).append('.').append(defaultValue);
+					if (implementingType.equals(String.class)) {
+						if (BindUtil.containsSkyveExpressions(defaultValue)) {
+							imports.add("org.skyve.util.Binder");
+							attributes.append(" = Binder.formatMessage(\"").append(defaultValue).append("\", this)");
+						}
+						else {
+							// NB cater for escaped {
+							attributes.append(" = \"").append(defaultValue.replace("\\{", "{")).append('"');
+						}
 					}
 					else {
-						attributes.append(" = new ").append(propertySimpleClassName);
-						attributes.append("(\"").append(defaultValue).append("\")");
+						if (BindUtil.isSkyveExpression(defaultValue)) {
+							imports.add("org.skyve.util.ExpressionEvaluator");
+							attributes.append(" = (").append(propertySimpleClassName).append(") ExpressionEvaluator.evaluate(\"").append(defaultValue).append("\", this)");
+						}
+						else {
+							if (AttributeType.bool.equals(type) ||
+									AttributeType.integer.equals(type) ||
+									AttributeType.longInteger.equals(type)) {
+								attributes.append(" = ").append(propertySimpleClassName).append(".valueOf(");
+								attributes.append(defaultValue).append(')');
+							}
+							else if (AttributeType.enumeration.equals(type)) {
+								attributes.append(" = ").append(propertySimpleClassName).append('.').append(defaultValue);
+							}
+							else {
+								attributes.append(" = new ").append(propertySimpleClassName);
+								attributes.append("(\"").append(defaultValue).append("\")");
+							}
+						}
 					}
 				}
 				attributes.append(";\n\n");
@@ -3410,7 +3422,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String expression = condition.getExpression();
 					methods.append("\n\tpublic boolean ").append(methodName).append("() {");
 					if (BindUtil.isSkyveExpression(expression)) {
-						imports.add("org.skyve.impl.bind.ExpressionEvaluator");
+						imports.add("org.skyve.util.ExpressionEvaluator");
 						methods.append("\n\t\treturn Boolean.TRUE.equals(ExpressionEvaluator.evaluate(\"");
 						methods.append(expression);
 						methods.append("\", this));");
