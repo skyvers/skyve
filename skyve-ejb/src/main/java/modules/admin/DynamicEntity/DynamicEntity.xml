@@ -28,6 +28,7 @@
 		</text>
 		<memo name="fields" required="true">
 			<displayName>Fields</displayName>
+			<index>none</index>
 		</memo>
 		<collection name="relations" type="child">
 			<displayName>Relations</displayName>

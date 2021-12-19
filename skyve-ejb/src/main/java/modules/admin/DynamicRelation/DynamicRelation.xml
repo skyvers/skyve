@@ -35,6 +35,12 @@
 			<length>128</length>
 		</text>
 		<id name="relatedId" required="true">
+			<documentation>
+				<![CDATA[
+					This is an ID because it may be related to a static entity.
+					It also makes schema evolution easier as deletes will remove everything related.
+				]]>
+			</documentation>
 			<displayName>Related ID</displayName>
 			<description>
 				The ID for the related dynamic entity (admin.DynamicEntity) OR a real entity.

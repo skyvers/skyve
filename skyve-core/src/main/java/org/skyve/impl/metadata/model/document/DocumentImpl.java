@@ -264,7 +264,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			
 			// PersistentBean
 			Persistent persistent = getPersistent();
-			if (persistent != null) { // includes mapped strategy as these are generated to AbstractPersistentBen extensions
+			if (persistent != null) { // includes mapped strategy as these are generated to AbstractPersistentBean extensions
 				p.put(PersistentBean.VERSION_NAME, null);
 				p.put(PersistentBean.LOCK_NAME, null);
 				p.put(PersistentBean.FLAG_COMMENT_NAME, null);
