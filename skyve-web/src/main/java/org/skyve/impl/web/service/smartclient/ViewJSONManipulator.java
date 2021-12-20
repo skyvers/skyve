@@ -415,7 +415,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 					// not an attribute
 				}
 				if ((attribute != null) && (attribute.getDomainType() != null)) {
-					value = value.toString();
+					value = (value == null) ? null : value.toString();
 				}
 			}
 			toAddTo.put(BindUtil.sanitiseBinding(binding), value);
