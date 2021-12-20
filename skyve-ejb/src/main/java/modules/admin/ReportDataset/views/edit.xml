@@ -26,7 +26,7 @@
 	        </row>
 	    </form>
 	    <!-- sql editor form -->
-	    <form percentageWidth="100" visible="typeQuery">
+	    <form responsiveWidth="12" visible="typeQuery">
 	        <column responsiveWidth="2"/>
 	        <column responsiveWidth="8" />
 	        <column responsiveWidth="2"/>
