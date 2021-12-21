@@ -68,6 +68,9 @@ public abstract class DynamicRelation extends AbstractPersistentBean implements 
 	 * Related ID
 	 * <br/>
 	 * The ID for the related dynamic entity (admin.DynamicEntity) OR a real entity.
+	 * <br/>
+	 * This is an ID because it may be related to a static entity.
+					It also makes schema evolution easier as deletes will remove everything related.
 	 **/
 	private String relatedId;
 

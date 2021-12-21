@@ -1378,8 +1378,9 @@ t.printStackTrace();
 	 * @param bean
 	 */
 	private void checkUniqueConstraints(Document document, Bean bean) {
-// TODO - Work the dynamic something in here
-Comment this method out to continue
+// TODO - Work the dynamic something in here - remove the short-circuit on dynamic
+if (document.isDynamic()) return;
+
 		String owningModuleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		String entityName = getDocumentEntityName(owningModuleName, documentName);
