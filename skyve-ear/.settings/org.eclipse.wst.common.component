@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                                                        
+                                                                            
+    
     
     
     
@@ -17,7 +18,8 @@
     
     
     <wb-module deploy-name="skyve-ear-8.1.0-SNAPSHOT">
-                                                                                                                                                
+                                                                                                                                                        
+        
         
         
         
@@ -35,7 +37,8 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                                                                                
+                                                                                                                                                        
+        
         
         
         
@@ -59,10 +62,10 @@
         <dependent-module archiveName="skyve.war" deploy-path="/" handle="module:/resource/skyve-war/skyve-war">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-ext-8.1.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
+        <dependent-module archiveName="skyve-ext-8.0.1.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="skyve-core-8.1.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
+        <dependent-module archiveName="skyve-core-8.0.1.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="commons-beanutils-1.9.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar">
@@ -419,13 +422,7 @@
         <dependent-module archiveName="spring-context-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-context/5.3.8/spring-context-5.3.8.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="slf4j-api-1.7.25.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="slf4j-log4j12-1.7.25.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/slf4j/slf4j-log4j12/1.7.25/slf4j-log4j12-1.7.25.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="log4j-1.2.17.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/log4j/log4j/1.2.17/log4j-1.2.17.jar">
+        <dependent-module archiveName="slf4j-api-1.7.32.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="poi-scratchpad-4.1.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/apache/poi/poi-scratchpad/4.1.2/poi-scratchpad-4.1.2.jar">
@@ -434,7 +431,8 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                                                                                            
+                                                                                                                                                    
+    
     
     
     
@@ -452,7 +450,8 @@
     
     
     </wb-module>
-                                                                    
+                                                                        
+
 
 
 
