@@ -36,7 +36,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReportDatasetExtension.class);
 
 	/**
-	 * Regular expression to located date sentinel values within a query
+	 * Regular expression to locate date sentinel values within a query
 	 */
 	private static final String BIZQL_DATE_PATTERN = "\\{DATE\\s?(([+-]\\d{1,})([dDmMyY]))?\\}";
 	/**
