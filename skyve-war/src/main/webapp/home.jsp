@@ -17,7 +17,6 @@
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
-<%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
 <%@ page import="org.skyve.impl.util.SQLMetaDataUtil"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 
@@ -56,9 +55,8 @@
 	String c = request.getParameter("c"); // customer
 	String b = request.getParameter("b"); // binding
 
-	// Set the user agent type
+	// Get (and set) the user agent type (if required - could have been set by device.jsp)
 	UserAgentType userAgentType = UserAgent.getType(request);
-	request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
 	Router router = repository.getRouter();
 
 	RouteCriteria criteria = new RouteCriteria();
@@ -146,8 +144,7 @@
 		}
 		
 		// Determine the UX/UI
-		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-		request.setAttribute(AbstractWebContext.UXUI, uxui);
+		UxUi uxui = UserAgent.getUxUi(request);
 
 		// Set the extra criterium if  user is defined
 		if (user != null) {

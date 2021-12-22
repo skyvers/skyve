@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
-import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
@@ -34,10 +33,8 @@ import org.skyve.metadata.module.menu.MenuRenderer;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
-import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 @ManagedBean
@@ -97,9 +94,7 @@ public class Desktop extends Harness {
 			    	String bizId = getBizIdParameter();
 			    	
 					HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
-					UserAgentType userAgentType = UserAgent.getType(request);
-					Router router = CORE.getRepository().getRouter();
-					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
+					UxUi uxui = UserAgent.getUxUi(request);
 					skin = uxui.getScSkin();
 					
 					StringBuilder sb = new StringBuilder(8192);

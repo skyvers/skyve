@@ -88,7 +88,7 @@ public class View extends HtmlPanelGroup {
 	    	FacesContext fc = FacesContext.getCurrentInstance();
 	    	Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
 	    	UxUi uxui = (UxUi) requestMap.get(AbstractWebContext.UXUI);
-	    	UserAgentType userAgentType = (UserAgentType) requestMap.get(FacesUtil.USER_AGENT_TYPE_KEY);
+	    	UserAgentType userAgentType = (UserAgentType) requestMap.get(AbstractWebContext.USER_AGENT_TYPE_KEY);
 	    	if ((uxui == null) || (userAgentType == null)) {
 	    		FacesView<?> fv = FacesUtil.getManagedBean(managedBeanName);
 	    		if (uxui == null) {

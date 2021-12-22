@@ -42,6 +42,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/pages/requestPasswordReset.jsp", "/pages/resetPassword.jsp").permitAll()
 				// Permit home.jsp as it controls access to public and private pages itself
 				.antMatchers("/home.jsp").permitAll()
+				// Permit device.jsp as it forwards to home.jsp
+				.antMatchers("/device.jsp").permitAll()
 				// Secure the loggedIn.jsp so that redirect occurs after login
 				.antMatchers("/loggedIn.jsp").authenticated()
 				// Secure the system JSPs and HTMLs

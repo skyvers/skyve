@@ -2,14 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" 
 		xmlns:ui="http://java.sun.com/jsf/facelets" 
 		xmlns:h="http://java.sun.com/jsf/html" 
-		xmlns:f="http://java.sun.com/jsf/core"
-		dir="#{skyve.dir}">
+		xmlns:f="http://java.sun.com/jsf/core">
     <f:view contentType="text/html" encoding="UTF-8">
 		<!-- Dont use h:head coz it'll bring in themes that can screw up the device layout -->
 		<head>
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
-			<link type="text/css" rel="stylesheet" href="#{skyve.baseHref}javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces" />
-			<script type="text/javascript" src="#{skyve.baseHref}javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces"></script>
+			<link type="text/css" rel="stylesheet" href="#{device.contextUrl}/javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces" />
+			<script type="text/javascript" src="#{device.contextUrl}/javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces"></script>
 			<style>
 				html, body {
 					height: 100%;
@@ -210,36 +209,33 @@
 					border: none;
 				}
 				
+				.fa-mobile, .fa-tablet, .fa-laptop, .fa-desktop {
+					font-weight: normal;
+				    color: gray;
+				}
 				.fa-mobile:hover, .fa-tablet:hover, .fa-laptop:hover, .fa-desktop:hover {
 				    font-weight: bold;
+				    color: darkgray;
 				}
 			</style>
 			<script type="text/javascript">
-				document.cookie='UserAgentType=phone';
-				
 				function clicked(styleClass, userAgentType) {
 					$('#device').attr('class', styleClass);
-					if (userAgentType) {
-						document.cookie='UserAgentType=' + userAgentType;
-					}
-					else {
-						document.cookie='UserAgentType=;expires=-1'
-					}
-					$('#iframe').attr('src', $('#iframe').attr('src'));
+					$('#iframe').attr('src', "#{device.clickDeviceJspUrl}" + userAgentType);
 				}
 			</script>
 		</head>
 		<body>
 			<div id="device" class="smartphone">
 			  <div class="content">
-			    <iframe id="iframe" src="#{skyve.baseHref}" style="width:100%;border:none;height:100%"></iframe>
+			    <iframe id="iframe" src="#{device.startingDeviceJspUrl}" style="width:100%;border:none;height:100%"></iframe>
 			  </div>
 			</div>
 			<div style="position:fixed;bottom:0;right:0;width:230px;height:70px;">
 				<i class="fa fa-mobile fa-4x fa-hover" onclick="clicked('smartphone', 'phone')" />
 				<i class="fa fa-tablet fa-4x" onclick="clicked('tablet', 'tablet')" />
 				<i class="fa fa-laptop fa-4x" onclick="clicked('laptop', 'desktop')" />
-				<i class="fa fa-desktop fa-4x" onclick="clicked('desktop', null)" />
+				<i class="fa fa-desktop fa-4x" onclick="clicked('desktop', 'desktop')" />
 			</div>
 		</body>
 	</f:view>

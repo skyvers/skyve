@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
@@ -18,7 +17,6 @@ import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
-import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
@@ -29,10 +27,8 @@ import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.menu.MenuRenderer;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
-import org.skyve.web.UserAgentType;
 
 public class InitialiseServlet extends HttpServlet {
 	private static final long serialVersionUID = -1850794772969374823L;
@@ -57,9 +53,7 @@ public class InitialiseServlet extends HttpServlet {
 				throw new SessionEndedException(request.getLocale());
 			}
 
-			UserAgentType userAgentType = UserAgent.getType(request);
-	        Router router = CORE.getRepository().getRouter();
-			UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
+			UxUi uxui = UserAgent.getUxUi(request);
 			String chosenModuleName = Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME));
 			
 			addModuleMenu(uxui.getName(), user,  chosenModuleName, json);

@@ -71,4 +71,18 @@ public class DefaultUxUiSelector implements UxUiSelector {
 				return EXTERNAL;
 		}
 	}
+	
+	@Override
+	public UxUi emulate(UserAgentType userAgentType, HttpServletRequest request) {
+		switch (userAgentType) {
+			case phone:
+				return PHONE;
+			case tablet:
+				return TABLET;
+			case desktop:
+				return DESKTOP;
+			default:
+				return EXTERNAL;
+		}
+	}
 }

@@ -5,16 +5,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
-import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
-import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
@@ -29,15 +25,11 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 
 		// Set the UX/UI and user agent type
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-		UserAgentType userAgentType = facesView.getUserAgentType();
-		if (userAgentType == null) {
-			userAgentType = UserAgent.getType(request);
-			facesView.setUserAgentType(userAgentType);
+		if (facesView.getUserAgentType() == null) {
+			facesView.setUserAgentType(UserAgent.getType(request));
 		}
 		if (facesView.getUxUi() == null) {
-			Router router = CORE.getRepository().getRouter();
-			UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-			facesView.setUxUi(uxui);
+			facesView.setUxUi(UserAgent.getUxUi(request));
 		}
 		
 		User user = CORE.getUser();

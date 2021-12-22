@@ -6,16 +6,16 @@ import javax.faces.component.FacesComponent;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.util.Util;
-import org.skyve.web.UserAgentType;
 
 @FacesComponent(Map.COMPONENT_TYPE)
 public class Map extends HtmlPanelGroup {
@@ -47,11 +47,8 @@ public class Map extends HtmlPanelGroup {
 			new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
-					FacesContext fc = FacesContext.getCurrentInstance();
-					final UserAgentType userAgentType = (UserAgentType) fc.getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
-
 					componentBuilder.setManagedBeanName(managedBeanName);
-			    	componentBuilder.setUserAgentType(userAgentType);
+			    	componentBuilder.setUserAgentType(UserAgent.getType((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()));
 
 			    	Map.this.getChildren().add(generate(moduleName,
 															queryName,

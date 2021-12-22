@@ -44,6 +44,16 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 	 */
 	public static final String UXUI = "skyveUxUi";
 
+	/**
+	 * Used to place the user agent type of the requesting device as a request attribute.
+	 */
+	public static String USER_AGENT_TYPE_KEY = "skyveUserAgentType";
+
+	/**
+	 * Used to indicate whether the user agent type was emulated or detected.
+	 */
+	public static String EMULATED_USER_AGENT_TYPE_KEY = "skyveEnumlatedUserAgentType";
+
 	private Map<String, Bean> contextBeans = new TreeMap<>();
 
 	private AbstractPersistence conversation;

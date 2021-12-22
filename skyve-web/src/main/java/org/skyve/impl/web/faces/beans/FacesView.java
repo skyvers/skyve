@@ -176,8 +176,9 @@ public class FacesView<T extends Bean> extends Harness {
 	
 	@PostConstruct
 	protected void postConstruct() {
-		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(AbstractWebContext.UXUI);
-		this.userAgentType = (UserAgentType) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
+		Map<String, Object> attributes = FacesContext.getCurrentInstance().getExternalContext().getRequestMap();
+		this.uxui = (UxUi) attributes.get(AbstractWebContext.UXUI);
+		this.userAgentType = (UserAgentType) attributes.get(AbstractWebContext.USER_AGENT_TYPE_KEY);
 	}
 	
 	public void preRender() {
@@ -218,7 +219,6 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	public void setUxUi(UxUi uxui) {
 		this.uxui = uxui;
-		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(AbstractWebContext.UXUI, uxui);
 	}
 
  	public UserAgentType getUserAgentType() {
@@ -226,7 +226,6 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
-		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
 	}
 
 	public String getThemeColour(String defaultColour) {

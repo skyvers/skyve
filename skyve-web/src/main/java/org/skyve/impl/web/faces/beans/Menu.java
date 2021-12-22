@@ -12,14 +12,12 @@ import org.primefaces.model.menu.DefaultMenuModel;
 import org.primefaces.model.menu.DefaultSubMenu;
 import org.primefaces.model.menu.MenuModel;
 import org.primefaces.model.menu.Submenu;
-import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
-import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.model.document.Document;
@@ -28,9 +26,7 @@ import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.menu.MenuRenderer;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Util;
-import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
 
 /**
@@ -69,10 +65,7 @@ public class Menu extends Harness {
 					setBizModuleParameter(request.getParameter("m"));
 					initialise(); // check m parameter and set to default if DNE
 					
-					UserAgentType userAgentType = UserAgent.getType(request);
-					Router router = CORE.getRepository().getRouter();
-					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
-
+					UxUi uxui = UserAgent.getUxUi(request);
 					menu = createMenuModel(getBizModuleParameter(), uxui.getName());
 				}
 				

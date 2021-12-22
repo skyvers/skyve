@@ -16,7 +16,6 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.model.chart.TextLengthBucketMetaData;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
@@ -36,7 +35,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -55,7 +53,6 @@ import org.skyve.metadata.view.model.chart.TextStartsWithBucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
-import org.skyve.web.UserAgentType;
 
 /**
  * Chart Servlet - supplies map data to a map display.
@@ -144,9 +141,7 @@ public class ChartServlet extends HttpServlet {
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
-		UserAgentType userAgentType = UserAgent.getType(request);
-		Router router = CORE.getRepository().getRouter();
-		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
+		UxUi uxui = UserAgent.getUxUi(request);
 		String uxuiName = uxui.getName();
 		UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
 

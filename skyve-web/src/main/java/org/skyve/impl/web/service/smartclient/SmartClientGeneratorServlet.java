@@ -10,12 +10,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
-import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -25,14 +23,12 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
-import org.skyve.web.UserAgentType;
 
 /**
  * Generates views based on bizhub's XML view spec.
@@ -110,9 +106,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					throw new ServletException("No document name in the request.");
 				}
 
-				UserAgentType userAgentType = UserAgent.getType(request);
-				Router router = CORE.getRepository().getRouter();
-				UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
+				UxUi uxui = UserAgent.getUxUi(request);
 				UtilImpl.LOGGER.info("UX/UI = " + uxui.getName());
 
 				Module module = customer.getModule(moduleName);

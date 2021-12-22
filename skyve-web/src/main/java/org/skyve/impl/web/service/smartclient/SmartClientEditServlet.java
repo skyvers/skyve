@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -39,7 +38,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -60,7 +58,6 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
@@ -69,7 +66,6 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
-import org.skyve.web.UserAgentType;
 
 public class SmartClientEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -180,9 +176,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	}
 			        webContext.setAction(OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ACTION_NAME))));
 			
-					UserAgentType userAgentType = UserAgent.getType(request);
-			        Router router = CORE.getRepository().getRouter();
-					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
+					UxUi uxui = UserAgent.getUxUi(request);
 					UtilImpl.LOGGER.info("UX/UI = " + uxui.getName());
 					
 			    	persistence.begin();
