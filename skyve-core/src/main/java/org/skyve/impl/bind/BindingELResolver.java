@@ -12,8 +12,8 @@ import org.skyve.domain.Bean;
  * Used to Resolve static/dynamic Skyve beans using BindUtil instead of bean introspection alone.
  * @author mike
  */
-class BindingELResolver extends ELResolver {
-	BindingELResolver() {
+public class BindingELResolver extends ELResolver {
+	public BindingELResolver() {
 		// nothing to see here
 	}
 	

@@ -48,7 +48,7 @@ import org.skyve.metadata.module.Module;
  * NB Static type checking may come undone where expressions assume polymorphic instances exist.
  * @author mike
  */
-class ValidationELResolver extends ELResolver {
+public class ValidationELResolver extends ELResolver {
 	private static final Class<?> UNMODIFIABLE_LIST_CLASS = Collections.unmodifiableList(new ArrayList<>()).getClass();
 	private static final Class<?> UNMODIFIABLE_MAP_CLASS = Collections.unmodifiableMap(new HashMap<>()).getClass();
 	
@@ -82,7 +82,7 @@ class ValidationELResolver extends ELResolver {
 		TERMINATING_MOCKS.put(Geometry.class, new GeometryFactory().createPoint());
 	}
 	
-	ValidationELResolver(Customer customer) {
+	public ValidationELResolver(Customer customer) {
 		this.customer = customer;
 	}
 	
