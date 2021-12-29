@@ -39,7 +39,6 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	public Object evaluateWithoutPrefix(String expression, Bean bean) {
 		ELProcessor elp = newSkyveEvaluationProcessor(bean);
-		elp.getELManager().addELResolver(new BindingELResolver());
 		return elp.eval(expression);
 	}
 
@@ -60,7 +59,6 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 			try {
 				// type-safe (el) starts with the document, if no document, no bean defined in the context
 				ELProcessor elp = newSkyveValidationProcessor(customer, document);
-				elp.getELManager().addELResolver(new ValidationELResolver(customer));
 				Object evaluation = elp.eval(expression);
 				if (returnType != null) {
 					Class<?> type = null;
@@ -92,11 +90,15 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	public static ELProcessor newSkyveValidationProcessor(@Nonnull Customer customer, @Nullable Document document) {
-		return setupProcessor(customer, document, UserImpl.class, Map.class);
+		ELProcessor result = setupProcessor(customer, document, UserImpl.class, Map.class);
+		result.getELManager().addELResolver(new ValidationELResolver(customer));
+		return result;
 	}
 	
 	public static ELProcessor newSkyveEvaluationProcessor(@Nullable Bean bean) {
-		return setupProcessor(null, bean, CORE.getUser(), CORE.getStash());
+		ELProcessor result = setupProcessor(null, bean, CORE.getUser(), CORE.getStash());
+		result.getELManager().addELResolver(new BindingELResolver());
+		return result;
 	}
 	
 	private static ELProcessor setupProcessor(@SuppressWarnings("unused") Customer customer, Object bean, Object user, Object stash) {
