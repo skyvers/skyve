@@ -1243,7 +1243,11 @@ public final class BindUtil {
 		
 					// if we are setting a String value to a non-string property then
 					// use an appropriate constructor or static valueOf()
-					if (String.class.equals(valueToSet.getClass()) && (! String.class.equals(propertyType))) {
+					// NB ensure we are not dealing with Object.clas as a property type.
+					// 	Returned by getPropertyType either directly if bean is dynamic or through apache BeanUtils
+					if (String.class.equals(valueToSet.getClass()) && 
+							(! String.class.equals(propertyType)) && 
+							(! Object.class.equals(propertyType))) {
 						try {
 							valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
 						}
@@ -1252,11 +1256,11 @@ public final class BindUtil {
 								valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
 							}
 							catch (@SuppressWarnings("unused") NoSuchMethodException e1) {
-								throw new DomainException("Cannot coerce String value " + valueToSet + " to type " + propertyType);
+								throw new DomainException("Cannot coerce String value " + valueToSet + " to type " + propertyType + " for setting for binding " + binding + " on bean " + bean);
 							}
 						}
 					}
-		
+			
 					// Convert the value to String if required
 					if (String.class.equals(propertyType)) {
 						valueToSet = valueToSet.toString();
@@ -1669,8 +1673,14 @@ public final class BindUtil {
 			propName = propName.substring(0, j);
 		}
 
-		if ((! List.class.isAssignableFrom(BindUtil.getPropertyType(target, propName))) &&
-			(! BindUtil.isMutable(target, propName))) {
+		try {
+			type = getPropertyType(target, propName);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return;
+		}
+		
+		if ((! List.class.isAssignableFrom(type)) && (! BindUtil.isMutable(target, propName))) {
 			return;
 		}
 
@@ -1679,13 +1689,6 @@ public final class BindUtil {
 		// Calculate the property type
 		if (target instanceof Bean) {
 			Bean targetBean = (Bean) target;
-
-			try {
-				type = getPropertyType(targetBean, propName);
-			}
-			catch (@SuppressWarnings("unused") Exception e) {
-				return;
-			}
 
 			String documentName = targetBean.getBizDocument();
 			if (documentName != null) {
