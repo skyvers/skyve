@@ -1248,7 +1248,12 @@ public final class BindUtil {
 							valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
 						}
 						catch (@SuppressWarnings("unused") NoSuchMethodException e) {
-							valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
+							try {
+								valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
+							}
+							catch (@SuppressWarnings("unused") NoSuchMethodException e1) {
+								throw new DomainException("Cannot coerce String value " + valueToSet + " to type " + propertyType);
+							}
 						}
 					}
 		
