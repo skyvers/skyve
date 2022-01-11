@@ -70,17 +70,18 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				Persistent persistent = visitedDocument.getPersistent();
 				if ((persistent != null) && 
 						(persistent.getName() != null)) { // persistent document
-					process(customer, module, visitedDocument, (PersistentBean) visitedBean);
+					process(customer, visitedDocument, (PersistentBean) visitedBean);
 				}
 				return true;
 			}
 		}.visit(document, bean, customer);
 	}
 	
-	private void process(Customer c, Module m, Document d, PersistentBean bean) {
+	private void process(Customer c, Document d, PersistentBean bean) {
 		final Map<String, Object> dynamicFields = new TreeMap<>();
 		final List<Reference> dynamicReferences = new ArrayList<>();
 		final boolean dynamicDocument = d.isDynamic();
+		Module m = c.getModule(d.getOwningModuleName());
 
 		for (Attribute a : d.getAllAttributes()) {
 			// if dynamic document or dynamic field or reference to dynamic document
