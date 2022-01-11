@@ -10,7 +10,8 @@
 	<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>
 	<modules homeModule="whosin">
 		<module name="admin" />
-		<module name="whosin"/>
+		<module name="whosin" />
+		<module name="kitchensink" />
 	</modules>
 	<interceptors>
 		<interceptor className="modules.admin.RDBMSAuditInterceptor" />

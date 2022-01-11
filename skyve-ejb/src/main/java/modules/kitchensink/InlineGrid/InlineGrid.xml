@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="InlineGrid" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Inline Grid</singularAlias>
+	<pluralAlias>Inline Grids</pluralAlias>
+	<parentDocument>KitchenSink</parentDocument>
+	<bizKey expression="Inline Grid" />
+	<attributes>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+			<defaultValue>{el:false}</defaultValue>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+			<defaultValue>{el:'#000000'}</defaultValue>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+			<defaultValue>{el:newDateOnly()}</defaultValue>
+		</date>
+		<decimal5 name="decimal5">
+			<displayName>Decimal 5</displayName>
+			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
+			<converterName>Decimal5TimeDuration</converterName>
+		</decimal5>
+		<enum name="enum3">
+			<displayName>Enum 3</displayName>
+			<defaultValue>one</defaultValue>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+	</attributes>
+</document>

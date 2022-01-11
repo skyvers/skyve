@@ -11,5 +11,6 @@
 	<modules homeModule="admin">
 		<module name="admin" />
 		<module name="test" />
+		<module name="kitchensink" />
 	</modules>
 </customer>
