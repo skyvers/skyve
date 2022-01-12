@@ -30,7 +30,7 @@ public class FluentEnumeratedValue {
 		return this;
 	}
 
-	FluentEnumeratedValue description(String description) {
+	public FluentEnumeratedValue description(String description) {
 		value.setDescription(description);
 		return this;
 	}
