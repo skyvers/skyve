@@ -32,7 +32,7 @@ This project was created using the following:
 $ flutter create skyve_flutter --template app --platforms ios,android,web -a java --org org.skyve
 ```
 
-* --platforms nominates the target devices fro the application
+* --platforms nominates the target devices for the application
 * -a nominates to use the Java  language for Android instead of the default which is Kotlin
 
 ### List Available Emulators
@@ -63,6 +63,15 @@ flutter run -d android
 
 ## Flutter in VS Code
 
+## Getting Setup
+
+You will need to install some extensions. These might be useful:
+
+* Flutter (possibly installs the Dart extension as well)
+* GitLens
+* Git History
+* Ultimate Flutter Extension Pack (installs some of the above)
+
 ### Device Selection
 
 The target device can be selected in the bottom right of the status bar. Only the devices supported by the project will be displayed in the device list. The device list is displayed in the same area as when entering commands via CTRL+SHFT+P (hint: look upwards not at the status bar).
@@ -73,4 +82,7 @@ If Android had been configured as one of the platforms for the project (which it
 
 Hit the F5 key - if certain files have focus hitting F5 won't work so make sure that either a dart file or the file explorer has focus.
 
+### General Commands
+
+Hit CTRL+SHFT+P and type flutter to see what is available in VS Code.
 
