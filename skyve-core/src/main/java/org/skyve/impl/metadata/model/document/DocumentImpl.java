@@ -346,8 +346,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 							}
 						}
 
-						result = BindUtil.fromString(null, null, type, defaultValue, true);
-					}					
+						result = BindUtil.fromSerialised(type, defaultValue);
+					}
 				}
 			}
 		}

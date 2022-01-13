@@ -466,7 +466,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 						}
 						else {
 							try {
-								BindUtil.fromString(null, null, implementingType, defaultValue, true);
+								BindUtil.fromSerialised(implementingType, defaultValue);
 							} 
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException("The default value " + defaultValue + " for attribute " + 

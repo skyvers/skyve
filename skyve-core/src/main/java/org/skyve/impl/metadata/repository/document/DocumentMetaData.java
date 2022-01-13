@@ -557,7 +557,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMin != null) {
 							try {
-								dateValidator.setMin((java.util.Date) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
+								dateValidator.setMin((java.util.Date) BindUtil.fromSerialised(converter, implementingType, xmlMin));
 							} 
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
@@ -567,7 +567,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMax != null) {
 							try {
-								dateValidator.setMax((java.util.Date) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
+								dateValidator.setMax((java.util.Date) BindUtil.fromSerialised(converter, implementingType, xmlMax));
 							} 
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
@@ -584,7 +584,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMin != null) {
 							try {
-								decimalValidator.setMin((Decimal) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
+								decimalValidator.setMin((Decimal) BindUtil.fromSerialised(converter, implementingType, xmlMin));
 							} 
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
@@ -593,7 +593,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMax != null) {
 							try {
-								decimalValidator.setMax((Decimal) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
+								decimalValidator.setMax((Decimal) BindUtil.fromSerialised(converter, implementingType, xmlMax));
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
@@ -609,7 +609,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMin != null) {
 							try {
-								integerValidator.setMin((java.lang.Integer) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
+								integerValidator.setMin((java.lang.Integer) BindUtil.fromSerialised(converter, implementingType, xmlMin));
 							} 
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
@@ -618,7 +618,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMax != null) {
 							try {
-								integerValidator.setMax((java.lang.Integer) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
+								integerValidator.setMax((java.lang.Integer) BindUtil.fromSerialised(converter, implementingType, xmlMax));
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
@@ -634,7 +634,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMin != null) {
 							try {
-								longValidator.setMin((java.lang.Long) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
+								longValidator.setMin((java.lang.Long) BindUtil.fromSerialised(converter, implementingType, xmlMin));
 							} 
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The min value of " + xmlMin + " for validator on field " + field.getName() + 
@@ -643,7 +643,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						}
 						if (xmlMax != null) {
 							try {
-								longValidator.setMax((java.lang.Long) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
+								longValidator.setMax((java.lang.Long) BindUtil.fromSerialised(converter, implementingType, xmlMax));
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
 								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 

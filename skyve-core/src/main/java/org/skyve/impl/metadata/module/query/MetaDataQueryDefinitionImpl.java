@@ -516,7 +516,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 									type = attribute.getAttributeType().getImplementingType();
 								}
 							}
-							operand = BindUtil.fromString(customer, converter, type, filterExpression, false);
+							operand = BindUtil.fromString(customer, converter, type, filterExpression);
 						}
 						catch (Exception e) {
 							throw new MetaDataException("Could not convert " + filterExpression + " from a string", e);

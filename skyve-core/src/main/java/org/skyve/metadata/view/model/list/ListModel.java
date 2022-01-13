@@ -299,7 +299,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 			}
 
 			if (type != null) {
-				result = BindUtil.fromString(c, converter, type, result.toString(), false);
+				result = BindUtil.fromString(c, converter, type, result.toString());
 			}
 		}
 		

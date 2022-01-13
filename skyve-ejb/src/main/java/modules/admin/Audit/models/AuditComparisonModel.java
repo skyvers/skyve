@@ -217,7 +217,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				}
 
 				if (value instanceof String) {
-					value = BindUtil.fromString(c, null, type, (String) value, true);
+					value = BindUtil.fromSerialised(type, (String) value);
 				}
 				else {
 					value = BindUtil.convert(type, value);
@@ -266,7 +266,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 					}
 
 					if (value instanceof String) {
-						value = BindUtil.fromString(c, null, type, (String) value, true);
+						value = BindUtil.fromSerialised(type, (String) value);
 					}
 					else {
 						value = BindUtil.convert(type, value);

@@ -253,7 +253,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 						Class<?> implementingType = type.getImplementingType();
 						if (! String.class.equals(implementingType)) {
 							try {
-								value = BindUtil.fromString(customer, converter, implementingType, (String) value, false);
+								value = BindUtil.fromString(customer, converter, implementingType, (String) value);
 							}
 							catch (@SuppressWarnings("unused") Exception e) {
 								UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 

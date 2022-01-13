@@ -1020,15 +1020,15 @@ public class SmartClientListServlet extends HttpServlet {
 			try {
 				// smart client can send dates (from filter builder) in the format YYYY-MM-DD without the T, so we'll add this
 				if ((Date.class.isAssignableFrom(type)) && (valueString.indexOf('T') < 0)) {
-					result = BindUtil.fromString(customer, converter, type, valueString + "T00:00:00.000", true);
+					result = BindUtil.fromSerialised(type, valueString + "T00:00:00.000");
 				}
 				else {
-					result = BindUtil.fromString(customer, converter, type, valueString, true);
+					result = BindUtil.fromSerialised(converter, type, valueString);
 				}
 			}
 			catch (Exception e) {
 				try {
-					result = BindUtil.fromString(customer, converter, type, valueString, false);
+					result = BindUtil.fromString(customer, converter, type, valueString);
 				}
 				catch (Exception e1) {
 					Util.LOGGER.warning("Could not format " + valueString + " as type " + type + " with converter " + converter + ". See the following stack traces below");

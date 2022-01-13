@@ -430,17 +430,37 @@ public final class BindUtil {
 	/**
 	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
 	 * Explicit type coercion using the <code>converter</code> if supplied, or by java language coercion.
-	 * 
-	 * @param attribute Used for type conversion. Can be <code>null</code>.
-	 * @param type
-	 * @param displayValue
-	 * @return
 	 */
 	public static synchronized Object fromString(Customer customer,
 													Converter<?> converter,
 													Class<?> type,
-													String stringValue,
-													boolean fromSerializedFormat) {
+													String stringValue) {
+		return fromString(customer, converter, type, stringValue, false);
+	}
+
+	/**
+	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
+	 * Explicit type coercion from serialised formats using the <code>converter</code> if supplied, or by java language coercion.
+	 */
+	public static synchronized Object fromSerialised(Converter<?> converter,
+														Class<?> type,
+														String stringValue) {
+		return fromString(null, converter, type, stringValue, true);
+	}
+
+	/**
+	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
+	 * Explicit type coercion from serialised formats using the <code>converter</code> if supplied, or by java language coercion.
+	 */
+	public static synchronized Object fromSerialised(Class<?> type, String stringValue) {
+		return fromString(null, null, type, stringValue, true);
+	}
+
+	private static Object fromString(Customer customer,
+										Converter<?> converter,
+										Class<?> type,
+										String stringValue,
+										boolean fromSerializedFormat) {
 		Object result = null;
 
 		try {

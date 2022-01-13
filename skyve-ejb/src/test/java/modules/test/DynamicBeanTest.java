@@ -79,7 +79,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		Assert.assertEquals("Decimal2 default value", new Decimal2("100.12"), Binder.get(bean, AllAttributesPersistent.decimal2PropertyName));
 		Assert.assertEquals("Decimal5 default value", new Decimal5("100.12345"), Binder.get(bean, AllAttributesPersistent.decimal5PropertyName));
 		Assert.assertEquals("Enum default value", "one", Binder.get(bean, AllAttributesPersistent.enum3PropertyName));
-		Geometry g = (Geometry) Binder.fromString(null, null, Geometry.class, "POINT(0 0)", true);
+		Geometry g = (Geometry) Binder.fromSerialised(Geometry.class, "POINT(0 0)");
 		Assert.assertEquals("Geometry default value", g, Binder.get(bean, AllAttributesPersistent.geometryPropertyName));
 		Assert.assertEquals("Id default value", "1234567890", Binder.get(bean, AllAttributesPersistent.idPropertyName));
 		Assert.assertEquals("Integer default value", Integer.valueOf(123), Binder.get(bean, AllAttributesPersistent.normalIntegerPropertyName));

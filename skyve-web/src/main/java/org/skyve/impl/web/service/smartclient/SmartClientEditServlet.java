@@ -864,7 +864,7 @@ public class SmartClientEditServlet extends HttpServlet {
 									}
 				    	    		
 				    	    		if (type != null) {
-				    	    			parameterValue = BindUtil.fromString(customer, converter, type, parameterValue.toString(), false);
+				    	    			parameterValue = BindUtil.fromString(customer, converter, type, parameterValue.toString());
 				    	    		}
 			    				}
 		    				}

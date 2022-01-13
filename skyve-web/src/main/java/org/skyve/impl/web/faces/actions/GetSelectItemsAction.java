@@ -139,7 +139,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	            			type = targetAttribute.getAttributeType().getImplementingType();
 	            		}
 	            		if (! type.equals(String.class)) {
-	            			value = Binder.fromString(customer, null, type, code, true);
+	            			value = Binder.fromSerialised(type, code);
 	            		}
 	            	}
             	}

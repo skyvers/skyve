@@ -59,20 +59,27 @@ public class Binder {
 	}
 
 	/**
-	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
 	 * Explicit type coercion using the <code>converter</code> if supplied, or by java language coercion.
-	 * 
-	 * @param attribute Used for type conversion. Can be <code>null</code>.
-	 * @param type
-	 * @param displayValue
-	 * @return
 	 */
 	public static Object fromString(Customer customer,
 										Converter<?> converter,
 										Class<?> type,
-										String stringValue,
-										boolean fromSerializedFormat) {
-		return BindUtil.fromString(customer, converter, type, stringValue, fromSerializedFormat);
+										String stringValue) {
+		return BindUtil.fromString(customer, converter, type, stringValue);
+	}
+
+	/**
+	 * Explicit type coercion from serialised formats using the <code>converter</code> if supplied, or by java language coercion.
+	 */
+	public static Object fromSerialised(Converter<?> converter, Class<?> type, String stringValue) {
+		return BindUtil.fromSerialised(converter, type, stringValue);
+	}
+
+	/**
+	 * Type coercion from serialised formats by java language coercion.
+	 */
+	public static Object fromSerialised(Class<?> type, String stringValue) {
+		return BindUtil.fromSerialised(null, type, stringValue);
 	}
 
 	/**
