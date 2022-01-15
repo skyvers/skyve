@@ -4,7 +4,7 @@
 		<column/>
 		<row>
 			<item>
-				<blurb>
+				<blurb escape="false">
 					<![CDATA[
 						<div style="width:100%; text-align:center">
 							<h4 style="margin: 2px auto;">
@@ -23,7 +23,7 @@
 		<column/>
 		<row>
 			<item>
-				<blurb>
+				<blurb escape="false">
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
@@ -39,7 +39,7 @@
 		<column/>
 		<row>
 			<item>
-				<blurb>
+				<blurb escape="false">
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
@@ -55,7 +55,7 @@
 		<column/>
 		<row>
 			<item>
-				<blurb>
+				<blurb escape="false">
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">

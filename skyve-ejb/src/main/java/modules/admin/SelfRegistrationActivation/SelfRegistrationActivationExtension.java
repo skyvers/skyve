@@ -3,6 +3,7 @@ package modules.admin.SelfRegistrationActivation;
 import org.skyve.CORE;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.TimeUtil;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
@@ -24,45 +25,53 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 		DocumentQuery userQuery = p.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		userQuery.getFilter().addEquals(User.activationCodePropertyName, activationCode);
 
-		UserExtension user = userQuery.beanResult();
+		// temporarily escalate access to query and save users
+		p.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+		UserExtension user = null;
 		try {
-			if (user == null) {
-				Util.LOGGER.warning("No user exists for activation code=" + activationCode);
-				setResult(Result.FAILURE);
-			} else if (Boolean.TRUE.equals(user.getActivated())) {
-				// User already activated, prompt them to login
-				Util.LOGGER.warning("User=" + user.getUserName() + " already activated");
-				setUser(user);
-				setResult(Result.ALREADYACTIVATED);
-			} else {
+			user = userQuery.beanResult();
 
-				boolean expired = false;
-				// check for expiry of activation code
-				Configuration configuration = Configuration.newInstance();
-				if (configuration.getSelfRegistrationActivationExpiryHours() != null) {
-					DateTime expiryDateTime = user.getActivationCodeCreationDateTime();
-					DateTime now = new DateTime();
-					if (expiryDateTime != null) {
-						TimeUtil.addHours(expiryDateTime, configuration.getSelfRegistrationActivationExpiryHours().intValue());
-						if (now.after(expiryDateTime)) {
-							expired = true;
+			try {
+				if (user == null) {
+					Util.LOGGER.warning("No user exists for activation code=" + activationCode);
+					setResult(Result.FAILURE);
+				} else if (Boolean.TRUE.equals(user.getActivated())) {
+					// User already activated, prompt them to login
+					Util.LOGGER.warning("User=" + user.getUserName() + " already activated");
+					setUser(user);
+					setResult(Result.ALREADYACTIVATED);
+				} else {
+
+					boolean expired = false;
+					// check for expiry of activation code
+					Configuration configuration = Configuration.newInstance();
+					if (configuration.getSelfRegistrationActivationExpiryHours() != null) {
+						DateTime expiryDateTime = user.getActivationCodeCreationDateTime();
+						DateTime now = new DateTime();
+						if (expiryDateTime != null) {
+							TimeUtil.addHours(expiryDateTime, configuration.getSelfRegistrationActivationExpiryHours().intValue());
+							if (now.after(expiryDateTime)) {
+								expired = true;
+							}
+
 						}
+					}
+					if (!expired) {
+						user.setActivated(Boolean.TRUE);
+						user = p.save(user);
 
+						setUser(user);
+						setResult(Result.SUCCESS);
+					} else {
+						setResult(Result.EXPIRED);
 					}
 				}
-				if (!expired) {
-					user.setActivated(Boolean.TRUE);
-					user = p.save(user);
-
-					setUser(user);
-					setResult(Result.SUCCESS);
-				} else {
-					setResult(Result.EXPIRED);
-				}
+				return user;
+			} catch (Exception e) {
+				throw e;
 			}
-			return user;
-		} catch (Exception e) {
-			throw e;
+		} finally {
+			p.resetDocumentPermissionScopes();
 		}
 	}
 
