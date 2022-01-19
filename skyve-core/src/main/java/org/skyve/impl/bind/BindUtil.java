@@ -471,7 +471,7 @@ public final class BindUtil {
 				result = stringValue;
 			}
 			else if (type.equals(Integer.class)) {
-				if(converter!=null){
+				if (converter != null) {
 					result = converter.fromDisplayValue(stringValue);
 				}
 				else {

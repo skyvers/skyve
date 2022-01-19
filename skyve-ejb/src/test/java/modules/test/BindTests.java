@@ -361,8 +361,7 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals(new WKTReader().read("POINT(0 0)"), Binder.get(bean, AllAttributesPersistent.geometryPropertyName));
 		Assert.assertEquals("Test POINT (0 0)", Binder.get(bean, AllAttributesPersistent.memoPropertyName));
 	}
-	
-	
+
 	@Test
 	public void testExpressionValidation() throws Exception {
 		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{USER}"));
@@ -432,6 +431,7 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedAssociation}", Bean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:empty bean.aggregatedAssociation}", Boolean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedCollection}", List.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", Boolean.TYPE, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.date}", DateOnly.class, c, m, aapd));
 
 		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation}", Bean.class, c, m, aapd));
