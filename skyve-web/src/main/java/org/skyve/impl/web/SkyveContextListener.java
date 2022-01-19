@@ -697,13 +697,15 @@ public class SkyveContextListener implements ServletContextListener {
 				// Ensure the content manager is destroyed so that resources and files locks are relinquished
 				@SuppressWarnings("resource")
 				AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
-				try {
-					cm.close();
-					cm.shutdown();
-				}
-				catch (Exception e) {
-					UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
-					e.printStackTrace();
+				if (cm != null) { // can be null if it wasn't initialised correctly.
+					try {
+						cm.close();
+						cm.shutdown();
+					}
+					catch (Exception e) {
+						UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
+						e.printStackTrace();
+					}
 				}
 			}
 		}
