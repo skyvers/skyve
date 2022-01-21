@@ -866,7 +866,7 @@ t.printStackTrace();
 						// Add non-dynamic (static) unpersisted (transient) beans reachable by persistent dynamic relations to the Set to persist later (excluding top-level).
 						// This implements persistence by reachability for dynamic -> static beans in mixed graphs
 						if (beansToMerge != null) {
-							if ((owningRelation != null) && // not the top-level bean
+							if ((owningRelation != null) && // not the top-level bean or parent
 									(persistentBean != beanToSave) && // not a reference to the top level bean
 									(! document.isDynamic()) && // bean is not dynamic
 										owningRelation.isPersistent() && // persistent relation
@@ -925,7 +925,7 @@ t.printStackTrace();
 				try {
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 
-					// If it is the top-level bean it is of course persistent since we are in preSave() here
+					// If it is the top-level bean or parent bean it is of course persistent since we are in preSave() here
 					// If bean is persisted, call preSave as changes will be flushed
 					// If bean is transient, it will be persisted by reachability by hibernate if it is a persistent reference
 					if ((owningRelation == null) || bean.isPersisted() || owningRelation.isPersistent()) {
@@ -986,7 +986,7 @@ t.printStackTrace();
 					ValidationUtil.checkCollectionUniqueConstraints(customer, document, bean);
 
 					if (persistentName != null) { // persistent
-						if (owningRelation == null) { // top level
+						if (owningRelation == null) { // top level or parent binding
 							checkUniqueConstraints(document, bean);
 						}
 						else {
@@ -1231,13 +1231,13 @@ t.printStackTrace();
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
-										Document parentDocument,
-										Relation parentRelation,
+										Document owningDocument,
+										Relation owningRelation,
 										Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
-				if ((parentRelation instanceof Inverse) && 
-						(! Boolean.TRUE.equals(((Inverse) parentRelation).getCascade()))) {
+				if ((owningRelation instanceof Inverse) && 
+						(! Boolean.TRUE.equals(((Inverse) owningRelation).getCascade()))) {
 					return false;
 				}
 				
@@ -1284,14 +1284,18 @@ t.printStackTrace();
 										Relation owningRelation,
 										Bean unmergedPart) {
 				// Replace any bean that has been persisted by reachability but is the old unpersisted/detached version
-				Bean mergedPart = (owningRelation == null) ? mergedBean : (Bean) BindUtil.get(mergedBean, binding);
+				Bean mergedPart = binding.isEmpty() ? mergedBean : (Bean) BindUtil.get(mergedBean, binding);
 				if (mergedPart == null) { // when a dynamic relation encountered and not persisted
 					BindUtil.set(mergedBean, binding, unmergedPart);
 				}
 				else if (mergedPart.isPersisted()) {
-					if ((owningRelation != null) && (unmergedPart == unmergedBean) && (unmergedPart != mergedBean)) {
+					// Set any deeper references to the top level unmerged bean to the top level merged bean
+					if ((! binding.isEmpty()) && // not top level bean
+							(unmergedPart == unmergedBean) && // a deeper reference to the top level bean (unmerged)
+							(unmergedPart != mergedBean)) { // but the reference is not the merged bean
 						BindUtil.set(mergedBean, binding, mergedBean);
 					}
+					// Set any references that were merged by persistence-by-reachability
 					else if (otherMergedBeans.containsKey(unmergedPart)) {
 						PersistentBean otherMergedBean = otherMergedBeans.get(unmergedPart);
 						if (unmergedPart != otherMergedBean) {

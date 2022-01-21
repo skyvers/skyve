@@ -24,7 +24,7 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	throws Exception {
 		// No use checking referential integrity on a bean that is not persisted as nothing will have referenced it yet.
 		if (visitedBean.isPersisted()) {
-			// check if top document or we have a persistent reference
+			// check if top document (or parent reference) or we have a persistent reference
 			boolean validate = (owningRelation == null) || owningRelation.isPersistent();
 
 			// check if binding isn't a parent binding - parent beans are not cascaded

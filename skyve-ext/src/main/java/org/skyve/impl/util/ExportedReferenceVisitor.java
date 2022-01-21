@@ -13,8 +13,6 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
-import org.skyve.impl.util.CascadeDeleteBeanVisitor;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -59,7 +57,6 @@ public abstract class ExportedReferenceVisitor {
 		
 		new CascadeDeleteBeanVisitor() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void preDeleteProcessing(Document documentToCascade,
 												Bean beanToCascade)
 			throws Exception {

@@ -78,7 +78,7 @@ public final class StandardGenerator {
 			protected boolean accept(String binding,
 										Document processDocument,
 										Document owningDocument,
-										Relation owningReference,
+										Relation owningRelation,
 										Bean processBean) throws Exception {
 				UtilImpl.LOGGER.info("B = " + binding);
 
@@ -90,8 +90,8 @@ public final class StandardGenerator {
 				}
 
 				// if its a collection, put in a joining sheet
-				if (owningReference instanceof Collection) {
-					Collection owningCollection = (Collection) owningReference;
+				if (owningRelation instanceof Collection) {
+					Collection owningCollection = (Collection) owningRelation;
 					if (! CollectionType.child.equals(owningCollection.getType())) {
 						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(), 
 																						document.getName(), binding));
@@ -137,7 +137,7 @@ public final class StandardGenerator {
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
-										Relation owningReference,
+										Relation owningRelation,
 										Bean bean) throws Exception {
 				if ("".equals(binding)) { // top level
 					topBean = bean;
@@ -146,8 +146,8 @@ public final class StandardGenerator {
 				String bizId = bean.getBizId();
 
 				// Add bean to the collection sheet if required
-				if (owningReference instanceof Collection) {
-					Collection owningCollection = (Collection) owningReference;
+				if (owningRelation instanceof Collection) {
+					Collection owningCollection = (Collection) owningRelation;
 					if (! CollectionType.child.equals(owningCollection.getType())) {
 						// search for the collection sheets through the binding with the array indexing removed - eg [0], [1]
 						String collectionBinding = binding.replaceAll("\\[\\d*\\]", "");

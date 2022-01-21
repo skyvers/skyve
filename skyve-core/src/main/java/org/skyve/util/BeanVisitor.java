@@ -288,11 +288,12 @@ public abstract class BeanVisitor {
 	/**
 	 * Accept the reference.
 	 * 
-	 * @param binding
-	 * @param document
-	 * @param owningDocument The owning document that got us here (by recursion)
-	 * @param owningRelation The owning document's relation that got us here (by recursion)
-	 * @param bean
+	 * @param binding	The visited binding.
+	 * @param document	
+	 * @param owningDocument The owning document that got us here (by recursion).
+	 * @param owningRelation The owning document's relation that got us here (by recursion).
+	 * 							This is null when top level bean or parent binding.
+	 * @param bean	The visited bean.
 	 * @return <code>false</code> to terminate, <code>true</code> to continue.
 	 * @throws Exception
 	 */
