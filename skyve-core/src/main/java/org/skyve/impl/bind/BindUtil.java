@@ -260,16 +260,21 @@ public final class BindUtil {
 					Module m = c.getModule(bean.getBizModule());
 					Document d = m.getDocument(c, bean.getBizDocument());
 					Condition condish = d.getCondition(conditionName);
-					String expression = condish.getExpression();
-					if (BindUtil.isSkyveExpression(expression)) {
-						if (negated) {
-							result = Boolean.FALSE.equals(ExpressionEvaluator.evaluate(expression, bean));
+					if (condish != null) { // could be null if an implicit condition (created or persisted etc)
+						String expression = condish.getExpression();
+						if (BindUtil.isSkyveExpression(expression)) { // condition expression
+							if (negated) {
+								result = Boolean.FALSE.equals(ExpressionEvaluator.evaluate(expression, bean));
+							}
+							else {
+								result = Boolean.TRUE.equals(ExpressionEvaluator.evaluate(expression, bean));
+							}
 						}
-						else {
-							result = Boolean.TRUE.equals(ExpressionEvaluator.evaluate(expression, bean));
+						else { // condition name
+							result = (Boolean.TRUE.equals(BindUtil.get(bean, condition)));
 						}
 					}
-					else {
+					else { // implicit condition
 						result = (Boolean.TRUE.equals(BindUtil.get(bean, condition)));
 					}
 				}
