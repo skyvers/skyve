@@ -39,16 +39,17 @@ public class ConvertableField extends ConstrainableField {
 		Converter<?> result = converter;
 		
 		if (result == null) {
-			if (getAttributeType() == AttributeType.date) {
+			AttributeType type = getAttributeType();
+			if (type == AttributeType.date) {
 				result = customer.getDefaultDateConverter();
 			}
-			else if (getAttributeType() == AttributeType.time) {
+			else if (type == AttributeType.time) {
 				result = customer.getDefaultTimeConverter();
 			}
-			else if (getAttributeType() == AttributeType.dateTime) {
+			else if (type == AttributeType.dateTime) {
 				result = customer.getDefaultDateTimeConverter();
 			}
-			else if (getAttributeType() == AttributeType.timestamp) {
+			else if (type == AttributeType.timestamp) {
 				result = customer.getDefaultTimestampConverter();
 			}
 		}
