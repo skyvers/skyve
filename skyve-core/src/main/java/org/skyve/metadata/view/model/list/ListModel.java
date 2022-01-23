@@ -13,6 +13,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
@@ -279,7 +280,15 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
 					if (attribute instanceof Enumeration) {
-						type = ((Enumeration) attribute).getEnum();
+						Enumeration e = (Enumeration) attribute;
+						e = e.getTarget();
+						if (e.isDynamic()) {
+							type = String.class;
+							converter = new DynamicEnumerationConverter(e);
+						}
+						else {
+							type = e.getEnum();
+						}
 					}
 					else if (attribute instanceof Field) {
 						type = attribute.getAttributeType().getImplementingType();

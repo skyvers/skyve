@@ -8,9 +8,12 @@ import javax.faces.model.SelectItem;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
@@ -115,16 +118,25 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	            result = new ArrayList<>(domainValues.size());
             }
 
+            Converter<?> converter = null;
             Class<?> type = null;
         	for (DomainValue domainValue : domainValues) {
             	String code = domainValue.getCode();
             	Object value = code;
             	if (code != null) {
-	            	if (targetAttribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
-	            		if (type == null) {
-	            			type = ((org.skyve.impl.metadata.model.document.field.Enumeration) targetAttribute).getEnum(); 
+	            	if (targetAttribute instanceof Enumeration) {
+	            		if ((type == null) && (converter == null)) {
+	            			Enumeration e = (Enumeration) targetAttribute;
+	            			e = e.getTarget();
+	    					if (e.isDynamic()) {
+	    						type = String.class;
+	    						converter = new DynamicEnumerationConverter(e);
+	    					}
+	    					else {
+	    						type = e.getEnum();
+	    					}
 	            		}
-            			value = Binder.convert(type, code);
+            			value = Binder.fromSerialised(converter, type, code);
             		}
 	            	else if (targetAttribute instanceof AssociationImpl) {
                    		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;

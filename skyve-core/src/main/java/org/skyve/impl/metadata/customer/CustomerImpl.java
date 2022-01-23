@@ -21,6 +21,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.util.UtilImpl;
@@ -482,8 +483,25 @@ public class CustomerImpl implements Customer {
 					domainValueCache.put(key, result);
 				}
 				if ((result == null) && (attribute instanceof Enumeration)) {
-					Class<org.skyve.domain.types.Enumeration> domainEnum = ((Enumeration) attribute).getEnum();
-					result = (List<DomainValue>) domainEnum.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
+					Enumeration e = (Enumeration) attribute;
+					e = e.getTarget();
+					if (e.isDynamic()) {
+						List<EnumeratedValue> values = e.getTarget().getValues();
+						result = new ArrayList<>(values.size());
+						for (EnumeratedValue value : values) {
+							String code = value.getCode();
+							String description = value.getDescription();
+							if (description == null) {
+								description = code;
+							}
+							result.add(new DomainValue(code, description));
+						}
+					}
+					else { // need to use the method if its available as it could be a hand implemented enumeration.
+						Class<org.skyve.domain.types.Enumeration> domainEnum = ((Enumeration) attribute).getEnum();
+						result = (List<DomainValue>) domainEnum.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
+					}
+					
 					domainValueCache.put(key, result);
 				}
 			}

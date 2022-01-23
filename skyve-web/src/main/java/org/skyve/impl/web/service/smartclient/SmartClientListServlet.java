@@ -31,6 +31,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -566,7 +567,14 @@ public class SmartClientListServlet extends HttpServlet {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
 					if (attribute instanceof Enumeration) {
-						type = ((Enumeration) attribute).getEnum();
+						Enumeration e = (Enumeration) attribute;
+						e = e.getTarget();
+						if (e.isDynamic()) {
+							converter = new DynamicEnumerationConverter(e);
+						}
+						else {
+							type = e.getEnum();
+						}
 						equalsOperatorRequired = true;
 					}
 					else {
@@ -731,7 +739,14 @@ public class SmartClientListServlet extends HttpServlet {
 	    				Attribute attribute = target.getAttribute();
 	    				if (attribute != null) {
 							if (attribute instanceof Enumeration) {
-								type = ((Enumeration) attribute).getEnum();
+								Enumeration e = (Enumeration) attribute;
+								e = e.getTarget();
+								if (e.isDynamic()) {
+									converter = new DynamicEnumerationConverter(e);
+								}
+								else {
+									type = e.getEnum();
+								}
 								filterOperator = transformWildcardFilterOperator(filterOperator);
 							}
 							else {

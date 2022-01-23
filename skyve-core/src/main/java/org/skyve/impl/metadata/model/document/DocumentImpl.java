@@ -21,6 +21,8 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.PersistentMapBean;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.flow.Flow;
@@ -337,16 +339,22 @@ public final class DocumentImpl extends ModelImpl implements Document {
 					}
 					else {
 						Class<?> type = attribute.getAttributeType().getImplementingType();
-
+						Converter<?> converter = null;
+						
 						// Cater where a dynamic enum references a generated one, otherwise it stays a string
 						if (attribute instanceof Enumeration) {
 							Enumeration enumeration = (Enumeration) attribute;
-							if (! enumeration.getTarget().isDynamic()) {
+							enumeration = enumeration.getTarget();
+							if (enumeration.isDynamic()) {
+								type = String.class;
+								converter = new DynamicEnumerationConverter(enumeration);
+							}
+							else {
 								type = enumeration.getEnum();
 							}
 						}
 
-						result = BindUtil.fromSerialised(type, defaultValue);
+						result = BindUtil.fromSerialised(converter, type, defaultValue);
 					}
 				}
 			}

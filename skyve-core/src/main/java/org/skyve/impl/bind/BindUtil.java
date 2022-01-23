@@ -40,6 +40,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
@@ -464,7 +465,12 @@ public final class BindUtil {
 		Object result = null;
 
 		try {
+			// use the converter if this is not from a serialized value
 			if ((! fromSerializedFormat) && (converter != null)) {
+				result = converter.fromDisplayValue(stringValue);
+			}
+			// cater for dynamic enum conversion to String
+			else if (fromSerializedFormat && (converter instanceof DynamicEnumerationConverter)) {
 				result = converter.fromDisplayValue(stringValue);
 			}
 			else if (type.equals(String.class)) {
