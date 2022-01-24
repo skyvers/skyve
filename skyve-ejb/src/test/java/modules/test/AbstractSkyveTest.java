@@ -28,6 +28,7 @@ import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.Reachability;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
+import modules.test.domain.UniqueConstraintOptimisation;
 import util.AbstractH2TestTruncate;
 
 public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
@@ -59,6 +60,7 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 	protected Document msjsd;
 	protected Document msssd;
 	protected Document rd;
+	protected Document ucno;
 	protected Document ucn;
 	protected Document ucnn;
 
@@ -91,6 +93,7 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 		msjsd = m.getDocument(c, MappedSubclassedJoinedStrategy.DOCUMENT_NAME);
 		msssd = m.getDocument(c, MappedSubclassedSingleStrategy.DOCUMENT_NAME);
 		rd = m.getDocument(c, Reachability.DOCUMENT_NAME);
+		ucno = m.getDocument(c, UniqueConstraintOptimisation.DOCUMENT_NAME);
 		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
 		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
 	}

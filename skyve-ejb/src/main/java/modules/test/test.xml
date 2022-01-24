@@ -28,6 +28,7 @@
 		<document ref="MappedSubclassedJoinedStrategy" />
 		<document ref="MappedSubclassedSingleStrategy" />
 		<document ref="Reachability" />
+		<document ref="UniqueConstraintOptimisation" />
 		<document ref="UniqueConstraintNonNullable" />
 		<document ref="UniqueConstraintNullable" />
 	</documents>

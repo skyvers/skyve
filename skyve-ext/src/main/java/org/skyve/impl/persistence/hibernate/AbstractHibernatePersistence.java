@@ -987,14 +987,14 @@ t.printStackTrace();
 
 					if (persistentName != null) { // persistent
 						if (owningRelation == null) { // top level or parent binding
-							checkUniqueConstraints(document, bean);
+							checkUniqueConstraints(customer, document, bean);
 						}
 						else {
 							boolean persistentRelation = owningRelation.isPersistent();
 							// Don't check the unique constraints if the relation is not persistent
 							// and the instance will not be persisted by reachability - ie the bean is transient too
 							if (persistentRelation || bean.isPersisted()) {
-								checkUniqueConstraints(document, bean);
+								checkUniqueConstraints(customer, document, bean);
 							}
 						}
 						
@@ -1378,17 +1378,20 @@ t.printStackTrace();
 	/**
 	 * Check the unique constraints for a document bean.
 	 * 
+	 * @param customer
 	 * @param document
 	 * @param bean
 	 */
-	private void checkUniqueConstraints(Document document, Bean bean) {
+	private void checkUniqueConstraints(Customer customer, Document document, Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
 
-		String owningModuleName = document.getOwningModuleName();
-		String documentName = document.getName();
-		String entityName = getDocumentEntityName(owningModuleName, documentName);
-
+		final String owningModuleName = document.getOwningModuleName();
+		final Module owningModule = customer.getModule(owningModuleName);
+		final String documentName = document.getName();
+		final String entityName = getDocumentEntityName(owningModuleName, documentName);
+		final boolean persisted = isPersisted(bean);
+		
 		try {
 			for (UniqueConstraint constraint : document.getAllUniqueConstraints()) {
 				StringBuilder queryString = new StringBuilder(48);
@@ -1399,10 +1402,13 @@ if (document.isDynamic()) return;
 				// indicates if we have appended any where clause conditions
 				boolean noWhere = true;
 	
-				// Don't check unique constraints if one of the parameters is a transient bean.
-				// The query will produce an error and there is no use anyway as there cannot possibly
-				// be unique constraint violation.
-				boolean abortCheck = false;
+				// Don't check unique constraints if one of the parameters is an unpersisted bean.
+				// The query will produce an error and there is no use anyway as there cannot possibly be unique constraint violation.
+				boolean unpersistedBeanParameter = false;
+				
+				// Don't check unique constraints if all of the parameters haven't changed and the bean is persisted
+				boolean persistedBeanAndNoDirtyParameters = persisted;
+				
 				List<Object> constraintFieldValues = new ArrayList<>();
 				int i = 1;
 				for (String fieldName : constraint.getFieldNames()) {
@@ -1413,11 +1419,59 @@ if (document.isDynamic()) return;
 					catch (Exception e) {
 						throw new DomainException(e);
 					}
+					
 					// Don't do the test if the query parameters are not persisted
 					if ((constraintFieldValue instanceof PersistentBean) && (! isPersisted((Bean) constraintFieldValue))) {
-						abortCheck = true;
+						if (UtilImpl.QUERY_TRACE) {
+							StringBuilder log = new StringBuilder(256);
+							log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+							log.append(" as field ").append(fieldName).append(" with value ").append(constraintFieldValue).append(" is not persisted");
+							Util.LOGGER.info(log.toString());
+						}
+						unpersistedBeanParameter = true;
 						break; // stop checking the field names of this constraint
 					}
+
+					if (persistedBeanAndNoDirtyParameters) {
+						// Check if the query parameter is dirty
+						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, document, fieldName);
+						Attribute attribute = target.getAttribute();
+						// Implicit attribute, so we have to assume we need to do the check
+						if (attribute == null) { // implicit
+							if (UtilImpl.QUERY_TRACE) {
+								StringBuilder log = new StringBuilder(256);
+								log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+								log.append(" as field ").append(fieldName).append(" is an implicit attribute");
+								Util.LOGGER.info(log.toString());
+							}
+							persistedBeanAndNoDirtyParameters = false;
+						}
+						else {
+							// Track changes is on so we can check to see if its dirty or not.
+							if (attribute.isTrackChanges()) {
+								if (bean.originalValues().containsKey(fieldName)) {
+									if (UtilImpl.QUERY_TRACE) {
+										StringBuilder log = new StringBuilder(256);
+										log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+										log.append(" as field ").append(fieldName).append(" has changed");
+										Util.LOGGER.info(log.toString());
+									}
+									persistedBeanAndNoDirtyParameters = false;
+								}
+							}
+							// Track changes is off, so we have to assume we need to do the check
+							else {
+								if (UtilImpl.QUERY_TRACE) {
+									StringBuilder log = new StringBuilder(256);
+									log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+									log.append(" as field ").append(fieldName).append(" has track changes off");
+									Util.LOGGER.info(log.toString());
+								}
+								persistedBeanAndNoDirtyParameters = false;
+							}
+						}
+					}
+					
 					constraintFieldValues.add(constraintFieldValue);
 					if (noWhere) {
 						queryString.append(" where bean.");
@@ -1430,7 +1484,7 @@ if (document.isDynamic()) return;
 					queryString.append(" = ?").append(i++);
 				}
 	
-				if (abortCheck) {
+				if (unpersistedBeanParameter || persistedBeanAndNoDirtyParameters) {
 					continue; // iterate to next constraint
 				}
 
