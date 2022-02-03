@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -78,7 +79,7 @@ class TaggedIterable implements AutoClosingIterable<Bean> {
 	
 	@Override
 	public Iterator<Bean> iterator() {
-		return new TaggedIterator(tagIterable.iterator());
+		return new LoggingIteratorAdapter<>(new TaggedIterator(tagIterable.iterator()));
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import org.hibernate.ScrollableResults;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.persistence.AutoClosingIterable;
 
 public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
@@ -125,7 +126,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 
 		results = null; // dereference the results
 
-		return i;
+		return new LoggingIteratorAdapter<>(i);
 	}
 
 	@Override
