@@ -11,6 +11,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.TimeoutException;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DataStore;
 
@@ -39,7 +40,7 @@ public class DynaIterable implements AutoClosingIterable<DynaBean> {
 	public Iterator<DynaBean> iterator() {
 		try {
 			final ResultSetDynaClass rsdc = new ResultSetDynaClass(rs, true, true);
-			return rsdc.iterator();
+			return new LoggingIteratorAdapter<>(rsdc.iterator());
 		}
 		catch (SQLException e) {
 			throw new DomainException(e);

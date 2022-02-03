@@ -13,6 +13,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
+import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
@@ -273,7 +274,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		return new AutoClosingIterable<>() {
 			@Override
 			public Iterator<Bean> iterator() {
-				return rows.iterator();
+				return new LoggingIteratorAdapter<>(rows.iterator());
 			}
 
 			@Override

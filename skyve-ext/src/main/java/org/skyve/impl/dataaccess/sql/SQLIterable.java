@@ -20,6 +20,7 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.NamedParameterPreparedStatement;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
+import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
@@ -59,7 +60,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 	
 	@Override
 	public Iterator<T> iterator() {
-		return new SQLIterator<>();
+		return new LoggingIteratorAdapter<>(new SQLIterator<>());
 	}
 
 	@Override
