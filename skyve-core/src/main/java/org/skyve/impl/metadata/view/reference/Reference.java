@@ -1,6 +1,6 @@
 package org.skyve.impl.metadata.view.reference;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * Defines a reference to some part of the skyve system or external reference.
@@ -8,6 +8,6 @@ import org.skyve.metadata.MetaData;
  * 
  * @author mike
  */
-public interface Reference extends MetaData {
+public interface Reference extends SerializableMetaData {
 	// nothing to see here
 }

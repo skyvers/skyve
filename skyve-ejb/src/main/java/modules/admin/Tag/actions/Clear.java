@@ -9,8 +9,6 @@ import org.skyve.web.WebContext;
 import modules.admin.Tag.TagExtension;
 
 public class Clear implements ServerSideAction<TagExtension> {
-	private static final long serialVersionUID = 2886341074753936987L;
-
 	/**
 	 * Clear tagged values.
 	 */

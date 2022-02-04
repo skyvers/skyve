@@ -8,8 +8,6 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.DataMaintenance;
 
 public class Create implements ServerSideAction<DataMaintenance> {
-	private static final long serialVersionUID = 7301976416286938546L;
-
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {

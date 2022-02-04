@@ -9,8 +9,6 @@ import modules.admin.domain.ReportParameter;
 
 public class ReportParameterBizlet extends Bizlet<ReportParameterExtension> {
 
-	private static final long serialVersionUID = 5579136484420481059L;
-
 	@Override
 	public void validate(ReportParameterExtension bean, ValidationException e) throws Exception {
 		// validate the report name cannot contain spaces or special characters

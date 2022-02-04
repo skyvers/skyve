@@ -13,8 +13,6 @@ import modules.admin.User.UserExtension;
 import modules.admin.domain.GroupRole;
 
 public class GroupRoleBizlet extends Bizlet<GroupRole> {
-	private static final long serialVersionUID = -3329006728591283654L;
-
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName)
 	throws Exception {

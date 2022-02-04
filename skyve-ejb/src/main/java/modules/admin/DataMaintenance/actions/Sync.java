@@ -8,8 +8,6 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.DataMaintenance;
 
 public class Sync implements ServerSideAction<DataMaintenance> {
-	private static final long serialVersionUID = -2610706078106375060L;
-
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {

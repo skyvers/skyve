@@ -17,8 +17,6 @@ import modules.admin.domain.DocumentCreator;
 
 public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 
-	private static final long serialVersionUID = -682204740567953097L;
-
 	@Override
 	@SuppressWarnings("boxing")
 	public ServerSideActionResult<DocumentCreator> execute(DocumentCreator bean, WebContext webContext) throws Exception {

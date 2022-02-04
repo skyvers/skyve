@@ -10,8 +10,8 @@ import org.skyve.metadata.view.model.chart.OrderBy;
 import org.skyve.metadata.view.model.chart.TemporalBucket;
 import org.skyve.metadata.view.model.chart.TemporalBucket.TemporalBucketType;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.persistence.Persistence;
 
 import modules.admin.ModulesUtil;
 import modules.admin.UserDashboard.UserDashboardExtension;
@@ -19,11 +19,6 @@ import modules.admin.domain.Audit;
 import modules.admin.domain.UserDashboard;
 
 public class UserActivityModel extends ChartModel<UserDashboard> {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4775794889575080733L;
 
 	@Override
 	public ChartData getChartData() {

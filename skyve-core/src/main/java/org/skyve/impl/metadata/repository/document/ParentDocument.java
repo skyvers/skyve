@@ -6,10 +6,10 @@ import javax.xml.bind.annotation.XmlValue;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public class ParentDocument implements MetaData {
+public class ParentDocument implements SerializableMetaData {
 	private static final long serialVersionUID = -4900367761036169747L;
 
 	private Boolean databaseIndex;

@@ -5,8 +5,6 @@ import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.persistence.DocumentQuery;
 
 public class ListGridChartListModel extends DocumentQueryListModel<Bean> {
-	private static final long serialVersionUID = -3572919565643542970L;
-
 	public DocumentQuery getDocumentQuery() {
 		return getDetailQuery();
 	}

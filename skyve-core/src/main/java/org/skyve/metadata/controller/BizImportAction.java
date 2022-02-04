@@ -8,8 +8,6 @@ import org.skyve.metadata.MetaData;
  * 
  */
 public abstract class BizImportAction implements MetaData {
-	private static final long serialVersionUID = -3956169127991820538L;
-
 	/**
 	 * 
 	 * @param bizPortable

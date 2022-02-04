@@ -1,15 +1,13 @@
 package modules.admin.Communication.actions;
 
-import modules.admin.domain.Communication;
-
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.Communication;
+
 public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 	
-	private static final long serialVersionUID = 2886341074753936987L;
-
 	private static final String UNSUBSCRIBE_LINK = "<a href=\"{unsubscribeUrl}\">Unsubscribe</a>";
 
 	/**

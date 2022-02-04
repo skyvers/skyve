@@ -7,8 +7,6 @@ import modules.admin.domain.Startup;
 
 public class StartupBizlet extends Bizlet<StartupExtension> {
 
-	private static final long serialVersionUID = 8910966230892423369L;
-
 	public static final String MAP_LAYER_GMAP = "google.maps.MapTypeId.ROADMAP";
 	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
 

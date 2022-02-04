@@ -25,8 +25,6 @@ import org.skyve.util.FileUtil;
 import modules.admin.domain.DownloadFolder;
 
 public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
-	private static final long serialVersionUID = -6554942396689007986L;
-
 	/**
 	 * fetch - generalised fetch for DownloadFolder
 	 * @param dirPath

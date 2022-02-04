@@ -7,8 +7,6 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.DataMaintenance;
 
 public class RefreshBackupList implements ServerSideAction<DataMaintenance> {
-	private static final long serialVersionUID = 5306067916641877356L;
-
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {

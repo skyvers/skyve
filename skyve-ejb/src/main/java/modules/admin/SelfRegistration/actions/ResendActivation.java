@@ -15,8 +15,6 @@ import modules.admin.domain.User;
  */
 public class ResendActivation implements ServerSideAction<SelfRegistrationExtension> {
 
-	private static final long serialVersionUID = 2690647999106611600L;
-
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext)
 			throws Exception {

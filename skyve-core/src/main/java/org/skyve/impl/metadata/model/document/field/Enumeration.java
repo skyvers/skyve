@@ -15,8 +15,8 @@ import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -29,7 +29,7 @@ public class Enumeration extends ConstrainableField {
 	private static final long serialVersionUID = -8699424041011741395L;
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, propOrder = {"name", "code", "description"})
-	public static class EnumeratedValue implements MetaData {
+	public static class EnumeratedValue implements SerializableMetaData {
 		private static final long serialVersionUID = -3923896082658921385L;
 
 		private String name;

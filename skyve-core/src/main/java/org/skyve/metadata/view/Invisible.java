@@ -1,11 +1,11 @@
 package org.skyve.metadata.view;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * 
  */
-public interface Invisible extends MetaData {
+public interface Invisible extends SerializableMetaData {
 	/**
 	 * A condition name to evaluate to determine if this is invisible.
 	 * @return

@@ -22,8 +22,6 @@ import org.skyve.util.Binder;
 import modules.admin.domain.JobSchedule;
 
 public class JobScheduleBizlet extends Bizlet<JobSchedule> {
-	private static final long serialVersionUID = 1824057397777084860L;
-
 	public static String getBizKey(JobSchedule schedule) {
 		try {
 			String jobName = schedule.getJobName();

@@ -19,8 +19,6 @@ import modules.admin.domain.User;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
 
-	private static final long serialVersionUID = -1282437688681930236L;
-
 	@Override
 	public ConfigurationExtension newInstance(ConfigurationExtension bean) throws Exception {
 		// temporarily elevate access to find existing configuration regardless of user

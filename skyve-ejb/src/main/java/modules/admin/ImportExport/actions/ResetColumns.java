@@ -10,11 +10,6 @@ import modules.admin.domain.ImportExport;
 
 public class ResetColumns implements ServerSideAction<ImportExportExtension> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -3906500305260248349L;
-
 	@Override
 	public ServerSideActionResult<ImportExportExtension> execute(ImportExportExtension bean, WebContext webContext)
 			throws Exception {

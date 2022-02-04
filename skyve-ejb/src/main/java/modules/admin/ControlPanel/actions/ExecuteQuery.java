@@ -15,8 +15,6 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 
 public class ExecuteQuery implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = 5990074876826469688L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {

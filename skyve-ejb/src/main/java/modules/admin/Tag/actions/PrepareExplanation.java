@@ -7,8 +7,6 @@ import org.skyve.web.WebContext;
 import modules.admin.Tag.TagExtension;
 
 public class PrepareExplanation implements ServerSideAction<TagExtension> {
-	private static final long serialVersionUID = 2886341074753936987L;
-
 	/**
 	 * Describe the set operation currently configured.
 	 */

@@ -1,9 +1,9 @@
 package org.skyve.metadata.model.document;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.model.Attribute.UsageType;
 
-public interface Condition extends MetaData {
+public interface Condition extends SerializableMetaData {
 	public String getDocumentation();
 	public String getDescription();
 	public String getExpression();

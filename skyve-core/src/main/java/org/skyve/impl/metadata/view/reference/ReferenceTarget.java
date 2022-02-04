@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * Specifies the modal window or frame target behaviour for opening a reference.
@@ -14,7 +14,7 @@ import org.skyve.metadata.MetaData;
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-public class ReferenceTarget implements MetaData {
+public class ReferenceTarget implements SerializableMetaData {
 	private static final long serialVersionUID = 245896096781243153L;
 
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)

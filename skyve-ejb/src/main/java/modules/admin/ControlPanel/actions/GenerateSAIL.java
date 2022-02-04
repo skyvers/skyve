@@ -23,8 +23,6 @@ import modules.admin.domain.ControlPanel.SailUserAgentType;
 import modules.admin.domain.UserProxy;
 
 public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = 7370653121212184868L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {

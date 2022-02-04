@@ -28,8 +28,6 @@ import org.skyve.util.Binder;
  * @param <T>	The type of the bean under edit.
  */
 public abstract class ReferenceListModel<T extends Bean> extends InMemoryListModel<T> {
-	private static final long serialVersionUID = 6928933794461259542L;
-
 	private String referenceBinding;
 	
 	/**

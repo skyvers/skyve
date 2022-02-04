@@ -1,9 +1,5 @@
 package modules.admin.Tag.actions;
 
-import modules.admin.Tag.TagDefaultAction;
-import modules.admin.Tag.TagExtension;
-import modules.admin.domain.Tag;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.MessageSeverity;
@@ -17,9 +13,11 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-public class BulkDocumentAction implements ServerSideAction<TagExtension> {
-	private static final long serialVersionUID = 2886341074753936987L;
+import modules.admin.Tag.TagDefaultAction;
+import modules.admin.Tag.TagExtension;
+import modules.admin.domain.Tag;
 
+public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 	/**
 	 * Perform an action in bulk.
 	 */

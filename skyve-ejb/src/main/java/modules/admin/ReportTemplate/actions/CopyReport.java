@@ -14,8 +14,6 @@ import modules.admin.domain.ReportTemplate;
 public class CopyReport implements ServerSideAction<ReportTemplate> {
 
 	private static final String COPY_PREFIX = "Copy of ";
-	private static final long serialVersionUID = 2898654972202883897L;
-
 	@Override
 	public ServerSideActionResult<ReportTemplate> execute(ReportTemplate bean, WebContext webContext)
 			throws Exception {

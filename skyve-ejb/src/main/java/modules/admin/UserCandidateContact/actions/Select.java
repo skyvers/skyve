@@ -10,11 +10,6 @@ import modules.admin.domain.User.WizardState;
 import modules.admin.domain.UserCandidateContact;
 
 public class Select implements ServerSideAction<UserCandidateContact> {
-	/**
-	 * For Serialization.
-	 */
-	private static final long serialVersionUID = 4813596591072958231L;
-
 	@Override
 	public ServerSideActionResult<UserCandidateContact> execute(UserCandidateContact candidate, WebContext webContext)
 	throws Exception {

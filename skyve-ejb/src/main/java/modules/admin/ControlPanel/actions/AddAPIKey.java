@@ -13,8 +13,6 @@ import modules.admin.domain.ControlPanel;
 import modules.admin.domain.Generic;
 
 public class AddAPIKey implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = -4439819451806091821L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) 
 	throws Exception {

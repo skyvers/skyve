@@ -1,19 +1,14 @@
 package modules.admin.Snapshot.actions;
 
-import modules.admin.domain.Snapshot;
-
 import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-public class CopySnapshotToUser implements ServerSideAction<Snapshot> {
-	/**
-	 * For Serialization
-	 */
-	private static final long serialVersionUID = 2886341074753936987L;
+import modules.admin.domain.Snapshot;
 
+public class CopySnapshotToUser implements ServerSideAction<Snapshot> {
 	/**
 	 * Update the payment batch details.
 	 */

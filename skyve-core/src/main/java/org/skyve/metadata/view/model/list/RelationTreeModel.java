@@ -23,8 +23,6 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
  * @param <T>	The edited bean type.
  */
 public abstract class RelationTreeModel<T extends Bean> extends InMemoryListModel<T> {
-	private static final long serialVersionUID = 7803713350746172725L;
-
 	private List<MetaDataQueryColumn> columns = null;
 	private String[] stopDocuments;
 	

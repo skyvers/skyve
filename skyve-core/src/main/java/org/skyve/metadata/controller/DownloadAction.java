@@ -1,14 +1,14 @@
 package org.skyve.metadata.controller;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.web.WebContext;
 
 /**
  * 
  * @param <T>
  */
-public abstract class DownloadAction<T extends Bean> implements MetaData {
+public abstract class DownloadAction<T extends Bean> implements SerializableMetaData {
 	private static final long serialVersionUID = -1360787878049667579L;
 
 	/**

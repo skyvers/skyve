@@ -10,11 +10,6 @@ import modules.whosin.domain.Staff.Status;
 
 public class StaffBizlet extends Bizlet<Staff> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5976944590775263367L;
-
 	@Override
 	public Staff preExecute(ImplicitActionName actionName, Staff bean, Bean parentBean, WebContext webContext) throws Exception {
 

@@ -19,8 +19,6 @@ import modules.admin.domain.ControlPanel.SailExecutor;
 import modules.admin.domain.UserProxy;
 
 public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = -4884065778373508731L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 	throws Exception {

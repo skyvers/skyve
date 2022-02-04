@@ -27,8 +27,6 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
-	private static final long serialVersionUID = 8763158382139036658L;
-
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();

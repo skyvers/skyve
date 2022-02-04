@@ -5,8 +5,6 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaData;
 
 public abstract class MapModel<T extends Bean> implements MetaData {
-	private static final long serialVersionUID = 3483411029192491351L;
-
 	private T bean;
 	public T getBean() {
 		return bean;

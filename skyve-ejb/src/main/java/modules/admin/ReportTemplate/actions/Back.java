@@ -9,8 +9,6 @@ import modules.admin.domain.ReportTemplate.WizardState;
 
 public class Back implements ServerSideAction<ReportTemplateExtension> {
 
-	private static final long serialVersionUID = -8712819625568075702L;
-
 	@Override
 	public ServerSideActionResult<ReportTemplateExtension> execute(ReportTemplateExtension bean, WebContext webContext)
 			throws Exception {

@@ -6,8 +6,6 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 
 public class ContactBizlet extends Bizlet<Contact> {
-	private static final long serialVersionUID = 6794069388827546373L;
-
 	public static String bizKey(Contact bean) {
 	  	StringBuilder result = new StringBuilder(64);
 	  	

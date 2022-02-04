@@ -37,7 +37,6 @@ import modules.admin.domain.ReportDataset;
 
 public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 
-	private static final long serialVersionUID = 8850955374877208367L;
 	private static final Logger LOG = LoggerFactory.getLogger(TestQuery.class);
 
 	@Override

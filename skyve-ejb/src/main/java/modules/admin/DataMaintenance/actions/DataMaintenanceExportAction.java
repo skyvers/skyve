@@ -9,8 +9,6 @@ import modules.admin.ModulesUtil;
 import modules.admin.domain.DataMaintenance;
 
 public class DataMaintenanceExportAction extends BizExportAction {
-	private static final long serialVersionUID = -4559826499532491074L;
-
 	@Override
 	public BizPortWorkbook bizExport(WebContext webContext) throws Exception {
 		DataMaintenance d = (DataMaintenance) webContext.getCurrentBean();

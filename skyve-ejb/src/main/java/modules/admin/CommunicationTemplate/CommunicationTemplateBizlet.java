@@ -8,8 +8,6 @@ import modules.admin.domain.CommunicationTemplate;
 
 public class CommunicationTemplateBizlet extends Bizlet<CommunicationTemplate> {
 
-	private static final long serialVersionUID = -4112006139889883101L;
-
 	public static final String TEMPLATE_BODY = "{body}";
 
 	@Override

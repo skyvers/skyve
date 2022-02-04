@@ -9,11 +9,6 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.Jobs;
 
 public class DeleteCompletedJobs implements ServerSideAction<Jobs> {
-	/**
-	 * For Serialization
-	 */
-	private static final long serialVersionUID = -1037253249182913062L;
-
 	@Override
 	public ServerSideActionResult<Jobs> execute(Jobs bean, WebContext webContext) 
 	throws Exception {

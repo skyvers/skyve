@@ -13,8 +13,6 @@ import modules.admin.domain.DataMaintenance;
 
 public class Truncate implements ServerSideAction<DataMaintenance> {
 	
-	private static final long serialVersionUID = -8003482363810304078L;
-
 	@Override
 	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {

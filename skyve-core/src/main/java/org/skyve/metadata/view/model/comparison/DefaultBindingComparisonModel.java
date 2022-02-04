@@ -14,8 +14,6 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 
 public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
-	private static final long serialVersionUID = -256924803932268240L;
-
 	private Customer customer;
 	private Document document;
 	private C toCompareTo;

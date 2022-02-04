@@ -19,11 +19,6 @@ import modules.admin.domain.UserDashboard;
 
 public class UserActivityContextModel extends ChartModel<UserDashboard> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4672856874635730792L;
-
 	@Override
 	public ChartData getChartData() {
 		

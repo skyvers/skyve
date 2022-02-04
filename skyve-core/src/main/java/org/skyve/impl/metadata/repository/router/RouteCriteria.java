@@ -7,7 +7,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -19,7 +19,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
-public class RouteCriteria implements MetaData {
+public class RouteCriteria implements SerializableMetaData {
 	private static final long serialVersionUID = 7017356339189117479L;
 
 	private ViewType viewType;

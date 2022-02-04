@@ -8,8 +8,6 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.persistence.DocumentQuery;
 
 public class InMemoryDocumentQueryListModel<T extends Bean> extends InMemoryListModel<T> {
-	private static final long serialVersionUID = 7072903544810000605L;
-
 	@SuppressWarnings("unused")
 	private DocumentQuery query;
 	

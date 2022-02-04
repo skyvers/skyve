@@ -6,8 +6,6 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.SQL;
 
 public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryListModel<T> {
-	private static final long serialVersionUID = 9079443533043386516L;
-
 	private SQL inputSQL;
 	private SQL detailSQL;
 	private SQL summarySQL;

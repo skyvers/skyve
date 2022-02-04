@@ -22,8 +22,6 @@ import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
-	private static final long serialVersionUID = -4317908281075686229L;
-
 	@Override
 	public ServerSideActionResult<ChangePassword> execute(ChangePassword bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();

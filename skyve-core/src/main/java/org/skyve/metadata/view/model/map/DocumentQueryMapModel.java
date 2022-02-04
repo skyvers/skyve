@@ -11,8 +11,6 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 
 public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
-	private static final long serialVersionUID = 5182580858481923068L;
-
 	private MetaDataQueryDefinition query;
 	private DocumentQuery documentQuery; // from query
 

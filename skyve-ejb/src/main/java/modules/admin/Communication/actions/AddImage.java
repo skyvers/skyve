@@ -13,9 +13,6 @@ import modules.admin.domain.Communication;
 
 public class AddImage extends UploadAction<Communication> {
 
-	private static final long serialVersionUID = -8154709480999519405L;
-
-
 	@Override
 	public Communication upload(Communication communication, Upload upload, UploadException exception, WebContext webContext) throws Exception {
 

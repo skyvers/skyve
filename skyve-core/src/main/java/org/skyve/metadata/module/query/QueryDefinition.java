@@ -1,13 +1,14 @@
 package org.skyve.metadata.module.query;
 
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
 /**
  * 
  */
-public interface QueryDefinition extends NamedMetaData {
+public interface QueryDefinition extends NamedMetaData, SerializableMetaData {
 	/**
 	 * 
 	 * @return

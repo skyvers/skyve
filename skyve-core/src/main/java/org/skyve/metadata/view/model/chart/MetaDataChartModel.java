@@ -7,8 +7,6 @@ import org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData;
 import org.skyve.impl.metadata.view.model.chart.NoBucketMetaData;
 
 public class MetaDataChartModel extends ChartModel<Bean> {
-	private static final long serialVersionUID = -5875809858997892893L;
-
 	private ChartBuilderMetaData builder = null;
 	
 	public MetaDataChartModel(ChartBuilderMetaData builder) {

@@ -11,8 +11,6 @@ import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag;
 
 public class PerformCombination implements ServerSideAction<TagExtension> {
-	private static final long serialVersionUID = 2886341074753936987L;
-
 	/**
 	 * Combine 2 tags with a set operator.
 	 */

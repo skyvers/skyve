@@ -9,8 +9,6 @@ import modules.admin.domain.ModuleDocument;
 
 public class ModuleDocumentBizlet extends Bizlet<ModuleDocument> {
 
-	private static final long serialVersionUID = 8569154769855174837L;
-
 	@Override
 	public ModuleDocument resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
 		if (conversationBean instanceof ControlPanelExtension) {

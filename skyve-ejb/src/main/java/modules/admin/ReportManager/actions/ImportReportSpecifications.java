@@ -31,8 +31,6 @@ import modules.admin.domain.ReportTemplate;
 
 public class ImportReportSpecifications extends UploadAction<ReportManagerExtension> {
 
-	private static final long serialVersionUID = 8644012510601735978L;
-
 	/**
 	 * Upload a zip containing a number of report configurations
 	 * unzip to a temporary folder

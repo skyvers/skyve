@@ -15,8 +15,6 @@ import modules.admin.domain.DocumentCreator;
 
 public class Submit implements ServerSideAction<DocumentCreator> {
 
-	private static final long serialVersionUID = -9077781738031503002L;
-
 	@Override
 	public ServerSideActionResult<DocumentCreator> execute(DocumentCreator bean, WebContext webContext) throws Exception {
 

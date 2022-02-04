@@ -21,8 +21,6 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
 public class CacheStats implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = -7040725375654325351L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
 		final Caching caching = EXT.getCaching();

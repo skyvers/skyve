@@ -18,8 +18,6 @@ import modules.admin.domain.Contact;
 
 public class TestSend implements ServerSideAction<Communication> {
 
-	private static final long serialVersionUID = 39012560771532168L;
-
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 

@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.UniqueConstraint;
@@ -25,7 +25,7 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	private static final long serialVersionUID = 835190692384615766L;
 
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ordering", propOrder = {"sort", "by"})
-	public static final class OrderingImpl implements Ordering, MetaData {
+	public static final class OrderingImpl implements Ordering, SerializableMetaData {
 		private static final long serialVersionUID = 5816585894418535717L;
 
 		private String by;

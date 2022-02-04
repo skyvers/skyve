@@ -1,6 +1,6 @@
 package org.skyve.metadata.view.model.chart;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * Used to aggregate chart data.
@@ -8,7 +8,7 @@ import org.skyve.metadata.MetaData;
  * 
  * @author mike
  */
-public interface Bucket extends MetaData {
+public interface Bucket extends SerializableMetaData {
 	/**
 	 * Create a BizQL expression representing the bucket.
 	 * @param categoryBinding	The category binding.

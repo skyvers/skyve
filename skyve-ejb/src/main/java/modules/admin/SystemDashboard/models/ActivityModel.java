@@ -19,11 +19,6 @@ import modules.admin.domain.SystemDashboard;
 
 public class ActivityModel extends ChartModel<SystemDashboard> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4775794889575080733L;
-
 	@Override
 	public ChartData getChartData() {
 		

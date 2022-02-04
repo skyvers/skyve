@@ -19,8 +19,6 @@ import modules.admin.domain.ReportTemplate;
 
 public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
 
-	private static final long serialVersionUID = 357812756088998042L;
-
 	@Override
 	public ReportDatasetExtension preExecute(ImplicitActionName actionName, ReportDatasetExtension bean, Bean parentBean,
 			WebContext webContext) throws Exception {

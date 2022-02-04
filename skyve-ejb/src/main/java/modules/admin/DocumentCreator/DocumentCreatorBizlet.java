@@ -16,8 +16,6 @@ import modules.admin.domain.ModuleDocument;
 
 public class DocumentCreatorBizlet extends Bizlet<DocumentCreator> {
 
-	private static final long serialVersionUID = -7115312801389008421L;
-
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (DocumentCreator.defaultModulePropertyName.equals(attributeName)) {

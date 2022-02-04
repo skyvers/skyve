@@ -16,8 +16,6 @@ import modules.admin.domain.UserDashboard;
  */
 public class FavouritesModel extends ReferenceListModel<Generic> {
 
-	private static final long serialVersionUID = 379921677409122428L;
-
 	private List<MetaDataQueryColumn> columns;
 
 	public FavouritesModel() throws Exception {

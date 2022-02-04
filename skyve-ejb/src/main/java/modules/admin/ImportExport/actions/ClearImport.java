@@ -8,8 +8,6 @@ import modules.admin.ImportExport.ImportExportExtension;
 
 public class ClearImport implements ServerSideAction<ImportExportExtension> {
 
-	private static final long serialVersionUID = 6886018866742274051L;
-
 	@Override
 	public ServerSideActionResult<ImportExportExtension> execute(ImportExportExtension bean, WebContext webContext)
 			throws Exception {

@@ -12,7 +12,7 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 public class DownloadResults extends DownloadAction<ControlPanelExtension> {
 
 	private static final long serialVersionUID = 2440491746517186884L;
-	
+
 	private static final String FILE_TITLE = "sail.txt";
 
 	@Override

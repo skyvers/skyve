@@ -28,8 +28,6 @@ import modules.admin.domain.User;
 import modules.admin.domain.UserCandidateContact;
 
 public class Check implements ServerSideAction<UserExtension> {
-	private static final long serialVersionUID = -4667349358677521637L;
-
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext) throws Exception {
 		// validate required fields

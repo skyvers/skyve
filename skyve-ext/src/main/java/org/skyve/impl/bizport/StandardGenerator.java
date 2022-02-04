@@ -291,7 +291,6 @@ public final class StandardGenerator {
 					}
 					if (bizlet == null) { // metadata has an error
 						bizlet = new Bizlet<>() {
-							private static final long serialVersionUID = 5302965331084582623L;
 						};
 					}
 					column.setRangeValues(getConstantRangeValues(bizlet, 

@@ -12,8 +12,6 @@ import modules.admin.domain.Contact;
 
 public class SendMail implements ServerSideAction<ConfigurationExtension> {
 
-	private static final long serialVersionUID = -4439819451806091821L;
-
 	@Override
 	public ServerSideActionResult<ConfigurationExtension> execute(ConfigurationExtension bean, WebContext webContext)
 	throws Exception {

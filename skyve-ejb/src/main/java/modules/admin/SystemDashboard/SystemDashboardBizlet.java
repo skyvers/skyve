@@ -13,8 +13,6 @@ import modules.admin.domain.SystemDashboard;
 
 public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 
-	private static final long serialVersionUID = -4784606165710946704L;
-
 	@Override
 	public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
 

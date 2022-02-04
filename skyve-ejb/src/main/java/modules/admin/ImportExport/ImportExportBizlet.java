@@ -24,8 +24,6 @@ import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 
-	private static final long serialVersionUID = -3224886678815636057L;
-
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
 

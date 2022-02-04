@@ -9,8 +9,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.web.UserAgentType;
 
 public class GenerateMenuSAIL extends GenerateSAIL {
-	private static final long serialVersionUID = 3235202497294674514L;
-
 	@Override
 	public Automation single(User user,
 								String loginCustomer,
