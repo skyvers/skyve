@@ -486,6 +486,7 @@
 		<group name="Reports">
 			<list name="Reports" query="qEnabledReports">
 				<uxui name="external" />
+				<uxui name="tablet"/>
 				<role name="BasicUser"/>
 			</list>
 			<edit name="Report Manager" document="ReportManager">
