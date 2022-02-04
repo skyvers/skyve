@@ -162,7 +162,7 @@
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />
 			</dataGrid>
-			<dataGrid binding="importExportColumns" visible="showExpressions" showEdit="false">
+			<dataGrid binding="importExportColumns" visible="showExpressions" >
 				<boundColumn binding="columnName" />
 				<boundColumn binding="bindingName" />
 				<boundColumn binding="bindingExpression" />
@@ -173,7 +173,7 @@
 				<boundColumn binding="bindingName" />
 				<boundColumn binding="columnName" />
 			</dataGrid>
-			<dataGrid binding="importExportColumns" visible="showExpressions" showEdit="false">
+			<dataGrid binding="importExportColumns" visible="showExpressions" >
 				<boundColumn binding="bindingName" />
 				<boundColumn binding="bindingExpression" />
 				<boundColumn binding="columnName" />
