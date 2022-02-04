@@ -14,6 +14,14 @@ If there is something you feel is missing from Skyve, we want to hear your ideas
 
 Create a new [GitHub Issue](https://github.com/skyvers/skyve/issues/new/choose) which describes the feature, how it would be useful to you, and how it should work. The core team will discuss with you in the issue, and if you would like to contribute you can then start working on a Pull Request.
 
+## Pull Requests
+
+If you have contributed to a feature or addressed an issue, please [create a Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request). Don't forget to link the [Pull Request to the related issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue).
+
+If you are creating a branch to address an issue, please name it in the form of `issue-##-name-of-issue`.
+
+If you have been assigned a Trello card for this feature/issue, you can link the relevant PR to the [card](https://blog.trello.com/github-and-trello-integrate-your-commits).
+
 ## Skyve Development Setup
 
 This Skyve repository is intended for developers with existing experience with Java projects and development environments. If you are trying to start a new Skyve project, please see our [Getting Started](https://skyve.org/getting-started) page instead.
