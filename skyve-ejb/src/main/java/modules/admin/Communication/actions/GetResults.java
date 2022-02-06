@@ -10,8 +10,6 @@ import modules.admin.domain.Communication;
 
 public class GetResults implements ServerSideAction<Communication> {
 
-	private static final long serialVersionUID = -215761915817921911L;
-
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 

@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public class ActionPrivilege implements MetaData {
+public class ActionPrivilege implements SerializableMetaData {
 	private static final long serialVersionUID = 1294697285074132505L;
 
 	private String actionName;

@@ -10,8 +10,6 @@ import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User.WizardState;
 
 public class New implements ServerSideAction<UserExtension> {
-	private static final long serialVersionUID = 7776867319664519408L;
-
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext)
 	throws Exception {

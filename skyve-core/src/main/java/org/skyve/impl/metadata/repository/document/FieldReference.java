@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlValue;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public class FieldReference implements MetaData {
+public class FieldReference implements SerializableMetaData {
 	private static final long serialVersionUID = 4832758292142080515L;
 
 	private String ref;

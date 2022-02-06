@@ -3,10 +3,6 @@ package modules.admin.Audit;
 import java.util.ArrayList;
 import java.util.List;
 
-import modules.admin.Audit.actions.SourceVersionChanged;
-import modules.admin.domain.Audit;
-import modules.admin.domain.Audit.Operation;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.SortDirection;
@@ -18,9 +14,11 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
-public class AuditBizlet extends Bizlet<Audit> {
-	private static final long serialVersionUID = -1421062280134070819L;
+import modules.admin.Audit.actions.SourceVersionChanged;
+import modules.admin.domain.Audit;
+import modules.admin.domain.Audit.Operation;
 
+public class AuditBizlet extends Bizlet<Audit> {
 	@Override
 	public Audit preExecute(ImplicitActionName actionName,
 								Audit bean,

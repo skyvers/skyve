@@ -2,16 +2,14 @@ package modules.admin.Jobs;
 
 import java.util.List;
 
-import modules.admin.domain.Job;
-import modules.admin.domain.Jobs;
-
 import org.skyve.EXT;
 import org.skyve.job.JobDescription;
 import org.skyve.metadata.model.document.Bizlet;
 
-public class JobsBizlet extends Bizlet<Jobs> {
-	private static final long serialVersionUID = 2374495221430654562L;
+import modules.admin.domain.Job;
+import modules.admin.domain.Jobs;
 
+public class JobsBizlet extends Bizlet<Jobs> {
 	public static final String SYSTEM_JOB_NOTIFICATION = "SYSTEM Job Notification";
 	public static final String SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT = "Job - Complete";
 	public static final String SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS = " Check <a href=\"{#context}?a=e&m=admin&d=Jobs\">Job log</a> for details.";

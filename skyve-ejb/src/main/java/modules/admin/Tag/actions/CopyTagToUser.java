@@ -14,8 +14,6 @@ import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag;
 
 public class CopyTagToUser implements ServerSideAction<TagExtension> {
-	private static final long serialVersionUID = 2886341074753936987L;
-
 	/**
 	 * Copy tag to another user.
 	 */

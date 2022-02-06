@@ -33,8 +33,6 @@ import modules.admin.domain.ImportExportColumn;
 
 public class RunImport implements ServerSideAction<ImportExport> {
 
-	private static final long serialVersionUID = 7301976416286938546L;
-
 	@Override
 	public ServerSideActionResult<ImportExport> execute(ImportExport bean, WebContext webContext)
 			throws Exception {

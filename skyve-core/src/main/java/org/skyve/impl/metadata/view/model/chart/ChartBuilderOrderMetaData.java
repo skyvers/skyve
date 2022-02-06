@@ -5,13 +5,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.view.model.chart.OrderBy;
 
 @XmlRootElement(name = "order", namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-public class ChartBuilderOrderMetaData implements MetaData {
+public class ChartBuilderOrderMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = -1811520217428427701L;
 	
 	private OrderBy by;

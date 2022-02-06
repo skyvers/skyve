@@ -1,11 +1,11 @@
 package org.skyve.metadata.view;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * 
  */
-public interface Disableable extends MetaData {
+public interface Disableable extends SerializableMetaData {
 	/**
 	 * A condition name to evaluate to determine if this is disabled.
 	 * @return

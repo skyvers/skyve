@@ -4,10 +4,6 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.UUID;
 
-import modules.admin.domain.Contact;
-import modules.admin.domain.Contact.ContactType;
-import modules.admin.domain.Subscription;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -23,9 +19,11 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 
-public class SubscriptionBizlet extends Bizlet<Subscription> {
+import modules.admin.domain.Contact;
+import modules.admin.domain.Contact.ContactType;
+import modules.admin.domain.Subscription;
 
-	private static final long serialVersionUID = -8006732196635189574L;
+public class SubscriptionBizlet extends Bizlet<Subscription> {
 
 	private static final String SUBSCRIPTION_PUBLIC_USERNAME = "SkyveSubscriptionUser";
 

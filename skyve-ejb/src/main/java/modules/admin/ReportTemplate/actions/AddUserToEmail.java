@@ -11,8 +11,6 @@ import modules.admin.domain.ReportTemplate;
 
 public class AddUserToEmail implements ServerSideAction<ReportTemplate> {
 
-	private static final long serialVersionUID = 3062041348627114224L;
-
 	@Override
 	public ServerSideActionResult<ReportTemplate> execute(ReportTemplate bean, WebContext webContext) throws Exception {
 		if (bean.getNewUserToEmail() == null) {

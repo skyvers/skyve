@@ -19,8 +19,6 @@ import modules.admin.domain.Tag;
 
 public class DeleteTestData implements ServerSideAction<ControlPanelExtension> {
 
-	private static final long serialVersionUID = -1015595549604693410L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext)
 			throws Exception {

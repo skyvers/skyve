@@ -7,8 +7,6 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
 public class ApplyStartupConfiguration implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = -4439819451806091821L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) 
 	throws Exception {

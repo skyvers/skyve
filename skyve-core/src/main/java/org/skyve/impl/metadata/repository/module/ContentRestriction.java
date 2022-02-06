@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * Content Restrictions are specified in user roles.
@@ -18,7 +18,7 @@ import org.skyve.metadata.MetaData;
  * @author Mike
  */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public class ContentRestriction implements MetaData {
+public class ContentRestriction implements SerializableMetaData {
 	private static final long serialVersionUID = -6659533167508298647L;
 
 	private String attributeName;

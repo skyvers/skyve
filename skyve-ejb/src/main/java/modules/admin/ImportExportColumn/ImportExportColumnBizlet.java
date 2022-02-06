@@ -25,7 +25,6 @@ import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 
-	private static final long serialVersionUID = 3350398188234057554L;
 	public static final String EXPRESSION = "expression...";
 
 	private List<DomainValue> bindings = null;

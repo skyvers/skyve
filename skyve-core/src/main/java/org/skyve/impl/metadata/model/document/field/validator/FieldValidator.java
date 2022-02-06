@@ -7,12 +7,12 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public abstract class FieldValidator<T extends Object> extends Validator<T> implements MetaData {
+public abstract class FieldValidator<T extends Object> extends Validator<T> implements SerializableMetaData {
 	private static final long serialVersionUID = -7074155220758634937L;
 
 	private String validationMessage;

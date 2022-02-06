@@ -28,8 +28,6 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.SortParameter;
 
 public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
-	private static final long serialVersionUID = -4488883647065013017L;
-
 	private Customer customer;
 	private Module module;
 	private Document drivingDocument;

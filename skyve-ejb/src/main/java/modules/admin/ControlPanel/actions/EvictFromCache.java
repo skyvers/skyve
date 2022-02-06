@@ -10,8 +10,6 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
 public class EvictFromCache implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = 3049239808434701310L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) 
 	throws Exception {

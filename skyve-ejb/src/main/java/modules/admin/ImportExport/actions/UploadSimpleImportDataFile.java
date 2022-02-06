@@ -25,8 +25,6 @@ import modules.admin.ImportExport.ImportExportExtension;
 import modules.admin.domain.ImportExportColumn;
 
 public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtension> {
-	private static final long serialVersionUID = -8154709480999519405L;
-
 	@Override
 	public ImportExportExtension upload(ImportExportExtension importExport,
 											Upload upload,

@@ -11,8 +11,6 @@ import modules.admin.domain.ReportTemplate.WizardState;
 
 public class Next implements ServerSideAction<ReportTemplateExtension> {
 
-	private static final long serialVersionUID = -921560136855719078L;
-
 	@Override
 	public ServerSideActionResult<ReportTemplateExtension> execute(ReportTemplateExtension bean, WebContext webContext)
 			throws Exception {

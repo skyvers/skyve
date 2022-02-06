@@ -21,8 +21,6 @@ import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import modules.admin.domain.ModuleDocument;
 
 public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance> {
-	private static final long serialVersionUID = -2754093263194272489L;
-
 	public static final String SYSTEM_DATA_REFRESH_NOTIFICATION = "SYSTEM Document Data Refresh Notification";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT = "Perform Document Data Refresh - Complete";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;

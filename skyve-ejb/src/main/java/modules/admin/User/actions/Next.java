@@ -13,8 +13,6 @@ import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
 
 public class Next implements ServerSideAction<UserExtension> {
-	private static final long serialVersionUID = -4667349358677521637L;
-
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension adminUser, WebContext webContext)
 	throws Exception {

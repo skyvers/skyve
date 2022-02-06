@@ -9,8 +9,6 @@ import modules.admin.domain.Communication;
 
 public class GetCount implements ServerSideAction<Communication> {
 
-	private static final long serialVersionUID = 60089863446674901L;
-
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 

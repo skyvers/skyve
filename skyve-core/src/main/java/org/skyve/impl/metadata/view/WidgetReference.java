@@ -21,10 +21,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-public class WidgetReference implements MetaData {
+public class WidgetReference implements SerializableMetaData {
 	private static final long serialVersionUID = -4623822506842372448L;
 
 	private InputWidget widget;

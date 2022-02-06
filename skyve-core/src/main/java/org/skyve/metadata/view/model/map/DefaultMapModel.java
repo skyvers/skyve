@@ -9,8 +9,6 @@ import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
 public abstract class DefaultMapModel<T extends Bean> extends MapModel<T> {
-	private static final long serialVersionUID = -2978244270525374267L;
-
 	private String geometryBinding;
 	public final String getGeometryBinding() {
 		return geometryBinding;

@@ -8,8 +8,6 @@ import modules.admin.Startup.StartupExtension;
 
 public class SaveChanges implements ServerSideAction<StartupExtension> {
 
-	private static final long serialVersionUID = -2131639715230917502L;
-
 	@Override
 	public ServerSideActionResult<StartupExtension> execute(StartupExtension bean, WebContext webContext) throws Exception {
 

@@ -34,8 +34,6 @@ import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
 public abstract class ListModel<T extends Bean> implements MetaData {
-	private static final long serialVersionUID = -5786617076399299709L;
-
 	public static final String ADMIN_MODULE_NAME = "admin";
 	public static final String GENERIC_DOCUMENT_NAME = "Generic";
 	public static final String MEMO_1_PROPERTY_NAME = "memo1";

@@ -1,12 +1,12 @@
 package org.skyve.domain.types;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * The Skyve Enumeration interface.
  */
-public interface Enumeration extends MetaData {
+public interface Enumeration extends SerializableMetaData {
 	/**
 	 * The toCode method name.
 	 */

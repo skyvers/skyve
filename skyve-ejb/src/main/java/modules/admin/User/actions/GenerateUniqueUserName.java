@@ -2,8 +2,6 @@ package modules.admin.User.actions;
 
 import java.util.List;
 
-import modules.admin.domain.User;
-
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -14,12 +12,9 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-public class GenerateUniqueUserName implements ServerSideAction<User> {
-	/**
-	 * For Serialization.
-	 */
-	private static final long serialVersionUID = 3904239033808385824L;
+import modules.admin.domain.User;
 
+public class GenerateUniqueUserName implements ServerSideAction<User> {
 	@Override
 	public ServerSideActionResult<User> execute(User user, WebContext webContext) throws Exception {
 
@@ -59,7 +54,7 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 					try {
 						// see if last chars are numeric
 						numericPart = Integer.valueOf(Integer.parseInt(maxUName.substring(i, maxUName.length())));
-					} catch (Exception e) {
+					} catch (@SuppressWarnings("unused") Exception e) {
 						// break out when non-numeric found
 						break;
 					}

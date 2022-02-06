@@ -33,8 +33,6 @@ import modules.admin.domain.ReportTemplate.ReportType;
 
 public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 
-	private static final long serialVersionUID = 5608017044113249859L;
-
 	public static final String FREEMARKER_HTML_TEMPLATE_EXTENSION = "ftlh";
 
 	// scheduling constants

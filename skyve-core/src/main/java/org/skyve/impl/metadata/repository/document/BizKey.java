@@ -8,10 +8,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public class BizKey implements MetaData {
+public class BizKey implements SerializableMetaData {
 	private static final long serialVersionUID = -2323204335740515884L;
 
 	private String expression;

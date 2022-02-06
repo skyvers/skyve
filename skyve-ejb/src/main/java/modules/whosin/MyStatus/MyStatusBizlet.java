@@ -1,8 +1,5 @@
 package modules.whosin.MyStatus;
 
-import modules.whosin.domain.MyStatus;
-import modules.whosin.domain.Staff;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet;
@@ -10,9 +7,10 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
-public class MyStatusBizlet extends Bizlet<MyStatus> {
-	private static final long serialVersionUID = 5831916461072143515L;
+import modules.whosin.domain.MyStatus;
+import modules.whosin.domain.Staff;
 
+public class MyStatusBizlet extends Bizlet<MyStatus> {
 	@Override
 	public MyStatus newInstance(MyStatus bean) throws Exception {
 		

@@ -9,8 +9,6 @@ import modules.admin.domain.User;
 
 public class GeneratePassword implements ServerSideAction<User> {
 
-	private static final long serialVersionUID = 3904239033808385824L;
-
 	@Override
 	public ServerSideActionResult<User> execute(User user, WebContext webContext) throws Exception {
 

@@ -10,8 +10,6 @@ import modules.admin.domain.UserList;
 public class InviteUsers implements ServerSideAction<UserList> {
 
 	
-	private static final long serialVersionUID = -4884065778373508731L;
-
 	@Override
 	public ServerSideActionResult<UserList> execute(UserList bean, WebContext webContext)
 			throws Exception {

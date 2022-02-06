@@ -18,8 +18,6 @@ import modules.admin.domain.DataMaintenance;
 
 public class UploadBackup extends UploadAction<DataMaintenance> {
 
-	private static final long serialVersionUID = -7270254238606857719L;
-
 	@Override
 	public DataMaintenance upload(final DataMaintenance bean, final Upload upload,
 			final UploadException exception, final WebContext webContext) throws Exception {

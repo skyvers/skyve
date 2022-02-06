@@ -9,11 +9,6 @@ import org.skyve.web.WebContext;
 
 public class SelfRegistrationActivationBizlet extends Bizlet<SelfRegistrationActivationExtension> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 142089849010035272L;
-
 	@Override
 	public SelfRegistrationActivationExtension preExecute(ImplicitActionName actionName, SelfRegistrationActivationExtension bean, Bean parentBean, WebContext webContext)
 			throws Exception {

@@ -2,19 +2,17 @@ package modules.admin.Audit.actions;
 
 import java.util.List;
 
-import modules.admin.Audit.AuditBizlet;
-import modules.admin.domain.Audit;
-import modules.admin.domain.Audit.Operation;
-
 import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.web.WebContext;
 
-public class SourceVersionChanged implements ServerSideAction<Audit> {
-	private static final long serialVersionUID = -1225628735166059147L;
+import modules.admin.Audit.AuditBizlet;
+import modules.admin.domain.Audit;
+import modules.admin.domain.Audit.Operation;
 
+public class SourceVersionChanged implements ServerSideAction<Audit> {
 	@Override
 	public ServerSideActionResult<Audit> execute(Audit bean, WebContext webContext) throws Exception {
 		sourceVersionChanged(bean);

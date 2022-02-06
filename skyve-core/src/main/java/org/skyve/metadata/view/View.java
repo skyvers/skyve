@@ -10,14 +10,14 @@ import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
 /**
  * 
  */
-public interface View extends NamedMetaData, DecoratedMetaData {
+public interface View extends NamedMetaData, DecoratedMetaData, SerializableMetaData {
 	/**
 	 * 
 	 */
@@ -50,7 +50,7 @@ public interface View extends NamedMetaData, DecoratedMetaData {
 	}
 
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public static class ViewParameter implements MetaData {
+	public static class ViewParameter implements SerializableMetaData {
 		private static final long serialVersionUID = 2845518081930588156L;
 
 		private String fromBinding;

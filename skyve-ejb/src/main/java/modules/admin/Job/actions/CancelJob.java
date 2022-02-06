@@ -9,8 +9,6 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.Job;
 
 public class CancelJob implements ServerSideAction<Job> {
-	private static final long serialVersionUID = 2335124953478958973L;
-
 	@Override
 	public ServerSideActionResult<Job> execute(Job bean, WebContext webContext) throws Exception {
 		String instanceId = bean.getInstanceId();

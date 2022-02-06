@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
-public interface Bordered extends MetaData {
+public interface Bordered extends SerializableMetaData {
 	public Boolean getBorder();
 	public void setBorder(Boolean border);
 	public String getBorderTitle();

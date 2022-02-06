@@ -11,8 +11,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
 public class InjectedDocumentBizlet extends Bizlet<InjectedDocumentExtension> {
-	private static final long serialVersionUID = -7149620934909349430L;
-
 	@Inject
 	public Persistence p;
 	@Inject

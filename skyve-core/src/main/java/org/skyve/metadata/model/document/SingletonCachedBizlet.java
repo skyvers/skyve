@@ -15,8 +15,6 @@ import org.skyve.metadata.user.User;
  * @param <T>
  */
 public abstract class SingletonCachedBizlet<T extends PersistentBean> extends SingletonBizlet<T> {
-	private static final long serialVersionUID = -4069583265754912169L;
-
 	/**
 	 * Thread-safe map of module/document keys to singleton instance bizId.
 	 */

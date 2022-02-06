@@ -27,8 +27,6 @@ import modules.admin.domain.Tag.FilterAction;
 import modules.admin.domain.Tag.FilterOperator;
 
 public class TagBizlet extends Bizlet<TagExtension> {
-	private static final long serialVersionUID = -927602139528710862L;
-
 	public static final String SYSTEM_TAG_ACTION_NOTIFICATION = "SYSTEM Tag Action Notification";
 	public static final String SYSTEM_TAG_ACTION_DEFAULT_SUBJECT = "Perform Document Action for Tag - Complete";
 	public static final String SYSTEM_TAG_ACTION_DEFAULT_BODY = "The action for Tag {name} is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;

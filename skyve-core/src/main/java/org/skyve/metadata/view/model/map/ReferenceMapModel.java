@@ -18,8 +18,6 @@ import org.skyve.util.Binder;
  * @param <T>	The type of the bean under edit.
  */
 public class ReferenceMapModel<T extends Bean> extends DefaultMapModel<T> {
-	private static final long serialVersionUID = -6315233078102862916L;
-
 	private String referenceBinding;
 
 	public ReferenceMapModel(String referenceBinding) {

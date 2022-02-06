@@ -12,8 +12,6 @@ import modules.admin.domain.User;
 
 public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 
-	private static final long serialVersionUID = -3270121906624275634L;
-	
 	@Override
 	public SelfRegistrationExtension newInstance(SelfRegistrationExtension bean) throws Exception {
 		bean.setUser(User.newInstance());

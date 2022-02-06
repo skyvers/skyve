@@ -17,8 +17,6 @@ import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
 public class OfficeMap extends MapModel<Office> {
-	private static final long serialVersionUID = 7880044512360465355L;
-
 	@Override
 	public MapResult getResult(Geometry mapBounds) throws Exception {
 		Office office = getBean();		

@@ -18,14 +18,14 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.job.Job;
 import org.skyve.job.JobStatus;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
-public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
+public abstract class AbstractSkyveJob implements InterruptableJob, SerializableMetaData {
 	private static final long serialVersionUID = -1272267642792331001L;
 
 	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";

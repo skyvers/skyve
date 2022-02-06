@@ -30,8 +30,6 @@ import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
 public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
-	private static final long serialVersionUID = -6033906392152210002L;
-
 	@Override
 	public ControlPanelExtension newInstance(ControlPanelExtension bean) throws Exception {
 		// Set the user name to the logged in user

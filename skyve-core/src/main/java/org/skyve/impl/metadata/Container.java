@@ -34,9 +34,10 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-public abstract class Container implements MetaData {
+public abstract class Container implements SerializableMetaData {
 	private static final long serialVersionUID = 2633803738970828551L;
 
 	@XmlElementRefs({@XmlElementRef(type = StaticImage.class),

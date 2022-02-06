@@ -34,8 +34,6 @@ import modules.admin.domain.ReportDesign.Orientation;
 import modules.admin.domain.ReportDesign.ReportType;
 
 public class ReportDesignBizlet extends Bizlet<ReportDesign> {
-	private static final long serialVersionUID = -6842667143963576852L;
-
 	@Override
 	public ReportDesign newInstance(ReportDesign bean) throws Exception {
 		ReportDesign rd = super.newInstance(beanDesignFromSpecification(bean, new DesignSpecification()));

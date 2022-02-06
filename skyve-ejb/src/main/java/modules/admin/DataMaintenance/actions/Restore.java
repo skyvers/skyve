@@ -21,7 +21,6 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.DataMaintenance;
 
 public class Restore implements ServerSideAction<DataMaintenance> {
-	private static final long serialVersionUID = 8521252561712649481L;
 	private static final String J_RESTORE = "jRestore";
 
 	@Override

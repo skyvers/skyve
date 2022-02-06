@@ -18,11 +18,6 @@ import modules.whosin.domain.StaffQualification;
 
 public class UploadQualifications extends UploadAction<Staff> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6442124009230068326L;
-
 	@Override
 	public Staff upload(Staff bean, Upload upload, UploadException exception, WebContext webContext) throws Exception {
 

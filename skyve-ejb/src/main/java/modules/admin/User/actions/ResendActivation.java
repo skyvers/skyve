@@ -15,8 +15,6 @@ import modules.admin.User.UserExtension;
  */
 public class ResendActivation implements ServerSideAction<UserExtension> {
 
-	private static final long serialVersionUID = -1947122266718966646L;
-
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension bean, WebContext webContext) throws Exception {
 

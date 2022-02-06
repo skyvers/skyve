@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * Content Permissions are specified in user roles.
@@ -19,7 +19,7 @@ import org.skyve.metadata.MetaData;
  * @author Mike
  */
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public class ContentPermission implements MetaData {
+public class ContentPermission implements SerializableMetaData {
 	private static final long serialVersionUID = 7523462852059026359L;
 
 	private String attributeName;

@@ -5,11 +5,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"fromComponent", "mappedTo"})
-public class ComponentNameMap implements MetaData {
+public class ComponentNameMap implements SerializableMetaData {
 	private static final long serialVersionUID = -1586157078585007880L;
 
 	private String fromComponent;

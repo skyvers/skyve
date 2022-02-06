@@ -10,8 +10,6 @@ import modules.admin.domain.Communication;
 
 public class CreateFiles implements ServerSideAction<Communication> {
 
-	private static final long serialVersionUID = 2886341074753936987L;
-
 	/**
 	 * Kick off the job to generate email files for bulk send.
 	 */

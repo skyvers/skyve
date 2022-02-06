@@ -34,8 +34,6 @@ import modules.admin.domain.Content;
 import modules.admin.domain.DataMaintenance;
 
 public class ContentModel extends ListModel<DataMaintenance> {
-	private static final long serialVersionUID = -5285830669475992183L;
-
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);

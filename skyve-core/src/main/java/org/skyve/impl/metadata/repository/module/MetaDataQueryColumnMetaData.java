@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.SortDirection;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
@@ -23,7 +23,7 @@ import org.skyve.metadata.SortDirection;
 							"filterExpression",
 							"pixelWidth",
 							"alignment"})
-public abstract class MetaDataQueryColumnMetaData implements MetaData {
+public abstract class MetaDataQueryColumnMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = 7831641243591117311L;
 
 	// The name of the property within the bean list. Can be null.

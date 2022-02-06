@@ -3,8 +3,8 @@ package org.skyve.metadata.module;
 import java.util.List;
 import java.util.Map;
 
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.menu.Menu;
@@ -19,11 +19,11 @@ import org.skyve.util.Util;
 /**
  * 
  */
-public interface Module extends NamedMetaData {
+public interface Module extends NamedMetaData, SerializableMetaData {
 	/**
 	 * 
 	 */
-	public static class DocumentRef implements MetaData {
+	public static class DocumentRef implements SerializableMetaData {
 		private static final long serialVersionUID = -7522103396710688388L;
 
 		// The module name where the document is defined

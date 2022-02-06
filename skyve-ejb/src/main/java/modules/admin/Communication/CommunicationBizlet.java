@@ -29,8 +29,6 @@ import modules.admin.domain.CommunicationTemplate;
 import modules.admin.domain.Tag;
 
 public class CommunicationBizlet extends Bizlet<Communication> {
-	private static final long serialVersionUID = -7404508611264793559L;
-
 	public static final String SYSTEM_COMMUNICATION_JOB_NOTIFICATION = "SYSTEM Communication Job Notification";
 	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_SUBJECT = "Bulk Communication Job for '{description}' - Complete";
 	public static final String SYSTEM_COMMUNICATION_JOB_DEFAULT_BODY = "The bulk communication job '{description}' for Tag '{tag.name}' is complete." + JobsBizlet.SYSTEM_JOB_NOTIFICATION_LINK_TO_JOBS;

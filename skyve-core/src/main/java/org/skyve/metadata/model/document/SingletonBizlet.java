@@ -10,8 +10,6 @@ import org.skyve.persistence.Persistence;
  * @param <T>
  */
 public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T> {
-	private static final long serialVersionUID = -2606463410901938512L;
-
 	/**
 	 * If there is no persisted instance (or the current user cannot see the persisted instance), bean is returned.
 	 * @param bean

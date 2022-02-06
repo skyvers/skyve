@@ -12,25 +12,23 @@ import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
-import org.skyve.web.SortParameter;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.web.SortParameter;
 
 public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
-	private static final long serialVersionUID = 8905939302545321358L;
-
 	private String description;
 	
 	private Customer customer;

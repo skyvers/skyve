@@ -1,6 +1,6 @@
 package org.skyve.impl.metadata.view;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * A Tagging interface that tells view renderers that the width 
@@ -8,6 +8,6 @@ import org.skyve.metadata.MetaData;
  * 
  * @author mike
  */
-public interface ContentSpecifiedWidth extends MetaData {
+public interface ContentSpecifiedWidth extends SerializableMetaData {
 	// nothing to see here
 }

@@ -20,8 +20,6 @@ import modules.admin.Tag.TagExtension;
 import modules.admin.domain.Tag.FilterAction;
 
 public class UploadTagCriteria extends UploadAction<TagExtension> {
-	private static final long serialVersionUID = -8154709480999519405L;
-
 	@Override
 	public TagExtension upload(TagExtension tag,
 								Upload upload,

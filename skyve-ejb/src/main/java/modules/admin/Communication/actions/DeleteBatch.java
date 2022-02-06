@@ -11,8 +11,6 @@ import modules.admin.domain.Communication;
 
 public class DeleteBatch implements ServerSideAction<Communication> {
 
-	private static final long serialVersionUID = 5306067916641877356L;
-
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication bean, WebContext webContext)
 	throws Exception {

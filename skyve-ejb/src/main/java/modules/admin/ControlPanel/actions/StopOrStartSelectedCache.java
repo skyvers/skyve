@@ -18,8 +18,6 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
 public class StopOrStartSelectedCache implements ServerSideAction<ControlPanelExtension> {
-	private static final long serialVersionUID = -8001307700407362818L;
-
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) throws Exception {
 		bean.setTabIndex(null);

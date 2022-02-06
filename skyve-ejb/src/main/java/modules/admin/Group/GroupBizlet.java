@@ -9,8 +9,6 @@ import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 
 public class GroupBizlet extends Bizlet<GroupExtension> {
-	private static final long serialVersionUID = -1878022453255869159L;
-
 	/**
 	 * Synthesize DomainValues from the candidate roles collection. 
 	 */

@@ -10,8 +10,6 @@ import org.skyve.web.WebContext;
  * @param <T>
  */
 public abstract class UploadAction<T extends Bean> implements MetaData {
-	private static final long serialVersionUID = 2843062742565336035L;
-
 	/**
 	 * 
 	 * @param bean

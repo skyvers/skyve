@@ -14,11 +14,6 @@ import modules.admin.domain.Snapshot;
 
 public class SnapshotBizlet extends Bizlet<Snapshot> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 8392969299579122149L;
-
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Snapshot bean) throws Exception {
 

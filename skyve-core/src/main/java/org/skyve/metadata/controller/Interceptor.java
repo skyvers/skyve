@@ -7,9 +7,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.metadata.MetaData;
-import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.web.WebContext;
 
 /**
@@ -17,7 +17,7 @@ import org.skyve.web.WebContext;
  * 
  * @author sandsm01
  */
-public abstract class Interceptor implements MetaData {
+public abstract class Interceptor implements SerializableMetaData {
 	private static final long serialVersionUID = -5377580171203674300L;
 
 	@SuppressWarnings({"unused", "static-method"})

@@ -1,11 +1,11 @@
 package org.skyve.metadata.customer;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
 /**
  * 
  */
-public interface LoginResources extends MetaData {
+public interface LoginResources extends SerializableMetaData {
 	/**
 	 * 
 	 * @return

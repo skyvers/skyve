@@ -1,12 +1,12 @@
 package org.skyve.metadata.customer;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.controller.Observer;
 
 /**
  * 
  */
-public interface ObserverMetaData extends MetaData {
+public interface ObserverMetaData extends SerializableMetaData {
 	/**
 	 * 
 	 * @return

@@ -34,8 +34,6 @@ import modules.admin.domain.User.WizardState;
 import modules.admin.domain.UserProxy;
 
 public class UserBizlet extends Bizlet<UserExtension> {
-	private static final long serialVersionUID = 5947293714061984815L;
-
 	/**
 	 * Populate the data group association if required.
 	 */

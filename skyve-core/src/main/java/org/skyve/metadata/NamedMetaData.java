@@ -3,7 +3,7 @@ package org.skyve.metadata;
 /**
  * 
  */
-public interface NamedMetaData extends MetaData {
+public interface NamedMetaData extends SerializableMetaData {
 	/**
 	 * The programmatic name given to this piece of metadata - field name, converter name etc.
 	 * 

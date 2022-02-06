@@ -1,7 +1,7 @@
 package org.skyve.metadata.model.document;
 
-import org.skyve.metadata.MetaData;
+import org.skyve.metadata.SerializableMetaData;
 
-public interface Interface extends MetaData {
+public interface Interface extends SerializableMetaData {
 	String getInterfaceName();
 }
