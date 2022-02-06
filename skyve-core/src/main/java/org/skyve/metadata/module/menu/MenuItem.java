@@ -3,14 +3,13 @@ package org.skyve.metadata.module.menu;
 import java.util.Set;
 
 import org.skyve.metadata.NamedMetaData;
-import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
 /**
  * Represents a menu. 
  * This class comprises the Component part of the GoF composite pattern.
  */
-public interface MenuItem extends NamedMetaData, SerializableMetaData {
+public interface MenuItem extends NamedMetaData {
 	public default String getLocalisedName() {
 		return Util.i18n(getName());
 	}

@@ -26,8 +26,6 @@ import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportTemplate;
 
 public class TestReport extends DownloadAction<ReportTemplate> {
-	private static final long serialVersionUID = 6741549541099049576L;
-
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// check there are no unsaved changes

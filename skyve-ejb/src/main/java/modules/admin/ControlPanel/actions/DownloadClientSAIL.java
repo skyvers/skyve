@@ -10,8 +10,6 @@ import modules.admin.domain.ControlPanel.SailUserAgentType;
 import router.UxUis;
 
 public class DownloadClientSAIL extends DownloadAction<ControlPanelExtension> {
-	private static final long serialVersionUID = 6509370665603777126L;
-
 	@Override
 	public void prepare(ControlPanelExtension bean, WebContext webContext)
 			throws Exception {

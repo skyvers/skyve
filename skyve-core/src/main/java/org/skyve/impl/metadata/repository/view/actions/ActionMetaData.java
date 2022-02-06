@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -30,10 +29,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 							"invisibleConditionName",
 							"visibleConditionName",
 							"properties"})
-public abstract class ActionMetaData implements DecoratedMetaData, SerializableMetaData {
-	/**
-	 * 
-	 */
+public abstract class ActionMetaData implements DecoratedMetaData {
 	private static final long serialVersionUID = -6621003946775667744L;
 
 	protected ImplicitActionName implicitName;

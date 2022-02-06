@@ -8,12 +8,9 @@ import modules.admin.ImportExport.ImportExportBizlet;
 import modules.admin.ImportExport.ImportExportExtension;
 
 public class GetImportTemplate extends DownloadAction<ImportExportExtension> {
-	private static final long serialVersionUID = -2929289166233711854L;
-
 	@Override
 	public void prepare(ImportExportExtension bean, WebContext webContext) throws Exception {
-		// TODO Auto-generated method stub
-
+		// Nothing to see here
 	}
 
 	@Override

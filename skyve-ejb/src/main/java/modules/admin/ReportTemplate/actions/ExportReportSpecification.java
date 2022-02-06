@@ -21,9 +21,6 @@ import modules.admin.domain.ReportTemplate;
  *
  */
 public class ExportReportSpecification extends DownloadAction<ReportTemplate> {
-
-	private static final long serialVersionUID = 6741549541099049576L;
-
 	private String json = null;
 
 	@Override

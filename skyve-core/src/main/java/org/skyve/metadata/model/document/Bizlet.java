@@ -1,5 +1,6 @@
 package org.skyve.metadata.model.document;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.skyve.domain.Bean;
@@ -38,7 +39,9 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	/**
 	 * Key/Value pairs for domains defined.
 	 */
-	public static class DomainValue {
+	public static class DomainValue implements Serializable {
+		private static final long serialVersionUID = -7737192861504224293L;
+
 		private String code;
 		private String description;
 		

@@ -10,9 +10,6 @@ import org.skyve.web.WebContext;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
 public class DownloadResults extends DownloadAction<ControlPanelExtension> {
-
-	private static final long serialVersionUID = 2440491746517186884L;
-
 	private static final String FILE_TITLE = "sail.txt";
 
 	@Override
@@ -31,5 +28,4 @@ public class DownloadResults extends DownloadAction<ControlPanelExtension> {
 		Download result = new Download(FILE_TITLE, results, MimeType.richtext);
 		return result;
 	}
-
 }

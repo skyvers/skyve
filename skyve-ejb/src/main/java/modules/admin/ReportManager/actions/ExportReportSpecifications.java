@@ -20,9 +20,6 @@ import modules.admin.domain.ReportTemplate;
  *
  */
 public class ExportReportSpecifications extends DownloadAction<ReportManagerExtension> {
-
-	private static final long serialVersionUID = 6741549541099049576L;
-
 	/**
 	 * Prepare the zip for download
 	 */
@@ -52,14 +49,14 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 	 * @param bean The ReportManager with all the selected reports to validate
 	 * @throws ValidationException if any reports fail validation
 	 */
-	private void validateReports(ReportManagerExtension bean) throws ValidationException {
+	private static void validateReports(ReportManagerExtension bean) throws ValidationException {
 		ValidationException e = new ValidationException();
 
 		for (ReportTemplate report : bean.getCurrentReports()) {
 			try {
 				BeanValidator.validateBeanAgainstDocument(report);
 				BeanValidator.validateBeanAgainstBizlet(report);
-			} catch (ValidationException veT) {
+			} catch (@SuppressWarnings("unused") ValidationException veT) {
 				e.getMessages().add(new Message(
 						"The report " + report.getName() + " is not valid - ensure the report is valid before exporting"));
 			}

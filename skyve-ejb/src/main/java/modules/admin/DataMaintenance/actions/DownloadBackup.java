@@ -16,8 +16,6 @@ import org.skyve.web.WebContext;
 import modules.admin.domain.DataMaintenance;
 
 public class DownloadBackup extends DownloadAction<DataMaintenance> {
-	private static final long serialVersionUID = 4544317770456317465L;
-
 	@Override
 	public void prepare(DataMaintenance bean, WebContext webContext) throws Exception {
 		String selectedBackupName = bean.getSelectedBackupName();

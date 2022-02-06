@@ -5,7 +5,6 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
-import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
@@ -15,7 +14,7 @@ import org.skyve.util.Util;
 /**
  * 
  */
-public interface Action extends NamedMetaData, Disableable, Invisible, Parameterizable, DecoratedMetaData, SerializableMetaData {
+public interface Action extends NamedMetaData, Disableable, Invisible, Parameterizable, DecoratedMetaData {
 	/**
 	 * 
 	 */

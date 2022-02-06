@@ -17,7 +17,7 @@ import org.skyve.util.Util;
 /**
  * 
  */
-public interface View extends NamedMetaData, DecoratedMetaData, SerializableMetaData {
+public interface View extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 */

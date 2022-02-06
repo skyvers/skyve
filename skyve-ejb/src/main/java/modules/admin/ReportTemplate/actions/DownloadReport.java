@@ -26,8 +26,6 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 import modules.admin.domain.ReportTemplate;
 
 public class DownloadReport extends DownloadAction<ReportTemplateExtension> {
-	private static final long serialVersionUID = -3424661104239448743L;
-
 	@Override
 	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		// validate any required parameters

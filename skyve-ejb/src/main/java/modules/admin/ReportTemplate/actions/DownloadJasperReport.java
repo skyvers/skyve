@@ -25,9 +25,6 @@ import modules.admin.domain.ReportTemplate;
  * Used to download a Jasper {@link ReportTemplate}.
  */
 public class DownloadJasperReport extends DownloadAction<ReportTemplateExtension> {
-
-	private static final long serialVersionUID = -2531700724468898944L;
-
 	@Override
 	public void prepare(ReportTemplateExtension bean, WebContext webContext) throws Exception {
 		// validate any required parameters

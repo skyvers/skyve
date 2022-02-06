@@ -3,14 +3,13 @@ package org.skyve.metadata.model;
 import java.util.List;
 
 import org.skyve.metadata.NamedMetaData;
-import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.util.Util;
 
 /**
  * 
  */
-public interface Model extends NamedMetaData, SerializableMetaData {
+public interface Model extends NamedMetaData {
 	/**
 	 * 
 	 * @return

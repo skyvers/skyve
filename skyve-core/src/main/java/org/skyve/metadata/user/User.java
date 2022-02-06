@@ -5,14 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.skyve.metadata.NamedMetaData;
-import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 
 /**
  * 
  */
-public interface User extends NamedMetaData, SerializableMetaData {
+public interface User extends NamedMetaData {
 	/**
 	 * 
 	 * @return

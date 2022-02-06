@@ -13,9 +13,6 @@ import modules.admin.domain.ReportTemplate.ReportType;
  * report type and template type.
  */
 public class DownloadTemplate extends DownloadAction<ReportTemplate> {
-
-	private static final long serialVersionUID = -723606290305446093L;
-
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// nothing to do here

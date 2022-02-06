@@ -27,9 +27,6 @@ import modules.admin.domain.ReportTemplate.Mode;
  * Used to test a Jasper {@link ReportTemplate}.
  */
 public class TestJasperReport extends DownloadAction<ReportTemplate> {
-
-	private static final long serialVersionUID = 8412092286055535499L;
-
 	@Override
 	public void prepare(ReportTemplate bean, WebContext webContext) throws Exception {
 		// check there are no unsaved changes

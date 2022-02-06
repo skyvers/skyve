@@ -25,14 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Preview extends DownloadAction<ReportDesign> {
-
-	private static final long serialVersionUID = -8203773871581974793L;
-
 	@Override
 	public void prepare(ReportDesign bean, WebContext webContext)
 	throws Exception {
-		// TODO Auto-generated method stub
-
+		// Nothing to see here
 	}
 
 	@Override

@@ -12,15 +12,9 @@ import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExportColumn;
 
 public class RunExport extends DownloadAction<ImportExport> {
-	/**
-	 * For Serialization
-	 */
-	private static final long serialVersionUID = 2886341074753936987L;
-
 	@Override
 	public void prepare(ImportExport bean, WebContext webContext) throws Exception {
-		// TODO Auto-generated method stub
-
+		// Nothing to see here
 	}
 
 	@Override
