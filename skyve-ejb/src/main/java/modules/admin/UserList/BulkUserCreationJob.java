@@ -28,8 +28,6 @@ import modules.admin.domain.User;
 import modules.admin.domain.UserList;
 
 public class BulkUserCreationJob extends Job {
-	private static final long serialVersionUID = 6282346785863992703L;
-
 	private static final String SPACE_COMMA_OR_SEMICOLON = "[\\s,;]+";
 
 	@Override

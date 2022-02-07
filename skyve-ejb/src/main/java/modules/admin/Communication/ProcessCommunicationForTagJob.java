@@ -18,8 +18,6 @@ import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
 
 public class ProcessCommunicationForTagJob extends Job {
-	private static final long serialVersionUID = 6282346785863992703L;
-
 	@Override
 	public String cancel() {
 		return null;

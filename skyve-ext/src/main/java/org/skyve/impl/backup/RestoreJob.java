@@ -44,8 +44,6 @@ import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
 public class RestoreJob extends CancellableJob {
-	private static final long serialVersionUID = -4076693395300706664L;
-
 	@Override
 	public void execute() throws Exception {
 		Bean bean = getBean();

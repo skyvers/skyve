@@ -23,8 +23,6 @@ import modules.admin.domain.ModuleDocument;
 import modules.admin.domain.Tag;
 
 public class GenerateTestDataJob extends CancellableJob {
-
-	private static final long serialVersionUID = -3430408494450224782L;
 	private DataBuilder db;
 	
 	@Override

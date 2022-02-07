@@ -56,8 +56,6 @@ import org.supercsv.prefs.CsvPreference;
  * of the content node - ie module name and document name are not known to the table.
  */
 public class BackupJob extends CancellableJob {
-	private static final long serialVersionUID = 1590777761018078475L;
-
 	private File backupZip;
 
 	public File getBackupZip() {

@@ -33,13 +33,6 @@ import org.xml.sax.SAXException;
 import modules.admin.domain.User;
 
 public class GenerateSAILSuite extends Job {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -783434573979058287L;
-	
-	
 	private static String baseSailXMLPath = "C:/_/skyve/skyve-ee/src/test/sail/";
 
 	@Override

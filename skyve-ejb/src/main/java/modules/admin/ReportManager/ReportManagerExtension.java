@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 
 import org.skyve.CORE;
@@ -15,8 +16,6 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
-
-import com.ibm.icu.text.SimpleDateFormat;
 
 import modules.admin.domain.ReportManager;
 import modules.admin.domain.ReportTemplate;

@@ -27,8 +27,6 @@ import org.skyve.util.PushMessage;
 import modules.admin.domain.DataMaintenance.EvictOption;
 
 public class PerformDocumentActionForTagJob extends Job {
-	private static final long serialVersionUID = 6282346785863992703L;
-
 	@Override
 	public String cancel() {
 		return null;

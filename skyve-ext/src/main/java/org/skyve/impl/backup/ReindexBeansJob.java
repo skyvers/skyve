@@ -22,8 +22,6 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 
 public class ReindexBeansJob extends CancellableJob {
-	private static final long serialVersionUID = 3902304459915888093L;
-
 	@Override
 	public void execute() throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();

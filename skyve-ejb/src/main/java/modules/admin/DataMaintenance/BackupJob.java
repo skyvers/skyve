@@ -20,8 +20,6 @@ import org.skyve.util.Util;
 import modules.admin.domain.DataMaintenance;
 
 public class BackupJob extends Job {
-	private static final long serialVersionUID = 5924130498320912107L;
-
 	@Override
 	public String cancel() {
 		return null;

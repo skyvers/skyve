@@ -22,8 +22,6 @@ import modules.admin.domain.DataMaintenance.RefreshOption;
 import modules.admin.domain.ModuleDocument;
 
 public class RefreshDocumentTuplesJob extends Job {
-	private static final long serialVersionUID = 6282346785863992703L;
-
 	@Override
 	public String cancel() {
 		return null;

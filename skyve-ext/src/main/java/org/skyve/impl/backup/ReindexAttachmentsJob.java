@@ -17,8 +17,6 @@ import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class ReindexAttachmentsJob extends CancellableJob {
-	private static final long serialVersionUID = 1964062122174630675L;
-
 	@Override
 	@SuppressWarnings("resource")
 	public void execute() throws Exception {

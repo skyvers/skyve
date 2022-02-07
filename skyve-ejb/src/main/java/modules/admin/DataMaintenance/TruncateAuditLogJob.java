@@ -17,8 +17,6 @@ import modules.admin.domain.Audit;
 import modules.admin.domain.DataMaintenance;
 
 public class TruncateAuditLogJob extends Job {
-	private static final long serialVersionUID = 6282346785863992703L;
-
 	@Override
 	public String cancel() {
 		return null;

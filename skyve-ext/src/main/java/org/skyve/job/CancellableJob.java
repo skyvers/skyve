@@ -4,8 +4,6 @@ package org.skyve.job;
  * A job which can be cancelled.
  */
 public abstract class CancellableJob extends Job {
-	private static final long serialVersionUID = -335053024821258158L;
-
 	private volatile boolean cancelled = false;
 
 	/**

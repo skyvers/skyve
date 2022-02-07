@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
  * A job that performs an operation over a collection of elements.
  */
 public abstract class IteratingJob<T> extends CancellableJob {
-	private static final long serialVersionUID = 2364295456406284975L;
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(IteratingJob.class);
 
 	@Inject
@@ -120,6 +118,7 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	 *
 	 * @return The number of operations to perform before committing.
 	 */
+	@SuppressWarnings("static-method")
 	protected int getCommitFrequency() {
 		return 0;
 	}
@@ -127,12 +126,12 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	/**
 	 * Commits the current transaction if required.
 	 *
-	 * @param numProcessedElements The number of elements that have been processed so far.
+	 * @param elementCount The number of elements that have been processed so far.
 	 * @return True if a commit was performed.
 	 */
-	protected boolean commitIfRequired(int numProcessedElements) {
+	protected boolean commitIfRequired(int elementCount) {
 		final int commitFrequency = getCommitFrequency();
-		if (commitFrequency > 0 && numProcessedElements % commitFrequency == 0) {
+		if (commitFrequency > 0 && elementCount % commitFrequency == 0) {
 			persistence.commit(false);
 			persistence.begin();
 			return true;

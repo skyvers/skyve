@@ -28,8 +28,6 @@ import modules.whosin.domain.Staff.Status;
  * @author rob
  */
 public class LoadDemonstrationDataJob extends Job {
-	private static final long serialVersionUID = 8903261480076338400L;
-
 	private static String[] roles = { "Manager", "Sales Manager", "Sales Consultant", "Sales Support Technician", "Accountant", "Receptionist" };
 
 	private volatile boolean cancelled = false;

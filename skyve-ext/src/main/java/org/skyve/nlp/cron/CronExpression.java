@@ -1,11 +1,10 @@
 package org.skyve.nlp.cron;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.regex.Pattern;
 
 import org.skyve.CORE;
-
-import com.ibm.icu.util.Calendar;
 
 public class CronExpression {
 

@@ -12,8 +12,6 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.Generic;
 
 public class AvailableDiskSpaceAlarmJob extends Job {
-	private static final long serialVersionUID = 2168075392920819080L;
-
 	private static final Integer DEFAULT_AVAILABLE_DISK_SPACE_ALARM_LEVEL_PERCENTAGE = Integer.valueOf(10);
 	private static final String AVAILABLE_DISK_SPACE_ALARM_NOFITICATION = "Available Disk Space Alarm Notification";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO = "{startup.environmentSupportEmail}";

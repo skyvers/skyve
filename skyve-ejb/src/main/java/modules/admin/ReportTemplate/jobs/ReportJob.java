@@ -30,8 +30,6 @@ import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
 public class ReportJob extends Job {
-	private static final long serialVersionUID = 5330288443923536041L;
-
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL = "SYSTEM Scheduled Report";
 	public static final String SYSTEM_SCHEDULED_REPORT_EMAIL_DEFAULT_SUBJECT = String.format("Scheduled Report {%s}",
 			ReportTemplate.namePropertyName);
