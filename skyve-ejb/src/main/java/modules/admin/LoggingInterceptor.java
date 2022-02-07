@@ -18,8 +18,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class LoggingInterceptor extends Interceptor {
-	private static final long serialVersionUID = 6991646689104206033L;
-
 	private boolean veto = false;
 	
 	@Override
