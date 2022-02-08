@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.SortedMap;
 
+import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -48,6 +50,14 @@ public class CORE {
 	 */
 	public static Ordering newOrdering(String by, SortDirection sort) {
 		return new CollectionImpl.OrderingImpl(by, sort);
+	}
+	
+	/**
+	 * Get the Skyve number generator.
+	 * @return	A NumberGenerator.
+	 */
+	public static NumberGenerator getNumberGenerator() {
+		return NumberGeneratorStaticSingleton.get();
 	}
 	
 	/**
