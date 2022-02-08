@@ -3,8 +3,10 @@ package org.skyve.impl.bind;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
@@ -118,7 +120,23 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 				}
 				else {
 					if (returnType != null) {
-						Class<?> attributeClass = attribute.getAttributeType().getImplementingType();
+						AttributeType type = attribute.getAttributeType();
+						Class<?> attributeClass = null;
+						if ((AttributeType.association == type) || (AttributeType.inverseOne == type)) {
+							DocumentImpl d = (DocumentImpl) customer.getModule(contextDocument.getOwningModuleName()).getDocument(customer, ((Relation) attribute).getDocumentName());
+							try {
+								attributeClass = d.getBeanClass(customer);
+							}
+							catch (ClassNotFoundException e) {
+								e.printStackTrace();
+								error = "Binding " + expression + " resolves to an attribute of type " + type + 
+										" but the document class for document " + d.getOwningModuleName() + '.' + d.getName() + " cannot be loaded:- " + e.toString();
+							}
+						}
+						else {
+							attributeClass = type.getImplementingType();
+						}
+
 						if (! returnType.isAssignableFrom(attributeClass)) {
 							error = "Binding " + expression + " resolves to an attribute of type " + attributeClass + 
 										" that is incompatible with required type of " + returnType;

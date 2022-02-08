@@ -431,9 +431,18 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedAssociation}", Bean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:empty bean.aggregatedAssociation}", Boolean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedCollection}", List.class, c, m, aapd));
-		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", Boolean.TYPE, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", Boolean.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.date.after(newDateOnly())}", Boolean.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", Boolean.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.date.after(newDateOnly())}", Boolean.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.getDate().after(bean.getDate())}", Boolean.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:empty bean.date or bean.getDate().after(bean.getDate())}", Boolean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.date}", DateOnly.class, c, m, aapd));
-
+		Assert.assertNull(ExpressionEvaluator.validate("{el:empty bean.date or not empty bean.date}", Boolean.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.normalInteger + bean.normalInteger}", Number.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean}", AllAttributesPersistent.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedAssociation}", AllAttributesPersistent.class, c, m, aapd));
+		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation}", AllAttributesPersistent.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation}", Bean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{bizId}", String.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation.bizId}", String.class, c, m, aapd));

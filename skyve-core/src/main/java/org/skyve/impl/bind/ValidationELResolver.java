@@ -56,14 +56,23 @@ class ValidationELResolver extends ELResolver {
 	
 	private static final Map<Class<?>, Object> TERMINATING_MOCKS = new HashMap<>();
 	static {
+		TERMINATING_MOCKS.put(Boolean.TYPE, Boolean.TRUE);
 		TERMINATING_MOCKS.put(Boolean.class, Boolean.TRUE);
-		
+		TERMINATING_MOCKS.put(Byte.TYPE, Byte.valueOf((byte) 1));
 		TERMINATING_MOCKS.put(Byte.class, Byte.valueOf((byte) 1));
+		TERMINATING_MOCKS.put(Short.TYPE, Short.valueOf((short) 1));
 		TERMINATING_MOCKS.put(Short.class, Short.valueOf((short) 1));
+		TERMINATING_MOCKS.put(Character.TYPE, Character.valueOf('\0'));
+		TERMINATING_MOCKS.put(Character.class, Character.valueOf('\0'));
+		TERMINATING_MOCKS.put(Integer.TYPE, Integer.valueOf(1));
 		TERMINATING_MOCKS.put(Integer.class, Integer.valueOf(1));
+		TERMINATING_MOCKS.put(Long.TYPE,  Long.valueOf(1L));
 		TERMINATING_MOCKS.put(Long.class,  Long.valueOf(1L));
+		TERMINATING_MOCKS.put(Float.TYPE, Float.valueOf(1.0F));
 		TERMINATING_MOCKS.put(Float.class, Float.valueOf(1.0F));
+		TERMINATING_MOCKS.put(Double.TYPE, Double.valueOf(1.0F));
 		TERMINATING_MOCKS.put(Double.class, Double.valueOf(1.0F));
+
 		TERMINATING_MOCKS.put(BigInteger.class, BigInteger.valueOf(1L));
 		TERMINATING_MOCKS.put(BigDecimal.class, BigDecimal.valueOf(1.0));
 		TERMINATING_MOCKS.put(Decimal2.class, new Decimal2(1.0));
@@ -71,7 +80,6 @@ class ValidationELResolver extends ELResolver {
 		TERMINATING_MOCKS.put(Decimal10.class, new Decimal10(1.0));
 		
 		TERMINATING_MOCKS.put(String.class, "");
-		TERMINATING_MOCKS.put(Character.class, Character.valueOf('\0'));
 
 		TERMINATING_MOCKS.put(Date.class, new Date());
 		TERMINATING_MOCKS.put(DateOnly.class, new DateOnly());
@@ -86,11 +94,6 @@ class ValidationELResolver extends ELResolver {
 		this.customer = customer;
 	}
 	
-	private static Object mock(Class<?> type) {
-		Object mock = TERMINATING_MOCKS.get(type);
-		return (mock == null) ? type : mock;
-	}
-
 	@Override
 	public Class<?> getType(ELContext context, Object base, Object property) {
 		Class<?> type = getType(base, property);
@@ -294,7 +297,7 @@ class ValidationELResolver extends ELResolver {
 				Method m = type.getMethod((String) method, paramTypes);
 				if (Modifier.isPublic(m.getModifiers())) {
 					context.setPropertyResolved(base, method);
-					return m.getReturnType();
+					return mock(m.getReturnType());
 	            }
 				throw new MethodNotFoundException("Method " + method + " on " + base + " is not public");
 			}
@@ -304,7 +307,7 @@ class ValidationELResolver extends ELResolver {
 				if (m.getName().equals(method) && 
 						(m.isVarArgs() || (m.getParameterTypes().length == paramCount))) {
 					context.setPropertyResolved(base, method);
-					return m.getReturnType();
+					return mock(m.getReturnType());
 				}
 			}
 			throw new MethodNotFoundException("Method " + method + " on " + base + " does not exist");
@@ -419,6 +422,11 @@ class ValidationELResolver extends ELResolver {
 		}
 
 		return null;
+	}
+	
+	private static Object mock(Class<?> type) {
+		Object mock = TERMINATING_MOCKS.get(type);
+		return (mock == null) ? type : mock;
 	}
 
 	private static void checkInteger(Object p) {
