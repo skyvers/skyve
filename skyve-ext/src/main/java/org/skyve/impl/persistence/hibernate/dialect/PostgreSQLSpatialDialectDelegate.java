@@ -17,11 +17,11 @@ import org.postgresql.util.PGobject;
 public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	private static final long serialVersionUID = 614578841629775970L;
 
-	private JTSGeometryType geometryType = new JTSGeometryType(PGGeometryTypeDescriptor.INSTANCE);
+	private JTSGeometryType geometryType = new JTSGeometryType(PGGeometryTypeDescriptor.INSTANCE_WKB_2);
 
 	@Override
 	public int getGeometrySqlType() {
-		return PGGeometryTypeDescriptor.INSTANCE.getSqlType();
+		return PGGeometryTypeDescriptor.INSTANCE_WKB_2.getSqlType();
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 
 	@Override
 	public Geometry convertFromPersistedValue(Object geometry) {
-		org.geolatte.geom.Geometry<?> result = PGGeometryTypeDescriptor.toGeometry(geometry);
+		org.geolatte.geom.Geometry<?> result = PGGeometryTypeDescriptor.INSTANCE_WKB_2.toGeometry(geometry);
 		return (result == null) ? null : JTS.to(result);
 	}
 
