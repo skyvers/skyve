@@ -109,4 +109,9 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	public ContentIterable all() throws Exception {
 		throw new UnsupportedOperationException("Iterating over a remote content repository is not supported");
 	}
+	
+	@Override
+	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+		throw new UnsupportedOperationException("Reindexing a remote content repository is not supported");
+	}
 }
