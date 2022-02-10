@@ -8,7 +8,11 @@ import org.skyve.impl.content.AbstractContentManager;
 
 /**
  * This class is used to talk to another skyve server's EJB content server.
- * Implement the server EJB lookup in obtainServer() something like this...
+ * Implement the server EJB lookup in obtainServer()
+ * 
+ * @author mike
+ * <p/>
+ * something like this...
  * <p/>
  * <code>
  * <pre>
@@ -16,7 +20,7 @@ import org.skyve.impl.content.AbstractContentManager;
  *		Properties jndiProps = new Properties();
  *		jndiProps.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
  *		Context context = new InitialContext(jndiProps);
- *		// Lookup the Greeter bean using the ejb: namespace syntax which is explained here https://docs.jboss.org/author/display/AS71/EJB+invocations+from+a+remote+client+using+JNDI
+ *		// Lookup the content manager server bean using the ejb: namespace syntax which is explained here https://docs.jboss.org/author/display/AS71/EJB+invocations+from+a+remote+client+using+JNDI
  *		return (EJBRemoteContentManagerServer) context.lookup("ejb:skyve/apps//EJBRemoteContentManagerServerBean!org.skyve.impl.content.ejb.EJBRemoteContentManagerServer");
  *	}
  * </pre>
@@ -31,7 +35,6 @@ import org.skyve.impl.content.AbstractContentManager;
  *			contentManagerClass: "modules.MyEJBRemoteContentManagerClientImplementation"},
  *			...
  * </pre>
- * @author mike
  */
 public abstract class AbstractEJBRemoteContentManagerClient extends AbstractContentManager {
 	@Override

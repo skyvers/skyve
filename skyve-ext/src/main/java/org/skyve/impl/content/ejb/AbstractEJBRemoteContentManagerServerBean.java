@@ -8,7 +8,10 @@ import org.skyve.content.SearchResults;
 
 /**
  * Extend this to make a stateless session bean in the skyve server instance.
+ * @author mike
+ *
  * <p/>
+ * Like this...<p/>
  * <code>
  * <pre>
  *	@Stateless
@@ -17,8 +20,6 @@ import org.skyve.content.SearchResults;
  *	}
  * </pre>
  * </code>
- * 
- * @author mike
  */
 public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRemoteContentManagerServer {
 	@Override
