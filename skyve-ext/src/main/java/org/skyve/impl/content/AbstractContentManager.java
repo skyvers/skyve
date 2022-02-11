@@ -41,7 +41,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	
 	public static AbstractContentManager get() {
 		try {
-			AbstractContentManager result = IMPLEMENTATION_CLASS.getConstructor().newInstance();
+			AbstractContentManager result = IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
 			return result;
 		}
 		catch (Exception e) {

@@ -299,7 +299,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		}
 		else {
 			final Class<T> beanClass = getBeanClass(customer);
-			result = beanClass.getConstructor().newInstance();
+			result = beanClass.getDeclaredConstructor().newInstance();
 			populateDynamicAttributeDefaults(customer, result);
 		}
 		

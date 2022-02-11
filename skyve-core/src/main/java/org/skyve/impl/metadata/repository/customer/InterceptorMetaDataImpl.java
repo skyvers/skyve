@@ -33,7 +33,8 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	public Interceptor getInterceptor() {
 		if (interceptor == null) {
 			try {
-				interceptor = (Interceptor) Thread.currentThread().getContextClassLoader().loadClass(className).getDeclaredConstructor().newInstance();
+				Class<?> interceptorClass = Thread.currentThread().getContextClassLoader().loadClass(className);
+				interceptor = (Interceptor) interceptorClass.getDeclaredConstructor().newInstance();
 			}
 			catch (Exception e) {
 				throw new MetaDataException("Could not instantiate interceptor class " + className, e);

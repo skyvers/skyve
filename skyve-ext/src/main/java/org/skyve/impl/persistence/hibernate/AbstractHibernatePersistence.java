@@ -366,7 +366,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				dialect = DIALECTS.get(dialectClassName);
 				if (dialect == null) {
 					try {
-						dialect = (SkyveDialect) Class.forName(dialectClassName).getDeclaredConstructor().newInstance();
+						Class<?> dialectClass = Class.forName(dialectClassName);
+						dialect = (SkyveDialect) dialectClass.getDeclaredConstructor().newInstance();
 						DIALECTS.put(dialectClassName, dialect);
 					}
 					catch (Exception e) {

@@ -635,7 +635,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			String key = new StringBuilder(128).append(MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).append('/').append(documentName).append("Factory").toString();
 			Class<?> factoryClass = getJavaClass(customer, key);
 			if (factoryClass != null) {
-				result = factoryClass.getConstructor().newInstance();
+				result = factoryClass.getDeclaredConstructor().newInstance();
 			}
 		}
 		catch (Exception e) {
@@ -725,7 +725,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 		else {
 			try {
-				result = (T) type.getConstructor().newInstance();
+				result = (T) type.getDeclaredConstructor().newInstance();
 				if (runtime) {
 					BeanProvider.injectFields(result);
 				}

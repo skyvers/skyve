@@ -49,9 +49,13 @@ public class View extends HtmlPanelGroup {
 	    	String classString = (String) attributes.get("componentBuilderClass");
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
-	    		tempComponentBuilder = (classString != null) ? 
-	    								(ComponentBuilder) Class.forName(classString).getDeclaredConstructor().newInstance() :
-    									new SkyveComponentBuilderChain();
+	    		if (classString == null) {
+	    			tempComponentBuilder = new SkyveComponentBuilderChain();
+	    		}
+	    		else {
+	    			Class<?> type = Class.forName(classString);
+	    			tempComponentBuilder = (ComponentBuilder) type.getDeclaredConstructor().newInstance();	    			
+	    		}
 	    	}
 	    	catch (Exception e) {
 	    		throw new IOException("Cannot instantiate the component builder " + classString, e);
@@ -59,9 +63,13 @@ public class View extends HtmlPanelGroup {
 	    	classString = (String) attributes.get("layoutBuilderClass");
 	    	LayoutBuilder tempLayoutBuilder = null;
 	    	try {
-	    		tempLayoutBuilder = (classString != null) ? 
-										(LayoutBuilder) Class.forName(classString).getDeclaredConstructor().newInstance() :
-										new ResponsiveLayoutBuilder();
+	    		if (classString == null) {
+	    			tempLayoutBuilder = new ResponsiveLayoutBuilder();
+	    		}
+	    		else {
+	    			Class<?> type = Class.forName(classString);
+		    		tempLayoutBuilder = (LayoutBuilder) type.getDeclaredConstructor().newInstance();
+	    		}
 	    	}
 	    	catch (Exception e) {
 	    		throw new IOException("Cannot instantiate the layout builder " + classString, e);

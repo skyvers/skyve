@@ -27,7 +27,7 @@ public class RuntimeCompilerTest {
 			RuntimeCompiler.compile(file, UtilImpl.TEMP_DIRECTORY);
 			Class<?> type = RuntimeCompiler.loadClass(UtilImpl.TEMP_DIRECTORY, "Calculator");
 			Method testAdd = type.getDeclaredMethod("testAdd");
-			Assert.assertEquals(Integer.valueOf(500), testAdd.invoke(type.newInstance()));
+			Assert.assertEquals(Integer.valueOf(500), testAdd.invoke(type.getDeclaredConstructor().newInstance()));
 		}
 		finally {
 			File classFile = new File(UtilImpl.TEMP_DIRECTORY, "Calculator.class");
@@ -45,6 +45,6 @@ public class RuntimeCompilerTest {
 		InMemoryClassLoader cl = RuntimeCompiler.compile(Arrays.asList(file));
 		Class<?> type = cl.loadClass("Calculator");
 		Method testAdd = type.getDeclaredMethod("testAdd");
-		Assert.assertEquals(Integer.valueOf(500), testAdd.invoke(type.newInstance()));
+		Assert.assertEquals(Integer.valueOf(500), testAdd.invoke(type.getDeclaredConstructor().newInstance()));
 	}
 }

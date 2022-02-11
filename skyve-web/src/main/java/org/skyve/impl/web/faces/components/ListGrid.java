@@ -61,9 +61,13 @@ public class ListGrid extends HtmlPanelGroup {
 	    	String classString = (String) attributes.get("componentBuilderClass");
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
-	    		tempComponentBuilder = (classString != null) ? 
-	    								(ComponentBuilder) Class.forName(classString).getConstructor().newInstance() :
-	    									new SkyveComponentBuilderChain();
+	    		if (classString == null) {
+	    			tempComponentBuilder = new SkyveComponentBuilderChain();
+	    		}
+	    		else {
+	    			Class<?> type = Class.forName(classString);
+	    			tempComponentBuilder = (ComponentBuilder) type.getDeclaredConstructor().newInstance();
+	    		}
 	    	}
 	    	catch (Exception e) {
 	    		throw new IOException("Cannot instantiate the component builder " + classString, e);

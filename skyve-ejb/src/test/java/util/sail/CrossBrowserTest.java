@@ -68,7 +68,7 @@ public abstract class CrossBrowserTest {
 		// driver = new ChromeDriver(options);
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Class<?> optionsClass = cl.loadClass(CHROME_OPTIONS_CLASS);
-		Object options = optionsClass.newInstance();
+		Object options = optionsClass.getDeclaredConstructor().newInstance();
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			List<String> arguments = new ArrayList<>(2);
@@ -111,17 +111,17 @@ public abstract class CrossBrowserTest {
 		// driver = new FirefoxDriver(options);
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Class<?> optionsClass = cl.loadClass(FIREFOX_OPTIONS_CLASS);
-		Object options = optionsClass.newInstance();
+		Object options = optionsClass.getDeclaredConstructor().newInstance();
 		if (config.isHeadless()) {
 			Class<?> binaryClass = cl.loadClass(FIREFOX_BINARY_CLASS);
-			Object binary = binaryClass.newInstance();
+			Object binary = binaryClass.getDeclaredConstructor().newInstance();
 			binaryClass.getMethod(FIREFOX_ADD_COMMAND_LINE_OPTIONS_METHOD, String[].class).invoke(binary, new Object[] {new String[] {"--headless"}});
 			optionsClass.getMethod(FIREFOX_SET_BINARY_METHOD, binaryClass).invoke(options, binary);
 		}
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			Class<?> profileClass = cl.loadClass(FIREFOX_PROFILE_CLASS);
-			Object profile = profileClass.newInstance();
+			Object profile = profileClass.getDeclaredConstructor().newInstance();
 			profileClass.getMethod(FIREFOX_SET_PREFERENCE_METHOD, String.class, String.class).invoke(profile, "general.useragent.override", userAgentString);
 			optionsClass.getMethod(FIREFOX_SET_PROFILE_METHOD, profileClass).invoke(options, profile);
 		}

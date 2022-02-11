@@ -1,6 +1,7 @@
 package org.skyve.impl.backup;
 
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -47,8 +48,9 @@ public interface ExternalBackup {
 		final String externalBackupClass = getExternalBackupClass();
 		if (externalBackupClass != null) {
 			try {
-				return ((Class<? extends ExternalBackup>) Class.forName(externalBackupClass)).newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				Class<?> instanceClass = Class.forName(externalBackupClass);
+				return ((Class<? extends ExternalBackup>) instanceClass).getDeclaredConstructor().newInstance();
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException e) {
 				throw new IllegalStateException("Failed to instantiate external backup class.", e);
 			}
 		}

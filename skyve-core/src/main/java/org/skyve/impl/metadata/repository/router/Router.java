@@ -57,7 +57,7 @@ public class Router implements PersistentMetaData<Router> {
 	public TaggingUxUiSelector getUxuiSelector() throws Exception {
 		if (uxuiSelector == null) {
 			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);
-			uxuiSelector = (TaggingUxUiSelector) type.getConstructor().newInstance();
+			uxuiSelector = (TaggingUxUiSelector) type.getDeclaredConstructor().newInstance();
 		}
 		return uxuiSelector;
 	}

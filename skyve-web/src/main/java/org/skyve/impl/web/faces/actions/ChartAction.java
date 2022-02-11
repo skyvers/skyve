@@ -271,8 +271,9 @@ public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
 		}
 		if (postProcessor != null) {
 			try {
+				Class<?> instanceClass = Thread.currentThread().getContextClassLoader().loadClass(postProcessor);
 				@SuppressWarnings("unchecked")
-				PrimeFacesChartPostProcessor<ChartModel> instance = (PrimeFacesChartPostProcessor<ChartModel>) Thread.currentThread().getContextClassLoader().loadClass(postProcessor).getConstructor().newInstance();
+				PrimeFacesChartPostProcessor<ChartModel> instance = (PrimeFacesChartPostProcessor<ChartModel>) instanceClass.getDeclaredConstructor().newInstance();
 				instance.process(model);
 			}
 			catch (Exception e) {
