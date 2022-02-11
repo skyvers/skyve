@@ -2,11 +2,19 @@ package org.skyve.impl.report.freemarker;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTWriter;
 import org.skyve.CORE;
-import org.skyve.impl.bind.BindUtil;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.customer.Customer;
 
 import freemarker.core.Environment;
@@ -18,7 +26,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.DeepUnwrap;
 
 /**
- * FreeMarker user-defined directive that performs a Skyve display format on the specified value
+ * Freemarker user-defined directive that performs a Skyve display format on the specified value
  * based on the Java class.
  *
  * <p>
@@ -80,12 +88,53 @@ public class SqlFormatDirective implements TemplateDirectiveModel {
 		// do the actual directive execution
 		try (Writer out = env.getOut()) {
 			if (valueParam != null) {
-				Customer customer = CORE.getCustomer();
-				if (customer == null) {
-					throw new TemplateModelException("No customer available, unable to format.");
-				}
-				out.write(BindUtil.toDisplay(customer, null, null, valueParam));
+				out.write(toDisplay(valueParam));
 			}
 		}
+	}
+	
+	@SuppressWarnings("static-method")
+	private String toDisplay(final Object value) {
+		String result = "";
+		try {
+			Customer customer = CORE.getCustomer();
+			if (customer == null) {
+				throw new TemplateModelException("No customer available, unable to format.");
+			}
+
+			if (value == null) {
+				// do nothing as result is already empty
+			} else if (value instanceof java.sql.Timestamp) {
+				java.sql.Timestamp timestamp = (java.sql.Timestamp) value;
+				result = customer.getDefaultTimestampConverter().toDisplayValue(new Timestamp(timestamp));
+			} else if (value instanceof java.sql.Date) {
+				java.sql.Date date = (java.sql.Date) value;
+				result = customer.getDefaultDateConverter().toDisplayValue(new DateOnly(date));
+			} else if (value instanceof DateOnly) {
+				result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
+			} else if (value instanceof TimeOnly) {
+				result = customer.getDefaultTimeConverter().toDisplayValue((TimeOnly) value);
+			} else if (value instanceof DateTime) {
+				result = customer.getDefaultDateTimeConverter().toDisplayValue((DateTime) value);
+			} else if (value instanceof Timestamp) {
+				result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
+			} else if (value instanceof Date) {
+				result = customer.getDefaultDateTimeConverter().toDisplayValue(new DateTime((Date) value));
+			} else if (value instanceof Boolean) {
+				result = (((Boolean) value).booleanValue() ? "Yes" : "No");
+			} else if (value instanceof Geometry) {
+				result = new WKTWriter().write((Geometry) value);
+			} else {
+				result = value.toString();
+			}
+		} catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
+
+			throw new DomainException(e);
+		}
+
+		return result;
 	}
 }
