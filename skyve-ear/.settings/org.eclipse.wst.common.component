@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                                                                    
+                                                                                                
     
     
     
@@ -19,8 +19,14 @@
     
     
     
-    <wb-module deploy-name="skyve-ear-8.0.1">
-                                                                                                                                                                        
+    
+    
+    
+    <wb-module deploy-name="skyve-ear-8.1.0-SNAPSHOT">
+                                                                                                                                                                                                
+        
+        
+        
         
         
         
@@ -41,7 +47,10 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                                                                                                        
+                                                                                                                                                                                                
+        
+        
+        
         
         
         
@@ -116,9 +125,6 @@
         <dependent-module archiveName="jsr305-3.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="checker-qual-2.5.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="error_prone_annotations-2.2.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -128,16 +134,16 @@
         <dependent-module archiveName="animal-sniffer-annotations-1.17.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hibernate-core-5.4.3.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-core/5.4.3.Final/hibernate-core-5.4.3.Final.jar">
+        <dependent-module archiveName="hibernate-core-5.4.33.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-core/5.4.33.Final/hibernate-core-5.4.33.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="jboss-logging-3.3.2.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/jboss/logging/jboss-logging/3.3.2.Final/jboss-logging-3.3.2.Final.jar">
+        <dependent-module archiveName="jboss-logging-3.4.1.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/jboss/logging/jboss-logging/3.4.1.Final/jboss-logging-3.4.1.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="javax.persistence-api-2.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/javax/persistence/javax.persistence-api/2.2/javax.persistence-api-2.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="byte-buddy-1.9.10.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/net/bytebuddy/byte-buddy/1.9.10/byte-buddy-1.9.10.jar">
+        <dependent-module archiveName="byte-buddy-1.11.12.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/net/bytebuddy/byte-buddy/1.11.12/byte-buddy-1.11.12.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="antlr-2.7.7.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/antlr/antlr/2.7.7/antlr-2.7.7.jar">
@@ -146,19 +152,19 @@
         <dependent-module archiveName="jboss-transaction-api_1.2_spec-1.1.1.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/jboss/spec/javax/transaction/jboss-transaction-api_1.2_spec/1.1.1.Final/jboss-transaction-api_1.2_spec-1.1.1.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="jandex-2.0.5.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/jboss/jandex/2.0.5.Final/jandex-2.0.5.Final.jar">
+        <dependent-module archiveName="jandex-2.2.3.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/jboss/jandex/2.2.3.Final/jandex-2.2.3.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="classmate-1.3.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/fasterxml/classmate/1.3.4/classmate-1.3.4.jar">
+        <dependent-module archiveName="classmate-1.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/fasterxml/classmate/1.5.1/classmate-1.5.1.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="javax.activation-api-1.2.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="dom4j-2.1.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/dom4j/dom4j/2.1.1/dom4j-2.1.1.jar">
+        <dependent-module archiveName="dom4j-2.1.3.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/dom4j/dom4j/2.1.3/dom4j-2.1.3.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hibernate-commons-annotations-5.1.0.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/common/hibernate-commons-annotations/5.1.0.Final/hibernate-commons-annotations-5.1.0.Final.jar">
+        <dependent-module archiveName="hibernate-commons-annotations-5.1.2.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/common/hibernate-commons-annotations/5.1.2.Final/hibernate-commons-annotations-5.1.2.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="jaxb-api-2.3.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar">
@@ -179,19 +185,22 @@
         <dependent-module archiveName="FastInfoset-1.2.15.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/sun/xml/fastinfoset/FastInfoset/1.2.15/FastInfoset-1.2.15.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hibernate-entitymanager-5.4.3.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-entitymanager/5.4.3.Final/hibernate-entitymanager-5.4.3.Final.jar">
+        <dependent-module archiveName="hibernate-entitymanager-5.4.33.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-entitymanager/5.4.33.Final/hibernate-entitymanager-5.4.33.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hibernate-spatial-5.4.3.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-spatial/5.4.3.Final/hibernate-spatial-5.4.3.Final.jar">
+        <dependent-module archiveName="hibernate-spatial-5.4.33.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-spatial/5.4.33.Final/hibernate-spatial-5.4.33.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="geolatte-geom-1.4.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/geolatte/geolatte-geom/1.4.0/geolatte-geom-1.4.0.jar">
+        <dependent-module archiveName="geolatte-geom-1.8.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/geolatte/geolatte-geom/1.8.2/geolatte-geom-1.8.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="postgresql-42.2.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/postgresql/postgresql/42.2.2/postgresql-42.2.2.jar">
+        <dependent-module archiveName="postgresql-42.2.16.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/postgresql/postgresql/42.2.16/postgresql-42.2.16.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="hibernate-jcache-5.4.3.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-jcache/5.4.3.Final/hibernate-jcache-5.4.3.Final.jar">
+        <dependent-module archiveName="checker-qual-3.5.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="hibernate-jcache-5.4.33.Final.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/hibernate/hibernate-jcache/5.4.33.Final/hibernate-jcache-5.4.33.Final.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="cache-api-1.0.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/javax/cache/cache-api/1.0.0/cache-api-1.0.0.jar">
@@ -365,12 +374,6 @@
         <dependent-module archiveName="javax.el-3.0.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/glassfish/javax.el/3.0.0/javax.el-3.0.0.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="asm-5.0.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/ow2/asm/asm/5.0.4/asm-5.0.4.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="asm-commons-5.0.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/ow2/asm/asm-commons/5.0.4/asm-commons-5.0.4.jar">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="hatbox-1.0.b11.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/net/sourceforge/hatbox/hatbox/1.0.b11/hatbox-1.0.b11.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -407,6 +410,9 @@
         <dependent-module archiveName="accessors-smart-2.4.7.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/net/minidev/accessors-smart/2.4.7/accessors-smart-2.4.7.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="asm-5.0.4.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/ow2/asm/asm/5.0.4/asm-5.0.4.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <dependent-module archiveName="lang-tag-1.5.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/nimbusds/lang-tag/1.5/lang-tag-1.5.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -437,7 +443,10 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                                                                                                                    
+                                                                                                                                                                                            
+    
+    
+    
     
     
     
@@ -458,7 +467,10 @@
     
     
     </wb-module>
-                                                                                
+                                                                                            
+
+
+
 
 
 
