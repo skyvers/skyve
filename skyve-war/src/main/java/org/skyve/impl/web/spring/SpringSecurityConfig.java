@@ -118,6 +118,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.deleteCookies("JSESSIONID")
 				.and()
 			.csrf().disable()
+			.httpBasic().disable()
 			.headers()
 				.httpStrictTransportSecurity().disable()
 				.frameOptions().disable()

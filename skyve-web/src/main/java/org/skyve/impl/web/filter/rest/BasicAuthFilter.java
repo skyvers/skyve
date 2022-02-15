@@ -15,15 +15,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentFilter;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 
 public class BasicAuthFilter extends AbstractRestFilter {
@@ -101,26 +102,36 @@ public class BasicAuthFilter extends AbstractRestFilter {
 	
 	private static void validateUserCredentials(Persistence p, String username, String password)
 	throws Exception {
-		DocumentQuery q = p.newDocumentQuery(SQLMetaDataUtil.ADMIN_MODULE_NAME, SQLMetaDataUtil.USER_DOCUMENT_NAME);
-		DocumentFilter f = q.getFilter();
+		ProvidedRepository r = ProvidedRepositoryFactory.get();
+		Module admin = r.getModule(null, SQLMetaDataUtil.ADMIN_MODULE_NAME);
+		String ADM_SecurityUser = admin.getDocument(null, SQLMetaDataUtil.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+		StringBuilder sql = new StringBuilder(128);
+		sql.append("select ").append(SQLMetaDataUtil.PASSWORD_PROPERTY_NAME).append(" from ").append(ADM_SecurityUser);
+		sql.append(" where " ).append(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME).append(" = :").append(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME);
+
 		final String[] customerAndUser = username.split("/");
+		if (customerAndUser.length > 1) {
+			sql.append(" and ").append(Bean.CUSTOMER_NAME).append(" = :").append(Bean.CUSTOMER_NAME);
+		}
+		SQL q = p.newSQL(sql.toString());
 		if (customerAndUser.length == 1) {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				throw new SecurityException("Invalid username/password");
 			}
-			f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, username);
+			q.putParameter(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, customerAndUser[0], false);
 		}
 		else {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
-				f.addEquals(Bean.CUSTOMER_NAME, customerAndUser[0]);
+				q.putParameter(Bean.CUSTOMER_NAME, customerAndUser[0], false);
 			}
-			f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, customerAndUser[1]);
+			q.putParameter(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, customerAndUser[1], false);
 		}
-		Bean user = q.beanResult();
-		if (user == null) {
+
+		String hashedPassword = q.scalarResult(String.class);
+		if (hashedPassword == null) {
 			throw new SecurityException("Invalid username/password");
 		}
-		if (! EXT.checkPassword(password, (String) BindUtil.get(user, SQLMetaDataUtil.PASSWORD_PROPERTY_NAME))) {
+		if (! EXT.checkPassword(password, hashedPassword)) {
 			throw new SecurityException("Invalid username/password");
 		}
 	}
