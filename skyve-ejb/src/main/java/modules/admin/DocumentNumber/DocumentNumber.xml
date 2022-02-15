@@ -8,6 +8,9 @@
 	<pluralAlias>Document Numbers</pluralAlias>
 	<iconStyleClass>fa fa-list-ol</iconStyleClass>
 	<bizKey expression="{moduleName}.{documentName}.{sequenceName}"/>
+	<implements>
+		<interface>org.skyve.domain.app.admin.DocumentNumber</interface>
+	</implements>
 	<attributes>
 		<text name="moduleName" required="true">
 			<displayName>Module Name</displayName>

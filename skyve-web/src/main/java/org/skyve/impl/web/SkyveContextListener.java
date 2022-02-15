@@ -30,10 +30,12 @@ import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
+import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.DefaultRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
@@ -457,7 +459,10 @@ public class SkyveContextListener implements ServletContextListener {
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
-					ProvidedRepositoryFactory.set((ProvidedRepository) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS).getDeclaredConstructor().newInstance());
+					Class<?> loadedClass = Thread.currentThread().getContextClassLoader()
+							.loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS);
+					ProvidedRepository providedRepository = (ProvidedRepository) loadedClass.getDeclaredConstructor().newInstance();
+					ProvidedRepositoryFactory.set(providedRepository);
 				}
 				catch (Exception e) {
 					throw new IllegalStateException("Could not create factories.repositoryClass " + UtilImpl.SKYVE_REPOSITORY_CLASS, e);
@@ -485,6 +490,20 @@ public class SkyveContextListener implements ServletContextListener {
 		// Can't load the class here as it may not be available to this class loader - it could be in the add-in.
 		// So we load it in the startup method.		
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
+
+		UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS = getString("factories", "documentNumberGeneratorClass", factories, false);
+		if (UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS != null) {
+			try {
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader()
+						.loadClass(UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS);
+				NumberGenerator numberGenerator = (NumberGenerator) loadedClass.getDeclaredConstructor().newInstance();
+				NumberGeneratorStaticSingleton.set(numberGenerator);
+			} catch (Exception e) {
+				throw new IllegalStateException(
+						"Could not create factories.documentNumberGeneratorClass " + UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS,
+						e);
+			}
+		}
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);

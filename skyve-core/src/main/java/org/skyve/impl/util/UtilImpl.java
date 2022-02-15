@@ -15,10 +15,10 @@ import java.util.logging.Logger;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
+import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
-import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
@@ -175,6 +175,7 @@ public class UtilImpl {
 	public static String SKYVE_REPOSITORY_CLASS = null;
 	public static String SKYVE_PERSISTENCE_CLASS = null;
 	public static String SKYVE_CONTENT_MANAGER_CLASS = null;
+	public static String SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
