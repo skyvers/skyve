@@ -48,41 +48,6 @@
 		</attribute>
 	</tag>
 	<tag>
-		<tag-name>csrfForm</tag-name>
-		<component>
-			<component-type>org.skyve.impl.web.faces.components.CSRFForm</component-type>
-			<renderer-type>javax.faces.Form</renderer-type>
-		</component>
-		<attribute>
-			<description>Unique identifier of the component in a namingContainer.</description>
-			<name>id</name>
-			<required>false</required>
-			<type>java.lang.String</type>
-		</attribute>
-		<attribute>
-			<description>Boolean value to indicate whether to prepend the component id as a naming container would</description>
-			<name>prependId</name>
-			<required>false</required>
-			<type>java.lang.Boolean</type>
-		</attribute>
-		<attribute>
-			<name>enctype</name>
-			<required>false</required>
-			<type>java.lang.String</type>
-		</attribute>
-		<attribute>
-			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
-			<name>rendered</name>
-			<required>false</required>
-			<type>java.lang.Boolean</type>
-		</attribute>
-		<attribute>
-			<name>managedBean</name>
-			<required>true</required>
-			<type>java.lang.String</type>
-		</attribute>
-	</tag>
-	<tag>
 		<tag-name>resetMenuState</tag-name>
 		<component>
 			<component-type>org.skyve.impl.web.faces.components.ResetMenuState</component-type>
@@ -309,6 +274,161 @@
 		<attribute>
 			<description>The fully qualified class name of a component builder to use</description>
 			<name>componentBuilderClass</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
+	<tag>
+		<tag-name>csrfForm</tag-name>
+		<component>
+			<component-type>org.skyve.impl.web.faces.components.CSRFForm</component-type>
+			<renderer-type>javax.faces.Form</renderer-type>
+		</component>
+		<attribute>
+			<description>Unique identifier of the component in a namingContainer.</description>
+			<name>id</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to indicate whether to prepend the component id as a naming container would</description>
+			<name>prependId</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<name>enctype</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<name>managedBean</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>List of content types that a server processing this form will handle correctly</description>
+			<name>accept</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>List of character encodings for input data that are accepted by the server processing this form.</description>
+			<name>acceptcharset</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Direction indication for text that does not inherit directionality. Valid values are "LTR" (left-to-right) and "RTL" (right-to-left).</description>
+			<name>dir</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Code describing the language used in the generated markup for this component.</description>
+			<name>lang</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a pointer button is clicked over this element.</description>
+			<name>onclick</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a pointer button is double clicked over this element.</description>
+			<name>ondblclick</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a key is pressed down over this element.</description>
+			<name>onkeydown</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a key is pressed and released over this element.</description>
+			<name>onkeypress</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a key is released over this element.</description>
+			<name>onkeyup</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a pointer button is pressed down over this element.</description>
+			<name>onmousedown</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a pointer button is moved within this element.</description>
+			<name>onmousemove</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a pointer button is moved away from this element.</description>
+			<name>onmouseout</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a pointer button is moved onto this element.</description>
+			<name>onmouseover</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when a pointer button is released over this element.</description>
+			<name>onmouseup</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when this form is reset.</description>
+			<name>onreset</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Javascript code executed when this form is submitted.</description>
+			<name>onsubmit</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>CSS style(s) to be applied when this component is rendered.</description>
+			<name>style</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Space-separated list of CSS style class(es) to be applied when this element is rendered. This value must be passed through as the "class" attribute on generated markup.</description>
+			<name>styleClass</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Name of a frame where the response retrieved after this form submit is to be displayed.</description>
+			<name>target</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Advisory title information about markup elements generated for this component.</description>
+			<name>title</name>
 			<required>false</required>
 			<type>java.lang.String</type>
 		</attribute>
