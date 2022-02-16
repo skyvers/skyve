@@ -17,6 +17,7 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
+import org.skyve.impl.report.jasperreports.SkyveDataSource;
 import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -78,8 +79,7 @@ import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
-
-    public static final String DESIGN_SPEC_PARAMETER_NAME = "DESIGN_SPEC";
+	public static final String DESIGN_SPEC_PARAMETER_NAME = "DESIGN_SPEC";
     protected final JasperDesign jasperDesign;
     protected final DesignSpecification designSpecification;
     protected final ReportDesignParameters reportDesignParameters;
@@ -87,7 +87,8 @@ public class JasperReportRenderer {
 	private static final Float FONT_TEN = Float.valueOf(10f);
 	private static final Float FONT_TWELVE = Float.valueOf(12f);
 	private static final Float FONT_TWENTY_SIX = Float.valueOf(26f);
-
+	private static final String SKYVE_DATA_SOURCE_CLASS = SkyveDataSource.class.getName();
+	
     private static final Map<String, String> properties;
     private boolean rendered = false;
 
@@ -391,15 +392,20 @@ public class JasperReportRenderer {
                     textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
                     expression = new JRDesignExpression();
                     if (isDateOrTimeAttribute(column.getAttributeType())) {
-                        expression.setText(String.format("(($V{%s_minDate} == null) || ($V{%s_maxDate} == null)) ? \"\" : org.skyve.impl.jasperreports.SkyveDataSource.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_minDate}) + \" - \" + org.skyve.impl.jasperreports.SkyveDataSource.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_maxDate})",
+                        expression.setText(String.format("(($V{%s_minDate} == null) || ($V{%s_maxDate} == null)) ? \"\" : %s.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_minDate}) + \" - \" + %s.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_maxDate})",
                         									column.getName(),
                         									column.getName(),
+                        									SKYVE_DATA_SOURCE_CLASS,
                         									column.getName(),
                         									column.getName(),
+                        									SKYVE_DATA_SOURCE_CLASS,
                                                             column.getName(),
                         									column.getName()));
                     } else {
-                        expression.setText(String.format("org.skyve.impl.jasperreports.SkyveDataSource.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_summary})", column.getName(), column.getName()));
+                        expression.setText(String.format("%s.getFormattedValue($F{USER}, $F{THIS}, \"%s\", $V{%s_summary})", 
+                        									SKYVE_DATA_SOURCE_CLASS,
+                        									column.getName(),
+                        									column.getName()));
                     }
                     textField.setExpression(expression);
                     summaryBand.addElement(textField);
