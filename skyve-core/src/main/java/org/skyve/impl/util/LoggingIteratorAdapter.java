@@ -15,7 +15,7 @@ public class LoggingIteratorAdapter<T> implements Iterator<T> {
 	@Override
 	public boolean hasNext() {
 		boolean result = adapted.hasNext();
-		if (!result) {
+		if ((! result) && (iterated >= 1000)) {
 			Util.LOGGER.info("Finished Iteration at " + iterated + " iterations");
 		}
 		return result;
