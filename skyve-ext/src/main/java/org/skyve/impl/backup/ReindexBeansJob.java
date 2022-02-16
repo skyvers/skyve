@@ -65,7 +65,8 @@ public class ReindexBeansJob extends CancellableJob {
 								try (AutoClosingIterable<PersistentBean> it = query.beanIterable()) {
 									for (PersistentBean bean : it) {
 										persistence.reindex(bean);
-										persistence.evictCached(bean);
+										// Evict anything inadvertently loaded and cached by the reindex operation above
+										persistence.evictAllCached();
 									}
 								}
 							}
