@@ -8,6 +8,7 @@ import javax.enterprise.inject.Produces;
 
 import org.skyve.addin.AddInManager;
 import org.skyve.cache.Caching;
+import org.skyve.domain.number.NumberGenerator;
 import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
@@ -62,5 +63,10 @@ public class SkyveCDIProducer implements Serializable {
 	@Produces
 	public static JobScheduler getJobScheduler() {
 		return new JobSchedulerInjectable();
+	}
+
+	@Produces
+	public static NumberGenerator getNumberGenerator() {
+		return new NumberGeneratorInjectable();
 	}
 }

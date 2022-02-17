@@ -15,7 +15,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class DocumentNumber extends AbstractPersistentBean {
+public class DocumentNumber extends AbstractPersistentBean implements org.skyve.domain.app.admin.DocumentNumber {
 	/**
 	 * For Serialization
 	 * @hidden
