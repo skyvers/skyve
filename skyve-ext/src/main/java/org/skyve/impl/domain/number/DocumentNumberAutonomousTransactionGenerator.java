@@ -11,6 +11,7 @@ public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocume
 	@Override
 	public String next(String prefix, String moduleName, String documentName, String fieldName, int minimumLength) {
 		AbstractHibernatePersistence pers = (AbstractHibernatePersistence) CORE.getPersistence();
+		User user = pers.getUser();
 		try {
 			pers = pers.getClass().getConstructor().newInstance();
 		}
@@ -18,7 +19,6 @@ public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocume
 			throw new DomainException("Could not instantiate Autonomous Transaction Persistence", e);
 		}
 		try {
-			User user = CORE.getPersistence().getUser();
 			pers.setUser(user);
 			pers.begin();
 			return getNextNumber(pers, prefix, moduleName, documentName, fieldName, minimumLength);
