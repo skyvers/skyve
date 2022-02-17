@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.DocumentNumber;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -18,9 +19,13 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
 public abstract class AbstractDocumentNumberGenerator implements NumberGenerator {
-
-	protected static String getNextNumber(Persistence pers, String prefix, String moduleName, String documentName, String fieldName,
-			int numberLength) throws Exception {
+	@SuppressWarnings("static-method")
+	protected String getNextNumber(Persistence pers,
+									String prefix,
+									String moduleName,
+									String documentName,
+									String fieldName,
+									int numberLength) {
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(DocumentNumber.MODULE_NAME);
@@ -41,14 +46,12 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 			List<DocumentNumber> num = null;
 			try {
 				num = qN.beanResults();
-			} finally {
+			}
+			finally {
 				pers.resetDocumentPermissionScopes();
 			}
 
 			if (num.isEmpty()) {
-
-				// System.out.println("DOCUMENT NUMBER: No previous found - source from table");
-
 				// Check if sequence name is a field in that table
 				boolean isField = false;
 				for (Attribute attribute : document.getAttributes()) {
@@ -64,24 +67,29 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 					query.addAggregateProjection(AggregateFunction.Max, fieldName, "MaxNumber");
 
 					List<Bean> beans = query.projectedResults();
-					if (!beans.isEmpty()) {
+					if (! beans.isEmpty()) {
 						Object o = Binder.get(beans.get(0), "MaxNumber");
 						if (o instanceof Integer) {
 							lastNumber = ((Integer) Binder.get(beans.get(0), "MaxNumber")).toString();
-						} else {
+						}
+						else {
 							lastNumber = (String) Binder.get(beans.get(0), "MaxNumber");
 						}
 					}
 				}
 
 				// create a new document number record
-				dN = document.newInstance(user);
-				dN.setModuleName(moduleName);
-				dN.setDocumentName(documentName);
-				dN.setSequenceName(fieldName);
-
-			} else {
-				// System.out.println("DOCUMENT NUMBER: Previous found");
+				try {
+					dN = document.newInstance(user);
+					dN.setModuleName(moduleName);
+					dN.setDocumentName(documentName);
+					dN.setSequenceName(fieldName);
+				}
+				catch (Exception e) {
+					throw new DomainException("Could not instantiate a new document number record", e);
+				}
+			}
+			else {
 				dN = num.get(0);
 				dN = pers.retrieveAndLock(document, dN.getBizId()); // issue a row-level lock
 				lastNumber = dN.getDocumentNumber();
@@ -93,17 +101,15 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 			pers.preMerge(document, dN);
 			pers.upsertBeanTuple(dN);
 			pers.postMerge(document, dN);
-		} finally {
+		}
+		finally {
 			if (dN != null) {
 				pers.evictCached(dN);
 			}
 		}
-		// System.out.println("Next document number for " + moduleName + "." +
-		// documentName + "." + fieldName + " is " + nextNumber);
 
 		return nextNumber;
 	}
-
 
 	/**
 	 * Returns the next alpha value - ie A00A1 becomes A00A2 etc
@@ -119,7 +125,6 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 * @return - the next number
 	 */
 	protected static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) {
-
 		String newNumber = "";
 		String nonNumeric = lastNumber;
 		Integer value = Integer.valueOf(1);

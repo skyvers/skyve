@@ -459,8 +459,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
-					Class<?> loadedClass = Thread.currentThread().getContextClassLoader()
-							.loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS);
+					Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS);
 					ProvidedRepository providedRepository = (ProvidedRepository) loadedClass.getDeclaredConstructor().newInstance();
 					ProvidedRepositoryFactory.set(providedRepository);
 				}
@@ -494,14 +493,12 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS = getString("factories", "documentNumberGeneratorClass", factories, false);
 		if (UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS != null) {
 			try {
-				Class<?> loadedClass = Thread.currentThread().getContextClassLoader()
-						.loadClass(UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS);
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS);
 				NumberGenerator numberGenerator = (NumberGenerator) loadedClass.getDeclaredConstructor().newInstance();
 				NumberGeneratorStaticSingleton.set(numberGenerator);
-			} catch (Exception e) {
-				throw new IllegalStateException(
-						"Could not create factories.documentNumberGeneratorClass " + UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS,
-						e);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create factories.documentNumberGeneratorClass " + UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS, e);
 			}
 		}
 

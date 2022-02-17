@@ -3,27 +3,42 @@ package org.skyve.domain.number;
 public interface NumberGenerator {
 	/**
 	 * Next Integer.
-	 * 
-	 * @throws Exception
-	 * @throws NumberFormatException
 	 */
-	default Integer nextInt(String moduleName, String documentName, String fieldName) throws NumberFormatException, Exception {
+	default Integer nextInt(String moduleName, String documentName, String fieldName) {
 		return Integer.valueOf(Integer.parseInt(next(null, moduleName, documentName, fieldName, 0)));
 	}
 
 	/**
 	 * Next Long.
-	 * 
-	 * @throws Exception
-	 * @throws NumberFormatException
 	 */
-	default Long nextLong(String moduleName, String documentName, String fieldName) throws NumberFormatException, Exception {
+	default Long nextLong(String moduleName, String documentName, String fieldName) {
 		return Long.valueOf(Long.parseLong(next(null, moduleName, documentName, fieldName, 0)));
 	}
 
 	/**
-	 * Returns a new document/sequence number for the given
-	 * module.document.fieldName in a thread-safe way.
+	 * Next String without prefix or length padding.
+	 */
+	default String next(String moduleName, String documentName, String fieldName) {
+		return next(null, moduleName, documentName, fieldName, 0);
+	}
+
+	/**
+	 * Next String without prefix.
+	 */
+	default String next(String moduleName, String documentName, String fieldName, int minimumLength) {
+		return next(null, moduleName, documentName, fieldName, minimumLength);
+	}
+	
+	/**
+	 * Next String without length padding.
+	 */
+	default String next(String prefix, String moduleName, String documentName, String fieldName) {
+		return next(prefix, moduleName, documentName, fieldName, 0);
+	}
+
+
+	/**
+	 * Returns a new document/sequence number for the given module.document.fieldName in a thread-safe way.
 	 * <p>
 	 * If no previous record is found in the DocumentNumber table, the method
 	 * attempts to find the Maximum existing value currently extant in the field and
@@ -34,13 +49,12 @@ public interface NumberGenerator {
 	 * @param moduleName the application module
 	 * @param documentName the application document
 	 * @param fieldName the fieldName/columnName in which the value is held
-	 * @param numberLength the minimum length of the number when specified as a string
+	 * @param minimumLength the minimum length of the number when specified as a string
 	 * @return the next sequence number
-	 * @throws Exception
 	 */
 	String next(String prefix,
 					String moduleName,
 					String documentName,
 					String fieldName,
-			int numberLength) throws Exception;
+					int minimumLength);
 }

@@ -208,10 +208,16 @@ class ViewValidator extends ViewVisitor {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Binding points nowhere");
 			}
 			Attribute attribute = target.getAttribute();
-			if (((assertTypes != null) && (assertTypes.length > 0)) || domainValuesRequired) {
+			if (domainValuesRequired) {
 				if (attribute == null) {
 					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 													" - Binding points to an implicit attribute or a condition that cannot have domain values defined.");
+				}
+			}
+			if ((assertTypes != null) && (assertTypes.length > 0)) {
+				if (attribute == null) {
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+													" - Binding points to an implicit attribute or a condition.");
 				}
 			}
 			
@@ -328,7 +334,7 @@ class ViewValidator extends ViewVisitor {
 			}
 		}
 	}
-	
+
 	private void validateMessageExpressions(String message, 
 												String widgetIdentifier,
 												String description) {

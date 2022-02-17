@@ -8,23 +8,22 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.metadata.user.User;
 
 public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocumentNumberGenerator {
-
 	@Override
-	public String next(String prefix, String moduleName, String documentName, String fieldName, int numberLength) throws Exception {
-		String nextNumber = "0";
-
+	public String next(String prefix, String moduleName, String documentName, String fieldName, int minimumLength) {
 		AbstractHibernatePersistence pers = (AbstractHibernatePersistence) CORE.getPersistence();
 		try {
 			pers = pers.getClass().getConstructor().newInstance();
-		} catch (Exception e) {
-			throw new DomainException("Could not instantiate Persistence", e);
+		}
+		catch (Exception e) {
+			throw new DomainException("Could not instantiate Autonomous Transaction Persistence", e);
 		}
 		try {
 			User user = CORE.getPersistence().getUser();
 			pers.setUser(user);
 			pers.begin();
-			nextNumber = getNextNumber(pers, prefix, moduleName, documentName, fieldName, numberLength);
-		} finally {
+			return getNextNumber(pers, prefix, moduleName, documentName, fieldName, minimumLength);
+		}
+		finally {
 			EntityManager em = pers.getEntityManager();
 			try {
 				em.getTransaction().commit();
@@ -33,9 +32,5 @@ public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocume
 				em.close();
 			}
 		}
-
-		return nextNumber;
 	}
-
-
 }
