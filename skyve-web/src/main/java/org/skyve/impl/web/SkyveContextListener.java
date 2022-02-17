@@ -490,15 +490,15 @@ public class SkyveContextListener implements ServletContextListener {
 		// So we load it in the startup method.		
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
 
-		UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS = getString("factories", "documentNumberGeneratorClass", factories, false);
-		if (UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS != null) {
+		UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS = getString("factories", "numberGeneratorClass", factories, false);
+		if (UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS != null) {
 			try {
-				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS);
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS);
 				NumberGenerator numberGenerator = (NumberGenerator) loadedClass.getDeclaredConstructor().newInstance();
 				NumberGeneratorStaticSingleton.set(numberGenerator);
 			}
 			catch (Exception e) {
-				throw new IllegalStateException("Could not create factories.documentNumberGeneratorClass " + UtilImpl.SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS, e);
+				throw new IllegalStateException("Could not create factories.numberGeneratorClass " + UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS, e);
 			}
 		}
 

@@ -201,7 +201,9 @@
 		// Skyve repository class
 		"repositoryClass": null,
 		// Skyve content manager class
-		"contentManagerClass": null
+		"contentManagerClass": null,
+		// Skyve number generator class
+		"numberGeneratorClass": null
 	},
 	// SMTP Settings
 	"smtp": {

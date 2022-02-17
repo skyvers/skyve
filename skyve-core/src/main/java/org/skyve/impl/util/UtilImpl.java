@@ -175,7 +175,7 @@ public class UtilImpl {
 	public static String SKYVE_REPOSITORY_CLASS = null;
 	public static String SKYVE_PERSISTENCE_CLASS = null;
 	public static String SKYVE_CONTENT_MANAGER_CLASS = null;
-	public static String SKYVE_DOCUMENT_NUMBER_GENERATOR_CLASS = null;
+	public static String SKYVE_NUMBER_GENERATOR_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
