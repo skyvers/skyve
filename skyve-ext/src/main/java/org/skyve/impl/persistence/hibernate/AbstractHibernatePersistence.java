@@ -1402,8 +1402,12 @@ if (document.isDynamic()) return;
 
 				// indicates if we have appended any where clause conditions
 				boolean noWhere = true;
-	
-				// Don't check unique constraints if one of the parameters is an unpersisted bean.
+
+				
+				// Don't check unique constraints if any of the parameters is null
+				boolean nullParameter = false;
+				
+				// Don't check unique constraints if any of the parameters is an unpersisted bean.
 				// The query will produce an error and there is no use anyway as there cannot possibly be unique constraint violation.
 				boolean unpersistedBeanParameter = false;
 				
@@ -1421,7 +1425,19 @@ if (document.isDynamic()) return;
 						throw new DomainException(e);
 					}
 					
-					// Don't do the test if the query parameters are not persisted
+					// Don't do the constraint check if any query parameter is null
+					if (constraintFieldValue == null) {
+						if (UtilImpl.QUERY_TRACE) {
+							StringBuilder log = new StringBuilder(256);
+							log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+							log.append(" as field ").append(fieldName).append(" is null");
+							Util.LOGGER.info(log.toString());
+						}
+						nullParameter = true;
+						break; // stop checking the field names of this constraint
+					}
+					
+					// Don't do the constraint check if any query parameters is not persisted
 					if ((constraintFieldValue instanceof PersistentBean) && (! isPersisted((Bean) constraintFieldValue))) {
 						if (UtilImpl.QUERY_TRACE) {
 							StringBuilder log = new StringBuilder(256);
@@ -1485,7 +1501,7 @@ if (document.isDynamic()) return;
 					queryString.append(" = ?").append(i++);
 				}
 	
-				if (unpersistedBeanParameter || persistedBeanAndNoDirtyParameters) {
+				if (nullParameter || unpersistedBeanParameter || persistedBeanAndNoDirtyParameters) {
 					continue; // iterate to next constraint
 				}
 

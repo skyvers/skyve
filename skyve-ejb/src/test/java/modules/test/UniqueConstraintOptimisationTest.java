@@ -8,6 +8,26 @@ import modules.test.domain.UniqueConstraintOptimisation;
 
 public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 	/**
+	 * Test composite with a null (uc1uc2c) is not tested,
+	 * single with null (uc3c) is not tested,
+	 * relation with a null (pac) is not tested, and
+	 * implicit (flagc) with a null is not tested.
+	 * @throws Exception
+	 */
+	@Test
+	public void testNullNotTested() throws Exception {
+		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		bean1.setUc1("1");
+		bean1.setUc2(null);
+		bean1 = p.save(bean1);
+		
+		UniqueConstraintOptimisation bean2 = ucno.newInstance(u);
+		bean2.setUc1("1");
+		bean2.setUc2(null);
+		bean2 = p.save(bean2);
+	}
+
+	/**
 	 * Test that a non-persistent relation with an unpersisted bean is ignored.
 	 */
 	@Test
