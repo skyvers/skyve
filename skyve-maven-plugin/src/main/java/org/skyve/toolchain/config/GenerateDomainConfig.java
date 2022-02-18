@@ -10,7 +10,7 @@ public class GenerateDomainConfig {
 	private boolean debug = false;
 
 	/**
-	 * Debug mode switch.
+	 * Multi-tenant switch.
 	 */
 	@Parameter(required = true, defaultValue = "false")
 	private boolean multiTenant = false;
