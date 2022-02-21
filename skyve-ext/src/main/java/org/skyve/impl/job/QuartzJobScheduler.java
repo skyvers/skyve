@@ -475,18 +475,21 @@ public class QuartzJobScheduler implements JobScheduler {
 
 		try {
 			for (JobExecutionContext context : JOB_SCHEDULER.getCurrentlyExecutingJobs()) {
-				AbstractSkyveJob job = (AbstractSkyveJob) context.getJobInstance();
-				Trigger trigger = context.getTrigger();
-				if (customerName.equals(trigger.getKey().getGroup())) {
-					JobDescription jd = new JobDescription();
-					jd.setUser((User) context.getMergedJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY));
-					jd.setStartTime(job.getStartTime());
-					jd.setName(job.getDisplayName());
-					jd.setPercentComplete(job.getPercentComplete());
-					jd.setLogging(job.createLogDescriptionString());
-					jd.setInstanceId(context.getFireInstanceId());
-		
-					result.add(jd);
+				org.quartz.Job instance = context.getJobInstance();
+				if (instance instanceof AbstractSkyveJob) {
+					AbstractSkyveJob job = (AbstractSkyveJob) instance;
+					Trigger trigger = context.getTrigger();
+					if (customerName.equals(trigger.getKey().getGroup())) {
+						JobDescription jd = new JobDescription();
+						jd.setUser((User) context.getMergedJobDataMap().get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY));
+						jd.setStartTime(job.getStartTime());
+						jd.setName(job.getDisplayName());
+						jd.setPercentComplete(job.getPercentComplete());
+						jd.setLogging(job.createLogDescriptionString());
+						jd.setInstanceId(context.getFireInstanceId());
+			
+						result.add(jd);
+					}
 				}
 			}
 		}
