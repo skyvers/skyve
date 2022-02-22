@@ -273,6 +273,16 @@ public class Time {
 	}
 
 	/**
+	 * Converts a {@link Date} or Skyve Date to a {@link LocalDate}.
+	 * 
+	 * @param date The date to convert
+	 * @return A LocalDate from the date, based on the System time zone
+	 */
+	public static LocalDate asLocalDate(final Date date) {
+		return TimeUtil.asLocalDate(date);
+	}
+
+	/**
 	 * Returns the first non-null date value
 	 */
 	public static DateOnly coalesce(DateOnly val, DateOnly ifNullValue) {

@@ -94,7 +94,7 @@ public class UploadException extends SkyveException {
 	/**
 	 * A Problem is a warning or error that is associated with a particular location during the upload.
 	 */
-	public static final class Problem implements Comparable<Problem> {
+	public static class Problem implements Comparable<Problem> {
 
 		private String what;
 		private String where;

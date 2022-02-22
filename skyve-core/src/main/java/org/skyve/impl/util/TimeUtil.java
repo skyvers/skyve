@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -432,6 +433,13 @@ public class TimeUtil {
 	 */
 	public static DateOnly asDateOnly(LocalDate localDate) {
 		return new DateOnly(Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
+	}
+
+	/**
+	 * See {@link Time#asLocalDate}
+	 */
+	public static LocalDate asLocalDate(Date date) {
+		return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 
 	/**
