@@ -110,6 +110,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -319,18 +320,33 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
-	private void validateFilterParameterBindings(List<FilterParameter> parameters, String parentWidgetIdentifier) {
+	private void validateFilterParameterBindings(List<FilterParameter> parameters,
+													String parentWidgetIdentifier,
+													Document drivingDocument) {
 		if (parameters != null) {
+			Module drivingModule = (drivingDocument == null) ? null : customer.getModule(drivingDocument.getOwningModuleName());
+
 			for (FilterParameter parameter : parameters) {
-				String name = parameter.getFilterBinding();
-				// TODO should validate filterBinding against child document.
+				String filterBinding = parameter.getFilterBinding();
+				String widgetIdentifier = new StringBuilder(128).append("Filter Parameter ").append(filterBinding).append(" in ").append(parentWidgetIdentifier).toString();
 				validateBinding(null,
 									parameter.getValueBinding(),
 									false,
 									false,
 									false,
 									false,
-									"Filter Parameter " + name + " in " + parentWidgetIdentifier);
+									widgetIdentifier);
+				if (drivingDocument != null) {
+					validateBinding(drivingModule,
+										drivingDocument,
+										null,
+										filterBinding,
+										false,
+										false,
+										false,
+										false,
+										widgetIdentifier);
+				}
 			}
 		}
 	}
@@ -381,42 +397,64 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateQueryOrModel(String queryName, String modelName, String widgetIdentifier) {
+	private Document validateQueryOrModel(String queryName, String modelName, String widgetIdentifier) {
+		Document result = null;
 		if (queryName != null) {
 			if (modelName != null) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has a query and a model name.");
 			}
-			validateQueryName(queryName, widgetIdentifier);
+			result = validateQueryName(queryName, widgetIdentifier);
 		}
 		else if (modelName != null) {
-			validateListModelName(modelName, widgetIdentifier);
+			result = validateListModelName(modelName, widgetIdentifier);
 		}
 		else {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " requires a query name or a model name.");
 		}
+		return result;
 	}
 
-	private void validateQueryName(String queryName, String widgetIdentifier) {
-		if ((queryName != null) && (module.getMetaDataQuery(queryName) == null)) {
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid query of " + queryName);
+	private Document validateQueryName(String queryName, String widgetIdentifier) {
+		Document result = null;
+		if (queryName != null) {
+			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+			if (query == null) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid query of " + queryName);
+			}
+			Module m = query.getDocumentModule(customer);
+			result = m.getDocument(customer, query.getDocumentName());
 		}
-	}
+		return result;
+ 	}
 	
-	private void validateListModelName(String modelName, String widgetIdentifier) {
+	private Document validateListModelName(String modelName, String widgetIdentifier) {
+		Document result = null;
 		if (modelName != null) {
 			try {
 				StringBuilder key = new StringBuilder(128);
 				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 				key.append(document.getName()).append('/');
 				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
-				if (repository.getJavaClass(customer, key.toString()) == null) {
+				Class<?> modelClass = repository.getJavaClass(customer, key.toString());
+				if (modelClass == null) {
 					throw new MetaDataException(key + " not found.");
+				}
+				
+				// Try load the model class, if it doesn't load because of some dependency on runtime (eg injection), return null
+				try {
+					@SuppressWarnings("unchecked")
+					ListModel<Bean> model = (ListModel<Bean>) modelClass.getConstructor().newInstance();
+					result = model.getDrivingDocument();
+				}
+				catch (@SuppressWarnings("unused") Exception e) {
+					// can't do anything to get the driving document
 				}
 			}
 			catch (Exception e) { // NB could be class cast problems
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid list model of " + modelName, e);
 			}
 		}
+		return result;
 	}
 
 	private void validateMapModelName(String modelName, String widgetIdentifier) {
@@ -1154,11 +1192,11 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getDisableRemoveConditionName(), listGridIdentifier);
 		validateConditionName(grid.getPostRefreshConditionName(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
-		validateFilterParameterBindings(grid.getFilterParameters(), listGridIdentifier);
+		Document drivingDocument = validateQueryOrModel(queryName, modelName, listGridIdentifier);
+		validateFilterParameterBindings(grid.getFilterParameters(), listGridIdentifier, drivingDocument);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
 		validateNoColonInFilterParameter(grid.getFilterParameters(), listGridIdentifier);
 		validateNoColonInParameter(grid.getParameters(), listGridIdentifier);
-		validateQueryOrModel(queryName, modelName, listGridIdentifier);
 	}
 
 	@Override
@@ -1169,11 +1207,11 @@ class ViewValidator extends ViewVisitor {
 		validateSize(repeater, listRepeaterIdentifier);
 		validateConditionName(repeater.getInvisibleConditionName(), listRepeaterIdentifier);
 		validateConditionName(repeater.getPostRefreshConditionName(), listRepeaterIdentifier);
-		validateFilterParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier);
+		Document drivingDocument = validateQueryOrModel(queryName, modelName, listRepeaterIdentifier);
+		validateFilterParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier, drivingDocument);
 		validateParameterBindings(repeater.getParameters(), listRepeaterIdentifier);
 		validateNoColonInFilterParameter(repeater.getFilterParameters(), listRepeaterIdentifier);
 		validateNoColonInParameter(repeater.getParameters(), listRepeaterIdentifier);
-		validateQueryOrModel(queryName, modelName, listRepeaterIdentifier);
 	}
 
 	@Override
@@ -1191,11 +1229,11 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier);
-		validateFilterParameterBindings(grid.getFilterParameters(), treeGridIdentifier);
+		Document drivingDocument = validateQueryOrModel(queryName, modelName, treeGridIdentifier);
+		validateFilterParameterBindings(grid.getFilterParameters(), treeGridIdentifier, drivingDocument);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
 		validateNoColonInFilterParameter(grid.getFilterParameters(), treeGridIdentifier);
 		validateNoColonInParameter(grid.getParameters(), treeGridIdentifier);
-		validateQueryOrModel(queryName, modelName, treeGridIdentifier);
 	}
 
 	@Override
@@ -1273,11 +1311,11 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
-		validateFilterParameterBindings(lookup.getFilterParameters(), lookupIdentifier);
+		Document drivingDocument = validateQueryName(lookup.getQuery(), lookupIdentifier);
+		validateFilterParameterBindings(lookup.getFilterParameters(), lookupIdentifier, drivingDocument);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
 		validateNoColonInFilterParameter(lookup.getFilterParameters(), lookupIdentifier);
 		validateNoColonInParameter(lookup.getParameters(), lookupIdentifier);
-		validateQueryName(lookup.getQuery(), lookupIdentifier);
 		
 		// determine the query that will be used
 		MetaDataQueryDefinition query = null;
