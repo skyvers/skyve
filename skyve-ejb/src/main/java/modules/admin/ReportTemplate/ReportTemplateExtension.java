@@ -80,7 +80,7 @@ public class ReportTemplateExtension extends ReportTemplate {
 				continue;
 			}
 
-			tableHeaderRows.append(generateTableHeaderRow(a.getDisplayName()));
+			tableHeaderRows.append(generateTableHeaderRow(a.getLocalisedDisplayName()));
 			tableDetailRows.append(generateTableDetailRow(a.getName()));
 		}
 

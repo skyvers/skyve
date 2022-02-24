@@ -120,6 +120,6 @@ public class DisplayNameDirective implements TemplateDirectiveModel {
 		final Document document = module.getDocument(customer, bean.getBizDocument());
 		final TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, fullyQualifiedPropertyName);
 
-		return tmd.getAttribute().getDisplayName();
+		return tmd.getAttribute().getLocalisedDisplayName();
 	}
 }

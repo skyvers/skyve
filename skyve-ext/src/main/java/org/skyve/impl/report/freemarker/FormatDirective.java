@@ -32,6 +32,7 @@ import freemarker.template.utility.DeepUnwrap;
  * <ul>
  * <li><code>bean</code>: The bean which the attribute to format belongs to
  * <li><code>binding</code>: The attribute name to format, can be a compound binding
+ * <li><code>expression</code>: The expression to format, must supply either expression or <code>binding</code>, not both
  * <li><code>escape</code>: Boolean (Optional), to explicitly turn off HTML escaping on (on by default)
  * </ul>
  * <p>
@@ -47,6 +48,7 @@ public class FormatDirective implements TemplateDirectiveModel {
 
 	private static final String PARAM_NAME_BEAN = "bean";
 	private static final String PARAM_NAME_BINDING = "binding";
+	private static final String PARAM_NAME_EXPRESSION = "expression";
 	private static final String PARAM_ESCAPE = "escape";
 
 	@SuppressWarnings("rawtypes")
@@ -69,6 +71,7 @@ public class FormatDirective implements TemplateDirectiveModel {
 		// process the parameters
 		Bean beanParam = null;
 		String bindingParam = null;
+		String expressionParam = null;
 		boolean escapeParam = true;
 
 		Iterator paramIter = params.entrySet().iterator();
@@ -90,6 +93,15 @@ public class FormatDirective implements TemplateDirectiveModel {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_BINDING));
 				}
 				bindingParam = ((TemplateScalarModel) paramValue).getAsString();
+			} else if (paramName.equals(PARAM_NAME_EXPRESSION)) {
+				if (!(paramValue instanceof TemplateScalarModel)) {
+					throw new TemplateModelException(String.format("The '%s' parameter must be a String.", PARAM_NAME_EXPRESSION));
+				}
+				expressionParam = ((TemplateScalarModel) paramValue).getAsString();
+				if (expressionParam != null && bindingParam != null) {
+					throw new TemplateModelException(
+							String.format("Only supply '%s' or '%s', not both.", PARAM_NAME_BINDING, PARAM_NAME_EXPRESSION));
+				}
 			} else if (paramName.equals(PARAM_ESCAPE)) {
 				if (paramValue instanceof TemplateBooleanModel) {
 					escapeParam = ((TemplateBooleanModel) paramValue).getAsBoolean();	
@@ -106,16 +118,26 @@ public class FormatDirective implements TemplateDirectiveModel {
 
 		// do the actual directive execution
 		try (Writer out = env.getOut()) {
-			if (beanParam != null && bindingParam != null) {
-				String display = Binder.getDisplay(CORE.getCustomer(), beanParam, bindingParam);
-				if (escapeParam) {
-					display = OWASP.escapeHtml(display);
+			if (beanParam != null) {
+				String display = null;
+				// get display based on attribute type
+				if(bindingParam != null) {
+					display = Binder.getDisplay(CORE.getCustomer(), beanParam, bindingParam);
+				} else if (expressionParam != null) {
+					// format message based on expression
+					display = Binder.formatMessage(expressionParam, beanParam);
 				}
 
-				// replace /n with <br/>
-				display = display.replace("\n", "<br/>");
-
-				out.write(display);
+				if (display != null) {
+					if (escapeParam) {
+						display = OWASP.escapeHtml(display);
+					}
+					
+					// replace /n with <br/>
+					display = display.replace("\n", "<br/>");
+					
+					out.write(display);
+				}
 			}
 		}
 	}
