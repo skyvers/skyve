@@ -243,25 +243,39 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			}
 		}.visit(document, bean, customer);
 
-		// delete all outgoing DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
-		// NB Could be extra relations left over from schema evolution
-		// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
-		SQL sql = persistence.newSQL("delete from ADM_DynamicRelation where parent_id in (:bizId)");
-		sql.putParameter(Bean.DOCUMENT_ID, bizIdsToDelete, AttributeType.id);
-		sql.execute();
+		// Delete in batches of 100
+		int i = 0;
+		int l = bizIdsToDelete.size();
+		List<String> batch = new ArrayList<>(100);
+		for (String bizId : bizIdsToDelete) {
+			batch.add(bizId);
+			i++;
+			if ((i == l) || // last element reached
+					((i % 100) == 0)) { // multiple of 100
+				// delete all outgoing DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
+				// NB Could be extra relations left over from schema evolution
+				// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
+				SQL sql = persistence.newSQL("delete from ADM_DynamicRelation where parent_id in (:bizId)");
+				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
+				sql.execute();
 
-		// delete all incoming DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
-		// NB Could be extra relations left over from schema evolution
-		// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
-		sql = persistence.newSQL("delete from ADM_DynamicRelation where relatedId in (:bizId)");
-		sql.putParameter(Bean.DOCUMENT_ID, bizIdsToDelete, AttributeType.id);
-		sql.execute();
+				// delete all incoming DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
+				// NB Could be extra relations left over from schema evolution
+				// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
+				sql = persistence.newSQL("delete from ADM_DynamicRelation where relatedId in (:bizId)");
+				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
+				sql.execute();
 
-		// delete the DynamicEntity
-		sql = persistence.newSQL("delete from ADM_DynamicEntity where bizId in (:bizId)");
-		sql.putParameter(Bean.DOCUMENT_ID, bizIdsToDelete, AttributeType.id);
-		sql.execute();
-		
+				// delete the DynamicEntity
+				sql = persistence.newSQL("delete from ADM_DynamicEntity where bizId in (:bizId)");
+				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
+				sql.execute();
+				
+				batch.clear();
+			}
+		}
+
+		batch.clear();
 		bizIdsToDelete.clear();
 	}
 
