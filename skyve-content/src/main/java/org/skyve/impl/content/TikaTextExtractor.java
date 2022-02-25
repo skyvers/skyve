@@ -27,10 +27,10 @@ public class TikaTextExtractor implements TextExtractor {
 			try {
 				result = UtilImpl.processStringValue(TIKA.parseToString(new ByteArrayInputStream(processedMarkup.getBytes())));
 			}
-			catch (Exception e) {
+			catch (Throwable t) { // include Errors like NoClassDefFound
 				UtilImpl.LOGGER.log(Level.SEVERE, 
 										"TextExtractorImpl.extractTextFromMarkup(): Markup could not be extracted by TIKA",
-										e);
+										t);
 			}
 		}
 		return result;
@@ -77,10 +77,10 @@ public class TikaTextExtractor implements TextExtractor {
 				}
 			}
 		}
-		catch (Exception e) {
+		catch (Throwable t) { // include Errors like NoClassDefFound
 			UtilImpl.LOGGER.log(Level.SEVERE, 
 									"TextExtractorImpl.extractTextFromContent(): Attachment could not be extracted by TIKA",
-									e);
+									t);
 		}
 		
 		return (result.length() == 0) ? null : result.toString();
@@ -104,10 +104,10 @@ public class TikaTextExtractor implements TextExtractor {
 					attachment.setContentType(contentType);
 				}
 			}
-			catch (Exception e) {
+			catch (Throwable t) { // include Errors like NoClassDefFound
 				UtilImpl.LOGGER.log(Level.SEVERE, 
 										"TextExtractorImpl.sniffContentType(): Attachment could not be sniffed by TIKA",
-										e);
+										t);
 			}
 		}
 	}
