@@ -112,7 +112,7 @@
 			<length>250</length>
 		</text>
 		<enum name="actionType" implementingEnumClassName="org.skyve.domain.app.admin.Communication$ActionType" trackChanges="false" persistent="false">
-			<displayName>admin.communicaiton.actionType.displayName</displayName>
+			<displayName>admin.communication.actionType.displayName</displayName>
 		</enum>
 		<enum name="formatType" implementingEnumClassName="org.skyve.domain.app.admin.Communication$FormatType">
 			<displayName>admin.communication.formatType.displayName</displayName>

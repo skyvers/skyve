@@ -177,7 +177,7 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case longInteger:
 						if (param.getReportInputValue() != null) {
-							bql.putParameter(param.getName(), Long.getLong(param.getReportInputValue()));
+							bql.putParameter(param.getName(), Long.valueOf(param.getReportInputValue()));
 						} else {
 							bql.putParameter(param.getName(), param.getNumericalDefaultValue());
 						}
