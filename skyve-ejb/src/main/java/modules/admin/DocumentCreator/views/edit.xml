@@ -73,7 +73,7 @@
     			<column />
     			<row>
     				<item>
-    					<blurb>
+    					<blurb escape="false">
     						<![CDATA[
     						<pre>
 {documentPreview}
