@@ -34,6 +34,7 @@ public class ContentGarbageCollectionJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context)
 	throws JobExecutionException {
+		Util.LOGGER.info("Start Content Garbage Collection");
 		try {
 			Repository r = CORE.getRepository();
 			Persistence p = CORE.getPersistence();
@@ -132,7 +133,7 @@ public class ContentGarbageCollectionJob implements Job {
 			finally {
 				p.commit(true);
 			}
-			if (UtilImpl.CONTENT_TRACE) Util.LOGGER.info("Successfully performed CMS garbage collection");
+			Util.LOGGER.info("Successfully performed Content Garbage Collection");
 		}
 		catch (Exception e) {
 			throw new JobExecutionException("Error encountered whilst performing CMS garbage collection", e);
