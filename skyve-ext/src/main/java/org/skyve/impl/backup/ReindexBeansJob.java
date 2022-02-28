@@ -62,7 +62,7 @@ public class ReindexBeansJob extends CancellableJob {
 								log.add(trace);
 								UtilImpl.LOGGER.info(trace);
 								DocumentQuery query = persistence.newDocumentQuery(document);
-								query.setTimeoutInSeconds(0);
+								query.noTimeout();
 								try (AutoClosingIterable<PersistentBean> it = query.beanIterable()) {
 									for (PersistentBean bean : it) {
 										persistence.reindex(bean);
