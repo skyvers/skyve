@@ -92,6 +92,12 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	}
 
 	@Override
+	public AbstractDocumentQuery noTimeout() {
+		this.timeoutInSeconds = 0;
+		return this;
+	}
+	
+	@Override
 	public AbstractDocumentQuery putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {

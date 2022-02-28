@@ -61,7 +61,4 @@ public abstract class AbstractQuery {
 	public void setTimeoutInSeconds(int timeoutInSeconds) {
 		this.timeoutInSeconds = timeoutInSeconds;
 	}
-	public void noTimeout() {
-		this.timeoutInSeconds = 0;
-	}
 }

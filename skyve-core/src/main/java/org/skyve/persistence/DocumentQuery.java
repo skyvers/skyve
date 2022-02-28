@@ -366,5 +366,5 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	
 	public int getTimeoutInSeconds();
 	public void setTimeoutInSeconds(int timeoutInSeconds);
-	public void noTimeout();
+	public DocumentQuery noTimeout();
 }

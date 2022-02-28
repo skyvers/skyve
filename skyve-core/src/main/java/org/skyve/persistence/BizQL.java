@@ -14,5 +14,5 @@ public interface BizQL extends BeanQuery, ProjectedQuery, ScalarQuery, TupleQuer
 	
 	public int getTimeoutInSeconds();
 	public void setTimeoutInSeconds(int timeoutInSeconds);
-	public void noTimeout();
+	public BizQL noTimeout();
 }

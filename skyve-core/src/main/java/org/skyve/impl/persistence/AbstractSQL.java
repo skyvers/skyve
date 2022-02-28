@@ -60,6 +60,12 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	}
  
 	@Override
+	public SQL noTimeout() {
+		this.timeoutInSeconds = 0;
+		return this;
+	}
+
+	@Override
 	public SQL putParameter(String name, DateOnly value) {
 		return putParameter(name, value, AttributeType.date);
 	}

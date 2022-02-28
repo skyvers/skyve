@@ -17,6 +17,12 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	}
 
 	@Override
+	public AbstractBizQL noTimeout() {
+		this.timeoutInSeconds = 0;
+		return this;
+	}
+	
+	@Override
 	public AbstractBizQL putParameter(String name, Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {

@@ -33,7 +33,7 @@ public interface SQL extends BeanQuery, ScalarQuery, TupleQuery, DMLQuery {
 	
 	public int getTimeoutInSeconds();
 	public void setTimeoutInSeconds(int timeoutInSeconds);
-	public void noTimeout();
+	public SQL noTimeout();
 	
 	public List<DynaBean> dynaResults();
 	public DynaBean dynaResult();
