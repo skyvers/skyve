@@ -118,6 +118,7 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
@@ -147,8 +148,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		em = sf.createEntityManager();
 		session = em.unwrap(Session.class);
 		session.setHibernateFlushMode(FlushMode.MANUAL);
-		
-		dynamicPersistence = new RDBMSDynamicPersistence(this);
 	}
 
 	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
@@ -175,6 +174,18 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalStateException("Could not find SKYVE_PERSISTENCE_CLASS " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
+			}
+		}
+
+		if (UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS == null) {
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
+		}
+		else {
+			try {
+				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Class.forName(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Could not find SKYVE_DYNAMIC_PERSISTENCE_CLASS " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS, e);
 			}
 		}
 

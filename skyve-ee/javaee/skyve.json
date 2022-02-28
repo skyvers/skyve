@@ -197,7 +197,9 @@
 	// Factory settings
 	"factories": {
 		// Skyve persistence class
-		"persistenceClass": null, 
+		"persistenceClass": null,
+		// Skyve dynamic persistence class
+		"dynamicPersistenceClass": null,
 		// Skyve repository class
 		"repositoryClass": null,
 		// Skyve content manager class

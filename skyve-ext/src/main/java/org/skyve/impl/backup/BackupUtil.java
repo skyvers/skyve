@@ -30,6 +30,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -60,6 +61,7 @@ final class BackupUtil {
 							String databasePassword) 
 	throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
+		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = AbstractContentManager.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 		UtilImpl.CONTENT_FILE_STORAGE = Boolean.parseBoolean(contentFileStorage);

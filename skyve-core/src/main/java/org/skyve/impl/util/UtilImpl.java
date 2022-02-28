@@ -174,6 +174,7 @@ public class UtilImpl {
 	// Implementations of Key SKYVE classes
 	public static String SKYVE_REPOSITORY_CLASS = null;
 	public static String SKYVE_PERSISTENCE_CLASS = null;
+	public static String SKYVE_DYNAMIC_PERSISTENCE_CLASS = null;
 	public static String SKYVE_CONTENT_MANAGER_CLASS = null;
 	public static String SKYVE_NUMBER_GENERATOR_CLASS = null;
 

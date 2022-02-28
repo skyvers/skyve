@@ -16,6 +16,7 @@ public abstract class AbstractPersistence implements Persistence {
 	private static final long serialVersionUID = -766607064543920926L;
 
 	public static Class<? extends AbstractPersistence> IMPLEMENTATION_CLASS;
+	public static Class<? extends DynamicPersistence> DYNAMIC_IMPLEMENTATION_CLASS;
 	
 	public static AbstractPersistence get() {
 		return threadLocalPersistence.get();
@@ -24,14 +25,23 @@ public abstract class AbstractPersistence implements Persistence {
 	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<>() {
 		@Override
 		protected synchronized AbstractPersistence initialValue() throws IllegalArgumentException {
+			AbstractPersistence persistence = null;
 			try {
-				AbstractPersistence persistence = IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
-				set(persistence);
-				return persistence;
+				persistence = IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
 			}
 			catch (Exception e) {
 				throw new IllegalArgumentException(IMPLEMENTATION_CLASS + " was not a good choice.", e);
 			}
+			
+			try {
+				persistence.dynamicPersistence = DYNAMIC_IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
+			}
+			catch (Exception e) {
+				throw new IllegalArgumentException(DYNAMIC_IMPLEMENTATION_CLASS + " was not a good choice.", e);
+			}
+
+			set(persistence);
+			return persistence;
 		}
 	};
 

@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
@@ -88,6 +89,7 @@ public class AbstractH2TestForJUnit5 {
     @SuppressWarnings("static-method")
     public void beforeBase() throws Exception {
         AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
+		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
         AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
         UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
         UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);

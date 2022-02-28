@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
@@ -46,6 +47,7 @@ class CreateAction extends AbstractAction {
 			UIUtil.startWaitCursor(panel);
 
 			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 //			UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 			UtilImpl.DATA_STORE = new DataStore(panel.getDBDriver(),
 													panel.getDBUrl(),

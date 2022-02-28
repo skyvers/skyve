@@ -38,6 +38,7 @@ import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
@@ -45,6 +46,7 @@ import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
+import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.Util;
 
 public class SkyveContextListener implements ServletContextListener {
@@ -472,7 +474,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_PERSISTENCE_CLASS = getString("factories", "persistenceClass", factories, false);
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
-				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT");
+				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT (HibernateContentPersistence)");
 				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 			}
 			else {
@@ -482,6 +484,23 @@ public class SkyveContextListener implements ServletContextListener {
 				}
 				catch (ClassNotFoundException e) {
 					throw new IllegalStateException("Could not find factories.persistenceClass " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
+				}
+			}
+		}
+
+		UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS = getString("factories", "dynamicPersistenceClass", factories, false);
+		if (AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS == null) {
+			if (UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS == null) {
+				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO DEFAULT (RDBMSDynamicPersistence)");
+				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
+			}
+			else {
+				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+				try {
+					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Class.forName(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+				}
+				catch (ClassNotFoundException e) {
+					throw new IllegalStateException("Could not find factories.dynamicPersistenceClass " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS, e);
 				}
 			}
 		}
