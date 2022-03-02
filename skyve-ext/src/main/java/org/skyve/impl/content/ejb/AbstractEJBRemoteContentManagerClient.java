@@ -5,6 +5,7 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResults;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.util.Util;
 
 /**
  * This class is used to talk to another skyve server's EJB content server.
@@ -56,36 +57,42 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	
 	@Override
 	public void put(BeanContent content) throws Exception {
+		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId());
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.put(content);
 	}
 
 	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
+		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for " + content.getBizId() + " attribute " + content.getAttributeName());
 		EJBRemoteContentManagerServer server = obtainServer();
 		content.setContentId(server.put(content, index));
 	}
 
 	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
+		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() sent for " + contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		return server.getAttachment(contentId);
 	}
 
 	@Override
 	public void removeBean(String bizId) throws Exception {
+		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() sent for " + bizId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeBean(bizId);
 	}
 
 	@Override
 	public void removeAttachment(String contentId) throws Exception {
+		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() sent for " + contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeAttachment(contentId);
 	}
 
 	@Override
 	public SearchResults google(String search, int maxResults) throws Exception {
+		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.google() sent for '" + search + '\'');
 		EJBRemoteContentManagerServer server = obtainServer();
 		return server.google(search, maxResults);
 	}
