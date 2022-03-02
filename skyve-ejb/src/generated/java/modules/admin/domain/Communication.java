@@ -291,7 +291,7 @@ public abstract class Communication extends AbstractPersistentBean implements or
 	private String attachmentFileName3;
 
 	/**
-	 * admin.communicaiton.actionType.displayName
+	 * Action
 	 **/
 	private ActionType actionType;
 

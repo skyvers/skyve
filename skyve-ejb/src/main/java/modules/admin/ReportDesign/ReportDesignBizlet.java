@@ -1,6 +1,7 @@
 package modules.admin.ReportDesign;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
@@ -252,6 +254,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 				Document document = module.getDocument(customer, documentName);
 				result.add(new DomainValue(document.getName(), document.getLocalisedDescription()));
 			}
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		if (ReportDesign.queryNamePropertyName.equals(attributeName) && bean.getModuleName() != null) {
@@ -265,6 +268,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 			for (QueryDefinition queryDefinition : documentQueries) {
 				result.add(new DomainValue(queryDefinition.getName(), queryDefinition.getLocalisedDescription()));
 			}
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		if (ReportDesign.menuItemPropertyName.equals(attributeName) && bean.getModuleName() != null) {

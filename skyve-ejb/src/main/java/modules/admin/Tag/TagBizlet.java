@@ -1,6 +1,7 @@
 package modules.admin.Tag;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.skyve.CORE;
@@ -12,6 +13,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
@@ -45,6 +47,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				Document document = module.getDocument(customer, documentName);
 				result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 			}
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		if (Tag.uploadDocumentNamePropertyName.equals(attributeName)
@@ -54,6 +57,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				Document document = module.getDocument(customer, documentName);
 				result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 			}
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		if (Tag.attributeNamePropertyName.equals(attributeName)
@@ -63,6 +67,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			for (Attribute attribute : document.getAllAttributes()) {
 				result.add(new DomainValue(attribute.getName(), attribute.getLocalisedDisplayName()));
 			}
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		if (Tag.operandTagPropertyName.equals(attributeName)) {
@@ -75,6 +80,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			for (Tag t : tags) {
 				result.add(new DomainValue(t.getBizId(), t.getName()));
 			}
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		if (Tag.documentActionPropertyName.equals(attributeName)
@@ -87,6 +93,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 
 			// add default save action
 			result.addAll(TagDefaultAction.toDomainValues());
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		if (Tag.documentConditionPropertyName.equals(attributeName)
@@ -97,6 +104,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				Condition condition = document.getCondition(act);
 				result.add(new DomainValue(act, (condition.getDescription() == null ? act : condition.getDescription())));
 			}
+			result.sort(Comparator.comparing(DomainValue::getDescription));
 		}
 
 		return result;
