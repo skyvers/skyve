@@ -222,10 +222,8 @@ class HibernateQueryDelegate {
 	}
 	
 	static void timeoutQuery(Query<?> query, int timeoutInSeconds, boolean asyncThread) {
-		if (timeoutInSeconds > 0) {
-			query.setTimeout(timeoutInSeconds);
-		}
-		else {
+		// negative timeout values means no timeout
+		if (timeoutInSeconds == 0) {
 			if (asyncThread) {
 				int timeout = UtilImpl.DATA_STORE.getAsyncConnectionTimeoutInSeconds();
 				if (timeout > 0) {
@@ -238,6 +236,9 @@ class HibernateQueryDelegate {
 					query.setTimeout(timeout);
 				}
 			}
+		}
+		else if (timeoutInSeconds > 0) {
+			query.setTimeout(timeoutInSeconds);
 		}
 	}
 }

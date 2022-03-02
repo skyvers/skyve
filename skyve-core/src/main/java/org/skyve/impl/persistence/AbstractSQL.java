@@ -61,7 +61,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
  
 	@Override
 	public SQL noTimeout() {
-		this.timeoutInSeconds = 0;
+		this.timeoutInSeconds = Integer.MIN_VALUE;
 		return this;
 	}
 
@@ -202,10 +202,8 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	
 	public void prepareStatement(NamedParameterPreparedStatement ps, DataStore dataStore, SkyveDialect dialect) {
 		try {
-			if (timeoutInSeconds > 0) {
-				ps.setQueryTimeout(timeoutInSeconds);
-			}
-			else {
+			// negative timeout values means no timeout
+			if (timeoutInSeconds == 0) {
 				AbstractPersistence p = AbstractPersistence.get();
 				if (p.isAsyncThread()) {
 					int timeout = dataStore.getAsyncConnectionTimeoutInSeconds();
@@ -219,6 +217,9 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 						ps.setQueryTimeout(timeout);
 					}
 				}
+			}
+			else if (timeoutInSeconds > 0) {
+				ps.setQueryTimeout(timeoutInSeconds);
 			}
 			
 			for (String name : getParameterNames()) {

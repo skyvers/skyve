@@ -16,7 +16,8 @@ public abstract class AbstractQuery {
 	protected String drivingModuleName;
 	protected String drivingDocumentName;
 
-	protected int timeoutInSeconds = 0;
+	// 0 = default timeout (for oltp or async threads), > 0 sets a timeout, < 0 means no timeout
+	protected int timeoutInSeconds = 0; // default timeout
 
 	public final Set<String> getParameterNames() {
 		return parameters.keySet();

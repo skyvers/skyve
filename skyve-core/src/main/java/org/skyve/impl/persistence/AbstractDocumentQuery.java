@@ -93,7 +93,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 
 	@Override
 	public AbstractDocumentQuery noTimeout() {
-		this.timeoutInSeconds = 0;
+		this.timeoutInSeconds = Integer.MIN_VALUE;
 		return this;
 	}
 	

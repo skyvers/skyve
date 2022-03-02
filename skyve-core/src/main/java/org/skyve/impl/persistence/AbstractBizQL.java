@@ -18,7 +18,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 
 	@Override
 	public AbstractBizQL noTimeout() {
-		this.timeoutInSeconds = 0;
+		this.timeoutInSeconds = Integer.MIN_VALUE;
 		return this;
 	}
 	
