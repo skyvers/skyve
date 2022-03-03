@@ -191,6 +191,9 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Identifier
 	 * <br/>
 	 * The description of this environment, e.g. Test, UAT. Leave this blank for production.
+					<br/>
+					<em>Note: If this is blank, the bootstrap user (if configured) will not be created for 
+					this instance until this is set to a non-blank value.</em>
 	 **/
 	private String environmentIdentifier;
 
