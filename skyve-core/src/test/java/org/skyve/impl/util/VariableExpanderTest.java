@@ -1,12 +1,11 @@
 package org.skyve.impl.util;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +38,7 @@ public class VariableExpanderTest {
 		final Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
 
 		final String expandedProperty = (String) expandedConfig.get(propertyKey);
-		Assert.assertThat(expandedProperty, is(variableValue));
+		assertThat(expandedProperty, is(variableValue));
 	}
 
 	/**
@@ -70,17 +69,17 @@ public class VariableExpanderTest {
 		final Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
 
 		final String expandedProperty = (String) expandedConfig.get(propertyKey);
-		Assert.assertThat(expandedProperty, is(variableValue));
+		assertThat(expandedProperty, is(variableValue));
 
 		final Map<String, Object> expandedFirstLevelPropertyMap =
 				(Map<String, Object>) expandedConfig.get(firstLevelMapPropertyKey);
 		final String expandedFirstLevelProperty = (String) expandedFirstLevelPropertyMap.get(propertyKey);
-		Assert.assertThat(expandedFirstLevelProperty, is(variableValue));
+		assertThat(expandedFirstLevelProperty, is(variableValue));
 
 		final Map<String, Object> expandedSecondLevelPropertyMap =
 				(Map<String, Object>) expandedFirstLevelPropertyMap.get(secondLevelMapPropertyKey);
 		final String expandedSecondLevelProperty = (String) expandedSecondLevelPropertyMap.get(propertyKey);
-		Assert.assertThat(expandedSecondLevelProperty, is(variableValue));
+		assertThat(expandedSecondLevelProperty, is(variableValue));
 	}
 
 	/**
@@ -96,7 +95,7 @@ public class VariableExpanderTest {
 		final Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
 
 		final String expandedProperty = (String) expandedConfig.get(propertyKey);
-		Assert.assertThat(expandedProperty, is(propertyDefaultValue));
+		assertThat(expandedProperty, is(propertyDefaultValue));
 	}
 
 	/**
@@ -111,7 +110,7 @@ public class VariableExpanderTest {
 		Map<String, Object> expandedConfig = variableExpander.expand(properties, variables);
 
 		String expandedProperty = (String) expandedConfig.get(propertyKey);
-		Assert.assertThat(expandedProperty, is(nullValue()));
+		assertThat(expandedProperty, is(nullValue()));
 
 		final String variableKey = "TEST";
 		final String variableValue = "\"testValue\"";
@@ -120,6 +119,6 @@ public class VariableExpanderTest {
 		expandedConfig = variableExpander.expand(properties, variables);
 
 		expandedProperty = (String) expandedConfig.get(propertyKey);
-		Assert.assertThat(expandedProperty, is(variableValue));
+		assertThat(expandedProperty, is(variableValue));
 	}
 }
