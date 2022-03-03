@@ -18,6 +18,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.metadata.view.model.comparison.ComparisonProperty;
@@ -48,8 +49,8 @@ import org.skyve.util.Binder.TargetMetaData;
  *           ]
  */
 public final class ComparisonJSONManipulator {
+	private User user;
 	private CustomerImpl customer;
-	private SmartClientViewRenderer renderer;
 	private ComparisonComposite root;
 
 	private static final String PARENT_KEY = "parent";
@@ -74,11 +75,9 @@ public final class ComparisonJSONManipulator {
 	private static final String DELETED_ICON = "icons/comparisonDeleted.png";
 	private static final String UPDATED_ICON = "icons/comparisonUpdated.png";
 
-	public ComparisonJSONManipulator(CustomerImpl customer, 
-										SmartClientViewRenderer renderer,
-										ComparisonComposite root) {
+	public ComparisonJSONManipulator(User user, CustomerImpl customer, ComparisonComposite root) {
+		this.user = user;
 		this.customer = customer;
-		this.renderer = renderer;
 		this.root = root;
 	}
 
@@ -156,9 +155,9 @@ public final class ComparisonJSONManipulator {
 			
 			if (nodeDocument != null) {
 				// NB Need to use getMetaDataFroBinding() to ensure we find any attributes in base documents inherited
-				Module module = customer.getModule(nodeDocument.getOwningModuleName());
+				Module nodeModule = customer.getModule(nodeDocument.getOwningModuleName());
 				try {
-					TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, propertyName);
+					TargetMetaData target = Binder.getMetaDataForBinding(customer, nodeModule, nodeDocument, propertyName);
 					Attribute attribute = target.getAttribute();
 					InputWidget propertyWidget = property.getWidget();
 					if (propertyWidget == null) {
@@ -172,7 +171,7 @@ public final class ComparisonJSONManipulator {
 						propertyWidget.setBinding(propertyName);
 					}
 					
-					SmartClientDataGridFieldDefinition field = renderer.getField(nodeDocument, propertyWidget, true);
+					SmartClientFieldDefinition field = new SmartClientFieldDefinition(user, customer, nodeModule, nodeDocument, propertyWidget, true);
 					String type = field.getType();
 					item.put(TYPE_KEY, type);
 					String editorType = field.getEditorType();

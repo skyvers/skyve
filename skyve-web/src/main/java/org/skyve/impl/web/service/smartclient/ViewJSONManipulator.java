@@ -1862,9 +1862,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {
 					comparisons.put(referenceName, 
-										new ComparisonJSONManipulator(customer,
-																		SmartClientGeneratorServlet.newRenderer(user, module, document, view, true),
-																		root).toJSONStructure());
+										new ComparisonJSONManipulator(user, customer, root).toJSONStructure());
 				}
 				else if (forApply && 
 							(! Boolean.FALSE.equals(comparison.getEditable())) && 
