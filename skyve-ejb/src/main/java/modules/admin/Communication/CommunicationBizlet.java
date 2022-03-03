@@ -2,6 +2,8 @@ package modules.admin.Communication;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +17,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
@@ -23,6 +26,7 @@ import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.ModulesUtil;
 import modules.admin.Jobs.JobsBizlet;
 import modules.admin.domain.Communication;
 import modules.admin.domain.CommunicationTemplate;
@@ -80,6 +84,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 					Document document = module.getDocument(customer, documentName);
 					result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 				}
+				result.sort(Comparator.comparing(DomainValue::getDescription));
 			}
 		}
 
