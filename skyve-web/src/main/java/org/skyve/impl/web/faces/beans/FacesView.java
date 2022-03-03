@@ -219,6 +219,11 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	public void setUxUi(UxUi uxui) {
 		this.uxui = uxui;
+		// Set the request attribute also
+		// NB Skyve never needs this set as it determines the UX/UI from the request/routing.
+		// Its set here so that FacesView extension classes can force the UX/UI in preRender() when
+		// an XHTML page is hit directly (not through the router)
+		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(AbstractWebContext.UXUI, uxui);
 	}
 
  	public UserAgentType getUserAgentType() {
@@ -226,6 +231,11 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
+		// Set the request attribute also
+		// NB Skyve never needs this set as it determines the UserAgent from the request headers and cookies etc.
+		// Its set here so that FacesView extension classes can force the UX/UI in preRender() when
+		// an XHTML page is hit directly (not through the router)
+		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(AbstractWebContext.USER_AGENT_TYPE_KEY, userAgentType);
 	}
 
 	public String getThemeColour(String defaultColour) {
