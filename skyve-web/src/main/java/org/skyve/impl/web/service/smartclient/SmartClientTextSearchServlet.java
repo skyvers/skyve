@@ -2,6 +2,7 @@ package org.skyve.impl.web.service.smartclient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.Principal;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
@@ -19,15 +20,16 @@ import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
-import org.skyve.web.WebContext;
 
 public class SmartClientTextSearchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -46,9 +48,16 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 		
 		AbstractPersistence persistence = null;
 		try {
+			persistence = AbstractPersistence.get();
 			try (ContentManager cm = EXT.newContentManager()) {
-				User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-				persistence = AbstractPersistence.get();
+				persistence.begin();
+				Principal userPrincipal = request.getUserPrincipal();
+				User user = WebUtil.processUserPrincipalForRequest(request, 
+																	(userPrincipal == null) ? null : userPrincipal.getName(),
+																	true);
+				if (user == null) {
+					throw new SessionEndedException(request.getLocale());
+				}
 				persistence.setUser(user);
 				Customer customer = user.getCustomer();
 
