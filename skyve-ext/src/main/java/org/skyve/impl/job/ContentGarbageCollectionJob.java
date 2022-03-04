@@ -54,20 +54,35 @@ public class ContentGarbageCollectionJob implements Job {
 						}
 						
 						try { // don't stop trying to detect removed content
-							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: FOUND customer=" + result.getCustomerName() + 
-																				" : module=" + result.getModuleName() + 
-																				" : document=" + result.getDocumentName() + 
-																				" : bizId=" + result.getBizId() + 
-																				" : attribute=" + result.getAttributeName() + 
-																				" : lastModified=" + result.getLastModified());
+							String customerName = result.getCustomerName();
+							String moduleName = result.getModuleName();
+							String documentName = result.getDocumentName();
+							String attributeName = result.getAttributeName();
+							String bizId = result.getBizId();
+							String contentId = result.getContentId();
 							Date lastModified = result.getLastModified();
+							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: FOUND customer=" + customerName + 
+																				" : module=" + moduleName + 
+																				" : document=" + documentName + 
+																				" : bizId=" + bizId + 
+																				" : attribute=" + attributeName + 
+																				" : contentId=" + contentId + 
+																				" : lastModified=" + lastModified);
 							// only process this if its at least a day old.
 							// Besides cutting out busy work on a data set in flux, it'll make sure that anyones freshly uploaded
 							// content that hasn't been saved (not pointed to yet in the database) won't be removed.
-							if ((lastModified == null) || ((System.currentTimeMillis() - lastModified.getTime()) > 86400000)) {
-								Customer customer = r.getCustomer(result.getCustomerName());
-								Module module = customer.getModule(result.getModuleName());
-								Document document = module.getDocument(customer, result.getDocumentName());
+							if (lastModified == null) {
+								if (result.isAttachment()) {
+									UtilImpl.LOGGER.warning("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId " + bizId + "/" + contentId);
+								}
+								else {
+									UtilImpl.LOGGER.warning("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId " + bizId);
+								}
+							}
+							else if ((System.currentTimeMillis() - lastModified.getTime()) > 86400000) { // at least a day old
+								Customer customer = r.getCustomer(customerName);
+								Module module = customer.getModule(moduleName);
+								Document document = module.getDocument(customer, documentName);
 								
 								SQL query = null;
 								StringBuilder sql = new StringBuilder(128);
@@ -75,26 +90,25 @@ public class ContentGarbageCollectionJob implements Job {
 								sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
 								
 								// check if we have a record
-								String attributeName = result.getAttributeName();
 								if (result.isAttachment()) { // attachment
 									sql.append(" and ").append(attributeName).append(" = :").append(attributeName);
 		
 									query = p.newSQL(sql.toString());
-									query.putParameter(Bean.DOCUMENT_ID, result.getBizId(), false);
-									query.putParameter(attributeName, result.getContentId(), false);
+									query.putParameter(Bean.DOCUMENT_ID, bizId, false);
+									query.putParameter(attributeName, contentId, false);
 								}
 								else { // bean
 									query = p.newSQL(sql.toString());
-									query.putParameter(Bean.DOCUMENT_ID, result.getBizId(), false);
+									query.putParameter(Bean.DOCUMENT_ID, bizId, false);
 								}
 								
 								if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());
 								if (query.scalarResults(Integer.class).isEmpty()) {
 									if (result.isAttachment()) {
-										orphanedAttachmentContentIds.add(result.getContentId());
+										orphanedAttachmentContentIds.add(contentId);
 									}
 									else {
-										orphanedBeanBizIds.add(result.getBizId());
+										orphanedBeanBizIds.add(bizId);
 									}
 								}
 							}
@@ -107,7 +121,7 @@ public class ContentGarbageCollectionJob implements Job {
 					
 					for (String contentId : orphanedAttachmentContentIds) {
 						try { // don't stop trying to remove content
-							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with contentId " + contentId);
+							UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with contentId " + contentId);
 							cm.removeAttachment(contentId);
 						}
 						catch (Exception e) {
@@ -119,7 +133,7 @@ public class ContentGarbageCollectionJob implements Job {
 
 					for (String bizId : orphanedBeanBizIds) {
 						try { // don't stop trying to remove content
-							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove bean content with bizId " + bizId);
+							UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove bean content with bizId " + bizId);
 							cm.removeBean(bizId);
 						}
 						catch (Exception e) {

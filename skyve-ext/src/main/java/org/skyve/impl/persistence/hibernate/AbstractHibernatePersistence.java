@@ -152,7 +152,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
 	protected abstract void putBeanContent(BeanContent content) throws Exception;
-	protected abstract void removeAttachmentContent(String contentId) throws Exception;
 	protected abstract void closeContent() throws Exception;
 	
 	@Override
@@ -2124,6 +2123,11 @@ if (document.isDynamic()) return;
 						}
 					}
 				}
+				// Do not remove attachment content here...
+				// If the transaction rolls back and we are using a file store content manager
+				// the file could be deleted when its not meant to be orphaning the content link.
+				// Let Content Garbage Collection pick it up in another thread once committed to the RDBMS.
+				/*
 				if (AttributeType.content.equals(type) || AttributeType.image.equals(type)) {
 					if (oldState != null) { // an update
 						if ((state[i] == null) && (oldState[i] != null)) { // removed the content link
@@ -2132,6 +2136,7 @@ if (document.isDynamic()) return;
 						}
 					}
 				}
+				*/
 			}
 		}
 

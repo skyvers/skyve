@@ -32,13 +32,4 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 		}
 		cm.put(content);
 	}
-
-	@Override
-	protected void removeAttachmentContent(String contentId)
-	throws Exception {
-		if (cm == null) {
-			cm = EXT.newContentManager();
-		}
-		cm.removeAttachment(contentId);
-	}
 }

@@ -20,10 +20,4 @@ public class HibernateNoContentPersistence extends AbstractHibernatePersistence 
 	protected void putBeanContent(BeanContent content) throws Exception {
 		// no-op
 	}
-
-	@Override
-	protected void removeAttachmentContent(String contentId)
-	throws Exception {
-		// no-op
-	}
 }
