@@ -10,13 +10,13 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.user.SuperUser;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
@@ -68,7 +68,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	}
 	
 	/**
-	 * Indicates if the current user can read the given content or not
+	 * Indicates if the current user can read and access the given content or not
 	 * 
 	 * @param bizCustomer
 	 * @param bizModule
@@ -76,24 +76,26 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param bizDataGroupId
 	 * @param bizUserId
 	 * @param bizId
-	 * @return true if the content can be read, otherwsie false.
+	 * @param attributeName
+	 * @return true if the content can be read and accessed, otherwise false.
 	 */
-	public static boolean canReadContent(String bizCustomer,
+	public static boolean canAccessContent(String bizCustomer,
 											String bizModule,
 											String bizDocument,
 											String bizDataGroupId,
 											String bizUserId,
-											String bizId) {
-		AbstractPersistence persistence = AbstractPersistence.get();
-		User user = persistence.getUser();
+											String bizId,
+											String attributeName) {
+		User user = CORE.getUser();
 		if (user instanceof SuperUser) {
 			return true;
 		}
 
 		try {
-			if (! user.canReadBean(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId)) {
-				return false;
+			if (attributeName == null) {
+				return user.canReadBean(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId);
 			}
+			return user.canAccessContent(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId, attributeName);
 		}
 		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// This can happen when a document was indexed but then the customer access was taken away
@@ -105,8 +107,6 @@ public abstract class AbstractContentManager implements ContentManager {
 			if (UtilImpl.SECURITY_TRACE) System.err.println("Could not retrieve bean " + bizModule + '.' + bizDocument + " with ID " + bizId);
 			return false;
 		}
-
-		return true;
 	}
 	
 	public static void writeContentFiles(StringBuilder absoluteContentStoreFolderPath, AttachmentContent attachment, byte[] content) 

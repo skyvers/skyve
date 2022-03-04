@@ -146,12 +146,14 @@ public class ContentModel extends ListModel<DataMaintenance> {
 				String bizDataGroupId = hit.getBizDataGroupId();
 				String bizUserId = hit.getBizUserId();
 				String bizId = hit.getBizId();
-				if (AbstractContentManager.canReadContent(bizCustomer, 
-															bizModule, 
-															bizDocument, 
-															bizDataGroupId, 
-															bizUserId, 
-															bizId)) {
+				String attributeName = hit.getAttributeName();
+				if (AbstractContentManager.canAccessContent(bizCustomer, 
+																bizModule, 
+																bizDocument, 
+																bizDataGroupId, 
+																bizUserId, 
+																bizId,
+																attributeName)) {
 					if (i >= start) {
 						String contentId = hit.getContentId();
 						Map<String, Object> properties = new TreeMap<>();

@@ -322,12 +322,17 @@ public class LuceneContentManager extends FileSystemContentManager {
 		
 		String term = UtilImpl.processStringValue(search);
 		if ((term != null) && (maxResults > 0)) {
+			long millis = System.currentTimeMillis();
+
 			try (IndexReader reader = DirectoryReader.open(directory)) {
 				IndexSearcher searcher = new IndexSearcher(reader);
 				QueryParser parser = new QueryParser(CONTENT, analyzer);
 				Query query = parser.parse(term);
-				TopDocs hits = searcher.search(query, maxResults);
-	
+				// Search for double the amount of docs (filtered by security later) up to a max of 10000
+				TopDocs hits = searcher.search(query, Math.min(maxResults * 2, 10000));
+
+				results.setSearchTimeInSecs(Long.toString(((System.currentTimeMillis() - millis) / 1000L)));
+
 				Formatter formatter = new SimpleHTMLFormatter("<span class=\"highlight\">", "</span>");
 		        
 				// It scores text fragments by the number of unique query terms found
@@ -342,8 +347,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		         
 				highlighter.setTextFragmenter(fragmenter);
 		         
-				//results.setSearchTimeInSecs(Integer.toString((int) (searchResponse.getTookInMillis() / 1000)));
-				//results.setSuggestion(search);
+				// TODO results.setSuggestion(search);
 	
 				List<SearchResult> resultList = results.getResults();
 				StringBuilder excerpt = new StringBuilder(256);
@@ -351,41 +355,59 @@ public class LuceneContentManager extends FileSystemContentManager {
 				for (int i = 0, l = hits.scoreDocs.length; i < l; i++) {
 					int docid = hits.scoreDocs[i].doc;
 					Document document = searcher.doc(docid);
-					 
-					// Get stored text from found document
-					String text = document.get(CONTENT);
-					 
-					// Create token stream
-				    Fields vectors = reader.getTermVectors(docid);
-					try (TokenStream stream = TokenSources.getTokenStream(CONTENT, vectors, text, analyzer, -1)) {
-						// Get highlighted text fragments
-						String[] fragments = highlighter.getBestFragments(stream, text, 10);
-						excerpt.setLength(0);
-						for (String fragment : fragments) {
-							excerpt.append(' ').append(fragment);
+
+					String bizCustomer = document.get(Bean.CUSTOMER_NAME);
+					String bizModule = document.get(Bean.MODULE_KEY);
+					String bizDocument = document.get(Bean.DOCUMENT_KEY);
+					String bizDataGroupId = document.get(Bean.DATA_GROUP_ID);
+					String bizUserId = document.get(Bean.USER_ID);
+					String bizId = document.get(Bean.DOCUMENT_ID);
+					String attributeName = document.get(ATTRIBUTE_NAME);
+					if (canAccessContent(bizCustomer,
+											bizModule,
+											bizDocument,
+											bizDataGroupId,
+											bizUserId,
+											bizId,
+											attributeName)) {
+						// Get stored text from found document
+						String text = document.get(CONTENT);
+						 
+						// Create token stream
+					    Fields vectors = reader.getTermVectors(docid);
+						try (TokenStream stream = TokenSources.getTokenStream(CONTENT, vectors, text, analyzer, -1)) {
+							// Get highlighted text fragments
+							String[] fragments = highlighter.getBestFragments(stream, text, 10);
+							excerpt.setLength(0);
+							for (String fragment : fragments) {
+								excerpt.append(' ').append(fragment);
+							}
+						}
+					
+						SearchResult result = new SearchResult();
+						result.setAttributeName(attributeName);
+						result.setBizDataGroupId(bizDataGroupId);
+						String contentId = document.get(AbstractContentManager.CONTENT_ID);
+						result.setContentId(contentId);
+						if (contentId == null) { // bean content
+							result.setBizId(bizId.substring(0, bizId.length() - 1));
+						}
+						else { // attachment content
+							result.setBizId(bizId);
+						}
+						result.setBizUserId(bizUserId);
+						result.setCustomerName(bizCustomer);
+						result.setDocumentName(bizDocument);
+						result.setExcerpt(excerpt.toString());
+						result.setLastModified(TimeUtil.parseISODate(document.get(LAST_MODIFIED)));
+						result.setModuleName(bizModule);
+						result.setScore((int) (hits.scoreDocs[i].score * 100.0));
+						resultList.add(result);
+
+						if (resultList.size() >= maxResults) {
+							break;
 						}
 					}
-					
-					SearchResult result = new SearchResult();
-					result.setAttributeName(document.get(ATTRIBUTE_NAME));
-					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));
-					String contentId = document.get(AbstractContentManager.CONTENT_ID);
-					result.setContentId(contentId);
-					String bizId = document.get(Bean.DOCUMENT_ID);
-					if (contentId == null) { // bean content
-						result.setBizId(bizId.substring(0, bizId.length() - 1));
-					}
-					else { // attachment content
-						result.setBizId(bizId);
-					}
-					result.setBizUserId(document.get(Bean.USER_ID));
-					result.setCustomerName(document.get(Bean.CUSTOMER_NAME));
-					result.setDocumentName(document.get(Bean.DOCUMENT_KEY));
-					result.setExcerpt(excerpt.toString());
-					result.setLastModified(TimeUtil.parseISODate(document.get(LAST_MODIFIED)));
-					result.setModuleName(document.get(Bean.MODULE_KEY));
-					result.setScore((int) (hits.scoreDocs[i].score * 100.0));
-					resultList.add(result);
 				}
 			}
 		}
