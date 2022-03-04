@@ -103,15 +103,20 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				            }
 				            row.put("icon", iconMarkup.toString());
 				            row.put("doc", document.getLocalisedSingularAlias());
-				            row.put(Bean.BIZ_KEY, (bean != null) ? bean.getBizKey() : null);
 				            row.put("excerpt", result.getExcerpt());
 				            row.put("score", Integer.valueOf(result.getScore()));
-		                    url.setLength(0);
-		                    url.append("?m=");
-		                    url.append(moduleName).append("&d=").append(documentName);
-		                    url.append("&i=").append(bizId);
-				            row.put("data", url.toString());
-		
+				            if (bean == null) { // deleted or otherwise non-existent
+				            	row.put(Bean.BIZ_KEY, null);
+				            	row.put("data", null);
+				            }
+				            else {
+				            	row.put(Bean.BIZ_KEY, bean.getBizKey());
+					            url.setLength(0);
+			                    url.append("?m=");
+			                    url.append(moduleName).append("&d=").append(documentName);
+			                    url.append("&i=").append(bizId);
+					            row.put("data", url.toString());
+				            }	
 				            if (result.isAttachment()) {
 					            url.setLength(0);
 			                    url.append("content?_doc=");
