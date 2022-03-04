@@ -35,6 +35,7 @@ public abstract class AbstractPersistence implements Persistence {
 			
 			try {
 				persistence.dynamicPersistence = DYNAMIC_IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
+				persistence.dynamicPersistence.postConstruct(persistence);
 			}
 			catch (Exception e) {
 				throw new IllegalArgumentException(DYNAMIC_IMPLEMENTATION_CLASS + " was not a good choice.", e);

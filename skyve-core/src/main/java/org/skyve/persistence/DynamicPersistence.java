@@ -16,6 +16,11 @@ import org.skyve.metadata.module.Module;
  */
 public interface DynamicPersistence extends Serializable {
 	/**
+	 * Hook used to setup the state of this DynamicPersistence in relation to the Persistence which created it.
+	 */
+	void postConstruct(Persistence persistence);
+
+	/**
 	 * Convenience persist.
 	 */
 	default void persist(PersistentBean bean) {

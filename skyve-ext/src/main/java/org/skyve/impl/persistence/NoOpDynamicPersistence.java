@@ -9,10 +9,16 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DynamicPersistence;
+import org.skyve.persistence.Persistence;
 
 public class NoOpDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = 2810341864186864562L;
 
+	@Override
+	public void postConstruct(Persistence persistence) {
+		// No-op
+	}
+	
 	@Override
 	public void persist(Customer customer, Module module, Document document, PersistentBean bean) {
 		// No-op

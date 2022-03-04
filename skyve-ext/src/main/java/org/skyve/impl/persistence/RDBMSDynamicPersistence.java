@@ -14,7 +14,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.hibernate.type.StringType;
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
@@ -45,6 +44,13 @@ import org.skyve.util.JSON;
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
 
+	private Persistence persistence;
+	
+	@Override
+	public void postConstruct(@SuppressWarnings("hiding") Persistence persistence) {
+		this.persistence = persistence;
+	}
+	
 	@Override
 	public void persist(Customer customer, Module module, Document document, PersistentBean bean) {
 		if (bean.isPersisted()) {
@@ -70,7 +76,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}.visit(document, bean, customer);
 	}
 	
-	private static void process(Customer c, Document d, PersistentBean bean) {
+	private void process(Customer c, Document d, PersistentBean bean) {
 		final Map<String, Object> dynamicFields = new TreeMap<>();
 		final List<Reference> dynamicReferences = new ArrayList<>();
 		final boolean dynamicDocument = d.isDynamic();
@@ -108,7 +114,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}
 	}
 
-	private static void insertEntity(PersistentBean bean, String json) {
+	private void insertEntity(PersistentBean bean, String json) {
 		// Dynamic beans have no version set as they have not been through hibernate
 		if (bean.getBizVersion() == null) {
 			bean.setBizVersion(Integer.valueOf(0));
@@ -116,10 +122,10 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 		String insert = "insert into ADM_DynamicEntity (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, moduleName, documentName, fields) " +
 							"values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizFlagComment, :bizDataGroupId, :bizUserId, :moduleName, :documentName, :fields)";
-		SQL sql = CORE.getPersistence().newSQL(insert);
+		SQL sql = persistence.newSQL(insert);
 		sql.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false);
 		sql.putParameter(PersistentBean.VERSION_NAME, bean.getBizVersion());
-		sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(CORE.getUser().getName(), new Date()).toString(), false);
+		sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(persistence.getUser().getName(), new Date()).toString(), false);
 		sql.putParameter(Bean.BIZ_KEY, bean.getBizKey(), false);
 		sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), false);
 		sql.putParameter(PersistentBean.FLAG_COMMENT_NAME, bean.getBizFlagComment(), false);
@@ -132,12 +138,11 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		sql.execute();
 	}
 	
-	private static void insertReferences(Customer c, PersistentBean bean, List<Reference> references) {
+	private void insertReferences(Customer c, PersistentBean bean, List<Reference> references) {
 		String insert = "insert into ADM_DynamicRelation (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, parent_id, relatedModuleName, relatedDocumentName, relatedId, attributeName, ordinal) " + 
 							"values (:bizId, 0, :bizLock, :bizKey, :bizCustomer, null, null, :bizUserId, :parent_id, :relatedModuleName, :relatedDocumentName, :relatedId, :attributeName, :ordinal)";
-		Persistence p = CORE.getPersistence();
-		SQL sql = p.newSQL(insert);		
-		String bizLock = new OptimisticLock(p.getUser().getName(), new Date()).toString();
+		SQL sql = persistence.newSQL(insert);		
+		String bizLock = new OptimisticLock(persistence.getUser().getName(), new Date()).toString();
 		sql.putParameter(PersistentBean.LOCK_NAME, bizLock, false);
 		sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), false);
 		sql.putParameter(Bean.USER_ID, bean.getBizUserId(), false);
@@ -199,7 +204,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		delete(customer, document, bean, false);
 	}
 	
-	private static void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
+	private void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
 		final Set<String> bizIdsToDelete = new TreeSet<>();
 		
 		new BeanVisitor(false, false, true) {
@@ -241,7 +246,6 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		int i = 0;
 		int l = bizIdsToDelete.size();
 		List<String> batch = new ArrayList<>(100);
-		Persistence p = CORE.getPersistence();
 		for (String bizId : bizIdsToDelete) {
 			batch.add(bizId);
 			i++;
@@ -250,19 +254,19 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				// delete all outgoing DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
 				// NB Could be extra relations left over from schema evolution
 				// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
-				SQL sql = p.newSQL("delete from ADM_DynamicRelation where parent_id in (:bizId)");
+				SQL sql = persistence.newSQL("delete from ADM_DynamicRelation where parent_id in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
 				sql.execute();
 
 				// delete all incoming DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
 				// NB Could be extra relations left over from schema evolution
 				// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
-				sql = p.newSQL("delete from ADM_DynamicRelation where relatedId in (:bizId)");
+				sql = persistence.newSQL("delete from ADM_DynamicRelation where relatedId in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
 				sql.execute();
 
 				// delete the DynamicEntity
-				sql = p.newSQL("delete from ADM_DynamicEntity where bizId in (:bizId)");
+				sql = persistence.newSQL("delete from ADM_DynamicEntity where bizId in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
 				sql.execute();
 				
@@ -312,7 +316,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
 
 		@SuppressWarnings("resource")
-		Query<?> query = ((AbstractHibernatePersistence) CORE.getPersistence()).getSession().createQuery(queryString.toString());
+		Query<?> query = ((AbstractHibernatePersistence) persistence).getSession().createQuery(queryString.toString());
 		query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 
 		// Set timeout if applicable
