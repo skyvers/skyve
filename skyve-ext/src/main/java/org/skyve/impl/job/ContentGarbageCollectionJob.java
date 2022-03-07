@@ -106,9 +106,11 @@ public class ContentGarbageCollectionJob implements Job {
 								if (query.scalarResults(Integer.class).isEmpty()) {
 									if (result.isAttachment()) {
 										orphanedAttachmentContentIds.add(contentId);
+										UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId " + contentId + "/" + bizId);
 									}
 									else {
 										orphanedBeanBizIds.add(bizId);
+										UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove bean content with bizId " + bizId);
 									}
 								}
 							}
@@ -121,7 +123,6 @@ public class ContentGarbageCollectionJob implements Job {
 					
 					for (String contentId : orphanedAttachmentContentIds) {
 						try { // don't stop trying to remove content
-							UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with contentId " + contentId);
 							cm.removeAttachment(contentId);
 						}
 						catch (Exception e) {
@@ -133,7 +134,6 @@ public class ContentGarbageCollectionJob implements Job {
 
 					for (String bizId : orphanedBeanBizIds) {
 						try { // don't stop trying to remove content
-							UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove bean content with bizId " + bizId);
 							cm.removeBean(bizId);
 						}
 						catch (Exception e) {
