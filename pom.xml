@@ -57,7 +57,7 @@
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.5.0</pf4j.version>
-		<poi.version>4.1.2</poi.version>
+		<poi.version>5.2.1</poi.version>
 		<primefaces.version>8.0</primefaces.version>
 		<primefaces-extensions.version>8.0.4</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
