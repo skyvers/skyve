@@ -14,6 +14,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 
@@ -51,7 +52,7 @@ import org.skyve.impl.web.faces.actions.GetBeansAction;
 import org.skyve.impl.web.faces.actions.GetContentFileNameAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
-import org.skyve.impl.web.faces.actions.PreRenderAction;
+import org.skyve.impl.web.faces.actions.PreRenderColdHitAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
 import org.skyve.impl.web.faces.actions.RerenderAction;
 import org.skyve.impl.web.faces.actions.SaveAction;
@@ -184,33 +185,42 @@ public class FacesView<T extends Bean> extends Harness {
 	public void preRender() {
 		FacesContext fc = FacesContext.getCurrentInstance();
 		if (fc.isPostback()) {
-			if (UtilImpl.FACES_TRACE) {
-				UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
-										" : m=" + getBizModuleParameter() + 
-										" : d=" + getBizDocumentParameter() + 
-										" : q=" + getQueryNameParameter() + 
-										" : i=" + getBizIdParameter());
-			}
-			if (! csrfTokenChecked) {
-				if (! FacesUtil.isIgnoreAutoUpdate()) {
-					String csrfTokenParameterValue = fc.getExternalContext().getRequestParameterMap().get("csrfToken");
-					if (csrfTokenParameterValue != null) {
-						setCsrfToken(csrfTokenParameterValue);
+			postBack();
+		}
+		else {
+			coldHit();
+		}
+	}
+	
+	protected void coldHit() {
+		new PreRenderColdHitAction<>(this).execute();
+	}
+	
+	protected void postBack() {
+		if (UtilImpl.FACES_TRACE) {
+			UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
+									" : m=" + getBizModuleParameter() + 
+									" : d=" + getBizDocumentParameter() + 
+									" : q=" + getQueryNameParameter() + 
+									" : i=" + getBizIdParameter());
+		}
+		if (! csrfTokenChecked) {
+			if (! FacesUtil.isIgnoreAutoUpdate()) {
+				ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+				String csrfTokenParameterValue = ec.getRequestParameterMap().get("csrfToken");
+				if (csrfTokenParameterValue != null) {
+					setCsrfToken(csrfTokenParameterValue);
+				}
+				else {
+					try {
+						Util.LOGGER.severe("No CSRF token detected");
+						ec.redirect(Util.getLoggedOutUrl());
 					}
-					else {
-						try {
-							Util.LOGGER.severe("No CSRF token detected");
-							fc.getExternalContext().redirect(Util.getLoggedOutUrl());
-						}
-						catch (IOException e) {
-							throw new FacesException("Could not redirect home after CSRF attack", e);
-						}
+					catch (IOException e) {
+						throw new FacesException("Could not redirect home after CSRF attack", e);
 					}
 				}
 			}
-		}
-		else {
-			new PreRenderAction<>(this).execute();
 		}
 	}
 

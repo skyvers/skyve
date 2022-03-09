@@ -43,7 +43,7 @@ public class CSRFForm extends HtmlForm {
 	    	
 			// Add hidden csrfToken
 			// <p:outputPanel id="<formId>_csrfToken" style="display:none" layout="inline" deferred="false">
-	    	// 		<input type="hidden" name="csrfToken" value="#{fspView.csrfToken}"/>
+	    	// 		<input type="hidden" name="csrfToken" value="#{<managedBeanName>.csrfToken}"/>
 			// 		<p:autoUpdate />
 			// </p:outputPanel>
 	    	OutputPanel panel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);

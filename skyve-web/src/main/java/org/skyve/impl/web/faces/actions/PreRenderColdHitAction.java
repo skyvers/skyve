@@ -13,15 +13,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
-public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
+public class PreRenderColdHitAction<T extends Bean> extends FacesAction<Void> {
 	private FacesView<T> facesView;
-	public PreRenderAction(FacesView<T> facesView) {
+	public PreRenderColdHitAction(FacesView<T> facesView) {
 		this.facesView = facesView;
 	}
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction");
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderColdHitAction");
 
 		// Set the UX/UI and user agent type
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
@@ -40,7 +40,7 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 		facesView.initialise();
 		WebAction webAction = facesView.getWebActionParameter();
 
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction - GO a=" + webAction + 
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderColdHitAction - GO a=" + webAction + 
 													" : m=" + facesView.getBizModuleParameter() + 
 													" : d=" + facesView.getBizDocumentParameter() + 
 													" : q=" + facesView.getQueryNameParameter() + 
