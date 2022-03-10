@@ -85,6 +85,12 @@ public interface Model extends NamedMetaData {
 	public boolean isDynamic();
 
 	/**
+	 * This document is dynamic or has a dynamic attribute or a relation to a document 
+	 * that is dynamic or has a dynamic attribute (recursively evaluated).
+	 */
+	public boolean hasDynamic();
+	
+	/**
 	 * 
 	 * @return
 	 */

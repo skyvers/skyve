@@ -1381,8 +1381,9 @@ t.printStackTrace();
 		}.visit(document, unmergedBean, customer);
 		
 		// Flush dynamic domain
-		if (document.getPersistent() != null) { // persistent
-			dynamicPersistence.persist(customer, customer.getModule(document.getOwningModuleName()), document, mergedBean);
+		if ((document.getPersistent() != null) && document.hasDynamic()) { // persistent with dynamism somewhere
+			Module owningModule = customer.getModule(document.getOwningModuleName());
+			dynamicPersistence.persist(customer, owningModule, document, mergedBean);
 		}
 	}
 

@@ -3,8 +3,11 @@ package org.skyve.impl.metadata.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.skyve.CORE;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -13,6 +16,7 @@ import org.skyve.metadata.model.Model;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Interface;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 
 public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
@@ -31,6 +35,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private String singularAlias;
 	private Persistent persistent;
 	private boolean dynamic = false;
+	private Boolean hasDynamic = null;
 	private Extends inherits;
 	private boolean abstractClass;
 	private String pluralAlias;
@@ -144,7 +149,54 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	public void setDynamic(boolean dynamic) {
 		this.dynamic = dynamic;
 	}
+	
+	@Override
+	public boolean hasDynamic() {
+		if (hasDynamic == null) {
+			determineHasDynamic(new TreeSet<String>());
+		}
 
+		return hasDynamic.booleanValue();
+	}
+	
+	public void clearHasDynamic() {
+		hasDynamic = null;
+	}
+	
+	private void determineHasDynamic(Set<String> modoc) {
+		Customer c = CORE.getCustomer();
+		String omn = getOwningModuleName();
+		modoc.add(omn + "." + getName());
+
+		if (dynamic) {
+			hasDynamic = Boolean.TRUE;
+			return;
+		}
+
+		Module m = c.getModule(omn);
+		for (Attribute a : getAllAttributes()) {
+			if (BindUtil.isDynamic(c, m, a)) {
+				hasDynamic = Boolean.TRUE;
+				return;
+			}
+			if (a instanceof Relation) {
+				String dn = ((Relation) a).getDocumentName();
+				ModelImpl rd = (ModelImpl) m.getDocument(c, dn);
+				if (modoc.add(rd.getOwningModuleName() + "." + dn)) {
+					if (rd.hasDynamic == null) {
+						rd.determineHasDynamic(modoc);
+					}
+					if (rd.hasDynamic.booleanValue()) {
+						hasDynamic = Boolean.TRUE;
+						return;
+					}
+				}
+			}
+		}
+
+		hasDynamic = Boolean.FALSE;
+	}
+	
 	@Override
 	public boolean isAudited() {
 		return audited;

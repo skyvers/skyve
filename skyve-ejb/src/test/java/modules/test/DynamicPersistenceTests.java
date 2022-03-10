@@ -1,41 +1,38 @@
 package modules.test;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.beanutils.DynaBean;
-import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Polygon;
-import org.skyve.CORE;
-import org.skyve.domain.Bean;
-import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.OptimisticLockException;
-import org.skyve.domain.types.OptimisticLock;
-import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
-import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.persistence.AutoClosingIterable;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.SQL;
-import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
-import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
-import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
-import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
-import modules.test.domain.MappedExtensionJoinedStrategy;
-import modules.test.domain.MappedExtensionSingleStrategy;
-import modules.test.domain.MappedSubclassedJoinedStrategy;
-import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
+	@Test
+	public void testHasDynamic() throws Exception {
+		Assert.assertFalse(aapd.hasDynamic());
+		Assert.assertTrue(adapd.hasDynamic()); // has dynamic attributes
+		Assert.assertTrue(aadpd.hasDynamic()); // is dynamic
+		Assert.assertFalse(aarpd.hasDynamic());
+		Assert.assertFalse(ad1.hasDynamic());
+		Assert.assertFalse(ad2.hasDynamic());
+		Assert.assertFalse(ao2m.hasDynamic());
+		Assert.assertFalse(ao2o.hasDynamic());
+		Assert.assertTrue(dmed.hasDynamic()); // is dynamic
+		Assert.assertTrue(dmsd.hasDynamic()); // is dynamic
+		Assert.assertFalse(hd.hasDynamic());
+		Assert.assertFalse(im2mpd.hasDynamic());
+		Assert.assertFalse(io2mpd.hasDynamic());
+		Assert.assertFalse(io2opd.hasDynamic());
+		Assert.assertTrue(mbd.hasDynamic()); // points to messd (dynamic)
+		Assert.assertTrue(mejsd.hasDynamic()); // has dyanmic attribute
+		Assert.assertTrue(messd.hasDynamic()); // has dyanmic attribute
+		Assert.assertTrue(msjsd.hasDynamic()); // has dyanmic attribute
+		Assert.assertTrue(msssd.hasDynamic()); // has dyanmic attribute
+		Assert.assertFalse(rd.hasDynamic());
+		Assert.assertFalse(ucn.hasDynamic());
+		Assert.assertFalse(ucnn.hasDynamic());
+	}
+	
 	@Test
 	public void testPersistenceOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
