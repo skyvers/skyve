@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -215,32 +216,47 @@ class ViewValidator extends ViewVisitor {
 													" - Binding points to an implicit attribute or a condition that cannot have domain values defined.");
 				}
 			}
+
 			if ((assertTypes != null) && (assertTypes.length > 0)) {
-				if (attribute == null) {
-					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-													" - Binding points to an implicit attribute or a condition.");
-				}
-			}
-			
-			if ((assertTypes != null) && (assertTypes.length > 0)) {
-				AttributeType type = attribute.getAttributeType();
-				boolean typeMatch = false;
-				for (AttributeType assertType : assertTypes) {
-					if (assertType.equals(type)) {
-						typeMatch = true;
-						break;
-					}
-				}
-				if (! typeMatch) {
-					StringBuilder msg = new StringBuilder(128);
-					msg.append(widgetIdentifier).append(" in ").append(viewIdentifier);
-					msg.append(" - Binding points to an attribute of type ").append(type).append(", not one of ");
+				// If we have a parent binding it had better be used where an association binding can be used (and not require domain values)
+				if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+					boolean typeMatch = false;
 					for (AttributeType assertType : assertTypes) {
-						msg.append(assertType).append(", ");
+						if (assertType.equals(AttributeType.association)) {
+							typeMatch = true;
+							break;
+						}
 					}
-					msg.setLength(msg.length() - 2); // remove last comma
-					msg.append('.');
-					throw new MetaDataException(msg.toString());
+					if (! typeMatch) {
+						throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+								" - Parent binding used where an association is not valid.");
+					}
+				}
+				else {
+					if (attribute == null) {
+						throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+														" - Binding points to an implicit attribute or a condition.");
+					}
+	
+					AttributeType type = attribute.getAttributeType();
+					boolean typeMatch = false;
+					for (AttributeType assertType : assertTypes) {
+						if (assertType.equals(type)) {
+							typeMatch = true;
+							break;
+						}
+					}
+					if (! typeMatch) {
+						StringBuilder msg = new StringBuilder(128);
+						msg.append(widgetIdentifier).append(" in ").append(viewIdentifier);
+						msg.append(" - Binding points to an attribute of type ").append(type).append(", not one of ");
+						for (AttributeType assertType : assertTypes) {
+							msg.append(assertType).append(", ");
+						}
+						msg.setLength(msg.length() - 2); // remove last comma
+						msg.append('.');
+						throw new MetaDataException(msg.toString());
+					}
 				}
 			}
 			
