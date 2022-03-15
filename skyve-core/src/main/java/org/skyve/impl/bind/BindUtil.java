@@ -1882,6 +1882,22 @@ public final class BindUtil {
 		StringTokenizer tokenizer = new StringTokenizer(binding, ".");
 		while (tokenizer.hasMoreTokens()) {
 			String fieldName = tokenizer.nextToken();
+			String parentDocumentName = null;
+			if (fieldName.equals(ChildBean.PARENT_NAME)) {
+				parentDocumentName = navigatingDocument.getParentDocumentName();
+				Extends inherits = navigatingDocument.getExtends();
+				while ((parentDocumentName == null) && (inherits != null)) {
+					Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
+					parentDocumentName = baseDocument.getParentDocumentName();
+					inherits = baseDocument.getExtends();
+				}
+				if (parentDocumentName == null) {
+					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
+							navigatingDocument.getName() + " @ " + binding + 
+							" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() + 
+							" is not a child document)");
+				}
+			}
 			int openBraceIndex = fieldName.indexOf('[');
 			if (openBraceIndex > -1) {
 				fieldName = fieldName.substring(0, openBraceIndex);
@@ -1899,13 +1915,6 @@ public final class BindUtil {
 			}
 			if (tokenizer.hasMoreTokens()) {
 				if (ChildBean.PARENT_NAME.equals(fieldName)) {
-					inherits = navigatingDocument.getExtends();
-					String parentDocumentName = navigatingDocument.getParentDocumentName();
-					while ((parentDocumentName == null) && (inherits != null)) {
-						Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
-						parentDocumentName = baseDocument.getParentDocumentName();
-						inherits = baseDocument.getExtends();
-					}
 					if (parentDocumentName == null) {
 						throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
 														navigatingDocument.getName() + " @ " + binding + 
@@ -1921,7 +1930,7 @@ public final class BindUtil {
 					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
 													navigatingDocument.getName() + " @ " + binding + 
 													" does not exist (token [" + 
-													tokenizer.nextToken() +
+													fieldName +
 													"] doesn't check out)");
 				}
 				navigatingModule = (customer == null) ?

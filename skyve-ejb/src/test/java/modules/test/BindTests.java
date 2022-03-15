@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentMapBean;
 import org.skyve.domain.types.DateOnly;
@@ -21,6 +22,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.Binder;
 import org.skyve.util.ExpressionEvaluator;
@@ -490,4 +492,35 @@ public class BindTests extends AbstractSkyveTest {
 								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
 	}
 
+	@Test(expected = MetaDataException.class)
+	public void testGetMetaDataForBindingThrowsOnParentBindingOfNonChildDocument() {
+		BindUtil.getMetaDataForBinding(c, m, aapd, ChildBean.PARENT_NAME);
+	}
+
+	@Test(expected = MetaDataException.class)
+	public void testGetMetaDataForBindingThrowsOnCompoundParentBindingOfNonChildDocument() {
+		BindUtil.getMetaDataForBinding(c, m, aapd, AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+	}
+	
+	@Test(expected = MetaDataException.class)
+	public void testGetMetaDataForBindingThrowsOnCompoundBinding() {
+		BindUtil.getMetaDataForBinding(c, m, aapd, "bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+	}
+
+	@Test
+	public void testGetMetaDataForBinding() throws Exception {
+		org.skyve.metadata.module.Module admin = c.getModule(Contact.MODULE_NAME);
+		Document user = admin.getDocument(c, User.DOCUMENT_NAME);
+		Document userRole = admin.getDocument(c, UserRole.DOCUMENT_NAME);
+		
+		BindUtil.getMetaDataForBinding(c, admin, userRole, UserRole.roleNamePropertyName);
+		BindUtil.getMetaDataForBinding(c, admin, userRole, ChildBean.PARENT_NAME);
+		BindUtil.getMetaDataForBinding(c, admin, userRole, BindUtil.createCompoundBinding(ChildBean.PARENT_NAME, Bean.DOCUMENT_ID));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIndexedBinding(User.rolesPropertyName, 0), ChildBean.PARENT_NAME));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIdBinding(User.rolesPropertyName, "ID"), ChildBean.PARENT_NAME));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIndexedBinding(User.rolesPropertyName, 0), ChildBean.PARENT_NAME, Bean.DOCUMENT_ID));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIdBinding(User.rolesPropertyName, "ID"), ChildBean.PARENT_NAME, Bean.DOCUMENT_ID));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIndexedBinding(User.rolesPropertyName, 0), ChildBean.PARENT_NAME, User.userNamePropertyName));
+		BindUtil.getMetaDataForBinding(c, admin, user, BindUtil.createCompoundBinding(BindUtil.createIdBinding(User.rolesPropertyName, "ID"), ChildBean.PARENT_NAME, User.userNamePropertyName));
+	}
 }
