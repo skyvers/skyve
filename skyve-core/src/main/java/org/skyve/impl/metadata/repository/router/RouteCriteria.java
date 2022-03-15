@@ -104,6 +104,9 @@ public class RouteCriteria implements SerializableMetaData {
 			if (documentName == null) {
 				throw new IllegalStateException("RouteCriteria - Set documentName before calling canonicalise()");
 			}
+			// Cater for FacesView.zoomInBindings stack written out as comma separated - convert to the view binding
+			b = b.replace(',', '.');
+
 			ProvidedRepository r = ProvidedRepositoryFactory.get();
 			Customer c = (customer == null) ? ((customerName != null) ? r.getCustomer(customerName) : null) : customer;
 			Module m = r.getModule(c, moduleName);

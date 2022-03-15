@@ -185,7 +185,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 		Bean current = null;
 		String viewBinding = bindingParameter.replace(',', '.');
 		try {
-			current = (Bean) BindUtil.get(bean, bindingParameter);
+			current = (Bean) BindUtil.get(bean, viewBinding);
 		}
 		catch (Exception e) {
 			// Failed to get the current bean - current is null
