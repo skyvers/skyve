@@ -1302,7 +1302,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 					createUrlParams.append('&').append(name).append('=');
 					modelExpression.append("['").append(name).append("','");
-					modelExpression.append(param.getOperator()).append("','");
+					modelExpression.append(param.getOperator()).append("',");
 					if (binding != null) {
 						createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
 						Attribute targetAttribute = null;
@@ -1322,11 +1322,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 						else {
 							createUrlParams.append('{').append(binding).append("}']}");
 						}
-						modelExpression.append('{').append(binding).append("}'],");
+						modelExpression.append("'{").append(binding).append("}'],");
 					}
 					else {
-						createUrlParams.append(value);
-						modelExpression.append(value).append("'],");
+						if (value == null) {
+							modelExpression.append("null],");
+						}
+						else {
+							createUrlParams.append(value);
+							modelExpression.append("'").append(value).append("'],");
+						}
 					}
 				}
 			}
@@ -1336,9 +1341,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					String binding = param.getValueBinding();
 					String value = param.getValue();
 
-					createUrlParams.append('&').append(name).append("=#{").append(managedBeanName).append(".currentBean['");
-					modelExpression.append("['").append(name).append("','");
+					createUrlParams.append('&').append(name).append('=');
+					modelExpression.append("['").append(name).append("',");
 					if (binding != null) {
+						createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
 						Attribute targetAttribute = null;
 						try {
 							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
@@ -1353,11 +1359,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 						else {
 							createUrlParams.append('{').append(binding).append("}']}");
 						}
-						modelExpression.append('{').append(binding).append("}'],");
+						modelExpression.append("'{").append(binding).append("}'],");
 					}
 					else {
-						createUrlParams.append(binding).append("']}");
-						modelExpression.append(value).append("'],");
+						if (value == null) {
+							modelExpression.append("null],");
+						}
+						else {
+							createUrlParams.append(value);
+							modelExpression.append("'").append(value).append("'],");
+						}
 					}
 				}
 			}

@@ -2810,13 +2810,19 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			builder.append("params:{");
 			for (Parameter parameter : parameters) {
-				builder.append("'").append(BindUtil.sanitiseBinding(parameter.getName())).append("':'");
+				builder.append("'").append(BindUtil.sanitiseBinding(parameter.getName())).append("':");
 				String binding = parameter.getValueBinding();
 				if (binding != null) {
-					builder.append('{').append(binding).append("}',");
+					builder.append("'{").append(binding).append("}',");
 				}
 				else {
-					builder.append(parameter.getValue()).append("',");
+					String value = parameter.getValue();
+					if (value == null) {
+						builder.append("null,");
+					}
+					else {
+						builder.append("'").append(value).append("',");
+					}
 				}
 			}
 			builder.setLength(builder.length() - 1); // remove comma
@@ -2833,26 +2839,38 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			if (filterParameters != null) {
 				for (FilterParameter parameter : filterParameters) {
 					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getFilterBinding())).append("',operator:'");
-					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
+					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:");
 					String binding = parameter.getValueBinding();
 					if (binding != null) {
-						builder.append('{').append(binding).append("}'},");
+						builder.append("'{").append(binding).append("}'},");
 					}
 					else {
-						builder.append(parameter.getValue()).append("'},");
+						String value = parameter.getValue();
+						if (value == null) {
+							builder.append("null},");
+						}
+						else {
+							builder.append("'").append(value).append("'},");
+						}
 					}
 				}
 			}
 			if (parameters != null) {
 				for (Parameter parameter : parameters) {
 					builder.append("{name:':").append(BindUtil.sanitiseBinding(parameter.getName()));
-					builder.append("',operator:'").append(SmartClientFilterOperator.equals).append("',value:'");
+					builder.append("',operator:'").append(SmartClientFilterOperator.equals).append("',value:");
 					String binding = parameter.getValueBinding();
 					if (binding != null) {
-						builder.append('{').append(binding).append("}'},");
+						builder.append("'{").append(binding).append("}'},");
 					}
 					else {
-						builder.append(parameter.getValue()).append("'},");
+						String value = parameter.getValue();
+						if (value == null) {
+							builder.append("null},");
+						}
+						else {
+							builder.append("'").append(value).append("'},");
+						}
 					}
 				}
 			}			
