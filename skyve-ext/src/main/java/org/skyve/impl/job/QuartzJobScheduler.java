@@ -243,6 +243,24 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 	
 	@Override
+	public void runContentGarbageCollector() {
+		JobDetail detail = JobBuilder.newJob(ContentGarbageCollectionJob.class)
+												.withIdentity(UUID.randomUUID().toString())
+												.storeDurably(false)
+												.build();
+		Trigger trigger = TriggerBuilder.newTrigger()
+											.withIdentity(UUID.randomUUID().toString())
+											.forJob(detail)
+											.build();
+		try {
+			JOB_SCHEDULER.scheduleJob(detail, trigger);
+		}
+		catch (SchedulerException e) {
+			throw new DomainException("Cannot run content garbage collector", e);
+		}
+	}
+
+	@Override
 	public void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when) {
 		Trigger trigger = TriggerBuilder.newTrigger()
 													.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())

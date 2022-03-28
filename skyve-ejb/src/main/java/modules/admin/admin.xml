@@ -232,6 +232,7 @@
 					<action name="Backup" />
 					<action name="BackupSelected" />
 					<action name="CheckContent" />
+					<action name="CollectContentGarbage" />
 					<action name="ContentSelected" />
 					<action name="DataMaintenanceExportAction" />
 					<action name="DataMaintenanceImportAction" />

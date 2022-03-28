@@ -55,6 +55,11 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	}
 
 	@Override
+	public void runContentGarbageCollector() {
+		EXT.getJobScheduler().runContentGarbageCollector();
+	}
+	
+	@Override
 	public void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when) {
 		EXT.getJobScheduler().scheduleOneShotJob(job, parameter, user, when);
 	}

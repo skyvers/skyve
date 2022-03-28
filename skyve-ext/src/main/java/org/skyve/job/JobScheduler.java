@@ -45,6 +45,11 @@ public interface JobScheduler extends Observer {
 	<T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId);
 	
 	/**
+	 * Run Content Garbage Collector.
+	 */
+	void runContentGarbageCollector();
+
+	/**
 	 * Run a job once at a certain date and time. 
 	 * The job disappears from the Scheduler once it is run and a record of the run in placed in admin.Job. 
 	 * User must look in admin to see if job was successful.

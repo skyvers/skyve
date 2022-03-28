@@ -187,9 +187,13 @@
 					<column pixelWidth="150" />
 					<column pixelWidth="150" />
 					<column pixelWidth="150" />
+					<column pixelWidth="150" />
 					<row>
 						<item>
 							<spacer />
+						</item>
+						<item align="right">
+							<button action="CollectContentGarbage" />
 						</item>
 						<item align="right">
 							<button action="CheckContent" />
@@ -348,6 +352,7 @@
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
 		<action className="ReindexContent" displayName="admin.dataMaintenance.actions.reindexContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.reindexContent.confirm"
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
+		<action className="CollectContentGarbage" displayName="admin.dataMaintenance.actions.collectContentGarbage.displayName" inActionPanel="false" />
 		<action className="CheckContent" displayName="admin.dataMaintenance.actions.checkContent.displayName" inActionPanel="false" />
 		<action className="Restore" displayName="admin.dataMaintenance.actions.restore.displayName" inActionPanel="false" disabled="notBackupSelected" confirm="admin.dataMaintenance.actions.restore.confirm" 
 			relativeIconFileName="shared/icons/Exclamation.gif"	iconStyleClass="fa fa-toggle-left" />
