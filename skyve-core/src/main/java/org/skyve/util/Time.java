@@ -128,6 +128,26 @@ public class Time {
 	}
 	
 	/**
+	 * Adds a number of minutes to a date.
+	 * 
+	 * @param date The date to add minutes to
+	 * @param numberOfMinutes The number of minutes to add (this can be negative)
+	 */
+	public static final void addMinutes(Date date, int numberOfMinutes) {
+		TimeUtil.addMinutes(date, numberOfMinutes);
+	}
+
+	/**
+	 * Adds a number of seconds to a date.
+	 * 
+	 * @param date The date to add seconds to
+	 * @param numberOfSeconds The number of seconds to add (this can be negative)
+	 */
+	public static final void addSeconds(Date date, int numberOfSeconds) {
+		TimeUtil.addSeconds(date, numberOfSeconds);
+	}
+
+	/**
 	 * Adds a number of days to a date.
 	 * 
 	 * @param date	The date to add to.

@@ -171,6 +171,34 @@ public class TimeUtil {
 	}
 
 	/**
+	 * See {@link Time#addMinutes}
+	 */
+	public static final void addMinutes(Date date, int numberOfMinutes) {
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(date);
+		calendar.setLenient(false);
+
+		// NB clear() does not work in JDK 1.3.1
+		calendar.add(Calendar.MINUTE, numberOfMinutes);
+
+		date.setTime(calendar.getTime().getTime());
+	}
+
+	/**
+	 * See {@link Time#addSeconds}
+	 */
+	public static final void addSeconds(Date date, int numberOfSeconds) {
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(date);
+		calendar.setLenient(false);
+
+		// NB clear() does not work in JDK 1.3.1
+		calendar.add(Calendar.SECOND, numberOfSeconds);
+
+		date.setTime(calendar.getTime().getTime());
+	}
+
+	/**
 	 * See {@link Time#addDays}
 	 */
 	public static final void addDays(Date date, int numberOfDays) {
