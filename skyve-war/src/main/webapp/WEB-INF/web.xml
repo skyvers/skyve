@@ -346,15 +346,6 @@
 	</servlet-mapping>-->
 
 	<servlet>
-		<servlet-name>HomeServlet</servlet-name>
-		<servlet-class>org.skyve.impl.web.HomeServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>HomeServlet</servlet-name>
-		<url-pattern>/home/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>LoginServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.LoginServlet</servlet-class>
 	</servlet>
