@@ -13,6 +13,7 @@ import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
+import org.skyve.impl.backup.ContentChecker;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -28,6 +29,8 @@ import org.skyve.util.Util;
  * @author sandsm01
  */
 public class ContentGarbageCollectionJob implements Job {
+	private static final long CONTENT_GC_ELIGIBLE_AGE_MILLIS = UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES * 60000L;
+	
 	private Set<String> orphanedAttachmentContentIds = new TreeSet<>();
 	private Set<String> orphanedBeanBizIds = new TreeSet<>();
 	
@@ -36,6 +39,7 @@ public class ContentGarbageCollectionJob implements Job {
 	throws JobExecutionException {
 		Util.LOGGER.info("Start Content Garbage Collection");
 		try {
+			ContentChecker contentChecker = new ContentChecker();
 			Repository r = CORE.getRepository();
 			Persistence p = CORE.getPersistence();
 			try {
@@ -79,14 +83,15 @@ public class ContentGarbageCollectionJob implements Job {
 									UtilImpl.LOGGER.warning("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId " + bizId);
 								}
 							}
-							else if ((System.currentTimeMillis() - lastModified.getTime()) > 86400000) { // at least a day old
+							else if ((System.currentTimeMillis() - lastModified.getTime()) > CONTENT_GC_ELIGIBLE_AGE_MILLIS) { // of eligible age
 								Customer customer = r.getCustomer(customerName);
 								Module module = customer.getModule(moduleName);
 								Document document = module.getDocument(customer, documentName);
+								String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
 								
 								SQL query = null;
 								StringBuilder sql = new StringBuilder(128);
-								sql.append("select 1 from ").append(document.getPersistent().getPersistentIdentifier());
+								sql.append("select 1 from ").append(persistentIdentifier);
 								sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
 								
 								// check if we have a record
@@ -105,8 +110,14 @@ public class ContentGarbageCollectionJob implements Job {
 								if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());
 								if (query.scalarResults(Integer.class).isEmpty()) {
 									if (result.isAttachment()) {
-										orphanedAttachmentContentIds.add(contentId);
-										UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId " + contentId + "/" + bizId);
+										String bogusContentReference = contentChecker.bogusContentReference(contentId);
+										if (bogusContentReference == null) {
+											orphanedAttachmentContentIds.add(contentId);
+											UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId " + contentId + "/" + bizId);
+										}
+										else {
+											UtilImpl.LOGGER.severe("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizid/contentId " + contentId + "/" + bizId + " as it is actually referenced by Table#BizId " + bogusContentReference);
+										}
 									}
 									else {
 										orphanedBeanBizIds.add(bizId);

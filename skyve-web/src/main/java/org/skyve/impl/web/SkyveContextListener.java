@@ -206,6 +206,10 @@ public class SkyveContextListener implements ServletContextListener {
 
 		// Content settings
 		UtilImpl.CONTENT_GC_CRON = getString("content", "gcCron", content, true);
+		Number gcEligibleAgeMinutes = getNumber("content", "gcEligibleAgeMinutes", content, false);
+		if (gcEligibleAgeMinutes != null) {
+			UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES = gcEligibleAgeMinutes.intValue();
+		}
 		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 

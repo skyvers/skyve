@@ -89,6 +89,9 @@ public class UtilImpl {
 	// Defaults to run at 7 past the hour every hour.
 	public static String CONTENT_GC_CRON = "0 7 0/1 1/1 * ? *";
 
+	// The age in minutes content must be to be eligible for garbage collection
+	public static int CONTENT_GC_ELIGIBLE_AGE_MINUTES = 720;
+
 	// The cron expression to use to fire off the evict expired state job
 	// Defaults to run at 37 past midnight every day.
 	public static String STATE_EVICT_CRON = "0 37 0 1/1 * ? *";

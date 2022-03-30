@@ -81,10 +81,14 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	
 	@Override
 	public List<? extends Attribute> getAllAttributes() {
+		return getAllAttributes(CORE.getCustomer());
+	}
+	
+	@Override
+	public List<? extends Attribute> getAllAttributes(Customer customer) {
 		List<Attribute> result = new ArrayList<>(attributes);
 		Extends currentInherits = inherits;
 		if (currentInherits != null) {
-			Customer customer = CORE.getUser().getCustomer();
 			while (currentInherits != null) {
 				Module module = customer.getModule(getOwningModuleName());
 				Document baseDocument = module.getDocument(customer, currentInherits.getDocumentName());

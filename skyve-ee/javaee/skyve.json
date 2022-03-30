@@ -28,6 +28,8 @@
 		"directory": "${SKYVE_CONTENT:/C:/skyve/skyve-ee/content/}",
 		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
 		"gcCron": "0 7 0/1 1/1 * ? *", 
+		// Age in minutes content must be to be eligible for collection
+		"gcEligibleAgeMinutes": 720,
 		// Attachments stored on file system or inline
 		"fileStorage": true
 	},

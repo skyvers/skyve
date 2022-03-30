@@ -12,7 +12,6 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -41,7 +40,7 @@ class Table {
 		return name.hashCode();
 	}
 
-	void addFieldsFromDocument(Document document) {
+	void addFieldsFromDocument(Customer customer, Document document) {
 		boolean joinedExtension = false;
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
@@ -80,15 +79,14 @@ class Table {
 			}
 		}
 		
-		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes()) {
+		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes(customer)) {
 			if (attribute.isPersistent()) {
 				String attributeName = attribute.getName();
 				AttributeType attributeType = attribute.getAttributeType();
 				if (attributeType == AttributeType.association) {
 					// Check if this is an arc and add the "type" field if so
 					Association association = (Association) attribute;
-					Customer c = AbstractPersistence.get().getUser().getCustomer();
-					Document referencedDocument = c.getModule(document.getOwningModuleName()).getDocument(c, association.getDocumentName());
+					Document referencedDocument = customer.getModule(document.getOwningModuleName()).getDocument(customer, association.getDocumentName());
 					if (! referencedDocument.isDynamic()) {
 						Persistent referencedPersistent = referencedDocument.getPersistent();
 						if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {

@@ -41,6 +41,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 
@@ -116,14 +117,24 @@ final class BackupUtil {
 		return result.values();
 	}
 
-	static Collection<Table> getTables(Collection<Document> documents) {
+	static Collection<Table> getTablesForAllCustomers() throws Exception {
 		Map<String, Table> result = new TreeMap<>();
-		Customer customer = AbstractPersistence.get().getUser().getCustomer();
-
-		for (Document document : documents) {
-			addOrUpdate(result, customer, document);
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		for (String customerName : repository.getAllCustomerNames()) {
+			Customer customer = repository.getCustomer(customerName);
+			
+			// insert all defined documents into the tables list
+			for (Module module : customer.getModules()) {
+				for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {
+					DocumentRef documentRef = entry.getValue();
+					if (documentRef.getOwningModuleName().equals(module.getName())) {
+						Document document = module.getDocument(customer, entry.getKey());
+						addOrUpdate(result, customer, document);
+					}
+				}
+			}
 		}
-
+		
 		return result.values();
 	}
 	
@@ -213,7 +224,7 @@ final class BackupUtil {
 				tables.put(persistentIdentifier, table);
 			}
 
-			table.addFieldsFromDocument(document);
+			table.addFieldsFromDocument(customer, document);
 			
 			// Process any references the document has
 			List<ExportedReference> references = ((CustomerImpl) customer).getExportedReferences(document);

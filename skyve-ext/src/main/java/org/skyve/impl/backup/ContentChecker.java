@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -20,6 +21,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.persistence.Persistence;
 
 public class ContentChecker {
 	@SuppressWarnings("static-method")
@@ -146,6 +148,43 @@ public class ContentChecker {
 		}
 	}
 
+	private Collection<Table> tablesForAllCustomers = null;
+	
+	public String bogusContentReference(String contentId) throws Exception {
+		if (tablesForAllCustomers == null) {
+			tablesForAllCustomers = BackupUtil.getTablesForAllCustomers();
+		}
+		
+		Persistence p = CORE.getPersistence();
+		StringBuilder sql = new StringBuilder(128);
+		
+		for (Table table : tablesForAllCustomers) {
+			sql.setLength(0);
+
+			for (String name : table.fields.keySet()) {
+				AttributeType attributeType = table.fields.get(name);
+				if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
+					if (sql.length() == 0) {
+						sql.append("select bizId from ").append(table.name).append(" where ");
+					}
+					else {
+						sql.append(" or ");
+					}
+					sql.append(name).append(" = :contentId");
+				}
+			}
+
+			if (sql.length() > 0) {
+				String rowBizId = p.newSQL(sql.toString()).putParameter("contentId", contentId, false).scalarResult(String.class);
+				if (rowBizId != null) {
+					return table.name + '#' + rowBizId;
+				}
+			}
+		}
+
+		return null;
+	}
+	
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
 			AttributeType attributeType = table.fields.get(name);

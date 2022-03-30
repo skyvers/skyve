@@ -3,6 +3,7 @@ package org.skyve.metadata.model;
 import java.util.List;
 
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.util.Util;
 
@@ -36,10 +37,17 @@ public interface Model extends NamedMetaData {
 	public List<? extends Attribute> getAttributes();
 
 	/**
-	 * 
-	 * @return
+	 * Get the attributes for this document and any super-documents for the current customer.
+	 * @return	All the attributes.
 	 */
 	public List<? extends Attribute> getAllAttributes();
+
+	/**
+	 * Get the attributes for this document and any super-documents for the given customer.
+	 * @param customer	The given customer
+	 * @return	All the attributes.
+	 */
+	public List<? extends Attribute> getAllAttributes(Customer customer);
 
 	/**
 	 * 
