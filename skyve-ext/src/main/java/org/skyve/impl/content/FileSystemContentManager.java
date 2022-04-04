@@ -45,6 +45,19 @@ public class FileSystemContentManager extends AbstractContentManager {
 	}
 
 	@Override
+	public void update(AttachmentContent attachment) throws Exception {
+		attachment.setLastModified(new Date());
+
+		if (UtilImpl.CONTENT_FILE_STORAGE) {
+			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
+			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
+			String contentId = attachment.getContentId();
+			AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
+			writeContentMeta(absoluteContentStoreFolderPath.toString(), attachment);
+		}
+	}
+	
+	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);

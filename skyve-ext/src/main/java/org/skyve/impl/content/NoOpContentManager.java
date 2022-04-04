@@ -17,6 +17,11 @@ public class NoOpContentManager extends AbstractContentManager {
 	}
 
 	@Override
+	public void update(AttachmentContent content) throws Exception {
+		// no-op
+	}
+	
+	@Override
 	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
 		// no-op
 	}

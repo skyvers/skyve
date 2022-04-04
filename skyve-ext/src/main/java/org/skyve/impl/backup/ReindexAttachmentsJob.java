@@ -24,6 +24,14 @@ public class ReindexAttachmentsJob extends CancellableJob {
 		List<String> log = getLog();
 		String trace;
 		
+		// truncate the attachment content ready to reindex
+		try (ContentManager cm = EXT.newContentManager()) {
+			trace = "Truncate Attachments";
+			log.add(trace);
+			UtilImpl.LOGGER.info(trace);
+			cm.truncateAttachments(customerName);
+		}
+
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 

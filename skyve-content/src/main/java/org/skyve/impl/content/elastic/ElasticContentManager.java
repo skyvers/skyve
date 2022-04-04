@@ -170,6 +170,11 @@ public class ElasticContentManager extends AbstractContentManager {
 		put(attachment, index, true);
 	}
 	
+	@Override
+	public void update(AttachmentContent content) throws Exception {
+		// needs implementation
+	}
+	
 	public void reindex(AttachmentContent attachment, boolean index) 
 	throws Exception {
 		put(attachment, index, false);

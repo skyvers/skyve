@@ -32,6 +32,15 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, Observer 
 	void put(AttachmentContent content, boolean index) throws Exception;
 
 	/**
+	 * Update an attachment in the content repository.
+	 * This is used to update the content metadata for an attachment.
+	 * This can be used when content is moved to a new data item in the database.
+	 * @param content
+	 * @throws Exception
+	 */
+	void update(AttachmentContent content) throws Exception;
+	
+	/**
 	 * Get an attachment by content ID.
 	 * @param id
 	 * @return

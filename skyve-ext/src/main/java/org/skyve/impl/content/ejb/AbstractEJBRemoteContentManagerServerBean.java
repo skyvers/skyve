@@ -41,6 +41,14 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 
 	@Override
+	public void update(AttachmentContent content) throws Exception {
+		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() received for " + content.getContentId());
+		try (ContentManager cm = EXT.newContentManager()) {
+			cm.update(content);
+		}
+	}
+	
+	@Override
 	public AttachmentContent getAttachment(String contentId) throws Exception {
 		Util.LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() received for " + contentId);
 		try (ContentManager cm = EXT.newContentManager()) {

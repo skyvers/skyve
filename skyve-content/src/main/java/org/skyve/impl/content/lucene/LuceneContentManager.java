@@ -49,6 +49,7 @@ import org.skyve.content.SearchResults;
 import org.skyve.content.TextExtractor;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ManyResultsException;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.FileSystemContentManager;
 import org.skyve.impl.content.TikaTextExtractor;
@@ -176,19 +177,65 @@ public class LuceneContentManager extends FileSystemContentManager {
 		putIndex(attachment, index);
 	}
 	
-	private static void putIndex(AttachmentContent attachment, boolean index) throws Exception {
-		String bizId = attachment.getBizId();
+	@Override
+	public void update(AttachmentContent attachment) throws Exception {
+		// NB Call super first coz this sets the last modified date.
+		super.update(attachment);
 
+		try (IndexReader attachmentReader = DirectoryReader.open(directory)) {
+			IndexSearcher searcher = new IndexSearcher(attachmentReader);
+			ScoreDoc[] results = searcher.search(new TermQuery(new Term(CONTENT_ID, attachment.getContentId())), 2).scoreDocs;
+			if (results.length == 0) {
+				throw new NoResultsException();
+			}
+			if (results.length > 1) {
+				throw new ManyResultsException();
+			}
+			Document document = attachmentReader.document(results[0].doc);
+			if (document == null) {
+				throw new NoResultsException();
+			}
+
+			// remove document fields about to be updated when putIndex() is called.
+			document.removeField(Bean.CUSTOMER_NAME);
+			document.removeField(Bean.DATA_GROUP_ID);
+			document.removeField(Bean.USER_ID);
+			document.removeField(Bean.MODULE_KEY);
+			document.removeField(Bean.DOCUMENT_KEY);
+			document.removeField(Bean.DOCUMENT_ID);
+			document.removeField(ATTRIBUTE_NAME);
+			document.removeField(FILENAME);
+			document.removeField(LAST_MODIFIED);
+			document.removeField(CONTENT_ID);
+			
+			putIndex(document, attachment);
+		}
+	}
+	
+	private static void putIndex(AttachmentContent attachment, boolean index) throws Exception {
 		Document document = new Document();
 		if (index) {
 			TextExtractor extractor = new TikaTextExtractor();
 			String text = extractor.extractTextFromContent(attachment);
 			if (text != null) {
 				document.add(new TextField(CONTENT, text, Store.YES)); // needs to be stored for excerpt generation
+			}
+		}
 
+		// Doc as binary attachment, inlined
+		if (! UtilImpl.CONTENT_FILE_STORAGE) {
+			byte[] bytes = attachment.getContentBytes();
+			if (bytes != null) {
+				document.add(new StoredField(ATTACHMENT, bytes));
 			}
 		}
 		
+		putIndex(document, attachment);
+	}
+	
+	private static void putIndex(Document document, AttachmentContent attachment) throws Exception {
+		String bizId = attachment.getBizId();
+
 		// Add meta-data
 		String bizCustomer = attachment.getBizCustomer();
 		if (bizCustomer != null) {
@@ -222,14 +269,6 @@ public class LuceneContentManager extends FileSystemContentManager {
 			document.add(new StringField(FILENAME, fileName, Store.YES));
 		}
 		document.add(new StoredField(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true)));
-
-		// Doc as binary attachment, inlined
-		if (! UtilImpl.CONTENT_FILE_STORAGE) {
-			byte[] bytes = attachment.getContentBytes();
-			if (bytes != null) {
-				document.add(new StoredField(ATTACHMENT, bytes));
-			}
-		}
 
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizId);
 		String contentId = attachment.getContentId();
@@ -432,7 +471,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	public void truncateBeans(String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
-										.add(new DocValuesFieldExistsQuery(CONTENT_ID), Occur.MUST_NOT)
+										.add(new TermQuery(new Term(Bean.DOCUMENT_ID, "~")), Occur.MUST)
 										.build());
 	}
 	

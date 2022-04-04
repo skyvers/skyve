@@ -113,9 +113,41 @@ public abstract class AbstractContentManager implements ContentManager {
 	throws Exception {
 		String contentId = attachment.getContentId();
 		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath, false);
-		File dir = new File(absoluteContentStoreFolderPath.toString());
+		String balancedFolderPath = absoluteContentStoreFolderPath.toString();
+		File dir = new File(balancedFolderPath);
 		dir.mkdirs();
 		
+		File file = new File(dir, CONTENT);
+		File old = null;
+		if (file.exists()) {
+			old = new File(file.getPath() + "_old");
+			if (Files.move(file.toPath(), old.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
+				throw new IOException("Could not rename " + balancedFolderPath + " to " + balancedFolderPath + "_old before file content store operation");
+			}
+		}
+		try {
+			try (FileOutputStream fos = new FileOutputStream(file)) {
+				fos.write(content);
+				fos.flush();
+			}
+			writeContentMeta(balancedFolderPath, attachment);
+		}
+		catch (Exception e) {
+			if ((old != null) && old.exists()) {
+				if (Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
+					throw new IOException("Could not rename " + balancedFolderPath + "_old to " + balancedFolderPath + "after file content store operation error.", e);
+				}
+			}
+			throw e;
+		}
+		// Now delete the old file after success
+		if ((old != null) && old.exists()) {
+			old.delete();
+		}
+	}
+	
+	protected static void writeContentMeta(String absoluteBalancedFolderPath, AttachmentContent attachment) 
+	throws Exception {
 		Map<String, Object> meta = new TreeMap<>();
 		meta.put(FILENAME, attachment.getFileName());
 		meta.put(LAST_MODIFIED, TimeUtil.formatISODate(attachment.getLastModified(), true));
@@ -128,20 +160,18 @@ public abstract class AbstractContentManager implements ContentManager {
 		meta.put(Bean.DOCUMENT_ID, attachment.getBizId());
 		meta.put(ATTRIBUTE_NAME, attachment.getAttributeName());
 
-		File file = new File(dir, CONTENT);
+		File dir = new File(absoluteBalancedFolderPath);
+
+		File file = new File(dir, META_JSON);
 		File old = null;
 		if (file.exists()) {
 			old = new File(file.getPath() + "_old");
 			if (Files.move(file.toPath(), old.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-				throw new IOException("Could not rename " + absoluteContentStoreFolderPath + " to " + absoluteContentStoreFolderPath + "_old before file content store operation");
+				throw new IOException("Could not rename " + absoluteBalancedFolderPath + " to " + absoluteBalancedFolderPath + "_old before file content store meta operation");
 			}
 		}
 		try {
-			try (FileOutputStream fos = new FileOutputStream(file)) {
-				fos.write(content);
-				fos.flush();
-			}
-			try (FileWriter fw = new FileWriter(new File(dir, META_JSON))) {
+			try (FileWriter fw = new FileWriter(file)) {
 				fw.write(JSON.marshall(meta));
 				fw.flush();
 			}
@@ -149,7 +179,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		catch (Exception e) {
 			if ((old != null) && old.exists()) {
 				if (Files.move(old.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-					throw new IOException("Could not rename " + absoluteContentStoreFolderPath + "_old to " + absoluteContentStoreFolderPath + "after file content store operation error.", e);
+					throw new IOException("Could not rename " + absoluteBalancedFolderPath + "_old to " + absoluteBalancedFolderPath + "after file content store meta operation error.", e);
 				}
 			}
 			throw e;

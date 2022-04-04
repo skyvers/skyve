@@ -63,6 +63,8 @@ public interface EJBRemoteContentManagerServer {
 	 */
 	public String put(AttachmentContent content, boolean index) throws Exception;
 
+	public void update(AttachmentContent content) throws Exception;
+
 	public AttachmentContent getAttachment(String contentId) throws Exception;
 	
 	public void removeBean(String bizId) throws Exception;

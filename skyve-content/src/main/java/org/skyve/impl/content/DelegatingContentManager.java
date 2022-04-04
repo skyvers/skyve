@@ -42,6 +42,12 @@ public class DelegatingContentManager extends AbstractContentManager {
 
 	@Override
 	@SuppressWarnings("resource")
+	public void update(AttachmentContent content) throws Exception {
+		delegate().update(content);
+	}
+	
+	@Override
+	@SuppressWarnings("resource")
 	public AttachmentContent getAttachment(String contentId) throws Exception {
 		return delegate().getAttachment(contentId);
 	}

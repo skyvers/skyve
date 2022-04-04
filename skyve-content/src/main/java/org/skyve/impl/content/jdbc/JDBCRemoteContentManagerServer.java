@@ -54,6 +54,7 @@ public class JDBCRemoteContentManagerServer {
 	static final String CONTENT_DATA_STORE_NAME = "CONTENT";
 	static final String PUT_BEAN_FUNCTION_NAME = "PUT_BEAN";
 	static final String PUT_ATTACHMENT_FUNCTION_NAME = "PUT_ATTACHMENT";
+	static final String UPDATE_ATTACHMENT_FUNCTION_NAME = "UPDATE_ATTACHMENT";
 	static final String GET_ATTACHMENT_FUNCTION_NAME = "GET_ATTACHMENT";
 	static final String REMOVE_BEAN_FUNCTION_NAME = "REMOVE_BEAN";
 	static final String REMOVE_ATTACHMENT_FUNCTION_NAME = "REMOVE_ATTACHMENT";
@@ -94,6 +95,15 @@ public class JDBCRemoteContentManagerServer {
 				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
 																		PUT_ATTACHMENT_FUNCTION_NAME,
 																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.putAttachmentFunction"))) {
+					s.execute();
+				}
+				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
+																		UPDATE_ATTACHMENT_FUNCTION_NAME))) {
+					s.execute();
+				}
+				try (CallableStatement s = c.prepareCall(String.format("CREATE ALIAS %s FOR \"%s\"",
+																		UPDATE_ATTACHMENT_FUNCTION_NAME,
+																		"org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer.updateAttachmentFunction"))) {
 					s.execute();
 				}
 				try (CallableStatement s = c.prepareCall(String.format("DROP ALIAS IF EXISTS %s",
@@ -170,6 +180,18 @@ public class JDBCRemoteContentManagerServer {
 			AttachmentContent attachment = (AttachmentContent) StateUtil.decode64(content);
 			cm.put(attachment, index);
 			return attachment.getContentId();
+		}
+	}
+
+	/**
+	 * 
+	 * @param content The base64 serialized versions of the AttachmentContent to put.
+	 * @throws Exception
+	 */
+	public static void updateAttachmentFunction(String content) throws Exception {
+		try (ContentManager cm = EXT.newContentManager()) {
+			AttachmentContent attachment = (AttachmentContent) StateUtil.decode64(content);
+			cm.update(attachment);
 		}
 	}
 

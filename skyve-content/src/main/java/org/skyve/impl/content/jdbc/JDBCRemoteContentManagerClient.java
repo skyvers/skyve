@@ -89,6 +89,16 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	}
 
 	@Override
+	public void update(AttachmentContent content) throws Exception {
+		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
+			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?)", JDBCRemoteContentManagerServer.UPDATE_ATTACHMENT_FUNCTION_NAME))) {
+				s.setString(1, StateUtil.encode64(content));
+				s.execute();
+			}
+		}
+	}
+
+	@Override
 	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
 		throw new UnsupportedOperationException("Reindex of a remote content repository is not supported");
 	}
