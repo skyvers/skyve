@@ -287,6 +287,9 @@ public class AttachmentContent extends Content {
 	public final String getAttributeName() {
 		return attributeName;
 	}
+	public final void setAttributeName(String attributeName) {
+		this.attributeName = attributeName;
+	}
 	
 	/**
 	 * The contentId unique identifier within the content repository.
@@ -307,7 +310,10 @@ public class AttachmentContent extends Content {
 	public final String getFileName() {
 		return fileName;
 	}
-
+	public final void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	
 	/**
 	 * The mime type of this content
 	 * @return
@@ -315,7 +321,7 @@ public class AttachmentContent extends Content {
 	public final MimeType getMimeType() {
 		return (contentType == null) ? null : MimeType.fromContentType(contentType);
 	}
-	
+
 	/**
 	 * The content type of this content - usually matches mime type but may be a variant.
 	 * @return
@@ -390,5 +396,27 @@ public class AttachmentContent extends Content {
 			}
 		}
 		return this;
+	}
+	
+	// Add mutability to Content interface
+	
+	public final void setBizCustomer(String bizCustomer) {
+		this.bizCustomer = bizCustomer;
+	}
+
+	public final void setBizModule(String bizModule) {
+		this.bizModule = bizModule;
+	}
+
+	public final void setBizDocument(String bizDocument) {
+		this.bizDocument = bizDocument;
+	}
+	
+	public final void setBizDataGroupId(String bizDataGroupId) {
+		this.bizDataGroupId = bizDataGroupId;
+	}
+	
+	public final void setBizUserId(String bizUserId) {
+		this.bizUserId = bizUserId;
 	}
 }
