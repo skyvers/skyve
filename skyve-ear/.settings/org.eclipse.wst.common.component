@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                                                                                
+                                                                                                        
+    
+    
     
     
     
@@ -23,7 +25,9 @@
     
     
     <wb-module deploy-name="skyve-ear-8.1.0-SNAPSHOT">
-                                                                                                                                                                                                
+                                                                                                                                                                                                                
+        
+        
         
         
         
@@ -47,7 +51,9 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                                                                                                                                
+                                                                                                                                                                                                                
+        
+        
         
         
         
@@ -326,19 +332,19 @@
         <dependent-module archiveName="commonmark-0.10.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/atlassian/commonmark/commonmark/0.10.0/commonmark-0.10.0.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-security-web-5.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-web/5.5.1/spring-security-web-5.5.1.jar">
+        <dependent-module archiveName="spring-security-web-5.6.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-web/5.6.2/spring-security-web-5.6.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-expression-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-expression/5.3.8/spring-expression-5.3.8.jar">
+        <dependent-module archiveName="spring-expression-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-expression/5.3.18/spring-expression-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-web-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-web/5.3.8/spring-web-5.3.8.jar">
+        <dependent-module archiveName="spring-web-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-web/5.3.18/spring-web-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-jdbc-5.2.11.RELEASE.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-jdbc/5.2.11.RELEASE/spring-jdbc-5.2.11.RELEASE.jar">
+        <dependent-module archiveName="spring-jdbc-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-jdbc/5.3.18/spring-jdbc-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-tx-5.2.11.RELEASE.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-tx/5.2.11.RELEASE/spring-tx-5.2.11.RELEASE.jar">
+        <dependent-module archiveName="spring-tx-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-tx/5.3.18/spring-tx-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="pf4j-3.5.0.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/pf4j/pf4j/3.5.0/pf4j-3.5.0.jar">
@@ -377,25 +383,25 @@
         <dependent-module archiveName="hatbox-1.0.b11.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/net/sourceforge/hatbox/hatbox/1.0.b11/hatbox-1.0.b11.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-security-oauth2-client-5.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-oauth2-client/5.5.1/spring-security-oauth2-client-5.5.1.jar">
+        <dependent-module archiveName="spring-security-oauth2-client-5.6.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-oauth2-client/5.6.2/spring-security-oauth2-client-5.6.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-security-core-5.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-core/5.5.1/spring-security-core-5.5.1.jar">
+        <dependent-module archiveName="spring-security-core-5.6.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-core/5.6.2/spring-security-core-5.6.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-security-crypto-5.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-crypto/5.5.1/spring-security-crypto-5.5.1.jar">
+        <dependent-module archiveName="spring-security-crypto-5.6.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-crypto/5.6.2/spring-security-crypto-5.6.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-security-oauth2-core-5.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-oauth2-core/5.5.1/spring-security-oauth2-core-5.5.1.jar">
+        <dependent-module archiveName="spring-security-oauth2-core-5.6.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-oauth2-core/5.6.2/spring-security-oauth2-core-5.6.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-core-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-core/5.3.8/spring-core-5.3.8.jar">
+        <dependent-module archiveName="spring-core-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-core/5.3.18/spring-core-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-jcl-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-jcl/5.3.8/spring-jcl-5.3.8.jar">
+        <dependent-module archiveName="spring-jcl-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-jcl/5.3.18/spring-jcl-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="oauth2-oidc-sdk-9.9.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/nimbusds/oauth2-oidc-sdk/9.9/oauth2-oidc-sdk-9.9.jar">
+        <dependent-module archiveName="oauth2-oidc-sdk-9.19.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/nimbusds/oauth2-oidc-sdk/9.19/oauth2-oidc-sdk-9.19.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="jcip-annotations-1.0-1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/github/stephenc/jcip/jcip-annotations/1.0-1/jcip-annotations-1.0-1.jar">
@@ -416,22 +422,22 @@
         <dependent-module archiveName="lang-tag-1.5.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/nimbusds/lang-tag/1.5/lang-tag-1.5.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-security-oauth2-jose-5.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-oauth2-jose/5.5.1/spring-security-oauth2-jose-5.5.1.jar">
+        <dependent-module archiveName="spring-security-oauth2-jose-5.6.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-oauth2-jose/5.6.2/spring-security-oauth2-jose-5.6.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="nimbus-jose-jwt-9.10.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/nimbusds/nimbus-jose-jwt/9.10/nimbus-jose-jwt-9.10.jar">
+        <dependent-module archiveName="nimbus-jose-jwt-9.14.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/com/nimbusds/nimbus-jose-jwt/9.14/nimbus-jose-jwt-9.14.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-security-config-5.5.1.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-config/5.5.1/spring-security-config-5.5.1.jar">
+        <dependent-module archiveName="spring-security-config-5.6.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/security/spring-security-config/5.6.2/spring-security-config-5.6.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-aop-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-aop/5.3.8/spring-aop-5.3.8.jar">
+        <dependent-module archiveName="spring-aop-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-aop/5.3.18/spring-aop-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-beans-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-beans/5.3.8/spring-beans-5.3.8.jar">
+        <dependent-module archiveName="spring-beans-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-beans/5.3.18/spring-beans-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="spring-context-5.3.8.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-context/5.3.8/spring-context-5.3.8.jar">
+        <dependent-module archiveName="spring-context-5.3.18.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/springframework/spring-context/5.3.18/spring-context-5.3.18.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module archiveName="slf4j-api-1.7.32.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar">
@@ -443,7 +449,9 @@
         <dependent-module archiveName="reactive-streams-1.0.2.jar" deploy-path="/lib/" handle="module:/classpath/var/M2_REPO/org/reactivestreams/reactive-streams/1.0.2/reactive-streams-1.0.2.jar">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-                                                                                                                                                                                            
+                                                                                                                                                                                                            
+    
+    
     
     
     
@@ -467,7 +475,9 @@
     
     
     </wb-module>
-                                                                                            
+                                                                                                    
+
+
 
 
 
