@@ -74,6 +74,25 @@ public class AttachmentContent extends Content {
 	}
 
 	/**
+	 * Copy constructor to use when updating metadata through ContentManager.update() with a remote call - EJB, JDBC, REST.
+	 * 
+	 * @param forUpdate	The attachment content to copy.
+	 */
+	public AttachmentContent(AttachmentContent forUpdate) {
+		this(forUpdate.bizCustomer,
+				forUpdate.bizModule,
+				forUpdate.bizDocument,
+				forUpdate.bizDataGroupId,
+				forUpdate.bizUserId,
+				forUpdate.bizId,
+				forUpdate.attributeName,
+				forUpdate.fileName,
+				forUpdate.contentType);
+		this.bytes = new byte[0];
+		this.contentId = forUpdate.contentId;
+	}
+	
+	/**
 	 * Bytes filename mime type constructor.
 	 * 
 	 * @param bizCustomer
