@@ -471,6 +471,9 @@ public class LuceneContentManager extends FileSystemContentManager {
 	public void truncateBeans(String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
+										// NB This "~" term query is sub-optimal but I could not get the following to work - it would delete both attachment and bean content
+										// like it was doing an or even though its a MUST_NOT. I can't explain even though I trawled various documentation sources.
+										// .add(new DocValuesFieldExistsQuery(CONTENT_ID), Occur.MUST_NOT)
 										.add(new TermQuery(new Term(Bean.DOCUMENT_ID, "~")), Occur.MUST)
 										.build());
 	}
