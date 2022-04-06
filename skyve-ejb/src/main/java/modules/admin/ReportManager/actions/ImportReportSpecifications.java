@@ -51,11 +51,13 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 	
 				try {
 					PersistentBean pb = (PersistentBean) JSON.unmarshall(CORE.getUser(), json);
-					validateReport(pb, true, null);
 	
 					if (bean.getImportActionType() == ImportActionType.validateOnlyReportConfigurationsAndTemplates) {
+						validateReport(pb, false, null);
 						webContext.growl(MessageSeverity.info, "Report validated ok - select import option to import this report");
 						return bean;
+					} else {
+						validateReport(pb, true, null);
 					}
 	
 					// now load
@@ -151,7 +153,9 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 			if (withRemove) {
 				removePreviousTemplate(newTemplate.getName());
 			} else {
-				templatesToReplace.add(newTemplate.getName());
+				if(templatesToReplace!=null) {
+					templatesToReplace.add(newTemplate.getName());
+				}
 			}
 		}
 	}
