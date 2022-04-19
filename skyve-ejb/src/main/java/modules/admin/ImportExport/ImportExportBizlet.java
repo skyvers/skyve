@@ -112,7 +112,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		Module module = customer.getModule(bean.getModuleName());
 		Document document = module.getDocument(customer, bean.getDocumentName());
 
-		for (Attribute a : document.getAllAttributes()) {
+		for (Attribute a : document.getAllAttributes(customer)) {
 			if (a.isPersistent()) {
 				// exclude unsupported types
 				switch (a.getAttributeType()) {

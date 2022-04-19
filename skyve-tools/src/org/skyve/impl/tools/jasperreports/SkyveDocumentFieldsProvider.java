@@ -39,7 +39,9 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
     		String moduleDotDocument = dataset.getQuery().getText();
     		Document document = getDocument(moduleDotDocument);
     		
-    		List<? extends Attribute> attributes = document.getAllAttributes();
+    		User user = SkyveDocumentExecuterFactory.getUser();
+    		Customer customer = user.getCustomer();
+    		List<? extends Attribute> attributes = document.getAllAttributes(customer);
     		JRField[] result = new JRField[attributes.size()];
     		for (int i = 0, l = attributes.size(); i < l; i++) {
     			Attribute attribute = attributes.get(i);

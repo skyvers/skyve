@@ -62,12 +62,6 @@ public interface Document extends Model {
 	public List<UniqueConstraint> getUniqueConstraints();
 
 	/**
-	 * Get the unique constraints for this document and any super-documents for the current customer.
-	 * @return	All the unique constraints.
-	 */
-	public List<UniqueConstraint> getAllUniqueConstraints();
-
-	/**
 	 * Get the unique constraints for this document and any super-documents for a given customer.
 	 * @param customer	The given customer.
 	 * @return	All the unique constraints.

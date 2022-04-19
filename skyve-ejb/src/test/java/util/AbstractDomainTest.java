@@ -243,7 +243,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Customer customer = CORE.getUser().getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
-		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes());
+		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes(customer));
 		return allAttributes;
 	}
 
@@ -261,7 +261,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Document document = module.getDocument(customer, bean.getBizDocument());
 		Attribute transientAttribute = null;
 
-		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes());
+		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes(customer));
 
 		// randomise the attributes in the collection
 		Collections.shuffle(allAttributes);

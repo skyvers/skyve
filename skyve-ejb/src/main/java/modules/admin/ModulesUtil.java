@@ -810,7 +810,7 @@ public class ModulesUtil {
 					Module module = customer.getModule(b.getBizModule());
 					Document document = module.getDocument(customer, b.getBizDocument());
 
-					for (Attribute attribute : document.getAllAttributes()) {
+					for (Attribute attribute : document.getAllAttributes(customer)) {
 						if (attribute.getLocalisedDisplayName().equals(a)) {
 							found = true;
 							if (binding.toString().length() > 0) {

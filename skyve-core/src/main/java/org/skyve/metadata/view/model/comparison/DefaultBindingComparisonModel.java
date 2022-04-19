@@ -156,7 +156,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 								String binding)
 	throws Exception {
 		// Get any inherited attributes here too.
-		for (Attribute attribute : beanDocument.getAllAttributes()) {
+		for (Attribute attribute : beanDocument.getAllAttributes(customer)) {
 			String fqAttributeBinding = null;
 			if (binding.isEmpty()) {
 				fqAttributeBinding = attribute.getName();

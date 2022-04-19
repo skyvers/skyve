@@ -417,7 +417,7 @@ public class ValidationUtil {
 
 	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
 		try {
-			for (Attribute attribute : document.getAllAttributes()) {
+			for (Attribute attribute : document.getAllAttributes(customer)) {
 				if (attribute instanceof Collection) {
 					String referenceName = attribute.getName();
 					Collection collection = (Collection) attribute;

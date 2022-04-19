@@ -24,6 +24,7 @@ import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
 
 class SQLIterable<T> implements AutoClosingIterable<T> {
@@ -129,9 +130,10 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 
 		private Z nextBean() {
 			try {
-				Z result = document.newInstance(CORE.getUser());
+				User u = CORE.getUser();
+				Z result = document.newInstance(u);
 	
-				for (Attribute attribute : document.getAllAttributes()) {
+				for (Attribute attribute : document.getAllAttributes(u.getCustomer())) {
 					String name = attribute.getName();
 					AttributeType type = attribute.getAttributeType();
 					if (AttributeType.bool.equals(type)) {

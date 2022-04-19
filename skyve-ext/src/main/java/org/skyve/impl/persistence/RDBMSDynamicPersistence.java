@@ -82,7 +82,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		final boolean dynamicDocument = d.isDynamic();
 		Module m = c.getModule(d.getOwningModuleName());
 
-		for (Attribute a : d.getAllAttributes()) {
+		for (Attribute a : d.getAllAttributes(c)) {
 			// if dynamic document or dynamic field or reference to dynamic document
 			boolean dynamicAttribute = dynamicDocument;
 			if (a instanceof Field) {

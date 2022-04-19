@@ -51,7 +51,7 @@ public class ReindexBeansJob extends CancellableJob {
 				// is the document defined in this module?
 				if (moduleName.equals(ref.getOwningModuleName())) {
 					Document document = module.getDocument(customer, documentName);
-					if (needsIndexing(document)) {
+					if (needsIndexing(customer, document)) {
 						try {
 							persistence.begin();
 							try (ContentManager cm = EXT.newContentManager()) {
@@ -91,10 +91,10 @@ public class ReindexBeansJob extends CancellableJob {
 		setPercentComplete(100);
 	}
 	
-	private static boolean needsIndexing(Document document) {
+	private static boolean needsIndexing(Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((persistent != null) && (persistent.getName() != null)) { // is persistent
-			for (Attribute attribute : document.getAllAttributes()) {
+			for (Attribute attribute : document.getAllAttributes(customer)) {
 				if (attribute instanceof Field) {
 					Field field = (Field) attribute;
 					IndexType index = field.getIndex();

@@ -194,7 +194,7 @@ public final class StandardGenerator {
 						sheet.setValue(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
 					}
 
-					for (Attribute attribute : currentDocument.getAllAttributes()) {
+					for (Attribute attribute : currentDocument.getAllAttributes(customer)) {
 						AttributeType type = attribute.getAttributeType();
 						String name = attribute.getName();
 
@@ -267,7 +267,7 @@ public final class StandardGenerator {
 		
 		Bizlet<?> bizlet = null;
 
-		for (Attribute attribute : currentDocument.getAllAttributes()) {
+		for (Attribute attribute : currentDocument.getAllAttributes(customer)) {
 			AttributeType type = attribute.getAttributeType();
 			String name = attribute.getName();
 
@@ -291,6 +291,7 @@ public final class StandardGenerator {
 					}
 					if (bizlet == null) { // metadata has an error
 						bizlet = new Bizlet<>() {
+							// empty bizlet
 						};
 					}
 					column.setRangeValues(getConstantRangeValues(bizlet, 

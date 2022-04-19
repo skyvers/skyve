@@ -130,7 +130,7 @@ public class HibernateListener implements PostUpdateEventListener,
 			Customer customer = persistence.getUser().getCustomer();
 			Module module = customer.getModule(eventBean.getBizModule());
 			Document document = module.getDocument(customer, eventBean.getBizDocument());
-			for (Attribute attribute : document.getAllAttributes()) {
+			for (Attribute attribute : document.getAllAttributes(customer)) {
 				if (attribute instanceof Collection) {
 					CollectionImpl collection = (CollectionImpl) attribute;
 					if (collection.isComplexOrdering()) {

@@ -14,7 +14,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -286,14 +285,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				}
 			}
 			
-			getAllAttributes().forEach(a -> p.put(a.getName(), null));
+			getAllAttributes(customer).forEach(a -> p.put(a.getName(), null));
 
 			@SuppressWarnings("unchecked")
 			T t = (persistent == null) ?
 					(T) new MapBean(getOwningModuleName(), getName(), p) :
 					(T) new PersistentMapBean(getOwningModuleName(), getName(), p);
 
-			getAllAttributes().forEach(a -> t.setDynamic(a.getName(), dynamicDefaultValue(a, t)));
+			getAllAttributes(customer).forEach(a -> t.setDynamic(a.getName(), dynamicDefaultValue(a, t)));
 
 			result = t;
 		}
@@ -309,7 +308,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public void populateDynamicAttributeDefaults(Customer customer, Bean bean) {
 		Module m = customer.getModule(getOwningModuleName());
 
-		getAllAttributes().forEach(a -> {
+		getAllAttributes(customer).forEach(a -> {
 			if (BindUtil.isDynamic(customer, m, this, a)) {
 				bean.setDynamic(a.getName(), dynamicDefaultValue(a, bean));
 			}
@@ -384,11 +383,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	@Override
 	public List<UniqueConstraint> getUniqueConstraints() {
 		return Collections.unmodifiableList(uniqueConstraints);
-	}
-	
-	@Override
-	public List<UniqueConstraint> getAllUniqueConstraints() {
-		return getAllUniqueConstraints(CORE.getCustomer());
 	}
 	
 	@Override

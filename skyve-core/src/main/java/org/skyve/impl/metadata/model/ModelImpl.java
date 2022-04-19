@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.annotation.Nonnull;
+
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
@@ -80,12 +82,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
 	@Override
-	public List<? extends Attribute> getAllAttributes() {
-		return getAllAttributes(CORE.getCustomer());
-	}
-	
-	@Override
-	public List<? extends Attribute> getAllAttributes(Customer customer) {
+	public List<? extends Attribute> getAllAttributes(@Nonnull Customer customer) {
 		List<Attribute> result = new ArrayList<>(attributes);
 		Extends currentInherits = inherits;
 		if (currentInherits != null) {
@@ -178,7 +175,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 		}
 
 		Module m = c.getModule(omn);
-		for (Attribute a : getAllAttributes()) {
+		for (Attribute a : getAllAttributes(c)) {
 			if (BindUtil.isDynamic(c, m, a)) {
 				hasDynamic = Boolean.TRUE;
 				return;

@@ -1395,7 +1395,7 @@ public final class BindUtil {
 						Module m = c.getModule(b.getBizModule());
 						Document d = m.getDocument(c, b.getBizDocument());
 						final String an = attributeName;
-						Attribute a = d.getAllAttributes().stream().filter(aa -> an.equals(aa.getName())).findAny().orElse(null);
+						Attribute a = d.getAllAttributes(c).stream().filter(aa -> an.equals(aa.getName())).findAny().orElse(null);
 						if (a != null) {
 							try {
 								// binding expression to Association or InverseOne
@@ -1819,7 +1819,7 @@ public final class BindUtil {
 		final Module m = c.getModule(from.getBizModule());
 		final Document d = m.getDocument(c, from.getBizDocument());
 
-		for (final Attribute attribute : d.getAllAttributes()) {
+		for (final Attribute attribute : d.getAllAttributes(c)) {
 			final String attributeName = attribute.getName();
 
 			if (AttributeType.collection.equals(attribute.getAttributeType())) {

@@ -437,7 +437,7 @@ public class DataBuilder {
 				}
 				visitedBizIds.add(resultBizId);
 
-				for (Attribute attribute : document.getAllAttributes()) {
+				for (Attribute attribute : document.getAllAttributes(customer)) {
 					if (filter(attribute)) {
 						continue;
 					}
@@ -533,7 +533,7 @@ public class DataBuilder {
 	throws Exception {
 		T result = document.newInstance(user);
 		
-		for (Attribute attribute : document.getAllAttributes()) {
+		for (Attribute attribute : document.getAllAttributes(customer)) {
 			if ((attribute instanceof Relation) || (filter(attribute))) {
 				continue;
 			}

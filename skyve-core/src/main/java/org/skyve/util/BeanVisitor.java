@@ -137,7 +137,7 @@ public abstract class BeanVisitor {
 				Module owningModule = customer.getModule(document.getOwningModuleName());
 
 				// NB visit relations in the order they are defined in the documents.
-				for (Attribute attribute : document.getAllAttributes()) {
+				for (Attribute attribute : document.getAllAttributes(customer)) {
 					if (attribute instanceof Relation) {
 						if ((! visitInverses) && (attribute instanceof Inverse)) {
 							continue;

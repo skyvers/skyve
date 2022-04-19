@@ -37,12 +37,6 @@ public interface Model extends NamedMetaData {
 	public List<? extends Attribute> getAttributes();
 
 	/**
-	 * Get the attributes for this document and any super-documents for the current customer.
-	 * @return	All the attributes.
-	 */
-	public List<? extends Attribute> getAllAttributes();
-
-	/**
 	 * Get the attributes for this document and any super-documents for the given customer.
 	 * @param customer	The given customer
 	 * @return	All the attributes.

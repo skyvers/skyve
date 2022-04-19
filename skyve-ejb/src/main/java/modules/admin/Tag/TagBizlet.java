@@ -13,7 +13,6 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
@@ -64,7 +63,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				&& bean.getUploadModuleName() != null && bean.getUploadDocumentName() != null) {
 			Module module = customer.getModule(bean.getUploadModuleName());
 			Document document = module.getDocument(customer, bean.getUploadDocumentName());
-			for (Attribute attribute : document.getAllAttributes()) {
+			for (Attribute attribute : document.getAllAttributes(customer)) {
 				result.add(new DomainValue(attribute.getName(), attribute.getLocalisedDisplayName()));
 			}
 			result.sort(Comparator.comparing(DomainValue::getDescription));

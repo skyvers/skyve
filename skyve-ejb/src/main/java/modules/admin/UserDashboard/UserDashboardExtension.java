@@ -385,7 +385,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 		if (bean != null) {
 			// provide a thumbnail for the first image or content attribute type
-			for (Attribute a : document.getAllAttributes()) {
+			for (Attribute a : document.getAllAttributes(customer)) {
 				if (AttributeType.content.equals(a.getAttributeType())
 						|| AttributeType.image.equals(a.getAttributeType())) {
 					String cId = (String) Binder.get(bean, a.getName());

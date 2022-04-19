@@ -1350,7 +1350,7 @@ t.printStackTrace();
 					
 					// Reinstate the transient attributes in the mergedBean from the unmerged bean lost when detached or persisted for the first time.
 					Module module = customer.getModule(document.getOwningModuleName());
-					for (Attribute attribute : document.getAllAttributes()) {
+					for (Attribute attribute : document.getAllAttributes(customer)) {
 						String attributeName = attribute.getName();
 						
 						boolean dynamic = BindUtil.isDynamic(customer, module, document, attribute);
@@ -1405,7 +1405,7 @@ if (document.isDynamic()) return;
 		final boolean persisted = isPersisted(bean);
 		
 		try {
-			for (UniqueConstraint constraint : document.getAllUniqueConstraints()) {
+			for (UniqueConstraint constraint : document.getAllUniqueConstraints(customer)) {
 				StringBuilder queryString = new StringBuilder(48);
 				queryString.append("select bean from ").append(entityName).append(" as bean");
 				
@@ -1991,7 +1991,7 @@ if (document.isDynamic()) return;
 														Module module,
 														Document document,
 														PersistentBean loadedBean) {
-		for (Attribute attribute : document.getAllAttributes()) {
+		for (Attribute attribute : document.getAllAttributes(customer)) {
 			if (attribute instanceof Association) {
 				Association association = (Association) attribute;
 				if (AssociationType.embedded.equals(association.getType())) {
@@ -2000,7 +2000,7 @@ if (document.isDynamic()) return;
 					if (embeddedBean != null) {
 						Document embeddedDocument = module.getDocument(customer, association.getDocumentName());
 						boolean empty = true;
-						for (Attribute embeddedAttribute : embeddedDocument.getAllAttributes()) {
+						for (Attribute embeddedAttribute : embeddedDocument.getAllAttributes(customer)) {
 							// ignore inverses since they are stored directly in the data store
 							if (! (embeddedAttribute instanceof Inverse)) {
 								Object value = BindUtil.get(embeddedBean, embeddedAttribute.getName());
@@ -2033,7 +2033,7 @@ if (document.isDynamic()) return;
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(beanToReindex.getBizModule());
 		Document document = module.getDocument(customer, beanToReindex.getBizDocument());
-		for (Attribute attribute : document.getAllAttributes()) {
+		for (Attribute attribute : document.getAllAttributes(customer)) {
 			if (attribute instanceof Field) {
 				Field field = (Field) attribute;
 				AttributeType type = attribute.getAttributeType();

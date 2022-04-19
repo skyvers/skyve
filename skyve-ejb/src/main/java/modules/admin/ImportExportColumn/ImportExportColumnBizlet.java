@@ -45,7 +45,7 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				Module module = customer.getModule(bean.getParent().getModuleName());
 				Document document = module.getDocument(customer, bean.getParent().getDocumentName());
 
-				for (Attribute a : document.getAllAttributes()) {
+				for (Attribute a : document.getAllAttributes(customer)) {
 
 					// exclude unimplemented types - some of these can be handled later
 					if (!AttributeType.collection.equals(a.getAttributeType())

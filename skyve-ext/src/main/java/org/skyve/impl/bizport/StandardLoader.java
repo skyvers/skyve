@@ -180,7 +180,7 @@ public class StandardLoader {
 	throws Exception {
 		T result = getBeanForRow(persistence, user, document, sheet);
 
-		for (Attribute attribute : document.getAllAttributes()) {
+		for (Attribute attribute : document.getAllAttributes(user.getCustomer())) {
 			if (! (attribute instanceof Relation)) {
 				String binding = attribute.getName();
 				// Ignore bizId, owner id and element id, bizKey columns

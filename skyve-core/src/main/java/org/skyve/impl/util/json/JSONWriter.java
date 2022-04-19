@@ -203,7 +203,7 @@ public class JSONWriter {
 				Module module = customer.getModule(bean.getBizModule());
 				Document document = module.getDocument(customer, bean.getBizDocument());
 
-				for (Attribute attribute : document.getAllAttributes()) {
+				for (Attribute attribute : document.getAllAttributes(customer)) {
 					String name = attribute.getName();
 					add(',');
 					if (attribute instanceof Reference) {

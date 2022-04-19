@@ -223,7 +223,7 @@ public class TestUtil {
 			throws Exception {
 		T result = document.newInstance(user);
 
-		for (Attribute attribute : document.getAllAttributes()) {
+		for (Attribute attribute : document.getAllAttributes(user.getCustomer())) {
 			String name = attribute.getName();
 			AttributeType type = attribute.getAttributeType();
 

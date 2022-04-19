@@ -116,7 +116,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 		Module m = c.getModule(parent.getBizModule());
 		Document d = m.getDocument(c, parent.getBizDocument());
 
-		for (Attribute a : d.getAllAttributes()) {
+		for (Attribute a : d.getAllAttributes(c)) {
 			AttributeType at = a.getAttributeType();
 			if (AttributeType.association.equals(at) || AttributeType.inverseOne.equals(at)) {
 				// Check it is not a document to stop on
