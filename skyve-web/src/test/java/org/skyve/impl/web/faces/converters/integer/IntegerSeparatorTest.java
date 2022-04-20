@@ -31,7 +31,7 @@ public class IntegerSeparatorTest {
 		try {
 			converter.getAsObject(null, null, "99999999999");
 		} catch (ConverterException e) {
-			assertThat(e.getMessage(), containsString("exceeds Integer max value"));
+			assertThat(e.getMessage(), containsString("must not be greater than"));
 			return;
 		}
 
@@ -44,7 +44,7 @@ public class IntegerSeparatorTest {
 		try {
 			converter.getAsObject(null, null, "+99999999999");
 		} catch (ConverterException e) {
-			assertThat(e.getMessage(), containsString("exceeds Integer max value"));
+			assertThat(e.getMessage(), containsString("must not be greater than"));
 			return;
 		}
 
@@ -57,7 +57,7 @@ public class IntegerSeparatorTest {
 		try {
 			converter.getAsObject(null, null, "-99999999999");
 		} catch (ConverterException e) {
-			assertThat(e.getMessage(), containsString("exceeds Integer min value"));
+			assertThat(e.getMessage(), containsString("must not be less than"));
 			return;
 		}
 

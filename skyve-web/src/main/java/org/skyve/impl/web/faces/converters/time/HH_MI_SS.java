@@ -6,6 +6,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.impl.util.UtilImpl;
 
@@ -17,11 +18,9 @@ public class HH_MI_SS extends org.skyve.domain.types.converters.time.HH_MI_SS im
 			try {
 				return fromDisplayValue(processedValue);
 			}
-			catch (Exception e) {
-				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-						"Invalid time (use HH:MI:SS AM/PM format)",
-						"Invalid time (use HH:MI:SS AM/PM format)"),
-												e);
+			catch (ConversionException e) {
+				String message = e.getMessages().get(0).getText();
+				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message), e);
 			}
     	}
     	return null;
@@ -29,11 +28,14 @@ public class HH_MI_SS extends org.skyve.domain.types.converters.time.HH_MI_SS im
 
 	@Override
 	public String getAsString(FacesContext fc, UIComponent component, Object value) {
+		if (value == null) {
+			return "";
+		}
 		try {
 			return toDisplayValue((TimeOnly) value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
-			return null;
+			return "";
 		}
 	}
 }

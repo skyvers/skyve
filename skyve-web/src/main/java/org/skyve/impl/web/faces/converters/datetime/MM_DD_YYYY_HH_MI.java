@@ -6,6 +6,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.UtilImpl;
 
@@ -17,9 +18,8 @@ public class MM_DD_YYYY_HH_MI extends org.skyve.domain.types.converters.datetime
 			try {
 				return fromDisplayValue(processedValue);
 			}
-			catch (Exception e) {
-				String message = String.format("Invalid date/time (use %s format)",
-						org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI.PATTERN);
+			catch (ConversionException e) {
+				String message = e.getMessages().get(0).getText();
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message), e);
 			}
 		}
@@ -28,11 +28,14 @@ public class MM_DD_YYYY_HH_MI extends org.skyve.domain.types.converters.datetime
 
 	@Override
 	public String getAsString(FacesContext fc, UIComponent component, Object value) {
+		if (value == null) {
+			return "";
+		}
 		try {
 			return toDisplayValue((DateTime) value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
-			return null;
+			return "";
 		}
 	}
 }

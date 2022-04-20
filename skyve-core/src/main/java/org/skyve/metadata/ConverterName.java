@@ -7,6 +7,7 @@ import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.date.DD_MM_YYYY;
 import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
 import org.skyve.domain.types.converters.date.MM_DD_YYYY;
+import org.skyve.domain.types.converters.date.YYYY_MM_DD;
 import org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
@@ -15,6 +16,8 @@ import org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
+import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
+import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
@@ -43,6 +46,8 @@ import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
+import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
+import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
@@ -52,6 +57,7 @@ public enum ConverterName {
 	DD_MMM_YYYY(new DD_MMM_YYYY()),
 	MM_DD_YYYY(new MM_DD_YYYY()),
 	MMM_DD_YYYY(new MMM_DD_YYYY()),
+	YYYY_MM_DD(new YYYY_MM_DD()),
 	DD_MM_YYYY_HH_MI(new DD_MM_YYYY_HH_MI()),
 	DD_MM_YYYY_HH24_MI(new DD_MM_YYYY_HH24_MI()),
 	DD_MM_YYYY_DateTime(new org.skyve.domain.types.converters.datetime.DD_MM_YYYY()),
@@ -64,6 +70,9 @@ public enum ConverterName {
 	MMM_DD_YYYY_HH_MI(new MMM_DD_YYYY_HH_MI()), 
 	MMM_DD_YYYY_HH24_MI(new MMM_DD_YYYY_HH24_MI()),
 	MMM_DD_YYYY_DateTime(new org.skyve.domain.types.converters.datetime.MMM_DD_YYYY()), 
+	YYYY_MM_DD_HH_MI(new YYYY_MM_DD_HH_MI()), 
+	YYYY_MM_DD_HH24_MI(new YYYY_MM_DD_HH24_MI()),
+	YYYY_MM_DD_DateTime(new org.skyve.domain.types.converters.datetime.YYYY_MM_DD()), 
 	Decimal2DollarsAndCents(new Decimal2DollarsAndCents()),
 	Decimal2DollarsAndCentsAbsolute(new Decimal2DollarsAndCentsAbsolute()),
 	Decimal2Integer(new Decimal2Integer()),
@@ -95,7 +104,10 @@ public enum ConverterName {
 	MM_DD_YYYY_Timestamp(new org.skyve.domain.types.converters.timestamp.MM_DD_YYYY()),
 	MMM_DD_YYYY_HH_MI_SS(new MMM_DD_YYYY_HH_MI_SS()),
 	MMM_DD_YYYY_HH24_MI_SS(new MMM_DD_YYYY_HH24_MI_SS()),
-	MMM_DD_YYYY_Timestamp(new org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY());
+	MMM_DD_YYYY_Timestamp(new org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY()),
+	YYYY_MM_DD_HH_MI_SS(new YYYY_MM_DD_HH_MI_SS()),
+	YYYY_MM_DD_HH24_MI_SS(new YYYY_MM_DD_HH24_MI_SS()),
+	YYYY_MM_DD_Timestamp(new org.skyve.domain.types.converters.timestamp.YYYY_MM_DD());
 	//@formatter:on
 	
 	private Converter<?> converter;

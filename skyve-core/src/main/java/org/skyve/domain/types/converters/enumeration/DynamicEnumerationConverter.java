@@ -2,6 +2,7 @@ package org.skyve.domain.types.converters.enumeration;
 
 import java.util.List;
 
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
@@ -20,8 +21,8 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	}
 	
 	@Override
-	public String toDisplayValue(String value) throws Exception {
-		if (value != null) {
+	public String toDisplayValue(String value) throws ConversionException {
+		try {
 			// check code first
 			for (EnumeratedValue enumValue : values) {
 				String code = enumValue.getCode();
@@ -54,13 +55,16 @@ public class DynamicEnumerationConverter implements Converter<String> {
 					return display;
 				}
 			}
+			return "";
 		}
-		return "";
+		catch (Exception e) {
+			throw new ConversionException(ConversionException.DYNAMIC_ENUMERATION_CONVERTER_KEY, e);
+		}
 	}
 
 	@Override
-	public String fromDisplayValue(String displayValue) throws Exception {
-		if (displayValue != null) {
+	public String fromDisplayValue(String displayValue) throws ConversionException {
+		try {
 			// check description first
 			for (EnumeratedValue enumValue : values) {
 				String code = enumValue.getCode();
@@ -82,8 +86,11 @@ public class DynamicEnumerationConverter implements Converter<String> {
 					return code;
 				}
 			}
+			return null;
 		}
-		return null;
+		catch (Exception e) {
+			throw new ConversionException(ConversionException.DYNAMIC_ENUMERATION_CONVERTER_KEY, e);
+		}
 	}
 
 	@Override

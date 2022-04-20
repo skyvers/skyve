@@ -7,23 +7,20 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.WKTReader;
-import org.locationtech.jts.io.WKTWriter;
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.impl.util.UtilImpl;
 
-public class GeometryConverter implements Converter {
+public class GeometryConverter extends org.skyve.domain.types.converters.geometry.GeometryConverter implements Converter {
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
-		String processedValue = UtilImpl.processStringValue(value);
+    	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
-				return new WKTReader().read(value);
+				return fromDisplayValue(processedValue);
 			}
-			catch (Exception e) {
-				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid geometry (use WKT format)",
-																"Invalid geometry (use WKT format)"),
-												e);
+			catch (ConversionException e) {
+				String message = e.getMessages().get(0).getText();
+				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message), e);
 			}
 		}
 		return null;
@@ -31,11 +28,14 @@ public class GeometryConverter implements Converter {
 
 	@Override
 	public String getAsString(FacesContext fc, UIComponent component, Object value) {
+		if (value == null) {
+			return "";
+		}
 		try {
-			return new WKTWriter().write((Geometry) value);
+			return toDisplayValue((Geometry) value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
-			return null;
+			return "";
 		}
 	}
 }

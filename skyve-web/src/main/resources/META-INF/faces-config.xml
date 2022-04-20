@@ -19,62 +19,7 @@
 	</lifecycle>
 
 	<!-- Converters -->
-	<converter>
-		<converter-for-class>java.lang.Boolean</converter-for-class>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Boolean</converter-class>
-	</converter>
-	<converter>
-		<converter-id>Boolean</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Boolean</converter-class>
-	</converter>
-	<converter>
-		<converter-for-class>org.skyve.domain.types.Decimal10</converter-for-class>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Decimal10</converter-class>
-	</converter>
-	<converter>
-		<converter-id>Decimal10</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Decimal10</converter-class>
-	</converter>
-	<converter>
-		<converter-for-class>org.skyve.domain.types.Decimal2</converter-for-class>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Decimal2</converter-class>
-	</converter>
-	<converter>
-		<converter-id>Decimal2</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Decimal2</converter-class>
-	</converter>
-	<converter>
-		<converter-for-class>org.skyve.domain.types.Decimal5</converter-for-class>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Decimal5</converter-class>
-	</converter>
-	<converter>
-		<converter-id>Decimal5</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Decimal5</converter-class>
-	</converter>
-	<converter>
-		<converter-for-class>java.lang.Integer</converter-for-class>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Integer</converter-class>
-	</converter>
-	<converter>
-		<converter-id>Integer</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Integer</converter-class>
-	</converter>
-	<converter>
-		<converter-for-class>java.lang.Long</converter-for-class>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Long</converter-class>
-	</converter>
-	<converter>
-		<converter-id>Long</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.Long</converter-class>
-	</converter>
-	<converter>
-		<converter-for-class>java.lang.String</converter-for-class>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.String</converter-class>
-	</converter>
-	<converter>
-		<converter-id>String</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.lang.String</converter-class>
-	</converter>
+	<!-- date -->
 	<converter>
 		<converter-id>DD_MM_YYYY</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.date.DD_MM_YYYY</converter-class>
@@ -84,6 +29,19 @@
 		<converter-class>org.skyve.impl.web.faces.converters.date.DD_MMM_YYYY</converter-class>
 	</converter>
 	<converter>
+		<converter-id>MM_DD_YYYY</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.date.MM_DD_YYYY</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MMM_DD_YYYY</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.date.MMM_DD_YYYY</converter-class>
+	</converter>
+	<converter>
+		<converter-id>YYYY_MM_DD</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.date.YYYY_MM_DD</converter-class>
+	</converter>
+	<!-- datetime -->
+	<converter>
 		<converter-id>DD_MM_YYYY_HH_MI</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY_HH_MI</converter-class>
 	</converter>
@@ -92,12 +50,61 @@
 		<converter-class>org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY_HH24_MI</converter-class>
 	</converter>
 	<converter>
+		<converter-id>DD_MM_YYYY_DateTime</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY</converter-class>
+	</converter>
+	<converter>
 		<converter-id>DD_MMM_YYYY_HH_MI</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH_MI</converter-class>
 	</converter>
 	<converter>
 		<converter-id>DD_MMM_YYYY_HH24_MI</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH24_MI</converter-class>
+	</converter>
+	<converter>
+		<converter-id>DD_MMM_YYYY_DateTime</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MM_DD_YYYY_HH_MI</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH_MI</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MM_DD_YYYY_HH24_MI</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH24_MI</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MM_DD_YYYY_DateTime</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MMM_DD_YYYY_HH_MI</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH_MI</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MMM_DD_YYYY_HH24_MI</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH24_MI</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MMM_DD_YYYY_DateTime</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY</converter-class>
+	</converter>
+	<converter>
+		<converter-id>YYYY_MM_DD_HH_MI</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH_MI</converter-class>
+	</converter>
+	<converter>
+		<converter-id>YYYY_MM_DD_HH24_MI</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH24_MI</converter-class>
+	</converter>
+	<converter>
+		<converter-id>YYYY_MM_DD_DateTime</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD</converter-class>
+	</converter>
+	<!-- currency -->
+	<converter>
+		<converter-id>Decimal10DollarsAndCents</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.currency.Decimal10DollarsAndCents</converter-class>
 	</converter>
 	<converter>
 		<converter-id>Decimal2DollarsAndCents</converter-id>
@@ -111,6 +118,23 @@
 		<converter-id>Decimal5DollarsAndCents</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents</converter-class>
 	</converter>
+	<!-- decimal -->
+	<converter>
+		<converter-for-class>org.skyve.domain.types.Decimal10</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10Converter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal10</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10Converter</converter-class>
+	</converter>
+	<converter>
+		<converter-for-class>org.skyve.domain.types.Decimal2</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2Converter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal2</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2Converter</converter-class>
+	</converter>
 	<converter>
 		<converter-id>Decimal2Integer</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2Integer</converter-class>
@@ -122,6 +146,18 @@
 	<converter>
 		<converter-id>Decimal2OneDecimalPlace</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2OneDecimalPlace</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal2TwoDecimalPlacesPercentage</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2TwoDecimalPlacesPercentage</converter-class>
+	</converter>
+	<converter>
+		<converter-for-class>org.skyve.domain.types.Decimal5</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal5Converter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal5</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal5Converter</converter-class>
 	</converter>
 	<converter>
 		<converter-id>Decimal5Integer</converter-id>
@@ -147,26 +183,96 @@
 		<converter-id>Decimal5TwoDecimalPlacesPercentage</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPercentage</converter-class>
 	</converter>
+	<!-- geometry -->
 	<converter>
-		<converter-id>SimplePercentage</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.integer.SimplePercentage</converter-class>
+		<converter-for-class>org.locationtech.jts.geom.Geometry</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.geometry.GeometryConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>GeometryConverter</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.geometry.GeometryConverter</converter-class>
+	</converter>
+	<!-- integer -->
+	<converter>
+		<converter-for-class>java.lang.Integer</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.integer.IntegerConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Integer</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.integer.IntegerConverter</converter-class>
 	</converter>
 	<converter>
 		<converter-id>IntegerSeparator</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.integer.IntegerSeparator</converter-class>
 	</converter>
 	<converter>
+		<converter-for-class>java.lang.Long</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.integer.LongIntegerConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>LongInteger</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.integer.LongIntegerConverter</converter-class>
+	</converter>
+	<converter>
 		<converter-id>LongIntegerSeparator</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.integer.LongIntegerSeparator</converter-class>
+	</converter>
+	<converter>
+		<converter-id>SimplePercentage</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.integer.SimplePercentage</converter-class>
+	</converter>
+	<!-- lang -->
+	<converter>
+		<converter-for-class>java.lang.Boolean</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.lang.Boolean</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Boolean</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.lang.Boolean</converter-class>
+	</converter>
+	<converter>
+		<converter-for-class>java.lang.String</converter-for-class>
+		<converter-class>org.skyve.impl.web.faces.converters.lang.String</converter-class>
+	</converter>
+	<converter>
+		<converter-id>String</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.lang.String</converter-class>
+	</converter>
+	<!-- select -->
+	<converter>
+		<converter-id>AssociationAutoComplete</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>AssociationPickList</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.select.AssociationPickListConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>SelectItemsBean</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>TriStateBoolean</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.select.TriStateCheckboxBooleanConverter</converter-class>
+	</converter>
+	<!-- time -->
+	<converter>
+		<converter-id>HH_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.time.HH_MI_SS</converter-class>
 	</converter>
 	<converter>
 		<converter-id>HH_MI</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.time.HH_MI</converter-class>
 	</converter>
 	<converter>
+		<converter-id>HH24_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.time.HH24_MI_SS</converter-class>
+	</converter>
+	<converter>
 		<converter-id>HH24_MI</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.time.HH24_MI</converter-class>
 	</converter>
+	<!-- timestamp -->
 	<converter>
 		<converter-id>DD_MM_YYYY_HH_MI_SS</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH_MI_SS</converter-class>
@@ -174,6 +280,10 @@
 	<converter>
 		<converter-id>DD_MM_YYYY_HH24_MI_SS</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH24_MI_SS</converter-class>
+	</converter>
+	<converter>
+		<converter-id>DD_MM_YYYY_Timestamp</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY</converter-class>
 	</converter>
 	<converter>
 		<converter-id>DD_MMM_YYYY_HH_MI_SS</converter-id>
@@ -184,21 +294,46 @@
 		<converter-class>org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS</converter-class>
 	</converter>
 	<converter>
-		<converter-id>SelectItemsBean</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter</converter-class>
+		<converter-id>DD_MMM_YYYY_Timestamp</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY</converter-class>
 	</converter>
 	<converter>
-		<converter-id>AssociationAutoComplete</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter</converter-class>
+		<converter-id>MM_DD_YYYY_HH_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS</converter-class>
 	</converter>
 	<converter>
-		<converter-id>TriStateBoolean</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.select.TriStateCheckboxBooleanConverter</converter-class>
+		<converter-id>MM_DD_YYYY_HH24_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS</converter-class>
 	</converter>
 	<converter>
-		<converter-id>Geometry</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.geometry.GeometryConverter</converter-class>
+		<converter-id>MM_DD_YYYY_Timestamp</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY</converter-class>
 	</converter>
+	<converter>
+		<converter-id>MMM_DD_YYYY_HH_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH_MI_SS</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MMM_DD_YYYY_HH24_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS</converter-class>
+	</converter>
+	<converter>
+		<converter-id>MMM_DD_YYYY_Timestamp</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY</converter-class>
+	</converter>
+	<converter>
+		<converter-id>YYYY_MM_DD_HH_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD_HH_MI_SS</converter-class>
+	</converter>
+	<converter>
+		<converter-id>YYYY_MM_DD_HH24_MI_SS</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD_HH24_MI_SS</converter-class>
+	</converter>
+	<converter>
+		<converter-id>YYYY_MM_DD_Timestamp</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD</converter-class>
+	</converter>
+	
 	<render-kit>
 		<renderer>
 			<component-family>org.primefaces.component</component-family>

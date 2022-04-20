@@ -31,7 +31,7 @@ public class LongIntegerSeparatorTest {
 		try {
 			converter.getAsObject(null, null, "9999999999999999999");
 		} catch (ConverterException e) {
-			assertThat(e.getMessage(), containsString("exceeds Long max value"));
+			assertThat(e.getMessage(), containsString("must not be greater than"));
 			return;
 		}
 
@@ -44,7 +44,7 @@ public class LongIntegerSeparatorTest {
 		try {
 			converter.getAsObject(null, null, "+9999999999999999999");
 		} catch (ConverterException e) {
-			assertThat(e.getMessage(), containsString("exceeds Long max value"));
+			assertThat(e.getMessage(), containsString("must not be greater than"));
 			return;
 		}
 
@@ -57,7 +57,7 @@ public class LongIntegerSeparatorTest {
 		try {
 			converter.getAsObject(null, null, "-9999999999999999999");
 		} catch (ConverterException e) {
-			assertThat(e.getMessage(), containsString("exceeds Long min value"));
+			assertThat(e.getMessage(), containsString("must not be less than"));
 			return;
 		}
 

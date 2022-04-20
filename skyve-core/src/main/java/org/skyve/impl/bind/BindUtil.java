@@ -519,7 +519,9 @@ public final class BindUtil {
 				}
 				else {
 					Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
-					result = new DateOnly(date.getTime());
+					if (date != null) {
+						result = new DateOnly(date.getTime());
+					}
 				}
 			}
 			else if (type.equals(TimeOnly.class)) {
@@ -528,7 +530,9 @@ public final class BindUtil {
 				}
 				else {
 					Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
-					result = new TimeOnly(date.getTime());
+					if (date != null) {
+						result = new TimeOnly(date.getTime());
+					}
 				}
 			}
 			else if (type.equals(DateTime.class)) {
@@ -537,7 +541,9 @@ public final class BindUtil {
 				}
 				else {
 					Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
-					result = new DateTime(date.getTime());
+					if (date != null) {
+						result = new DateTime(date.getTime());
+					}
 				}
 			}
 			else if (type.equals(Timestamp.class)) {
@@ -546,7 +552,9 @@ public final class BindUtil {
 				}
 				else {
 					Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
-					result = new Timestamp(date.getTime());
+					if (date != null) {
+						result = new Timestamp(date.getTime());
+					}
 				}
 			}
 			else if (Geometry.class.isAssignableFrom(type)) {

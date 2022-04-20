@@ -182,7 +182,6 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * <code>Iterator</code> appropriate to the UISelectItem(s) value.
      * </p>
      */
-    @SuppressWarnings("synthetic-access")
 	private void initializeItems(Object kid) {
 
         if (kid instanceof UISelectItem) {
@@ -249,7 +248,6 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * <code>item</code>
      * @param item the {@link SelectItem} to expose as an Iterator
      */
-    @SuppressWarnings("synthetic-access")
 	private void updateSingeItemIterator(SelectItem item) {
 
         if (singleItemIterator == null) {
@@ -404,7 +402,6 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         // --------------------------------------------------- Protected Methods
 
 
-        @SuppressWarnings("synthetic-access")
 		protected SelectItem getSelectItemFor(FacesContext ctx, Object value) {
 
             if (genericObjectSI == null) {

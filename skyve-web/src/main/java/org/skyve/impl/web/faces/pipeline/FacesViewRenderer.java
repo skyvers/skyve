@@ -12,6 +12,9 @@ import org.primefaces.component.calendar.Calendar;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
+import org.skyve.domain.types.converters.date.MM_DD_YYYY;
+import org.skyve.domain.types.converters.date.YYYY_MM_DD;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
@@ -104,24 +107,31 @@ import org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH24_MI;
 import org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY_HH_MI;
 import org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH24_MI;
 import org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH_MI;
+import org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH24_MI;
+import org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH_MI;
+import org.skyve.impl.web.faces.converters.decimal.Decimal10Converter;
+import org.skyve.impl.web.faces.converters.decimal.Decimal2Converter;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2OneDecimalPlace;
+import org.skyve.impl.web.faces.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
+import org.skyve.impl.web.faces.converters.decimal.Decimal5Converter;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5IntegerPercentage;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5OneDecimalPlace;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5TimeDuration;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
+import org.skyve.impl.web.faces.converters.decimal.currency.Decimal10DollarsAndCents;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents;
+import org.skyve.impl.web.faces.converters.geometry.GeometryConverter;
+import org.skyve.impl.web.faces.converters.integer.IntegerConverter;
 import org.skyve.impl.web.faces.converters.integer.IntegerSeparator;
+import org.skyve.impl.web.faces.converters.integer.LongIntegerConverter;
 import org.skyve.impl.web.faces.converters.integer.LongIntegerSeparator;
 import org.skyve.impl.web.faces.converters.integer.SimplePercentage;
-import org.skyve.impl.web.faces.converters.lang.Decimal10;
-import org.skyve.impl.web.faces.converters.lang.Decimal2;
-import org.skyve.impl.web.faces.converters.lang.Decimal5;
 import org.skyve.impl.web.faces.converters.time.HH24_MI;
 import org.skyve.impl.web.faces.converters.time.HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.time.HH_MI;
@@ -2123,167 +2133,229 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private static javax.faces.convert.Converter convertConverter(Converter<?> converter, AttributeType type) {
-	    javax.faces.convert.Converter result = null;
-	    if (converter != null) {
-		    String converterName = converter.getClass().getSimpleName();
-		    if ("DD_MM_YYYY".equals(converterName)) {
-		    	if (AttributeType.date.equals(type)) {
-		    		result = new DD_MM_YYYY();
-		    	}
-		    	else if (AttributeType.dateTime.equals(type)) {
-		    		result = new org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY();
-		    	}
-		    	else if (AttributeType.timestamp.equals(type)) {
-		    		result = new org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY();
-		    	}
-		    }
-		    else if ("DD_MMM_YYYY".equals(converterName)) {
-		    	if (AttributeType.date.equals(type)) {
-		    		result = new DD_MMM_YYYY();
-		    	}
-		    	else if (AttributeType.dateTime.equals(type)) {
-		    		result = new org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY();
-		    	}
-		    	else if (AttributeType.timestamp.equals(type)) {
-		    		result = new org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY();
-		    	}
-	        }
-	        else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
-	            result = new DD_MM_YYYY_HH_MI();
-	        }
-	        else if ("DD_MM_YYYY_HH24_MI".equals(converterName)) {
-	            result = new DD_MM_YYYY_HH24_MI();
-	        }
-	        else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
-	            result = new DD_MMM_YYYY_HH_MI();
-	        }
-	        else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
-	            result = new DD_MMM_YYYY_HH24_MI();
-	        }
-			else if ("MM_DD_YYYY".equals(converterName)) {
-				if (AttributeType.date.equals(type)) {
-					result = new org.skyve.impl.web.faces.converters.date.MM_DD_YYYY();
-				} else if (AttributeType.dateTime.equals(type)) {
-					result = new org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY();
-				} else if (AttributeType.timestamp.equals(type)) {
-					result = new org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY();
-				}
-			} else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
+		javax.faces.convert.Converter result = null;
+		if (converter != null) {
+			// Date
+			if (converter instanceof org.skyve.domain.types.converters.date.DD_MM_YYYY) {
+				result = new DD_MM_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.date.DD_MMM_YYYY) {
+				result = new DD_MMM_YYYY();
+			}
+			else if (converter instanceof MM_DD_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.date.MM_DD_YYYY();
+			}
+			else if (converter instanceof MMM_DD_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.date.MMM_DD_YYYY();
+			}
+			else if (converter instanceof YYYY_MM_DD) {
+				result = new org.skyve.impl.web.faces.converters.date.YYYY_MM_DD();
+			}
+			// Date/Time
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH_MI) {
+				result = new DD_MM_YYYY_HH_MI();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI) {
+				result = new DD_MM_YYYY_HH24_MI();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MM_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.datetime.DD_MM_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH_MI) {
+				result = new DD_MMM_YYYY_HH_MI();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH24_MI) {
+				result = new DD_MMM_YYYY_HH24_MI();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MMM_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI) {
 				result = new MM_DD_YYYY_HH_MI();
-			} else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI) {
 				result = new MM_DD_YYYY_HH24_MI();
-			} else if ("MMM_DD_YYYY".equals(converterName)) {
-				if (AttributeType.date.equals(type)) {
-					result = new org.skyve.impl.web.faces.converters.date.MMM_DD_YYYY();
-				} else if (AttributeType.dateTime.equals(type)) {
-					result = new org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY();
-				} else if (AttributeType.timestamp.equals(type)) {
-					result = new org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY();
-				}
-			} else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.MM_DD_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH_MI) {
 				result = new MMM_DD_YYYY_HH_MI();
-			} else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH24_MI) {
 				result = new MMM_DD_YYYY_HH24_MI();
 			}
-	        else if ("Decimal2DollarsAndCents".equals(converterName)) {
-	            result = new Decimal2DollarsAndCents();
-	        }
-			else if ("Decimal2DollarsAndCentsAbsolute".equals(converterName)) {
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.MMM_DD_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.datetime.MMM_DD_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI) {
+				result = new YYYY_MM_DD_HH_MI();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI) {
+				result = new YYYY_MM_DD_HH24_MI();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.datetime.YYYY_MM_DD) {
+				result = new org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD();
+			}
+			// Currency
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.currency.Decimal10DollarsAndCents) {
+				result = new Decimal10DollarsAndCents();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents) {
+				result = new Decimal2DollarsAndCents();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute) {
 				result = new Decimal2DollarsAndCentsAbsolute();
 			}
-	        else if ("Decimal5DollarsAndCents".equals(converterName)) {
-	            result = new Decimal5DollarsAndCents();
-	        }
-	        else if ("Decimal2Integer".equals(converterName)) {
-	            result = new Decimal2Integer();
-	        }
-	        else if ("Decimal2IntegerPercentage".equals(converterName)) {
-	            result = new Decimal2IntegerPercentage();
-	        }
-	        else if ("Decimal2OneDecimalPlace".equals(converterName)) {
-	            result = new Decimal2OneDecimalPlace();
-	        }
-	        else if ("Decimal5Integer".equals(converterName)) {
-	            result = new Decimal5Integer();
-	        }
-	        else if ("Decimal5IntegerPercentage".equals(converterName)) {
-	            result = new Decimal5IntegerPercentage();
-	        }
-	        else if ("Decimal5OneDecimalPlace".equals(converterName)) {
-	            result = new Decimal5OneDecimalPlace();
-	        }
-	        else if ("Decimal5TimeDuration".equals(converterName)) {
-	            result = new Decimal5TimeDuration();
-	        }
-	        else if ("Decimal5TwoDecimalPlaces".equals(converterName)) {
-	            result = new Decimal5TwoDecimalPlaces();
-	        }
-	        else if ("Decimal5TwoDecimalPlacesPercentage".equals(converterName)) {
-	            result = new Decimal5TwoDecimalPlacesPercentage();
-	        }
-	        else if ("SimplePercentage".equals(converterName)) {
-	            result = new SimplePercentage();
-	        }
-	        else if ("IntegerSeparator".equals(converterName)) {
-	            result = new IntegerSeparator();
-	        }
-			else if ("LongIntegerSeparator".equals(converterName)) {
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents) {
+				result = new Decimal5DollarsAndCents();
+			}
+			// Decimal
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal10Converter) {
+				result = new Decimal10Converter();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2Converter) {
+				result = new Decimal2Converter();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2Integer) {
+				result = new Decimal2Integer();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage) {
+				result = new Decimal2IntegerPercentage();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace) {
+				result = new Decimal2OneDecimalPlace();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage) {
+				result = new Decimal2TwoDecimalPlacesPercentage();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5Converter) {
+				result = new Decimal5Converter();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5Integer) {
+				result = new Decimal5Integer();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage) {
+				result = new Decimal5IntegerPercentage();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace) {
+				result = new Decimal5OneDecimalPlace();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5TimeDuration) {
+				result = new Decimal5TimeDuration();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces) {
+				result = new Decimal5TwoDecimalPlaces();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage) {
+				result = new Decimal5TwoDecimalPlacesPercentage();
+			}
+			// No Faces DynamicEnumerationConverter
+			// Geometry
+			else if (converter instanceof org.skyve.domain.types.converters.geometry.GeometryConverter) {
+				result = new GeometryConverter();
+			}
+			// Integer
+			else if (converter instanceof org.skyve.domain.types.converters.integer.IntegerConverter) {
+				result = new IntegerConverter();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.integer.IntegerSeparator) {
+				result = new IntegerSeparator();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.integer.LongIntegerConverter) {
+				result = new LongIntegerConverter();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.integer.LongIntegerSeparator) {
 				result = new LongIntegerSeparator();
 			}
-	        else if ("HH_MI".equals(converterName)) {
-	            result = new HH_MI();
-	        }
-			else if ("HH_MI_SS".equals(converterName)) {
+			else if (converter instanceof org.skyve.domain.types.converters.integer.SimplePercentage) {
+				result = new SimplePercentage();
+			}
+			// No corresponding Skyve lang converters for Boolean and String as these coercions are implicit
+			// No select converters required as these are faces specific - no Skyve converters for these
+			// Time
+			else if (converter instanceof org.skyve.domain.types.converters.time.HH_MI_SS) {
 				result = new HH_MI_SS();
 			}
-	        else if ("HH24_MI".equals(converterName)) {
-	            result = new HH24_MI();
-	        }
-			else if ("HH24_MI_SS".equals(converterName)) {
+			else if (converter instanceof org.skyve.domain.types.converters.time.HH_MI) {
+				result = new HH_MI();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.time.HH24_MI_SS) {
 				result = new HH24_MI_SS();
 			}
-	        else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
-	            result = new DD_MM_YYYY_HH_MI_SS();
-	        }
-	        else if ("DD_MM_YYYY_HH24_MI_SS".equals(converterName)) {
-	            result = new DD_MM_YYYY_HH24_MI_SS();
-	        }
-	        else if ("DD_MMM_YYYY_HH_MI_SS".equals(converterName)) {
-	            result = new DD_MMM_YYYY_HH_MI_SS();
-	        }
-	        else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
-	            result = new DD_MMM_YYYY_HH24_MI_SS();
-	        }
-			else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+			else if (converter instanceof org.skyve.domain.types.converters.time.HH24_MI) {
+				result = new HH24_MI();
+			}
+			// Timestamp
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH_MI_SS) {
+				result = new DD_MM_YYYY_HH_MI_SS();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH24_MI_SS) {
+				result = new DD_MM_YYYY_HH24_MI_SS();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MM_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH_MI_SS) {
+				result = new DD_MMM_YYYY_HH_MI_SS();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS) {
+				result = new DD_MMM_YYYY_HH24_MI_SS();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS) {
 				result = new MM_DD_YYYY_HH_MI_SS();
-			} else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH24_MI_SS) {
 				result = new MM_DD_YYYY_HH24_MI_SS();
-			} else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.MM_DD_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH_MI_SS) {
 				result = new MMM_DD_YYYY_HH_MI_SS();
-			} else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS) {
 				result = new MMM_DD_YYYY_HH24_MI_SS();
 			}
-	    }
-	    else {
-	    	// Set default faces numeric converters if none is set
-	    	if (AttributeType.decimal2.equals(type)) {
-	    		result = new Decimal2();
-	    	}
-	    	else if (AttributeType.decimal5.equals(type)) {
-	    		result = new Decimal5();
-	    	}
-	    	else if (AttributeType.decimal10.equals(type)) {
-	    		result = new Decimal10();
-	    	}
-	    	else if (AttributeType.integer.equals(type)) {
-	    		result = new org.skyve.impl.web.faces.converters.lang.Integer();
-	    	}
-	    	else if (AttributeType.longInteger.equals(type)) {
-	    		result = new org.skyve.impl.web.faces.converters.lang.Long();
-	    	}
-	    }
-	    
-	    return result;
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY) {
+				result = new org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS) {
+				result = new org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD_HH_MI_SS();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS) {
+				result = new org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD_HH24_MI_SS();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.timestamp.YYYY_MM_DD) {
+				result = new org.skyve.impl.web.faces.converters.timestamp.YYYY_MM_DD();
+			}
+			else {
+				throw new IllegalArgumentException(converter + " cannot be converted to a faces converter");
+			}
+		}
+		else {
+			// Set default faces numeric converters if none is set
+			if (AttributeType.decimal2.equals(type)) {
+				result = new Decimal2Converter();
+			}
+			else if (AttributeType.decimal5.equals(type)) {
+				result = new Decimal5Converter();
+			}
+			else if (AttributeType.decimal10.equals(type)) {
+				result = new Decimal10Converter();
+			}
+			else if (AttributeType.integer.equals(type)) {
+				result = new IntegerConverter();
+			}
+			else if (AttributeType.longInteger.equals(type)) {
+				result = new LongIntegerConverter();
+			}
+		}
+
+		return result;
 	}
 	
 	@Override

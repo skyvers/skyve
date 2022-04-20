@@ -1,6 +1,7 @@
 package org.skyve.domain.types.converters.time;
 
 import org.skyve.CORE;
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -30,25 +31,25 @@ public abstract class AbstractTimeConverter implements Converter<TimeOnly> {
 	 */
 	protected abstract String getPattern();
 
+	protected abstract String getI18nKey();
+	
 	@Override
-	public TimeOnly fromDisplayValue(String displayValue) throws Exception {
-		/*DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getPattern(), Locale.ENGLISH);
-		LocalTime localTime = LocalTime.parse(displayValue, formatter);
-		
-		Instant timeOnEpochDayInDefaultTimeZone = LocalDate.EPOCH
-		        .atTime(localTime)
-		        .atZone(ZoneId.systemDefault())
-		        .toInstant();
-		
-		return new TimeOnly(Date.from(timeOnEpochDayInDefaultTimeZone));*/
-		return new TimeOnly(CORE.getDateFormat(getPattern()).parse(displayValue).getTime());
+	public TimeOnly fromDisplayValue(String displayValue) throws ConversionException {
+		try {
+			return new TimeOnly(CORE.getDateFormat(getPattern()).parse(displayValue).getTime());
+		}
+		catch (Exception e) {
+			throw new ConversionException(getI18nKey(), e);
+		}
 	}
 
 	@Override
-	public String toDisplayValue(TimeOnly value) throws Exception {
-		/*DateTimeFormatter formatter = DateTimeFormatter.ofPattern(getPattern(), Locale.ENGLISH);
-		LocalDateTime localTime = Instant.ofEpochMilli(value.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-		return formatter.format(localTime);*/
-		return CORE.getDateFormat(getPattern()).format(value);
+	public String toDisplayValue(TimeOnly value) throws ConversionException {
+		try {
+			return CORE.getDateFormat(getPattern()).format(value);
+		}
+		catch (Exception e) {
+			throw new ConversionException(getI18nKey(), e);
+		}
 	}
 }

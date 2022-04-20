@@ -73,14 +73,19 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
 import org.skyve.domain.types.converters.date.MM_DD_YYYY;
+import org.skyve.domain.types.converters.date.YYYY_MM_DD;
 import org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
+import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
+import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
+import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
+import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -2989,10 +2994,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setPattern("dd/MM/yyyy");
 			result.setMask("99/99/9999");
 		}
-		else if ("DD_MMM_YYYY".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy");
-			result.setMask("99-aaa-9999");
-		}
 		else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy hh:mm a");
 			result.setMask("99/99/9999 99:99 aa");
@@ -3001,14 +3002,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setPattern("dd/MM/yyyy HH:mm");
 			result.setMask("99/99/9999 99:99");
 		}
-		else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy hh:mm a");
-			result.setMask("99-aaa-9999 99:99 aa");
-		}
-		else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy HH:mm");
-			result.setMask("99-aaa-9999 99:99");
-		}
 		else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy hh:mm:ss a");
 			result.setMask("99/99/9999 99:99:99 aa");
@@ -3016,6 +3009,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else if ("DD_MM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy HH:mm:ss");
 			result.setMask("99/99/9999 99:99:99");
+		}
+		else if ("DD_MMM_YYYY".equals(converterName)) {
+			result.setPattern("dd-MMM-yyyy");
+			result.setMask("99-aaa-9999");
+		}
+		else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
+			result.setPattern("dd-MMM-yyyy hh:mm a");
+			result.setMask("99-aaa-9999 99:99 aa");
+		}
+		else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
+			result.setPattern("dd-MMM-yyyy HH:mm");
+			result.setMask("99-aaa-9999 99:99");
 		}
 		else if ("DD_MMM_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy hh:mm:ss a");
@@ -3028,33 +3033,65 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else if ("MM_DD_YYYY".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY.PATTERN);
 			result.setMask("99/99/9999");
-		} else if ("MMM_DD_YYYY".equals(converterName)) {
-			result.setPattern(MMM_DD_YYYY.PATTERN);
-			result.setMask("aaa-99-9999");
-		} else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
+		}
+		else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI.PATTERN);
 			result.setMask("99/99/9999 99:99 aa");
-		} else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
+		}
+		else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI.PATTERN);
 			result.setMask("99/99/9999 99:99");
-		} else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
-			result.setPattern(MMM_DD_YYYY_HH_MI.PATTERN);
-			result.setMask("aaa-99-9999 99:99 aa");
-		} else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
-			result.setPattern(MMM_DD_YYYY_HH24_MI.PATTERN);
-			result.setMask("aaa-99-9999 99:99");
-		} else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+		}
+		else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI_SS.PATTERN);
 			result.setMask("99/99/9999 99:99:99 aa");
-		} else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+		}
+		else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI_SS.PATTERN);
 			result.setMask("99/99/9999 99:99:99");
-		} else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+		}
+		else if ("MMM_DD_YYYY".equals(converterName)) {
+			result.setPattern(MMM_DD_YYYY.PATTERN);
+			result.setMask("aaa-99-9999");
+		}
+		else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
+			result.setPattern(MMM_DD_YYYY_HH_MI.PATTERN);
+			result.setMask("aaa-99-9999 99:99 aa");
+		}
+		else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
+			result.setPattern(MMM_DD_YYYY_HH24_MI.PATTERN);
+			result.setMask("aaa-99-9999 99:99");
+		}
+		else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI_SS.PATTERN);
 			result.setMask("aaa-99-9999 99:99:99 aa");
-		} else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+		}
+		else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI_SS.PATTERN);
 			result.setMask("aaa-99-9999 99:99:99");
+		}
+		else if ("YYYY_MM_DD".equals(converterName)) {
+			result.setPattern(YYYY_MM_DD.PATTERN);
+			result.setMask("9999/99/99");
+		}
+		else if ("YYYY_MM_DD_HH_MI".equals(converterName)) {
+			result.setPattern(YYYY_MM_DD_HH_MI.PATTERN);
+			result.setMask("9999/99/99 99:99 aa");
+		}
+		else if ("YYYY_MM_DD_HH24_MI".equals(converterName)) {
+			result.setPattern(YYYY_MM_DD_HH24_MI.PATTERN);
+			result.setMask("9999/99/99 99:99");
+		}
+		else if ("YYYY_MM_DD_HH_MI_SS".equals(converterName)) {
+			result.setPattern(YYYY_MM_DD_HH_MI_SS.PATTERN);
+			result.setMask("9999/99/99 99:99:99 aa");
+		}
+		else if ("YYYY_MM_DD_HH24_MI_SS".equals(converterName)) {
+			result.setPattern(YYYY_MM_DD_HH24_MI_SS.PATTERN);
+			result.setMask("9999/99/99 99:99:99");
+		}
+		else {
+			throw new IllegalStateException(converterName + " is not supported");
 		}
 
 		result.setConverter(converter);

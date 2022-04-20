@@ -1,35 +1,45 @@
 package org.skyve.domain.types.converters;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 public interface Converter<T> {
 	/**
-	 * 
-	 * @param displayValue
-	 * @return
-	 * @throws Exception
+	 * Convert a display value to an instance of T.
+	 * This method should be symmetric with {@link #toDisplayValue(Object)}.
+	 * @param displayValue	The display value.
+	 * @return	An instance of T.
+	 * @throws ConversionException
 	 */
-	public T fromDisplayValue(String displayValue) throws Exception;
+	@Nullable T fromDisplayValue(@Nonnull String displayValue) throws ConversionException;
 
 	/**
-	 * 
-	 * @param value
-	 * @return
-	 * @throws Exception
+	 * Convert an instance of T to a display value.
+	 * This method should be symmetric with {@link #fromDisplayValue(String)}
+	 * @param value	An instance of T.
+	 * @return	The display value.
+	 * @throws ConversionException
 	 */
-	public String toDisplayValue(T value) throws Exception;
-	
-	public AttributeType getAttributeType();
-	
-	/**
-	 * A format definition to use to format the value for this converter.
-	 * @return
-	 */
-	public Format<T> getFormat();
+	@Nonnull String toDisplayValue(@Nonnull T value) throws ConversionException;
 	
 	/**
-	 * A validator to use after running fromDisplayValue()
-	 * @return
+	 * The attribute type this converter is applicable to.
+	 * @return	The applicable attribute type.
 	 */
-	public Validator<T> getValidator();
+	@Nonnull AttributeType getAttributeType();
+	
+	/**
+	 * The format definition to use to format the value for this converter.
+	 * @return	The format definition.
+	 */
+	@Nullable Format<T> getFormat();
+	
+	/**
+	 * The validator to use after running fromDisplayValue()
+	 * @return	The validator.
+	 */
+	@Nullable Validator<T> getValidator();
 }

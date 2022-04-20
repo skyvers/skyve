@@ -41,6 +41,6 @@ public class AssociationPickListConverter implements Converter {
 
     @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) {
-    	return (value == null) ? null : ((DomainValue) value).getCode();
+    	return (value == null) ? "" : ((DomainValue) value).getCode();
     }
 }

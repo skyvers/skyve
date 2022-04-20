@@ -3,10 +3,9 @@ package org.skyve.domain.types.converters.datetime;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.text.ParseException;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
@@ -19,7 +18,7 @@ public class DD_MMM_YYYY_HH_MITest {
 		formatter = new DD_MMM_YYYY_HH_MI();
 	}
 
-	@Test(expected = ParseException.class)
+	@Test(expected = ConversionException.class)
 	public void testFromDisplayValueInvalidFormat() throws Exception {
 		// setup the test data
 		DateTime testDate = new DateTime(Time.withDate(01, 03, 2020));

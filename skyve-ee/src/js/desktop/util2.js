@@ -254,6 +254,7 @@ isc.BizUtil.addClassMethods({
 				type.startsWith('DD_MM') ||
 				type.startsWith('MM_DD') ||
 				type.startsWith('MMM_DD') ||
+				type.startsWith('YYYY_MM') ||
 				type.startsWith('HH_MI') ||
 				type.startsWith('HH24_MI');
 	},

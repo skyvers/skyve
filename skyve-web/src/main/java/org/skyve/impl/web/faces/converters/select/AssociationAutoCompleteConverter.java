@@ -65,7 +65,7 @@ public class AssociationAutoCompleteConverter implements Converter {
 
     @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) {
-    	String result = null;
+    	String result = "";
     	
     	Bean bean = null;
 		if (value instanceof BeanMapAdapter<?>) {
