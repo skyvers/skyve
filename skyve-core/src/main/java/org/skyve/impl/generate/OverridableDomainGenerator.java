@@ -2044,10 +2044,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		enums.append("\t\t\treturn code;\n");
 		enums.append("\t\t}\n\n");
 
-		// toDescription()
+		// toLocalisedDescription()
 		enums.append("\t\t@Override\n");
-		enums.append("\t\tpublic String toDescription() {\n");
-		enums.append("\t\t\treturn description;\n");
+		enums.append("\t\tpublic String toLocalisedDescription() {\n");
+		enums.append("\t\t\treturn Util.i18n(description);\n");
 		enums.append("\t\t}\n\n");
 
 		// toDomainValue()
@@ -2068,11 +2068,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		enums.append("\t\t\treturn result;\n");
 		enums.append("\t\t}\n\n");
 
-		// fromDescription
-		enums.append("\t\tpublic static ").append(typeName).append(" fromDescription(String description) {\n");
+		// fromLocalisedDescription
+		enums.append("\t\tpublic static ").append(typeName).append(" fromLocalisedDescription(String description) {\n");
 		enums.append("\t\t\t").append(typeName).append(" result = null;\n\n");
 		enums.append("\t\t\tfor (").append(typeName).append(" value : values()) {\n");
-		enums.append("\t\t\t\tif (value.description.equals(description)) {\n");
+		enums.append("\t\t\t\tif (value.toLocalisedDescription().equals(description)) {\n");
 		enums.append("\t\t\t\t\tresult = value;\n");
 		enums.append("\t\t\t\t\tbreak;\n");
 		enums.append("\t\t\t\t}\n");
@@ -3101,6 +3101,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						else { // this is an inline definition
 							imports.add("org.skyve.domain.types.Enumeration");
 							imports.add("org.skyve.metadata.model.document.Bizlet.DomainValue");
+							imports.add("org.skyve.util.Util");
 							imports.add("java.util.List");
 							imports.add("java.util.ArrayList");
 							imports.add("javax.xml.bind.annotation.XmlEnum");

@@ -250,7 +250,7 @@ public final class ComparisonJSONManipulator {
 																				runtime);
 		Map<String, String> result = new TreeMap<>(); 
 		for (DomainValue value : values) {
-			result.put(value.getCode(), OWASP.escapeJsString(value.getDescription()));
+			result.put(value.getCode(), OWASP.escapeJsString(value.getLocalisedDescription()));
 		}
 		
 		return result;

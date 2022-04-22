@@ -114,7 +114,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				}
 
 				// sort the list by description in case the singular alias changes the sort order
-				results.sort(Comparator.comparing(DomainValue::getDescription));
+				results.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 			}
 			return results;
 		}

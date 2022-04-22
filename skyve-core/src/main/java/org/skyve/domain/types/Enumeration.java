@@ -18,12 +18,12 @@ public interface Enumeration extends SerializableMetaData {
 	public static final String FROM_CODE_METHOD_NAME = "fromCode";
 	
 	/**
-	 * The fromDescription method name.
+	 * The fromLocalisedDescription method name.
 	 */
-	public static final String FROM_DESCRIPTION_METHOD_NAME = "fromDescription";
+	public static final String FROM_LOCALISED_DESCRIPTION_METHOD_NAME = "fromLocalisedDescription";
 
 	/**
-	 * The fromDescription method name.
+	 * The toDomainValues method name.
 	 */
 	public static final String TO_DOMAIN_VALUES_METHOD_NAME = "toDomainValues";
 
@@ -39,7 +39,7 @@ public interface Enumeration extends SerializableMetaData {
 	 * The description is displayed in UIs.
 	 * @return	the description of the enumerated value.
 	 */
-	public String toDescription();
+	public String toLocalisedDescription();
 	
 	/**
 	 * Return a domain value representation of this enumerated value.

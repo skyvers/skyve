@@ -31,6 +31,7 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.impl.domain.types.jaxb.TimeOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Kitchen Sink
@@ -176,8 +177,8 @@ public class KitchenSink extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -198,11 +199,11 @@ public class KitchenSink extends AbstractTransientBean {
 			return result;
 		}
 
-		public static Combo fromDescription(String description) {
+		public static Combo fromLocalisedDescription(String description) {
 			Combo result = null;
 
 			for (Combo value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -254,8 +255,8 @@ public class KitchenSink extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -276,11 +277,11 @@ public class KitchenSink extends AbstractTransientBean {
 			return result;
 		}
 
-		public static Radio fromDescription(String description) {
+		public static Radio fromLocalisedDescription(String description) {
 			Radio result = null;
 
 			for (Radio value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

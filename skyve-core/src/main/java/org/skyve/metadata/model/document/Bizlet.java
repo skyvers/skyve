@@ -60,7 +60,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 		 */
 		public DomainValue(String code, String description) {
 			this.code = code;
-			this.description = Util.i18n(description);
+			this.description = description;
 		}
 		
 		/**
@@ -75,8 +75,8 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 		 * 
 		 * @return
 		 */
-		public String getDescription() {
-			return description;
+		public String getLocalisedDescription() {
+			return Util.i18n(description);
 		}
 		
 		@Override

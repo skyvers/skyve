@@ -18,6 +18,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Qualification
@@ -95,8 +96,8 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -117,11 +118,11 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 			return result;
 		}
 
-		public static Type fromDescription(String description) {
+		public static Type fromLocalisedDescription(String description) {
 			Type result = null;
 
 			for (Type value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

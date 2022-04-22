@@ -357,7 +357,7 @@ public class UserDashboardExtension extends UserDashboard {
 						link.setLength(0);
 					}
 				} else {
-					action = operation.toDescription();
+					action = operation.toLocalisedDescription();
 					actionClass = "fa-angle-up";
 					tileOperation = Tile.Operation.update;
 
@@ -368,7 +368,7 @@ public class UserDashboardExtension extends UserDashboard {
 				}
 				break;
 			default:
-				action = operation.toDescription();
+				action = operation.toLocalisedDescription();
 				actionClass = "fa-chevron-right";
 
 				// clear the link if the user does not have read permission

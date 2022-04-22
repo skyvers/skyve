@@ -15,6 +15,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Import Export Column
@@ -81,8 +82,8 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -103,11 +104,11 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 			return result;
 		}
 
-		public static LoadAction fromDescription(String description) {
+		public static LoadAction fromLocalisedDescription(String description) {
 			LoadAction result = null;
 
 			for (LoadAction value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

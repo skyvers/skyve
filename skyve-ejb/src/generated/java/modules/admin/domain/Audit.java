@@ -16,6 +16,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Audit
@@ -107,8 +108,8 @@ public class Audit extends AbstractPersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -129,11 +130,11 @@ public class Audit extends AbstractPersistentBean {
 			return result;
 		}
 
-		public static Operation fromDescription(String description) {
+		public static Operation fromLocalisedDescription(String description) {
 			Operation result = null;
 
 			for (Operation value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

@@ -15,6 +15,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Report Manager
@@ -78,8 +79,8 @@ public abstract class ReportManager extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -100,11 +101,11 @@ public abstract class ReportManager extends AbstractTransientBean {
 			return result;
 		}
 
-		public static ImportActionType fromDescription(String description) {
+		public static ImportActionType fromLocalisedDescription(String description) {
 			ImportActionType result = null;
 
 			for (ImportActionType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

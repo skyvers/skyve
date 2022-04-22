@@ -133,7 +133,7 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						default:
 							break;
 						}
-						sb.append(" using load action ").append(col.getLoadAction().toDescription());
+						sb.append(" using load action ").append(col.getLoadAction().toLocalisedDescription());
 					}
 
 					if (loader.isDebugMode()) {

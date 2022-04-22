@@ -12,6 +12,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * User Monthly Hits
@@ -83,8 +84,8 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -105,11 +106,11 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 			return result;
 		}
 
-		public static Device fromDescription(String description) {
+		public static Device fromLocalisedDescription(String description) {
 			Device result = null;
 
 			for (Device value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

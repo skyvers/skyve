@@ -10,6 +10,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 public interface ReportDataset extends PersistentBean {
 	public static final String MODULE_NAME = Contact.MODULE_NAME;
@@ -48,8 +49,8 @@ public interface ReportDataset extends PersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -70,11 +71,11 @@ public interface ReportDataset extends PersistentBean {
 			return result;
 		}
 
-		public static DatasetType fromDescription(String description) {
+		public static DatasetType fromLocalisedDescription(String description) {
 			DatasetType result = null;
 
 			for (DatasetType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

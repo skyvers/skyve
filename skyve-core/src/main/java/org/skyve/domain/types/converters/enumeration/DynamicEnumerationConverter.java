@@ -9,6 +9,7 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.util.Util;
 
 /**
  * Used to convert dynamic enumeration code/display without using Java method invocations.
@@ -26,7 +27,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 			// check code first
 			for (EnumeratedValue enumValue : values) {
 				String code = enumValue.getCode();
-				String display = enumValue.getDescription();
+				String display = Util.i18n(enumValue.getDescription());
 				if (display == null) {
 					display = code;
 				}
@@ -36,7 +37,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 			}
 			// check name next
 			for (EnumeratedValue enumValue : values) {
-				String display = enumValue.getDescription();
+				String display = Util.i18n(enumValue.getDescription());
 				if (display == null) {
 					display = enumValue.getCode();
 				}
@@ -46,12 +47,12 @@ public class DynamicEnumerationConverter implements Converter<String> {
 			}
 			// check description last
 			for (EnumeratedValue enumValue : values) {
-				String description = enumValue.getDescription();
-				String display = description;
+				String localisedDescription = Util.i18n(enumValue.getDescription());
+				String display = localisedDescription;
 				if (display == null) {
 					display = enumValue.getCode();
 				}
-				if (value.equals(description)) {
+				if (value.equals(localisedDescription)) {
 					return display;
 				}
 			}
@@ -68,7 +69,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 			// check description first
 			for (EnumeratedValue enumValue : values) {
 				String code = enumValue.getCode();
-				if (displayValue.equals(enumValue.getDescription())) {
+				if (displayValue.equals(Util.i18n(enumValue.getDescription()))) {
 					return code;
 				}
 			}

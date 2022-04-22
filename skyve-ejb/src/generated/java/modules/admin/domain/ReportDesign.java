@@ -17,6 +17,7 @@ import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.domain.types.jaxb.Decimal2Mapper;
 import org.skyve.impl.domain.types.jaxb.Decimal5Mapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Report Design
@@ -243,8 +244,8 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -265,11 +266,11 @@ public class ReportDesign extends AbstractTransientBean {
 			return result;
 		}
 
-		public static Mode fromDescription(String description) {
+		public static Mode fromLocalisedDescription(String description) {
 			Mode result = null;
 
 			for (Mode value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -322,8 +323,8 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -344,11 +345,11 @@ public class ReportDesign extends AbstractTransientBean {
 			return result;
 		}
 
-		public static DefinitionSource fromDescription(String description) {
+		public static DefinitionSource fromLocalisedDescription(String description) {
 			DefinitionSource result = null;
 
 			for (DefinitionSource value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -399,8 +400,8 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -421,11 +422,11 @@ public class ReportDesign extends AbstractTransientBean {
 			return result;
 		}
 
-		public static ReportType fromDescription(String description) {
+		public static ReportType fromLocalisedDescription(String description) {
 			ReportType result = null;
 
 			for (ReportType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -476,8 +477,8 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -498,11 +499,11 @@ public class ReportDesign extends AbstractTransientBean {
 			return result;
 		}
 
-		public static Orientation fromDescription(String description) {
+		public static Orientation fromLocalisedDescription(String description) {
 			Orientation result = null;
 
 			for (Orientation value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -554,8 +555,8 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -576,11 +577,11 @@ public class ReportDesign extends AbstractTransientBean {
 			return result;
 		}
 
-		public static CollectionType fromDescription(String description) {
+		public static CollectionType fromLocalisedDescription(String description) {
 			CollectionType result = null;
 
 			for (CollectionType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

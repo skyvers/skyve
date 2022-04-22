@@ -22,6 +22,7 @@ import org.skyve.impl.domain.types.jaxb.Decimal5Mapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Binder;
 import org.skyve.util.ExpressionEvaluator;
+import org.skyve.util.Util;
 
 /**
  * Inline Grid
@@ -89,8 +90,8 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -111,11 +112,11 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 			return result;
 		}
 
-		public static Enum3 fromDescription(String description) {
+		public static Enum3 fromLocalisedDescription(String description) {
 			Enum3 result = null;
 
 			for (Enum3 value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

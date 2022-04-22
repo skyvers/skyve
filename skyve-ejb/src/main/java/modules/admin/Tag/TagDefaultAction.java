@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 public enum TagDefaultAction {
 	tagUpsert("SkyveUpsert", "Upsert (Save Top Level Only) Documents"), tagResave("SkyveResave", "Save Documents"), tagDelete("SkyveDelete", "Delete Documents"), tagValidate("SkyveValidate", "Validate Documents");
@@ -23,8 +24,8 @@ public enum TagDefaultAction {
 		return code;
 	}
 
-	public String toDescription() {
-		return description;
+	public String toLocalisedDescription() {
+		return Util.i18n(description);
 	}
 
 	public static TagDefaultAction fromCode(String code) {
@@ -40,11 +41,11 @@ public enum TagDefaultAction {
 		return result;
 	}
 
-	public static TagDefaultAction fromDescription(String description) {
+	public static TagDefaultAction fromLocalisedDescription(String description) {
 		TagDefaultAction result = null;
 
 		for (TagDefaultAction value : values()) {
-			if (value.description.equals(description)) {
+			if (value.toLocalisedDescription().equals(description)) {
 				result = value;
 				break;
 			}

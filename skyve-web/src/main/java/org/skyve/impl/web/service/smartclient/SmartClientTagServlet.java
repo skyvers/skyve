@@ -202,7 +202,7 @@ public class SmartClientTagServlet extends HttpServlet {
 
         for (DomainValue value : EXT.getTagManager().getTags()) {
         	String escapedCode = OWASP.escapeJsString(value.getCode());
-        	String escapedDescription = OWASP.escapeJsString(value.getDescription());
+        	String escapedDescription = OWASP.escapeJsString(value.getLocalisedDescription());
         	
         	// tag select menu
             sb.append(",{title:'").append(escapedDescription).append("',icon:'icons/tag.png',click:function(){");

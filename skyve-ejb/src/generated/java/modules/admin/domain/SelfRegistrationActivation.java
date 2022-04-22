@@ -14,6 +14,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Self Registration Activation
@@ -77,8 +78,8 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -99,11 +100,11 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 			return result;
 		}
 
-		public static Result fromDescription(String description) {
+		public static Result fromLocalisedDescription(String description) {
 			Result result = null;
 
 			for (Result value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

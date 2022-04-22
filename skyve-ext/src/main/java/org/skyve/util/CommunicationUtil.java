@@ -305,7 +305,7 @@ public class CommunicationUtil {
 								msg.append(address).append(" has a ").append(subscriptionDoc.getLocalisedSingularAlias());
 								msg.append(" set ").append(Subscription.declinedPropertyName);
 								if (subscription.getFormatType() != null) {
-									msg.append(" for ").append(subscription.getFormatType().toDescription());
+									msg.append(" for ").append(subscription.getFormatType().toLocalisedDescription());
 								}
 
 								// block the communication if explicit mode

@@ -36,7 +36,7 @@ public class OfficeMap extends MapModel<Office> {
 				MapFeature feature = new MapFeature();
 				feature.setGeometry(office.getBoundary());
 				feature.setFillColour("#FFFF00"); //yellow
-				feature.setFillOpacity(Float.valueOf(0.8f));
+				feature.setFillOpacity(0.8f);
 				feature.setStrokeColour("#BDB76B"); //dark khaki
 				item.getFeatures().add(feature);
 
@@ -62,7 +62,7 @@ public class OfficeMap extends MapModel<Office> {
 					StringBuilder markup = new StringBuilder(64);
 					markup.append(member.getContact().getName());
 					if (memberStatus != null) {
-						markup.append("<br/>").append(memberStatus.toDescription());
+						markup.append("<br/>").append(memberStatus.toLocalisedDescription());
 					}
 					item.setInfoMarkup(markup.toString());
 					

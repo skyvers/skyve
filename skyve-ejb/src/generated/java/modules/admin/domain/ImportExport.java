@@ -14,6 +14,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Import Export
@@ -112,8 +113,8 @@ public abstract class ImportExport extends AbstractPersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -134,11 +135,11 @@ public abstract class ImportExport extends AbstractPersistentBean {
 			return result;
 		}
 
-		public static Mode fromDescription(String description) {
+		public static Mode fromLocalisedDescription(String description) {
 			Mode result = null;
 
 			for (Mode value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -189,8 +190,8 @@ public abstract class ImportExport extends AbstractPersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -211,11 +212,11 @@ public abstract class ImportExport extends AbstractPersistentBean {
 			return result;
 		}
 
-		public static RollbackErrors fromDescription(String description) {
+		public static RollbackErrors fromLocalisedDescription(String description) {
 			RollbackErrors result = null;
 
 			for (RollbackErrors value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -274,8 +275,8 @@ public abstract class ImportExport extends AbstractPersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -296,11 +297,11 @@ public abstract class ImportExport extends AbstractPersistentBean {
 			return result;
 		}
 
-		public static LoadType fromDescription(String description) {
+		public static LoadType fromLocalisedDescription(String description) {
 			LoadType result = null;
 
 			for (LoadType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

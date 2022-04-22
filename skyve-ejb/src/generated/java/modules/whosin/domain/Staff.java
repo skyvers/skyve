@@ -26,6 +26,7 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Util;
 
 /**
  * Staff
@@ -124,8 +125,8 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -146,11 +147,11 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 			return result;
 		}
 
-		public static Status fromDescription(String description) {
+		public static Status fromLocalisedDescription(String description) {
 			Status result = null;
 
 			for (Status value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

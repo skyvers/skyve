@@ -37,7 +37,7 @@ public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 		
 		if (TagDefaultAction.isDefaultTagAction(tag.getDocumentAction())) {
 			TagDefaultAction defaultAction  = TagDefaultAction.fromCode(tag.getDocumentAction());
-			sb.append(defaultAction.toDescription());	
+			sb.append(defaultAction.toLocalisedDescription());	
 		} else {
 			sb.append(tag.getDocumentAction());
 		}

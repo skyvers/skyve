@@ -15,6 +15,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Control Panel
@@ -183,8 +184,8 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -205,11 +206,11 @@ public abstract class ControlPanel extends AbstractTransientBean {
 			return result;
 		}
 
-		public static SailUserAgentType fromDescription(String description) {
+		public static SailUserAgentType fromLocalisedDescription(String description) {
 			SailUserAgentType result = null;
 
 			for (SailUserAgentType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -263,8 +264,8 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -285,11 +286,11 @@ public abstract class ControlPanel extends AbstractTransientBean {
 			return result;
 		}
 
-		public static SailTestStrategy fromDescription(String description) {
+		public static SailTestStrategy fromLocalisedDescription(String description) {
 			SailTestStrategy result = null;
 
 			for (SailTestStrategy value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -340,8 +341,8 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -362,11 +363,11 @@ public abstract class ControlPanel extends AbstractTransientBean {
 			return result;
 		}
 
-		public static SailExecutor fromDescription(String description) {
+		public static SailExecutor fromLocalisedDescription(String description) {
 			SailExecutor result = null;
 
 			for (SailExecutor value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

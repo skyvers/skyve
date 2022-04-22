@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 public interface ReportParameter extends PersistentBean {
 	public static final String MODULE_NAME = Contact.MODULE_NAME;
@@ -46,8 +47,8 @@ public interface ReportParameter extends PersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -68,11 +69,11 @@ public interface ReportParameter extends PersistentBean {
 			return result;
 		}
 
-		public static Type fromDescription(String description) {
+		public static Type fromLocalisedDescription(String description) {
 			Type result = null;
 
 			for (Type value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

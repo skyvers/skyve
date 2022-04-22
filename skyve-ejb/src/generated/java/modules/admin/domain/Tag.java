@@ -15,6 +15,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Tag
@@ -153,8 +154,8 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -175,11 +176,11 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 			return result;
 		}
 
-		public static CombinationsOperator fromDescription(String description) {
+		public static CombinationsOperator fromLocalisedDescription(String description) {
 			CombinationsOperator result = null;
 
 			for (CombinationsOperator value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -231,8 +232,8 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -253,11 +254,11 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 			return result;
 		}
 
-		public static FilterOperator fromDescription(String description) {
+		public static FilterOperator fromLocalisedDescription(String description) {
 			FilterOperator result = null;
 
 			for (FilterOperator value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -308,8 +309,8 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -330,11 +331,11 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 			return result;
 		}
 
-		public static FilterAction fromDescription(String description) {
+		public static FilterAction fromLocalisedDescription(String description) {
 			FilterAction result = null;
 
 			for (FilterAction value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

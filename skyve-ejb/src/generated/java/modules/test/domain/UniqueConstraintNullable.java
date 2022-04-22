@@ -12,6 +12,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * All Unique Constraint Nullable
@@ -75,8 +76,8 @@ public class UniqueConstraintNullable extends AbstractPersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -97,11 +98,11 @@ public class UniqueConstraintNullable extends AbstractPersistentBean {
 			return result;
 		}
 
-		public static Enum3 fromDescription(String description) {
+		public static Enum3 fromLocalisedDescription(String description) {
 			Enum3 result = null;
 
 			for (Enum3 value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

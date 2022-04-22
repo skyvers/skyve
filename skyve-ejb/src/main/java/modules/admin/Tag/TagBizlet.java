@@ -46,7 +46,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				Document document = module.getDocument(customer, documentName);
 				result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 			}
-			result.sort(Comparator.comparing(DomainValue::getDescription));
+			result.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 		}
 
 		if (Tag.uploadDocumentNamePropertyName.equals(attributeName)
@@ -56,7 +56,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				Document document = module.getDocument(customer, documentName);
 				result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 			}
-			result.sort(Comparator.comparing(DomainValue::getDescription));
+			result.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 		}
 
 		if (Tag.attributeNamePropertyName.equals(attributeName)
@@ -66,7 +66,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			for (Attribute attribute : document.getAllAttributes(customer)) {
 				result.add(new DomainValue(attribute.getName(), attribute.getLocalisedDisplayName()));
 			}
-			result.sort(Comparator.comparing(DomainValue::getDescription));
+			result.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 		}
 
 		if (Tag.operandTagPropertyName.equals(attributeName)) {
@@ -79,7 +79,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 			for (Tag t : tags) {
 				result.add(new DomainValue(t.getBizId(), t.getName()));
 			}
-			result.sort(Comparator.comparing(DomainValue::getDescription));
+			result.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 		}
 
 		if (Tag.documentActionPropertyName.equals(attributeName)
@@ -92,7 +92,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 
 			// add default save action
 			result.addAll(TagDefaultAction.toDomainValues());
-			result.sort(Comparator.comparing(DomainValue::getDescription));
+			result.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 		}
 
 		if (Tag.documentConditionPropertyName.equals(attributeName)
@@ -103,7 +103,7 @@ public class TagBizlet extends Bizlet<TagExtension> {
 				Condition condition = document.getCondition(act);
 				result.add(new DomainValue(act, (condition.getDescription() == null ? act : condition.getDescription())));
 			}
-			result.sort(Comparator.comparing(DomainValue::getDescription));
+			result.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 		}
 
 		return result;

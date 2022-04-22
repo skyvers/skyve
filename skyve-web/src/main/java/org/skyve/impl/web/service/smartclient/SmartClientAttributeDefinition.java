@@ -718,7 +718,7 @@ public class SmartClientAttributeDefinition {
 		sb.append('{');
 		for (DomainValue value : values) {
 			sb.append('\'').append(OWASP.escapeJsString(value.getCode())).append("':'");
-			sb.append(OWASP.escapeJsString(value.getDescription())).append("',");
+			sb.append(OWASP.escapeJsString(value.getLocalisedDescription())).append("',");
 		}
 		if (values.isEmpty()) { // no values
 			sb.append('}');

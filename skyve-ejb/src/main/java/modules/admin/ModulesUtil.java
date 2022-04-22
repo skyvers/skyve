@@ -71,7 +71,7 @@ public class ModulesUtil {
 	public static class DomainValueSortByDescription implements Comparator<DomainValue> {
 		@Override
 		public int compare(DomainValue d1, DomainValue d2) {
-			return d1.getDescription().compareTo(d2.getDescription());
+			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
 		}
 	}
 

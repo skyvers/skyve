@@ -2475,7 +2475,7 @@ public void doWorkOnConnection(Session session) {
 					Object value = BindUtil.get(bean, attributeName);
 					if (domainValues != null) {
 						for (DomainValue domainValue : domainValues) {
-							if (domainValue.getDescription().equals(value)) {
+							if (domainValue.getLocalisedDescription().equals(value)) {
 								value = domainValue.getCode();
 								break;
 							}

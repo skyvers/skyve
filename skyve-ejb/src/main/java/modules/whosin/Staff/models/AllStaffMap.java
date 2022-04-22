@@ -36,7 +36,7 @@ public class AllStaffMap extends MapModel<Staff> {
 				StringBuilder markup = new StringBuilder(64);
 				markup.append(member.getContact().getName());
 				if (memberStatus != null) {
-					markup.append("<br/>").append(memberStatus.toDescription());
+					markup.append("<br/>").append(memberStatus.toLocalisedDescription());
 				}
 				item.setInfoMarkup(markup.toString());
 

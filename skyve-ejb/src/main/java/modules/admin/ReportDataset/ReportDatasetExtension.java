@@ -148,7 +148,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	@Override
 	public List<Bean> executeQuery() throws Exception {
 		if (DatasetType.bizQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.bizQL.toDescription()));
+			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.bizQL.toLocalisedDescription()));
 		}
 
 		SubstitutedQueryResult sQR = getSubstitutedQuery();
@@ -209,7 +209,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	@Override
 	public List<DynaBean> executeSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toDescription()));
+			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toLocalisedDescription()));
 		}
 
 		final SQL sql = CORE.getPersistence().newSQL(getQuery());
@@ -273,7 +273,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 */
 	public List<Bean> executeTestQuery() {
 		if (DatasetType.bizQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.bizQL.toDescription()));
+			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.bizQL.toLocalisedDescription()));
 		}
 
 		SubstitutedQueryResult sQR = getSubstitutedQuery();
@@ -315,7 +315,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	 */
 	public List<DynaBean> executeTestSQLQuery() throws Exception {
 		if (DatasetType.SQL != getDatasetType()) {
-			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toDescription()));
+			throw new IllegalArgumentException(String.format("Dataset type must be %s", DatasetType.SQL.toLocalisedDescription()));
 		}
 
 		final SQL sql = CORE.getPersistence().newSQL(getQuery());

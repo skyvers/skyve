@@ -33,6 +33,7 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.impl.domain.types.jaxb.TimeOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * All Value
@@ -150,8 +151,8 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -172,11 +173,11 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 			return result;
 		}
 
-		public static Enum3 fromDescription(String description) {
+		public static Enum3 fromLocalisedDescription(String description) {
 			Enum3 result = null;
 
 			for (Enum3 value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

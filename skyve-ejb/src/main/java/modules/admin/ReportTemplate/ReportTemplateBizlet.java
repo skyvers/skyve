@@ -397,7 +397,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			results.add(new DomainValue(document.getName(), document.getSingularAlias()));
 		}
 		// sort the list by description in case the singular alias changes the sort order
-		results.sort(Comparator.comparing(DomainValue::getDescription));
+		results.sort(Comparator.comparing(DomainValue::getLocalisedDescription));
 
 		return results;
 	}

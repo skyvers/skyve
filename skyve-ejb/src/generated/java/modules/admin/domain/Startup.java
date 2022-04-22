@@ -16,6 +16,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Startup Configuration
@@ -132,8 +133,8 @@ public abstract class Startup extends AbstractTransientBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -154,11 +155,11 @@ public abstract class Startup extends AbstractTransientBean {
 			return result;
 		}
 
-		public static MapType fromDescription(String description) {
+		public static MapType fromLocalisedDescription(String description) {
 			MapType result = null;
 
 			for (MapType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

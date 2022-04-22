@@ -276,7 +276,7 @@ public class DoctorUtil {
 						try {
 							for(DomainValue val: ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null, false) ){
 								StringBuilder sb = new StringBuilder();
-								sb.append(val.getDescription()).append(" (").append(val.getCode()).append(")");
+								sb.append(val.getLocalisedDescription()).append(" (").append(val.getCode()).append(")");
 								valueList.getItems().add(sb.toString());
 								if(val.getCode().length()>fieldLen){
 									fieldLen = val.getCode().length();

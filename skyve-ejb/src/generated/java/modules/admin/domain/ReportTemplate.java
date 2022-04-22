@@ -21,6 +21,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Report Template
@@ -402,8 +403,8 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -424,11 +425,11 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 			return result;
 		}
 
-		public static ReportType fromDescription(String description) {
+		public static ReportType fromLocalisedDescription(String description) {
 			ReportType result = null;
 
 			for (ReportType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -481,8 +482,8 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -503,11 +504,11 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 			return result;
 		}
 
-		public static OutputFormat fromDescription(String description) {
+		public static OutputFormat fromLocalisedDescription(String description) {
 			OutputFormat result = null;
 
 			for (OutputFormat value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -560,8 +561,8 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -582,11 +583,11 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 			return result;
 		}
 
-		public static Mode fromDescription(String description) {
+		public static Mode fromLocalisedDescription(String description) {
 			Mode result = null;
 
 			for (Mode value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -643,8 +644,8 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -665,11 +666,11 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 			return result;
 		}
 
-		public static WizardState fromDescription(String description) {
+		public static WizardState fromLocalisedDescription(String description) {
 			WizardState result = null;
 
 			for (WizardState value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -723,8 +724,8 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -745,11 +746,11 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 			return result;
 		}
 
-		public static GenerateExisting fromDescription(String description) {
+		public static GenerateExisting fromLocalisedDescription(String description) {
 			GenerateExisting result = null;
 
 			for (GenerateExisting value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}

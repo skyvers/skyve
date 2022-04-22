@@ -87,7 +87,7 @@ public class RefreshDocumentTuplesJob extends Job {
 					catch (@SuppressWarnings("unused") Exception e) {
 						log.add(String.format("%s - %s failed for id: %s",
 												sb.toString(),
-												dm.getRefreshOption().toDescription(),
+												dm.getRefreshOption().toLocalisedDescription(),
 												bean.getBizId()));
 					}
 					processed++;

@@ -408,7 +408,7 @@ public final class BindUtil {
 						try {
 							result = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
 							if (result == null) {
-								result = type.getMethod(Enumeration.FROM_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
+								result = type.getMethod(Enumeration.FROM_LOCALISED_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
 							}
 						}
 						catch (Exception e) {
@@ -604,14 +604,14 @@ public final class BindUtil {
 			}
 			else if (domainValues != null) {
 				if (value instanceof Enumeration) {
-					result = ((Enumeration) value).toDescription();
+					result = ((Enumeration) value).toLocalisedDescription();
 				}
 				else {
 					boolean found = false;
 					String codeValue = value.toString();
 					for (DomainValue domainValue : domainValues) {
 						if (domainValue.getCode().equals(codeValue)) {
-							result = domainValue.getDescription();
+							result = domainValue.getLocalisedDescription();
 							found = true;
 							break;
 						}

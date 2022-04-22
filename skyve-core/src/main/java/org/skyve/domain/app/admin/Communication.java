@@ -9,6 +9,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 public interface Communication extends PersistentBean {
 	public static final String MODULE_NAME = Contact.MODULE_NAME;
@@ -48,8 +49,8 @@ public interface Communication extends PersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -70,11 +71,11 @@ public interface Communication extends PersistentBean {
 			return result;
 		}
 
-		public static FormatType fromDescription(String description) {
+		public static FormatType fromLocalisedDescription(String description) {
 			FormatType result = null;
 
 			for (FormatType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
@@ -123,8 +124,8 @@ public interface Communication extends PersistentBean {
 		}
 
 		@Override
-		public String toDescription() {
-			return description;
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
 		}
 
 		@Override
@@ -145,11 +146,11 @@ public interface Communication extends PersistentBean {
 			return result;
 		}
 
-		public static ActionType fromDescription(String description) {
+		public static ActionType fromLocalisedDescription(String description) {
 			ActionType result = null;
 
 			for (ActionType value : values()) {
-				if (value.description.equals(description)) {
+				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
 				}
