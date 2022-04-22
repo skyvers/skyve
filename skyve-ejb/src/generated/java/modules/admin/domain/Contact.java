@@ -57,8 +57,8 @@ public class Contact extends AbstractPersistentBean implements org.skyve.domain.
 	 **/
 	@XmlEnum
 	public static enum ContactType implements Enumeration {
-		pagebizImportwhat("Person", "page.bizImport.what"),
-		pagebizImportwhere("Organisation", "page.bizImport.where");
+		person("Person", "Person"),
+		organisation("Organisation", "Organisation");
 
 		private String code;
 		private String description;

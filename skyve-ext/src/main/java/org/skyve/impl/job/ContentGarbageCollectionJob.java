@@ -16,6 +16,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.backup.ContentChecker;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
@@ -87,7 +88,26 @@ public class ContentGarbageCollectionJob implements Job {
 								Customer customer = r.getCustomer(customerName);
 								Module module = customer.getModule(moduleName);
 								Document document = module.getDocument(customer, documentName);
-								String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
+								Persistent persistent = document.getPersistent();
+								if (persistent == null) { // was persistent with content but now transient
+									if (result.isAttachment()) {
+										UtilImpl.LOGGER.warning("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId " + bizId + "/" + contentId + " as the owning document " + moduleName + "." + documentName + " is not persistent");
+									}
+									else {
+										UtilImpl.LOGGER.warning("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId " + bizId + " as the owning document " + moduleName + "." + documentName + " is not persistent");
+									}
+									continue;
+								}
+								String persistentIdentifier = persistent.getPersistentIdentifier();
+								if (persistentIdentifier == null) { // was persistent with content but now transient
+									if (result.isAttachment()) {
+										UtilImpl.LOGGER.warning("ContentGarbageCollectionJob: Cannot determine whether to remove attachment content with bizId/contentId " + bizId + "/" + contentId + " as the owning document " + moduleName + "." + documentName + " is not directly persistent");
+									}
+									else {
+										UtilImpl.LOGGER.warning("ContentGarbageCollectionJob: Cannot determine whether to remove bean content with bizId " + bizId + " as the owning document " + moduleName + "." + documentName + " is not directly persistent");
+									}
+									continue;
+								}
 								
 								SQL query = null;
 								StringBuilder sql = new StringBuilder(128);
