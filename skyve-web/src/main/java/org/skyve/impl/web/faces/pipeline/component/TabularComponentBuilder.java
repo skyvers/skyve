@@ -1904,7 +1904,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         result.setVar("item");
         result.setValueExpression("itemValue", ef.createValueExpression(elc, "#{item}", DomainValue.class));
-        result.setValueExpression("itemLabel", ef.createValueExpression(elc, "#{item.description}", String.class));
+        result.setValueExpression("itemLabel", ef.createValueExpression(elc, "#{item.localisedDescription}", String.class));
 
         Map<String, UIComponent> facets = result.getFacets();
 		UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
