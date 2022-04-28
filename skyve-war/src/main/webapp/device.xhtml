@@ -7,8 +7,24 @@
 		<!-- Dont use h:head coz it'll bring in themes that can screw up the device layout -->
 		<head>
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
-			<link type="text/css" rel="stylesheet" href="#{device.contextUrl}/javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces" />
+			<link type="text/css" rel="stylesheet" href="#{device.contextUrl}/fontawesome-6.1.1/css/all.min.css" />
+
 			<script type="text/javascript" src="#{device.contextUrl}/javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces"></script>
+
+			<link href="#{device.contextUrl}/primevue-3.12.6/themes/saga-blue/theme.css" rel="stylesheet" />
+			<link href="#{device.contextUrl}/primevue-3.12.6/primevue.min.css" rel="stylesheet" />
+			<link href="#{device.contextUrl}/primevue-3.12.6/primeflex-3.1.3.min.css" rel="stylesheet" />
+			<link href="#{device.contextUrl}/primevue-3.12.6/primeicons-5.0.0/primeicons.css" rel="stylesheet" />
+
+			<!-- Dependencies -->
+			<script src="#{device.contextUrl}/primevue-3.12.6/vue.global.3.2.33.min.js"></script>
+			<script src="#{device.contextUrl}/primevue-3.12.6/core.min.js"></script>
+			
+			<!-- App -->
+			<script src="#{device.contextUrl}/primevue-3.12.6/speeddial.min.js"></script>
+			<script src="#{device.contextUrl}/primevue-3.12.6/toast.min.js"></script>
+			<script src="#{device.contextUrl}/primevue-3.12.6/toastservice.min.js"></script>
+
 			<style>
 				html, body {
 					height: 100%;
@@ -38,6 +54,7 @@
 					border-bottom-width: 60px;
 					border-radius: 36px;
 					margin-top: 20px;
+					box-sizing: content-box;
 				}
 				
 				/* The horizontal line on the top of the device */
@@ -92,6 +109,7 @@
 					border-bottom-width: 60px;
 					border-radius: 36px;
 					margin-top: 20px;
+					box-sizing: content-box;
 				}
 				
 				/* The horizontal line on the top of the device */
@@ -148,6 +166,7 @@
 					border-width: 24px 24px 80px;
 					background-color: black;
 					margin-top: 20px;
+					box-sizing: content-box;
 				}
 				
 				/* The keyboard of the laptop */
@@ -209,21 +228,12 @@
 					border: none;
 				}
 				
-				.fa-mobile, .fa-tablet, .fa-laptop, .fa-desktop {
-					font-weight: normal;
-				    color: gray;
-				}
-				.fa-mobile:hover, .fa-tablet:hover, .fa-laptop:hover, .fa-desktop:hover {
-				    font-weight: bold;
-				    color: darkgray;
+				.p-speeddial-action {
+					width: 64px;
+					height: 64px;
+					text-decoration: none;
 				}
 			</style>
-			<script type="text/javascript">
-				function clicked(styleClass, userAgentType) {
-					$('#device').attr('class', styleClass);
-					$('#iframe').attr('src', "#{device.clickDeviceJspUrl}" + userAgentType);
-				}
-			</script>
 		</head>
 		<body>
 			<div id="device" class="smartphone">
@@ -231,12 +241,74 @@
 			    <iframe id="iframe" src="#{device.startingDeviceJspUrl}" style="width:100%;border:none;height:100%"></iframe>
 			  </div>
 			</div>
-			<div style="position:fixed;bottom:0;right:0;width:230px;height:70px;">
-				<i class="fa fa-mobile fa-4x fa-hover" onclick="clicked('smartphone', 'phone')" />
-				<i class="fa fa-tablet fa-4x" onclick="clicked('tablet', 'tablet')" />
-				<i class="fa fa-laptop fa-4x" onclick="clicked('laptop', 'desktop')" />
-				<i class="fa fa-desktop fa-4x" onclick="clicked('desktop', 'desktop')" />
+			<div style="position:fixed;bottom:80px;right:70px;">
+				<div id="app" >
+ 					<p-toast position="center" />
+ 					<h:outputText value="&lt;p-speeddial :model=&quot;items&quot; show-icon=&quot;pi pi-bars&quot; hide-icon=&quot;pi pi-times&quot; button-class=&quot;p-button-danger&quot; radius=&quot;150&quot; direction=&quot;up-left&quot; type=&quot;quarter-circle&quot; :tooltip-options=&quot;{position: 'left'}&quot; /&gt;" escape="false" />
+				</div>
 			</div>
+
+			<script type="module">
+				const {createApp, ref} = Vue;
+				const {useToast} = primevue.usetoast;
+				const Tooltip = primevue.tooltip;
+
+				const App = {
+					setup() {
+						const toast = useToast();
+
+						const items = ref([
+							{
+								label: 'Mobile',
+								icon: 'fa-solid fa-mobile-screen-button fa-2x',
+								command: () => {
+									App.clicked('smartphone', 'phone');
+									toast.add({severity: 'success', summary: 'Mobile', detail: 'Mobile selected', closable: false, life: 2000});
+								}
+							},
+							{
+								label: 'Tablet',
+								icon: 'fa-solid fa-tablet-screen-button fa-2x',
+								command: () => {
+									App.clicked('tablet', 'tablet');
+									toast.add({severity: 'success', summary: 'Tablet', detail: 'Tablet selected', closable: false, life: 2000});
+								}
+							},
+							{ 
+								label: 'Laptop',
+								icon: 'fa-solid fa-laptop fa-2x',
+								command: () => {
+									App.clicked('laptop', 'desktop');
+									toast.add({severity: 'success', summary: 'Laptop', detail: 'Laptop selected', closable: false, life: 2000});
+								}
+							},
+							{
+								label: 'Desktop',
+								icon: 'fa-solid fa-desktop fa-2x',
+								command: () => {
+									App.clicked('desktop', 'desktop');
+									toast.add({severity: 'success', summary: 'Desktop', detail: 'Desktop selected', closable: false, life: 2000});
+								}
+							}
+						]);
+						return {items}
+					},
+					components: {
+						"p-speeddial": primevue.speeddial,
+						"p-toast": primevue.toast
+					},
+					clicked(styleClass, userAgentType) {
+						$('#device').attr('class', styleClass);
+						$('#iframe').attr('src', "#{device.clickDeviceJspUrl}" + userAgentType);
+					}
+				};
+
+				createApp(App)
+					.use(primevue.config.default)
+					.use(primevue.toastservice)
+					.directive("tooltip", Tooltip)
+					.mount("#app");
+			</script>
 		</body>
 	</f:view>
 </html>
