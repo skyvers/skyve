@@ -900,6 +900,44 @@ public final class BindUtil {
 		return new Object[] {collectionOwner, collectionName};
 	}
 	
+	private static void setElementParent(Customer c, Module m, Document d, Relation r, Bean element, Bean parent) {
+		// Set the parent of a child bean, if applicable
+		if (element instanceof ChildBean<?>) {
+			String relatedDocumentName = r.getDocumentName();
+			Document relatedDocument = m.getDocument(c, relatedDocumentName);
+			Document parentDocument = relatedDocument.getParentDocument(c);
+			String parentModuleName = parentDocument.getOwningModuleName();
+			String parentDocumentName = parentDocument.getName();
+
+			// Check if processBean.setParent() can be called or not.
+			// The processBean may be a child of some other bean and just being added to another collection here.
+			// Or it could be a derived document, so need to check inheritance as well.
+			CustomerImpl internalCustomer = (CustomerImpl) c;
+			Document parentBeanDocument = d;
+			while (parentBeanDocument != null) {
+				if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
+						parentDocumentName.equals(parentBeanDocument.getName())) {
+					@SuppressWarnings("unchecked")
+					ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) element;
+					uncheckedNewBean.setParent(parent);
+					parentBeanDocument = null;
+				}
+				else {
+					String baseDocumentName = internalCustomer.getBaseDocument(parentBeanDocument);
+    				if (baseDocumentName == null) {
+    					parentBeanDocument = null;
+    				}
+    				else {
+        				int dotIndex = baseDocumentName.indexOf('.');
+        				Module baseModule = c.getModule(baseDocumentName.substring(0, dotIndex));
+        				parentBeanDocument = baseModule.getDocument(c, baseDocumentName.substring(dotIndex + 1));
+    				}
+				}
+			}
+		}
+		
+	}
+	
 	/**
 	 * Call the addElement method on a Bean's collection.
 	 * @param bean	The owning bean.
@@ -908,6 +946,19 @@ public final class BindUtil {
 	 */
 	public static boolean addElement(Bean bean, String collectionBinding, Bean element) {
 		try {
+			Customer c = CORE.getCustomer();
+			Module m = c.getModule(bean.getBizModule());
+			Document d = m.getDocument(c, bean.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			// Dynamic collection - make it happen here with no convenience method
+			if (BindUtil.isDynamic(c, m, d, a)) {
+				setElementParent(c, m, d, (Relation) a, element, bean);
+				@SuppressWarnings("unchecked")
+				List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding);
+				return list.add(element);
+			}
+
+			// Static collection - use the add method
 			Object[] args = collectionArguments(bean, collectionBinding);
 			Bean collectionOwner = (Bean) args[0];
 			String collectionName = (String) args[1];
@@ -918,10 +969,10 @@ public final class BindUtil {
 			
 			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
 			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
-			Method[] ms = collectionOwner.getClass().getMethods(); 
-			for (Method m : ms) {
-				if (methodName.equals(m.getName()) && (m.getParameterTypes().length == 1)) {
-					Object result = m.invoke(collectionOwner, element);
+			Method[] methods = collectionOwner.getClass().getMethods(); 
+			for (Method method : methods) {
+				if (methodName.equals(method.getName()) && (method.getParameterTypes().length == 1)) {
+					Object result = method.invoke(collectionOwner, element);
 					return Boolean.TRUE.equals(result);
 				}
 			}
@@ -945,6 +996,19 @@ public final class BindUtil {
 	 */
 	public static void addElement(Bean bean, String collectionBinding, int index, Bean element) {
 		try {
+			Customer c = CORE.getCustomer();
+			Module m = c.getModule(bean.getBizModule());
+			Document d = m.getDocument(c, bean.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			// Dynamic collection - make it happen here with no convenience method
+			if (BindUtil.isDynamic(c, m, d, a)) {
+				setElementParent(c, m, d, (Relation) a, element, bean);
+				@SuppressWarnings("unchecked")
+				List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding);
+				list.add(index, element);
+			}
+
+			// Static collection - use the add method
 			Object[] args = collectionArguments(bean, collectionBinding);
 			Bean collectionOwner = (Bean) args[0];
 			String collectionName = (String) args[1];
@@ -955,10 +1019,10 @@ public final class BindUtil {
 			
 			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
 			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE, element.getClass());
-			Method[] ms = collectionOwner.getClass().getMethods(); 
-			for (Method m : ms) {
-				if (methodName.equals(m.getName()) && (m.getParameterTypes().length == 2)) {
-					m.invoke(collectionOwner, Integer.valueOf(index), element);
+			Method[] methods = collectionOwner.getClass().getMethods(); 
+			for (Method method : methods) {
+				if (methodName.equals(method.getName()) && (method.getParameterTypes().length == 2)) {
+					method.invoke(collectionOwner, Integer.valueOf(index), element);
 					return;
 				}
 			}
@@ -981,6 +1045,19 @@ public final class BindUtil {
 	 */
 	public static boolean removeElement(Bean bean, String collectionBinding, Bean element) {
 		try {
+			Customer c = CORE.getCustomer();
+			Module m = c.getModule(bean.getBizModule());
+			Document d = m.getDocument(c, bean.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			// Dynamic collection - make it happen here with no convenience method
+			if (BindUtil.isDynamic(c, m, d, a)) {
+				setElementParent(c, m, d, (Relation) a, element, null);
+				@SuppressWarnings("unchecked")
+				List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding);
+				return list.remove(element);
+			}
+
+			// Static collection - use the add method
 			Object[] args = collectionArguments(bean, collectionBinding);
 			Bean collectionOwner = (Bean) args[0];
 			String collectionName = (String) args[1];
@@ -991,13 +1068,13 @@ public final class BindUtil {
 			
 			// NB - cant use getMethod directly as element may not be the exact class - ie dynamic proxy subclass etc
 			// Method m = collectionOwner.getClass().getMethod(methodName.toString(), element.getClass());
-			Method[] ms = collectionOwner.getClass().getMethods(); 
-			for (Method m : ms) {
-				if (methodName.equals(m.getName())) {
-					Class<?>[] pts = m.getParameterTypes();
+			Method[] methods = collectionOwner.getClass().getMethods(); 
+			for (Method method : methods) {
+				if (methodName.equals(method.getName())) {
+					Class<?>[] pts = method.getParameterTypes();
 					// Skim over remove element by index method
 					if ((pts.length == 1) && (! Integer.TYPE.equals(pts[0]))) {
-						Object result = m.invoke(collectionOwner, element);
+						Object result = method.invoke(collectionOwner, element);
 						return Boolean.TRUE.equals(result);
 					}
 				}
@@ -1022,15 +1099,29 @@ public final class BindUtil {
 	 */
 	public static <T extends Bean> T removeElement(Bean bean, String collectionBinding, int index) {
 		try {
+			Customer c = CORE.getCustomer();
+			Module m = c.getModule(bean.getBizModule());
+			Document d = m.getDocument(c, bean.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			// Dynamic collection - make it happen here with no convenience method
+			if (BindUtil.isDynamic(c, m, d, a)) {
+				@SuppressWarnings("unchecked")
+				List<T> list = (List<T>) BindUtil.get(bean, collectionBinding);
+				T element = list.get(index);
+				setElementParent(c, m, d, (Relation) a, element, null);
+				return list.remove(index);
+			}
+
+			// Static collection - use the add method
 			Object[] args = collectionArguments(bean, collectionBinding);
 			Bean collectionOwner = (Bean) args[0];
 			String collectionName = (String) args[1];
 
 			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
 			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
-			Method m = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE);
+			Method method = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE);
 			@SuppressWarnings("unchecked")
-			T result = (T) m.invoke(collectionOwner, Integer.valueOf(index));
+			T result = (T) method.invoke(collectionOwner, Integer.valueOf(index));
 			return result;
 		}
 		catch (Exception e) {
@@ -1167,20 +1258,17 @@ public final class BindUtil {
 						attributeName = simpleBinding.substring(0, braceIndex);
 					}
 					if (b.isDynamic(attributeName)) {
-						if (braceIndex < 0) {
-							result = b.getDynamic(attributeName);
-						}
-						else {
+						result = b.getDynamic(attributeName);
+						if ((result != null) && (braceIndex > 0)) {
+							@SuppressWarnings("unchecked")
+							List<? extends Bean> list = (List<? extends Bean>) result;
 							if (indexed) {
-								result = PROPERTY_UTILS.getProperty(currentBean, simpleBinding);
+								int index = Integer.parseInt(simpleBinding.substring(braceIndex + 1, simpleBinding.length() - 1)); // substring between '[' and ']'
+								result = list.get(index);
 							}
 							else { // by Id
-								@SuppressWarnings("unchecked")
-								List<? extends Bean> list = (List<? extends Bean>) PROPERTY_UTILS.getProperty(currentBean, attributeName);
-								if (list != null) {
-									String bizId = simpleBinding.substring(braceIndex + 12, simpleBinding.length() - 1);
-									result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
-								}
+								String bizId = simpleBinding.substring(braceIndex + 12, simpleBinding.length() - 1); // substring between '(' and ')'
+								result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
 							}
 						}
 					}
@@ -1325,12 +1413,20 @@ public final class BindUtil {
 						}
 						else {
 							if (indexed) {
-								PROPERTY_UTILS.setProperty(penultimate, simpleBinding, valueToSet);
+								@SuppressWarnings("unchecked")
+								List<Object> list = (List<Object>) b.getDynamic(attributeName);
+								if (list != null) {
+									int index = Integer.parseInt(simpleBinding.substring(braceIndex + 1, simpleBinding.length() - 1));
+									list.set(index, valueToSet);
+								}
+								else {
+									throw new IllegalStateException("Attempt to set " + binding + " in " + bean + " to " + valueToSet + " but the list is null");
+								}
 							}
 							else { // by Id
 								if (valueToSet instanceof Bean) {
 									@SuppressWarnings("unchecked")
-									List<Bean> list = (List<Bean>) PROPERTY_UTILS.getProperty(penultimate, attributeName);
+									List<Bean> list = (List<Bean>) b.getDynamic(attributeName);
 									if (list != null) {
 										String bizId = simpleBinding.substring(braceIndex + 12, simpleBinding.length() - 1);
 										Bean result = list.stream().filter(e -> bizId.equals(e.getBizId())).findFirst().orElse(null);
