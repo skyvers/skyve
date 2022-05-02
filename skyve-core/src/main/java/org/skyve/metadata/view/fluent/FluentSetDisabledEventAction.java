@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 
-public class FluentSetDisabledEventAction {
+public class FluentSetDisabledEventAction extends FluentEventAction {
 	private SetDisabledEventAction action = null;
 
 	public FluentSetDisabledEventAction() {
@@ -30,6 +30,7 @@ public class FluentSetDisabledEventAction {
 		return this;
 	}
 
+	@Override
 	public SetDisabledEventAction get() {
 		return action;
 	}

@@ -14,24 +14,27 @@ abstract class FluentEventAction {
 	}
 
 	protected static FluentEventAction from(EventAction action) {
-
 		if (action instanceof RerenderEventAction) {
-			new FluentRerenderEventAction().from((RerenderEventAction) action);
-		} else if (action instanceof ServerSideActionEventAction) {
-			new FluentServerSideActionEventAction().from((ServerSideActionEventAction) action);
-		} else if (action instanceof SetDisabledEventAction) {
-			new FluentSetDisabledEventAction().from((SetDisabledEventAction) action);
-		} else if (action instanceof SetInvisibleEventAction) {
-			new FluentSetInvisibleEventAction().from((SetInvisibleEventAction) action);
-		} else if (action instanceof ToggleDisabledEventAction) {
-			new FluentToggleDisabledEventAction().from((ToggleDisabledEventAction) action);
-		} else if (action instanceof ToggleVisibilityEventAction) {
-			new FluentToggleVisibilityEventAction().from((ToggleVisibilityEventAction) action);
-		} else {
+			return new FluentRerenderEventAction().from((RerenderEventAction) action);
+		}
+		else if (action instanceof ServerSideActionEventAction) {
+			return new FluentServerSideActionEventAction().from((ServerSideActionEventAction) action);
+		}
+		else if (action instanceof SetDisabledEventAction) {
+			return new FluentSetDisabledEventAction().from((SetDisabledEventAction) action);
+		}
+		else if (action instanceof SetInvisibleEventAction) {
+			return new FluentSetInvisibleEventAction().from((SetInvisibleEventAction) action);
+		}
+		else if (action instanceof ToggleDisabledEventAction) {
+			return new FluentToggleDisabledEventAction().from((ToggleDisabledEventAction) action);
+		}
+		else if (action instanceof ToggleVisibilityEventAction) {
+			return new FluentToggleVisibilityEventAction().from((ToggleVisibilityEventAction) action);
+		}
+		else {
 			throw new IllegalArgumentException(action + " is not catered for");
 		}
-
-		return null;
 	}
 
 	abstract EventAction get();

@@ -14,7 +14,7 @@ public class FluentDefaultsAction extends FluentAction<FluentDefaultsAction> {
 	}
 
 	public FluentDefaultsAction from(@SuppressWarnings("hiding") DefaultsAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	

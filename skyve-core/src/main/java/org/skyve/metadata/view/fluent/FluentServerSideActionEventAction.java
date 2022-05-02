@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 
-public class FluentServerSideActionEventAction {
+public class FluentServerSideActionEventAction extends FluentEventAction {
 	private ServerSideActionEventAction action = null;
 
 	public FluentServerSideActionEventAction() {
@@ -23,6 +23,7 @@ public class FluentServerSideActionEventAction {
 		return this;
 	}
 
+	@Override
 	public ServerSideActionEventAction get() {
 		return action;
 	}

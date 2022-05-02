@@ -14,7 +14,7 @@ public class FluentDeleteAction extends FluentValidatableAction<FluentDeleteActi
 	}
 	
 	public FluentDeleteAction from(@SuppressWarnings("hiding") DeleteAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	

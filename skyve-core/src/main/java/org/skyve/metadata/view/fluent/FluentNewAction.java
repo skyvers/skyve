@@ -14,7 +14,7 @@ public class FluentNewAction extends FluentAction<FluentNewAction> {
 	}
 
 	public FluentNewAction from(@SuppressWarnings("hiding") NewAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	

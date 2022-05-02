@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 
-public class FluentToggleDisabledEventAction {
+public class FluentToggleDisabledEventAction extends FluentEventAction {
 	private ToggleDisabledEventAction action = null;
 
 	public FluentToggleDisabledEventAction() {
@@ -23,6 +23,7 @@ public class FluentToggleDisabledEventAction {
 		return this;
 	}
 
+	@Override
 	public ToggleDisabledEventAction get() {
 		return action;
 	}

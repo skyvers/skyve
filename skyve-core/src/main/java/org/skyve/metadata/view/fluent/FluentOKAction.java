@@ -14,7 +14,7 @@ public class FluentOKAction extends FluentValidatableAction<FluentOKAction> {
 	}
 	
 	public FluentOKAction from(@SuppressWarnings("hiding") OKAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	

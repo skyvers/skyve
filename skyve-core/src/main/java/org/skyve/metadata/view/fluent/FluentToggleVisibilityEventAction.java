@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 
-public class FluentToggleVisibilityEventAction {
+public class FluentToggleVisibilityEventAction extends FluentEventAction {
 	private ToggleVisibilityEventAction action = null;
 
 	public FluentToggleVisibilityEventAction() {
@@ -23,6 +23,7 @@ public class FluentToggleVisibilityEventAction {
 		return this;
 	}
 
+	@Override
 	public ToggleVisibilityEventAction get() {
 		return action;
 	}

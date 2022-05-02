@@ -14,7 +14,7 @@ public class FluentDownloadAction extends FluentClassAction<FluentDownloadAction
 	}
 	
 	public FluentDownloadAction from(@SuppressWarnings("hiding") DownloadAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	

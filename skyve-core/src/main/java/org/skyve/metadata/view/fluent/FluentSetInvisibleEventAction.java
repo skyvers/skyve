@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 
-public class FluentSetInvisibleEventAction {
+public class FluentSetInvisibleEventAction extends FluentEventAction {
 	private SetInvisibleEventAction action = null;
 
 	public FluentSetInvisibleEventAction() {
@@ -29,6 +29,7 @@ public class FluentSetInvisibleEventAction {
 		return this;
 	}
 
+	@Override
 	public SetInvisibleEventAction get() {
 		return action;
 	}

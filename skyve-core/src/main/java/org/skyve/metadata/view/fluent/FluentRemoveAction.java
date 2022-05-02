@@ -14,7 +14,7 @@ public class FluentRemoveAction extends FluentAction<FluentRemoveAction> {
 	}
 
 	public FluentRemoveAction from(@SuppressWarnings("hiding") RemoveAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	

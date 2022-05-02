@@ -2,7 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 
-public class FluentRerenderEventAction {
+public class FluentRerenderEventAction extends FluentEventAction {
 	private RerenderEventAction action = null;
 
 	public FluentRerenderEventAction() {
@@ -23,6 +23,7 @@ public class FluentRerenderEventAction {
 		return this;
 	}
 
+	@Override
 	public RerenderEventAction get() {
 		return action;
 	}

@@ -14,7 +14,7 @@ public class FluentCancelAction extends FluentAction<FluentCancelAction> {
 	}
 
 	public FluentCancelAction from(@SuppressWarnings("hiding") CancelAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	

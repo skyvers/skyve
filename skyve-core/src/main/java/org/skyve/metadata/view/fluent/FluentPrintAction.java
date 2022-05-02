@@ -14,7 +14,7 @@ public class FluentPrintAction extends FluentValidatableAction<FluentPrintAction
 	}
 	
 	public FluentPrintAction from(@SuppressWarnings("hiding") PrintAction action) {
-		super.from(action);
+		super.fromBase(action);
 		return this;
 	}
 	
