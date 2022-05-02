@@ -422,12 +422,17 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		if (UtilImpl.DEV_MODE) {
 			// Cater for the situation where setView has been called
 			Optional<MetaData> o = cache.get(viewKey.toString());
-			if ((o != null) && o.isEmpty()) { // not a cache miss
-				// Load the view using the searchUxUi
-				ViewMetaData viewMetaData = loadView(customerName, documentModuleName, documentName, seachUxUi, viewName);
-				if (viewMetaData != null) {
-					// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-					result = this.convertView(customerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
+			if (o != null) { // not a cache miss
+				if (o.isEmpty()) { // preloaded key but not loaded yet
+					// Load the view using the searchUxUi
+					ViewMetaData viewMetaData = loadView(customerName, documentModuleName, documentName, seachUxUi, viewName);
+					if (viewMetaData != null) {
+						// Convert the view ensuring view components within vanilla views are resolved with the current uxui
+						result = this.convertView(customerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
+					}
+				}
+				else { // loaded through a DynamicRepository
+					result = (View) o.get();
 				}
 			}
 		}
@@ -496,8 +501,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		StringBuilder viewKey = new StringBuilder(128);
 		viewKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 		viewKey.append(MODULES_NAMESPACE).append(moduleName).append('/');
-		viewKey.append(documentName).append('/').append(uxui).append('/');
-		viewKey.append(VIEWS_NAMESPACE).append(view.getName());
+		viewKey.append(documentName).append('/').append(VIEWS_NAMESPACE);
+		viewKey.append(uxui).append('/').append(view.getName());
 		cache.put(viewKey.toString(), Optional.of(result));
 		
 		return result;
@@ -511,8 +516,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		
 		StringBuilder viewKey = new StringBuilder(128);
 		viewKey.append(MODULES_NAMESPACE).append(moduleName).append('/');
-		viewKey.append(documentName).append('/').append(uxui).append('/');
-		viewKey.append(VIEWS_NAMESPACE).append(view.getName());
+		viewKey.append(documentName).append('/').append(VIEWS_NAMESPACE);
+		viewKey.append(uxui).append('/').append(view.getName());
 		cache.put(viewKey.toString(), Optional.of(result));
 		
 		return result;
