@@ -26,8 +26,14 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 		if (i != null) {
 			maxCardinality(i.intValue());
 		}
-		ownerDatabaseIndex(! Boolean.FALSE.equals(collection.getOwnerDatabaseIndex()));
-		elementDatabaseIndex(! Boolean.FALSE.equals(collection.getElementDatabaseIndex()));
+		Boolean index = collection.getOwnerDatabaseIndex();
+		if (index != null) {
+			ownerDatabaseIndex(index.booleanValue());
+		}
+		index = collection.getElementDatabaseIndex();
+		if (index != null) {
+			elementDatabaseIndex(index.booleanValue());
+		}
 		cacheName(collection.getCacheName());
 
 		for (Ordering ordering : collection.getOrdering()) {
