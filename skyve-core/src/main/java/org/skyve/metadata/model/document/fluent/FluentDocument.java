@@ -375,17 +375,32 @@ public class FluentDocument {
 		document.getAttributes().add(inverseMany.get());
 		return this;
 	}
-	
+
+	public FluentDocument removeAttribute(String name) {
+		document.getAttributes().removeIf(a -> name.equals(a.getName()));
+		return this;
+	}
+
 	public FluentDocument addCondition(FluentCondition condition) {
 		document.getConditions().add(condition.get());
 		return this;
 	}
 	
+	public FluentDocument removeCondition(String name) {
+		document.getConditions().removeIf(c -> name.equals(c.getName()));
+		return this;
+	}
+
 	public FluentDocument addUniqueConstraint(FluentDocumentUniqueConstraint constraint) {
 		document.getUniqueConstraints().add(constraint.get());
 		return this;
 	}
-	
+
+	public FluentDocument removeUniqueConstraint(String name) {
+		document.getUniqueConstraints().removeIf(c -> name.equals(c.getName()));
+		return this;
+	}
+
 	public DocumentMetaData get() {
 		return document;
 	}

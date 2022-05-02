@@ -268,6 +268,12 @@ abstract class FluentContainer<T extends FluentContainer<T>> extends FluentWidge
 		return (T) this;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public T removeContained(int index) {
+		get().getContained().remove(index);
+		return (T) this;
+	}
+	
 	@Override
 	public abstract Container get();
 }
