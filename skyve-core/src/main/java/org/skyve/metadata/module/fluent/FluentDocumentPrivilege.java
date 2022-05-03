@@ -49,17 +49,47 @@ public class FluentDocumentPrivilege {
 		return this;
 	}
 
+	public FluentDocumentPrivilege removeActionPrivilege(String actionName) {
+		privilege.getActions().removeIf(a -> actionName.equals(a.getActionName()));
+		return this;
+	}
+
+	public FluentDocumentPrivilege clearActionPrivileges() {
+		privilege.getActions().clear();
+		return this;
+	}
+	
 	public FluentDocumentPrivilege addContentPermission(String attributeName) {
 		ContentPermission content = new ContentPermission();
 		content.setAttributeName(attributeName);
 		privilege.getContentPermissions().add(content);
 		return this;
 	}
-	
+
+	public FluentDocumentPrivilege removeContentPermission(String attributeName) {
+		privilege.getContentPermissions().removeIf(p -> attributeName.equals(p.getAttributeName()));
+		return this;
+	}
+
+	public FluentDocumentPrivilege clearContentPermissions() {
+		privilege.getContentPermissions().clear();
+		return this;
+	}
+
 	public FluentDocumentPrivilege addContentRestriction(String attributeName) {
 		ContentRestriction content = new ContentRestriction();
 		content.setAttributeName(attributeName);
 		privilege.getContentRestrictions().add(content);
+		return this;
+	}
+
+	public FluentDocumentPrivilege removeContentRestriction(String attributeName) {
+		privilege.getContentRestrictions().removeIf(r -> attributeName.equals(r.getAttributeName()));
+		return this;
+	}
+
+	public FluentDocumentPrivilege clearContentRestrictions() {
+		privilege.getContentRestrictions().clear();
 		return this;
 	}
 

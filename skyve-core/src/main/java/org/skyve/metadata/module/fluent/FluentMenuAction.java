@@ -30,5 +30,17 @@ abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 		return (T) this;
 	}
 
+	@SuppressWarnings("unchecked")
+	public T removeUxUi(String uxui) {
+		get().getUxuis().removeIf(u -> uxui.equals(u.getUxUi()));
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T clearUxUis() {
+		get().getUxuis().clear();
+		return (T) this;
+	}
+
 	public abstract Action get();
 }

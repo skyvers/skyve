@@ -1,6 +1,8 @@
 package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
+import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
@@ -86,11 +88,47 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 		return this;
 	}
 
+	public FluentCollection removeOrdering(String by) {
+		collection.getOrdering().removeIf(o -> by.equals(o.getBy()));
+		return this;
+	}
+
+	public FluentCollection clearOrdering() {
+		collection.getOrdering().clear();
+		return this;
+	}
+
+	public FluentCollectionOrdering findOrdering(String by) {
+		OrderingImpl result = (OrderingImpl) collection.getOrdering().stream().filter(o -> by.equals(o.getBy())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentCollectionOrdering(result);
+		}
+		return null;
+	}
+
 	public FluentCollection addUniqueConstraint(FluentCollectionUniqueConstraint constraint) {
 		collection.getUniqueConstraints().add(constraint.get());
 		return this;
 	}
 	
+	public FluentCollection removeUniqueConstraint(String name) {
+		collection.getUniqueConstraints().removeIf(u -> name.equals(u.getName()));
+		return this;
+	}
+
+	public FluentCollection clearUniqueConstraints() {
+		collection.getUniqueConstraints().clear();
+		return this;
+	}
+	
+	public FluentCollectionUniqueConstraint findUniqueConstraint(String name) {
+		UniqueConstraintImpl result = (UniqueConstraintImpl) collection.getUniqueConstraints().stream().filter(u -> name.equals(u.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentCollectionUniqueConstraint(result);
+		}
+		return null;
+	}
+
 	@Override
 	public CollectionImpl get() {
 		return collection;

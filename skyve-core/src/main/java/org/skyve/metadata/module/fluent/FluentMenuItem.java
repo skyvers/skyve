@@ -24,7 +24,19 @@ abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAct
 		get().getRoles().add(role);
 		return (T) this;
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public T removeRole(String name) {
+		get().getRoles().removeIf(r -> name.equals(r.getRoleName()));
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T clearRoles() {
+		get().getRoles().clear();
+		return (T) this;
+	}
+
 	@Override
 	public abstract Item get();
 }

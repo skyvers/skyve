@@ -37,6 +37,19 @@ public class FluentCustomerModules {
 		return this;
 	}
 
+	public FluentCustomerModules removeModule(String moduleName) {
+		modules.getModules().removeIf(m -> moduleName.equals(m.getName()));
+		if (moduleName.equals(modules.getHomeModule())) {
+			modules.setHomeModule(null);
+		}
+		return this;
+	}
+	
+	public FluentCustomerModules clearModules() {
+		modules.getModules().clear();
+		return this;
+	}
+	
 	public CustomerModulesMetaData get() {
 		return modules;
 	}

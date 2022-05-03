@@ -44,6 +44,50 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 		return this;
 	}
 
+	public FluentEnumeration removeValueByName(String name) {
+		enumeration.getXmlValues().removeIf(v -> name.equals(v.getName()));
+		return this;
+	}
+
+	public FluentEnumeratedValue findValueByName(String name) {
+		EnumeratedValue result = enumeration.getXmlValues().stream().filter(v -> name.equals(v.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentEnumeratedValue(result);
+		}
+		return null;
+	}
+	
+	public FluentEnumeration removeValueByCode(String code) {
+		enumeration.getXmlValues().removeIf(v -> code.equals(v.getCode()));
+		return this;
+	}
+
+	public FluentEnumeratedValue findValueByCode(String code) {
+		EnumeratedValue result = enumeration.getXmlValues().stream().filter(v -> code.equals(v.getCode())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentEnumeratedValue(result);
+		}
+		return null;
+	}
+	
+	public FluentEnumeration removeValueByDescription(String description) {
+		enumeration.getXmlValues().removeIf(v -> description.equals(v.getDescription()));
+		return this;
+	}
+
+	public FluentEnumeratedValue findValueByDescription(String description) {
+		EnumeratedValue result = enumeration.getXmlValues().stream().filter(v -> description.equals(v.getDescription())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentEnumeratedValue(result);
+		}
+		return null;
+	}
+
+	public FluentEnumeration clearValues() {
+		enumeration.getXmlValues().clear();
+		return this;
+	}
+	
 	public FluentEnumeration moduleRef(String moduleRef) {
 		enumeration.setModuleRef(moduleRef);
 		return this;

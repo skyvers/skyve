@@ -51,6 +51,16 @@ public class FluentDocumentUniqueConstraint {
 		return this;
 	}
 
+	public FluentDocumentUniqueConstraint removeFieldName(String name) {
+		constraint.getFieldReferences().removeIf(f -> name.equals(f.getRef()));
+		return this;
+	}
+	
+	public FluentDocumentUniqueConstraint clearFieldNames() {
+		constraint.getFieldReferences().clear();
+		return this;
+	}
+	
 	public UniqueConstraint get() {
 		return constraint;
 	}

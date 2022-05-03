@@ -120,10 +120,30 @@ public class FluentCustomer {
 		return this;
 	}
 	
+	public FluentCustomer removeInterceptor(String fullyQualifiedClassName) {
+		customer.getInterceptors().removeIf(i -> fullyQualifiedClassName.equals(i.getClassName()));
+		return this;
+	}
+	
+	public FluentCustomer clearInterceptors() {
+		customer.getInterceptors().clear();
+		return this;
+	}
+	
 	public FluentCustomer addObserver(String fullyQualifiedClassName) {
 		ObserverMetaDataImpl observer = new ObserverMetaDataImpl();
 		observer.setClassName(fullyQualifiedClassName);
 		customer.getObservers().add(observer);
+		return this;
+	}
+	
+	public FluentCustomer removeObserver(String fullyQualifiedClassName) {
+		customer.getObservers().removeIf(o -> fullyQualifiedClassName.equals(o.getClassName()));
+		return this;
+	}
+	
+	public FluentCustomer clearObservers() {
+		customer.getObservers().clear();
 		return this;
 	}
 	

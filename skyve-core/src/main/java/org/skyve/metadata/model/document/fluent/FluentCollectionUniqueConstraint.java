@@ -16,12 +16,18 @@ public class FluentCollectionUniqueConstraint {
 	}
 
 	public FluentCollectionUniqueConstraint from(@SuppressWarnings("hiding") UniqueConstraint constraint) {
+		name(constraint.getName());
 		description(constraint.getDescription());
 		scope(constraint.getScope());
 		message(constraint.getMessage());
 		constraint.getFieldNames().forEach(f -> addFieldName(f));
 		return this;
 	}	
+
+	public FluentCollectionUniqueConstraint name(String name) {
+		constraint.setName(name);
+		return this;
+	}
 
 	public FluentCollectionUniqueConstraint description(String description) {
 		constraint.setDescription(description);
@@ -43,6 +49,16 @@ public class FluentCollectionUniqueConstraint {
 		return this;
 	}
 
+	public FluentCollectionUniqueConstraint removeFieldName(String fieldName) {
+		constraint.getFieldNames().remove(fieldName);
+		return this;
+	}
+	
+	public FluentCollectionUniqueConstraint clearFieldNames() {
+		constraint.getFieldNames().clear();
+		return this;
+	}
+	
 	public UniqueConstraintImpl get() {
 		return constraint;
 	}

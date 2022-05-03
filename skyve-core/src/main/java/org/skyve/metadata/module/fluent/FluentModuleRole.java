@@ -76,6 +76,24 @@ public class FluentModuleRole {
 		return this;
 	}
 
+	public FluentModuleRole removePrivilege(String documentName) {
+		role.getPrivileges().removeIf(p -> documentName.equals(p.getDocumentName()));
+		return this;
+	}
+
+	public FluentModuleRole clearPrivileges() {
+		role.getPrivileges().clear();
+		return this;
+	}
+
+	public FluentDocumentPrivilege findPrivilege(String documentName) {
+		org.skyve.impl.metadata.repository.module.DocumentPrivilege result = role.getPrivileges().stream().filter(p -> documentName.equals(p.getDocumentName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentDocumentPrivilege(result);
+		}
+		return null;
+	}
+	
 	public ModuleRoleMetaData get() {
 		return role;
 	}

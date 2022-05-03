@@ -45,7 +45,25 @@ public class FluentCustomerRole {
 		role.getRoles().add(moduleRole.get());
 		return this;
 	}
+	
+	public FluentCustomerRole removeRole(String moduleName, String name) {
+		role.getRoles().removeIf(r -> moduleName.equals(r.getModuleName()) && name.equals(r.getName()));
+		return this;
+	}
 
+	public FluentCustomerRole clearRoles() {
+		role.getRoles().clear();
+		return this;
+	}
+	
+	public FluentCustomerModuleRole findRole(String moduleName, String name) {
+		CustomerModuleRoleMetaData result = role.getRoles().stream().filter(r -> moduleName.equals(r.getModuleName()) && name.equals(r.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentCustomerModuleRole(result);
+		}
+		return null;
+	}
+	
 	public CustomerRoleMetaData get() {
 		return role;
 	}

@@ -1,6 +1,5 @@
 package org.skyve.metadata.model.document.fluent;
 
-import org.skyve.impl.metadata.model.document.AbstractInverse;
 import org.skyve.impl.metadata.model.document.InverseMany;
 
 public class FluentInverseMany extends FluentInverse<FluentInverseMany> {
@@ -20,7 +19,7 @@ public class FluentInverseMany extends FluentInverse<FluentInverseMany> {
 	}
 	
 	@Override
-	public AbstractInverse get() {
+	public InverseMany get() {
 		return inverse;
 	}
 }

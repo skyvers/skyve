@@ -1,6 +1,8 @@
 package org.skyve.metadata.module.fluent;
 
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryMetaData;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryProjectedColumnMetaData;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -66,8 +68,76 @@ public class FluentMetaDataQuery extends FluentQuery<FluentMetaDataQuery> {
 		return this;
 	}
 
+	public FluentMetaDataQueryProjectedColumn findProjectedColumnByName(String name) {
+		MetaDataQueryProjectedColumnMetaData result = (MetaDataQueryProjectedColumnMetaData) query.getColumns().stream().filter(c -> name.equals(c.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentMetaDataQueryProjectedColumn(result);
+		}
+		return null;
+	}
+
+	public FluentMetaDataQueryProjectedColumn findProjectedColumnByBinding(String binding) {
+		MetaDataQueryProjectedColumnMetaData result = (MetaDataQueryProjectedColumnMetaData) query.getColumns().stream().filter(c -> binding.equals(c.getBinding())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentMetaDataQueryProjectedColumn(result);
+		}
+		return null;
+	}
+
+	public FluentMetaDataQueryProjectedColumn findProjectedColumnByDisplayName(String displayName) {
+		MetaDataQueryProjectedColumnMetaData result = (MetaDataQueryProjectedColumnMetaData) query.getColumns().stream().filter(c -> displayName.equals(c.getDisplayName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentMetaDataQueryProjectedColumn(result);
+		}
+		return null;
+	}
+
 	public FluentMetaDataQuery addContentColumn(FluentMetaDataQueryContentColumn column) {
 		query.getColumns().add(column.get());
+		return this;
+	}
+
+	public FluentMetaDataQueryContentColumn findContentColumnByName(String name) {
+		MetaDataQueryContentColumnMetaData result = (MetaDataQueryContentColumnMetaData) query.getColumns().stream().filter(c -> name.equals(c.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentMetaDataQueryContentColumn(result);
+		}
+		return null;
+	}
+
+	public FluentMetaDataQueryContentColumn findContentColumnByBinding(String binding) {
+		MetaDataQueryContentColumnMetaData result = (MetaDataQueryContentColumnMetaData) query.getColumns().stream().filter(c -> binding.equals(c.getBinding())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentMetaDataQueryContentColumn(result);
+		}
+		return null;
+	}
+
+	public FluentMetaDataQueryContentColumn findContentColumnByDisplayName(String displayName) {
+		MetaDataQueryContentColumnMetaData result = (MetaDataQueryContentColumnMetaData) query.getColumns().stream().filter(c -> displayName.equals(c.getDisplayName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentMetaDataQueryContentColumn(result);
+		}
+		return null;
+	}
+
+	public FluentMetaDataQuery removeColumnByName(String name) {
+		query.getColumns().removeIf(c -> name.equals(c.getName()));
+		return this;
+	}
+
+	public FluentMetaDataQuery removeColumnByBinding(String binding) {
+		query.getColumns().removeIf(c -> binding.equals(c.getBinding()));
+		return this;
+	}
+
+	public FluentMetaDataQuery removeColumnByDisplayName(String displayName) {
+		query.getColumns().removeIf(c -> displayName.equals(c.getDisplayName()));
+		return this;
+	}
+
+	public FluentMetaDataQuery clearColumns() {
+		query.getColumns().clear();
 		return this;
 	}
 

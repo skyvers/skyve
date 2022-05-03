@@ -2,8 +2,13 @@ package org.skyve.metadata.module.fluent;
 
 import java.util.Map.Entry;
 
+import org.skyve.impl.metadata.module.JobMetaDataImpl;
+import org.skyve.impl.metadata.repository.module.BizQLMetaData;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryMetaData;
+import org.skyve.impl.metadata.repository.module.ModuleDocument;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
+import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -102,19 +107,72 @@ public class FluentModule {
 		return this;
 	}
 	
+	public FluentModule removeJob(String name) {
+		module.getJobs().removeIf(j -> name.equals(j.getName()));
+		return this;
+	}
+	
+	public FluentModule clearJobs() {
+		module.getJobs().clear();
+		return this;
+	}
+
+	public FluentJob findJob(String name) {
+		JobMetaDataImpl result = module.getJobs().stream().filter(j -> name.equals(j.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentJob(result);
+		}
+		return null;
+	}
+	
 	public FluentModule addDocument(FluentModuleDocument document) {
 		module.getDocuments().add(document.get());
 		return this;
 	}
 
+	public FluentModule removeDocument(String name) {
+		module.getDocuments().removeIf(d -> name.equals(d.getRef()));
+		// TOD remove document privileges?
+		return this;
+	}
+
+	public FluentModule clearDocuments() {
+		module.getDocuments().clear();
+		return this;
+	}
+
+	public FluentModuleDocument findDocument(String name) {
+		ModuleDocument result = module.getDocuments().stream().filter(d -> name.equals(d.getRef())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentModuleDocument(result);
+		}
+		return null;
+	}
+	
 	public FluentModule addMetaDataQuery(FluentMetaDataQuery query) {
 		module.getQueries().add(query.get());
 		return this;
 	}
 
+	public FluentMetaDataQuery findMetaDataQuery(String name) {
+		MetaDataQueryMetaData result = (MetaDataQueryMetaData) module.getQueries().stream().filter(q -> name.equals(q.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentMetaDataQuery(result);
+		}
+		return null;
+	}
+	
 	public FluentModule addSQL(FluentSQL sql) {
 		module.getQueries().add(sql.get());
 		return this;
+	}
+	
+	public FluentSQL findSQL(String name) {
+		SQLMetaData result = (SQLMetaData) module.getQueries().stream().filter(q -> name.equals(q.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentSQL(result);
+		}
+		return null;
 	}
 	
 	public FluentModule addBizQL(FluentBizQL bizql) {
@@ -122,19 +180,47 @@ public class FluentModule {
 		return this;
 	}
 	
+	public FluentBizQL findBizQL(String name) {
+		BizQLMetaData result = (BizQLMetaData) module.getQueries().stream().filter(q -> name.equals(q.getName())).findAny().orElse(null);
+		if (result != null) {
+			return new FluentBizQL(result);
+		}
+		return null;
+	}
+
+	public FluentModule removeQuery(String name) {
+		module.getQueries().removeIf(q -> name.equals(q.getName()));
+		return this;
+	}
+
+	public FluentModule clearQueries() {
+		module.getQueries().clear();
+		return this;
+	}
+
 	public FluentModule addRole(FluentModuleRole role) {
 		module.getRoles().add(role.get());
 		return this;
 	}
+
+	public FluentModule removeRole(String name) {
+		module.getRoles().removeIf(r -> name.equals(r.getName()));
+		return this;
+	}
 	
-	public FluentModuleRole getRole(String name) {
+	public FluentModule clearRoles() {
+		module.getRoles().clear();
+		return this;
+	}
+
+	public FluentModuleRole findRole(String name) {
 		ModuleRoleMetaData role = module.getRoles().stream().filter(r -> r.getName().equals(name)).findAny().orElse(null);
 		if (role != null) {
 			return new FluentModuleRole(role);
 		}
 		return null;
 	}
-	
+
 	public FluentModule menu(FluentMenu menu) {
 		module.setMenu(menu.get());
 		return this;
