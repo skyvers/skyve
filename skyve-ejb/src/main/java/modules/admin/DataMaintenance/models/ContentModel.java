@@ -15,7 +15,7 @@ import org.skyve.content.ContentIterable.ContentIterator;
 import org.skyve.content.ContentManager;
 import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
@@ -177,7 +177,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 						properties.put(Content.documentNamePropertyName, bizDocument);
 						properties.put(Content.moduleNamePropertyName, bizModule);
 						properties.put(Content.contentPropertyName, hit.getExcerpt());
-						rows.add(new MapBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
+						rows.add(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
 	
 						if (i >= end) {
 							break;
@@ -197,7 +197,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 
 			Map<String, Object> properties = new TreeMap<>();
 			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
-			page.setSummary(new MapBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
+			page.setSummary(new DynamicBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
 			return page;
 		}
 	}

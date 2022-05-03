@@ -16,10 +16,14 @@ import java.util.logging.Level;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.ChildDynamicBean;
 import org.skyve.domain.HierarchicalBean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.HierarchicalDynamicBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.PersistentMapBean;
+import org.skyve.domain.PersistentChildDynamicBean;
+import org.skyve.domain.PersistentDynamicBean;
+import org.skyve.domain.PersistentHierarchicalDynamicBean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
@@ -172,7 +176,19 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public <T extends Bean> Class<T> getBeanClass(Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
-			return (Class<T>) MapBean.class;
+			Persistent persistent = getPersistent();
+			if (parentDocumentName != null) {
+				if (parentDocumentName.equals(getName())) { // hierarchical
+					return (persistent == null) ?
+								(Class<T>) HierarchicalDynamicBean.class : 
+								(Class<T>) PersistentHierarchicalDynamicBean.class;
+				}
+				// child
+				return (persistent == null) ?
+							(Class<T>) ChildDynamicBean.class :
+							(Class<T>) PersistentChildDynamicBean.class;
+			}
+			return (persistent == null) ? (Class<T>) DynamicBean.class : (Class<T>) PersistentDynamicBean.class;
 		}
 		
 		Class<T> result = null;
@@ -242,7 +258,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	/**
-	 * Instantiates a static compiled bean by default constructor or a MapBean.
+	 * Instantiates a static compiled bean by default constructor or a DynamicBean.
 	 * This is not the normal bean newInstance() static factory method as it does not call the bizlet or interceptor etc.
 	 * This is akin the the vanilla Java default constructor (but also caters for dynamic documents)
 	 * @param <T>	The type of bean to produce.
@@ -264,22 +280,28 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			p.put(Bean.USER_ID, null);
 			
 			// PersistentBean
+			boolean isPersistent = false;
 			Persistent persistent = getPersistent();
 			if (persistent != null) { // includes mapped strategy as these are generated to AbstractPersistentBean extensions
+				isPersistent = true;
 				p.put(PersistentBean.VERSION_NAME, null);
 				p.put(PersistentBean.LOCK_NAME, null);
 				p.put(PersistentBean.FLAG_COMMENT_NAME, null);
 				p.put(PersistentBean.TAGGED_NAME, null);
 			}
 			
+			boolean isHierarchical = false;
+			boolean isChild = false;
 			if (parentDocumentName != null) {
 				String name = getName();
 				// HierarchicalBean
 				if (parentDocumentName.equals(name)) {
+					isHierarchical = true;
 					p.put(HierarchicalBean.PARENT_ID, null);
 				}
 				// ChildBean
 				else {
+					isChild = true;
 					p.put(ChildBean.PARENT_NAME, null);
 					p.put(Bean.ORDINAL_NAME, null);
 				}
@@ -287,14 +309,29 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			
 			getAllAttributes(customer).forEach(a -> p.put(a.getName(), null));
 
-			@SuppressWarnings("unchecked")
-			T t = (persistent == null) ?
-					(T) new MapBean(getOwningModuleName(), getName(), p) :
-					(T) new PersistentMapBean(getOwningModuleName(), getName(), p);
-
+			if (isHierarchical) {
+				@SuppressWarnings("unchecked")
+				T t = isPersistent ?
+						(T) new HierarchicalDynamicBean(getOwningModuleName(), getName(), p) :
+						(T) new PersistentHierarchicalDynamicBean(getOwningModuleName(), getName(), p);
+				result = t;
+			}
+			else if (isChild) {
+				@SuppressWarnings("unchecked")
+				T t = isPersistent ?
+						(T) new ChildDynamicBean(getOwningModuleName(), getName(), p) :
+						(T) new PersistentChildDynamicBean(getOwningModuleName(), getName(), p);
+				result = t;
+			}
+			else {
+				@SuppressWarnings("unchecked")
+				T t = isPersistent ?
+						(T) new DynamicBean(getOwningModuleName(), getName(), p) :
+						(T) new PersistentDynamicBean(getOwningModuleName(), getName(), p);
+				result = t;
+			}
+			final T t = result; // to get around final required in forEach()
 			getAllAttributes(customer).forEach(a -> t.setDynamic(a.getName(), dynamicDefaultValue(a, t)));
-
-			result = t;
 		}
 		else {
 			final Class<T> beanClass = getBeanClass(customer);

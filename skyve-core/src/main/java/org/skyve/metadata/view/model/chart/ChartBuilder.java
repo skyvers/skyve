@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.SortDirection;
@@ -337,7 +337,7 @@ public class ChartBuilder {
 					Map<String, Object> properties = new TreeMap<>();
 					properties.put((categoryBucket == null) ? categoryBinding : "category", null);
 					properties.put("value", rest);
-					best.add(new MapBean(document.getOwningModuleName(), document.getName(), properties));
+					best.add(new DynamicBean(document.getOwningModuleName(), document.getName(), properties));
 					result = best;
 				}
 				else {

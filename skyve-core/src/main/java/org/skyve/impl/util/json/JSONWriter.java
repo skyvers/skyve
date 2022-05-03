@@ -259,7 +259,7 @@ public class JSONWriter {
 					add(PersistentBean.LOCK_NAME, persistentBean.getBizLock(), propertyNames, topLevel);
 				}
 			}
-			else { // we are marshalling a MapBean (for List View)
+			else { // we are marshalling a DynamicBean (for List View)
 				for (String name : propertyNames) {
 					Object value = null;
 					try {

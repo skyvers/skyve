@@ -10,7 +10,7 @@ import java.util.TreeSet;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
 import org.skyve.impl.util.LoggingIteratorAdapter;
@@ -179,7 +179,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			}
 		}
 		
-		return new MapBean(module.getName(), drivingDocument.getName(), summaryData);
+		return new DynamicBean(module.getName(), drivingDocument.getName(), summaryData);
 	}
 	
 	private void minOrMax(Map<String, Object> summaryData, boolean max) throws Exception {

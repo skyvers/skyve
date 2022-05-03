@@ -12,7 +12,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Geometry;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.TimeoutException;
@@ -123,7 +123,7 @@ class HibernateQueryDelegate {
 					properties.put(aliases[0], result);
 				}
 
-				beans.add((T) new MapBean(drivingModuleName, 
+				beans.add((T) new DynamicBean(drivingModuleName, 
 											drivingDocumentName, 
 											properties));
 			}

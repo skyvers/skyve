@@ -10,8 +10,8 @@ import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.MapBean;
-import org.skyve.domain.PersistentMapBean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.domain.PersistentDynamicBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -135,20 +135,20 @@ public class BindTests extends AbstractSkyveTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSimpleMapBeanProperty() {
+	public void testSimpleDynamicBeanProperty() {
 		Map<String, Object> map = new TreeMap<>();
 		map.put(User.userNamePropertyName, "mike");
-		MapBean bean = new MapBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
+		DynamicBean bean = new DynamicBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
 		Assert.assertEquals("mike", Binder.get(bean, User.userNamePropertyName)); 
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCompoundMapBeanProperty() {
+	public void testCompoundDynamicBeanProperty() {
 		String binding = Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(binding, "mike");
-		MapBean bean = new MapBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
+		DynamicBean bean = new DynamicBean(User.MODULE_NAME, User.DOCUMENT_NAME, map);
 		Assert.assertEquals("mike", Binder.get(bean, binding)); 
 	}
 	
@@ -156,8 +156,8 @@ public class BindTests extends AbstractSkyveTest {
 	public void testSimpleThisProperty() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
-		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		map.put(DynamicBean.BEAN_PROPERTY_KEY, aap);
+		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
 	}
 	
@@ -167,8 +167,8 @@ public class BindTests extends AbstractSkyveTest {
 														AllAttributesPersistent.booleanFlagPropertyName);
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
-		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		map.put(DynamicBean.BEAN_PROPERTY_KEY, aap);
+		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
 	}
 
@@ -176,9 +176,9 @@ public class BindTests extends AbstractSkyveTest {
 	public void testSimpleMapPropertyOverThisProperty() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
+		map.put(DynamicBean.BEAN_PROPERTY_KEY, aap);
 		map.put(AllAttributesPersistent.booleanFlagPropertyName, null);
-		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
 		Assert.assertFalse(Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
 	}
 
@@ -188,9 +188,9 @@ public class BindTests extends AbstractSkyveTest {
 														AllAttributesPersistent.booleanFlagPropertyName);
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
-		map.put(MapBean.BEAN_PROPERTY_KEY, aap);
+		map.put(DynamicBean.BEAN_PROPERTY_KEY, aap);
 		map.put(binding, null);
-		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
 		Assert.assertFalse(Binder.get(bean, binding) instanceof Boolean);
 	}
 	
@@ -201,7 +201,7 @@ public class BindTests extends AbstractSkyveTest {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(AllAttributesPersistent.aggregatedAssociationPropertyName, aap);
-		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
 	}
 
@@ -213,7 +213,7 @@ public class BindTests extends AbstractSkyveTest {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		Map<String, Object> map = new TreeMap<>();
 		map.put(AllAttributesPersistent.aggregatedAssociationPropertyName, aap);
-		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
 	}
 
@@ -228,7 +228,7 @@ public class BindTests extends AbstractSkyveTest {
 		map.put(Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
 												AllAttributesPersistent.aggregatedAssociationPropertyName),
 					aap);
-		MapBean bean = new MapBean(m.getName(), aapd.getName(), map);
+		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
 		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
 	}
 	
@@ -313,7 +313,7 @@ public class BindTests extends AbstractSkyveTest {
 	
 	@Test
 	public void testDynamicExpressions() throws Exception {
-		PersistentMapBean bean = Util.constructRandomInstance(u, m, aadpd, 2);
+		PersistentDynamicBean bean = Util.constructRandomInstance(u, m, aadpd, 2);
 		Binder.set(bean, AllAttributesPersistent.textPropertyName, "Test");
 		
 		Assert.assertEquals("Test", Binder.formatMessage("{text}", bean));
@@ -470,14 +470,14 @@ public class BindTests extends AbstractSkyveTest {
 	}
 	
 	/**
-	 * Test that a MapBean with a display binding with a dynamic domain defined by no THIS_ALIAS returns code.
+	 * Test that a DynamicBean with a display binding with a dynamic domain defined by no THIS_ALIAS returns code.
 	 */
 	@Test
-	public void testMapBeanWithNoThisReturnsDynamicDomainCode() {
+	public void testDynamicBeanWithNoThisReturnsDynamicDomainCode() {
 		Map<String, Object> properties = new TreeMap<>();
 		properties.put(Snapshot.queryNamePropertyName, "dynamicDomainValue");
-		MapBean bean = new MapBean(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME, properties);
-		Assert.assertEquals("Dynamic domain code value with no THIS_ALIAS should return the code value for a MapBean",
+		DynamicBean bean = new DynamicBean(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME, properties);
+		Assert.assertEquals("Dynamic domain code value with no THIS_ALIAS should return the code value for a DynamicBean",
 								"dynamicDomainValue",
 								BindUtil.getDisplay(c, bean, Snapshot.queryNamePropertyName));
 	}

@@ -8,7 +8,7 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
@@ -171,7 +171,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 			Map<String, Object> properties = new TreeMap<>();
 			properties.put(Bean.DOCUMENT_ID, Long.valueOf(rows.size()));
 			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
-			summaryBean = new MapBean(module.getName(), drivingDocument.getName(), properties);
+			summaryBean = new DynamicBean(module.getName(), drivingDocument.getName(), properties);
 		}
 		else {
 			summaryBean = summaryQuery.projectedResult();

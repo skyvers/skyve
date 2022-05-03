@@ -25,7 +25,7 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
@@ -1480,7 +1480,7 @@ public class SmartClientListServlet extends HttpServlet {
 		}
 
 		message.append(JSON.marshall(customer,
-											new MapBean(module.getName(),
+											new DynamicBean(module.getName(),
 															model.getDrivingDocument().getName(),
 															properties),
 											projections));

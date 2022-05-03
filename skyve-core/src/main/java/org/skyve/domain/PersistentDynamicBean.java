@@ -4,10 +4,10 @@ import java.util.Map;
 
 import org.skyve.domain.types.OptimisticLock;
 
-public class PersistentMapBean extends MapBean implements PersistentBean {
+public class PersistentDynamicBean extends DynamicBean implements PersistentBean {
 	private static final long serialVersionUID = -689278030377120098L;
 
-	public PersistentMapBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+	public PersistentDynamicBean(String bizModule, String bizDocument, Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
 	}
 

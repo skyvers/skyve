@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
 public class InMemoryFilterTest extends AbstractSkyveTest {
@@ -19,27 +19,27 @@ public class InMemoryFilterTest extends AbstractSkyveTest {
 
 		Map<String, Object> map = new TreeMap<>();
 		map.put("name", "Ted");
-		MapBean bean = new MapBean("admin", "Contact", map);
+		DynamicBean bean = new DynamicBean("admin", "Contact", map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", "Fred");
-		bean = new MapBean("admin", "Contact", map);
+		bean = new DynamicBean("admin", "Contact", map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", "Jed");
-		bean = new MapBean("admin", "Contact", map);
+		bean = new DynamicBean("admin", "Contact", map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", "Ned");
-		bean = new MapBean("admin", "Contact", map);
+		bean = new DynamicBean("admin", "Contact", map);
 		beans.add(bean);
 
 		map = new TreeMap<>();
 		map.put("name", null);
-		bean = new MapBean("admin", "Contact", map);
+		bean = new DynamicBean("admin", "Contact", map);
 		beans.add(bean);
 
 		InMemoryFilter f = new InMemoryFilter();

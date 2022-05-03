@@ -31,7 +31,7 @@ public interface DynamicPersistence extends Serializable {
 	}
 	
 	/**
-	 * Recursively persist the given bean which may be totally dynamic (PersistentMapBean) or have some dynamic attributes (AbstractBean).
+	 * Recursively persist the given bean which may be totally dynamic (PersistentDynamicBean) or have some dynamic attributes (AbstractBean).
 	 */
 	void persist(Customer customer, Module module, Document document, PersistentBean bean);
 

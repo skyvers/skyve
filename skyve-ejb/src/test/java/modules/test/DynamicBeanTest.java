@@ -8,8 +8,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
-import org.skyve.domain.PersistentMapBean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.domain.PersistentDynamicBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -48,10 +48,10 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMapBean() {
+	public void testDynamicBean() {
 		Map<String, Object> values = new TreeMap<>();
 		values.put(ONE, TWO);
-		MapBean contact = new MapBean(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, values);
+		DynamicBean contact = new DynamicBean(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, values);
 		Assert.assertEquals("Dynamic Property set correctly", TWO, contact.getDynamic(ONE));
 		Assert.assertTrue("Is a dynamic property", contact.isDynamic(ONE));
 		contact.setDynamic(ONE, THREE);
@@ -65,7 +65,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 
 	@Test
 	public void testGetAllAttributesDynamicPersistentClass() throws Exception {
-		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", PersistentMapBean.class, aadpd.newInstance(u).getClass());
+		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", PersistentDynamicBean.class, aadpd.newInstance(u).getClass());
 	}
 	
 	@Test
@@ -98,7 +98,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		String json = JSON.marshall(c, bean);
 		bean = (Bean) JSON.unmarshall(u, json);
 		Assert.assertEquals("JSON marshall/unmarshall problem", bizId, bean.getBizId());
-		Assert.assertEquals("JSON unmarshall document should create AllAtrributesDynamicPersistent", PersistentMapBean.class, bean.getClass());
+		Assert.assertEquals("JSON unmarshall document should create AllAtrributesDynamicPersistent", PersistentDynamicBean.class, bean.getClass());
 
 		bean = Util.constructRandomInstance(u, m, adapd, 2);
 		bizId = bean.getBizId();

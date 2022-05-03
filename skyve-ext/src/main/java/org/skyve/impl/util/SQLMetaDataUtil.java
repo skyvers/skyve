@@ -13,7 +13,7 @@ import java.util.TreeMap;
 import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
@@ -263,7 +263,7 @@ public class SQLMetaDataUtil {
 				properties.put("disabled", row[6]);
 				properties.put("user", user);
 				
-				MapBean jobSchedule = new MapBean("admin", "JobSchedule", properties);
+				DynamicBean jobSchedule = new DynamicBean("admin", "JobSchedule", properties);
 				result.add(jobSchedule);
 			}
 		}
@@ -311,7 +311,7 @@ public class SQLMetaDataUtil {
 				properties.put("scheduled", row[6]);
 				properties.put("user", user);
 
-				MapBean reportSchedule = new MapBean("admin", "ReportTemplate", properties);
+				DynamicBean reportSchedule = new DynamicBean("admin", "ReportTemplate", properties);
 				result.add(reportSchedule);
 			}
 		}

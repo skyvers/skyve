@@ -12,7 +12,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.customer.Customer;
@@ -143,9 +143,9 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	}
 
 	/**
-	 * Generate a MapBean for the bean to add as a row.
+	 * Generate a DynamicBean for the bean to add as a row.
 	 */
-	private static MapBean newOutlineFromBean(Bean bean, String bizParentId) {
+	private static DynamicBean newOutlineFromBean(Bean bean, String bizParentId) {
 		final User u = CORE.getUser();
 		final Customer c = u.getCustomer();
 		
@@ -166,6 +166,6 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 										(icon == null) ? "fa fa-document" : icon,
 										bean.getBizKey()));
 
-		return new MapBean(bean.getBizModule(), bean.getBizDocument(), properties);
+		return new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);
 	}
 }

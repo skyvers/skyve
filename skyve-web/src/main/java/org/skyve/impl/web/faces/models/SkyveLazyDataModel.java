@@ -14,7 +14,7 @@ import org.primefaces.model.SortMeta;
 import org.primefaces.model.SortOrder;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Decimal;
@@ -193,7 +193,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	public BeanMapAdapter<Bean> getRowData(String rowKey) {
 		Map<String, Object> properties = new TreeMap<>();
 		properties.put(Bean.DOCUMENT_ID, rowKey);
-		MapBean bean = new MapBean(moduleName, documentName, properties);
+		DynamicBean bean = new DynamicBean(moduleName, documentName, properties);
 		return new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext());
 	}
 	

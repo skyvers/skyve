@@ -14,12 +14,12 @@ import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
-public class MapBean extends LazyDynaMap implements Bean {
+public class DynamicBean extends LazyDynaMap implements Bean {
 	private static final long serialVersionUID = 1L;
 
 	public static final String BEAN_PROPERTY_KEY = "bean";
 	
-	public MapBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+	public DynamicBean(String bizModule, String bizDocument, Map<String, Object> properties) {
 		super(properties);
 		
 		values.put(Bean.MODULE_KEY, bizModule);
@@ -364,9 +364,9 @@ public class MapBean extends LazyDynaMap implements Bean {
 			result.append(propertyName).append(" = ");
 			Object value = get(propertyName);
 			// Stop infinite recursion on cyclic graphs
-			if (value instanceof MapBean) {
-				MapBean bean = (MapBean) value;
-				result.append("MapBean:").append(bean.getBizModule()).append(bean.getBizDocument()).append('#').append(bean.getBizId()).append(' ');
+			if (value instanceof DynamicBean) {
+				DynamicBean bean = (DynamicBean) value;
+				result.append("DynamicBean:").append(bean.getBizModule()).append(bean.getBizDocument()).append('#').append(bean.getBizId()).append(' ');
 			}
 			else {
 				result.append(value).append(' ');
@@ -389,9 +389,9 @@ public class MapBean extends LazyDynaMap implements Bean {
 	 */
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof MapBean) {
+		if (other instanceof DynamicBean) {
 			String thisBizId = this.getBizId();
-			String otherBizId = ((MapBean) other).getBizId();
+			String otherBizId = ((DynamicBean) other).getBizId();
 			return (thisBizId != null) && thisBizId.equals(otherBizId);
 		}
 		return false;

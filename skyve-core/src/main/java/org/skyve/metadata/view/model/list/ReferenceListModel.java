@@ -9,7 +9,7 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.TransientBean;
 import org.skyve.metadata.customer.Customer;
@@ -107,7 +107,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 			properties.put(PersistentBean.LOCK_NAME, null);
 			properties.put(PersistentBean.TAGGED_NAME, Boolean.FALSE);
 			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
-			return new MapBean(bean.getBizModule(), bean.getBizDocument(), properties);
+			return new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);
 		}
 		return bean;
 	}

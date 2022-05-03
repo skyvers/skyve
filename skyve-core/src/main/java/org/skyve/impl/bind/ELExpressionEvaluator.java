@@ -186,7 +186,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 				}
 			}
 		}
-		else if ((bean != null) && (! (bean instanceof MapBean))) { // not dynamic
+		else if ((bean != null) && (! (bean instanceof DynamicBean))) { // not dynamic
 			classToImport = bean.getClass();
 		}
 

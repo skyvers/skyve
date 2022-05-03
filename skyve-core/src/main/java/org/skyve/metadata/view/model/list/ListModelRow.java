@@ -3,17 +3,17 @@ package org.skyve.metadata.view.model.list;
 import java.util.Map;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 
-public class ListModelRow extends MapBean {
+public class ListModelRow extends DynamicBean {
 	private static final long serialVersionUID = 477773812246146903L;
 /*
-	public ListModelRow(MapBean bean) {
+	public ListModelRow(DynamicBean bean) {
 		super(bean.getBizModule(), bean.getBizDocument(), bean.getValues());
 	}
 	
-	private static Map<String, Object> getValues(MapBean bean) {
+	private static Map<String, Object> getValues(DynamicBean bean) {
 		Map<String, Object>
 		for (DynaProperty property : bean.getDynaProperties()) {
 			String propertyName = property.getName();

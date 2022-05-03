@@ -22,7 +22,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
-import org.skyve.domain.MapBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
@@ -732,14 +732,14 @@ public final class BindUtil {
 				if (domainType != null) {
 					DocumentImpl internalDocument = (DocumentImpl) document;
 					if (DomainType.dynamic.equals(domainType)) {
-						// Get the real deal if this is a MapBean from a query
+						// Get the real deal if this is a DynamicBean from a query
 						Bean realBean = bean;
-						if (bean instanceof MapBean) {
-							MapBean mapBean = (MapBean) bean;
-							if (mapBean.isProperty(MapBean.BEAN_PROPERTY_KEY)) {
-								realBean = (Bean) mapBean.get(MapBean.BEAN_PROPERTY_KEY);
+						if (bean instanceof DynamicBean) {
+							DynamicBean dynamicBean = (DynamicBean) bean;
+							if (dynamicBean.isProperty(DynamicBean.BEAN_PROPERTY_KEY)) {
+								realBean = (Bean) dynamicBean.get(DynamicBean.BEAN_PROPERTY_KEY);
 							}
-							else { // no THIS_ALIAS in this mapBean (maybe its a app coder's list model)
+							else { // no THIS_ALIAS in this DynamicBean (maybe its a app coder's list model)
 								realBean = null;
 							}
 						}
@@ -1233,8 +1233,8 @@ public final class BindUtil {
 	 * 					Examples would be "identifier" (simple) or "identifier.clientId" (compound).
 	 */
 	public static Object get(Object bean, String binding) {
-		if ((bean instanceof MapBean) && ((MapBean) bean).isProperty(binding)) {
-			return ((MapBean) bean).get(binding);
+		if ((bean instanceof DynamicBean) && ((DynamicBean) bean).isProperty(binding)) {
+			return ((DynamicBean) bean).get(binding);
 		}
 
 		Object result = null;
@@ -1352,8 +1352,8 @@ public final class BindUtil {
 				valueToSet = null;
 			}
 	
-			if ((bean instanceof MapBean) && ((MapBean) bean).isProperty(binding)) {
-				((MapBean) bean).set(binding, valueToSet);
+			if ((bean instanceof DynamicBean) && ((DynamicBean) bean).isProperty(binding)) {
+				((DynamicBean) bean).set(binding, valueToSet);
 			}
 			else {
 				// Get the penultimate object to ensure we traverse static and dynamic beans correctly
@@ -1471,7 +1471,7 @@ public final class BindUtil {
 		if (bean instanceof Bean) {
 			Bean b = (Bean) bean;
 
-			// NB true if a MapBean or where the binding is to a dynamic attribute name
+			// NB true if a DynamicBean or where the binding is to a dynamic attribute name
 			boolean dynamic = b.isDynamic(binding);
 			int lastDotIndex = binding.lastIndexOf('.');
 			String attributeName = null;
@@ -1555,7 +1555,7 @@ public final class BindUtil {
 			
 			Bean b = (Bean) bean;
 			boolean dynamic = b.isDynamic(simplePropertyName);
-			if ((b instanceof MapBean) && (! dynamic)) {
+			if ((b instanceof DynamicBean) && (! dynamic)) {
 				throw new IllegalStateException(simplePropertyName + " is not a property of " + bean);
 			}
 			
