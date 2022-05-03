@@ -13,14 +13,85 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View;
 
 public interface MutableRepository {
+	/**
+	 * Set's the router in this repository.
+	 * @param router	The router to set.
+	 * @return	The converted router.
+	 */
 	@Nonnull Router setRouter(@Nonnull Router router);
-	@Nonnull Customer addCustomer(@Nonnull CustomerMetaData customer);
-	@Nonnull Module addModule(@Nonnull Customer customer, @Nonnull ModuleMetaData module);
-	@Nonnull Module addModule(@Nonnull ModuleMetaData module);
-	@Nonnull Document addDocument(@Nonnull Customer customer, @Nonnull Module module, @Nonnull DocumentMetaData document);
-	@Nonnull Document addDocument(@Nonnull Module module, @Nonnull DocumentMetaData document);
-	@Nonnull View addView(@Nonnull Customer customer, @Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view); 
-	@Nonnull View addView(@Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view); 
-	@Nonnull View addView(@Nonnull Customer customer, @Nonnull Document document, @Nonnull ViewMetaData view); 
-	@Nonnull View addView(@Nonnull Document document, @Nonnull ViewMetaData view); 
+	
+	/**
+	 * Puts the customer meta-data in this repository.
+	 * @param customer	The customer meta-data to put.
+	 * @return	The converted customer.
+	 */
+	@Nonnull Customer putCustomer(@Nonnull CustomerMetaData customer);
+	
+	/**
+	 * Puts a customer overridden module meta-data into this repository.
+	 * @param customer	The customer the module is for.
+	 * @param module	The module meta-data to put.
+	 * @return	The converted module.
+	 */
+	@Nonnull Module putModule(@Nonnull Customer customer, @Nonnull ModuleMetaData module);
+	
+	/**
+	 * Puts a vanilla module meta-data into this repository.
+	 * @param module	The module meta-data to put.
+	 * @return	The converted module.
+	 */
+	@Nonnull Module putModule(@Nonnull ModuleMetaData module);
+	
+	/**
+	 * Puts a customer overridden document meta-data into this repository.
+	 * @param customer	The customer the document is for.
+	 * @param module	The module the document is for.
+	 * @param document	The document meta-data to put.
+	 * @return	The converted document.
+	 */
+	@Nonnull Document putDocument(@Nonnull Customer customer, @Nonnull Module module, @Nonnull DocumentMetaData document);
+
+	/**
+	 * Puts a vanilla document meta-data into this repository.
+	 * @param module	The module the document is for.
+	 * @param document	The document meta-data to put.
+	 * @return	The converted document.
+	 */
+	@Nonnull Document putDocument(@Nonnull Module module, @Nonnull DocumentMetaData document);
+
+	/**
+	 * Puts a customer overridden UX/UI specific view meta-data into this repository.
+	 * @param customer	The customer the view is for.
+	 * @param uxui	The UX/UI the view is for.
+	 * @param document	The document the document is for.
+	 * @param view	The view meta-data to put.
+	 * @return	The converted view.
+	 */
+	@Nonnull View putView(@Nonnull Customer customer, @Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view); 
+
+	/**
+	 * Puts a UX/UI specific view meta-data into this repository.
+	 * @param uxui	The UX/UI the view is for.
+	 * @param document	The document the document is for.
+	 * @param view	The view meta-data to put.
+	 * @return	The converted view.
+	 */
+	@Nonnull View putView(@Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view); 
+
+	/**
+	 * Puts a customer overridden UX/UI agnostic view meta-data into this repository.
+	 * @param customer	The customer the view is for.
+	 * @param document	The document the document is for.
+	 * @param view	The view meta-data to put.
+	 * @return	The converted view.
+	 */
+	@Nonnull View putView(@Nonnull Customer customer, @Nonnull Document document, @Nonnull ViewMetaData view); 
+
+	/**
+	 * Puts a UX/UI agnostic view meta-data into this repository.
+	 * @param document	The document the document is for.
+	 * @param view	The view meta-data to put.
+	 * @return	The converted view.
+	 */
+	@Nonnull View putView(@Nonnull Document document, @Nonnull ViewMetaData view); 
 }

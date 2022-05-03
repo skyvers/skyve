@@ -131,7 +131,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 
 	@Override
-	public Customer addCustomer(CustomerMetaData customer) {
+	public Customer putCustomer(CustomerMetaData customer) {
 		String customerName = customer.getName();
 		Customer result = customer.convert(customerName, getDelegator());
 		cache.put(CUSTOMERS_NAMESPACE + customerName, Optional.of(result));
@@ -188,7 +188,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 	
 	@Override
-	public Module addModule(Customer customer, ModuleMetaData module) {
+	public Module putModule(Customer customer, ModuleMetaData module) {
 		String customerName = customer.getName();
 		String moduleName = module.getName();
 		Module result = convertModule(customerName, moduleName, module);
@@ -201,7 +201,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 	
 	@Override
-	public Module addModule(ModuleMetaData module) {
+	public Module putModule(ModuleMetaData module) {
 		String moduleName = module.getName();
 
 		Module result = convertModule(null, moduleName, module);
@@ -322,7 +322,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 	
 	@Override
-	public Document addDocument(Customer customer, Module module, DocumentMetaData document) {
+	public Document putDocument(Customer customer, Module module, DocumentMetaData document) {
 		String customerName = customer.getName();
 		String moduleName = module.getName();
 		String documentName = document.getName();
@@ -336,7 +336,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 
 	@Override
-	public Document addDocument(Module module, DocumentMetaData document) {
+	public Document putDocument(Module module, DocumentMetaData document) {
 		String moduleName = module.getName();
 		String documentName = document.getName();
 		Document result = convertDocument(null, null, moduleName, module, documentName, document);
@@ -492,7 +492,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 
 	@Override
-	public View addView(Customer customer, String uxui, Document document, ViewMetaData view) {
+	public View putView(Customer customer, String uxui, Document document, ViewMetaData view) {
 		String customerName = customer.getName();
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
@@ -509,7 +509,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 
 	@Override
-	public View addView(String uxui, Document document, ViewMetaData view) {
+	public View putView(String uxui, Document document, ViewMetaData view) {
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		View result = convertView(null, uxui, null, moduleName, documentName, document, uxui, view);
@@ -524,7 +524,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 	
 	@Override
-	public View addView(Customer customer, Document document, ViewMetaData view) {
+	public View putView(Customer customer, Document document, ViewMetaData view) {
 		String customerName = customer.getName();
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
@@ -541,7 +541,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 	
 	@Override
-	public View addView(Document document, ViewMetaData view) {
+	public View putView(Document document, ViewMetaData view) {
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		View result = convertView(null, null, null, moduleName, documentName, document, null, view);
