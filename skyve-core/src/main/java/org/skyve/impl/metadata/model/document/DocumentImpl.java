@@ -312,22 +312,22 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			if (isHierarchical) {
 				@SuppressWarnings("unchecked")
 				T t = isPersistent ?
-						(T) new HierarchicalDynamicBean(getOwningModuleName(), getName(), p) :
-						(T) new PersistentHierarchicalDynamicBean(getOwningModuleName(), getName(), p);
+						(T) new PersistentHierarchicalDynamicBean(getOwningModuleName(), getName(), p) :
+						(T) new HierarchicalDynamicBean(getOwningModuleName(), getName(), p);
 				result = t;
 			}
 			else if (isChild) {
 				@SuppressWarnings("unchecked")
 				T t = isPersistent ?
-						(T) new ChildDynamicBean(getOwningModuleName(), getName(), p) :
-						(T) new PersistentChildDynamicBean(getOwningModuleName(), getName(), p);
+						(T) new PersistentChildDynamicBean(getOwningModuleName(), getName(), p) :
+						(T) new ChildDynamicBean(getOwningModuleName(), getName(), p);
 				result = t;
 			}
 			else {
 				@SuppressWarnings("unchecked")
 				T t = isPersistent ?
-						(T) new DynamicBean(getOwningModuleName(), getName(), p) :
-						(T) new PersistentDynamicBean(getOwningModuleName(), getName(), p);
+						(T) new PersistentDynamicBean(getOwningModuleName(), getName(), p) :
+						(T) new DynamicBean(getOwningModuleName(), getName(), p);
 				result = t;
 			}
 			final T t = result; // to get around final required in forEach()
