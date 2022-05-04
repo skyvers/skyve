@@ -14,13 +14,10 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implem
 	}
 
 	public FluentCombo from(@SuppressWarnings("hiding") Combo combo) {
-
 		absoluteWidth(combo, this);
-
 		super.from(combo);
 		return this;
 	}
-
 
 	@Override
 	public FluentCombo pixelWidth(int width) {
@@ -32,5 +29,4 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implem
 	public Combo get() {
 		return combo;
 	}
-
 }
