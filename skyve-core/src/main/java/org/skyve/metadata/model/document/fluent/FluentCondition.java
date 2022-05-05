@@ -25,7 +25,7 @@ public class FluentCondition {
 	}
 	
 	public FluentCondition name(String name) {
-		condition.setDocumentation(name);
+		condition.setName(name);
 		return this;
 	}
 
