@@ -77,6 +77,9 @@ public class SkyveContextListener implements ServletContextListener {
 	
 					EXT.bootstrap(p);
 				}
+
+				// Start the job scheduler whilst we have a Persistence as it needs to get the JobSchedule document.
+				EXT.getJobScheduler().startup();
 			}
 			catch (Throwable t) {
 				if (p != null) {
@@ -91,8 +94,6 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			
 			EXT.getReporting().startup();
-			
-			EXT.getJobScheduler().startup();
 			
 			// Set up the session cookie
 			SessionCookieConfig scc = ctx.getSessionCookieConfig();

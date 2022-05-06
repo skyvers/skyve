@@ -7,10 +7,10 @@ import org.skyve.CORE;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
-public class HierarchicalDynamicBean extends DynamicBean implements HierarchicalBean<Bean> {
-	private static final long serialVersionUID = -7668370665710632246L;
+public class DynamicPersistentHierarchicalBean extends DynamicPersistentBean implements HierarchicalBean<Bean> {
+	private static final long serialVersionUID = 9192062244299454210L;
 
-	public HierarchicalDynamicBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+	public DynamicPersistentHierarchicalBean(String bizModule, String bizDocument, Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
 	}
 

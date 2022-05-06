@@ -115,7 +115,6 @@ public abstract class AbstractPersistence implements Persistence {
 	public abstract String getDocumentEntityName(String moduleName, String documentName);
 
 	public abstract void postLoad(PersistentBean bean) throws Exception;
-
 	public abstract void preRemove(PersistentBean bean) throws Exception;
 	public abstract void postRemove(PersistentBean bean) throws Exception;
 
