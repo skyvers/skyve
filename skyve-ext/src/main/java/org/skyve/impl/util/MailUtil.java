@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,12 @@ public class MailUtil {
 
 		// fill message
 		Multipart multipart = new MimeMultipart();
-		messageBodyPart.setContent(body, contentType.toString());
+		
+		// informs the java email libraries how to encode the text.
+		// This is a fix for being able to email Japanese characters (and will likely fix some other languages as well)
+		// tyoe = html/text; charset=UTF-8, 
+		String type = contentType.toString() + "; charset=" + StandardCharsets.UTF_8.name();
+		messageBodyPart.setContent(body, type);
 		multipart.addBodyPart(messageBodyPart);
 
 		// add headers
