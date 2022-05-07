@@ -3,6 +3,7 @@ package org.skyve.impl.persistence;
 import java.util.Set;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.metadata.customer.Customer;
@@ -30,11 +31,16 @@ public class NoOpDynamicPersistence implements DynamicPersistence {
 	}
 
 	@Override
-	public Bean retrieve(Customer customer, Module module, Document document, String bizId) {
+	public DynamicPersistentBean populate(String bizId) {
 		// No-op
 		return null;
 	}
 
+	@Override
+	public void populate(PersistentBean bean) {
+		// No-op
+	}
+	
 	@Override
 	public boolean hasReferentialIntegrity(Document documentToDelete,
 											PersistentBean beanToDelete,

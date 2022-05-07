@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
@@ -219,7 +220,12 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			result = getDocumentInternal(true, customer, module, documentName);
 		}
 		if (result == null) { // not overridden
-			result = getDocumentInternal(false, (customer == null) ? CORE.getCustomer() : customer, module, documentName);
+			if (AbstractPersistence.IMPLEMENTATION_CLASS == null) { // not initialised or gen domain
+				result = getDocumentInternal(false, customer, module, documentName);
+			}
+			else {
+				result = getDocumentInternal(false, (customer == null) ? CORE.getCustomer() : customer, module, documentName);
+			}
 		}
 		return result;
 	}

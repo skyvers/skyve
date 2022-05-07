@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.metadata.customer.Customer;
@@ -31,7 +32,7 @@ public interface DynamicPersistence extends Serializable {
 	}
 	
 	/**
-	 * Recursively persist the given bean which may be totally dynamic (PersistentDynamicBean) or have some dynamic attributes (AbstractBean).
+	 * Recursively persist the given bean which may be totally dynamic (PersistentDynamicBean) or have some dynamic attributes (AbstractPersistentBean).
 	 */
 	void persist(Customer customer, Module module, Document document, PersistentBean bean);
 
@@ -56,26 +57,20 @@ public interface DynamicPersistence extends Serializable {
 	void delete(Customer customer, Document document, PersistentBean bean);
 
 	/**
-	 * Convenience retrieve.
+	 * This method should recursively retrieve the entire bean graph (excluding any detritus from schema evolution).
+	 * ie Excluding any outgoing relations/edges that are no longer expressed in metadata because the schema has evolved.
+	 * NB The module and document is derived from the data store to allow polymorphism.
+	 * @param bizId
 	 */
-	default Bean retrieve(String bizModule, String bizDocument, String bizId) {
-		Customer c = CORE.getCustomer();
-		Module m = c.getModule(bizModule);
-		Document d = m.getDocument(c, bizDocument);
-		return retrieve(c, m, d, bizId);
-	}
-
+	DynamicPersistentBean populate(String bizId);
+	
 	/**
 	 * This method should recursively retrieve the entire bean graph (excluding any detritus from schema evolution).
-	 * ie Exluded any outgoing relations/edges that are no longer expressed in metadata because the schema has evolved.
-	 * 
-	 * @param customer
-	 * @param module
-	 * @param document
-	 * @param bizId
-	 * @return
+	 * ie Excluding any outgoing relations/edges that are no longer expressed in metadata because the schema has evolved.
+	 * NB The module and document is derived from the bean to allow polymorphism.
+	 * @param bean
 	 */
-	Bean retrieve(Customer customer, Module module, Document document, String bizId);
+	void populate(PersistentBean bean);
 	
 	/**
 	 * Return false if anything is referencing a bean that is about to be deleted, otherwise true.
