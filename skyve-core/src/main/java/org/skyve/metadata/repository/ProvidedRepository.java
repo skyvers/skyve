@@ -124,13 +124,13 @@ public interface ProvidedRepository extends CachedRepository {
 
 	UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime);
 
-	void validateCustomerForGenerateDomain(Customer customer);
+	void validateCustomerForGenerateDomain(@Nonnull Customer customer);
 
-	void validateModuleForGenerateDomain(Customer customer, Module module);
+	void validateModuleForGenerateDomain(@Nonnull Customer customer, @Nonnull Module module);
 
-	void validateDocumentForGenerateDomain(Customer customer, Document document);
+	void validateDocumentForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document);
 
-	void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui);
+	void validateViewForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui);
 
 	/**
 	 * @return The global router that is not module specific.

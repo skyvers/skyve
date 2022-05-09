@@ -29,6 +29,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
@@ -402,19 +403,35 @@ public class LocalDesignRepository extends FileSystemRepository {
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
+		Module module = getModule(customer, document.getOwningModuleName());
 
-		// Check that conditions do not start with is or not
-		for (String conditionName : ((DocumentImpl) document).getConditionNames()) {
+		// Check conditions
+		for (String conditionName : document.getConditionNames()) {
+			// Check that conditions do not start with is or not
 			if (conditionName.startsWith("is")) {
 				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'is' - the 'is' prefix is generated in the bean method.");
 			}
 			else if (conditionName.startsWith("not")) {
 				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'not' - not conditions are automatically generated.  Switch the sense of the condition.");
 			}
+			
+			// Check expression conditions
+			Condition condition = document.getCondition(conditionName);
+			String expression = condition.getExpression();
+			if (BindUtil.isSkyveExpression(expression)) {
+				String error = ExpressionEvaluator.validate(expression,
+																Boolean.class,
+																customer,
+																module,
+																document);
+				if (error != null) {
+					throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " with expression " + expression + " has an error : " + error);
+				}
+			}
+
 		}
 		
 		// Check the bizKey expression, if defined
-		Module module = getModule(customer, document.getOwningModuleName());
 		String bizKeyExpression = document.getBizKeyExpression();
 		if (bizKeyExpression != null) {
 			String error = BindUtil.validateMessageExpressions(customer, module, document, bizKeyExpression);

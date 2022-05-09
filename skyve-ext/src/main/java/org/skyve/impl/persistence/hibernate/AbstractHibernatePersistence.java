@@ -539,7 +539,7 @@ t.printStackTrace();
 
 	@Override
 	public void resetDocumentPermissionScopes() {
-		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
+		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
 //		String userDataGroupId = user.getDataGroupId();
