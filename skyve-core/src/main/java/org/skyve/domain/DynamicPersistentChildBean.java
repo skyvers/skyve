@@ -2,10 +2,10 @@ package org.skyve.domain;
 
 import java.util.Map;
 
-public class ChildDynamicBean extends DynamicBean implements ChildBean<Bean> {
-	private static final long serialVersionUID = 7086283769532783686L;
+public class DynamicPersistentChildBean extends DynamicPersistentBean implements ChildBean<Bean> {
+	private static final long serialVersionUID = -1007733210670332962L;
 
-	public ChildDynamicBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+	public DynamicPersistentChildBean(String bizModule, String bizDocument, Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
 	}
 

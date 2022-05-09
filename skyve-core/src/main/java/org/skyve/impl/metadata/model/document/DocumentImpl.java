@@ -16,14 +16,14 @@ import java.util.logging.Level;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.ChildDynamicBean;
 import org.skyve.domain.HierarchicalBean;
-import org.skyve.domain.HierarchicalDynamicBean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.DynamicChildBean;
+import org.skyve.domain.DynamicHierarchicalBean;
+import org.skyve.domain.DynamicPersistentBean;
+import org.skyve.domain.DynamicPersistentChildBean;
+import org.skyve.domain.DynamicPersistentHierarchicalBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.PersistentChildDynamicBean;
-import org.skyve.domain.PersistentDynamicBean;
-import org.skyve.domain.PersistentHierarchicalDynamicBean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
@@ -180,15 +180,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			if (parentDocumentName != null) {
 				if (parentDocumentName.equals(getName())) { // hierarchical
 					return (persistent == null) ?
-								(Class<T>) HierarchicalDynamicBean.class : 
-								(Class<T>) PersistentHierarchicalDynamicBean.class;
+								(Class<T>) DynamicHierarchicalBean.class : 
+								(Class<T>) DynamicPersistentHierarchicalBean.class;
 				}
 				// child
 				return (persistent == null) ?
-							(Class<T>) ChildDynamicBean.class :
-							(Class<T>) PersistentChildDynamicBean.class;
+							(Class<T>) DynamicChildBean.class :
+							(Class<T>) DynamicPersistentChildBean.class;
 			}
-			return (persistent == null) ? (Class<T>) DynamicBean.class : (Class<T>) PersistentDynamicBean.class;
+			return (persistent == null) ? (Class<T>) DynamicBean.class : (Class<T>) DynamicPersistentBean.class;
 		}
 		
 		Class<T> result = null;
@@ -312,21 +312,21 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			if (isHierarchical) {
 				@SuppressWarnings("unchecked")
 				T t = isPersistent ?
-						(T) new PersistentHierarchicalDynamicBean(getOwningModuleName(), getName(), p) :
-						(T) new HierarchicalDynamicBean(getOwningModuleName(), getName(), p);
+						(T) new DynamicPersistentHierarchicalBean(getOwningModuleName(), getName(), p) :
+						(T) new DynamicHierarchicalBean(getOwningModuleName(), getName(), p);
 				result = t;
 			}
 			else if (isChild) {
 				@SuppressWarnings("unchecked")
 				T t = isPersistent ?
-						(T) new PersistentChildDynamicBean(getOwningModuleName(), getName(), p) :
-						(T) new ChildDynamicBean(getOwningModuleName(), getName(), p);
+						(T) new DynamicPersistentChildBean(getOwningModuleName(), getName(), p) :
+						(T) new DynamicChildBean(getOwningModuleName(), getName(), p);
 				result = t;
 			}
 			else {
 				@SuppressWarnings("unchecked")
 				T t = isPersistent ?
-						(T) new PersistentDynamicBean(getOwningModuleName(), getName(), p) :
+						(T) new DynamicPersistentBean(getOwningModuleName(), getName(), p) :
 						(T) new DynamicBean(getOwningModuleName(), getName(), p);
 				result = t;
 			}

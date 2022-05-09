@@ -7,6 +7,7 @@ import org.skyve.util.Util;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
 public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
+
 	@Test
 	public void testHasDynamic() throws Exception {
 		Assert.assertFalse(aapd.hasDynamic());
@@ -43,6 +44,19 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(0).getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(1).getBizVersion());
 	}
+/*
+	@Test
+	public void testRetrievalOfDynamicAttributes() throws Exception {
+		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
+		test = p.save(test);
+		p.evictAllCached();
+		
+		AllDynamicAttributesPersistent clone = p.retrieve(adapd, test.getBizId());
+		
+		Assert.assertEquals(test.getDynamic(AllDynamicAttributesPersistent.colourPropertyName), clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals(test.getDynamic(AllDynamicAttributesPersistent.colourPropertyName), clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+	}
+*/
 /*
 	@Test
 	public void testPersistenceOfDynamicDocument() throws Exception {

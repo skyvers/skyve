@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -19,6 +20,7 @@ import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
@@ -218,7 +220,12 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			result = getDocumentInternal(true, customer, module, documentName);
 		}
 		if (result == null) { // not overridden
-			result = getDocumentInternal(false, customer, module, documentName);
+			if (AbstractPersistence.IMPLEMENTATION_CLASS == null) { // not initialised or gen domain
+				result = getDocumentInternal(false, customer, module, documentName);
+			}
+			else {
+				result = getDocumentInternal(false, (customer == null) ? CORE.getCustomer() : customer, module, documentName);
+			}
 		}
 		return result;
 	}
@@ -243,7 +250,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 																	documentModuleName,
 																	documentName);
 				Module documentModule = getModule(customer, documentModuleName);
-				Document document = this.convertDocument(customerName, customer, documentModuleName, documentModule, documentName, documentMetaData);
+				Document document = convertDocument(customerName, customer, documentModuleName, documentModule, documentName, documentMetaData);
 				return Optional.of(document);
 			}
 			return v;
@@ -339,7 +346,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	public Document putDocument(Module module, DocumentMetaData document) {
 		String moduleName = module.getName();
 		String documentName = document.getName();
-		Document result = convertDocument(null, null, moduleName, module, documentName, document);
+		Document result = convertDocument(null, CORE.getCustomer(), moduleName, module, documentName, document);
 		
 		StringBuilder documentKey = new StringBuilder(64);
 		documentKey.append(MODULES_NAMESPACE).append(moduleName).append('/').append(documentName);

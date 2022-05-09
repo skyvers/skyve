@@ -1100,12 +1100,17 @@ t.printStackTrace();
 					preMerge(document, bean, beansToMerge);
 
 					// Merge the bean to save
-					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-					result = (T) session.merge(entityName, bean);
-
+					if (document.isDynamic()) {
+						result = bean;
+					}
+					else {
+						String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
+						result = (T) session.merge(entityName, bean);
+					}
+					
 					// Persist (by reachability) static beans referenced by dynamic relations found in preMerge()
 					for (PersistentBean beanToMerge : beansToMerge.keySet()) {
-						entityName = getDocumentEntityName(beanToMerge.getBizModule(), beanToMerge.getBizDocument());
+						String entityName = getDocumentEntityName(beanToMerge.getBizModule(), beanToMerge.getBizDocument());
 						beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
 					}
 					
@@ -1178,8 +1183,13 @@ t.printStackTrace();
 						Module m = internalCustomer.getModule(bean.getBizModule());
 						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
 
-						String entityName = getDocumentEntityName(d.getOwningModuleName(), d.getName());
-						results.add((T) session.merge(entityName, bean));
+						if (d.isDynamic()) {
+							results.add((T) bean);
+						}
+						else {
+							String entityName = getDocumentEntityName(d.getOwningModuleName(), d.getName());
+							results.add((T) session.merge(entityName, bean));
+						}
 					}
 					
 					// Persist (by reachability) static beans referenced by dynamic relations found in preMerge()
@@ -1917,22 +1927,32 @@ if (document.isDynamic()) return;
 			if (UtilImpl.USING_JPA && (! entityName.startsWith(customer.getName()))) {
 				beanClass = ((DocumentImpl) document).getBeanClass(customer);
 			}
-
-			if (forUpdate) {
-				if (beanClass != null) {
-					result = (T) session.load(beanClass, id, LockMode.PESSIMISTIC_WRITE);
+			if (document.isDynamic()) {
+				try {
+					result = (T) dynamicPersistence.populate(id);
 				}
-				else {
-					result = (T) session.load(entityName, id, LockMode.PESSIMISTIC_WRITE);
+				catch (Exception e) {
+					// throw this to be caught below
+					throw new ClassNotFoundException("Could not create a new instance of document " + document.getOwningModuleName() + "." + document.getName(), e);
 				}
 			}
-			else // works with transient instances
-			{
-				if (beanClass != null) {
-					result = (T) em.find(beanClass, id);
+			else {
+				if (forUpdate) {
+					if (beanClass != null) {
+						result = (T) session.load(beanClass, id, LockMode.PESSIMISTIC_WRITE);
+					}
+					else {
+						result = (T) session.load(entityName, id, LockMode.PESSIMISTIC_WRITE);
+					}
 				}
-				else {
-					result = (T) session.get(entityName, id);
+				else // works with transient instances
+				{
+					if (beanClass != null) {
+						result = (T) em.find(beanClass, id);
+					}
+					else {
+						result = (T) session.get(entityName, id);
+					}
 				}
 			}
 		}
@@ -1951,7 +1971,7 @@ if (document.isDynamic()) return;
 
 			session.refresh(result, LockMode.PESSIMISTIC_WRITE);
 		}
-		catch (ClassNotFoundException e) {
+		catch (ClassNotFoundException e) { // Can emanate out of hibernate innards
 			throw new MetaDataException("Could not find bean", e);
 		}
 
@@ -1968,6 +1988,10 @@ if (document.isDynamic()) return;
 		Module module = customer.getModule(loadedBean.getBizModule());
 		Document document = module.getDocument(customer, loadedBean.getBizDocument());
 		
+		if (document.hasDynamic()) {
+			dynamicPersistence.populate(loadedBean);
+		}
+
 		// check that embedded objects are empty and null them if they are
 		nullEmbeddedReferencesOnLoad(customer, module, document, loadedBean);
 		

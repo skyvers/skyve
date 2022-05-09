@@ -11,7 +11,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
-import org.skyve.domain.PersistentDynamicBean;
+import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -313,7 +313,7 @@ public class BindTests extends AbstractSkyveTest {
 	
 	@Test
 	public void testDynamicExpressions() throws Exception {
-		PersistentDynamicBean bean = Util.constructRandomInstance(u, m, aadpd, 2);
+		DynamicPersistentBean bean = Util.constructRandomInstance(u, m, aadpd, 2);
 		Binder.set(bean, AllAttributesPersistent.textPropertyName, "Test");
 		
 		Assert.assertEquals("Test", Binder.formatMessage("{text}", bean));

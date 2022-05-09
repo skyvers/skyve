@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
-import org.skyve.domain.PersistentDynamicBean;
+import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -65,7 +65,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 
 	@Test
 	public void testGetAllAttributesDynamicPersistentClass() throws Exception {
-		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", PersistentDynamicBean.class, aadpd.newInstance(u).getClass());
+		Assert.assertEquals("AADPD document should create AllAtrributesDynamicPersistent", DynamicPersistentBean.class, aadpd.newInstance(u).getClass());
 	}
 	
 	@Test
@@ -98,7 +98,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		String json = JSON.marshall(c, bean);
 		bean = (Bean) JSON.unmarshall(u, json);
 		Assert.assertEquals("JSON marshall/unmarshall problem", bizId, bean.getBizId());
-		Assert.assertEquals("JSON unmarshall document should create AllAtrributesDynamicPersistent", PersistentDynamicBean.class, bean.getClass());
+		Assert.assertEquals("JSON unmarshall document should create AllAtrributesDynamicPersistent", DynamicPersistentBean.class, bean.getClass());
 
 		bean = Util.constructRandomInstance(u, m, adapd, 2);
 		bizId = bean.getBizId();
