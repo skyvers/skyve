@@ -859,7 +859,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			String parentDocumentName = document.getParentDocumentName();
 			if (parentDocumentName != null) {
 				Document parentDocument = document.getParentDocument(null);
-				if (parentDocument.getPersistent() != null) {
+				if ((parentDocument != null) && (parentDocument.getPersistent() != null)) {
 					if (parentDocumentName.equals(documentName)) { // hierarchical
 						contents.append(indent).append("\t\t<property name=\"").append(HierarchicalBean.PARENT_ID).append("\" length=\"36\"");
 						if (shouldIndex(((DocumentImpl) document).getParentDatabaseIndex())) {

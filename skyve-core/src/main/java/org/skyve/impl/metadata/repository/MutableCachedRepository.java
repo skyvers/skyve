@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewGenerator;
@@ -153,10 +156,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		if (result == null) { // not overridden
 			result = getModuleInternal(null, moduleName);
 		}
+		if (result == null) {
+			throw new MetaDataException(moduleName + " does not exist" + ((customer == null) ? "" : " for customer " + customer.getName()));
+		}
 		return result;
 	}
 	
-	private Module getModuleInternal(Customer customer, String moduleName) {
+	private @Nullable Module getModuleInternal(@Nullable Customer customer, @Nonnull String moduleName) {
 		final String customerName = (customer == null) ? null : customer.getName();
 		StringBuilder moduleKey = new StringBuilder(64);
 		if (customerName != null) {
@@ -178,7 +184,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return null;
 	}
 
-	private Module convertModule(String customerName, String moduleName, ModuleMetaData module) {
+	private @Nonnull Module convertModule(@Nullable String customerName, @Nonnull String moduleName, @Nonnull ModuleMetaData module) {
 		String metaDataName = null;
 		if (customerName != null) {
 			metaDataName = new StringBuilder(64).append(moduleName).append(" (").append(customerName).append(')').toString();
@@ -226,6 +232,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			else {
 				result = getDocumentInternal(false, (customer == null) ? CORE.getCustomer() : customer, module, documentName);
 			}
+		}
+		if (result == null) {
+			throw new MetaDataException(documentName + " does not exist for module " + module.getName() + ((customer == null) ? "" : " for customer " + customer.getName()));
 		}
 		return result;
 	}

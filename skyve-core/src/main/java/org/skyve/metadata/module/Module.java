@@ -3,6 +3,9 @@ package org.skyve.metadata.module;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
@@ -19,7 +22,7 @@ import org.skyve.util.Util;
 /**
  * 
  */
-public interface Module extends NamedMetaData, SerializableMetaData {
+public interface Module extends NamedMetaData {
 	/**
 	 * 
 	 */
@@ -39,7 +42,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 		 * 
 		 * @return
 		 */
-		public String getDefaultQueryName() {
+		public @Nullable String getDefaultQueryName() {
 			return defaultQueryName;
 		}
 
@@ -47,7 +50,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 		 * 
 		 * @param defaultQueryName
 		 */
-		public void setDefaultQueryName(String defaultQueryName) {
+		public void setDefaultQueryName(@Nullable String defaultQueryName) {
 			this.defaultQueryName = defaultQueryName;
 		}
 
@@ -55,7 +58,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 		 * 
 		 * @return
 		 */
-		public String getOwningModuleName() {
+		public @Nonnull String getOwningModuleName() {
 			return owningModuleName;
 		}
 
@@ -63,7 +66,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 		 * 
 		 * @param owningModuleName
 		 */
-		public void setOwningModuleName(String owningModuleName) {
+		public void setOwningModuleName(@Nonnull String owningModuleName) {
 			this.owningModuleName = owningModuleName;
 		}
 
@@ -72,7 +75,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 		 * @param documentName
 		 * @return
 		 */
-		public String getModuleNameDotDocumentName(String documentName) {
+		public @Nonnull String getModuleNameDotDocumentName(@Nonnull String documentName) {
 			String result = null;
 
 			if (referencedModuleName != null) {
@@ -89,7 +92,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 		 * 
 		 * @return
 		 */
-		public String getReferencedModuleName() {
+		public @Nullable String getReferencedModuleName() {
 			return referencedModuleName;
 		}
 
@@ -97,7 +100,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 		 * 
 		 * @param referencedModuleName
 		 */
-		public void setReferencedModuleName(String referencedModuleName) {
+		public void setReferencedModuleName(@Nullable String referencedModuleName) {
 			this.referencedModuleName = referencedModuleName;
 		}
 	}
@@ -106,9 +109,9 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 	 * 
 	 * @return
 	 */
-	public String getTitle();
+	public @Nonnull String getTitle();
 	
-	public default String getLocalisedTitle() {
+	public default @Nonnull String getLocalisedTitle() {
 		return Util.i18n(getTitle());
 	}
 	
@@ -122,7 +125,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 	 * 
 	 * @return
 	 */
-	public Map<String, DocumentRef> getDocumentRefs();
+	public @Nonnull Map<String, DocumentRef> getDocumentRefs();
 
 	/**
 	 * 
@@ -130,7 +133,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 	 * @param documentName
 	 * @return
 	 */
-	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName);
+	public @Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName);
 
 	/**
 	 *
@@ -139,7 +142,7 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 	 * @param includeAssociationBizKeys
 	 * @return
 	 */
-	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys);
+	public @Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName, boolean includeAssociationBizKeys);
 
 	/**
 	 * 
@@ -147,82 +150,82 @@ public interface Module extends NamedMetaData, SerializableMetaData {
 	 * @param documentName
 	 * @return
 	 */
-	public Document getDocument(Customer customer, String documentName);
+	public @Nonnull Document getDocument(@Nullable Customer customer, @Nonnull String documentName);
 	
 	/**
 	 * 
 	 * @param jobName
 	 * @return
 	 */
-	public JobMetaData getJob(String jobName);
+	public @Nonnull JobMetaData getJob(@Nonnull String jobName);
 	
 	/**
 	 * Unmodifiable list
 	 * @return
 	 */
-	public List<JobMetaData> getJobs();
+	public @Nonnull List<JobMetaData> getJobs();
 	
 	/**
 	 * 
 	 * @param queryName
 	 * @return
 	 */
-	public MetaDataQueryDefinition getMetaDataQuery(String queryName);
+	public @Nonnull MetaDataQueryDefinition getMetaDataQuery(@Nonnull String queryName);
 	
 	/**
 	 * 
 	 * @param queryName
 	 * @return
 	 */
-	public SQLDefinition getSQL(String queryName);
+	public @Nonnull SQLDefinition getSQL(@Nonnull String queryName);
 
 	/**
 	 * 
 	 * @param queryName
 	 * @return
 	 */
-	public BizQLDefinition getBizQL(String queryName);
+	public @Nonnull BizQLDefinition getBizQL(@Nonnull String queryName);
 
 	/**
 	 * 
 	 * @return
 	 */
-	public List<QueryDefinition> getMetadataQueries();
+	public @Nonnull List<QueryDefinition> getMetadataQueries();
 	
 	/**
 	 * 
 	 * @param roleName
 	 * @return
 	 */
-	public Role getRole(String roleName);
+	public @Nonnull Role getRole(@Nonnull String roleName);
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public List<Role> getRoles();
+	public @Nonnull List<Role> getRoles();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public ViewType getHomeRef();
+	public @Nullable ViewType getHomeRef();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getHomeDocumentName();
+	public @Nullable String getHomeDocumentName();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public Menu getMenu();
+	public @Nonnull Menu getMenu();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getDocumentation();
+	public @Nullable String getDocumentation();
 }
