@@ -1645,7 +1645,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					style.append("right");
 					break;
 				default:
-					style.append("centre");
+					style.append("center");
 					break;
 				}
 				
