@@ -798,7 +798,7 @@ public class FacesView<T extends Bean> extends Harness {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				String json = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(signatureClientId + "_signature_value");
+				String json = Util.processStringValue(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(signatureClientId + "_signature_value"));
 				if (json == null) {
 					throw new ValidationException("Signature was not found");
 				}
