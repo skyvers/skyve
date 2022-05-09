@@ -16,6 +16,7 @@ import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
 import org.skyve.domain.types.converters.date.MM_DD_YYYY;
 import org.skyve.domain.types.converters.date.YYYY_MM_DD;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
@@ -23,6 +24,7 @@ import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
@@ -1391,18 +1393,28 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		String binding = column.getBinding();
+		
+		TargetMetaData target = getCurrentTarget();
+		
 		if (binding == null) {
 			binding = Bean.BIZ_KEY;
 		}
 		else {
-			TargetMetaData target = getCurrentTarget();
 			if (target != null) {
 				Attribute targetAttribute = target.getAttribute();
+				
 				if (targetAttribute instanceof Association) {
 					binding = BindUtil.createCompoundBinding(binding, Bean.BIZ_KEY);
 				}
 			}
 		}
+		
+		HorizontalAlignment alignment = column.getAlignment();
+		if (alignment == null && target != null && target.getAttribute() != null) {
+            alignment = ViewGenerator.determineDefaultColumnAlignment(target.getAttribute().getAttributeType());
+        }
+		
+		
 		current = cb.addDataGridBoundColumn(null,
 												current, 
 												getCurrentDataWidget(),
@@ -1410,7 +1422,8 @@ public class FacesViewRenderer extends ViewRenderer {
 												dataWidgetVar,
 												title, 
 												binding, 
-												gridColumnExpression);
+												gridColumnExpression,
+												alignment);
 	}
 
 	@Override
@@ -1430,7 +1443,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
-        current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column);
+		
+		TargetMetaData target = getCurrentTarget();
+		
+		HorizontalAlignment alignment = column.getAlignment();
+		if (alignment == null && target != null && target.getAttribute() != null) {
+            alignment = ViewGenerator.determineDefaultColumnAlignment(target.getAttribute().getAttributeType());
+        }
+		
+        current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
 	}
 
 	@Override

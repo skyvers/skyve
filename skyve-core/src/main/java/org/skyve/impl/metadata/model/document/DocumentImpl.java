@@ -13,6 +13,8 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.annotation.Nonnull;
+
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -173,7 +175,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends Bean> Class<T> getBeanClass(Customer customer)
+	public <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
 			Persistent persistent = getPersistent();

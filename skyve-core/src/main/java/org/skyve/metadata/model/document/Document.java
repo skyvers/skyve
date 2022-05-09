@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.controller.BizExportAction;
@@ -29,23 +32,23 @@ public interface Document extends Model {
 	 * @return
 	 * @throws Exception
 	 */
-	public <T extends Bean> T newInstance(User user) throws Exception;
+	public <T extends Bean> @Nonnull T newInstance(@Nonnull User user) throws Exception;
 	
-	public String getBizKeyExpression();
+	public @Nullable String getBizKeyExpression();
 	
 	/**
 	 * Set the bizKey for static/dynamic beans.
 	 * 
 	 * @param bean
 	 */
-	public void setBizKey(PersistentBean bean);
+	public void setBizKey(@Nonnull PersistentBean bean);
 	
 	/**
 	 * 
 	 * @param name
 	 * @return
 	 */
-	public UniqueConstraint getUniqueConstraint(String name);
+	public @Nullable UniqueConstraint getUniqueConstraint(@Nonnull String name);
 	
 	/**
 	 * 
@@ -59,14 +62,14 @@ public interface Document extends Model {
 	 * Get the unique constraints for this document only - no super-documents.
 	 * @return
 	 */
-	public List<UniqueConstraint> getUniqueConstraints();
+	public @Nonnull List<UniqueConstraint> getUniqueConstraints();
 
 	/**
 	 * Get the unique constraints for this document and any super-documents for a given customer.
 	 * @param customer	The given customer.
 	 * @return	All the unique constraints.
 	 */
-	public List<UniqueConstraint> getAllUniqueConstraints(Customer customer);
+	public @Nonnull List<UniqueConstraint> getAllUniqueConstraints(Customer customer);
 
 	/**
 	 * 
@@ -137,7 +140,7 @@ public interface Document extends Model {
 	 * @param customer
 	 * @return
 	 */
-	public Document getParentDocument(Customer customer);
+	public @Nullable Document getParentDocument(@Nullable Customer customer);
 	
 	/**
 	 * 
@@ -146,15 +149,15 @@ public interface Document extends Model {
 	 * @param name
 	 * @return
 	 */
-	public View getView(String uxui, Customer customer, String name);
+	public @Nonnull View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull String name);
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getDocumentation();
+	public @Nullable String getDocumentation();
 	
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer);
+	public <T extends Bean> @Nullable Bizlet<T> getBizlet(@Nullable Customer customer);
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime);
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime);
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime);

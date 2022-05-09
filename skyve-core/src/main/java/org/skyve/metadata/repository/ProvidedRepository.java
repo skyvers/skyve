@@ -51,14 +51,14 @@ public interface ProvidedRepository extends CachedRepository {
 	final String DOMAIN_NAME = "domain";
 	final String DOMAIN_NAMESPACE = DOMAIN_NAME + '/';
 
-	List<String> getAllCustomerNames();
+	@Nonnull List<String> getAllCustomerNames();
 
 	/**
 	 * Used to return all module names defined in the modules area (not customer overridden definitions).
 	 * 
 	 * @return
 	 */
-	List<String> getAllVanillaModuleNames();
+	@Nonnull List<String> getAllVanillaModuleNames();
 
 	/**
 	 * 
@@ -66,7 +66,7 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param moduleName
 	 * @return
 	 */
-	Module getModule(Customer customer, String moduleName);
+	@Nonnull Module getModule(@Nullable Customer customer, @Nonnull String moduleName);
 
 	/**
 	 * 
@@ -75,7 +75,7 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param documentName
 	 * @return
 	 */
-	Document getDocument(Customer customer, Module module, String documentName);
+	@Nonnull Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName);
 
 	/**
 	 * 
@@ -85,13 +85,13 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param viewType
 	 * @return
 	 */
-	View getView(String uxui, Customer customer, Document document, String name);
+	@Nullable View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull Document document, @Nonnull String name);
 
 	boolean getUseScaffoldedViews();
 	
 	@Nullable String vtable(@Nonnull String customerName, @Nonnull String key);
 
-	<T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime);
+	<T extends Bean> @Nullable Bizlet<T> getBizlet(@Nonnull Customer customer, @Nonnull Document document, boolean runtime);
 
 	/**
 	 * 

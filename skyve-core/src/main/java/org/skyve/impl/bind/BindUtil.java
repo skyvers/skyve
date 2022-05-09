@@ -13,6 +13,9 @@ import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.function.Function;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
@@ -906,32 +909,34 @@ public final class BindUtil {
 			String relatedDocumentName = r.getDocumentName();
 			Document relatedDocument = m.getDocument(c, relatedDocumentName);
 			Document parentDocument = relatedDocument.getParentDocument(c);
-			String parentModuleName = parentDocument.getOwningModuleName();
-			String parentDocumentName = parentDocument.getName();
-
-			// Check if processBean.setParent() can be called or not.
-			// The processBean may be a child of some other bean and just being added to another collection here.
-			// Or it could be a derived document, so need to check inheritance as well.
-			CustomerImpl internalCustomer = (CustomerImpl) c;
-			Document parentBeanDocument = d;
-			while (parentBeanDocument != null) {
-				if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
-						parentDocumentName.equals(parentBeanDocument.getName())) {
-					@SuppressWarnings("unchecked")
-					ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) element;
-					uncheckedNewBean.setParent(parent);
-					parentBeanDocument = null;
-				}
-				else {
-					String baseDocumentName = internalCustomer.getBaseDocument(parentBeanDocument);
-    				if (baseDocumentName == null) {
-    					parentBeanDocument = null;
-    				}
-    				else {
-        				int dotIndex = baseDocumentName.indexOf('.');
-        				Module baseModule = c.getModule(baseDocumentName.substring(0, dotIndex));
-        				parentBeanDocument = baseModule.getDocument(c, baseDocumentName.substring(dotIndex + 1));
-    				}
+			if (parentDocument != null) {
+				String parentModuleName = parentDocument.getOwningModuleName();
+				String parentDocumentName = parentDocument.getName();
+	
+				// Check if processBean.setParent() can be called or not.
+				// The processBean may be a child of some other bean and just being added to another collection here.
+				// Or it could be a derived document, so need to check inheritance as well.
+				CustomerImpl internalCustomer = (CustomerImpl) c;
+				Document parentBeanDocument = d;
+				while (parentBeanDocument != null) {
+					if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
+							parentDocumentName.equals(parentBeanDocument.getName())) {
+						@SuppressWarnings("unchecked")
+						ChildBean<Bean> uncheckedNewBean = (ChildBean<Bean>) element;
+						uncheckedNewBean.setParent(parent);
+						parentBeanDocument = null;
+					}
+					else {
+						String baseDocumentName = internalCustomer.getBaseDocument(parentBeanDocument);
+	    				if (baseDocumentName == null) {
+	    					parentBeanDocument = null;
+	    				}
+	    				else {
+	        				int dotIndex = baseDocumentName.indexOf('.');
+	        				Module baseModule = c.getModule(baseDocumentName.substring(0, dotIndex));
+	        				parentBeanDocument = baseModule.getDocument(c, baseDocumentName.substring(dotIndex + 1));
+	    				}
+					}
 				}
 			}
 		}
@@ -1970,15 +1975,15 @@ public final class BindUtil {
 	 * @param document	The document to start at (with respect to)
 	 * @param binding	The binding expression.
 	 * @return	The document and attribute that the binding expression points to.
-	 * 			The document is never null whereas the attribute can be null if'
+	 * 			The document is never null whereas the attribute can be null if
 	 * 			the binding expression ultimately resolves to an implicit attribute
 	 * 			like bizKey or bizId or the like.
 	 * @throws	MetaDataException if the binding is malformed or cannot be resolved.
 	 */
-	public static TargetMetaData getMetaDataForBinding(Customer customer, 
-														Module module, 
-														Document document, 
-														String binding) {
+	public static @Nonnull TargetMetaData getMetaDataForBinding(@Nullable Customer customer, 
+																	@Nonnull Module module, 
+																	@Nonnull Document document, 
+																	@Nonnull String binding) {
 		Document navigatingDocument = document;
 		Module navigatingModule = module;
 		Attribute attribute = null;
@@ -2074,6 +2079,9 @@ public final class BindUtil {
 			// Cater for the "parent" property
 			if (ChildBean.PARENT_NAME.equals(fieldName)) {
 				navigatingDocument = navigatingDocument.getParentDocument(customer);
+				if (navigatingDocument == null) {
+					throw new MetaDataException(binding + " should point to a parent document but parent document does not exist");
+				}
 			}
 			else {
 				// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
@@ -2088,10 +2096,10 @@ public final class BindUtil {
 				}
 				else {
 					if (tokenizer.hasMoreTokens()) {
-						throw new IllegalArgumentException(binding + 
-															" does not exist (token " + 
-															tokenizer.nextToken() +
-															" doesn't check out)");
+						throw new MetaDataException(binding + 
+														" does not exist (token " + 
+														tokenizer.nextToken() +
+														" doesn't check out)");
 					}
 				}
 			}
