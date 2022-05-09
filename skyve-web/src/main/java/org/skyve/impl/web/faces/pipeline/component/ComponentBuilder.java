@@ -15,6 +15,7 @@ import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -206,13 +207,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														String dataWidgetVar,
 														String columnTitle,
 														String columnBinding,
-														StringBuilder gridColumnExpression);
+														StringBuilder gridColumnExpression,
+														HorizontalAlignment horizontalAlignment);
 	public abstract UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current);
 	public abstract UIComponent addDataGridContainerColumn(UIComponent component,
 															UIComponent current,
 															AbstractDataWidget widget,
 															String title,
-															DataGridContainerColumn column);
+															DataGridContainerColumn column,
+															HorizontalAlignment horizontalAlignment);
 	public abstract UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current);
 	public abstract UIComponent addDataGridActionColumn(UIComponent component,
 															UIComponent current, 

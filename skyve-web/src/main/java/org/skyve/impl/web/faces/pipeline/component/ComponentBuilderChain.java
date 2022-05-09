@@ -7,6 +7,7 @@ import javax.faces.component.UIComponent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -360,7 +361,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												String dataWidgetVar,
 												String columnTitle,
 												String columnBinding,
-												StringBuilder gridColumnExpression) {
+												StringBuilder gridColumnExpression,
+												HorizontalAlignment alignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridBoundColumn(result, 
@@ -370,7 +372,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 														dataWidgetVar,
 														columnTitle,
 														columnBinding,
-														gridColumnExpression);
+														gridColumnExpression,
+														alignment);
 		}
 		return result;
 	}
@@ -389,10 +392,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 													UIComponent current,
 													AbstractDataWidget widget,
 													String title,
-													DataGridContainerColumn column) {
+													DataGridContainerColumn column,
+													HorizontalAlignment alignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.addDataGridContainerColumn(result, current, widget, title, column);
+			result = builder.addDataGridContainerColumn(result, current, widget, title, column,alignment);
 		}
 		return result;
 	}

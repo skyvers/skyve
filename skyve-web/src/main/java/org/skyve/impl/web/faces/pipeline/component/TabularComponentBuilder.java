@@ -587,7 +587,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												String dataWidgetVar,
 												String columnTitle,
 												String columnBinding,
-												StringBuilder gridColumnExpression) {
+												StringBuilder gridColumnExpression,
+												HorizontalAlignment alignment) {
 		if (component != null) {
 			return component;
 		}
@@ -595,7 +596,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Column result = column(dataWidgetVar,
 								null,
 								columnTitle,
-	                            column.getAlignment(),
+								alignment,
 	                            false,
 	                            column.getPixelWidth());
 		result.setPriority(columnPriority);
@@ -674,7 +675,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													UIComponent current,
 													AbstractDataWidget widget,
 													String title,
-													DataGridContainerColumn column) {
+													DataGridContainerColumn column,
+													HorizontalAlignment alignment) {
 		if (component != null) {
 			return component;
 		}
@@ -682,7 +684,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Column col = column(widget.getBinding(),
 								null,
 								title,
-				                column.getAlignment(),
+								alignment,
 				                false,
 				                column.getPixelWidth());
 		col.setPriority(columnPriority);
@@ -721,7 +723,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			Column col = column(null,
 									null,
 									"",
-					                HorizontalAlignment.centre,
+									HorizontalAlignment.centre,
 					                true,
 					                SINGLE_ACTION_COLUMN_WIDTH_INTEGER);
 			col.setPriority(1);
@@ -1629,10 +1631,28 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			HorizontalAlignment alignment = queryColumn.getAlignment();
 			if (alignment == null) {
 				alignment = ViewGenerator.determineDefaultColumnAlignment(attributeType);
-			}
-			if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
-				style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");
-			}
+			} 
+			
+			if (alignment != null) {	
+				
+				style.append("text-align:");
+				
+				switch (alignment) {
+				case left:
+					style.append("left");
+					break;
+				case right:
+					style.append("right");
+					break;
+				default:
+					style.append("centre");
+					break;
+				}
+				
+				style.append(" !important;");
+			} 
+			
+			
 			if (style.length() > 0) {
 				column.setStyle(style.toString());
 			}
@@ -1799,7 +1819,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         setId(result, null);
     	result.setWidgetVar(result.getId());
-
+    	
+    	
         // Write out getLazyDataModel call as the value
         StringBuilder value = new StringBuilder(64);
 		value.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
@@ -4082,10 +4103,28 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		if (noWrap) {
 			style.append("white-space:nowrap;");
-		}
-		if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
-			style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");
-		}
+		} 
+		
+		if (alignment != null) {
+			
+			style.append("text-align:");
+			
+			switch (alignment) {
+			case left:
+				style.append("left");
+				break;
+			case right:
+				style.append("right");
+				break;
+			default:
+				style.append("centre");
+				break;
+			}
+			
+			style.append(" !important;");
+		} 
+		
+		
 		if (style.length() > 0) {
 			result.setStyle(style.toString());
 		}
