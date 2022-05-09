@@ -7,6 +7,7 @@ import javax.faces.component.UIComponent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -190,7 +191,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 												String dataWidgetVar,
 												String columnTitle,
 												String columnBinding,
-												StringBuilder gridColumnExpression) {
+												StringBuilder gridColumnExpression,
+												HorizontalAlignment alignment) {
 		return component;
 	}
 
@@ -204,7 +206,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 													UIComponent current,
 													AbstractDataWidget widget,
 													String title,
-													DataGridContainerColumn column) {
+													DataGridContainerColumn column,
+													HorizontalAlignment alignment) {
 		return component;
 	}
 
