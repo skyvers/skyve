@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -400,11 +402,41 @@ public class SmartClientListServlet extends HttpServlet {
 		model.setSummary(summaryType);
 		model.setSelectedTagId(tagId);
 		
+//		DigestUtils.sha256Hex(tagId);
+//		model.addFilterParameters(queryDocument, shite here null, null);
+		
 		// Add filter criteria to query
 		addFilterCriteriaToQuery(module, queryDocument, user, operator, criteria, parameters, tagId, model);
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
+
+		// Determine if any display bindings are required for dynamic or variant domain attributes.
+		// Map of binding to synthesized display binding for SC.
+		Map<String, String> displayBindings = new TreeMap<>();
+		for (MetaDataQueryColumn column : model.getColumns()) {
+			String binding = column.getBinding();
+			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, queryDocument, binding);
+			if (target != null) {
+				Attribute attribute = target.getAttribute();
+				if (attribute != null) {
+					DomainType domainType = attribute.getDomainType();
+					if ((domainType == DomainType.variant) || (domainType == DomainType.dynamic)) {
+						displayBindings.put(binding, "_display_" + BindUtil.sanitiseBinding(binding));
+					}
+				}
+			}
+		}
+
+		// Add the display bindings in if some are required
+		if (! displayBindings.isEmpty()) {
+			for (Bean bean : beans) {
+				for (Entry<String, String> entry : displayBindings.entrySet()) {
+					String display = BindUtil.getDisplay(customer, bean, entry.getKey());
+					bean.addDynamic(entry.getValue(), display);
+				}
+			}
+		}
 		
 		// Sanitise rows
 		// Note that HTML escaping is taken care by SC client-side for data grid columns
@@ -419,8 +451,17 @@ public class SmartClientListServlet extends HttpServlet {
 		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("totalRows = %d, row size = %d", 
 																		Long.valueOf(page.getTotalRows()), 
 																		Integer.valueOf(page.getRows().size())));
-		Set<String> projections = model.getProjections();
 
+		// Setup projections from the model plus any added display bindings
+		Set<String> projections = null;
+		if (! displayBindings.isEmpty()) {
+			projections = new TreeSet<>(model.getProjections());
+			projections.addAll(displayBindings.values());
+		}
+		else {
+			projections = model.getProjections();
+		}
+		
 		message.append("{\"response\":{");
 		message.append("\"status\":0,");
 		// If SmartClient requests a start row > what we have in the set
@@ -533,8 +574,8 @@ public class SmartClientListServlet extends HttpServlet {
     	// for correct operator precedence.
     	for (String binding : criteria.keySet()) {
 			Object value = criteria.get(binding);
-			if ("".equals(value)) {
-				value = null;
+			if (value instanceof String) {
+				value = Util.processStringValue((String) value);
 			}
 			
 			binding = BindUtil.unsanitiseBinding(binding);
@@ -564,6 +605,7 @@ public class SmartClientListServlet extends HttpServlet {
     			}
     		}
 			if (target != null) {
+				Document targetDocument = target.getDocument();
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
 					if (attribute instanceof Enumeration) {
@@ -580,8 +622,16 @@ public class SmartClientListServlet extends HttpServlet {
 					else {
 						type = attribute.getAttributeType().getImplementingType();
 					}
-					if (DomainType.constant.equals(attribute.getDomainType())) {
+					DomainType domainType = attribute.getDomainType();
+					if (domainType == DomainType.constant) {
 						equalsOperatorRequired = true;
+					}
+					else if (domainType == DomainType.variant) {
+						if (value != null) {
+							Object[] codes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, value.toString());
+							filter.addIn(binding, codes);
+							continue;
+						}
 					}
 					if (attribute instanceof ConvertableField) {
 						ConvertableField field = (ConvertableField) attribute;
@@ -707,10 +757,7 @@ public class SmartClientListServlet extends HttpServlet {
 					Object value = criterium.get("value");
 		    		String valueString = null;
 		    		if (value != null) {
-		    			valueString = value.toString();
-			    		if ("".equals(valueString)) {
-			    			valueString = null;
-			    		}
+		    			valueString = Util.processStringValue(value.toString());
 		    		}
 	
 		    		boolean parameter = (binding.charAt(0) == ':');
@@ -736,6 +783,7 @@ public class SmartClientListServlet extends HttpServlet {
 		    			}
 		    		}
 		    		if (target != null) {
+		    			Document targetDocument = target.getDocument();
 	    				Attribute attribute = target.getAttribute();
 	    				if (attribute != null) {
 							if (attribute instanceof Enumeration) {
@@ -752,8 +800,16 @@ public class SmartClientListServlet extends HttpServlet {
 							else {
 								type = attribute.getAttributeType().getImplementingType();
 							}
-							if (attribute.getDomainType() != null) {
+							
+							DomainType domainType = attribute.getDomainType();
+							if (domainType != null) {
 								filterOperator = transformWildcardFilterOperator(filterOperator);
+								// Translate variant domain filters to a set of codes to search for
+								if ((valueString != null) && (domainType == DomainType.variant)) {
+									 value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
+									 filter.addIn(binding, (Object[]) value);
+									 continue;
+								}
 							}
 	    					if (attribute instanceof ConvertableField) {
 	    						ConvertableField field = (ConvertableField) attribute;

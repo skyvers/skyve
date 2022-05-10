@@ -742,7 +742,7 @@ public final class BindUtil {
 							if (dynamicBean.isProperty(DynamicBean.BEAN_PROPERTY_KEY)) {
 								realBean = (Bean) dynamicBean.get(DynamicBean.BEAN_PROPERTY_KEY);
 							}
-							else { // no THIS_ALIAS in this DynamicBean (maybe its a app coder's list model)
+							else { // no THIS_ALIAS in this DynamicBean (maybe its an app coder's list model)
 								realBean = null;
 							}
 						}

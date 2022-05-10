@@ -3139,6 +3139,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 
 			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true);
+			if (def.isHasDisplayField()) {
+				hiddenBindingsList.add("_display_" + def.getName());
+			}
 			toAppendTo.append('{').append(def.toJavascript()).append("},");
 
 			// define the minimum fixed cell height for the grid (dataSource) based on any content image columns

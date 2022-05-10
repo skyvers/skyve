@@ -258,6 +258,9 @@ isc.BizListGrid.addMethods({
 							me._advancedFilter.getCriteria() :
 							me.grid.getFilterEditorCriteria(true);
 
+			// Remove _display_ prefix from any criteria
+			isc.BizUtil.convertFilterCriteria(result);
+						
 			// if params are defined, ensure they are added to the filter criteria
 			// NB only listgrid's have config.params (and thus me._view is defined)
 			if (config && config.params) {
@@ -1286,6 +1289,9 @@ isc.BizListGrid.addMethods({
 				if (editorCriteria) {} else {
 					editorCriteria = {};
 				}
+
+				// Remove _display_ prefix from any criteria
+				isc.BizUtil.convertFilterCriteria(result);
 
 				// if params are defined, ensure they are added to the filter criteria
 				// NB config.params is only defined for listgrid's so me._view is defined in this case

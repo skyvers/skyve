@@ -704,6 +704,40 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
+	public void addIn(String binding, Object... values) {
+		empty = false;
+/*
+		if (UtilImpl.QUERY_TRACE) {
+			StringBuilder sb = new StringBuilder(20 + (7 * values.length));
+			sb.append(binding).append(" in  ");
+			for (Object value : values) {
+				sb.append(value).append(", ");
+			}
+			sb.setLength(sb.length() - 2);
+			UtilImpl.LOGGER.info(sb.toString());
+		}
+		if (values.length > 0) {
+			detailFilter.addIn(binding, values);
+		}
+		else {
+			// select nothing
+			detailFilter.addNull(binding);
+			detailFilter.addNotNull(binding);
+		}
+		if (summaryFilter != null) {
+			if (values.length > 0) {
+				summaryFilter.addIn(binding, values);
+			}
+			else {
+				// select nothing
+				summaryFilter.addNull(binding);
+				summaryFilter.addNotNull(binding);
+			}
+		}
+ */
+	}
+	
+	@Override
 	public void addWithin(String binding, Geometry value) {
 		empty = false;
 /*

@@ -69,6 +69,8 @@ public interface Filter {
 	public void addBetween(String binding, Long start, Long end);
 	public void addBetween(String binding, Decimal start, Decimal end);
 
+	public void addIn(String binding, Object... values);
+	
 	public void addWithin(String binding, Geometry value);
 	public void addContains(String binding, Geometry value);
 	public void addCrosses(String binding, Geometry value);

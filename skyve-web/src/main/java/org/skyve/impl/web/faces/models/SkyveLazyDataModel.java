@@ -43,6 +43,7 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
+import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
@@ -220,45 +221,54 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		for (String key : filters.keySet()) {
 			FilterMeta fm = filters.get(key);
 			Object value = fm.getFilterValue();
-			if ((value == null) || "".equals(value)) {
+			if (value instanceof String) {
+				value = Util.processStringValue((String) value);
+			}
+			if (value == null) {
 				continue;
 			}
-
+			
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, drivingModule, drivingDocument, key);
 			boolean contains = false;
 			if (target != null) {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
-					AttributeType type = attribute.getAttributeType();
-					// Use "like" if its textual and not a constant domain type
-					if (AttributeType.colour.equals(type) ||
-							AttributeType.markup.equals(type) ||
-							AttributeType.memo.equals(type) ||
-							AttributeType.text.equals(type)) {
-						if (! DomainType.constant.equals(attribute.getDomainType())) {
-							contains = true;
-						}
+					DomainType domainType = attribute.getDomainType();
+					if (domainType == DomainType.variant) {
+						value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(drivingDocument, attribute, value.toString());
 					}
-					// if we have a binding to an association use "like" and 
-					// make it to the bizKey since we have no relational stuff in the PF filter line.
-					else if (AttributeType.association.equals(type)) {
-						contains = true;
-						key = BindUtil.createCompoundBinding(key, Bean.BIZ_KEY);
-					}
-					else if (value instanceof String) {
-						Converter<?> converter = null;
-						if (attribute instanceof ConvertableField) {
-							converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
-						}
-						Class<?> implementingType = type.getImplementingType();
-						if (! String.class.equals(implementingType)) {
-							try {
-								value = BindUtil.fromString(customer, converter, implementingType, (String) value);
+					else {
+						AttributeType type = attribute.getAttributeType();
+						// Use "like" if its textual and not a constant domain type
+						if (AttributeType.colour.equals(type) ||
+								AttributeType.markup.equals(type) ||
+								AttributeType.memo.equals(type) ||
+								AttributeType.text.equals(type)) {
+							if (domainType == null) {
+								contains = true;
 							}
-							catch (@SuppressWarnings("unused") Exception e) {
-								UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 
-														"] for filter parameter [" + key + "] to the required type, so just ignore...");
-								continue;
+						}
+						// if we have a binding to an association use "like" and 
+						// make it to the bizKey since we have no relational stuff in the PF filter line.
+						else if (AttributeType.association.equals(type)) {
+							contains = true;
+							key = BindUtil.createCompoundBinding(key, Bean.BIZ_KEY);
+						}
+						else if (value instanceof String) {
+							Converter<?> converter = null;
+							if (attribute instanceof ConvertableField) {
+								converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+							}
+							Class<?> implementingType = type.getImplementingType();
+							if (! String.class.equals(implementingType)) {
+								try {
+									value = BindUtil.fromString(customer, converter, implementingType, (String) value);
+								}
+								catch (@SuppressWarnings("unused") Exception e) {
+									UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 
+															"] for filter parameter [" + key + "] to the required type, so just ignore...");
+									continue;
+								}
 							}
 						}
 					}
@@ -297,6 +307,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 				}
 				else if (value instanceof String) {
 					modelFilter.addEquals(key, (String) value);
+				}
+				else if (value instanceof Object[]) {
+					modelFilter.addIn(key, (Object[]) value);
 				}
 				else {
 					throw new IllegalArgumentException(value + " is not a valid value for param " + key);

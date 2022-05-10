@@ -26,7 +26,9 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	private boolean canSave = true;
 	private boolean detail = false;
 	private boolean canSortClientOnly = false;
+	private String sortByField;
 	private boolean onlyEqualsFilterOperators = false;
+	private boolean onlyContainsFilterOperator = false;
 	private boolean hasTextFilterOperators = false;
 	protected Integer pixelWidth;
 	protected Integer pixelHeight;
@@ -57,11 +59,11 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 
 		Attribute attribute = (target != null) ? target.getAttribute() : null;
 		if (attribute != null) {
+			AttributeType attributeType = attribute.getAttributeType();
 			DomainType domainType = attribute.getDomainType();
 			if (domainType != null) {
 				// Constant domains have a drop down as a filter
-				if ((attribute.getAttributeType() == AttributeType.enumeration) ||
-						DomainType.constant.equals(domainType)) {
+				if ((attributeType == AttributeType.enumeration) || (domainType == DomainType.constant)) {
 					onlyEqualsFilterOperators = true;
 				}
 				// Variant and Dynamic domains use a text field
@@ -72,10 +74,18 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 					type = "text";
 					filterEditorType = "text";
 					hasTextFilterOperators = true;
+					sortByField = name; // sort by the code field, not _display_*
+					// Dynamic domain values can't be filtered
+					if (domainType == DomainType.dynamic) {
+						canFilter = false;
+					}
+					// Variant domain values only has contain operator
+					else {
+						onlyContainsFilterOperator = true;
+					}
 				}
 			}
 			else {
-				AttributeType attributeType = attribute.getAttributeType();
 				hasTextFilterOperators = AttributeType.text.equals(attributeType) ||
 											AttributeType.memo.equals(attributeType) || 
 											AttributeType.markup.equals(attributeType) ||
@@ -84,13 +94,6 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 					Text text = (Text) attribute;
 					setMaskAndStyle(text);
 				}
-				if (align == null) {
-					align = ViewGenerator.determineDefaultColumnAlignment(attributeType);
-				}
-				if (pixelWidth == null) {
-					pixelWidth = ViewGenerator.determineDefaultColumnWidth(attributeType);
-				}
-
 				// Bindings directly to an association with no domain values
 				// work similarly to a lookupDescription with editable="false"
 				if (attribute instanceof Association) {
@@ -112,12 +115,19 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 					}
 				}
 			}
+			
+			if (align == null) {
+				align = ViewGenerator.determineDefaultColumnAlignment(attributeType);
+			}
+			if (pixelWidth == null) {
+				pixelWidth = ViewGenerator.determineDefaultColumnWidth(attributeType);
+			}
 		}
 
 		detail = column.isHidden();
 		if (column instanceof MetaDataQueryProjectedColumn) {
 			MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
-			canFilter = projectedColumn.isFilterable();
+			canFilter = canFilter && projectedColumn.isFilterable();
 			canSortClientOnly = (! projectedColumn.isSortable());
 			canSave = canSave && projectedColumn.isEditable();
 		}
@@ -255,6 +265,9 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 			// TODO should use the listgridcolumn to set sorting off
 			result.append(",canSortClientOnly:true");
 		}
+		if (sortByField != null) {
+			result.append(",sortByField:'").append(sortByField).append('\'');
+		}
         if (align != null) {
         	result.append(",align:'").append(align.toAlignmentString()).append('\'');
         }
@@ -274,6 +287,9 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
         }
 		if (onlyEqualsFilterOperators) {
 			result.append(",validOperators:['equals','notEqual','isNull','notNull']");
+		}
+		else if (onlyContainsFilterOperator) {
+			result.append(",validOperators:['iContains','isNull','notNull']");
 		}
 		else if ("geometry".equals(type)) {
 			result.append(",validOperators:isc.GeometryItem.validOperators");

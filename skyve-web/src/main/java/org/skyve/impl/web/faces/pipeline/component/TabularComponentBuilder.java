@@ -1486,6 +1486,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			String displayName = queryColumn.getLocalisedDisplayName();
 			UIComponent specialFilterComponent = null;
 			AttributeType attributeType = null;
+			DomainType domainType = null;
 			if (binding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 				Document bindingDocument = target.getDocument();
@@ -1507,12 +1508,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				}
 				else if (bindingAttribute != null) {
 					attributeType = bindingAttribute.getAttributeType();
+					domainType = bindingAttribute.getDomainType();
 					if (displayName == null) {
 						displayName = bindingAttribute.getLocalisedDisplayName();
 					}
 					if (showFilter &&
 							(projectedQueryColumn != null) &&
-							projectedQueryColumn.isFilterable()) {
+							projectedQueryColumn.isFilterable() &&
+							(domainType != DomainType.dynamic)) {
 						specialFilterComponent = createSpecialColumnFilterFacetComponent(document,
 																							binding,
 																							bindingAttribute,
@@ -1542,11 +1545,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											createValueExpressionFromFragment("row", true, binding, true, null, Object.class, false, Sanitisation.none));
 			}
 
-			// Unbound columns, content columns or unfilterable columns should be set unfilterable
+			// Unbound columns, content columns, unfilterable columns, or dynamic domain columns should be set unfilterable
 			if ((binding != null) &&
 					showFilter &&
 					(projectedQueryColumn != null) &&
-					projectedQueryColumn.isFilterable()) {
+					projectedQueryColumn.isFilterable() &&
+					(domainType != DomainType.dynamic)) {
 				column.setValueExpression("filterBy",
 											// NB no need to sanitise and escape here as the SkyveLazyDataModel does this to the underlying data
 											createValueExpressionFromFragment("row", true, binding, true, null, Object.class, false, Sanitisation.none));

@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.model.list;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -15,14 +16,19 @@ import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -97,7 +103,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 											List<Parameter> parameters)
 	throws Exception {
 		Filter filter = getFilter();
-		Customer customer = CORE.getUser().getCustomer();
+		Customer customer = CORE.getCustomer();
 		Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
 		
 		if (filterParameters != null) {
@@ -246,7 +252,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 
 		// The resulting parameter contents
 		String newName = name;
-		Object result = null;
+		Object newValue = null;
 
 		// Determine the parameter value to use
 		if (newBinding == null) {
@@ -256,18 +262,18 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 					newBinding = value.substring(1, value.length() - 1);
 				}
 				else {
-					result = value;
+					newValue = value;
 				}
 			}
 		}
 		if (newBinding != null) {
-			result = BindUtil.get(bean, newBinding);
+			newValue = BindUtil.get(bean, newBinding);
 		}
-		if (result instanceof Bean) {
-			result = ((Bean) result).getBizId();
+		if (newValue instanceof Bean) {
+			newValue = ((Bean) newValue).getBizId();
 		}
 
-		if (result != null) {
+		if (newValue != null) {
 			// Determine the type and converter of the filtered attribute
 			Converter<?> converter = null;
     		Class<?> type = null;
@@ -292,7 +298,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 						type = attribute.getAttributeType().getImplementingType();
 					}
 					else if (attribute instanceof Association) {
-						newName = String.format("%s.%s", name, Bean.DOCUMENT_ID);
+						newName = name + '.' + Bean.DOCUMENT_ID;
 					}
 					
 					if (attribute instanceof ConvertableField) {
@@ -301,16 +307,16 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 					}
 				}
     			else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-					newName = String.format("%s.%s", name, Bean.DOCUMENT_ID);
+					newName = name + '.' + Bean.DOCUMENT_ID;
     			}
 			}
 
 			if (type != null) {
-				result = BindUtil.fromString(c, converter, type, result.toString());
+				newValue = BindUtil.fromString(c, converter, type, newValue.toString());
 			}
 		}
 		
-		return new ImmutablePair<>(newName, result);
+		return new ImmutablePair<>(newName, newValue);
 	}
 	
 	public abstract String getDescription();
@@ -506,5 +512,41 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		orFilter.addNull(binding);
 		orFilter.addOr(somethingFilter);
 		filterToAddTo.addAnd(orFilter);
+	}
+	
+	public static Object[] getTop100VariantDomainValueCodesFromDescriptionFilter(Document document, Attribute attribute, String like) {
+		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) CORE.getCustomer(),
+																				DomainType.variant,
+																				attribute, 
+																				null,
+																				true);
+		
+		if ((values == null) || values.isEmpty()) {
+			return new Object[0];
+		}
+		
+		List<String> codes = new ArrayList<>(values.size());
+		for (DomainValue value : values) {
+			String description = value.getLocalisedDescription();
+			if (description.toLowerCase().contains(like.toLowerCase())) {
+				codes.add(value.getCode());
+			}
+		}
+		int length = Math.min(codes.size(), 100);
+		AttributeType attributeType = attribute.getAttributeType();
+		Class<?> implementingType = attributeType.getImplementingType();
+		Object[] result = new Object[length];
+		for (int i = 0; i < length; i++) {
+			// Leave strings, enumerations and bean bizIds alone
+			if (String.class.equals(implementingType) || (attributeType == AttributeType.enumeration) || Bean.class.equals(implementingType)) {
+				result[i] = codes.get(i);
+			}
+			// coerce to the correct type
+			else {
+				result[i] = BindUtil.fromSerialised(implementingType, codes.get(i));
+			}
+		}
+		
+		return result;
 	}
 }

@@ -274,6 +274,32 @@ isc.BizUtil.addClassMethods({
 		}
 	},
 	
+	// Rename _display_* criteria produced by list filter line
+	convertFilterCriteria: function(criteria) {
+		if (criteria) {
+			if (criteria.criteria) { // advanced criteria
+				for (var i = 0, l = criteria.criteria.length; i < l; i++) {
+					var criterium = criteria.criteria[i];
+					isc.BizUtil.convertFilterCriteria(criterium);
+				}
+			}
+			else if (criteria.fieldName) { // advanced criterium
+				var propertyName = criteria.fieldName;
+				if (propertyName.startsWith('_display_')) {
+					criteria.fieldName = propertyName.substring(9);
+				}
+			}
+			else { // simple criteria
+				for (var propertyName in criteria) {
+					if (propertyName.startsWith('_display_')) {
+						criteria[propertyName.substring(9)] = criteria[propertyName];
+						delete criteria[propertyName];
+					}
+				}
+			}
+		}
+	},
+	
 	// Add extra criteria defined in filterParams to the criteria parameter given
 	// Add filterParams like [{fileName: 'poo', operator: 'equals', value 'wee'}] to the criteria
 	//

@@ -65,6 +65,7 @@ public class SmartClientAttributeDefinition {
 	protected String type = "text";
 	protected String editorType;
 	protected String filterEditorType;
+	protected boolean hasDisplayField = false;
 	protected Integer length;
 	protected String mask;
 	protected String textBoxStyle;
@@ -119,7 +120,7 @@ public class SmartClientAttributeDefinition {
 				if (DomainType.constant.equals(domainType)) {
 					valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, runtime);
 				}
-				else { // variant or dynamic
+				else {
 					// if this is an enumeration on a query column defn, ensure the filter has all values
 					if (isQueryColumn && bindingAttribute.getAttributeType() == AttributeType.enumeration) {
 						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, runtime);
@@ -128,6 +129,10 @@ public class SmartClientAttributeDefinition {
 					// select widget doesn't try to use the form's data source to get values when opened
 					else {
 						valueMap = "[' ']";
+					}
+					
+					if (domainType == DomainType.variant || domainType == DomainType.dynamic) {
+						hasDisplayField = true;
 					}
 				}
 				type = "enum";
@@ -458,6 +463,14 @@ public class SmartClientAttributeDefinition {
 		this.type = type;
 	}
 
+	public boolean isHasDisplayField() {
+		return hasDisplayField;
+	}
+	
+	public void setHasDisplayField(boolean hasDisplayField) {
+		this.hasDisplayField = hasDisplayField;
+	}
+	
 	public boolean isEscape() {
 		return escape;
 	}
@@ -569,7 +582,7 @@ public class SmartClientAttributeDefinition {
 			if (triStateCheckBox) {
 				result.append(",editorProperties:{allowEmptyValue:true}");
 			}
-			if ((! required) && ("select".equals(type) || "enum".equals(type))) {
+			else if ((! required) && ("select".equals(type) || "enum".equals(type))) {
 				result.append(",editorProperties:{allowEmptyValue:true}");
 			}
 			else if ("geometry".equals(type)) {
@@ -622,6 +635,9 @@ public class SmartClientAttributeDefinition {
 				if (validation != null) {
 					result.append(",validators:[").append(validation).append(']');
 				}
+			}
+			if (hasDisplayField) { // select or enum or text can have display fields
+				result.append(",displayField:'_display_").append(name).append('\'');
 			}
 		}
 		else {

@@ -1763,6 +1763,8 @@ isc.BizLookupDescriptionItem.addMethods({
 //				addUnknownValues: false,
 			getPickListFilterCriteria: function() {
 				var result = this.Super("getPickListFilterCriteria", arguments);
+				// Remove _display_ prefix from any criteria
+				isc.BizUtil.convertFilterCriteria(result);
 				if (config.params) {
 					result = isc.BizUtil.completeFilterCriteria(result, config.params, me._view);
 				}
