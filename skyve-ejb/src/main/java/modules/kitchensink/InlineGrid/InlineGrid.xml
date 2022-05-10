@@ -8,6 +8,29 @@
 	<parentDocument>KitchenSink</parentDocument>
 	<bizKey expression="Inline Grid" />
 	<attributes>
+		<enum name="constantEnum">
+			<displayName>ConstantEnum</displayName>
+			<values>
+				<value code="one" description="One (1)!" />
+				<value code="two" description="Two (2)!" />
+				<value code="three" description="Three (3)!" />
+			</values>
+		</enum>
+		<text name="constantDomain">
+			<displayName>ConstantDomain</displayName>
+			<domain>constant</domain>
+			<length>5</length>
+		</text>
+		<text name="variantDomain">
+			<displayName>VariantDomain</displayName>
+			<domain>variant</domain>
+			<length>5</length>
+		</text>
+		<text name="dynamicDomain">
+			<displayName>DynamicDomain</displayName>
+			<domain>dynamic</domain>
+			<length>5</length>
+		</text>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>
 			<defaultValue>{el:false}</defaultValue>
@@ -25,14 +48,5 @@
 			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
 			<converterName>Decimal5TimeDuration</converterName>
 		</decimal5>
-		<enum name="enum3">
-			<displayName>Enum 3</displayName>
-			<defaultValue>one</defaultValue>
-			<values>
-				<value code="one" />
-				<value code="two" />
-				<value code="three" />
-			</values>
-		</enum>
 	</attributes>
 </document>

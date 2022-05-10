@@ -169,13 +169,16 @@
 				</containerColumn>
 			</dataGrid>
 			<dataGrid binding="inlineGrid" inline="true" title="Inline Grid">
+				<boundColumn binding="constantEnum" />
+				<boundColumn binding="constantDomain" />
+				<boundColumn binding="variantDomain" />
+				<boundColumn binding="dynamicDomain" />
 				<boundColumn binding="booleanFlag" />
 				<boundColumn binding="date" />
 <!-- dont work in SC - gives smartgen error
 				<boundColumn binding="colour" />
 				<boundColumn binding="decimal5" />
 -->
-				<boundColumn binding="enum3" />
 			</dataGrid>
 			<dataGrid binding="orderedGrid" title="Ordered Grid">
 				<boundColumn binding="booleanFlag" />
@@ -209,7 +212,7 @@
 				List Grid
 			</blurb>
 		</tab>
-		<tab title="">
+		<tab title="Map">
 			<blurb>
 				Map
 			</blurb>

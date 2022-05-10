@@ -10,6 +10,7 @@
 		<document ref="KitchenSink" />
 		<document ref="ContainerGrid" />
 		<document ref="InlineGrid" />
+		<document ref="ListAttributes" />
 		<document ref="OrderedGrid" />
 		<document ref="DataRepeater" />
 		<document ref="LookupDescription" />
@@ -21,6 +22,7 @@
 				<document name="KitchenSink" permission="_____" />
 				<document name="ContainerGrid" permission="CRUDD" />
 				<document name="InlineGrid" permission="CRUDD" />
+				<document name="ListAttributes" permission="CRUDD" />
 				<document name="OrderedGrid" permission="CRUDD" />
 				<document name="DataRepeater" permission="CRUDD" />
 				<document name="LookupDescription" permission="CRUDD" />
@@ -34,9 +36,9 @@
 		<link href="#" name="Calendar">
 			<role name="dev" />
 		</link>
-		<link href="#" name="List">
+		<list name="List" document="ListAttributes">
 			<role name="dev" />
-		</link>
+		</list>
 		<link href="#" name="Map">
 			<role name="dev" />
 		</link>
