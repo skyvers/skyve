@@ -6,11 +6,13 @@
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
+<%@ page import="org.skyve.impl.web.AbstractWebContext"%>
 <%@ page import="org.skyve.metadata.user.User"%>
 <%@ page import="org.skyve.metadata.view.TextOutput.Sanitisation"%>
 <%@ page import="org.skyve.util.OWASP"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebContext"%>
+
 <%
 	final String newPasswordFieldName = "newPassword";
 	final String confirmPasswordFieldName = "confirmPassword";
@@ -31,7 +33,15 @@
 	else if ((newPasswordValue != null) && (confirmPasswordValue != null)) {
 		passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {
-			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+			
+			String redirectURL = response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp");
+
+			String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
+			if (customerName != null && !customerName.isBlank()) {
+				redirectURL = redirectURL + "?" + AbstractWebContext.CUSTOMER_COOKIE_NAME + "=" + customerName;
+			}
+			
+			response.sendRedirect(redirectURL);
 			return;
 		}
 	}
