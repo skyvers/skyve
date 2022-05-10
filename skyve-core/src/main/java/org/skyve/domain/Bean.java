@@ -217,7 +217,14 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @param value	The value.
 	 */
 	public void setDynamic(String simpleBinding, Object value);
-	
+
+	/**
+	 * Add a dynamic attribute value to create a new property.
+	 * @param simpleBinding	A non-compound binding (can be indexed or mapped).
+	 * @param value	The value.
+	 */
+	public void addDynamic(String simpleBinding, Object value);
+
 	/**
 	 * Set the dynamic map if currently null
 	 * or merge into the current dynamic map if not

@@ -346,6 +346,11 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	}
 	
 	@Override
+	public void addDynamic(String simpleBinding, Object value) {
+		super.set(simpleBinding, value);
+	}
+	
+	@Override
 	public void setDynamic(Map<String, Object> dynamic) {
 		if (dynamic == null) {
 			getMap().clear();

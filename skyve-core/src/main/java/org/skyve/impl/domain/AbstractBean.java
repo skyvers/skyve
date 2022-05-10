@@ -261,7 +261,15 @@ public abstract class AbstractBean implements Bean {
 		}
 		dynamic.set(simpleBinding, value);
 	}
-	
+
+	@Override
+	public void addDynamic(String simpleBinding, Object value) {
+		if (dynamic == null) {
+			dynamic = new LazyDynaMap();
+		}
+		dynamic.set(simpleBinding, value);
+	}
+
 	@Override
 	public void setDynamic(Map<String, Object> dynamic) {
 		if (dynamic == null) {
