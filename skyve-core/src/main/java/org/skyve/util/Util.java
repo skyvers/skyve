@@ -14,6 +14,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -376,6 +377,16 @@ public class Util {
 
 	public static String getResourceUrl(String resourceFileName) {
 		return getResourceUrl(null, null, resourceFileName);
+	}
+	
+	public static String getResetPasswordUrl() {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl())
+			  .append("/pages/resetPassword.jsp").append("?")
+			  .append("t={passwordResetToken}").append("&")
+			  .append(AbstractWebContext.CUSTOMER_COOKIE_NAME).append("={bizCustomer}");
+		
+		return result.toString();
 	}
 	
     /**

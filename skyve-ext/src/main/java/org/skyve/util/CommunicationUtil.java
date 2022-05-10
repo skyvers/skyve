@@ -38,6 +38,7 @@ public class CommunicationUtil {
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
 	public static final String SPECIAL_CONTEXT = "{#context}";
+	public static final String SPECIAL_LOGOUT_URL = "{#resetPasswordUrl}";
 	public static final String SENT_SUCCESSFULLY_MESSAGE = "Communication sent";
 
 	/**
@@ -166,7 +167,7 @@ public class CommunicationUtil {
 
 		// process email body
 		String emailBodyMain = communication.getBody();
-
+		
 		emailBodyMain = formatCommunicationMessage(customer, emailBodyMain, beans);
 
 		if (communication.getTemplate() != null) {
@@ -757,12 +758,17 @@ public class CommunicationUtil {
 	 */
 	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
 		String result = expression;
-
+		
+		if (result != null) {
+			result = result.replace(SPECIAL_LOGOUT_URL, Util.getResetPasswordUrl());
+		}
+		
+		
 		// default url binding to first bean
-		if (beans != null && beans.length > 0 && expression != null) {
+		if (beans != null && beans.length > 0 && result != null) {
 			Bean bean = beans[0];
 			if (bean != null) {
-				result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
+				result = result.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
 				result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
 			}
 			result = Binder.formatMessage(result, beans);
