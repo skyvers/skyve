@@ -3,6 +3,7 @@ package modules.admin.Configuration;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -50,10 +51,10 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		if (result.getPasswordResetEmailBody() == null) {
 			String body = String.format("<html><head/><body>Hi {%s},<p/>" +
 					"Please click below to reset your password.<p/>" +
-					"<a href=\"{url}/pages/resetPassword.jsp?t={%s}\">" +
+					"<a href=\"{#resetPasswordUrl}\">" +
 					"Reset Password</a></body></html>",
-					Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName),
-					User.passwordResetTokenPropertyName);
+					Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName)
+				);
 			result.setPasswordResetEmailBody(body);
 		}
 

@@ -284,7 +284,11 @@ public class WebUtil {
 				String subject = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME);
 				subject = Binder.formatMessage(subject, firstUser);
 				String body = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME); 
+				
+				body = body.replace("{#resetPasswordUrl}", Util.getResetPasswordUrl());
+				// keeping this for backwards compatibility
 				body = body.replace("{url}", Util.getSkyveContextUrl());
+				
 				body = Binder.formatMessage(body, firstUser);
 				String fromEmail = (String) Binder.get(configuration, SQLMetaDataUtil.FROM_EMAIL_PROPERTY_NAME);
 				EXT.sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
