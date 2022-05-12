@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
 import org.skyve.metadata.controller.DownloadAction;
@@ -295,7 +296,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 				return result;
 			}
 		}
-		return null;
+		throw new MetaDataException(moduleName + " does not exist" + ((customer == null) ? "" : " for customer " + customer.getName()));
 	}
 
 	@Override
@@ -306,7 +307,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 				return result;
 			}
 		}
-		return null;
+		throw new MetaDataException(documentName + " does not exist for module " + module.getName() + ((customer == null) ? "" : " for customer " + customer.getName()));
 	}
 
 	@Override

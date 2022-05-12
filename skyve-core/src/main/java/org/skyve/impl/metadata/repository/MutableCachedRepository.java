@@ -40,7 +40,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	 * MetaData namespace and name -> MetaData.
 	 * eg customers/bizhub
 	 *    modules/admin
-	 *    modules/admin/
+	 *    modules/admin/Contact
 	 * Thread-safe and performant for mostly-read operations.
 	 */
 	private ConcurrentHashMap<String, Optional<MetaData>> cache = new ConcurrentHashMap<>();
@@ -151,9 +151,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		if (result == null) { // not overridden
 			result = getModuleInternal(null, moduleName);
 		}
-		if (result == null) {
-			throw new MetaDataException(moduleName + " does not exist" + ((customer == null) ? "" : " for customer " + customer.getName()));
-		}
+		// Note we can not test for existence of the module here because it may be a repository in a DelegatedProvidedRepositoryChain (DefaultRepository)
 		return result;
 	}
 	
@@ -223,9 +221,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		if (result == null) { // not overridden
 			result = getDocumentInternal(false, customer, module, documentName);
 		}
-		if (result == null) {
-			throw new MetaDataException(documentName + " does not exist for module " + module.getName() + ((customer == null) ? "" : " for customer " + customer.getName()));
-		}
+		// Note we can not test for existence of the module here because it may be a repository in a DelegatedProvidedRepositoryChain (DefaultRepository)
 		return result;
 	}
 
