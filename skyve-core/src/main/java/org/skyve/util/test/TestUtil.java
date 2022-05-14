@@ -216,14 +216,14 @@ public class TestUtil {
 
 	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
 	private static <T extends Bean> T constructRandomInstance(User user,
-			Module module,
-			Document document,
-			int currentDepth,
-			int maxDepth)
-			throws Exception {
+																Module module,
+																Document document,
+																int currentDepth,
+																int maxDepth)
+	throws Exception {
 		T result = document.newInstance(user);
-
-		for (Attribute attribute : document.getAllAttributes(user.getCustomer())) {
+		Customer customer = user.getCustomer();
+		for (Attribute attribute : document.getAllAttributes(customer)) {
 			String name = attribute.getName();
 			AttributeType type = attribute.getAttributeType();
 
@@ -232,20 +232,18 @@ public class TestUtil {
 					if (currentDepth < maxDepth) {
 						AssociationImpl association = (AssociationImpl) attribute;
 						Module associationModule = module;
-						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName())
-								.getReferencedModuleName();
+						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
 						if (associationModuleRef != null) {
-							associationModule = user.getCustomer().getModule(associationModuleRef);
+							associationModule = customer.getModule(associationModuleRef);
 						}
-						Document associationDocument = associationModule.getDocument(user.getCustomer(),
-								association.getDocumentName());
+						Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
 						BindUtil.set(result,
-								name,
-								TestUtil.constructRandomInstance(user,
-										associationModule,
-										associationDocument,
-										currentDepth + 1,
-										maxDepth));
+										name,
+										TestUtil.constructRandomInstance(user,
+												associationModule,
+												associationDocument,
+												currentDepth + 1,
+												maxDepth));
 					}
 					break;
 				case bool:
@@ -260,22 +258,13 @@ public class TestUtil {
 						String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName())
 								.getReferencedModuleName();
 						if (collectionModuleRef != null) {
-							collectionModule = user.getCustomer().getModule(collectionModuleRef);
+							collectionModule = customer.getModule(collectionModuleRef);
 						}
-						Document collectionDocument = collectionModule.getDocument(user.getCustomer(),
-								collection.getDocumentName());
-						@SuppressWarnings("unchecked")
-						List<Bean> list = (List<Bean>) BindUtil.get(result, name);
-						list.add(TestUtil.constructRandomInstance(user,
-								collectionModule,
-								collectionDocument,
-								currentDepth + 1,
-								maxDepth));
-						list.add(TestUtil.constructRandomInstance(user,
-								collectionModule,
-								collectionDocument,
-								currentDepth + 1,
-								maxDepth));
+						Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
+						Bean element = TestUtil.constructRandomInstance(user, collectionModule, collectionDocument, currentDepth + 1, maxDepth);
+						BindUtil.addElementToCollection(result, name, element);
+						element = TestUtil.constructRandomInstance(user, collectionModule, collectionDocument, currentDepth + 1, maxDepth);
+						BindUtil.addElementToCollection(result, name, element);
 					}
 					break;
 				case colour:
