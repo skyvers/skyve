@@ -117,7 +117,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	@Test
 	public void testBinderWithDynamicAttributes() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
-		testBinder(bean, AllDynamicAttributesPersistent.aggregatedAssociationPropertyName, AllDynamicAttributesPersistent.aggregatedCollectionPropertyName);
+		testBinder(bean, AllDynamicAttributesPersistent.composedAssociationPropertyName, AllDynamicAttributesPersistent.composedCollectionPropertyName);
 	}
 
 	@Test

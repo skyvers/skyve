@@ -16,12 +16,15 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  * <br/>
  * All dynamic attributes in a persistent document.
  * 
- * @navhas n aggregatedCollection 0..n AllAttributesPersistent
+ * @navhas n composedCollection 0..n AllDynamicAttributesPersistent
+ * @navhas n dynamicAggregatedCollection 0..n AllAttributesDynamicPersistent
  * @navcomposed n dynamicEmbeddedAssociation 0..1 AllAttributesDynamicEmbedded
  * @navcomposed n composedAssociation 0..1 AllDynamicAttributesPersistent
  * @navhas n aggregatedAssociation 0..1 AllDynamicAttributesPersistent
  * @navhas n dynamicAggregatedAssociation 0..1 AllAttributesDynamicPersistent
+ * @navcomposed n dynamicComposedCollection 0..n AllAttributesDynamicPersistent
  * @navcomposed n dynamicComposedAssociation 0..1 AllAttributesDynamicPersistent
+ * @navcomposed 1 dynamicChildCollection 0..n AllDynamicAttributesPersistentDynamicChild
  * @navcomposed n embeddedAssociation 0..1 AllAttributesEmbedded
  * @stereotype "persistent"
  */
@@ -59,10 +62,19 @@ public class AllDynamicAttributesPersistent extends AbstractPersistentBean {
 	public static final String dynamicEmbeddedAssociationPropertyName = "dynamicEmbeddedAssociation";
 
 	/** @hidden */
-	public static final String booleanFlagPropertyName = "booleanFlag";
+	public static final String composedCollectionPropertyName = "composedCollection";
 
 	/** @hidden */
-	public static final String aggregatedCollectionPropertyName = "aggregatedCollection";
+	public static final String dynamicAggregatedCollectionPropertyName = "dynamicAggregatedCollection";
+
+	/** @hidden */
+	public static final String dynamicComposedCollectionPropertyName = "dynamicComposedCollection";
+
+	/** @hidden */
+	public static final String dynamicChildCollectionPropertyName = "dynamicChildCollection";
+
+	/** @hidden */
+	public static final String booleanFlagPropertyName = "booleanFlag";
 
 	/** @hidden */
 	public static final String colourPropertyName = "colour";
@@ -134,9 +146,9 @@ public class AllDynamicAttributesPersistent extends AbstractPersistentBean {
 	private AllAttributesEmbedded embeddedAssociation = null;
 
 	/**
-	 * Aggregated Collection
+	 * Composed Collection
 	 **/
-	private List<AllAttributesPersistent> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
+	private List<AllDynamicAttributesPersistent> composedCollection = new ChangeTrackingArrayList<>("composedCollection", this);
 
 	/**
 	 * Inverse
@@ -256,63 +268,63 @@ public class AllDynamicAttributesPersistent extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #aggregatedCollection} accessor.
+	 * {@link #composedCollection} accessor.
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<AllAttributesPersistent> getAggregatedCollection() {
-		return aggregatedCollection;
+	public List<AllDynamicAttributesPersistent> getComposedCollection() {
+		return composedCollection;
 	}
 
 	/**
-	 * {@link #aggregatedCollection} accessor.
+	 * {@link #composedCollection} accessor.
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public AllAttributesPersistent getAggregatedCollectionElementById(String bizId) {
-		return getElementById(aggregatedCollection, bizId);
+	public AllDynamicAttributesPersistent getComposedCollectionElementById(String bizId) {
+		return getElementById(composedCollection, bizId);
 	}
 
 	/**
-	 * {@link #aggregatedCollection} mutator.
+	 * {@link #composedCollection} mutator.
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setAggregatedCollectionElementById(String bizId, AllAttributesPersistent element) {
-		setElementById(aggregatedCollection, element);
+	public void setComposedCollectionElementById(String bizId, AllDynamicAttributesPersistent element) {
+		setElementById(composedCollection, element);
 	}
 
 	/**
-	 * {@link #aggregatedCollection} add.
+	 * {@link #composedCollection} add.
 	 * @param element	The element to add.
 	 **/
-	public boolean addAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.add(element);
+	public boolean addComposedCollectionElement(AllDynamicAttributesPersistent element) {
+		return composedCollection.add(element);
 	}
 
 	/**
-	 * {@link #aggregatedCollection} add.
+	 * {@link #composedCollection} add.
 	 * @param index	The index in the list to add the element to.
 	 * @param element	The element to add.
 	 **/
-	public void addAggregatedCollectionElement(int index, AllAttributesPersistent element) {
-		aggregatedCollection.add(index, element);
+	public void addComposedCollectionElement(int index, AllDynamicAttributesPersistent element) {
+		composedCollection.add(index, element);
 	}
 
 	/**
-	 * {@link #aggregatedCollection} remove.
+	 * {@link #composedCollection} remove.
 	 * @param element	The element to remove.
 	 **/
-	public boolean removeAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.remove(element);
+	public boolean removeComposedCollectionElement(AllDynamicAttributesPersistent element) {
+		return composedCollection.remove(element);
 	}
 
 	/**
-	 * {@link #aggregatedCollection} remove.
+	 * {@link #composedCollection} remove.
 	 * @param index	The index in the list to remove the element from.
 	 **/
-	public AllAttributesPersistent removeAggregatedCollectionElement(int index) {
-		return aggregatedCollection.remove(index);
+	public AllDynamicAttributesPersistent removeComposedCollectionElement(int index) {
+		return composedCollection.remove(index);
 	}
 
 	/**

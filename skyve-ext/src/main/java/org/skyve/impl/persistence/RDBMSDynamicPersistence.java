@@ -43,10 +43,10 @@ import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
-import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 
 // TODO Need to replicate HibernateListener functions for dynamic beans
+// TODO Need to treat bizVersion and bizLock which requirees change detection in DynamicBean.
 // The idea here is to completely persist all beans reachable, no matter the relationship.
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
@@ -76,7 +76,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			delete(c, d, bean, true);
 		}
 
-		new BeanVisitor(false, false, true) {
+		new BeanVisitor(false, false, false) {
 			@Override
 			protected boolean accept(String binding,
 										Document visitedDocument,
@@ -118,7 +118,7 @@ System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " +
 								Bean owningBean = null;
 								int lastDotIndex = binding.lastIndexOf('.');
 								if (lastDotIndex > 0) {
-									owningBean = (Bean) Binder.get(bean, binding.substring(0, lastDotIndex));
+									owningBean = (Bean) BindUtil.get(bean, binding.substring(0, lastDotIndex));
 								}
 								else {
 									owningBean = bean;
@@ -158,7 +158,7 @@ System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " +
 				}
 				if (dynamicAttribute) {
 					String name = a.getName();
-					dynamicFields.put(name, Binder.get(bean, name));
+					dynamicFields.put(name, BindUtil.get(bean, name));
 				}
 			}
 			else if (a instanceof Reference) {
@@ -224,7 +224,7 @@ System.out.println("insert entity " + bean.getBizDocument() + " with bizId " + b
 		sql.putParameter("parent_id", parentId, false);
 		
 		for (String name : references.keySet()) {
-			Object value = Binder.get(bean, name);
+			Object value = BindUtil.get(bean, name);
 			// NB don't insert null references
 			if (value != null) {
 				if (value instanceof List<?>) {
@@ -283,7 +283,7 @@ System.out.println("insert association element for " + bean.getBizDocument() + "
 	private void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
 		final Set<String> bizIdsToDelete = new TreeSet<>();
 		
-		new BeanVisitor(false, false, true) {
+		new BeanVisitor(false, false, false) {
 			@Override
 			protected boolean accept(String binding,
 										Document visitedDocument,
@@ -510,9 +510,7 @@ System.out.println("populate document for " + bean.getBizDocument() + " with biz
 					Object value = bean.getDynamic(attributeName);
 					if (value instanceof List<?>) {
 						if (relatedBean != null) {
-							@SuppressWarnings("unchecked")
-							List<PersistentBean> list = ((List<PersistentBean>) value);
-							list.add(relatedBean);
+							BindUtil.addElementToCollection(bean, attributeName, relatedBean);
 						}
 					}
 					else {

@@ -6,10 +6,12 @@
 	<documents>
 		<document ref="AllAttributesDynamicEmbedded" />
 		<document ref="AllAttributesDynamicPersistent" />
+		<document ref="AllAttributesDynamicPersistentDynamicChild" />
 		<document ref="AllAttributesPersistent" />
 		<document ref="AllAttributesEmbedded" />
 		<document ref="AllAttributesRequiredPersistent" />
 		<document ref="AllDynamicAttributesPersistent" />
+		<document ref="AllDynamicAttributesPersistentDynamicChild" />
 		<document ref="AnyBase" />
 		<document ref="AnyDerived1" />
 		<document ref="AnyDerived2" />

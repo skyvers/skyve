@@ -539,7 +539,14 @@ public class LocalDesignRepository extends FileSystemRepository {
 				if (document.isDynamic() && (! targetDocument.isDynamic()) && (reference.getType() == AssociationType.embedded)) {
 					throw new MetaDataException("The dynamic embedded association " + reference.getName() + 
 													" in document " + documentIdentifier + " references document " +
-													targetDocumentName + " which is not a dynamic document.");
+													targetDocumentName + " which is not a dynamic document. Dynamic embedded associations to static documents are not permitted.");
+				}
+
+				// Disallow a dynamic child collection to a static document (can't save it in hibernate without a static owner)
+				if (document.isDynamic() && (! targetDocument.isDynamic()) && (reference.getType() == CollectionType.child)) {
+					throw new MetaDataException("The dynamic child collection " + reference.getName() + 
+													" in document " + documentIdentifier + " references document " +
+													targetDocumentName + " which is not a dynamic document. Dynamic child collections to static documents are not permitted.");
 				}
 			}
 			else if (attribute instanceof Inverse) {

@@ -37,15 +37,30 @@
 			<displayName>Dynamic Embedded Association</displayName>
 			<documentName>AllAttributesDynamicEmbedded</documentName>
 		</association>
+		<collection name="composedCollection" type="aggregation">
+			<displayName>Composed Collection</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicAggregatedCollection" type="aggregation">
+			<displayName>Dynamic Aggregated Collection</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicComposedCollection" type="composition">
+			<displayName>Dynamic Composed Collection</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicChildCollection" type="child">
+			<displayName>Dynamic Child Collection</displayName>
+			<documentName>AllDynamicAttributesPersistentDynamicChild</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>
 			<dynamic>true</dynamic>
 		</boolean>
-		<collection name="aggregatedCollection" type="aggregation">
-			<displayName>Aggregated Collection</displayName>
-			<documentName>AllAttributesPersistent</documentName>
-			<minCardinality>0</minCardinality>
-		</collection>
 		<colour name="colour">
 			<displayName>Colour</displayName>
 			<dynamic>true</dynamic>

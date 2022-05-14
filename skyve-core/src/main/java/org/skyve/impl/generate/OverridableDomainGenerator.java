@@ -3286,15 +3286,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		String parentDocumentName = document.getParentDocumentName();
 		Document parentDocument = null;
-		String parentPackagePath = null;
 		String parentClassName = null;
 
 		if (parentDocumentName != null) {
 			parentDocument = module.getDocument(customer, parentDocumentName);
 			String parentPackageName = parentDocument.getOwningModuleName();
-			parentPackagePath = new StringBuilder(128).append("modules.")
-														.append(parentPackageName)
-														.append(".domain").toString();
+			String parentPackagePath = new StringBuilder(128).append("modules.")
+																.append(parentPackageName)
+																.append(".domain").toString();
 			parentClassName = parentDocumentName;
 			String parentDocumentModulePath = ProvidedRepository.MODULES_NAMESPACE + parentPackageName;
 			if (domainExtensionClassExists(parentDocumentModulePath, parentDocumentName)) {
@@ -3304,7 +3303,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 															.append(parentDocumentName).toString();
 				parentClassName += "Extension";
 			}
-
+			
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				imports.add("java.util.List");
 				imports.add("org.skyve.CORE");
