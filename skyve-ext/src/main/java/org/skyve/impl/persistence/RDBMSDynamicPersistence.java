@@ -18,6 +18,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.ExportedReference;
@@ -26,8 +27,8 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
@@ -46,6 +47,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 
 // TODO Need to replicate HibernateListener functions for dynamic beans
+// The idea here is to completely persist all beans reachable, no matter the relationship.
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
 
@@ -53,7 +55,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 	private Persistence persistence;
 	
-//	private Map<String, PersistenteBean> dynamicFirstLevelCache = new TreeMap<>();
+	private final Map<String, DynamicPersistentBean> dynamicFirstLevelCache = new TreeMap<>();
 	
 	@Override
 	public void postConstruct(@SuppressWarnings("hiding") Persistence persistence) {
@@ -61,9 +63,13 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	}
 	
 	@Override
-	public void persist(Customer customer, Module module, Document document, PersistentBean bean) {
+	public void persist(PersistentBean bean) {
+		Customer c = persistence.getUser().getCustomer();
+		Module m = c.getModule(bean.getBizModule());
+		Document d = m.getDocument(c, bean.getBizDocument());
+		
 		if (bean.isPersisted()) {
-			delete(customer, document, bean, true);
+			delete(c, d, bean, true);
 		}
 
 		new BeanVisitor(false, false, true) {
@@ -74,25 +80,72 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 										Relation owningRelation,
 										Bean visitedBean)
 			throws Exception {
-				// TODO refine this rule possibly - transient reference to persisted bean and all that crap?
-				Persistent persistent = visitedDocument.getPersistent();
-				if ((persistent != null) && 
-						(persistent.getName() != null)) { // persistent document
-					persistOne(customer, visitedDocument, (PersistentBean) visitedBean);
+System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " + visitedBean.getClass());
+				// Use our own cascade rules for dynamic beans
+				if (visitedDocument.isDynamic()) {
+					// Persist persistent documents
+					Persistent persistent = visitedDocument.getPersistent();
+					if ((persistent != null) && 
+							(persistent.getName() != null)) { // persistent document
+						persistOne(c, visitedDocument, (PersistentBean) visitedBean);
+					}
+					else {
+						// Persist persistent embedded associations as its own DynamicEntity
+						if ((owningRelation instanceof Association) && owningRelation.isPersistent()) {
+							Association association = (Association) owningRelation;
+							if (association.getType() == AssociationType.embedded) {
+								persistOne(c, visitedDocument, (PersistentBean) visitedBean);
+							}
+						}
+					}
 				}
+				// Follow hibernate's lead and persist only persistent beans.
+				else if (visitedDocument.hasDynamic()) {
+					// Persist if hibernate has it persisted
+					if (visitedBean.isPersisted()) {
+						persistOne(c, visitedDocument, (PersistentBean) visitedBean);
+					}
+					else {
+						// Persist persistent embedded associations as its own DynamicEntity if the owner is persisted
+						if ((owningRelation instanceof Association) && owningRelation.isPersistent()) {
+							Association association = (Association) owningRelation;
+							if (association.getType() == AssociationType.embedded) {
+								// Get the owning bean
+								Bean owningBean = null;
+								int lastDotIndex = binding.lastIndexOf('.');
+								if (lastDotIndex > 0) {
+									owningBean = (Bean) Binder.get(bean, binding.substring(0, lastDotIndex));
+								}
+								else {
+									owningBean = bean;
+								}
+								// If the owningBean is persisted then the embedded object has been persisted also
+								if (owningBean.isPersisted()) {
+									persistOne(c, visitedDocument, (PersistentBean) visitedBean);
+								}
+							}
+						}						
+					}
+				}
+				
 				return true;
 			}
-		}.visit(document, bean, customer);
+		}.visit(d, bean, c);
 	}
 	
 	private void persistOne(Customer c, Document d, PersistentBean bean) {
 		final Map<String, Object> dynamicFields = new TreeMap<>();
-		final List<String> dynamicReferenceNames = new ArrayList<>();
+		// Reference name -> emebdded association indictor
+		Map<String, Boolean> dynamicReferences = new TreeMap<>();
 		final Module m = c.getModule(d.getOwningModuleName());
 
 		final boolean dynamicDocument = d.isDynamic();
 
 		for (Attribute a : d.getAllAttributes(c)) {
+			if (! a.isPersistent()) {
+				continue;
+			}
+			
 			// if dynamic document or dynamic field or reference to dynamic document
 			boolean dynamicAttribute = dynamicDocument;
 			if (a instanceof Field) {
@@ -110,17 +163,17 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					dynamicAttribute = BindUtil.isDynamic(c, m, r);
 				}
 				if (dynamicAttribute) {
-					dynamicReferenceNames.add(r.getName());
+					dynamicReferences.put(r.getName(), Boolean.valueOf(r.getType() == AssociationType.embedded));
 				}
 			}
 		}
 		
-		if (! (dynamicFields.isEmpty() && dynamicReferenceNames.isEmpty())) {
+		if (! (dynamicFields.isEmpty() && dynamicReferences.isEmpty())) {
 			insertEntity(bean, JSON.marshall(dynamicFields));
-			insertReferences(c, bean, dynamicReferenceNames);
+			insertReferences(c, bean, dynamicReferences);
 
 			dynamicFields.clear();
-			dynamicReferenceNames.clear();
+			dynamicReferences.clear();
 		}
 	}
 
@@ -130,13 +183,15 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			bean.setBizVersion(NEW_VERSION);
 		}
 		
+System.out.println("insert entity " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " with json " + json);
 		String insert = "insert into ADM_DynamicEntity (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, moduleName, documentName, fields) " +
 							"values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizFlagComment, :bizDataGroupId, :bizUserId, :moduleName, :documentName, :fields)";
 		SQL sql = persistence.newSQL(insert);
 		sql.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false);
 		sql.putParameter(PersistentBean.VERSION_NAME, bean.getBizVersion());
 		sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(persistence.getUser().getName(), new Date()).toString(), false);
-		sql.putParameter(Bean.BIZ_KEY, bean.getBizKey(), false);
+		String bizKey = bean.getBizKey();
+		sql.putParameter(Bean.BIZ_KEY, (bizKey == null) ? "Unkown" : bizKey, false);
 		sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), false);
 		sql.putParameter(PersistentBean.FLAG_COMMENT_NAME, bean.getBizFlagComment(), false);
 		sql.putParameter(Bean.DATA_GROUP_ID, bean.getBizDataGroupId(), false);
@@ -148,7 +203,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		sql.execute();
 	}
 	
-	private void insertReferences(Customer c, PersistentBean bean, List<String> referenceNames) {
+	private void insertReferences(Customer c, PersistentBean bean, Map<String, Boolean> references) {
 		String insert = "insert into ADM_DynamicRelation (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, parent_id, relatedModuleName, relatedDocumentName, relatedId, attributeName, ordinal) " + 
 							"values (:bizId, 0, :bizLock, :bizKey, :bizCustomer, null, null, :bizUserId, :parent_id, :relatedModuleName, :relatedDocumentName, :relatedId, :attributeName, :ordinal)";
 		SQL sql = persistence.newSQL(insert);		
@@ -156,63 +211,66 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		sql.putParameter(PersistentBean.LOCK_NAME, bizLock, false);
 		sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), false);
 		sql.putParameter(Bean.USER_ID, bean.getBizUserId(), false);
-		sql.putParameter("parent_id", bean.getBizId(), false);
+		String parentId = bean.getBizId();
+		sql.putParameter("parent_id", parentId, false);
 		
-		for (String name : referenceNames) {
+		for (String name : references.keySet()) {
 			Object value = Binder.get(bean, name);
-			if (value == null) {
-				sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
-				sql.putParameter(Bean.BIZ_KEY, "->null", false);
-				sql.putParameter("relatedModuleName", null, false);
-				sql.putParameter("relatedDocumentName", null, false);
-				sql.putParameter("relatedId", null, false);
-				sql.putParameter("attributeName", name, false);
-				sql.putParameter("ordinal", null, false);
-				sql.execute();
-			}
-			else if (value instanceof List<?>) {
-				int ordinal = 0;
-				@SuppressWarnings("unchecked")
-				List<Bean> relatedBeans = (List<Bean>) value;
-				for (Bean relatedBean : relatedBeans) {
+			// NB don't insert null references
+			if (value != null) {
+				if (value instanceof List<?>) {
+					int ordinal = 0;
+					@SuppressWarnings("unchecked")
+					List<Bean> relatedBeans = (List<Bean>) value;
+					for (Bean relatedBean : relatedBeans) {
+						sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
+						String relatedId = relatedBean.getBizId();
+System.out.println("insert collection element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
+						sql.putParameter(Bean.BIZ_KEY, parentId + "->" + relatedId, false);
+						String relatedModuleName = relatedBean.getBizModule();
+						String relatedDocumentName = relatedBean.getBizDocument();
+						boolean dynamic = c.getModule(relatedModuleName).getDocument(c, relatedDocumentName).isDynamic();
+						sql.putParameter("relatedModuleName", dynamic ? null : relatedModuleName, false);
+						sql.putParameter("relatedDocumentName", dynamic ? null : relatedDocumentName, false);
+						sql.putParameter("relatedId", relatedId, false);
+						sql.putParameter("attributeName", name, false);
+						sql.putParameter("ordinal", Integer.valueOf(ordinal));
+						sql.execute();
+						ordinal++;
+					}
+				}
+				else {
+					Bean relatedBean = (Bean) value;
 					sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
 					String relatedId = relatedBean.getBizId();
-					sql.putParameter(Bean.BIZ_KEY, "->" + relatedId, false);
+System.out.println("insert association element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
+					sql.putParameter(Bean.BIZ_KEY, parentId + "->" + relatedId, false);
 					String relatedModuleName = relatedBean.getBizModule();
 					String relatedDocumentName = relatedBean.getBizDocument();
-					boolean dynnamic = c.getModule(relatedModuleName).getDocument(c, relatedDocumentName).isDynamic();
-					sql.putParameter("relatedModuleName", dynnamic ? null : relatedModuleName, false);
-					sql.putParameter("relatedDocumentName", dynnamic ? null : relatedDocumentName, false);
+					boolean dynamic = references.get(name).booleanValue() || // an embedded association 
+											c.getModule(relatedModuleName).getDocument(c, relatedDocumentName).isDynamic(); // or dynamic
+					sql.putParameter("relatedModuleName", dynamic ? null : relatedModuleName, false);
+					sql.putParameter("relatedDocumentName", dynamic ? null : relatedDocumentName, false);
 					sql.putParameter("relatedId", relatedId, false);
 					sql.putParameter("attributeName", name, false);
-					sql.putParameter("ordinal", Integer.valueOf(ordinal));
+					sql.putParameter("ordinal", null, false);
 					sql.execute();
-					ordinal++;
 				}
-			}
-			else {
-				Bean relatedBean = (Bean) value;
-				sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
-				String relatedId = relatedBean.getBizId();
-				sql.putParameter(Bean.BIZ_KEY, "->" + relatedId, false);
-				String relatedModuleName = relatedBean.getBizModule();
-				String relatedDocumentName = relatedBean.getBizDocument();
-				boolean dynnamic = c.getModule(relatedModuleName).getDocument(c, relatedDocumentName).isDynamic();
-				sql.putParameter("relatedModuleName", dynnamic ? null : relatedModuleName, false);
-				sql.putParameter("relatedDocumentName", dynnamic ? null : relatedDocumentName, false);
-				sql.putParameter("relatedId", relatedId, false);
-				sql.putParameter("attributeName", name, false);
-				sql.putParameter("ordinal", null, false);
-				sql.execute();
 			}
 		}
 	}
 	
 	@Override
-	public void delete(Customer customer, Document document, PersistentBean bean) {
-		delete(customer, document, bean, false);
+	public void delete(PersistentBean bean) {
+		Customer c = persistence.getUser().getCustomer();
+		Module m = c.getModule(bean.getBizModule());
+		Document d = m.getDocument(c, bean.getBizDocument());
+		delete(c, d, bean, false);
 	}
 	
+	// Remove the lot before save, we'll put it all back there if its required
+	// Otherwise if its an actual delete, just cascade all but aggregations.
+	// NB We don't check that the document hasDynamic here so we can clean up anything that has gone from dynamic to static
 	private void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
 		final Set<String> bizIdsToDelete = new TreeSet<>();
 		
@@ -225,23 +283,31 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 										Bean visitedBean)
 			throws Exception {
 				if (owningRelation == null) {
-					bizIdsToDelete.add(visitedBean.getBizId());
+					if (visitedBean.isPersisted()) {
+						bizIdsToDelete.add(visitedBean.getBizId());
+					}
 				}
 				else {
 					if (beforeSave) {
-						bizIdsToDelete.add(visitedBean.getBizId());
+						if (visitedBean.isPersisted()) {
+							bizIdsToDelete.add(visitedBean.getBizId());
+						}
 					}
 					else {
 						if (owningRelation instanceof Collection) {
 							// cascade
 							if (((Collection) owningRelation).getType() != CollectionType.aggregation) {
-								bizIdsToDelete.add(visitedBean.getBizId());
+								if (visitedBean.isPersisted()) {
+									bizIdsToDelete.add(visitedBean.getBizId());
+								}
 							}
 						}
 						else if (owningRelation instanceof Association) {
 							// cascade
 							if (((Association) owningRelation).getType() != AssociationType.aggregation) {
-								bizIdsToDelete.add(visitedBean.getBizId());
+								if (visitedBean.isPersisted()) {
+									bizIdsToDelete.add(visitedBean.getBizId());
+								}
 							}
 						}
 					}
@@ -252,6 +318,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}.visit(document, bean, customer);
 
 		// Delete in batches of 100
+System.out.println("delete entity (and relations) for " + JSON.marshall(bizIdsToDelete));
 		int i = 0;
 		int l = bizIdsToDelete.size();
 		List<String> batch = new ArrayList<>(100);
@@ -266,14 +333,15 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				SQL sql = persistence.newSQL("delete from ADM_DynamicRelation where parent_id in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
 				sql.execute();
-
+/*
 				// delete all incoming DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
 				// NB Could be extra relations left over from schema evolution
 				// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
+// TODO cant delete incoming relatiosn!
 				sql = persistence.newSQL("delete from ADM_DynamicRelation where relatedId in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
 				sql.execute();
-
+*/
 				// delete the DynamicEntity
 				sql = persistence.newSQL("delete from ADM_DynamicEntity where bizId in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
@@ -286,21 +354,11 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		batch.clear();
 		bizIdsToDelete.clear();
 	}
-
-//	Do I need a first level cache to keep all the objects the same?
-//	I think I do...
-//	Just for dynamic objects though - static ones are cached by hibernate
-			
 	
 	@Override
 	public DynamicPersistentBean populate(String bizId) {
-		Map<String, PersistentBean> loaded = new TreeMap<>();
-		populate(bizId, loaded);
-		return null;
-	}
-	
-	private DynamicPersistentBean populate(String bizId, Map<String, PersistentBean> visited) {
 		try {
+System.out.println("populate entity with bizId " + bizId);
 			// select the json by bizId
 			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields, moduleName, documentName from ADM_DynamicEntity where bizid = :bizId";
 			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bizId, false).retrieveTuple();
@@ -310,10 +368,15 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			Module m = c.getModule((String) tuple[8]);
 			Document d = m.getDocument(c, (String) tuple[9]);
 			DynamicPersistentBean result = d.newInstance(u);
+			result.setDynamic(Bean.DOCUMENT_ID, bizId); // set the new bean's bizId
 			
+			Map<String, PersistentBean> visited = new TreeMap<>();
 			populate(u, c, m, d, result, tuple, visited);
 			visited.clear();
 			return result;
+		}
+		catch (SkyveException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			throw new DomainException(e);
@@ -323,6 +386,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	@Override
 	public void populate(PersistentBean bean) {
 		try {
+System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
 			// select the json by bizId
 			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields from ADM_DynamicEntity where bizid = :bizId";
 			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).retrieveTuple();
@@ -336,6 +400,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			populate(u, c, m, d, bean, tuple, visited);
 			visited.clear();
 		}
+		catch (SkyveException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			throw new DomainException(e);
 		}
@@ -348,13 +415,16 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 							PersistentBean bean,
 							Object[] tuple,
 							Map<String, PersistentBean> visited) throws Exception {
-		bean.setBizVersion(Integer.valueOf(((Number) tuple[0]).intValue()));
-		bean.setBizLock(new OptimisticLock((String) tuple[1]));
-		bean.setBizKey((String) tuple[2]);
-		bean.setBizCustomer((String) tuple[3]);
-		bean.setBizFlagComment((String) tuple[4]);
-		bean.setBizDataGroupId((String) tuple[5]);
-		bean.setBizUserId((String) tuple[6]);
+		// only populate the biz stuff if this is a dynamic bean, otherwise its in the static bean
+		if (d.isDynamic()) {
+			bean.setBizVersion(Integer.valueOf(((Number) tuple[0]).intValue()));
+			bean.setBizLock(new OptimisticLock((String) tuple[1]));
+			bean.setBizKey((String) tuple[2]);
+			bean.setBizCustomer((String) tuple[3]);
+			bean.setBizFlagComment((String) tuple[4]);
+			bean.setBizDataGroupId((String) tuple[5]);
+			bean.setBizUserId((String) tuple[6]);
+		}
 		
 		@SuppressWarnings("unchecked")
 		Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(u, (String) tuple[7]);
@@ -400,11 +470,13 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					// Find the related bean
 					PersistentBean relatedBean = null;
 					if (relatedId != null) {
+						// static document has related module and document name
 						if ((relatedModuleName != null) && (relatedDocumentName != null)) {
 							relatedBean = persistence.retrieve(relatedModuleName, relatedDocumentName, relatedId);
 						}
+						// otherwise dynamic document
 						else {
-							populate(relatedId);
+							relatedBean = populate(relatedId);
 						}
 					}
 					

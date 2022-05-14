@@ -333,7 +333,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				result = t;
 			}
 			final T t = result; // to get around final required in forEach()
-			getAllAttributes(customer).forEach(a -> t.setDynamic(a.getName(), dynamicDefaultValue(a, t)));
+			getAllAttributes(customer).forEach(a -> t.putDynamic(a.getName(), dynamicDefaultValue(a, t)));
 		}
 		else {
 			final Class<T> beanClass = getBeanClass(customer);
@@ -349,7 +349,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 		getAllAttributes(customer).forEach(a -> {
 			if (BindUtil.isDynamic(customer, m, this, a)) {
-				bean.setDynamic(a.getName(), dynamicDefaultValue(a, bean));
+				bean.putDynamic(a.getName(), dynamicDefaultValue(a, bean));
 			}
 		});
 	}

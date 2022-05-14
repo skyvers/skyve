@@ -13,6 +13,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -1111,7 +1112,14 @@ t.printStackTrace();
 					// Persist (by reachability) static beans referenced by dynamic relations found in preMerge()
 					for (PersistentBean beanToMerge : beansToMerge.keySet()) {
 						String entityName = getDocumentEntityName(beanToMerge.getBizModule(), beanToMerge.getBizDocument());
-						beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
+						try {
+							beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
+						}
+						// if we cant merge any bean, act like we didn't merge the main bean
+						catch (Throwable t) {
+							result = null;
+							throw t;
+						}
 					}
 					
 					if (flush) {
@@ -1121,10 +1129,27 @@ t.printStackTrace();
 			}
 			finally {
 				if (result != null) { // only do if we got a result from the merge
-					prepareMergedBean(document, result, bean, beansToMerge);
+					if (beansToMerge != null) { // shut the compiler up here
+						beansToMerge.put(bean, result);
+						// Prepare all merged beans (reinstate non-persistents and re-point to persistent instances)
+						for (Entry<PersistentBean, PersistentBean> entry : beansToMerge.entrySet()) {
+							PersistentBean beanToMerge = entry.getKey();
+							PersistentBean mergedBean = entry.getValue();
+							if (mergedBean != null) { // only do if we got a result from the merge
+								Module m = internalCustomer.getModule(mergedBean.getBizModule());
+								Document d = m.getDocument(internalCustomer, mergedBean.getBizDocument());
+								prepareMergedBean(d, mergedBean, beanToMerge, beansToMerge);
+							}
+						}
+					}
 				}
 			}
 			if (! vetoed) {
+				// Flush dynamic domain
+				if ((document.getPersistent() != null) && document.hasDynamic()) { // persistent with dynamism somewhere
+					dynamicPersistence.persist(result);
+				}
+
 				postMerge(document, result);
 				internalCustomer.interceptAfterSave(document, result);
 			}
@@ -1178,6 +1203,7 @@ t.printStackTrace();
 						preMerge(d, bean, beansToMerge);
 					}
 					
+					// Merge the beans to save
 					for (PersistentBean bean : beans) {
 						currentBean = bean; // for exception handling
 						Module m = internalCustomer.getModule(bean.getBizModule());
@@ -1195,7 +1221,14 @@ t.printStackTrace();
 					// Persist (by reachability) static beans referenced by dynamic relations found in preMerge()
 					for (PersistentBean beanToMerge : beansToMerge.keySet()) {
 						String entityName = getDocumentEntityName(beanToMerge.getBizModule(), beanToMerge.getBizDocument());
-						beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
+						try {
+							beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
+						}
+						// if we cant merge any bean, act like we didn't merge the main beans
+						catch (Throwable t) {
+							results.clear();
+							throw t;
+						}
 					}
 
 					if (flush) {
@@ -1204,25 +1237,48 @@ t.printStackTrace();
 				}
 			}
 			finally {
-				int i = 0;
-				for (PersistentBean result : results) {
-					currentBean = result; // for exception handling
-					if (result != null) { // only do if we got a result from the merge
-						PersistentBean bean = beans.get(i);
-						Module m = internalCustomer.getModule(bean.getBizModule());
-						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
-						prepareMergedBean(d, result, bean, beansToMerge);
+				if (beansToMerge != null) { // shut the compiler up here
+					int i = 0;
+					// Add results to the beansToMerge
+					for (PersistentBean result : results) {
+						if (result != null) { // only do if we got a result from the merge
+							PersistentBean bean = beans.get(i);
+							beansToMerge.put(bean, result);
+						}
+						i++;
 					}
-					i++;
+					// Prepare all merged beans (reinstate non-persistents and re-point to persistent instances)
+					for (Entry<PersistentBean, PersistentBean> entry : beansToMerge.entrySet()) {
+						PersistentBean beanToMerge = entry.getKey();
+						PersistentBean mergedBean = entry.getValue();
+						if (mergedBean != null) { // only do if we got a result from the merge
+							Module m = internalCustomer.getModule(mergedBean.getBizModule());
+							Document d = m.getDocument(internalCustomer, mergedBean.getBizDocument());
+							prepareMergedBean(d, mergedBean, beanToMerge, beansToMerge);
+						}
+					}
 				}
 			}
 			if (! vetoed) {
+				// Flush dynamic domain
+				for (PersistentBean result : results) {
+					currentBean = result; // for exception handling
+					Module m = internalCustomer.getModule(result.getBizModule());
+					Document d = m.getDocument(internalCustomer, result.getBizDocument());
+					if ((d.getPersistent() != null) && d.hasDynamic()) { // persistent with dynamism somewhere
+						dynamicPersistence.persist(result);
+					}
+				}
+				
+				// Post merge
 				for (PersistentBean result : results) {
 					currentBean = result; // for exception handling
 					Module m = internalCustomer.getModule(result.getBizModule());
 					Document d = m.getDocument(internalCustomer, result.getBizDocument());
 					postMerge(d, result);
 				}
+				
+				// Fire interceptors
 				for (PersistentBean result : results) {
 					currentBean = result; // for exception handling
 					Module m = internalCustomer.getModule(result.getBizModule());
@@ -1309,10 +1365,9 @@ t.printStackTrace();
 				if (mergedPart == null) { // when a dynamic relation encountered and not persisted
 					BindUtil.set(mergedBean, binding, unmergedPart);
 				}
-				else if (mergedPart.isPersisted()) {
+				else if (! binding.isEmpty()) { // not top level bean
 					// Set any deeper references to the top level unmerged bean to the top level merged bean
-					if ((! binding.isEmpty()) && // not top level bean
-							(unmergedPart == unmergedBean) && // a deeper reference to the top level bean (unmerged)
+					if ((unmergedPart == unmergedBean) && // a deeper reference to the top level bean (unmerged)
 							(unmergedPart != mergedBean)) { // but the reference is not the merged bean
 						BindUtil.set(mergedBean, binding, mergedBean);
 					}
@@ -1387,14 +1442,7 @@ t.printStackTrace();
 				
 				return true;
 			}
-
 		}.visit(document, unmergedBean, customer);
-		
-		// Flush dynamic domain
-		if ((document.getPersistent() != null) && document.hasDynamic()) { // persistent with dynamism somewhere
-			Module owningModule = customer.getModule(document.getOwningModuleName());
-			dynamicPersistence.persist(customer, owningModule, document, mergedBean);
-		}
 	}
 
 	/**
@@ -1987,7 +2035,9 @@ if (document.isDynamic()) return;
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(loadedBean.getBizModule());
 		Document document = module.getDocument(customer, loadedBean.getBizDocument());
-		
+
+		((DocumentImpl) document).populateDynamicAttributeDefaults(customer, loadedBean);
+
 		if (document.hasDynamic()) {
 			dynamicPersistence.populate(loadedBean);
 		}

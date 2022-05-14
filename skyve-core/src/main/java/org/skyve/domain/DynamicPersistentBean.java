@@ -3,6 +3,7 @@ package org.skyve.domain;
 import java.util.Map;
 
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.persistence.AbstractPersistence;
 
 public class DynamicPersistentBean extends DynamicBean implements PersistentBean {
 	private static final long serialVersionUID = -689278030377120098L;
@@ -54,5 +55,15 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	@Override
 	public void setBizTagged(Boolean bizTagged) {
 		set(PersistentBean.TAGGED_NAME, bizTagged);
+	}
+	
+	@Override
+	public boolean isPersisted() {
+		return AbstractPersistence.get().isPersisted(this);
+	}
+
+	@Override
+	public boolean isNotPersisted() {
+		return (! AbstractPersistence.get().isPersisted(this));
 	}
 }

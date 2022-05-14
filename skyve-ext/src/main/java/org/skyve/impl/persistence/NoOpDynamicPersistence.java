@@ -6,9 +6,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.ExportedReference;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 
@@ -21,12 +19,12 @@ public class NoOpDynamicPersistence implements DynamicPersistence {
 	}
 	
 	@Override
-	public void persist(Customer customer, Module module, Document document, PersistentBean bean) {
+	public void persist(PersistentBean bean) {
 		// No-op
 	}
 
 	@Override
-	public void delete(Customer customer, Document document, PersistentBean bean) {
+	public void delete(PersistentBean bean) {
 		// No-op
 	}
 

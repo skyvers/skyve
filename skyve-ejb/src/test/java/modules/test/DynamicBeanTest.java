@@ -37,12 +37,18 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	public void testAbstractBean() {
 		Contact contact = Contact.newInstance();
-		contact.setDynamic(ONE, TWO);
+		contact.putDynamic(ONE, TWO);
 		Assert.assertEquals("Dynamic Property set correctly", TWO, contact.getDynamic(ONE));
 		Assert.assertTrue("Is a dynamic property", contact.isDynamic(ONE));
 		contact.setDynamic(ONE, THREE);
 		Assert.assertEquals("Dynamic Property set correctly", THREE, contact.getDynamic(ONE));
-		Assert.assertNull("Not a property", contact.getDynamic(THREE));
+		try {
+			contact.getDynamic(THREE);
+			Assert.fail("Not a property");
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			// do nothing
+		}
 		Assert.assertFalse("Not a property", contact.isDynamic(THREE));
 	}
 
@@ -111,7 +117,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	@Test
 	public void testBinderWithDynamicAttributes() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
-		testBinder(bean, AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		testBinder(bean, AllDynamicAttributesPersistent.aggregatedAssociationPropertyName, AllDynamicAttributesPersistent.aggregatedCollectionPropertyName);
 	}
 
 	@Test

@@ -22,10 +22,6 @@
 			<displayName>Composed Association</displayName>
 			<documentName>AllDynamicAttributesPersistent</documentName>
 		</association>
-		<association name="embeddedAssociation" type="embedded" embeddedColumnsPrefix="embedded">
-			<displayName>Embedded Association</displayName>
-			<documentName>AllAttributesEmbedded</documentName>
-		</association>
 		<association name="dynamicAggregatedAssociation" type="aggregation">
 			<displayName>Dynamic Aggregated Association</displayName>
 			<documentName>AllAttributesDynamicPersistent</documentName>

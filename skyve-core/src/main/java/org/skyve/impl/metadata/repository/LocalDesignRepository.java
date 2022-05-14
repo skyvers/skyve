@@ -36,6 +36,7 @@ import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
@@ -505,6 +506,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 													reference.getName() + " in document " + 
 													documentIdentifier + " is not a valid document reference in this module.");
 				}
+				Document targetDocument = module.getDocument(customer, targetDocumentName);
+				if (targetDocument == null) {
+					throw new MetaDataException("The target [documentName] of " + 
+													targetDocumentName + " in Reference " +
+													reference.getName() + " in document " + 
+													documentIdentifier + " cannot be found.");
+				}
 				
 				// Check the query (if defined) points to a query of the required document type
 				String queryName = reference.getQueryName();
@@ -525,6 +533,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 														documentIdentifier + " references a document query for document " + 
 														queryDocumentName + ", not document " + targetDocumentName);
 					}
+				}
+				
+				// Disallow a dynamic embedded association to a static document (can't save it in hibernate without a static owner)
+				if (document.isDynamic() && (! targetDocument.isDynamic()) && (reference.getType() == AssociationType.embedded)) {
+					throw new MetaDataException("The dynamic embedded association " + reference.getName() + 
+													" in document " + documentIdentifier + " references document " +
+													targetDocumentName + " which is not a dynamic document.");
 				}
 			}
 			else if (attribute instanceof Inverse) {

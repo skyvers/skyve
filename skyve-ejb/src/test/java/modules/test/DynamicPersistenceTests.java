@@ -1,13 +1,17 @@
 package modules.test;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.util.Util;
 
+import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
 public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
-
 	@Test
 	public void testHasDynamic() throws Exception {
 		Assert.assertFalse(aapd.hasDynamic());
@@ -33,7 +37,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertFalse(ucn.hasDynamic());
 		Assert.assertFalse(ucnn.hasDynamic());
 	}
-	
+
 	@Test
 	public void testPersistenceOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
@@ -44,31 +48,79 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(0).getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(1).getBizVersion());
 	}
-/*
+
 	@Test
 	public void testRetrievalOfDynamicAttributes() throws Exception {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
+
+		test.setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000001");
+		test.getAggregatedAssociation().setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000002");
+		test.getComposedAssociation().setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000003");
+		test.getEmbeddedAssociation().setColour("#000004");
+
+		PersistentBean bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName);
+		bean.setDynamic(AllAttributesPersistent.colourPropertyName, "#000005");
+		bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName);
+		bean.setDynamic(AllAttributesPersistent.colourPropertyName, "#000006");
+		bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName);
+		bean.setDynamic(AllAttributesPersistent.colourPropertyName, "#000007");
+		
 		test = p.save(test);
 		p.evictAllCached();
 		
 		AllDynamicAttributesPersistent clone = p.retrieve(adapd, test.getBizId());
 		
-		Assert.assertEquals(test.getDynamic(AllDynamicAttributesPersistent.colourPropertyName), clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
-		Assert.assertEquals(test.getDynamic(AllDynamicAttributesPersistent.colourPropertyName), clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000002", clone.getAggregatedAssociation().getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000003", clone.getComposedAssociation().getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000004", clone.getEmbeddedAssociation().getColour());
+
+		Assert.assertEquals("#000005", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000006", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000007", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 	}
-*/
-/*
+
 	@Test
 	public void testPersistenceOfDynamicDocument() throws Exception {
-		Bean test = Util.constructRandomInstance(u, m, aadpd, 3);
+		PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 2);
 		test = p.save(test);
 		test = p.save(test);
 
-		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedAssociation().getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(1).getBizVersion());
+		Assert.assertEquals(Integer.valueOf(0), ((PersistentBean) test.getDynamic(AllAttributesPersistent.aggregatedAssociationPropertyName)).getBizVersion());
+		@SuppressWarnings("unchecked")
+		List<PersistentBean> ac = (List<PersistentBean>) test.getDynamic(AllAttributesPersistent.aggregatedCollectionPropertyName);
+		Assert.assertEquals(Integer.valueOf(0), ac.get(0).getBizVersion());
+		Assert.assertEquals(Integer.valueOf(0), ac.get(1).getBizVersion());
 	}
-*/
+
+	@Test
+	public void testRetrievalOfDynamicDocument() throws Exception {
+		 PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 2);
+		test.setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000001");
+		((Bean) test.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000002");
+		((Bean) test.getDynamic(AllDynamicAttributesPersistent.composedAssociationPropertyName)).setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000003");
+
+		PersistentBean bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName);
+		bean.setDynamic(AllAttributesPersistent.colourPropertyName, "#000005");
+		bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName);
+		bean.setDynamic(AllAttributesPersistent.colourPropertyName, "#000006");
+		bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName);
+		bean.setDynamic(AllAttributesPersistent.colourPropertyName, "#000007");
+		
+		test = p.save(test);
+		p.evictAllCached();
+		
+		PersistentBean clone = p.retrieve(aadpd, test.getBizId());
+		
+		Assert.assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000002", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000003", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.composedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+
+		Assert.assertEquals("#000005", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000006", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+		Assert.assertEquals("#000007", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+	}
+
 /*
 	@Test
 	public void testPersistBizLockEJS() throws Exception {

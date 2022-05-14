@@ -248,14 +248,22 @@ public abstract class AbstractBean implements Bean {
 
 	@Override
 	public Object getDynamic(String simpleBinding) {
-		if (dynamic == null) {
-			return null;
+		if (! isDynamic(simpleBinding)) {
+			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
 		}
 		return dynamic.get(simpleBinding);
 	}
 	
 	@Override
 	public void setDynamic(String simpleBinding, Object value) {
+		if (! isDynamic(simpleBinding)) {
+			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
+		}
+		dynamic.set(simpleBinding, value);
+	}
+
+	@Override
+	public void putDynamic(String simpleBinding, Object value) {
 		if (dynamic == null) {
 			dynamic = new LazyDynaMap();
 		}
@@ -263,15 +271,7 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	@Override
-	public void addDynamic(String simpleBinding, Object value) {
-		if (dynamic == null) {
-			dynamic = new LazyDynaMap();
-		}
-		dynamic.set(simpleBinding, value);
-	}
-
-	@Override
-	public void setDynamic(Map<String, Object> dynamic) {
+	public void putAllDynamic(@SuppressWarnings("hiding") Map<String, Object> dynamic) {
 		if (dynamic == null) {
 			this.dynamic = null;
 		}

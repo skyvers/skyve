@@ -433,7 +433,7 @@ public class SmartClientListServlet extends HttpServlet {
 			for (Bean bean : beans) {
 				for (Entry<String, String> entry : displayBindings.entrySet()) {
 					String display = BindUtil.getDisplay(customer, bean, entry.getKey());
-					bean.addDynamic(entry.getValue(), display);
+					bean.putDynamic(entry.getValue(), display);
 				}
 			}
 		}

@@ -337,21 +337,27 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 
 	@Override
 	public Object getDynamic(String simpleBinding) {
+		if (! isDynaProperty(simpleBinding)) {
+			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
+		}
 		return get(simpleBinding);
 	}
 
 	@Override
 	public void setDynamic(String simpleBinding, Object value) {
+		if (! isDynaProperty(simpleBinding)) {
+			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
+		}
 		set(simpleBinding, value);
 	}
 	
 	@Override
-	public void addDynamic(String simpleBinding, Object value) {
+	public void putDynamic(String simpleBinding, Object value) {
 		super.set(simpleBinding, value);
 	}
 	
 	@Override
-	public void setDynamic(Map<String, Object> dynamic) {
+	public void putAllDynamic(Map<String, Object> dynamic) {
 		if (dynamic == null) {
 			getMap().clear();
 		}
