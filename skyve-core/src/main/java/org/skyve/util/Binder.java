@@ -168,8 +168,8 @@ public class Binder {
 	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean addElement(Bean bean, String collectionBinding, Bean element) {
-		return BindUtil.addElement(bean, collectionBinding, element);
+	public static boolean addElementToCollection(Bean bean, String collectionBinding, Bean element) {
+		return BindUtil.addElementToCollection(bean, collectionBinding, element);
 	}
 	
 	/**
@@ -179,8 +179,8 @@ public class Binder {
 	 * @param index	The index to add the element at.
 	 * @param element	The element.
 	 */
-	public static void addElement(Bean bean, String collectionBinding, int index, Bean element) {
-		BindUtil.addElement(bean, collectionBinding, index, element);
+	public static void addElementToCollection(Bean bean, String collectionBinding, int index, Bean element) {
+		BindUtil.addElementToCollection(bean, collectionBinding, index, element);
 	}
 	
 	/**
@@ -189,8 +189,8 @@ public class Binder {
 	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean removeElement(Bean bean, String collectionBinding, Bean element) {
-		return BindUtil.removeElement(bean, collectionBinding, element);
+	public static boolean removeElementFromCollection(Bean bean, String collectionBinding, Bean element) {
+		return BindUtil.removeElementFromCollection(bean, collectionBinding, element);
 	}
 
 	/**
@@ -200,8 +200,8 @@ public class Binder {
 	 * @param index	The index to add the element at.
 	 * @return	The removed element.
 	 */
-	public static <T extends Bean> T removeElement(Bean bean, String collectionBinding, int index) {
-		return BindUtil.removeElement(bean, collectionBinding, index);
+	public static <T extends Bean> T removeElementFromCollection(Bean bean, String collectionBinding, int index) {
+		return BindUtil.removeElementFromCollection(bean, collectionBinding, index);
 	}
 	
 	/**

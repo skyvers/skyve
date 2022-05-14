@@ -571,7 +571,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 											persistence,
 											webContext);
 							}
-							BindUtil.addElement(appliedTo, childBindingPrefix, newIndex, thisBean);
+							BindUtil.addElementToCollection(appliedTo, childBindingPrefix, newIndex, thisBean);
 						}
 						else { // found
 							// Only move the bean in the collection if required
@@ -596,7 +596,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	
 					// delete any left over beans in the list as these were not present in the requestList
 					while (beanList.size() > newIndex) {
-						BindUtil.removeElement(appliedTo, childBindingPrefix, newIndex);
+						BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, newIndex);
 					}
 					
 					if (relation instanceof Collection) { // NB it could be an inverse

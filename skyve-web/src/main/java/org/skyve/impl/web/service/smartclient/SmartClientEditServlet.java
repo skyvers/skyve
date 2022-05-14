@@ -648,7 +648,7 @@ public class SmartClientEditServlet extends HttpServlet {
 
 			    		// add the newInstance to the context bean after preExecute
 			    		if (referenceValue instanceof List<?>) {
-			    			BindUtil.addElement(contextBean, formBinding, processBean);
+			    			BindUtil.addElementToCollection(contextBean, formBinding, processBean);
 			    		}
 			    		else {
 			    			BindUtil.set(contextBean, formBinding, processBean);
@@ -661,7 +661,7 @@ public class SmartClientEditServlet extends HttpServlet {
 					if (! vetoed) {
 			    		// add the newInstance to the context bean before preRerender
 			    		if (referenceValue instanceof List<?>) {
-			    			BindUtil.addElement(contextBean, formBinding, processBean);
+			    			BindUtil.addElementToCollection(contextBean, formBinding, processBean);
 			    		}
 			    		else {
 			    			BindUtil.set(contextBean, formBinding, processBean);
@@ -678,7 +678,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		else {
 		    		// add the newInstance to the context bean
 		    		if (referenceValue instanceof List<?>) {
-		    			BindUtil.addElement(contextBean, formBinding, processBean);
+		    			BindUtil.addElementToCollection(contextBean, formBinding, processBean);
 		    		}
 		    		else {
 		    			BindUtil.set(contextBean, formBinding, processBean);

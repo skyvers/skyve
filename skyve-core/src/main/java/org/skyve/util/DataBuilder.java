@@ -508,7 +508,7 @@ public class DataBuilder {
 									trace(new StringBuilder(128).append("Set \"").append(newBinding).append("\" to new data"), currentDepth + 1);
 								}
 								Bean element = build(collectionModule, collectionDocument, newBinding, currentDepth + 1, allowFactoryRecursion);
-								BindUtil.addElement(result, name, element);
+								BindUtil.addElementToCollection(result, name, element);
 							}
 						}
 					}

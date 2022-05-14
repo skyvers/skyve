@@ -105,7 +105,7 @@ public class AddAction extends FacesAction<Void> {
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 
 			// Add the new element to the collection after preExecute
-			Binder.addElement(bean, newViewBinding.toString(), newBean);
+			Binder.addElementToCollection(bean, newViewBinding.toString(), newBean);
 
 			if (! inline) {
 				newViewBinding.append("ElementById(").append(newBean.getBizId()).append(')');

@@ -52,7 +52,7 @@ public class RemoveAction extends FacesAction<Void> {
 				collectionBinding.append(viewBinding).append('.');
 			}
 			collectionBinding.append(collectionName);
-			BindUtil.removeElement(bean, collectionBinding.toString(), beanToRemove);
+			BindUtil.removeElementFromCollection(bean, collectionBinding.toString(), beanToRemove);
 			
 			// fire onRemovedHandlers after removal
 			if (removedHandlerActionNames != null) {
@@ -94,7 +94,7 @@ public class RemoveAction extends FacesAction<Void> {
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, beanToRemove, null, webContext);
 
-				BindUtil.removeElement(bean, viewBinding.substring(0, lastCollectionindex), beanToRemove);
+				BindUtil.removeElementFromCollection(bean, viewBinding.substring(0, lastCollectionindex), beanToRemove);
 				ZoomOutAction.zoomOut(facesView);
 			}
 		}

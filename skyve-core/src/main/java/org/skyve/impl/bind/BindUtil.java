@@ -853,7 +853,7 @@ public final class BindUtil {
 			}
 		}
 
-		BindUtil.addElement(owner, binding, element);
+		BindUtil.addElementToCollection(owner, binding, element);
 		return element;
 	}
 
@@ -940,7 +940,6 @@ public final class BindUtil {
 				}
 			}
 		}
-		
 	}
 	
 	/**
@@ -949,7 +948,7 @@ public final class BindUtil {
 	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean addElement(Bean bean, String collectionBinding, Bean element) {
+	public static boolean addElementToCollection(Bean bean, String collectionBinding, Bean element) {
 		try {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(bean.getBizModule());
@@ -999,7 +998,7 @@ public final class BindUtil {
 	 * @param index	The index to add the element at.
 	 * @param element	The element.
 	 */
-	public static void addElement(Bean bean, String collectionBinding, int index, Bean element) {
+	public static void addElementToCollection(Bean bean, String collectionBinding, int index, Bean element) {
 		try {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(bean.getBizModule());
@@ -1048,7 +1047,7 @@ public final class BindUtil {
 	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean removeElement(Bean bean, String collectionBinding, Bean element) {
+	public static boolean removeElementFromCollection(Bean bean, String collectionBinding, Bean element) {
 		try {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(bean.getBizModule());
@@ -1102,7 +1101,7 @@ public final class BindUtil {
 	 * @param index	The index to add the element at.
 	 * @return	The removed element.
 	 */
-	public static <T extends Bean> T removeElement(Bean bean, String collectionBinding, int index) {
+	public static <T extends Bean> T removeElementFromCollection(Bean bean, String collectionBinding, int index) {
 		try {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(bean.getBizModule());
@@ -2123,7 +2122,7 @@ public final class BindUtil {
 						// but they may not be contiguous (some are deleted)
 						while (collection.size() <= collectionIndex) {
 							Bean fillerElement = collectionDocument.newInstance(user);
-							BindUtil.addElement((Bean) owner, collectionBinding, fillerElement);
+							BindUtil.addElementToCollection((Bean) owner, collectionBinding, fillerElement);
 /*
 							if (fillerElement instanceof ChildBean) {
 								try {
