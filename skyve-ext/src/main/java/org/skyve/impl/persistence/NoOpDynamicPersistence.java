@@ -48,4 +48,20 @@ public class NoOpDynamicPersistence implements DynamicPersistence {
 		// No-op
 		return false;
 	}
+	
+	@Override
+	public void evictAllCached() {
+		// No-op
+	}
+	
+	@Override
+	public void evictCached(Bean bean) {
+		// No-op
+	}
+	
+	@Override
+	public boolean cached(Bean bean) {
+		// No-op
+		return false;
+	}
 }

@@ -108,9 +108,16 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		bean.setDynamic(AllAttributesPersistent.colourPropertyName, "#000007");
 		
 		test = p.save(test);
+		PersistentBean clone = p.retrieve(aadpd, test.getBizId());
+		if (clone != test) {
+			Assert.fail("save did not cache");
+		}
 		p.evictAllCached();
 		
-		PersistentBean clone = p.retrieve(aadpd, test.getBizId());
+		clone = p.retrieve(aadpd, test.getBizId());
+		if (clone == test) {
+			Assert.fail("cache was not evicted");
+		}
 		
 		Assert.assertEquals("#000001", clone.getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		Assert.assertEquals("#000002", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
@@ -119,6 +126,11 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertEquals("#000005", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		Assert.assertEquals("#000006", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
 		Assert.assertEquals("#000007", ((Bean) clone.getDynamic(AllDynamicAttributesPersistent.dynamicEmbeddedAssociationPropertyName)).getDynamic(AllDynamicAttributesPersistent.colourPropertyName));
+
+		PersistentBean cached = p.retrieve(aadpd, test.getBizId());
+		if (clone != cached) {
+			Assert.fail("populate did not cache");
+		}
 	}
 
 /*

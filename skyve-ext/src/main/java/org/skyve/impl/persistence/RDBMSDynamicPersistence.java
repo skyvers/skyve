@@ -55,6 +55,10 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 	private Persistence persistence;
 	
+	// Cache that points to each DynamicBean ever populated.
+	// This cache is not concerned with dynamic static beans as hibernate caching controls them.
+	// There is no merge function implemented. It is expected that an existing persisted instance was gotten from populate()
+	// and any non-persistent instances saved will be put into the cache.
 	private final Map<String, DynamicPersistentBean> dynamicFirstLevelCache = new TreeMap<>();
 	
 	@Override
@@ -124,7 +128,7 @@ System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " +
 									persistOne(c, visitedDocument, (PersistentBean) visitedBean);
 								}
 							}
-						}						
+						}
 					}
 				}
 				
@@ -172,6 +176,11 @@ System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " +
 			insertEntity(bean, JSON.marshall(dynamicFields));
 			insertReferences(c, bean, dynamicReferences);
 
+			// Cache the flushed instances
+			if (dynamicDocument) {
+				dynamicFirstLevelCache.put(bean.getBizId(), (DynamicPersistentBean) bean);
+			}
+			
 			dynamicFields.clear();
 			dynamicReferences.clear();
 		}
@@ -351,6 +360,13 @@ System.out.println("delete entity (and relations) for " + JSON.marshall(bizIdsTo
 			}
 		}
 
+		if (! beforeSave) {
+			// Flush above was successful, remove from the first level cache now
+			for (String bizId : bizIdsToDelete) {
+				dynamicFirstLevelCache.remove(bizId);
+			}
+		}
+
 		batch.clear();
 		bizIdsToDelete.clear();
 	}
@@ -359,6 +375,10 @@ System.out.println("delete entity (and relations) for " + JSON.marshall(bizIdsTo
 	public DynamicPersistentBean populate(String bizId) {
 		try {
 System.out.println("populate entity with bizId " + bizId);
+			if (dynamicFirstLevelCache.containsKey(bizId)) {
+				return dynamicFirstLevelCache.get(bizId);
+			}
+			
 			// select the json by bizId
 			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields, moduleName, documentName from ADM_DynamicEntity where bizid = :bizId";
 			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bizId, false).retrieveTuple();
@@ -373,6 +393,10 @@ System.out.println("populate entity with bizId " + bizId);
 			Map<String, PersistentBean> visited = new TreeMap<>();
 			populate(u, c, m, d, result, tuple, visited);
 			visited.clear();
+
+			// Cache the newly created bean
+			dynamicFirstLevelCache.put(bizId, result);
+			
 			return result;
 		}
 		catch (SkyveException e) {
@@ -387,6 +411,8 @@ System.out.println("populate entity with bizId " + bizId);
 	public void populate(PersistentBean bean) {
 		try {
 System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
+			// Note that caching of these mixed beans is handled by hibernate so if AbstractHibernatePersistence.postLoad() calls this method, we don't ask questions.
+
 			// select the json by bizId
 			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields from ADM_DynamicEntity where bizid = :bizId";
 			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).retrieveTuple();
@@ -548,5 +574,20 @@ System.out.println("populate document for " + bean.getBizDocument() + " with biz
 		try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 			return (! results.next());
 		}
+	}
+	
+	@Override
+	public void evictAllCached() {
+		dynamicFirstLevelCache.clear();
+	}
+	
+	@Override
+	public void evictCached(Bean bean) {
+		dynamicFirstLevelCache.remove(bean.getBizId());
+	}
+	
+	@Override
+	public boolean cached(Bean bean) {
+		return dynamicFirstLevelCache.containsKey(bean.getBizId());
 	}
 }

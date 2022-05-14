@@ -68,4 +68,9 @@ public interface DynamicPersistence extends Serializable {
 										ExportedReference exportedReference,
 										Document referenceDocument,
 										Set<Bean> beansToBeExcluded);
+	
+	// Persistence first level cache methods
+	public void evictAllCached();
+	public void evictCached(Bean bean);
+	public boolean cached(Bean bean);
 }

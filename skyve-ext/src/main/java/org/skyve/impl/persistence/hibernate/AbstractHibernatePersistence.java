@@ -64,6 +64,7 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
@@ -720,17 +721,24 @@ t.printStackTrace();
 	@Override
 	public void evictAllCached() {
 		session.clear();
+		dynamicPersistence.evictAllCached();
 	}
 
 	@Override
 	public void evictCached(Bean bean) {
-		if (cached(bean)) {
+		if (bean instanceof DynamicBean) {
+			dynamicPersistence.evictCached(bean);
+		}
+		else if (cached(bean)) {
 			session.evict(bean);
 		}
 	}
 	
 	@Override
 	public boolean cached(Bean bean) {
+		if (bean instanceof DynamicBean) {
+			return dynamicPersistence.cached(bean);
+		}
 		return session.contains(getDocumentEntityName(bean.getBizModule(), bean.getBizDocument()), bean);
 	}
 	
