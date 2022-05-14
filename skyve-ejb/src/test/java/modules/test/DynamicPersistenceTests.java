@@ -237,4 +237,26 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 			Assert.fail("populate did not cache");
 		}
 	}
+	
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testPersistAndPopulateACyclicDynamicDocument() throws Exception {
+		PersistentBean test = Util.constructRandomInstance(u, m, aadpd, 2);
+
+		PersistentBean bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName);
+		bean.setDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName, test);
+
+		List<PersistentBean> list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
+		list.get(0).setDynamic(AllDynamicAttributesPersistent.colourPropertyName, "#000014");
+		list.set(1, test);
+
+		test = p.save(test);
+		p.evictAllCached();
+		test = p.retrieve(aadpd, test.getBizId());
+		bean = (PersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName);
+		list = (List<PersistentBean>) test.getDynamic(AllDynamicAttributesPersistent.dynamicChildCollectionPropertyName);
+		
+		Assert.assertSame(test, bean.getDynamic(AllDynamicAttributesPersistent.aggregatedAssociationPropertyName));
+		Assert.assertSame(test, list.get(1));
+	}	
 }

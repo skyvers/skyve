@@ -372,42 +372,6 @@ System.out.println("delete entity (and relations) for " + JSON.marshall(bizIdsTo
 	}
 	
 	@Override
-	public DynamicPersistentBean populate(String bizId) {
-		try {
-System.out.println("populate entity with bizId " + bizId);
-			if (dynamicFirstLevelCache.containsKey(bizId)) {
-				return dynamicFirstLevelCache.get(bizId);
-			}
-			
-			// select the json by bizId
-			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields, moduleName, documentName from ADM_DynamicEntity where bizid = :bizId";
-			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bizId, false).retrieveTuple();
-			
-			User u = persistence.getUser();
-			Customer c = u.getCustomer();
-			Module m = c.getModule((String) tuple[8]);
-			Document d = m.getDocument(c, (String) tuple[9]);
-			DynamicPersistentBean result = d.newInstance(u);
-			result.setDynamic(Bean.DOCUMENT_ID, bizId); // set the new bean's bizId
-			
-			Map<String, PersistentBean> visited = new TreeMap<>();
-			populate(u, c, m, d, result, tuple, visited);
-			visited.clear();
-
-			// Cache the newly created bean
-			dynamicFirstLevelCache.put(bizId, result);
-			
-			return result;
-		}
-		catch (SkyveException e) {
-			throw e;
-		}
-		catch (Exception e) {
-			throw new DomainException(e);
-		}
-	}
-	
-	@Override
 	public void populate(PersistentBean bean) {
 		try {
 System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
@@ -422,9 +386,7 @@ System.out.println("populate document for " + bean.getBizDocument() + " with biz
 			Module m = c.getModule(bean.getBizModule());
 			Document d = m.getDocument(c, bean.getBizDocument());
 			
-			Map<String, PersistentBean> visited = new TreeMap<>();
-			populate(u, c, m, d, bean, tuple, visited);
-			visited.clear();
+			populate(u, c, m, d, bean, tuple);
 		}
 		catch (SkyveException e) {
 			throw e;
@@ -434,13 +396,48 @@ System.out.println("populate document for " + bean.getBizDocument() + " with biz
 		}
 	}
 
+	@Override
+	public DynamicPersistentBean populate(String bizId) {
+		try {
+System.out.println("populate entity with bizId " + bizId);
+			if (dynamicFirstLevelCache.containsKey(bizId)) {
+				return dynamicFirstLevelCache.get(bizId);
+			}
+
+			// select the json by bizId
+			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields, moduleName, documentName from ADM_DynamicEntity where bizid = :bizId";
+			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bizId, false).retrieveTuple();
+			
+			User u = persistence.getUser();
+			Customer c = u.getCustomer();
+			Module m = c.getModule((String) tuple[8]);
+			Document d = m.getDocument(c, (String) tuple[9]);
+			DynamicPersistentBean result = d.newInstance(u);
+			result.setDynamic(Bean.DOCUMENT_ID, bizId); // set the new bean's bizId
+			
+			// Cache the newly created bean
+			// NB Do this before calling populate to short circuit cyclic references
+			dynamicFirstLevelCache.put(bizId, result);
+			
+			populate(u, c, m, d, result, tuple);
+
+			return result;
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+	}
+	
 	private void populate(User u,
 							Customer c,
 							Module m,
 							Document d,
 							PersistentBean bean,
-							Object[] tuple,
-							Map<String, PersistentBean> visited) throws Exception {
+							Object[] tuple)
+	throws Exception {
 		// only populate the biz stuff if this is a dynamic bean, otherwise its in the static bean
 		if (d.isDynamic()) {
 			bean.setBizVersion(Integer.valueOf(((Number) tuple[0]).intValue()));
@@ -478,7 +475,6 @@ System.out.println("populate document for " + bean.getBizDocument() + " with biz
 				}
 			}
 		}
-		visited.put(bean.getBizId(), bean);
 		
 		populateReferences(bean, dynamicReferenceNames);
 	}

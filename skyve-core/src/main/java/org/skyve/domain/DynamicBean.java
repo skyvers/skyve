@@ -3,7 +3,6 @@ package org.skyve.domain;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.LazyDynaMap;
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
@@ -369,21 +368,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(128);
-
-		for (DynaProperty property : getDynaProperties()) {
-			String propertyName = property.getName();
-			result.append(propertyName).append(" = ");
-			Object value = get(propertyName);
-			// Stop infinite recursion on cyclic graphs
-			if (value instanceof DynamicBean) {
-				DynamicBean bean = (DynamicBean) value;
-				result.append("DynamicBean:").append(bean.getBizModule()).append(bean.getBizDocument()).append('#').append(bean.getBizId()).append(' ');
-			}
-			else {
-				result.append(value).append(' ');
-			}
-		}
-
+		result.append("DynamicBean:").append(getBizModule()).append('.').append(getBizDocument()).append('#').append(getBizId());
 		return result.toString();
 	}
 
