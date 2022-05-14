@@ -10,6 +10,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.DynamicPersistentBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -117,30 +118,20 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 	@Test
 	public void testBinderWithDynamicAttributes() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
-		testBinder(bean, AllDynamicAttributesPersistent.composedAssociationPropertyName, AllDynamicAttributesPersistent.composedCollectionPropertyName);
+		AllDynamicAttributesPersistent testAssignment = AllDynamicAttributesPersistent.newInstance();
+		testBinder(bean, AllDynamicAttributesPersistent.aggregatedAssociationPropertyName, AllDynamicAttributesPersistent.composedCollectionPropertyName, testAssignment);
 	}
 
 	@Test
 	public void testBinderWithDynamicDocument() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
-		testBinder(bean, AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
-	}
-
-	@Test
-	public void testBinderWithDynamicAttributesAndReferences() throws Exception {
-		Bean bean = Util.constructRandomInstance(u, m, adapd, 2);
-		testBinder(bean, "dynamicAggregatedAssociation", AllAttributesPersistent.aggregatedCollectionPropertyName);
-	}
-
-	@Test
-	public void testBinderWithDynamicDocumentAndReferences() throws Exception {
-		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
-		testBinder(bean, "dynamicAggregatedAssociation", "dynamicAggregatedCollection");
+		AllAttributesPersistent testAssignment = AllAttributesPersistent.newInstance();
+		testBinder(bean, AllAttributesPersistent.aggregatedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName, testAssignment);
 	}
 
 	private static final Integer INTEGER = Integer.valueOf(Integer.MAX_VALUE);
 	
-	private static void testBinder(Bean bean, String associationPropertyName, String collectionPropertyName) {
+	private static void testBinder(Bean bean, String associationPropertyName, String collectionPropertyName, PersistentBean testAssignment) {
 		// Simple scalar
 		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, Boolean.TRUE);
 		Assert.assertEquals(Boolean.TRUE, Binder.get(bean, AllAttributesPersistent.booleanFlagPropertyName));
@@ -171,14 +162,13 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		Assert.assertTrue(Binder.get(bean, binding) instanceof List<?>);
 
 		// Compound association to indexed
-		AllAttributesPersistent test = AllAttributesPersistent.newInstance();
 		binding = Binder.createIndexedBinding(Binder.createCompoundBinding(associationPropertyName, collectionPropertyName), 0);
-		Binder.set(bean, binding, test);
-		Assert.assertEquals(test, Binder.get(bean, binding));
+		Binder.set(bean, binding, testAssignment);
+		Assert.assertEquals(testAssignment, Binder.get(bean, binding));
 
 		// Check set above via Compound association to Id
-		binding = Binder.createIdBinding(Binder.createCompoundBinding(associationPropertyName, collectionPropertyName), test.getBizId());
-		Assert.assertEquals(test, Binder.get(bean, binding));
+		binding = Binder.createIdBinding(Binder.createCompoundBinding(associationPropertyName, collectionPropertyName), testAssignment.getBizId());
+		Assert.assertEquals(testAssignment, Binder.get(bean, binding));
 		
 		// Indexed collection to scalar
 		binding = Binder.createCompoundBinding(Binder.createIndexedBinding(collectionPropertyName, 0), AllAttributesPersistent.normalIntegerPropertyName);

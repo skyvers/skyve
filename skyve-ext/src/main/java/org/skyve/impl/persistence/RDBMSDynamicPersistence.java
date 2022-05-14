@@ -84,7 +84,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 										Relation owningRelation,
 										Bean visitedBean)
 			throws Exception {
-System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " + visitedBean.getClass());
+//System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " + visitedBean.getClass());
 				// Use our own cascade rules for dynamic beans
 				if (visitedDocument.isDynamic()) {
 					// Persist persistent documents
@@ -192,7 +192,7 @@ System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " +
 			bean.setBizVersion(NEW_VERSION);
 		}
 		
-System.out.println("insert entity " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " with json " + json);
+//System.out.println("insert entity " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " with json " + json);
 		String insert = "insert into ADM_DynamicEntity (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, moduleName, documentName, fields) " +
 							"values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizFlagComment, :bizDataGroupId, :bizUserId, :moduleName, :documentName, :fields)";
 		SQL sql = persistence.newSQL(insert);
@@ -234,7 +234,7 @@ System.out.println("insert entity " + bean.getBizDocument() + " with bizId " + b
 					for (Bean relatedBean : relatedBeans) {
 						sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
 						String relatedId = relatedBean.getBizId();
-System.out.println("insert collection element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
+//System.out.println("insert collection element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
 						sql.putParameter(Bean.BIZ_KEY, parentId + "->" + relatedId, false);
 						String relatedModuleName = relatedBean.getBizModule();
 						String relatedDocumentName = relatedBean.getBizDocument();
@@ -252,7 +252,7 @@ System.out.println("insert collection element for " + bean.getBizDocument() + " 
 					Bean relatedBean = (Bean) value;
 					sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
 					String relatedId = relatedBean.getBizId();
-System.out.println("insert association element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
+//System.out.println("insert association element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
 					sql.putParameter(Bean.BIZ_KEY, parentId + "->" + relatedId, false);
 					String relatedModuleName = relatedBean.getBizModule();
 					String relatedDocumentName = relatedBean.getBizDocument();
@@ -327,7 +327,7 @@ System.out.println("insert association element for " + bean.getBizDocument() + "
 		}.visit(document, bean, customer);
 
 		// Delete in batches of 100
-System.out.println("delete entity (and relations) for " + JSON.marshall(bizIdsToDelete));
+//System.out.println("delete entity (and relations) for " + JSON.marshall(bizIdsToDelete));
 		int i = 0;
 		int l = bizIdsToDelete.size();
 		List<String> batch = new ArrayList<>(100);
@@ -374,7 +374,7 @@ System.out.println("delete entity (and relations) for " + JSON.marshall(bizIdsTo
 	@Override
 	public void populate(PersistentBean bean) {
 		try {
-System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
+//System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
 			// Note that caching of these mixed beans is handled by hibernate so if AbstractHibernatePersistence.postLoad() calls this method, we don't ask questions.
 
 			// select the json by bizId
@@ -399,7 +399,7 @@ System.out.println("populate document for " + bean.getBizDocument() + " with biz
 	@Override
 	public DynamicPersistentBean populate(String bizId) {
 		try {
-System.out.println("populate entity with bizId " + bizId);
+//System.out.println("populate entity with bizId " + bizId);
 			if (dynamicFirstLevelCache.containsKey(bizId)) {
 				return dynamicFirstLevelCache.get(bizId);
 			}

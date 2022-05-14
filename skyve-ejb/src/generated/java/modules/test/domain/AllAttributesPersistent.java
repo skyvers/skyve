@@ -42,6 +42,7 @@ import org.skyve.util.Util;
  * 
  * @depend - - - Enum3
  * @navhas n aggregatedCollection 0..n AllAttributesPersistent
+ * @navcomposed n composedCollection 0..n AllAttributesPersistent
  * @navcomposed n composedAssociation 0..1 AllAttributesPersistent
  * @navhas n aggregatedAssociation 0..1 AllAttributesPersistent
  * @navcomposed n embeddedAssociation 0..1 AllAttributesEmbedded
@@ -76,6 +77,9 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String aggregatedCollectionPropertyName = "aggregatedCollection";
+
+	/** @hidden */
+	public static final String composedCollectionPropertyName = "composedCollection";
 
 	/** @hidden */
 	public static final String colourPropertyName = "colour";
@@ -230,6 +234,11 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * Aggregated Collection
 	 **/
 	private List<AllAttributesPersistent> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
+
+	/**
+	 * Composed Collection
+	 **/
+	private List<AllAttributesPersistent> composedCollection = new ChangeTrackingArrayList<>("composedCollection", this);
 
 	/**
 	 * Colour
@@ -508,6 +517,66 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 **/
 	public AllAttributesPersistent removeAggregatedCollectionElement(int index) {
 		return aggregatedCollection.remove(index);
+	}
+
+	/**
+	 * {@link #composedCollection} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<AllAttributesPersistent> getComposedCollection() {
+		return composedCollection;
+	}
+
+	/**
+	 * {@link #composedCollection} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public AllAttributesPersistent getComposedCollectionElementById(String bizId) {
+		return getElementById(composedCollection, bizId);
+	}
+
+	/**
+	 * {@link #composedCollection} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setComposedCollectionElementById(String bizId, AllAttributesPersistent element) {
+		setElementById(composedCollection, element);
+	}
+
+	/**
+	 * {@link #composedCollection} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addComposedCollectionElement(AllAttributesPersistent element) {
+		return composedCollection.add(element);
+	}
+
+	/**
+	 * {@link #composedCollection} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addComposedCollectionElement(int index, AllAttributesPersistent element) {
+		composedCollection.add(index, element);
+	}
+
+	/**
+	 * {@link #composedCollection} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeComposedCollectionElement(AllAttributesPersistent element) {
+		return composedCollection.remove(element);
+	}
+
+	/**
+	 * {@link #composedCollection} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public AllAttributesPersistent removeComposedCollectionElement(int index) {
+		return composedCollection.remove(index);
 	}
 
 	/**

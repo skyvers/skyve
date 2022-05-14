@@ -17,6 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
@@ -892,15 +894,15 @@ public final class BindUtil {
 		}
 	}
 	
-	private static Object[] collectionArguments(Bean bean, String collectionBinding) {
-		Bean collectionOwner = bean;
-		String collectionName = collectionBinding;
-		int dotIndex = collectionName.lastIndexOf('.');
+	private static Pair<Bean, String> penultimateBind(Bean bean, String relationBinding) {
+		Bean relationOwner = bean;
+		String relationName = relationBinding;
+		int dotIndex = relationName.lastIndexOf('.');
 		if (dotIndex > -1) {
-			collectionName = collectionName.substring(dotIndex + 1);
-			collectionOwner = (Bean) BindUtil.get(bean, collectionBinding.substring(0, dotIndex));
+			relationName = relationName.substring(dotIndex + 1);
+			relationOwner = (Bean) BindUtil.get(bean, relationBinding.substring(0, dotIndex));
 		}
-		return new Object[] {collectionOwner, collectionName};
+		return new ImmutablePair<>(relationOwner, relationName);
 	}
 	
 	private static void setElementParent(Customer c, Module m, Document d, Relation r, Bean element, Bean parent) {
@@ -950,23 +952,24 @@ public final class BindUtil {
 	 */
 	public static boolean addElementToCollection(Bean bean, String collectionBinding, Bean element) {
 		try {
+			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
+			Bean collectionOwner = args.getLeft();
+			String collectionName = args.getRight();
+
 			Customer c = CORE.getCustomer();
-			Module m = c.getModule(bean.getBizModule());
-			Document d = m.getDocument(c, bean.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			Module m = c.getModule(collectionOwner.getBizModule());
+			Document d = m.getDocument(c, collectionOwner.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
-				setElementParent(c, m, d, (Relation) a, element, bean);
+				setElementParent(c, m, d, (Relation) a, element, collectionOwner);
 				@SuppressWarnings("unchecked")
-				List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding);
+				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
 				return list.add(element);
 			}
 
 			// Static collection - use the add method
-			Object[] args = collectionArguments(bean, collectionBinding);
-			Bean collectionOwner = (Bean) args[0];
-			String collectionName = (String) args[1];
-
 			StringBuilder sb = new StringBuilder(collectionName.length() + 10);
 			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
 			String methodName = sb.toString();
@@ -1000,23 +1003,25 @@ public final class BindUtil {
 	 */
 	public static void addElementToCollection(Bean bean, String collectionBinding, int index, Bean element) {
 		try {
+			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
+			Bean collectionOwner = args.getLeft();
+			String collectionName = args.getRight();
+
 			Customer c = CORE.getCustomer();
-			Module m = c.getModule(bean.getBizModule());
-			Document d = m.getDocument(c, bean.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			Module m = c.getModule(collectionOwner.getBizModule());
+			Document d = m.getDocument(c, collectionOwner.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
-				setElementParent(c, m, d, (Relation) a, element, bean);
+				setElementParent(c, m, d, (Relation) a, element, collectionOwner);
 				@SuppressWarnings("unchecked")
-				List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding);
+				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
 				list.add(index, element);
+				return;
 			}
 
 			// Static collection - use the add method
-			Object[] args = collectionArguments(bean, collectionBinding);
-			Bean collectionOwner = (Bean) args[0];
-			String collectionName = (String) args[1];
-
 			StringBuilder sb = new StringBuilder(collectionName.length() + 10);
 			sb.append("add").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
 			String methodName = sb.toString();
@@ -1049,23 +1054,24 @@ public final class BindUtil {
 	 */
 	public static boolean removeElementFromCollection(Bean bean, String collectionBinding, Bean element) {
 		try {
+			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
+			Bean collectionOwner = args.getLeft();
+			String collectionName = args.getRight();
+
 			Customer c = CORE.getCustomer();
-			Module m = c.getModule(bean.getBizModule());
-			Document d = m.getDocument(c, bean.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			Module m = c.getModule(collectionOwner.getBizModule());
+			Document d = m.getDocument(c, collectionOwner.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
 				setElementParent(c, m, d, (Relation) a, element, null);
 				@SuppressWarnings("unchecked")
-				List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding);
+				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
 				return list.remove(element);
 			}
 
-			// Static collection - use the add method
-			Object[] args = collectionArguments(bean, collectionBinding);
-			Bean collectionOwner = (Bean) args[0];
-			String collectionName = (String) args[1];
-
+			// Static collection - use the remove method
 			StringBuilder sb = new StringBuilder(collectionName.length() + 13);
 			sb.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
 			String methodName = sb.toString();
@@ -1103,24 +1109,25 @@ public final class BindUtil {
 	 */
 	public static <T extends Bean> T removeElementFromCollection(Bean bean, String collectionBinding, int index) {
 		try {
+			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
+			Bean collectionOwner = args.getLeft();
+			String collectionName = args.getRight();
+
 			Customer c = CORE.getCustomer();
-			Module m = c.getModule(bean.getBizModule());
-			Document d = m.getDocument(c, bean.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionBinding.equals(aa.getName())).findAny().orElse(null);
+			Module m = c.getModule(collectionOwner.getBizModule());
+			Document d = m.getDocument(c, collectionOwner.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+			
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
 				@SuppressWarnings("unchecked")
-				List<T> list = (List<T>) BindUtil.get(bean, collectionBinding);
+				List<T> list = (List<T>) BindUtil.get(collectionOwner, collectionName);
 				T element = list.get(index);
 				setElementParent(c, m, d, (Relation) a, element, null);
 				return list.remove(index);
 			}
 
-			// Static collection - use the add method
-			Object[] args = collectionArguments(bean, collectionBinding);
-			Bean collectionOwner = (Bean) args[0];
-			String collectionName = (String) args[1];
-
+			// Static collection - use the remove method
 			StringBuilder methodName = new StringBuilder(collectionName.length() + 13);
 			methodName.append("remove").append(Character.toUpperCase(collectionName.charAt(0))).append(collectionName.substring(1)).append("Element");
 			Method method = collectionOwner.getClass().getMethod(methodName.toString(), Integer.TYPE);

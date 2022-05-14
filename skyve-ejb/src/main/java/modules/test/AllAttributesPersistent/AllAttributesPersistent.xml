@@ -34,6 +34,11 @@
 			<documentName>AllAttributesPersistent</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
+		<collection name="composedCollection" type="composition">
+			<displayName>Composed Collection</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 		<colour name="colour">
 			<displayName>Colour</displayName>
 			<defaultValue>{el:'#000000'}</defaultValue>

@@ -57,6 +57,10 @@
 			<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />
 			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
 		</bag>
+		<bag name="composedCollection" table="TEST_AllAttributesPersistent_composedCollection" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_composedCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_composedCollection_element_id" column="element_id" />
+		</bag>
 		<property name="colour" />
 		<property name="date" type="DateOnly" />
 		<property name="dateTime" type="DateTime" />
