@@ -769,8 +769,10 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	public void testOptimisticLockException() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
+		@SuppressWarnings("null")
+		String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 		SQL sql = p.newSQL(String.format("update %s set %s = :%s, %s = :%s",
-				aapd.getPersistent().getPersistentIdentifier(),
+				persistentIdentifier,
 				PersistentBean.LOCK_NAME,
 				PersistentBean.LOCK_NAME,
 				PersistentBean.VERSION_NAME,
@@ -959,6 +961,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
 	public void testSQLDyna() throws Exception {
+		@SuppressWarnings("null")
 		String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 		p.newSQL("delete from " + persistentIdentifier).execute();
 		

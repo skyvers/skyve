@@ -95,7 +95,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				Module module = customer.getModule(bean.getTestModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					if (document.getPersistent() != null) {
+					if (document.isPersistable()) {
 						
 						// check this is not already selected
 						boolean alreadySelected = false;

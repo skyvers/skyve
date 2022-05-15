@@ -16,6 +16,7 @@ import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
@@ -496,41 +497,45 @@ public class UserImpl implements User {
 				}
 				else { // found a parent document
 					if (! beanBizDocument.equals(parentDocument.getName())) { // exclude hierarchical documents
-						StringBuilder sb = new StringBuilder(256);
-						sb.append("select p.").append(Bean.DOCUMENT_ID).append(", p.");
-						sb.append(Bean.CUSTOMER_NAME).append(", p.");
-						sb.append(Bean.DATA_GROUP_ID).append(", p.");
-						sb.append(Bean.USER_ID);
-						sb.append(" from ");
-						sb.append(parentDocument.getPersistent().getPersistentIdentifier());
-						sb.append(" as p inner join ");
-						sb.append(document.getPersistent().getPersistentIdentifier());
-						sb.append(" as c on p.").append(Bean.DOCUMENT_ID);
-						sb.append(" = c.").append(ChildBean.PARENT_NAME);
-						sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
-						sb.append(Bean.DOCUMENT_ID);
-						Persistence p = AbstractPersistence.get();
-						List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId, false).tupleResults();
-						if (rows.isEmpty()) { // bean is still transient - user hasn't saved
-							result = true;
-						}
-						else {
-							Object[] values = rows.get(0);
-	
-							// deny if user can't read parent document
-							result = canReadBean((String) values[0], 
-													parentDocument.getOwningModuleName(), 
-													parentDocument.getName(),
-													(String) values[1], 
-													(String) values[2], 
-													(String) values[3]);
-							if ((! result) && (UtilImpl.SECURITY_TRACE)) {
-								StringBuilder trace = new StringBuilder(64);
-								trace.append("Security - ");
-								trace.append(beanBizModule).append('.');
-								trace.append(beanBizDocument).append('.');
-								trace.append(beanBizId).append(" denied - no read on parent");
-								UtilImpl.LOGGER.info(trace.toString());
+						if (document.isPersistable() && parentDocument.isPersistable()) {
+							StringBuilder sb = new StringBuilder(256);
+							sb.append("select p.").append(Bean.DOCUMENT_ID).append(", p.");
+							sb.append(Bean.CUSTOMER_NAME).append(", p.");
+							sb.append(Bean.DATA_GROUP_ID).append(", p.");
+							sb.append(Bean.USER_ID);
+							sb.append(" from ");
+							Persistent persistent = parentDocument.getPersistent();
+							sb.append((persistent == null) ? "N/A" : persistent.getPersistentIdentifier()); // work around compiler
+							sb.append(" as p inner join ");
+							persistent = document.getPersistent();
+							sb.append((persistent == null) ? "N/A" : persistent.getPersistentIdentifier()); // work around compiler
+							sb.append(" as c on p.").append(Bean.DOCUMENT_ID);
+							sb.append(" = c.").append(ChildBean.PARENT_NAME);
+							sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
+							sb.append(Bean.DOCUMENT_ID);
+							Persistence p = AbstractPersistence.get();
+							List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId, false).tupleResults();
+							if (rows.isEmpty()) { // bean is still transient - user hasn't saved
+								result = true;
+							}
+							else {
+								Object[] values = rows.get(0);
+		
+								// deny if user can't read parent document
+								result = canReadBean((String) values[0], 
+														parentDocument.getOwningModuleName(), 
+														parentDocument.getName(),
+														(String) values[1], 
+														(String) values[2], 
+														(String) values[3]);
+								if ((! result) && (UtilImpl.SECURITY_TRACE)) {
+									StringBuilder trace = new StringBuilder(64);
+									trace.append("Security - ");
+									trace.append(beanBizModule).append('.');
+									trace.append(beanBizDocument).append('.');
+									trace.append(beanBizId).append(" denied - no read on parent");
+									UtilImpl.LOGGER.info(trace.toString());
+								}
 							}
 						}
 					}

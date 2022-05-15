@@ -6,7 +6,6 @@ import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaD
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
@@ -99,8 +98,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 				if (attribute instanceof Association) {
 					String targetDocumentName = ((Association) attribute).getDocumentName();
 					Document targetDocument = module.getDocument(customer, targetDocumentName);
-					Persistent targetPersistent = targetDocument.getPersistent();
-					if (targetPersistent.getName() != null) { // this is a persistent target document - not a mapped document
+					if (targetDocument.isPersistable()) { // this is a persistent target document - not a mapped document
 						type = "text";
 						editorType = "comboBox";
 						lookup = new SmartClientLookupDefinition(false,

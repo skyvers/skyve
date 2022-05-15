@@ -709,8 +709,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			Reference reference = (Reference) attribute;
 			org.skyve.metadata.model.document.Document referencedDocument = getRelatedDocument(customer, attribute.getName());
 			// Query only if persistent
-			Persistent persistent = referencedDocument.getPersistent();
-			if ((persistent != null) && (persistent.getName() != null)) { // persistent referenced document
+			if (referencedDocument.isPersistable()) { // persistent referenced document
 				AbstractDocumentQuery referenceQuery = null;
 				String queryName = reference.getQueryName();
 				if (queryName != null) {

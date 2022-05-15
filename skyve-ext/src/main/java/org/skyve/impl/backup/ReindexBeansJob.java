@@ -14,7 +14,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -92,8 +91,7 @@ public class ReindexBeansJob extends CancellableJob {
 	}
 	
 	private static boolean needsIndexing(Customer customer, Document document) {
-		Persistent persistent = document.getPersistent();
-		if ((persistent != null) && (persistent.getName() != null)) { // is persistent
+		if (document.isPersistable()) {
 			for (Attribute attribute : document.getAllAttributes(customer)) {
 				if (attribute instanceof Field) {
 					Field field = (Field) attribute;

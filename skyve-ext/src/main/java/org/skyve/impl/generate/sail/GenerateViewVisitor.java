@@ -162,11 +162,11 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 	
 	boolean getHasSave() {
-		return hasSave && (document.getPersistent() != null);
+		return hasSave && document.isPersistable();
 	}
 	
 	boolean getHasOk() {
-		return hasOk&& (document.getPersistent() != null);
+		return hasOk && document.isPersistable();
 	}
 	
 	boolean getHasCancel() {
@@ -174,6 +174,6 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 	
 	boolean getHasDelete() {
-		return hasDelete&& (document.getPersistent() != null);
+		return hasDelete && document.isPersistable();
 	}
 }

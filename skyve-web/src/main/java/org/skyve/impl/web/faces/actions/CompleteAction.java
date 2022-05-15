@@ -18,7 +18,6 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -92,9 +91,7 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 				throw new SecurityException("read this data", user.getName());
 			}
 
-			Persistent persistent = document.getPersistent();
-			String persistentName = (persistent == null) ? null : persistent.getName();
-			if (persistentName != null) { // persistent document
+			if (document.isPersistable()) { // persistent document
 				if ((attribute == null) || // implicit attribute or
 						attribute.isPersistent()) { // explicit and persistent attribute
 					DocumentQuery q = persistence.newDocumentQuery(document.getOwningModuleName(), document.getName());

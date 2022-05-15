@@ -29,7 +29,6 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -160,9 +159,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						long totalRows = 0L;
 						List<Object> values = Collections.emptyList();
 
-						Persistent persistent = document.getPersistent();
-						String persistentName = (persistent == null) ? null : persistent.getName();
-						if (persistentName != null) { // persistent document
+						if (document.isPersistable()) { // persistent document
 							if ((attribute == null) || // implicit attribute or
 									attribute.isPersistent()) { // explicit and persistent attribute
 								String moduleName = document.getOwningModuleName();

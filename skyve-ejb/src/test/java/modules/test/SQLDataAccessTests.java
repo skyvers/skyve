@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -27,17 +28,25 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
 public class SQLDataAccessTests extends AbstractSkyveTestDispose {
+	private String persistentIdentifier;
+	
+	@Before
+	@Override
+	@SuppressWarnings("null")
+	public void before() {
+		persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
+	}
+	
 	@Test
 	public void testBeanParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 
-			sql = sda.newSQL(aapd, String.format("select * from %s where bizId = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where bizId = :param", persistentIdentifier));
 			sql.putParameter("param", aap);
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -57,23 +66,21 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 
 	private void testBeanObject(AttributeType type) throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 
 			// test scalar
-			sql = sda.newSQL(aapd, String.format("select * from %s where bizId = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where bizId = :param", persistentIdentifier));
 			sql.putParameter("param", aap, type);
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
 			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 	
 			// test null
-			sql = sda.newSQL(aapd, String.format("select * from %s where bizid = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where bizid = :param", persistentIdentifier));
 			sql.putParameter("param", null, type);
 			results = sql.beanResults();
 			Assert.assertEquals(0, results.size());
@@ -83,14 +90,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testBooleanParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where booleanFlag = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where booleanFlag = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getBooleanFlag());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -106,14 +112,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testDateOnlyParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where date = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where date = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDate());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -129,14 +134,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testDateTimeParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where dateTime = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where dateTime = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDateTime());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -152,14 +156,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testDecimal2Param() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where decimal2 = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where decimal2 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDecimal2());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -175,14 +178,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testDecimal5Param() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where decimal5 = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where decimal5 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDecimal5());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -198,14 +200,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testDecimal10Param() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where decimal10 = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where decimal10 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getDecimal10());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -221,15 +222,14 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testEnumParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap.setEnum3(Enum3.one);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where enum3 = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where enum3 = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getEnum3());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -245,14 +245,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testGeometryParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where geometry = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where geometry = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getGeometry());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -270,15 +269,15 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testIntegerParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
 			sql = sda.newSQL(aapd, String.format("select * from %s where %s = :param",
-					aapd.getPersistent().getPersistentIdentifier(),
-					AllAttributesPersistent.normalIntegerPropertyName));
+														persistentIdentifier,
+														AllAttributesPersistent.normalIntegerPropertyName));
 			sql.putParameter("param", aap.getNormalInteger());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -294,14 +293,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testLongParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where longInteger = :param",
-					aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where longInteger = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getLongInteger());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -317,14 +315,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testTimeOnlyParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where time = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where time = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getTime());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -340,14 +337,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testTimestampParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where timestamp = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where timestamp = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getTimestamp());
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -363,14 +359,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testTextParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 	
-			sql = sda.newSQL(aapd, String.format("select * from %s where text = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where text = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getText(), false);
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -386,14 +381,13 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testMemoParam() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			aap = p.save(aap);
 			p.commit(false);
 
-			sql = sda.newSQL(aapd, String.format("select * from %s where memo = :param",
-													aapd.getPersistent().getPersistentIdentifier()));
+			sql = sda.newSQL(aapd, String.format("select * from %s where memo = :param", persistentIdentifier));
 			sql.putParameter("param", aap.getMemo(), true);
 			List<AllAttributesPersistent> results = sql.beanResults();
 			Assert.assertEquals(1, results.size());
@@ -408,7 +402,7 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 
 	private void testObject(String binding, Object value, AttributeType type) throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			SQL sql = sda.newSQL(String.format("delete from %s", aapd.getPersistent().getPersistentIdentifier()));
+			SQL sql = sda.newSQL(String.format("delete from %s", persistentIdentifier));
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 			Binder.set(aap, binding, value);
@@ -416,8 +410,7 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			p.commit(false);
 
 			// test scalar
-			sql = sda.newSQL(aapd, String.format("select * from %s where %s = :param",
-													aapd.getPersistent().getPersistentIdentifier(),
+			sql = sda.newSQL(aapd, String.format("select * from %s where %s = :param", persistentIdentifier,
 													binding));
 			sql.putParameter("param", value, type);
 			List<AllAttributesPersistent> results = sql.beanResults();
@@ -425,9 +418,7 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 			Assert.assertNotEquals(aap.getBizId(), results.get(0).getBizId());
 	
 			// test null
-			sql = sda.newSQL(aapd, String.format("select * from %s where %s = :param",
-													aapd.getPersistent().getPersistentIdentifier(),
-													binding));
+			sql = sda.newSQL(aapd, String.format("select * from %s where %s = :param", persistentIdentifier, binding));
 			sql.putParameter("param", null, type);
 			results = sql.beanResults();
 			Assert.assertEquals(0, results.size());
@@ -437,7 +428,6 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testSQLDyna() throws Exception {
 		try (SQLDataAccess sda = EXT.newSQLDataAccess()) {
-			String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 			sda.newSQL("delete from " + persistentIdentifier).execute();
 	
 			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);

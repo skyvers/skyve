@@ -53,7 +53,6 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
@@ -544,8 +543,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		}
 	    	}
 	    	else { // persisted instance (or a zoomout)
-	    		Persistent persistent = processDocument.getPersistent();
-	    		boolean persistentDocument = (persistent != null) && (persistent.getName() != null);
+	    		boolean persistentDocument = processDocument.isPersistable();
 	    		// if document is persistent, try to retrieve the instance
 	    		if (persistentDocument) {
 	    			processBean = persistence.retrieve(processDocument, bizId);
@@ -614,11 +612,10 @@ public class SmartClientEditServlet extends HttpServlet {
     			Document contextDocument = contextModule.getDocument(customer, contextBean.getBizDocument());
     			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, formBinding);
         		Attribute targetRelation = (target == null) ? null : target.getAttribute();
-            	Persistent persistent = processDocument.getPersistent();
 
             	// check for create privilege if the collection is persistent and the collection document is persistent
             	if ((targetRelation != null) && targetRelation.isPersistent() && // collection is persistent
-    	    			(persistent != null) && (persistent.getName() != null) &&  // collection document is persistent
+            			processDocument.isPersistable() &&  // collection document is persistent
     	    			(! user.canCreateDocument(processDocument))) {
     				throw new SecurityException("create this data", user.getName());
     			}

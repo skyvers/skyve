@@ -527,10 +527,8 @@ t.printStackTrace();
 
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(moduleCustomer, documentName);
-				Persistent persistent = document.getPersistent();
 				if ((! document.isDynamic()) && // is not dynamic
-						(persistent != null) &&  // is persistent document
-						(persistent.getName() != null) && // and has a persistent name
+						document.isPersistable() && // is persistent document
 						(repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, module, document) == null) && // not a sub-class (which don't have filters)
 						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
 					setFilters(document, scope);
@@ -556,10 +554,8 @@ t.printStackTrace();
 
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(moduleCustomer, documentName);
-				Persistent persistent = document.getPersistent();
 				if ((! document.isDynamic()) && // is not dynamic
-						(persistent != null) &&  // is persistent document
-						(persistent.getName() != null) && // with a persistent name
+						(document.isPersistable()) && // is persistent document
 						(repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, module, document) == null) && // not a sub-class (which don't have filters)
 						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
 					
@@ -854,9 +850,7 @@ t.printStackTrace();
 					return false;
 				}
 			
-				Persistent persistent = document.getPersistent();
-				if ((persistent != null) && 
-						(persistent.getName() != null)) { // persistent document
+				if (document.isPersistable()) {
 					// dataGroup and user are NOT set here - it is only set on newInstance()
 					// this allows us to set the data group programmatically.
 					// DataGroup and user are used to create a path
@@ -988,13 +982,6 @@ t.printStackTrace();
 					return false;
 				}
 				
-				// NOTE:- We only check if the document is a persistent document here,
-				// not if the reference (if any) is persistent.
-				// We could have a transient reference to a persistent document and 
-				// the save operation still needs to cascade persist any changes to the 
-				// persistent attributes in the referenced document.
-				Persistent persistent = document.getPersistent();
-				String persistentName = (persistent == null) ? null : persistent.getName();
 				try {
 					ValidationUtil.validateBeanAgainstDocument(document, bean);
 
@@ -1005,7 +992,12 @@ t.printStackTrace();
 
 					ValidationUtil.checkCollectionUniqueConstraints(customer, document, bean);
 
-					if (persistentName != null) { // persistent
+					// NOTE:- We only check if the document is a persistent document here,
+					// not if the reference (if any) is persistent.
+					// We could have a transient reference to a persistent document and 
+					// the save operation still needs to cascade persist any changes to the 
+					// persistent attributes in the referenced document.
+					if (document.isPersistable()) {
 						if (owningRelation == null) { // top level or parent binding
 							checkUniqueConstraints(customer, document, bean);
 						}
@@ -1154,7 +1146,7 @@ t.printStackTrace();
 			}
 			if (! vetoed) {
 				// Flush dynamic domain
-				if ((document.getPersistent() != null) && document.hasDynamic()) { // persistent with dynamism somewhere
+				if ((document.getPersistent() != null) && document.hasDynamic()) { // persistent (somehow) with dynamism somewhere
 					dynamicPersistence.persist(result);
 				}
 
@@ -1273,7 +1265,7 @@ t.printStackTrace();
 					currentBean = result; // for exception handling
 					Module m = internalCustomer.getModule(result.getBizModule());
 					Document d = m.getDocument(internalCustomer, result.getBizDocument());
-					if ((d.getPersistent() != null) && d.hasDynamic()) { // persistent with dynamism somewhere
+					if ((d.getPersistent() != null) && d.hasDynamic()) { // persistent (somehow) with dynamism somewhere
 						dynamicPersistence.persist(result);
 					}
 				}
@@ -1953,8 +1945,7 @@ if (document.isDynamic()) return;
 			Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
 			Document derivedDocument = derivedModule.getDocument(customer, derivedDocumentName.substring(dotIndex + 1));
 
-			Persistent derivedPersistent = derivedDocument.getPersistent();
-			if ((derivedPersistent != null) && (derivedPersistent.getName() != null)) {
+			if (derivedDocument.isPersistable()) {
 				result.add(derivedDocument);
 			}
 			else {

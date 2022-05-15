@@ -2,6 +2,8 @@ package org.skyve.metadata.model;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Interface;
@@ -15,41 +17,41 @@ public interface Model extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getOwningModuleName();
+	String getOwningModuleName();
 
 	/**
 	 * 
 	 * @param name
 	 * @return
 	 */
-	public Attribute getAttribute(String name);
+	Attribute getAttribute(String name);
 
 	/**
 	 *
 	 * @return
 	 */
-	public List<? extends Interface> getInterfaces();
+	List<? extends Interface> getInterfaces();
 
 	/**
 	 * 
 	 * @return
 	 */
-	public List<? extends Attribute> getAttributes();
+	List<? extends Attribute> getAttributes();
 
 	/**
 	 * Get the attributes for this document and any super-documents for the given customer.
 	 * @param customer	The given customer
 	 * @return	All the attributes.
 	 */
-	public List<? extends Attribute> getAllAttributes(Customer customer);
+	List<? extends Attribute> getAllAttributes(Customer customer);
 
 	/**
 	 * 
 	 * @return
 	 */
-	public String getPluralAlias();
+	String getPluralAlias();
 
-	public default String getLocalisedPluralAlias() {
+	default String getLocalisedPluralAlias() {
 		return Util.i18n(getPluralAlias());
 	}
 	
@@ -57,9 +59,9 @@ public interface Model extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getSingularAlias();
+	String getSingularAlias();
 
-	public default String getLocalisedSingularAlias() {
+	default String getLocalisedSingularAlias() {
 		return Util.i18n(getSingularAlias());
 	}
 	
@@ -67,54 +69,64 @@ public interface Model extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getDescription();
+	String getDescription();
 	
-	public default String getLocalisedDescription() {
+	default String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 	
 	/**
-	 * 
-	 * @return
+	 * Get the persistent settings for this document.
+	 * @return	The settings or null if not defined.
 	 */
-	public Persistent getPersistent();
+	@Nullable Persistent getPersistent();
 
+	/**
+	 * Indicates if this document is directly persistent (not mapped).
+	 * That is it has a data store name (identifier).
+	 * @return	true if persistent settings are defined with a name, otherwise false.
+	 */
+	default boolean isPersistable() {
+		Persistent p = getPersistent();
+		return ((p != null) && (p.getName() != null));
+	}
+	
 	/**
 	 * This document is dynamic.
 	 * 
 	 * @return
 	 */
-	public boolean isDynamic();
+	boolean isDynamic();
 
 	/**
 	 * This document is dynamic or has a dynamic attribute or a relation to a document 
 	 * that is dynamic or has a dynamic attribute (recursively evaluated).
 	 */
-	public boolean hasDynamic();
+	boolean hasDynamic();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public Extends getExtends();
+	Extends getExtends();
 
 	/**
 	 * Should this document be abstract.
 	 *
 	 * @return
 	 */
-	public boolean isAbstract();
+	boolean isAbstract();
 	
 	/**
 	 * Should this document be audited.
 	 * 
 	 * @return
 	 */
-	public boolean isAudited();
+	boolean isAudited();
 	
-	public String getIcon16x16RelativeFileName();
+	String getIcon16x16RelativeFileName();
 
-	public String getIcon32x32RelativeFileName();
+	String getIcon32x32RelativeFileName();
 
-	public String getIconStyleClass();
+	String getIconStyleClass();
 }

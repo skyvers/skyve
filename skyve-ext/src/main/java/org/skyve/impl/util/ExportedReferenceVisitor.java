@@ -146,8 +146,7 @@ public abstract class ExportedReferenceVisitor {
 			Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
 			Document derivedDocument = derivedModule.getDocument(customer, derivedDocumentName.substring(dotIndex + 1));
 
-			Persistent derivedPersistent = derivedDocument.getPersistent();
-			if ((derivedPersistent != null) && (derivedPersistent.getName() != null)) {
+			if (derivedDocument.isPersistable()) {
 				result.add(derivedDocument);
 			}
 			else {

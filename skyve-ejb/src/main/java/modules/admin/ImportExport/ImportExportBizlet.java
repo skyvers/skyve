@@ -52,7 +52,7 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 				Module module = customer.getModule(bean.getModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					if (document.getPersistent() != null && document.getPersistent().getPersistentIdentifier() != null) {
+					if (document.isPersistable()) {
 						result.add(new DomainValue(document.getName(), document.getLocalisedSingularAlias()));
 					}
 				}

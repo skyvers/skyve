@@ -71,6 +71,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 		if (ad.isAudited()) {
 			// Check if there exists an insert audit record.
 			Module m = c.getModule(Audit.MODULE_NAME);
+			@SuppressWarnings("null")
 			String persistentIdentifier = m.getDocument(c, Audit.DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 
 			// Cater for multi-tenancy

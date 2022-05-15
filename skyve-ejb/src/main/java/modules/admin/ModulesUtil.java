@@ -1029,7 +1029,7 @@ public class ModulesUtil {
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
 		Persistent p = document.getPersistent();
-		return p.getPersistentIdentifier();
+		return (p == null) ? null : p.getPersistentIdentifier();
 	}
 
 	/**

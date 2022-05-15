@@ -45,7 +45,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet;
@@ -337,10 +336,8 @@ public class ViewGenerator {
 					}
 					else {
 						MetaData metaData = null;
-						Persistent associationPersistent = associationDocument.getPersistent();
 						// Use a bizKey text field when there is no domain values defined and the association document is not persistent
-						if ((domainType == null) && 
-								((associationPersistent == null) || (associationPersistent.getName() == null))) {
+						if ((domainType == null) && (! associationDocument.isPersistable())) {
 							TextField widget = new TextField();
 							widget.setBinding(Binder.createCompoundBinding(binding, Bean.BIZ_KEY));
 							metaData = widget;
@@ -450,10 +447,8 @@ public class ViewGenerator {
 				else if (attribute instanceof Association) {
 					Association association = (Association) attribute;
 					Document associationDocument = module.getDocument(customer, association.getDocumentName());
-					Persistent associationPersistent = associationDocument.getPersistent();
 					if (AssociationType.embedded.equals(association.getType()) || // embedded
-							(associationPersistent == null) ||
-							(associationPersistent.getName() == null)) { // not persistent document
+							(! associationDocument.isPersistable())) { // not persistent document
 						column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
 						column.setEditable(Boolean.FALSE);
 					}

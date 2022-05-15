@@ -24,7 +24,6 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
@@ -138,8 +137,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 			}
 			else {
 				Document document = getDocument(customer, documentName);
-				Persistent persistent = document.getPersistent();
-				if ((persistent == null) || (persistent.getName() == null)) {
+				if (! document.isPersistable()) {
 					throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
 				}
 				MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();

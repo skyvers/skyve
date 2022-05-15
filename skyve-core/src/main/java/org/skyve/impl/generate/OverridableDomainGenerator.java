@@ -728,7 +728,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		// class defn
-		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
+		if ((persistent != null) && document.isPersistable()) { // persistent document
 			// check table name length if required
 			if (identifierIsTooLong(persistent.getName())) {
 				throw new MetaDataException("Persistent name " + persistent.getName() + 
@@ -1461,7 +1461,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				contents.append(indentation).append("\t\t</property>\n");
 			}
 			else if (attribute instanceof Inverse) {
-				// ignore transient attributes
+				// ignore non-persistent attributes
 				if (! attribute.isPersistent()) {
 					continue;
 				}
@@ -1471,11 +1471,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// determine the inverse target metadata
 				String inverseDocumentName = inverse.getDocumentName();
 				Document inverseDocument = module.getDocument(null, inverseDocumentName);
-				Persistent inversePersistent = inverseDocument.getPersistent();
+				Persistent inversePersistent = inverseDocument.getPersistent();				
 				String inverseReferenceName = inverse.getReferenceName();
 				String inverseModuleName = inverseDocument.getOwningModuleName();
 				InverseRelationship inverseRelationship = inverse.getRelationship();
 				Boolean cascade = inverse.getCascade();
+				
+				// Ignore non-persistent inverse document
+				if (inversePersistent == null) {
+					continue;
+				}
 
 				// ignore an inverse to a dynamic document
 				if (inverseDocument.isDynamic()) {
@@ -1684,8 +1689,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		TreeMap<String, Document> derivations = modocDerivations.get(key);
 		if (derivations != null) {
 			for (Document derivation : derivations.values()) {
-				Persistent derivationPersistent = derivation.getPersistent();
-				if ((derivationPersistent != null) && (derivationPersistent.getName() != null)) {
+				if (derivation.isPersistable()) {
 					key = new StringBuilder(32).append(derivation.getOwningModuleName()).append('.').append(derivation.getName()).toString();
 					result.put(key, derivation);
 				}

@@ -19,7 +19,6 @@ import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.BizQLDefinition;
@@ -41,8 +40,7 @@ public class QueryGenerator {
 
 		for (String documentName : documentNames) {
 			Document document = module.getDocument(customer, documentName);
-			Persistent persistent = document.getPersistent();
-			if ((persistent != null) && (persistent.getName() != null)) { // transient document
+			if (document.isPersistable()) {
 				result.add(module.getDocumentDefaultQuery(customer, documentName, includeAssociationBizKeys));
 			}
 		}

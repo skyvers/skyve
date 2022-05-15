@@ -104,6 +104,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 	throws Exception {
 		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		Module admin = r.getModule(null, SQLMetaDataUtil.ADMIN_MODULE_NAME);
+		@SuppressWarnings("null")
 		String ADM_SecurityUser = admin.getDocument(null, SQLMetaDataUtil.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 		StringBuilder sql = new StringBuilder(128);
 		sql.append("select ").append(SQLMetaDataUtil.PASSWORD_PROPERTY_NAME).append(" from ").append(ADM_SecurityUser);

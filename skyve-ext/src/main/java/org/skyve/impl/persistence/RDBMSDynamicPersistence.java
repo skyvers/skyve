@@ -28,7 +28,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
@@ -88,9 +87,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				// Use our own cascade rules for dynamic beans
 				if (visitedDocument.isDynamic()) {
 					// Persist persistent documents
-					Persistent persistent = visitedDocument.getPersistent();
-					if ((persistent != null) && 
-							(persistent.getName() != null)) { // persistent document
+					if (visitedDocument.isPersistable()) {
 						persistOne(c, visitedDocument, (PersistentBean) visitedBean);
 					}
 					else {

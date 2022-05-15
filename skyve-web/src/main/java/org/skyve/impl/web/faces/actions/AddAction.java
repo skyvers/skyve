@@ -13,7 +13,6 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
@@ -71,11 +70,10 @@ public class AddAction extends FacesAction<Void> {
     	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
 		Relation targetRelation = (Relation) target.getAttribute();
 		Document relationDocument = module.getDocument(customer, targetRelation.getDocumentName());
-    	Persistent persistent = relationDocument.getPersistent();
 
     	// check for create privilege if the collection is persistent and the collection document is persistent
     	if (targetRelation.isPersistent() && // collection is persistent
-    			(persistent != null) && (persistent.getName() != null) && // collection document is persistent
+    			relationDocument.isPersistable() && // collection document is persistent
     			(! user.canCreateDocument(relationDocument))) {
 			throw new SecurityException("create this data", user.getName());
 		}

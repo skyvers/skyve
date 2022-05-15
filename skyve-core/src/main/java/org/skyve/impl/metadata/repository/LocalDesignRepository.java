@@ -27,7 +27,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -228,8 +227,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	
 						Document targetDocument = target.getDocument();
 						Attribute targetAttribute = target.getAttribute();
-						Persistent targetPersistent = targetDocument.getPersistent();
-						if ((targetPersistent == null) || (targetPersistent.getName() == null) || // transient document
+						if ((! targetDocument.isPersistable()) || // non-persistent document
 								((targetAttribute != null) && 
 									(! BindUtil.isImplicit(targetAttribute.getName())) &&
 									(! targetAttribute.isPersistent()))) { // transient non-implicit attribute

@@ -216,7 +216,7 @@ final class BackupUtil {
 
 	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
-		if ((! document.isDynamic()) && (persistent != null) && (persistent.getName() != null)) { // static persistent document
+		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			Table table = tables.get(persistentIdentifier);
 			if (table == null) {
@@ -253,9 +253,8 @@ final class BackupUtil {
 											Module derivedModule = customer.getModule(derivedModoc.substring(0, dotIndex));
 											Document derivedDocument = derivedModule.getDocument(customer, derivedModoc.substring(dotIndex + 1));
 	
-											Persistent derivedPersistent = derivedDocument.getPersistent();
-											if ((derivedPersistent != null) && (derivedPersistent.getName() != null)) {
-												ownerTableName = derivedPersistent.getName();
+											if (derivedDocument.isPersistable()) {
+												ownerTableName = derivedDocument.getPersistent().getName();
 												String tableName = ownerTableName + '_' + referenceFieldName;
 												if (! tables.containsKey(tableName)) {
 													JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
@@ -275,9 +274,8 @@ final class BackupUtil {
 											Document baseDocument = module.getDocument(customer, currentInherits.getDocumentName());
 											currentInherits = null;
 		
-											Persistent basePersistent = baseDocument.getPersistent();
-											if ((basePersistent != null) && (basePersistent.getName() != null)) {
-												ExtensionStrategy baseStrategy = basePersistent.getStrategy();
+											if (baseDocument.isPersistable()) {
+												ExtensionStrategy baseStrategy = baseDocument.getPersistent().getStrategy();
 												// keep looking if joined
 												if (ExtensionStrategy.joined.equals(baseStrategy)) {
 													ultimateDocument = baseDocument;

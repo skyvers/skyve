@@ -33,7 +33,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		for (Module m : c.getModules()) {
 			for (String k : m.getDocumentRefs().keySet()) {
 				Document d = m.getDocument(c, k);
-				if (d.getPersistent() != null) {
+				if (d.isPersistable()) {
 					ModuleDocument doc = ModuleDocument.newInstance();
 					doc.setModuleName(m.getName());
 					doc.setDocumentName(d.getName());
@@ -56,7 +56,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 			for (Module m : c.getModules()) {
 				for (String k : m.getDocumentRefs().keySet()) {
 					Document d = m.getDocument(c, k);
-					if (d.getPersistent() != null) {
+					if (d.isPersistable()) {
 						result.add(new DomainValue(String.format("%s.%s", m.getName(), k), 
 													String.format("%s.%s", m.getLocalisedTitle(), d.getLocalisedSingularAlias())));
 					}
@@ -142,7 +142,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 			Module m = c.getModule(bean.getAuditModuleName());
 			for (String k : m.getDocumentRefs().keySet()) {
 				Document d = m.getDocument(c, k);
-				if (d.getPersistent() != null) {
+				if (d.isPersistable()) {
 					result.add(new DomainValue(d.getName(), d.getLocalisedSingularAlias()));
 				}
 			}
