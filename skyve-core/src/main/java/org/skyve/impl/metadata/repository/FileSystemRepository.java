@@ -28,6 +28,7 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
@@ -522,6 +523,18 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+		// If dynamic, use the bizletClassName if defined
+		Dynamic dynamic = document.getDynamism();
+		if (dynamic != null) {
+			String bizletClassName = dynamic.getBizletClassName();
+			if (bizletClassName == null) {
+				return null;
+			}
+			addKey(bizletClassName);
+			return getJavaMetaData(customer, bizletClassName, false, runtime);
+		}
+
+		// Otherwise load from the file system
 		StringBuilder key = new StringBuilder(128);
 		String documentName = document.getName();
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
@@ -531,6 +544,18 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
+		// If dynamic, use the images map
+		Dynamic dynamic = document.getDynamism();
+		if (dynamic != null) {
+			String imageClassName = dynamic.getImages().get(imageName);
+			if (imageClassName == null) {
+				throw new MetaDataException(imageName + " is not defined under dynamic.images in document " + document.getName());
+			}
+			addKey(imageClassName);
+			return getJavaMetaData(customer, imageClassName, true, runtime);
+		}
+
+		// Otherwise load from the file system
 		StringBuilder key = new StringBuilder(128);
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		key.append(document.getName()).append('/');
@@ -539,6 +564,18 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	private <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
+		// If dynamic, use the models map
+		Dynamic dynamic = document.getDynamism();
+		if (dynamic != null) {
+			String modelClassName = dynamic.getModels().get(modelName);
+			if (modelClassName == null) {
+				throw new MetaDataException(modelName + " is not defined under dynamic.models in document " + document.getName());
+			}
+			addKey(modelClassName);
+			return getJavaMetaData(customer, modelClassName, true, runtime);
+		}
+
+		// Otherwise load from the file system
 		StringBuilder key = new StringBuilder(128);
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		key.append(document.getName()).append('/');
@@ -573,6 +610,21 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	protected <T extends MetaData> T getAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
+		// If dynamic, use the actions map
+		Dynamic dynamic = document.getDynamism();
+		if (dynamic != null) {
+			String actionClassName = dynamic.getActions().get(actionName);
+			if (actionClassName == null) {
+				if (assertExistence) {
+					throw new MetaDataException(actionName + " is not defined under dynamic.actions in document " + document.getName());
+				}
+				return null;
+			}
+			addKey(actionClassName);
+			return getJavaMetaData(customer, actionClassName, assertExistence, runtime);
+		}
+
+		// Otherwise load from the file system
 		StringBuilder key = new StringBuilder(128);
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		key.append(document.getName()).append('/');
@@ -628,12 +680,30 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	@Override
-	public Object getDataFactory(Customer customer, String moduleName, String documentName) {
+	public Object getDataFactory(Customer customer, Document document) {
 		Object result = null;
+
+		final String moduleName = document.getOwningModuleName();
+		final String documentName = document.getName();
 		
 		try {
-			String key = new StringBuilder(128).append(MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).append('/').append(documentName).append("Factory").toString();
-			Class<?> factoryClass = getJavaClass(customer, key);
+			Class<?> factoryClass = null;
+
+			// If dynamic, use the bizletClassName if defined
+			Dynamic dynamic = document.getDynamism();
+			if (dynamic != null) {
+				String dataFactoryClassName = dynamic.getDataFactoryClassName();
+				if (dataFactoryClassName != null) {
+					addKey(dataFactoryClassName);
+					factoryClass = getJavaClass(customer, dataFactoryClassName);
+				}
+			}
+			// Otherwise load from the file system
+			else {
+				String key = new StringBuilder(128).append(MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).append('/').append(documentName).append("Factory").toString();
+				factoryClass = getJavaClass(customer, key);
+			}
+			
 			if (factoryClass != null) {
 				result = factoryClass.getDeclaredConstructor().newInstance();
 			}

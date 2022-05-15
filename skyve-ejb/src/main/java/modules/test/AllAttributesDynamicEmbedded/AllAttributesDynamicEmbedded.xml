@@ -9,7 +9,7 @@
 		]]>
 	</documentation>
 	<persistent strategy="mapped" />
-	<dynamic>true</dynamic>
+	<dynamic />
 	<singularAlias>All Value</singularAlias>
 	<pluralAlias>All Value</pluralAlias>
 	<parentDocument>AllAttributesDynamicPersistent</parentDocument>

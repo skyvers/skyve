@@ -8,6 +8,7 @@ import javax.enterprise.inject.Alternative;
 import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 
@@ -36,10 +37,8 @@ public class RepositoryInjectable implements Repository, Serializable {
 	}
 
 	@Override
-	public Object getDataFactory(Customer customer,
-										String moduleName,
-										String documentName) {
-		return CORE.getRepository().getDataFactory(customer, moduleName, documentName);
+	public Object getDataFactory(Customer customer, Document document) {
+		return CORE.getRepository().getDataFactory(customer, document);
 	}
 	
 	@Override

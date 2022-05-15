@@ -9,7 +9,7 @@
 		]]>
 	</documentation>
 	<extends document="DynamicMappedExtension" />
-	<dynamic>true</dynamic>
+	<dynamic />
 	<singularAlias>Mapped Extension Subclass</singularAlias>
 	<pluralAlias>Mapped Extension Subclass</pluralAlias>
 	<bizKey expression="{text}" />

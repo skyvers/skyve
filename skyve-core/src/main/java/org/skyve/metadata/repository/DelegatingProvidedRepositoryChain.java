@@ -222,9 +222,9 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 	}
 
 	@Override
-	public Object getDataFactory(Customer customer, String moduleName, String documentName) {
+	public Object getDataFactory(Customer customer, Document document) {
 		for (ProvidedRepository delegate : delegates) {
-			Object result = delegate.getDataFactory(customer, moduleName, documentName);
+			Object result = delegate.getDataFactory(customer, document);
 			if (result != null) {
 				return result;
 			}

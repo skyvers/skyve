@@ -9,7 +9,17 @@
 		]]>
 	</documentation>
 	<persistent name="TEST_AllAttributesDynamicPersistent" />
-	<dynamic>true</dynamic>
+	<dynamic bizletClassName="modules.test.AllAttributesDynamicPersistent.Bizlet" dataFactoryClassName="modules.test.AllAttributesDynamicPersistent.DataFactory">
+		<actions>
+			<class name="ServerSideAction" className="modules.test.AllAttributesDynamicPersistent.ServerSideAction" />
+		</actions>
+		<images>
+			<class name="DynamicImage" className="modules.test.AllAttributesDynamicPersistent.DynamicImage" />
+		</images>
+		<models>
+			<class name="ListModel" className="modules.test.AllAttributesDynamicPersistent.ListModel" />
+		</models>
+	</dynamic>
 	<singularAlias>All Attributes Dynamic Persistent</singularAlias>
 	<pluralAlias>All Attributes Dynamic Persistent</pluralAlias>
 	<bizKey expression="{text}" />

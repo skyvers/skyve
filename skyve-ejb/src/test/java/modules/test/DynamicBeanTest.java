@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.DynamicPersistentBean;
@@ -18,8 +19,12 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.controller.ServerSideAction;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
@@ -210,5 +215,23 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 				return true;
 			}
 		}.visit(document, bean, c);
+	}
+	
+	@Test
+	public void testDynamicDefinitions() throws Exception {
+		Bizlet<Bean> bizlet = aadpd.getBizlet(c);
+		Assert.assertNotNull(bizlet);
+		
+		Object dataFactory = CORE.getRepository().getDataFactory(c, aadpd);
+		Assert.assertNotNull(dataFactory);
+		
+		ServerSideAction<Bean> action = aadpd.getServerSideAction(c, "ServerSideAction", true);
+		Assert.assertNotNull(action);
+
+		DynamicImage<Bean> image = aadpd.getDynamicImage(c, "DynamicImage");
+		Assert.assertNotNull(image);
+
+		ListModel<Bean> model = aadpd.getListModel(c, "ListModel", true);
+		Assert.assertNotNull(model);
 	}
 }

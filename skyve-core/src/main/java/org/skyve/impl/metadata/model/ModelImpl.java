@@ -13,6 +13,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.model.Persistent;
@@ -36,7 +37,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private List<Attribute> attributes = new ArrayList<>();
 	private String singularAlias;
 	private Persistent persistent;
-	private boolean dynamic = false;
+	private Dynamic dynamic;
 	private Boolean hasDynamic = null;
 	private Extends inherits;
 	private boolean abstractClass;
@@ -144,10 +145,15 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 
 	@Override
 	public boolean isDynamic() {
-		return dynamic;
+		return (dynamic != null);
 	}
 
-	public void setDynamic(boolean dynamic) {
+	@Override
+	public Dynamic getDynamism() {
+		return dynamic;
+	}
+	
+	public void setDynamism(Dynamic dynamic) {
 		this.dynamic = dynamic;
 	}
 	
@@ -169,7 +175,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 		String omn = getOwningModuleName();
 		modoc.add(omn + "." + getName());
 
-		if (dynamic) {
+		if (isDynamic()) {
 			hasDynamic = Boolean.TRUE;
 			return;
 		}

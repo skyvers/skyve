@@ -9,7 +9,7 @@
 		]]>
 	</documentation>
 	<persistent name="TEST_AllDynamicAttributesPersistentDynamicChild" />
-	<dynamic>true</dynamic>
+	<dynamic />
 	<singularAlias>All Dynamic Attributes Persistent Dynamic Child</singularAlias>
 	<pluralAlias>All Dynamic Attributes Persistent Dynamic Child</pluralAlias>
 	<parentDocument>AllDynamicAttributesPersistent</parentDocument>

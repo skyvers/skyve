@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 /**
@@ -32,7 +34,13 @@ public interface Repository {
 	 */
 	Customer getCustomer(String customerName);
 
-	Object getDataFactory(Customer customer, String moduleName, String documentName);
+	default Object getDataFactory(Customer customer, String moduleName, String documentName) {
+		Module m = customer.getModule(moduleName);
+		Document d = m.getDocument(customer, documentName);
+		return getDataFactory(customer, d);
+	}
+	
+	Object getDataFactory(Customer customer, Document document);
 	
 	/**
 	 * 

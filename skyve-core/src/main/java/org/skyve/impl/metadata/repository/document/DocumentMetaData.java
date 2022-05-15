@@ -67,6 +67,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
+import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -106,7 +107,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private Extends inherits;
 	private java.lang.Boolean abstractClass;
 	private Persistent persistent;
-	private java.lang.Boolean dynamic;
+	private Dynamic dynamic;
 	private String singularAlias;
 	private String pluralAlias;
 	private String iconStyleClass;
@@ -149,12 +150,12 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		this.persistent = persistent;
 	}
 
-	public java.lang.Boolean getDynamic() {
+	public Dynamic getDynamic() {
 		return dynamic;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setDynamic(java.lang.Boolean dynamic) {
+	public void setDynamic(Dynamic dynamic) {
 		this.dynamic = dynamic;
 	}
 
@@ -312,8 +313,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		result.setExtends(getExtends());
 		result.setAbstract(java.lang.Boolean.TRUE.equals(getAbstract()));
 		result.setPersistent(getPersistent());
-		boolean resultDynamic = java.lang.Boolean.TRUE.equals(getDynamic()) ? true : false;
-		result.setDynamic(resultDynamic);
+		Dynamic resultDynamic = getDynamic();
+		result.setDynamism(resultDynamic);
 		value = getSingularAlias();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The document [singularAlias] is required");
@@ -371,6 +372,35 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 			if ((bizKeyCode == null) && (bizKeyExpression == null)) {
 				throw new MetaDataException(metaDataName + " : The document [bizKey] requires either some code or an expression defined.");
 			}
+		}
+
+		if (resultDynamic != null) {
+			resultDynamic.getActions().forEach((k, v) -> {
+				if (UtilImpl.processStringValue(k) == null) {
+					throw new MetaDataException(metaDataName + " : The attribute [name] in dynamic actions is required");
+				}
+				if (UtilImpl.processStringValue(v) == null) {
+					throw new MetaDataException(metaDataName + " : The attribute [className] in dynamic actions is required");
+				}
+			});
+
+			resultDynamic.getImages().forEach((k, v) -> {
+				if (UtilImpl.processStringValue(k) == null) {
+					throw new MetaDataException(metaDataName + " : The attribute [name] in dynamic images is required");
+				}
+				if (UtilImpl.processStringValue(v) == null) {
+					throw new MetaDataException(metaDataName + " : The attribute [className] in dynamic images is required");
+				}
+			});
+
+			resultDynamic.getModels().forEach((k, v) -> {
+				if (UtilImpl.processStringValue(k) == null) {
+					throw new MetaDataException(metaDataName + " : The attribute [name] in dynamic models is required");
+				}
+				if (UtilImpl.processStringValue(v) == null) {
+					throw new MetaDataException(metaDataName + " : The attribute [className] in dynamic models is required");
+				}
+			});
 		}
 
 		if (bizKeyCode != null) {
@@ -469,7 +499,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						field.setPersistent(false);
 					}
 
-					if (resultDynamic) {
+					if (resultDynamic != null) {
 						field.setDynamic(true);
 					}
 					

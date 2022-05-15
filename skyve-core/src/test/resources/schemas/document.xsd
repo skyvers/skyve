@@ -31,6 +31,8 @@
 
   <xs:element name="document" type="tns:document"/>
 
+  <xs:element name="dynamic" type="tns:dynamic"/>
+
   <xs:element name="enum" type="tns:enumeration"/>
 
   <xs:element name="extends" type="tns:extends"/>
@@ -77,7 +79,7 @@
           <xs:element ref="tns:extends" minOccurs="0"/>
           <xs:element name="abstract" type="xs:boolean" form="qualified" minOccurs="0"/>
           <xs:element ref="tns:persistent" minOccurs="0"/>
-          <xs:element name="dynamic" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element ref="tns:dynamic" minOccurs="0"/>
           <xs:element name="singularAlias" type="xs:string" form="qualified"/>
           <xs:element name="pluralAlias" type="xs:string" form="qualified"/>
           <xs:element name="audited" type="xs:boolean" form="qualified" minOccurs="0"/>
@@ -161,6 +163,28 @@
         <xs:attribute name="discriminator" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dynamic">
+    <xs:sequence>
+      <xs:element name="actions" type="tns:dynamicClassMapType" form="qualified" minOccurs="0"/>
+      <xs:element name="images" type="tns:dynamicClassMapType" form="qualified" minOccurs="0"/>
+      <xs:element name="models" type="tns:dynamicClassMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="bizletClassName" type="xs:string"/>
+    <xs:attribute name="dataFactoryClassName" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="dynamicClassMapType" final="extension restriction">
+    <xs:sequence>
+      <xs:element name="class" type="tns:dynamicClassMapEntryType" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="dynamicClassMapEntryType" final="extension restriction">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="className" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="parentDocument">

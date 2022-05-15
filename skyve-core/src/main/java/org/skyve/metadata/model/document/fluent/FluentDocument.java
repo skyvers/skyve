@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.ConditionMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
@@ -73,7 +74,11 @@ public class FluentDocument {
 			persistent(new FluentPersistent().from(persistent));
 		}
 		
-		dynamic(document.isDynamic());
+		Dynamic dynamic = document.getDynamism();
+		if (dynamic != null) {
+			dynamic(new FluentDynamic().from(dynamic));
+		}
+
 		singularAlias(document.getSingularAlias());
 		pluralAlias(document.getPluralAlias());
 		description(document.getDescription());
@@ -210,8 +215,8 @@ public class FluentDocument {
 		return this;
 	}
 	
-	public FluentDocument dynamic(boolean dynamic) {
-		document.setDynamic(dynamic ? Boolean.TRUE : Boolean.FALSE);
+	public FluentDocument dynamic(FluentDynamic dynamic) {
+		document.setDynamic(dynamic.get());
 		return this;
 	}
 

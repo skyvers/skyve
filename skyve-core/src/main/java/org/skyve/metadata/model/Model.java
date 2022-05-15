@@ -105,6 +105,12 @@ public interface Model extends NamedMetaData {
 	boolean hasDynamic();
 	
 	/**
+	 * Get the dynamic settings.
+	 * @return	The settings.
+	 */
+	Dynamic getDynamism();
+	
+	/**
 	 * 
 	 * @return
 	 */

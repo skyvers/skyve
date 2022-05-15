@@ -145,7 +145,7 @@ public abstract class AbstractDynamicOnDemandRepository extends MutableCachedRep
 	}
 
 	@Override
-	public Object getDataFactory(Customer customer, String moduleName, String documentName) {
+	public Object getDataFactory(Customer customer, Document document) {
 		return null;
 	}
 }

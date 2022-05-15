@@ -595,7 +595,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
-		return isDynamic() ? null : repository.getBizlet(customer, this, true);
+		return repository.getBizlet(customer, this, true);
 	}
 
 	@Override

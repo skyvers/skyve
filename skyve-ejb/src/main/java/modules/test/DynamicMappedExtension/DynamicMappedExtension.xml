@@ -9,7 +9,7 @@
 		]]>
 	</documentation>
 	<extends document="MappedBase" />
-	<dynamic>true</dynamic>
+	<dynamic />
 	<singularAlias>Mapped Extension Single Strategy</singularAlias>
 	<pluralAlias>Mapped Extension Single Strategy</pluralAlias>
 	<bizKey expression="{text}" />

@@ -4,7 +4,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 
 public class FluentPersistent {
-	Persistent persistent = null;
+	private Persistent persistent = null;
 	
 	public FluentPersistent() {
 		persistent = new Persistent();
