@@ -26,6 +26,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.addin.PF4JAddInManager;
@@ -39,6 +40,8 @@ import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.job.QuartzJobScheduler;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.tag.DefaultTagManager;
@@ -49,9 +52,13 @@ import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.chart.ChartData;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -333,6 +340,33 @@ public class EXT {
 	
 	public static SQLDataAccess newSQLDataAccess(DataStore dataStore) {
 		return new SQLDataAccessImpl(dataStore);
+	}
+	
+	public static <T extends Bean> ListModel<T> newListModel(MetaDataQueryDefinition query) {
+		Customer c = CORE.getCustomer();
+		Module m = query.getDocumentModule(c);
+		Document d = m.getDocument(c, query.getDocumentName());
+
+		try {
+			if (d.isDynamic()) {
+				if (AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS.equals(RDBMSDynamicPersistence.class)) {
+					RDBMSDynamicPersistenceListModel<T> result = new RDBMSDynamicPersistenceListModel<>();
+					result.setQuery(query);
+					return result;
+				}
+				throw new DomainException("Cannot create new list model for dynamic persistence implementation " + AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS);
+			}
+
+			DocumentQueryListModel<T> result = new DocumentQueryListModel<>();
+			result.setQuery(query);
+			return result;
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Throwable t) {
+			throw new DomainException("Cannot create new list model", t);
+		}
 	}
 	
 	/**

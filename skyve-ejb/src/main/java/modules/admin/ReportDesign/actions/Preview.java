@@ -55,7 +55,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 			final String queryName = designSpecification.getQueryName();
 			final String documentName = designSpecification.getDocumentName();
 			final String documentOrQueryOrModelName = queryName != null ? queryName : documentName;
-			final ListModel<Bean> listModel = JasperReportUtil.getDocumentQueryListModel(module, documentOrQueryOrModelName);
+			final ListModel<Bean> listModel = JasperReportUtil.getQueryListModel(module, documentOrQueryOrModelName);
 			JasperReportUtil.runReport(reportRenderer.getReport(),
 					user,
 					parameters,

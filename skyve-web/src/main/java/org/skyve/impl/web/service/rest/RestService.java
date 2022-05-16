@@ -35,7 +35,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
@@ -313,8 +313,7 @@ public class RestService {
 				throw new IllegalArgumentException(documentOrQuery + " is not a valid query or document.");
 			}
 	 
-			DocumentQueryListModel<Bean> qm = new DocumentQueryListModel<>();
-	        qm.setQuery(q);
+			ListModel<Bean> qm = EXT.newListModel(q);
 	        qm.setStartRow(start);
 	        qm.setEndRow(end);
 	

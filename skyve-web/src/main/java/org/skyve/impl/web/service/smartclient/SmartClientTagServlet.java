@@ -30,7 +30,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.tag.TagManager;
@@ -274,9 +273,7 @@ public class SmartClientTagServlet extends HttpServlet {
 				throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 			}
 			drivingDocument = module.getDocument(customer, query.getDocumentName());
-			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-			queryModel.setQuery(query);
-			model = queryModel;
+			model = EXT.newListModel(query);
 		}
 		
 		// add filter criteria

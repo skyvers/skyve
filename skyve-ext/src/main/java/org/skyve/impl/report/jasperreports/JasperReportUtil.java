@@ -21,7 +21,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
@@ -347,7 +346,7 @@ public final class JasperReportUtil {
 		return exporter;
 	}
 
-	public static DocumentQueryListModel<Bean> getDocumentQueryListModel(Module module, String documentOrQueryOrModelName) {
+	public static ListModel<Bean> getQueryListModel(Module module, String documentOrQueryOrModelName) {
 		final Customer customer = CORE.getCustomer();
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 		if (query == null) {
@@ -356,9 +355,7 @@ public final class JasperReportUtil {
 		if (query == null) {
 			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 		}
-		final DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-		queryModel.setQuery(query);
 
-		return queryModel;
+		return EXT.newListModel(query);
 	}
 }

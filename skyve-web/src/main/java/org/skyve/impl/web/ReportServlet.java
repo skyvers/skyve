@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
@@ -41,7 +42,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
@@ -171,7 +171,7 @@ public class ReportServlet extends HttpServlet {
 					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
 					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 					final String documentOrQueryOrModelName = modelName != null ? modelName : queryName != null ? queryName : documentName;
-					final ListModel<Bean> listModel = JasperReportUtil.getDocumentQueryListModel(module, documentOrQueryOrModelName);
+					final ListModel<Bean> listModel = JasperReportUtil.getQueryListModel(module, documentOrQueryOrModelName);
 					jasperPrint = JasperReportUtil.runReport(user,
 							document,
 							reportName,
@@ -371,9 +371,7 @@ public class ReportServlet extends HttpServlet {
 						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 					}
 					drivingDocument = module.getDocument(customer, query.getDocumentName());
-					DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-					queryModel.setQuery(query);
-					model = queryModel;
+					model = EXT.newListModel(query);
 				}
 
 				String tagId = (String) values.get("tagId");

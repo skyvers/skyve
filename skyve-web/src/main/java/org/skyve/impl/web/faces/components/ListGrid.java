@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
@@ -22,7 +23,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Util;
 
@@ -124,9 +124,7 @@ public class ListGrid extends HtmlPanelGroup {
 				query = module.getDocumentDefaultQuery(customer, queryName);
 			}
 			aggregateQuery = query.isAggregate();
-			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-			queryModel.setQuery(query);
-			model = queryModel;
+			model = EXT.newListModel(query);
 			listGrid.setQueryName(queryName);
 			name = queryName;
 		}

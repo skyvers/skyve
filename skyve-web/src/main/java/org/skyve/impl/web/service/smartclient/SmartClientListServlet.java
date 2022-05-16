@@ -57,7 +57,6 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
@@ -193,9 +192,7 @@ public class SmartClientListServlet extends HttpServlet {
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
 							}
-					        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-					        queryModel.setQuery(query);
-					        model = queryModel;
+					        model = EXT.newListModel(query);
 					        drivingDocument = module.getDocument(customer, query.getDocumentName());
 						}
 			        }

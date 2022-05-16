@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
@@ -29,7 +30,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
 
@@ -1243,7 +1244,7 @@ public class JasperReportRenderer {
         reportDesignParameters.setLeftMargin(20);
         reportDesignParameters.setRightMargin(20);
 
-        final DocumentQueryListModel<Bean> listModel = getListModel(designSpecification);
+        final ListModel<Bean> listModel = getListModel(designSpecification);
         final Document drivingDocument = listModel.getDrivingDocument();
         for (MetaDataQueryColumn queryColumn : listModel.getColumns()) {
             ReportDesignParameters.ReportColumn reportColumn = new ReportDesignParameters.ReportColumn();
@@ -1272,7 +1273,7 @@ public class JasperReportRenderer {
         return reportDesignParameters;
     }
 
-    protected DocumentQueryListModel<Bean> getListModel(DesignSpecification designSpecification) {
+    protected ListModel<Bean> getListModel(DesignSpecification designSpecification) {
         final Customer customer = CORE.getCustomer();
         final Module module = designSpecification.getModule();
 
@@ -1287,10 +1288,7 @@ public class JasperReportRenderer {
             throw new IllegalArgumentException("Design does not reference a valid query " + designSpecification.getQueryName());
         }
 
-        final DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-        queryModel.setQuery(query);
-
-        return queryModel;
+        return EXT.newListModel(query);
     }
 
     protected boolean isAggregatableAttribute(AttributeType attributeType) {

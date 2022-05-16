@@ -13,6 +13,7 @@ import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
 import org.primefaces.model.SortOrder;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
@@ -35,7 +36,6 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
@@ -116,9 +116,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 				}
 			}
 			d = m.getDocument(c, query.getDocumentName());
-	        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-	        queryModel.setQuery(query);
-	        model = queryModel;
+	        model = EXT.newListModel(query);
 		}
 
 		if (! u.canReadDocument(model.getDrivingDocument())) {

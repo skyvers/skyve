@@ -971,7 +971,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentListWidgetModelName = queryName;
 			currentListWidgetModelDocumentName = query.getDocumentName();
 			currentListWidgetDrivingDocument = query.getDocumentModule(customer).getDocument(customer, currentListWidgetModelDocumentName);
-	        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
+			// Don't need the real list model here and EXT is not available.
+			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 	        queryModel.setQuery(query);
 	        currentListWidgetModel = queryModel;
 	        currentListWidgetAggregateQuery = query.isAggregate();
