@@ -163,6 +163,16 @@ public class Binder {
 	}
 
 	/**
+	 * Call a Bean's association setter method.
+	 * @param bean	The owning bean.
+	 * @param associationBinding	The binding to the association.
+	 * @param value	The value to set.
+	 */
+	public static void setAssociation(Bean bean, String associationBinding, Bean value) {
+		BindUtil.setAssociation(bean, associationBinding, value);
+	}
+	
+	/**
 	 * Call the addElement method on a Bean's collection.
 	 * @param bean	The owning bean.
 	 * @param collectionBinding	The binding to the collection.

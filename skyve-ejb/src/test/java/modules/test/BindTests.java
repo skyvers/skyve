@@ -218,21 +218,6 @@ public class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	public void testCompoundPropertyWithoutMappedProperty4Deep() throws Exception {
-		String binding = Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
-														AllAttributesPersistent.aggregatedAssociationPropertyName,
-														AllAttributesPersistent.aggregatedAssociationPropertyName,
-														AllAttributesPersistent.booleanFlagPropertyName);
-		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
-		Map<String, Object> map = new TreeMap<>();
-		map.put(Binder.createCompoundBinding(AllAttributesPersistent.aggregatedAssociationPropertyName,
-												AllAttributesPersistent.aggregatedAssociationPropertyName),
-					aap);
-		DynamicBean bean = new DynamicBean(m.getName(), aapd.getName(), map);
-		Assert.assertTrue(Binder.get(bean, binding) instanceof Boolean);
-	}
-	
-	@Test
 	public void testFormatMessage() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
 		aap.setText("Test");

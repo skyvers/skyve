@@ -610,7 +610,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				Object requestObject = BindUtil.get(values, BindUtil.unsanitiseBinding(childBindingPrefix));
 				if (requestObject == null) {
 					if (referencedBean != null) {
-						BindUtil.set(appliedTo, childBindingPrefix, null);
+						BindUtil.setAssociation(appliedTo, childBindingPrefix, null);
 					}
 				}
 				else {
@@ -619,7 +619,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 						// find the existing bean with retrieve if not the same as in the request
 						if ((referencedBean == null) || (! referencedBean.getBizId().equals(requestBizId))) {
 							referencedBean = WebUtil.findReferencedBean(relatedDocument, requestBizId, persistence, bean, webContext);
-							BindUtil.set(appliedTo, childBindingPrefix, referencedBean);
+							BindUtil.setAssociation(appliedTo, childBindingPrefix, referencedBean);
 						}
 					}
 					else { // a JSON object

@@ -34,6 +34,7 @@ public class SQLParameterTests extends AbstractSkyveTest {
 	@Override
 	@SuppressWarnings("null")
 	public void before() {
+		super.before();
 		persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 	}
 	

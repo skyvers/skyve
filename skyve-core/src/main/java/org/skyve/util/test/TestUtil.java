@@ -237,13 +237,8 @@ public class TestUtil {
 							associationModule = customer.getModule(associationModuleRef);
 						}
 						Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
-						BindUtil.set(result,
-										name,
-										TestUtil.constructRandomInstance(user,
-												associationModule,
-												associationDocument,
-												currentDepth + 1,
-												maxDepth));
+						Bean value = TestUtil.constructRandomInstance(user, associationModule, associationDocument, currentDepth + 1, maxDepth);
+						BindUtil.setAssociation(result, name, value);
 					}
 					break;
 				case bool:

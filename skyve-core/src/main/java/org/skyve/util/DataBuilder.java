@@ -465,9 +465,8 @@ public class DataBuilder {
 							if (trace) {
 								trace(new StringBuilder(128).append("Set \"").append(newBinding).append("\" to new data"), currentDepth + 1);
 							}
-							BindUtil.set(result,
-											name,
-											build(associationModule, associationDocument, newBinding, currentDepth + 1, allowFactoryRecursion));
+							Bean value = build(associationModule, associationDocument, newBinding, currentDepth + 1, allowFactoryRecursion);
+							BindUtil.setAssociation(result, name, value);
 						}
 					}
 					else if (AttributeType.collection.equals(type)) {

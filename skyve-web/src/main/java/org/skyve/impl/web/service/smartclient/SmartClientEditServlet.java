@@ -648,7 +648,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    			BindUtil.addElementToCollection(contextBean, formBinding, processBean);
 			    		}
 			    		else {
-			    			BindUtil.set(contextBean, formBinding, processBean);
+			    			BindUtil.setAssociation(contextBean, formBinding, processBean);
 			    		}
 					}
 	    		}
@@ -661,7 +661,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    			BindUtil.addElementToCollection(contextBean, formBinding, processBean);
 			    		}
 			    		else {
-			    			BindUtil.set(contextBean, formBinding, processBean);
+			    			BindUtil.setAssociation(contextBean, formBinding, processBean);
 			    		}
 
 			    		if (processBizlet != null) {
@@ -678,7 +678,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			BindUtil.addElementToCollection(contextBean, formBinding, processBean);
 		    		}
 		    		else {
-		    			BindUtil.set(contextBean, formBinding, processBean);
+		    			BindUtil.setAssociation(contextBean, formBinding, processBean);
 		    		}
 	    		}
     		}

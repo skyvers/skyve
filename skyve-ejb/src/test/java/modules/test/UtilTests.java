@@ -44,6 +44,7 @@ public class UtilTests extends AbstractSkyveTest {
 	public void testNestedAttributeHasChanged() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.getAggregatedCollection().clear();
+		test.getComposedCollection().clear();
 
 		test.originalValues().clear();
 		test.getAggregatedAssociation().originalValues().clear();

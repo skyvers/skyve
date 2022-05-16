@@ -69,6 +69,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -104,8 +105,13 @@ public final class BindUtil {
 				boolean success = false;
 				Exception cause = null;
 				for (Bean bean : beans) {
-					String documentName = bean.getBizDocument();
-					if (documentName != null) {
+// The document name null check was commented out because PersistenceTest did not pass.
+// Genn'd EL expressions in AllAttributesPersistent didn't get past the documentName test below
+// because they were a hibernate proxy getting initiailised on construction.
+// I cant work out why this test was here but it must have been guarding something.
+// Maybe MapBean (now DynamicBean) never used to set the document name.
+//					String documentName = bean.getBizDocument();
+//					if (documentName != null) {
 						try {
 							// Try to get the value from this bean
 							// Do not use BindUtil.getMetaDataForBinding as it may not be a document
@@ -129,7 +135,7 @@ public final class BindUtil {
 							cause = e;
 						}
 					}
-				}
+//				}
 				
 				if (! success) {
 					StringBuilder exMessage = new StringBuilder();
@@ -944,6 +950,85 @@ public final class BindUtil {
 		}
 	}
 	
+	private static void setRelationInverse(Customer c, Document d, Relation r, Bean owner, String relationName, Bean value, boolean remove) {
+		String attributeName = null;
+		if (r instanceof Inverse) { // we just set the inverse
+			attributeName = ((Inverse) r).getReferenceName();
+		}
+		else { // lets see if there is an inverse on the element side
+			Module elementModule = c.getModule(value.getBizModule());
+			Document elementDocument = elementModule.getDocument(c, value.getBizDocument());
+			String ownerDocumentName = d.getName(); // owner could be null
+			for (Attribute a : elementDocument.getAllAttributes(c)) {
+				if (a instanceof Inverse) {
+					Inverse i = (Inverse) a;
+					if (ownerDocumentName.equals(i.getDocumentName()) && relationName.equals(i.getReferenceName())) {
+						attributeName = i.getName();
+						break;
+					}
+				}
+			}
+		}
+		
+		if (attributeName != null) {
+			Object inverseValue = get(value, attributeName);
+			if (inverseValue instanceof List<?>) {
+				@SuppressWarnings("unchecked")
+				List<Bean> collection = (List<Bean>) inverseValue;
+				if (remove) {
+					collection.remove(owner);
+				}
+				else {
+					collection.add(owner);
+				}
+			}
+			else {
+				set(value, attributeName, remove ? null : owner);
+			}
+		}
+	}
+	
+	/**
+	 * Call a Bean's association setter method.
+	 * @param bean	The owning bean.
+	 * @param associationBinding	The binding to the association.
+	 * @param value	The value to set.
+	 */
+	public static void setAssociation(Bean bean, String associationBinding, Bean value) {
+		try {
+			Pair<Bean, String> args = penultimateBind(bean, associationBinding);
+			Bean associationOwner = args.getLeft();
+			String associationName = args.getRight();
+			
+			Customer c = CORE.getCustomer();
+			Module m = c.getModule(associationOwner.getBizModule());
+			Document d = m.getDocument(c, associationOwner.getBizDocument());
+			Attribute a = d.getAllAttributes(c).stream().filter(aa -> associationName.equals(aa.getName())).findAny().orElse(null);
+
+			// Dynamic association - make it happen here with no convenience method
+			if (BindUtil.isDynamic(c, m, d, a)) {
+				Relation r = (Relation) a;
+				Bean oldValue = (Bean) BindUtil.get(associationOwner, associationName);
+				if (oldValue != null) {
+					setRelationInverse(c, d, r, associationOwner, associationName, oldValue, true);
+				}
+				if (value != null) {
+					setRelationInverse(c, d, r, associationOwner, associationName, value, false);
+				}
+			}
+
+			// Static or Dynamic association - use set
+			set(associationOwner, associationName, value);
+		}
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
+			throw new DomainException(e);
+		}
+		
+	}
+	
 	/**
 	 * Call the addElement method on a Bean's collection.
 	 * @param bean	The owning bean.
@@ -963,7 +1048,9 @@ public final class BindUtil {
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
-				setElementParent(c, m, d, (Relation) a, element, collectionOwner);
+				Relation r = (Relation) a;
+				setElementParent(c, m, d, r, element, collectionOwner);
+				setRelationInverse(c, d, r, collectionOwner, collectionName, element, false);
 				@SuppressWarnings("unchecked")
 				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
 				return list.add(element);
@@ -1014,7 +1101,9 @@ public final class BindUtil {
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
-				setElementParent(c, m, d, (Relation) a, element, collectionOwner);
+				Relation r = (Relation) a;
+				setElementParent(c, m, d, r, element, collectionOwner);
+				setRelationInverse(c, d, r, collectionOwner, collectionName, element, false);
 				@SuppressWarnings("unchecked")
 				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
 				list.add(index, element);
@@ -1065,7 +1154,9 @@ public final class BindUtil {
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
-				setElementParent(c, m, d, (Relation) a, element, null);
+				Relation r = (Relation) a;
+				setElementParent(c, m, d, r, element, null);
+				setRelationInverse(c, d, r, collectionOwner, collectionName, element, true);
 				@SuppressWarnings("unchecked")
 				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
 				return list.remove(element);
@@ -1123,7 +1214,9 @@ public final class BindUtil {
 				@SuppressWarnings("unchecked")
 				List<T> list = (List<T>) BindUtil.get(collectionOwner, collectionName);
 				T element = list.get(index);
-				setElementParent(c, m, d, (Relation) a, element, null);
+				Relation r = (Relation) a;
+				setElementParent(c, m, d, r, element, null);
+				setRelationInverse(c, d, r, collectionOwner, collectionName, element, true);
 				return list.remove(index);
 			}
 
@@ -2151,7 +2244,7 @@ public final class BindUtil {
 				}
 				if (value == null) {
 					value = navigatingDocument.newInstance(user);
-					BindUtil.set(owner, bindingPart, value);
+					BindUtil.setAssociation((Bean) owner, bindingPart, (Bean) value);
 				}
 				owner = value;
 			}

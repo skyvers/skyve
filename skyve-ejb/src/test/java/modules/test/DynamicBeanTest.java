@@ -19,6 +19,7 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
@@ -233,5 +234,46 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 
 		ListModel<Bean> model = aadpd.getListModel(c, "ListModel", true);
 		Assert.assertNotNull(model);
+	}
+	
+	@Test
+	public void testDynamicInverses() throws Exception {
+		// added to inverse collection assigns to other side (dynamic/static)
+		DynamicPersistentBean dynamicBean = aadpd.newInstance(u);
+		AllDynamicAttributesPersistent staticBean = adapd.newInstance(u);
+		BindUtil.addElementToCollection(dynamicBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, staticBean);
+		Assert.assertSame(dynamicBean, staticBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+
+		// removing from inverse collection nulls other side (dynamic/static)
+		BindUtil.removeElementFromCollection(dynamicBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, staticBean);
+		Assert.assertNull(staticBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+
+		// added to inverse collection assigns to other side (static/dynamic)
+		staticBean = adapd.newInstance(u);
+		dynamicBean = aadpd.newInstance(u);
+		BindUtil.addElementToCollection(staticBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, dynamicBean);
+		Assert.assertSame(staticBean, dynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+
+		// removing from inverse collection nulls other side (static/dynamic)
+		BindUtil.removeElementFromCollection(staticBean, AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName, dynamicBean);
+		Assert.assertNull(dynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName));
+
+		// setting dynamic association adds to inverse collection
+		dynamicBean = aadpd.newInstance(u);
+		DynamicPersistentBean nutherDynamicBean = aadpd.newInstance(u);
+		BindUtil.setAssociation(dynamicBean, AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName, nutherDynamicBean);
+		@SuppressWarnings("unchecked")
+		List<Bean> list = (List<Bean>) nutherDynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName);
+		Assert.assertTrue(list.contains(dynamicBean));
+		
+		// overwriting dynamic association removes from old inverse collection and adds to new inverse collection
+		DynamicPersistentBean nutherNutherDynamicBean = aadpd.newInstance(u);
+		BindUtil.setAssociation(dynamicBean, AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName, nutherNutherDynamicBean);
+		//old
+		Assert.assertFalse(list.contains(dynamicBean));
+		// new
+		@SuppressWarnings("unchecked")
+		List<Bean> newList = (List<Bean>) nutherNutherDynamicBean.getDynamic(AllDynamicAttributesPersistent.dynamicInverseAggregatedAssociationPropertyName);
+		Assert.assertTrue(newList.contains(dynamicBean));
 	}
 }

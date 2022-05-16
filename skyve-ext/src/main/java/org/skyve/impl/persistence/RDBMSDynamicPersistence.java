@@ -507,7 +507,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 						}
 					}
 					else {
-						bean.setDynamic(attributeName, relatedBean);
+						BindUtil.setAssociation(bean, attributeName, relatedBean);
 					}
 				}
 			}

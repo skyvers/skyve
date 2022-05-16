@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -29,6 +30,8 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0));
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1));
 		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
+		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 0));
+		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 1));
 		expectedBindings.add(AllAttributesPersistent.embeddedAssociationPropertyName);
 
 		final Set<String> actualBindings = new TreeSet<>();
@@ -63,6 +66,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(expectedBinding);
 		// importExportColumns[0].parent
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
+		BindUtil.set(test, expectedBinding, null);
 		expectedBindings.add(expectedBinding);
 		// importExportColumns[0].parent.importExportColumns
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ImportExport.importExportColumnsPropertyName);
@@ -75,6 +79,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(expectedBinding);
 		// importExportColumns[1].parent
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ChildBean.PARENT_NAME);
+		BindUtil.set(test, expectedBinding, null);
 		expectedBindings.add(expectedBinding);
 		// importExportColumns[1].parent.importExportColumns
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, ImportExport.importExportColumnsPropertyName);
@@ -116,6 +121,10 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0));
 		// composedAssociation
 		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
+		// composedCollection[0]
+		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 0));
+		// composedCollection[1]
+		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 1));
 		// embeddedAssociation
 		expectedBindings.add(AllAttributesPersistent.embeddedAssociationPropertyName);
 
@@ -154,6 +163,10 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(expectedBinding);
 		// inverseAggregatedAssociation[0].composedAssociation
 		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedAssociationPropertyName));
+		// inverseAggregatedAssociation[0].composedCollection[0]
+		expectedBindings.add(Binder.createIndexedBinding(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedCollectionPropertyName), 0));
+		// inverseAggregatedAssociation[0].composedCollection[1]
+		expectedBindings.add(Binder.createIndexedBinding(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedCollectionPropertyName), 1));
 		// inverseAggregatedAssociation[0].embeddedAssociation
 		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.embeddedAssociationPropertyName));
 		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.embeddedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
@@ -226,6 +239,10 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1));
 		// composedAssociation
 		expectedBindings.add(AllAttributesPersistent.composedAssociationPropertyName);
+		// composedCollection[0]
+		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 0));
+		// composedCollection[1]
+		expectedBindings.add(Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 1));
 		// embeddedAssociation
 		expectedBindings.add(AllAttributesPersistent.embeddedAssociationPropertyName);
 		
@@ -268,10 +285,18 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(Binder.createCompoundBinding(AllAttributesPersistent.embeddedAssociationPropertyName,
 															ChildBean.PARENT_NAME,
 															Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 0)));
-		// embeddedAssociation.parentaggregatedCollection[1]
+		// embeddedAssociation.parent.aggregatedCollection[1]
 		expectedBindings.add(Binder.createCompoundBinding(AllAttributesPersistent.embeddedAssociationPropertyName,
 															ChildBean.PARENT_NAME,
 															Binder.createIndexedBinding(AllAttributesPersistent.aggregatedCollectionPropertyName, 1)));
+		// embeddedAssociation.parent.composedCollection[0]
+		expectedBindings.add(Binder.createCompoundBinding(AllAttributesPersistent.embeddedAssociationPropertyName,
+															ChildBean.PARENT_NAME,
+															Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 0)));
+		// embeddedAssociation.parent.composedCollection[1]
+		expectedBindings.add(Binder.createCompoundBinding(AllAttributesPersistent.embeddedAssociationPropertyName,
+															ChildBean.PARENT_NAME,
+															Binder.createIndexedBinding(AllAttributesPersistent.composedCollectionPropertyName, 1)));
 
 		final Set<String> actualBindings = new TreeSet<>();
 

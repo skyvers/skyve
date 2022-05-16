@@ -34,6 +34,7 @@ public class SQLDataAccessTests extends AbstractSkyveTestDispose {
 	@Override
 	@SuppressWarnings("null")
 	public void before() {
+		super.before();
 		persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 	}
 	
