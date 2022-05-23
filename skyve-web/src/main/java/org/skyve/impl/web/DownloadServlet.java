@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -75,6 +76,7 @@ public class DownloadServlet extends HttpServlet {
 						boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, webContext);
 						Download result = null;
 			        	byte[] bytes = null;
+			        	File file = null;
 						if (! vetoed) {
 							result = downloadAction.download(bean, webContext);
 							WebFileInputStream stream = result.getInputStream();
@@ -83,17 +85,9 @@ public class DownloadServlet extends HttpServlet {
 	
 								bytes = result.getBytes();
 								if (bytes == null) {
-									File file = result.getFile();
-									if (file != null) {
-										try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-											try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-												bis.transferTo(baos);
-												bytes = baos.toByteArray();
-											}
-										}
-									}
+									file = result.getFile();
 								}
-								if (bytes == null) {
+								if ((bytes == null) && (file == null)) {
 									if (stream != null) {
 										try (BufferedInputStream bis = new BufferedInputStream(stream)) {
 											try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -124,16 +118,32 @@ public class DownloadServlet extends HttpServlet {
 							response.setHeader("Content-Disposition",  header.toString());
 			            }
 			
-			            response.setContentLength((bytes != null) ? bytes.length : 0);
+			            if (bytes != null) {
+			            	response.setContentLength(bytes.length);
+			            }
+			            else if (file != null) {
+			            	response.setContentLengthLong(file.length());
+			            }
+			            else {
+			            	response.setContentLength(0);
+			            }
 			            
 			    		// NEED TO KEEP THIS FOR IE TO SHOW PDFs ACTIVE-X temp files required
 			    		response.setHeader("Cache-Control", "cache");
 			            response.setHeader("Pragma", "cache");
 			            response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
 						// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
-						response.setHeader("Accept-Ranges", "bytes");
+						// NOTE - This doesn't support partial requests - Spring does.
+			            // response.setHeader("Accept-Ranges", "bytes");
 			
-			            out.write(bytes);
+						if (bytes != null) {
+							out.write(bytes);
+						}
+						else if (file != null) {
+							try (FileInputStream fis = new FileInputStream(file)) {
+								IOUtils.copy(fis, out);
+							}
+						}
 			            out.flush();
 			            
 						// lastly put the conversation in the cache, after the response is sent
