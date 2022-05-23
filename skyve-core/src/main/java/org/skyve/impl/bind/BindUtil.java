@@ -1003,7 +1003,7 @@ public final class BindUtil {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(associationOwner.getBizModule());
 			Document d = m.getDocument(c, associationOwner.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> associationName.equals(aa.getName())).findAny().orElse(null);
+			Attribute a = d.getPolymorphicAttribute(c, associationName);
 
 			// Dynamic association - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1044,7 +1044,7 @@ public final class BindUtil {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1097,7 +1097,7 @@ public final class BindUtil {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1150,7 +1150,7 @@ public final class BindUtil {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1207,7 +1207,7 @@ public final class BindUtil {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(collectionOwner.getBizModule());
 			Document d = m.getDocument(c, collectionOwner.getBizDocument());
-			Attribute a = d.getAllAttributes(c).stream().filter(aa -> collectionName.equals(aa.getName())).findAny().orElse(null);
+			Attribute a = d.getPolymorphicAttribute(c, collectionName);
 			
 			// Dynamic collection - make it happen here with no convenience method
 			if (BindUtil.isDynamic(c, m, d, a)) {
@@ -1602,8 +1602,7 @@ public final class BindUtil {
 						Customer c = CORE.getCustomer();
 						Module m = c.getModule(b.getBizModule());
 						Document d = m.getDocument(c, b.getBizDocument());
-						final String an = attributeName;
-						Attribute a = d.getAllAttributes(c).stream().filter(aa -> an.equals(aa.getName())).findAny().orElse(null);
+						Attribute a = d.getPolymorphicAttribute(c, attributeName);
 						if (a != null) {
 							try {
 								// binding expression to Association or InverseOne

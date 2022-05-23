@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.MessageSeverity;
@@ -130,7 +131,8 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					// and guess a binding
 					// prefer a like match on Display Name
 					boolean bindingFound = false;
-					for (Attribute a : document.getAllAttributes(customer)) {
+					List<? extends Attribute> attributes = document.getAllAttributes(customer);
+					for (Attribute a : attributes) {
 						if (a.getLocalisedDisplayName().equalsIgnoreCase(columnName)) {
 							newCol.setBindingName(a.getName());
 							bindingFound = true;
@@ -139,7 +141,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					}
 					if (!bindingFound) {
 						// attempt a close match on binding name
-						for (Attribute a : document.getAllAttributes(customer)) {
+						for (Attribute a : attributes) {
 							String cleanColName = Binder.toJavaInstanceIdentifier(columnName);
 							if (a.getName().equalsIgnoreCase(cleanColName)) {
 								newCol.setBindingName(a.getName());
@@ -150,7 +152,7 @@ public class UploadSimpleImportDataFile extends UploadAction<ImportExportExtensi
 					}
 					if (!bindingFound) {
 						// attempt a close match on description
-						for (Attribute a : document.getAllAttributes(customer)) {
+						for (Attribute a : attributes) {
 							String localisedDescription = a.getLocalisedDescription();
 							if ((localisedDescription) != null && localisedDescription.equalsIgnoreCase(columnName)) {
 								newCol.setBindingName(a.getName());

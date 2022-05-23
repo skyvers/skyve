@@ -2,6 +2,7 @@ package org.skyve.metadata.model;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.skyve.metadata.NamedMetaData;
@@ -17,33 +18,35 @@ public interface Model extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	String getOwningModuleName();
+	@Nonnull String getOwningModuleName();
 
 	/**
 	 * 
 	 * @param name
 	 * @return
 	 */
-	Attribute getAttribute(String name);
+	@Nullable Attribute getAttribute(@Nonnull String name);
+	
+	@Nullable Attribute getPolymorphicAttribute(@Nonnull Customer customer, @Nonnull String name);
 
 	/**
 	 *
 	 * @return
 	 */
-	List<? extends Interface> getInterfaces();
+	@Nonnull List<? extends Interface> getInterfaces();
 
 	/**
 	 * 
 	 * @return
 	 */
-	List<? extends Attribute> getAttributes();
+	@Nonnull List<? extends Attribute> getAttributes();
 
 	/**
 	 * Get the attributes for this document and any super-documents for the given customer.
 	 * @param customer	The given customer
 	 * @return	All the attributes.
 	 */
-	List<? extends Attribute> getAllAttributes(Customer customer);
+	@Nonnull List<? extends Attribute> getAllAttributes(Customer customer);
 
 	/**
 	 * 

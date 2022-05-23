@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
@@ -50,7 +51,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private String description;
 
 	@Override
-	public String getOwningModuleName() {
+	public @Nonnull String getOwningModuleName() {
 		return owningModuleName;
 	}
 
@@ -59,7 +60,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 
 	@Override
-	public Attribute getAttribute(@SuppressWarnings("hiding") String name) {
+	public @Nullable Attribute getAttribute(@SuppressWarnings("hiding") @Nonnull String name) {
 		return (Attribute) getMetaData(name);
 	}
 
@@ -78,12 +79,12 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 
 	@Override
-	public List<? extends Attribute> getAttributes() {
+	public @Nonnull List<? extends Attribute> getAttributes() {
 		return Collections.unmodifiableList(attributes);
 	}
 	
 	@Override
-	public List<? extends Attribute> getAllAttributes(@Nonnull Customer customer) {
+	public @Nonnull List<? extends Attribute> getAllAttributes(@Nonnull Customer customer) {
 		List<Attribute> result = new ArrayList<>(attributes);
 		Extends currentInherits = inherits;
 		if (currentInherits != null) {
@@ -98,6 +99,23 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 		return Collections.unmodifiableList(result);
 	}
 
+	@Override
+	public @Nullable Attribute getPolymorphicAttribute(@Nonnull Customer customer, @SuppressWarnings("hiding") @Nonnull String name) {
+		Attribute result = getAttribute(name);
+		if (result == null) {
+			Extends currentInherits = inherits;
+			if (currentInherits != null) {
+				while ((result == null) && (currentInherits != null)) {
+					Module module = customer.getModule(getOwningModuleName());
+					Document baseDocument = module.getDocument(customer, currentInherits.getDocumentName());
+					result = baseDocument.getAttribute(name);
+					currentInherits = baseDocument.getExtends();
+				}
+			}
+		}
+		return result;
+	}
+	
 	@Override
 	public String getPluralAlias() {
 		return pluralAlias;

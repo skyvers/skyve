@@ -309,8 +309,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 				}
 			}
 			
-			getAllAttributes(customer).forEach(a -> p.put(a.getName(), null));
-
 			if (isHierarchical) {
 				@SuppressWarnings("unchecked")
 				T t = isPersistent ?
@@ -332,6 +330,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						(T) new DynamicBean(getOwningModuleName(), getName(), p);
 				result = t;
 			}
+			// default any dynamic values here
 			final T t = result; // to get around final required in forEach()
 			getAllAttributes(customer).forEach(a -> t.putDynamic(a.getName(), dynamicDefaultValue(a, t)));
 		}
