@@ -94,7 +94,7 @@ public class NewModuleMojo extends AbstractSkyveMojo {
 				final CustomerModuleMetaData newCustomerModuleMetaData = new CustomerModuleMetaData();
 				newCustomerModuleMetaData.setName(properModuleName);
 
-				final CustomerMetaData customerMetaData = XMLMetaData.unmarshalCustomer(customerFile.getAbsolutePath());
+				final CustomerMetaData customerMetaData = XMLMetaData.unmarshalCustomerFile(customerFile.getAbsolutePath());
 				customerMetaData.getModules().getModules().add(newCustomerModuleMetaData);
 
 				XMLMetaData.marshalCustomer(customerMetaData, absoluteSrcPath.toFile().getAbsolutePath());

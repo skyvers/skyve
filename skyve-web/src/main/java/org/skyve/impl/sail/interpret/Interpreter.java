@@ -63,7 +63,7 @@ public class Interpreter {
 				System.out.println(XMLMetaData.marshalSAIL(automation));
 			}
 */
-			Automation automation = XMLMetaData.unmarshalSAIL("/Users/mike/dtf/skyve/skyve-tools/test.xml");
+			Automation automation = XMLMetaData.unmarshalSAILString("/Users/mike/dtf/skyve/skyve-tools/test.xml");
 			PrimeFacesInlineSeleneseExecutor executor = new PrimeFacesInlineSeleneseExecutor(new SkyveComponentBuilderChain(),
 																								new ResponsiveLayoutBuilder());
 			automation.execute(executor);

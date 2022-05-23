@@ -150,7 +150,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Router unmarshalRouter(String file) {
+	public static Router unmarshalRouterFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -166,6 +166,17 @@ public class XMLMetaData {
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal router at " + file, e);
+		}
+	}
+
+	public static Router unmarshalRouterString(String xml) {
+		try (StringReader sr = new StringReader(xml)) {
+			Unmarshaller unmarshaller = ROUTER_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(ROUTER_SCHEMA);
+			return (Router) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal router xml " + xml, e);
 		}
 	}
 
@@ -223,12 +234,13 @@ public class XMLMetaData {
 					}
 				}
 			}
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal customer at " + file.getPath(), e);
 		}
 	}
 
-	public static CustomerMetaData unmarshalCustomer(String file) {
+	public static CustomerMetaData unmarshalCustomerFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -244,6 +256,17 @@ public class XMLMetaData {
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal customer at " + file, e);
+		}
+	}
+
+	public static CustomerMetaData unmarshalCustomerString(String xml) {
+		try (StringReader sr = new StringReader(xml)) {
+			Unmarshaller unmarshaller = CUSTOMER_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(CUSTOMER_SCHEMA);
+			return (CustomerMetaData) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal customer xml " + xml, e);
 		}
 	}
 
@@ -308,12 +331,13 @@ public class XMLMetaData {
 					}
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal document at " + file.getPath(), e);
 		}
 	}
 
-	public static ModuleMetaData unmarshalModule(String file) {
+	public static ModuleMetaData unmarshalModuleFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -326,8 +350,20 @@ public class XMLMetaData {
 					}
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal module at " + file, e);
+		}
+	}
+
+	public static ModuleMetaData unmarshalModuleString(String xml) {
+		try (StringReader sr = new StringReader(xml)) {
+			Unmarshaller unmarshaller = MODULE_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(MODULE_SCHEMA);
+			return (ModuleMetaData) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal module xml " + xml, e);
 		}
 	}
 
@@ -347,7 +383,8 @@ public class XMLMetaData {
 
 			String xml = cleanup(doc.asXML());
 			return xml;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal document " + document.getName(), e);
 		}
 	}
@@ -390,12 +427,13 @@ public class XMLMetaData {
 					}
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal document at " + file.getPath(), e);
 		}
 	}
 
-	public static DocumentMetaData unmarshalDocument(String file) {
+	public static DocumentMetaData unmarshalDocumentFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -411,6 +449,17 @@ public class XMLMetaData {
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal document at " + file, e);
+		}
+	}
+
+	public static DocumentMetaData unmarshalDocumentString(String xml) {
+		try (StringReader sr = new StringReader(xml)) {
+			Unmarshaller unmarshaller = DOCUMENT_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(DOCUMENT_SCHEMA);
+			return (DocumentMetaData) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal document xml " + xml, e);
 		}
 	}
 
@@ -486,7 +535,7 @@ public class XMLMetaData {
 		}
 	}
 	
-	public static ViewMetaData unmarshalView(String file) {
+	public static ViewMetaData unmarshalViewFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -502,6 +551,17 @@ public class XMLMetaData {
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal view at " + file, e);
+		}
+	}
+
+	public static ViewMetaData unmarshalViewString(String xml) {
+		try (StringReader sr = new StringReader(xml)) {
+			Unmarshaller unmarshaller = VIEW_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(VIEW_SCHEMA);
+			return (ViewMetaData) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal view xml " + xml, e);
 		}
 	}
 
@@ -544,7 +604,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Automation unmarshalSAIL(String sail) {
+	public static Automation unmarshalSAILString(String sail) {
 		try (StringReader sr = new StringReader(sail)) {
 			Unmarshaller unmarshaller = SAIL_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(SAIL_SCHEMA);

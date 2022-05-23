@@ -97,7 +97,7 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 				return;
 			}
 
-			final ModuleMetaData moduleMetaData = XMLMetaData.unmarshalModule(moduleMetaDataFile.toFile().getAbsolutePath());
+			final ModuleMetaData moduleMetaData = XMLMetaData.unmarshalModuleFile(moduleMetaDataFile.toFile().getAbsolutePath());
 			final ModuleDocument moduleDocument = new ModuleDocument();
 			moduleDocument.setRef(documentName);
 			moduleMetaData.getDocuments().add(moduleDocument);

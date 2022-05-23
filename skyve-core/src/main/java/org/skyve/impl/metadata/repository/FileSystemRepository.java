@@ -320,7 +320,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(absolutePath);
 		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-		final Router globalRouter = XMLMetaData.unmarshalRouter(sb.toString());
+		final Router globalRouter = XMLMetaData.unmarshalRouterFile(sb.toString());
 		return globalRouter.convert(ROUTER_NAME, getDelegator());
 	}
 
@@ -339,7 +339,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				sb.append(absolutePath);
 				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
 				if (new File(sb.toString()).exists()) {
-					final Router moduleRouter = XMLMetaData.unmarshalRouter(sb.toString());
+					final Router moduleRouter = XMLMetaData.unmarshalRouterFile(sb.toString());
 					result.add(moduleRouter.convert(ROUTER_NAME, getDelegator()));
 				}
 				sb.setLength(0);
@@ -351,7 +351,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(absolutePath);
 			sb.append(MODULES_NAMESPACE).append(moduleName).append("/").append(ROUTER_NAME).append(".xml");
 			if (new File(sb.toString()).exists()) {
-				final Router moduleRouter = XMLMetaData.unmarshalRouter(sb.toString());
+				final Router moduleRouter = XMLMetaData.unmarshalRouterFile(sb.toString());
 				result.add(moduleRouter.convert(ROUTER_NAME, getDelegator()));
 			}
 			sb.setLength(0);
@@ -407,7 +407,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			sb.append(absolutePath);
 			sb.append(CUSTOMERS_NAMESPACE);
 			sb.append(customerName).append('/').append(customerName).append(".xml");
-			result = XMLMetaData.unmarshalCustomer(sb.toString());
+			result = XMLMetaData.unmarshalCustomerFile(sb.toString());
 			if (! customerName.equals(result.getName())) {
 				throw new MetaDataException("Customer is defined with file name of " + sb.toString() + 
 												" but the name attribute is " + result.getName());
@@ -437,7 +437,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 			}
 			sb.append(moduleName).append('/').append(moduleName).append(".xml");
-			result = XMLMetaData.unmarshalModule(sb.toString());
+			result = XMLMetaData.unmarshalModuleFile(sb.toString());
 			if (! moduleName.equals(result.getName())) {
 				throw new MetaDataException("Module is defined with file name of " + sb.toString() + 
 												" but the name attribute is " + result.getName());
@@ -469,7 +469,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			}
 			sb.append(moduleName).append('/');
 			sb.append(documentName).append('/').append(documentName).append(".xml");
-			result = XMLMetaData.unmarshalDocument(sb.toString());
+			result = XMLMetaData.unmarshalDocumentFile(sb.toString());
 			if (! documentName.equals(result.getName())) {
 				throw new MetaDataException("Document is defined with file name of " + sb.toString() + 
 												" but the name attribute is " + result.getName());
@@ -505,7 +505,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				sb.append(uxui).append('/');
 			}
 			sb.append(viewName).append(".xml");
-			result = XMLMetaData.unmarshalView(sb.toString());
+			result = XMLMetaData.unmarshalViewFile(sb.toString());
 			if (! viewName.equals(result.getName())) {
 				throw new MetaDataException("View is defined with file name of " + sb.toString() + 
 												" but the name attribute is " + result.getName());

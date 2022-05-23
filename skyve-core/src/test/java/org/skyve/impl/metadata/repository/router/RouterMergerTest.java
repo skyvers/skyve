@@ -22,7 +22,7 @@ public class RouterMergerTest {
 
 	@Test
 	public void testMerge() {
-		final Router router = XMLMetaData.unmarshalRouter(this.getClass().getResource("router.xml").getPath());
+		final Router router = XMLMetaData.unmarshalRouterFile(this.getClass().getResource("router.xml").getPath());
 
 		final Router routerToMerge = new Router();
 		final UxUiMetadata newUxUi = new UxUiMetadata();
