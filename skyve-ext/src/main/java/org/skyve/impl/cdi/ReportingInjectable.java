@@ -112,6 +112,11 @@ public class ReportingInjectable implements Reporting, Serializable {
 	}
 
 	@Override
+	public void addTemplate(String templateName, String templateMarkup) {
+		EXT.getReporting().addTemplate(templateName, templateMarkup);
+	}
+
+	@Override
 	public Template getFreemarkerTemplate(String templateName) throws Exception {
 		return EXT.getReporting().getFreemarkerTemplate(templateName);
 	}

@@ -9,9 +9,9 @@ import java.util.Map;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.impl.util.ReportParameters;
-import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 import org.skyve.util.MailAttachment;
@@ -118,6 +118,17 @@ public interface Reporting extends Observer {
 	 */
 	MailAttachment getMailAttachmentFromJasperReport(List<ReportParameters> reportParameters)
 	throws Exception;
+
+	/**
+	 * Adds a new in-memory String based template to the list of templates Freemarker will search
+	 * for when attempting to resolve templates to merge. This can be used when the template
+	 * for a report does not reside in a document report package, or in the default report
+	 * database location.
+	 * 
+	 * @param templateName The name of the template, e.g. <code>myDynamicReport</code>
+	 * @param templateMarkup The markup in the template, e.g. <code>"Hello ${user}"</code>
+	 */
+	void addTemplate(final String templateName, final String templateMarkup);
 
 	Template getFreemarkerTemplate(String templateName) throws Exception;
 	

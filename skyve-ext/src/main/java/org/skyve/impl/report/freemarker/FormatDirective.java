@@ -84,6 +84,9 @@ public class FormatDirective implements TemplateDirectiveModel {
 			if (paramName.equals(PARAM_NAME_BEAN)) {
 				// unwrap to try get the skyve object
 				Object beanObj = DeepUnwrap.permissiveUnwrap(paramValue);
+				if (beanObj == null) {
+					throw new TemplateModelException("Parameter '" + PARAM_NAME_BEAN + "' cannot be null.");
+				}
 				if (!(beanObj instanceof Bean)) {
 					throw new TemplateModelException(String.format("The '%s' parameter must be a Skyve bean.", PARAM_NAME_BEAN));
 				}
