@@ -51,6 +51,7 @@ import freemarker.cache.ConditionalTemplateConfigurationFactory;
 import freemarker.cache.FileExtensionMatcher;
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.OrMatcher;
+import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.TemplateConfiguration;
@@ -61,6 +62,7 @@ import freemarker.template.TemplateExceptionHandler;
 public final class FreemarkerReportUtil {
 	private static Configuration cfg;
 	private static PathMatchingResourcePatternResolver resolver;
+	private static StringTemplateLoader strl;
 
 	private FreemarkerReportUtil() {
 		// disallow instantiation
@@ -77,12 +79,13 @@ public final class FreemarkerReportUtil {
 		ClassTemplateLoader ctl = new ClassTemplateLoader(cl, "/modules");
 		ClassTemplateLoader ctl2 = new ClassTemplateLoader(cl, "/templates");
 		SkyveDatastoreTemplateLoader sdtl = new SkyveDatastoreTemplateLoader();
+		strl = new StringTemplateLoader();
 
 		// Use a resolver based on the context class loader
 		resolver = new PathMatchingResourcePatternResolver(cl);
 
 		// Define a multi-template loader in the order we want templates discovered
-		MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { sdtl, ctl, ctl2 });
+		MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { strl, sdtl, ctl, ctl2 });
 		cfg.setTemplateLoader(mtl);
 
 		// From here we will set the settings recommended for new projects. These
@@ -134,6 +137,17 @@ public final class FreemarkerReportUtil {
 		// customDateFormats.put("skyveDateTime", new AliasTemplateDateFormatFactory("dd-MMM-yyyy hh:mm"));
 		// customDateFormats.put("skyveTimestamp", new AliasTemplateDateFormatFactory("dd-MMM-yyyy HH:mm:ss a"));
 		// cfg.setCustomDateFormats(customDateFormats);
+	}
+
+	/**
+	 * Adds a new in-memory String based template to the list of templates Freemarker will search
+	 * for when attempting to resolve templates to merge.
+	 * 
+	 * @param templateName The name of the template, e.g. <code>myDynamicReport</code>
+	 * @param templateMarkup The markup in the template, e.g. <code>"Hello ${user}"</code>
+	 */
+	public static void addTemplate(final String templateName, final String templateMarkup) {
+		strl.putTemplate(templateName, templateMarkup);
 	}
 
 	/**
@@ -336,6 +350,21 @@ public final class FreemarkerReportUtil {
 		Template t = cfg.getTemplate(templateName);
 		CORE.getPersistence().resetDocumentPermissionScopes();
 		return t;
+	}
+
+	/**
+	 * Removes the template with the specified name if it was added earlier using {@link #addTemplate(String, String)}.
+	 * 
+	 * <p>
+	 * Note that this method is not thread safe! Don't call it after FreeMarker has started
+	 * using this template loader.
+	 * </p>
+	 * 
+	 * @param templateName Exactly the key with which the template was added.
+	 * @return Whether a template was found with the given key (and hence was removed now)
+	 */
+	public static boolean removeTemplate(final String templateName) {
+		return strl.removeTemplate(templateName);
 	}
 
 	/**

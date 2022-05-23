@@ -89,6 +89,11 @@ public class DefaultReporting implements Reporting {
 	}
 
 	@Override
+	public void addTemplate(String templateName, String templateMarkup) {
+		FreemarkerReportUtil.addTemplate(templateName, templateMarkup);
+	}
+
+	@Override
 	public Template getFreemarkerTemplate(String templateName) throws Exception {
 		return FreemarkerReportUtil.getTemplate(templateName);
 	}
