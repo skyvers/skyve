@@ -21,7 +21,7 @@ public class TemporalBucket implements Bucket {
 
 	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public static enum TemporalBucketType {
-		dayMonthYear, day, month, year, monthYear, hour, hourDay, hourDayMonth, minuteHour, secondMinuteHour
+		quarter, dayMonthYear, day, month, year, monthYear, hour, hourDay, hourDayMonth, minuteHour, secondMinuteHour
 	}
 	
 	protected TemporalBucketType type = null;
@@ -33,57 +33,62 @@ public class TemporalBucket implements Bucket {
 	@Override
 	public String bizQLExpression(String categoryBinding) {
 		StringBuilder result = new StringBuilder(128);
-		if (TemporalBucketType.dayMonthYear.equals(type)) {
+		if (TemporalBucketType.quarter.equals(type)) {
+			result.append("case when month(bean.")
+					.append(categoryBinding).append(") <= 3 then 1 when month(bean.")
+					.append(categoryBinding).append(") <= 6 then 2 when month(bean.")
+					.append(categoryBinding).append(") <= 9 then 3 ")
+					.append("else 4 end");
+			padZero(result);
+			String month = result.toString();
+
+			result.setLength(0);
+			result.append("concat(cast(year(bean.").append(categoryBinding);
+			result.append(") as string), '-', ").append(month).append(')');
+		} else if (TemporalBucketType.dayMonthYear.equals(type)) {
 			result.append("month(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String month = result.toString();
-			
+
 			result.setLength(0);
 			result.append("day(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String day = result.toString();
-			
+
 			result.setLength(0);
 			result.append("concat(cast(year(bean.").append(categoryBinding);
 			result.append(") as string), '-', ").append(month);
 			result.append(", '-', ").append(day).append(')');
-		}
-		else if (TemporalBucketType.day.equals(type)) {
+		} else if (TemporalBucketType.day.equals(type)) {
 			result.append("day(bean.").append(categoryBinding).append(')');
-		}
-		else if (TemporalBucketType.month.equals(type)) {
+		} else if (TemporalBucketType.month.equals(type)) {
 			result.append("month(bean.").append(categoryBinding).append(')');
-		}
-		else if (TemporalBucketType.year.equals(type)) {
+		} else if (TemporalBucketType.year.equals(type)) {
 			result.append("year(bean.").append(categoryBinding).append(')');
-		}
-		else if (TemporalBucketType.monthYear.equals(type)) {
+		} else if (TemporalBucketType.monthYear.equals(type)) {
 			result.append("month(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String month = result.toString();
-			
+
 			result.setLength(0);
 			result.append("concat(cast(year(bean.").append(categoryBinding);
 			result.append(") as string), '-', ").append(month).append(')');
-		}
-		else if (TemporalBucketType.hour.equals(type)) {
+		} else if (TemporalBucketType.hour.equals(type)) {
 			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
-		}
-		else if (TemporalBucketType.hourDay.equals(type)) {
+		} else if (TemporalBucketType.hourDay.equals(type)) {
 			result.append("day(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String day = result.toString();
-			
+
 			result.setLength(0);
 			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String hour = result.toString();
-			
+
 			result.setLength(0);
 			result.append("concat(").append(day).append(", ' ', ").append(hour).append(')');
-		}
-		else if (TemporalBucketType.hourDayMonth.equals(type)) {
+		} else if (TemporalBucketType.hourDayMonth.equals(type)) {
 			result.append("month(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String month = result.toString();
@@ -102,8 +107,7 @@ public class TemporalBucket implements Bucket {
 			result.append("concat(").append(month);
 			result.append(", '-', ").append(day);
 			result.append(", ' ', ").append(hour).append(')');
-		}
-		else if (TemporalBucketType.minuteHour.equals(type)) {
+		} else if (TemporalBucketType.minuteHour.equals(type)) {
 			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String hour = result.toString();
@@ -115,8 +119,7 @@ public class TemporalBucket implements Bucket {
 
 			result.setLength(0);
 			result.append("concat(").append(hour).append(", ':', ").append(minute).append(')');
-		}
-		else if (TemporalBucketType.secondMinuteHour.equals(type)) {
+		} else if (TemporalBucketType.secondMinuteHour.equals(type)) {
 			result.append("hour(bean.").append(categoryBinding).append(')');
 			padZero(result);
 			String hour = result.toString();
@@ -143,43 +146,37 @@ public class TemporalBucket implements Bucket {
 		if (category == null) {
 			return null;
 		}
-		
+
 		StringBuilder result = new StringBuilder(16);
-		if (TemporalBucketType.dayMonthYear.equals(type)) {
+		if (TemporalBucketType.quarter.equals(type)) {
+			String[] tokens = category.toString().split("-");
+			result.append(quarter(Integer.parseInt(tokens[1]))).append(' ').append(tokens[0]);
+		} else if (TemporalBucketType.dayMonthYear.equals(type)) {
 			String[] tokens = category.toString().split("-");
 			result.append(day(Integer.parseInt(tokens[2]))).append(' ');
 			result.append(month(Integer.parseInt(tokens[1]))).append(' ').append(tokens[0]);
-		}
-		else if (TemporalBucketType.day.equals(type)) {
+		} else if (TemporalBucketType.day.equals(type)) {
 			result.append(day(((Number) category).intValue()));
-		}
-		else if (TemporalBucketType.month.equals(type)) {
+		} else if (TemporalBucketType.month.equals(type)) {
 			result.append(month(((Number) category).intValue()));
-		}
-		else if (TemporalBucketType.year.equals(type)) {
+		} else if (TemporalBucketType.year.equals(type)) {
 			result.append(category);
-		}
-		else if (TemporalBucketType.monthYear.equals(type)) {
+		} else if (TemporalBucketType.monthYear.equals(type)) {
 			String[] tokens = category.toString().split("-");
 			result.append(month(Integer.parseInt(tokens[1]))).append(' ').append(tokens[0]);
-		}
-		else if (TemporalBucketType.hour.equals(type)) {
+		} else if (TemporalBucketType.hour.equals(type)) {
 			result.append(category).append(":00");
-		}
-		else if (TemporalBucketType.hourDay.equals(type)) {
+		} else if (TemporalBucketType.hourDay.equals(type)) {
 			String[] tokens = category.toString().split("\\s");
 			result.append(day(Integer.parseInt(tokens[0]))).append(' ').append(tokens[1]).append(":00");
-		}
-		else if (TemporalBucketType.hourDayMonth.equals(type)) {
+		} else if (TemporalBucketType.hourDayMonth.equals(type)) {
 			String[] tokens = category.toString().split("(\\s|-)");
 			result.append(month(Integer.parseInt(tokens[0]))).append(' ');
 			result.append(day(Integer.parseInt(tokens[1]))).append(' ').append(tokens[2]).append(":00");
-		}
-		else if (TemporalBucketType.minuteHour.equals(type)) {
+		} else if (TemporalBucketType.minuteHour.equals(type)) {
 			String[] tokens = category.toString().split(":");
 			result.append(tokens[0]).append(':').append(tokens[1]);
-		}
-		else if (TemporalBucketType.secondMinuteHour.equals(type)) {
+		} else if (TemporalBucketType.secondMinuteHour.equals(type)) {
 			String[] tokens = category.toString().split(":");
 			result.append(tokens[0]).append(':').append(tokens[1]).append(':').append(tokens[2]);
 		}
@@ -210,5 +207,9 @@ public class TemporalBucket implements Bucket {
 		expression.insert(0, "case when ");
 		expression.append(" < 10 then concat('0', cast(").append(string);
 		expression.append(" as string)) else concat('', cast(").append(string).append(" as string)) end");
+	}
+
+	private static String quarter(int quarter) {
+		return "Q" + quarter;
 	}
 }
