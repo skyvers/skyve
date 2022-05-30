@@ -17,7 +17,6 @@ public class SubscriptionFactory {
 				.optional(true, false)
 				.depth(1)
 				.build(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
-		sub.setFormatType(FormatType.email);
 
 		return sub;
 	}

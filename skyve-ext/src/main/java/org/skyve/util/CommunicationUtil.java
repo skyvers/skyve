@@ -294,28 +294,21 @@ public class CommunicationUtil {
 					CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
 					DocumentQuery q = CORE.getPersistence().newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
 					q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, address);
-					q.getFilter().addEquals(Subscription.formatTypePropertyName, c.getFormatType());
 					Subscription subscription = q.beanResult();
 
 					if (subscription != null) {
 						// check for declined
 						if (Boolean.TRUE.equals(subscription.getDeclined())) {
 							StringBuilder msg = new StringBuilder(128);
-							if (subscription.getFormatType() == null || c.getFormatType().equals(subscription.getFormatType())) {
-								msg.append(communicationDoc.getLocalisedSingularAlias()).append(" prevented because the recipient ");
-								msg.append(address).append(" has a ").append(subscriptionDoc.getLocalisedSingularAlias());
-								msg.append(" set ").append(Subscription.declinedPropertyName);
-								if (subscription.getFormatType() != null) {
-									msg.append(" for ").append(subscription.getFormatType().toLocalisedDescription());
-								}
+							msg.append(communicationDoc.getLocalisedSingularAlias()).append(" prevented because the recipient ");
+							msg.append(address).append(" has a ").append(subscriptionDoc.getLocalisedSingularAlias());
+							msg.append(" set ").append(Subscription.declinedPropertyName);
 
-								// block the communication if explicit mode
-								if (ResponseMode.EXPLICIT.equals(responseMode)) {
-									throw new Exception(msg.toString());
-								}
+							// block the communication if explicit mode
+							if (ResponseMode.EXPLICIT.equals(responseMode)) {
+								throw new Exception(msg.toString());
 							}
 						} else {
-							// format = subscription.getFormatType();
 							address = subscription.getPreferredReceiverIdentifier();
 						}
 					}
