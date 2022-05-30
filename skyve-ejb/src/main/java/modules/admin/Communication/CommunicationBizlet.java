@@ -133,11 +133,11 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
 
 			StringBuilder sb = new StringBuilder(64);
-			sb.append(document.getAttribute(Communication.systemUsePropertyName).getLocalisedDisplayName());
-			sb.append(' ').append(document.getLocalisedPluralAlias());
+			@SuppressWarnings("null")
+			String su = document.getAttribute(Communication.systemUsePropertyName).getLocalisedDisplayName();
+			sb.append(su).append(' ').append(document.getLocalisedPluralAlias());
 			sb.append(" may not be deleted unless ");
-			sb.append(document.getAttribute(Communication.systemUsePropertyName).getLocalisedDisplayName());
-			sb.append(" is set to FALSE.");
+			sb.append(su).append(" is set to FALSE.");
 
 			throw new ValidationException(new Message(sb.toString()));
 		}

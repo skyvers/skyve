@@ -57,9 +57,13 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 			if (bean.getFormatType() == null) {
 				StringBuilder msg = new StringBuilder(128);
 				msg.append("A ").append(document.getLocalisedSingularAlias());
-				msg.append(" requires a ").append(document.getAttribute(Subscription.formatTypePropertyName).getLocalisedDisplayName());
+				@SuppressWarnings("null")
+				String formatTypeDisplayName = document.getAttribute(Subscription.formatTypePropertyName).getLocalisedDisplayName();
+				msg.append(" requires a ").append(formatTypeDisplayName);
 				msg.append(" unless the ").append(document.getLocalisedSingularAlias());
-				msg.append(" has ").append(document.getAttribute(Subscription.declinedPropertyName).getLocalisedDisplayName()).append(" set.");
+				@SuppressWarnings("null")
+				String declinedDisplayName = document.getAttribute(Subscription.declinedPropertyName).getLocalisedDisplayName();
+				msg.append(" has ").append(declinedDisplayName).append(" set.");
 				e.getMessages().add(new Message(Subscription.formatTypePropertyName, msg.toString()));
 			}
 		}

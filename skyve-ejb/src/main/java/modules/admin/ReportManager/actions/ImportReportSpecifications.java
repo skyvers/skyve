@@ -56,9 +56,8 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 						validateReport(pb, false, null);
 						webContext.growl(MessageSeverity.info, "Report validated ok - select import option to import this report");
 						return bean;
-					} else {
-						validateReport(pb, true, null);
 					}
+					validateReport(pb, true, null);
 	
 					// now load
 					pb = (PersistentBean) JSON.unmarshall(CORE.getUser(), json);
@@ -75,9 +74,9 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 			} else if (MimeType.zip.getStandardFileSuffix().equals(ext)) {
 	
 				// store the uploaded zip
-				File outdir = bean.getTemporaryPreparationFolder();
+				File outdir = ReportManagerExtension.getTemporaryPreparationFolder();
 				bean.setPathToZip(outdir.getAbsolutePath());
-				File importFile = bean.getZipFile();
+				File importFile = ReportManagerExtension.getZipFile();
 				Files.copy(in, Paths.get(importFile.getAbsolutePath()));
 	
 				// extract the report configurations from the zip
@@ -193,7 +192,7 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 				newTemplate = CORE.getPersistence().save(newTemplate);
 			} catch (Exception e) {
 				e.printStackTrace();
-				bean.cleanUpTemporaryFiles();
+				ReportManagerExtension.cleanUpTemporaryFiles();
 				throw new ValidationException(new Message("The report template " + newTemplate.getName() + " could not be saved."));
 			}
 		}

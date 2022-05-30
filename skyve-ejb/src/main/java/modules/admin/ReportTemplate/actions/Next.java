@@ -34,7 +34,7 @@ public class Next implements ServerSideAction<ReportTemplateExtension> {
 	/**
 	 * Reset the markup field state to the initial state.
 	 */
-	private void resetState(ReportTemplateExtension bean) {
+	private static void resetState(ReportTemplateExtension bean) {
 		bean.getParameters().clear();
 		bean.getDatasets().clear();
 		bean.setTemplate(null);

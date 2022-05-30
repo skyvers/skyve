@@ -82,7 +82,7 @@ public class StartupExtension extends Startup {
 		} else {
 			try {
 				setMapCentre(new WKTReader().read(mapCentre));
-			} catch (ParseException e) {
+			} catch (@SuppressWarnings("unused") ParseException e) {
 				setMapCentre(new GeometryFactory().createPoint(new Coordinate(0, 0)));
 			}
 		}

@@ -122,8 +122,6 @@ public class SkyveSpringSecurity {
 				
 				return getJdbcTemplate().query(
 						skyveUserQuery,
-						// 2 params for multi-tennant
-						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, userName} : new String[] {userName},
 						new RowMapper<UserDetails>() {
 							@Override
 							public UserDetails mapRow(ResultSet rs, int rowNum)
@@ -165,7 +163,9 @@ public class SkyveSpringSecurity {
 													! locked,
 													AuthorityUtils.NO_AUTHORITIES);
 							}
-						});
+						},
+						// 2 params for multi-tennant
+						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, userName} : new String[] {userName});
 			}
 			
 			@Override

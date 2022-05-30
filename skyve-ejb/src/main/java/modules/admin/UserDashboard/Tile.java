@@ -59,44 +59,43 @@ public class Tile implements Serializable {
 		public Builder() {
 		}
 
-		public Builder action(final String action) {
+		public Builder action(@SuppressWarnings("hiding") final String action) {
 			this.action = action;
 			return this;
 		}
 
-		public Builder actionClass(final String actionClass) {
+		public Builder actionClass(@SuppressWarnings("hiding") final String actionClass) {
 			this.actionClass = actionClass;
 			return this;
 		}
 
-		public Builder icon(final String icon) {
+		public Builder icon(@SuppressWarnings("hiding") final String icon) {
 			this.icon = icon;
 			return this;
 		}
 
-		public Builder link(final String link) {
+		public Builder link(@SuppressWarnings("hiding") final String link) {
 			if (link != null && link.length() > 0) {
 				this.link = String.format("onclick=\"location.href='%s';\"", link);
 			}
 			return this;
 		}
 
-		public Builder operation(final Operation operation) {
+		public Builder operation(@SuppressWarnings("hiding") final Operation operation) {
 			this.operation = operation.toString();
 			return this;
 		}
 
-		public Builder reason(final String reason) {
+		public Builder reason(@SuppressWarnings("hiding") final String reason) {
 			this.reason = reason;
 			return this;
 		}
 
-		public Builder title(final String title) {
+		public Builder title(@SuppressWarnings("hiding") final String title) {
 			this.title = title;
 			return this;
 		}
 
-		@SuppressWarnings("synthetic-access")
 		public synchronized Tile build() {
 			Tile tile = new Tile();
 			tile.action = this.action;

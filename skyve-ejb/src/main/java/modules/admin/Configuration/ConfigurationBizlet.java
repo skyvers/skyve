@@ -3,7 +3,6 @@ package modules.admin.Configuration;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -19,7 +18,6 @@ import modules.admin.domain.Startup;
 import modules.admin.domain.User;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
-
 	@Override
 	public ConfigurationExtension newInstance(ConfigurationExtension bean) throws Exception {
 		// temporarily elevate access to find existing configuration regardless of user

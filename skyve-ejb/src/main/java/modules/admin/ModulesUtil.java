@@ -621,17 +621,17 @@ public class ModulesUtil {
 		CORE.getCustomer().getModule(homeModuleName);
 
 		// save the contact to validate the contact and so that it can be referenced by the user
-		contact = CORE.getPersistence().save(contact);
+		Contact newContact = CORE.getPersistence().save(contact);
 
 		final String token = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
 		// create a user - not with a generated password
 		UserExtension newUser = modules.admin.domain.User.newInstance();
-		newUser.setUserName(contact.getEmail1());
+		newUser.setUserName(newContact.getEmail1());
 		newUser.setPassword(EXT.hashPassword(token));
 		newUser.setPasswordExpired(Boolean.TRUE);
 		newUser.setPasswordResetToken(token);
 		newUser.setHomeModule(homeModuleName);
-		newUser.setContact(contact);
+		newUser.setContact(newContact);
 
 		// assign group
 		newUser.getGroups().add(group);

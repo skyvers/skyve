@@ -426,7 +426,7 @@ public class ControlPanelExtension extends ControlPanel {
 						if (findExp.length() > 0) {
 							try {
 								content = replaceGroup(findExp.toString(), content, 3, replacementString);
-							} catch (StackOverflowError e) {
+							} catch (@SuppressWarnings("unused") StackOverflowError e) {
 								// TODO: handle exception
 								EXT.push(new PushMessage().user(CORE.getUser()).growl(MessageSeverity.error, g.getText5001() + " - The previous value could not be matched"));
 								throw new ValidationException(
@@ -593,7 +593,7 @@ public class ControlPanelExtension extends ControlPanel {
 						try {
 							int x = Integer.parseInt(value);
 							g.setText5002(Integer.toString(x));
-						} catch (Exception ex) {
+						} catch (@SuppressWarnings("unused") Exception ex) {
 							v.getMessages().add(new Message(Binder.createIndexedBinding(ControlPanel.startupPropertiesPropertyName, index),
 									property + " must be a valid integer."));
 						}
@@ -612,7 +612,7 @@ public class ControlPanelExtension extends ControlPanel {
 							} else {
 								v.getMessages().add(msg);
 							}
-						} catch (Exception ex) {
+						} catch (@SuppressWarnings("unused") Exception ex) {
 							v.getMessages().add(msg);
 						}
 					}

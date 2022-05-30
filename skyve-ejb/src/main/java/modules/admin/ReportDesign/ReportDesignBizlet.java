@@ -347,27 +347,25 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 			}
 		}
 
-		bean = resetDesign(bean);
+		resetDesign(bean);
 
 		super.preRerender(source, bean, webContext);
 	}
 
 	@SuppressWarnings("boxing")
-	public static ReportDesign resetDesign(ReportDesign design) throws Exception {
-		ReportDesign result = design;
-		if (Orientation.portrait.equals(result.getOrientation())) {
-			result.setWidth(595);
-			result.setColumnWidth(595 - result.getLeftMargin() - result.getRightMargin());
-			result.setHeight(842);
+	private static void resetDesign(ReportDesign design) throws Exception {
+		if (Orientation.portrait.equals(design.getOrientation())) {
+			design.setWidth(595);
+			design.setColumnWidth(595 - design.getLeftMargin() - design.getRightMargin());
+			design.setHeight(842);
 		} else {
-			result.setWidth(842);
-			result.setColumnWidth(842 - result.getLeftMargin() - result.getRightMargin());
-			result.setHeight(595);
+			design.setWidth(842);
+			design.setColumnWidth(842 - design.getLeftMargin() - design.getRightMargin());
+			design.setHeight(595);
 		}
-		return result;
 	}
 
-	public static List<DomainValue> defaultBindingDomainValues(Document document, ReportDesign bean) throws Exception {
+	public static List<DomainValue> defaultBindingDomainValues(Document document) throws Exception {
 
 		List<DomainValue> result = new ArrayList<>();
 

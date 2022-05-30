@@ -9,6 +9,7 @@ import modules.admin.domain.Snapshot;
 public class SnapshotFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
+	@SuppressWarnings("static-method")
 	public Snapshot crudInstance() {
 		Snapshot bean = new DataBuilder()
 				.fixture(FixtureType.crud)

@@ -82,7 +82,7 @@ public class BackupJob extends Job {
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				try {
 					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
-				} catch (Exception e) {
+				} catch (@SuppressWarnings("unused") Exception e) {
 					trace = String.format("Failed to move external backup from %s to %s", backupZip.getName(), dailyZip.getName());
 					log.add(trace);
 					Util.LOGGER.warning(trace);
@@ -101,7 +101,7 @@ public class BackupJob extends Job {
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (Exception e) {
+					} catch (@SuppressWarnings("unused") Exception e) {
 						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
@@ -125,7 +125,7 @@ public class BackupJob extends Job {
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (Exception e) {
+					} catch (@SuppressWarnings("unused") Exception e) {
 						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
@@ -149,7 +149,7 @@ public class BackupJob extends Job {
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (Exception e) {
+					} catch (@SuppressWarnings("unused") Exception e) {
 						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
@@ -186,10 +186,7 @@ public class BackupJob extends Job {
 	private void cull(File backupDir, String prefix, String suffix, int retain)
 	throws IOException {
 		Collection<String> log = getLog();
-		if (suffix == null) {
-			suffix = "";
-		}
-		final String regex = prefix + "\\d*" + suffix + "\\.zip";
+		final String regex = prefix + "\\d*" + ((suffix == null) ? "" : suffix) + "\\.zip";
 		File[] files = FileUtil.listFiles(backupDir, regex, SortDirection.descending);
 
 		for (int i = retain, l = files.length; i < l; i++) {
@@ -213,7 +210,7 @@ public class BackupJob extends Job {
 					Util.LOGGER.info(trace);
 					try {
 						ExternalBackup.getInstance().deleteBackup(matchingBackups.get(i));
-					} catch (Exception e) {
+					} catch (@SuppressWarnings("unused") Exception e) {
 						trace = String.format("Failed to cull external backup %s", matchingBackups.get(i));
 						log.add(trace);
 						Util.LOGGER.warning(trace);

@@ -33,7 +33,7 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 		// validate all reports first
 		validateReports(bean);
 
-		File outdir = bean.getTemporaryPreparationFolder();
+		File outdir = ReportManagerExtension.getTemporaryPreparationFolder();
 		bean.setPathToZip(outdir.getAbsolutePath());
 
 		// write each ReportTemplate to a file within the folder
@@ -74,9 +74,9 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 	@Override
 	public Download download(ReportManagerExtension bean, WebContext webContext) throws Exception {
 
-		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), bean.getZipName(), webContext);
+		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), ReportManagerExtension.getZipName(), webContext);
 
-		bean.cleanUpTemporaryFiles();
+		ReportManagerExtension.cleanUpTemporaryFiles();
 
 		return download;
 	}

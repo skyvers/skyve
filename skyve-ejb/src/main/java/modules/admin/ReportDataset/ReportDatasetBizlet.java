@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -46,7 +47,7 @@ public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
 	 * view won't validate the parameters as they belong to the parent ReportTemplate not the dataset
 	 * being edited.
 	 */
-	private void validateReportParameters(ReportDatasetExtension bean) {
+	private static void validateReportParameters(ReportDatasetExtension bean) {
 		if (bean.getParent() != null) {
 			List<ReportParameterExtension> parameters = bean.getParent().getParameters();
 			if (parameters.size() > 0) {
@@ -61,7 +62,7 @@ public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
 							List<String> newBindings = new ArrayList<>();
 							for (Iterator<String> iterator = m.getBindings().iterator(); iterator.hasNext();) {
 								String binding = iterator.next();
-								newBindings.add(String.format("%s.%s", Binder.createCompoundBinding(ReportDataset.PARENT_NAME,
+								newBindings.add(String.format("%s.%s", Binder.createCompoundBinding(ChildBean.PARENT_NAME,
 											Binder.createIndexedBinding(ReportTemplate.parametersPropertyName, i)), binding));
 							}
 							e.getMessages().add(new Message(newBindings.toArray(new String[0]), m.getText()));
