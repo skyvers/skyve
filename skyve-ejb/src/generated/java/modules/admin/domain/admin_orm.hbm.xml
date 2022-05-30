@@ -583,11 +583,6 @@
 		<many-to-one name="communication" entity-name="adminCommunication" column="communication_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Subscription_communication"/>
 		<property name="receiverIdentifier" length="254" />
 		<property name="declined" />
-		<property name="formatType" length="5">
-			<type name="Enum">
-				<param name="enumClass">org.skyve.domain.app.admin.Communication$FormatType</param>
-			</type>
-		</property>
 		<property name="preferredReceiverIdentifier" length="254" />
 		<filter name="adminSubscriptionNoneFilter" condition="1=0"/>
 		<filter name="adminSubscriptionCustomerFilter" condition="bizCustomer=:customerParam"/>

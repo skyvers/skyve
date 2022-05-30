@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.Communication.CommunicationExtension;
 import org.skyve.CORE;
-import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
@@ -25,7 +24,6 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 		Subscriptions are user-scoped - The assumption is that it is up to the user whether they wish to 
 		accept or decline receiving communications and in what manner they are delivered.
  * 
- * @depend - - - FormatType
  * @navhas n communication 1 Communication
  * @stereotype "persistent"
  */
@@ -54,10 +52,6 @@ public class Subscription extends AbstractPersistentBean implements org.skyve.do
 	public static final String declinedPropertyName = "declined";
 
 	/** @hidden */
-	@Deprecated
-	public static final String formatTypePropertyName = "formatType";
-
-	/** @hidden */
 	public static final String preferredReceiverIdentifierPropertyName = "preferredReceiverIdentifier";
 
 	/**
@@ -76,14 +70,6 @@ public class Subscription extends AbstractPersistentBean implements org.skyve.do
 	 * Declined
 	 **/
 	private Boolean declined;
-
-	/**
-	 * Format
-	 * <br/>
-	 * This feature has been deprecated
-	 **/
-	@Deprecated
-	private FormatType formatType;
 
 	/**
 	 * Redirect to
@@ -187,26 +173,6 @@ public class Subscription extends AbstractPersistentBean implements org.skyve.do
 	public void setDeclined(Boolean declined) {
 		preset(declinedPropertyName, declined);
 		this.declined = declined;
-	}
-
-	/**
-	 * {@link #formatType} accessor.
-	 * @return	The value.
-	 **/
-	@Deprecated
-	public FormatType getFormatType() {
-		return formatType;
-	}
-
-	/**
-	 * {@link #formatType} mutator.
-	 * @param formatType	The new value.
-	 **/
-	@Deprecated
-	@XmlElement
-	public void setFormatType(FormatType formatType) {
-		preset(formatTypePropertyName, formatType);
-		this.formatType = formatType;
 	}
 
 	/**

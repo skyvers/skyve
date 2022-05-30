@@ -39,10 +39,6 @@
 		<boolean name="declined">
 			<displayName>admin.subscription.declined.displayName</displayName>
 		</boolean>
-		<enum name="formatType" documentRef="Communication" attributeRef="formatType" deprecated="true">
-			<documentation>This feature has been deprecated</documentation>
-			<displayName>Format</displayName>
-		</enum>
 		<text name="preferredReceiverIdentifier">
 			<displayName>admin.subscription.preferredReceiverIdentifier.displayName</displayName>
 			<description>admin.subscription.preferredReceiverIdentifier.description</description>			
