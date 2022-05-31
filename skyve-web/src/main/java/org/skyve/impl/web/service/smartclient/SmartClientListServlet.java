@@ -399,9 +399,6 @@ public class SmartClientListServlet extends HttpServlet {
 		model.setSummary(summaryType);
 		model.setSelectedTagId(tagId);
 		
-//		DigestUtils.sha256Hex(tagId);
-//		model.addFilterParameters(queryDocument, shite here null, null);
-		
 		// Add filter criteria to query
 		addFilterCriteriaToQuery(module, queryDocument, user, operator, criteria, parameters, tagId, model);
 
@@ -413,13 +410,15 @@ public class SmartClientListServlet extends HttpServlet {
 		Map<String, String> displayBindings = new TreeMap<>();
 		for (MetaDataQueryColumn column : model.getColumns()) {
 			String binding = column.getBinding();
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, queryDocument, binding);
-			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					DomainType domainType = attribute.getDomainType();
-					if ((domainType == DomainType.variant) || (domainType == DomainType.dynamic)) {
-						displayBindings.put(binding, "_display_" + BindUtil.sanitiseBinding(binding));
+			if (binding != null) {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, queryDocument, binding);
+				if (target != null) {
+					Attribute attribute = target.getAttribute();
+					if (attribute != null) {
+						DomainType domainType = attribute.getDomainType();
+						if ((domainType == DomainType.variant) || (domainType == DomainType.dynamic)) {
+							displayBindings.put(binding, "_display_" + BindUtil.sanitiseBinding(binding));
+						}
 					}
 				}
 			}
