@@ -113,10 +113,6 @@
 			return;
 		}
 	}
-	else if (customerName != null) {
-		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl()));
-		return;
-	}
 	else {
 		userName = userPrincipal.getName();
 	}
