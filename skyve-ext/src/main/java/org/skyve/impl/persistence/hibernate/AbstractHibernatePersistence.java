@@ -1780,7 +1780,8 @@ if (document.isDynamic()) return;
 										String modoc,
 										Document referenceDocument)
 	throws ReferentialConstraintViolationException {
-		if (ExtensionStrategy.mapped.equals(referenceDocument.getPersistent().getStrategy())) {
+		Persistent persistent = referenceDocument.getPersistent();
+		if ((persistent != null) && ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
@@ -1870,68 +1871,71 @@ if (document.isDynamic()) return;
 										ExportedReference ref,
 										String modoc,
 										Document referenceDocument) {
-		if (ExtensionStrategy.mapped.equals(referenceDocument.getPersistent().getStrategy())) {
-			// Find all implementations below the mapped and check these instead
-			Set<Document> derivations = new HashSet<>();
-			populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
-			for (Document derivation : derivations) {
-				checkMappedReference(bean, beansToBeCascaded, document, ref, modoc, derivation);
-			}
-		}
-		else {
-			StringBuilder queryString = new StringBuilder(64);
-			queryString.append("select 1 from ");
-			queryString.append(referenceDocument.getPersistent().getPersistentIdentifier());
-			if (ref.isCollection()) {
-				queryString.append('_').append(ref.getReferenceFieldName());
-				queryString.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :reference_id");
+		Persistent persistent = referenceDocument.getPersistent();
+		if (persistent != null) {
+			if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
+				// Find all implementations below the mapped and check these instead
+				Set<Document> derivations = new HashSet<>();
+				populateImmediateMapImplementingDerivations((CustomerImpl) user.getCustomer(), referenceDocument, derivations);
+				for (Document derivation : derivations) {
+					checkMappedReference(bean, beansToBeCascaded, document, ref, modoc, derivation);
+				}
 			}
 			else {
-				queryString.append(" where ").append(ref.getReferenceFieldName());
-				queryString.append("_id = :reference_id");
-			}
-			
-			Set<Bean> theseBeansToBeCascaded = beansToBeCascaded.get(modoc);
-			if (theseBeansToBeCascaded != null) {
-				int i = 0;
-				for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-					if (ref.isCollection()) {
-						queryString.append(" and ").append(PersistentBean.OWNER_COLUMN_NAME).append(" != :deleted_id");
-					}
-					else {
-						queryString.append(" and ").append(Bean.DOCUMENT_ID).append(" != :deleted_id");
-					}
-					queryString.append(i++);
+				StringBuilder queryString = new StringBuilder(64);
+				queryString.append("select 1 from ");
+				queryString.append(persistent.getPersistentIdentifier());
+				if (ref.isCollection()) {
+					queryString.append('_').append(ref.getReferenceFieldName());
+					queryString.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :reference_id");
 				}
-			}
-			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
-	
-			NativeQuery<?> query = session.createNativeQuery(queryString.toString());
-//			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
-
-			// Set timeout if applicable
-			int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
-			if (timeout > 0) {
-				query.setTimeout(timeout);
-			}
-
-			if (UtilImpl.QUERY_TRACE) {
-				UtilImpl.LOGGER.info("    SET PARAM reference_id = " + bean.getBizId());
-			}
-			query.setParameter("reference_id", bean.getBizId(), StringType.INSTANCE);
-			if (theseBeansToBeCascaded != null) {
-				int i = 0;
-				for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-					if (UtilImpl.QUERY_TRACE) {
-						UtilImpl.LOGGER.info("    SET PARAM deleted_id " + i + " = " + thisBeanToBeCascaded.getBizId());
-					}
-					query.setParameter("deleted_id" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
+				else {
+					queryString.append(" where ").append(ref.getReferenceFieldName());
+					queryString.append("_id = :reference_id");
 				}
-			}
+				
+				Set<Bean> theseBeansToBeCascaded = beansToBeCascaded.get(modoc);
+				if (theseBeansToBeCascaded != null) {
+					int i = 0;
+					for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
+						if (ref.isCollection()) {
+							queryString.append(" and ").append(PersistentBean.OWNER_COLUMN_NAME).append(" != :deleted_id");
+						}
+						else {
+							queryString.append(" and ").append(Bean.DOCUMENT_ID).append(" != :deleted_id");
+						}
+						queryString.append(i++);
+					}
+				}
+				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
+		
+				NativeQuery<?> query = session.createNativeQuery(queryString.toString());
+//				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 	
-			try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
-				if (results.next()) {
-					throw new ReferentialConstraintViolationException(document.getLocalisedSingularAlias(), bean.getBizKey(), ref.getLocalisedDocumentAlias());
+				// Set timeout if applicable
+				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
+				if (timeout > 0) {
+					query.setTimeout(timeout);
+				}
+	
+				if (UtilImpl.QUERY_TRACE) {
+					UtilImpl.LOGGER.info("    SET PARAM reference_id = " + bean.getBizId());
+				}
+				query.setParameter("reference_id", bean.getBizId(), StringType.INSTANCE);
+				if (theseBeansToBeCascaded != null) {
+					int i = 0;
+					for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
+						if (UtilImpl.QUERY_TRACE) {
+							UtilImpl.LOGGER.info("    SET PARAM deleted_id " + i + " = " + thisBeanToBeCascaded.getBizId());
+						}
+						query.setParameter("deleted_id" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
+					}
+				}
+		
+				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
+					if (results.next()) {
+						throw new ReferentialConstraintViolationException(document.getLocalisedSingularAlias(), bean.getBizKey(), ref.getLocalisedDocumentAlias());
+					}
 				}
 			}
 		}
@@ -2325,6 +2329,12 @@ public void doWorkOnConnection(Session session) {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
+		if (! document.isPersistable()) {
+			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+		}
+		@SuppressWarnings("null") // tested above
+		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
+		
 		String parentDocumentName = document.getParentDocumentName();
 		String bizDiscriminator = null;
 		StringBuilder query = new StringBuilder(256);
@@ -2349,7 +2359,7 @@ public void doWorkOnConnection(Session session) {
 		// now get on with the upsert
 		
 		if (bean.isPersisted()) { // update an existing row
-			query.append("update ").append(document.getPersistent().getPersistentIdentifier()).append(" set ");
+			query.append("update ").append(persistentIdentifier).append(" set ");
 			query.append(PersistentBean.VERSION_NAME).append('=').append(PersistentBean.VERSION_NAME).append("+1");
 			query.append(',').append(PersistentBean.LOCK_NAME).append("=:").append(PersistentBean.LOCK_NAME);
 			query.append(',').append(PersistentBean.FLAG_COMMENT_NAME).append("=:").append(PersistentBean.FLAG_COMMENT_NAME);
@@ -2467,7 +2477,7 @@ public void doWorkOnConnection(Session session) {
 			}
 
 			// build the query
-			query.append(" insert into ").append(document.getPersistent().getPersistentIdentifier()).append(" (");
+			query.append(" insert into ").append(persistentIdentifier).append(" (");
 			query.append(columns).append(") values (").append(values).append(')');
 		}
 
@@ -2576,6 +2586,12 @@ public void doWorkOnConnection(Session session) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
+		if (! document.isPersistable()) {
+			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+		}
+		@SuppressWarnings("null") // tested above
+		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
+		
 		StringBuilder query = new StringBuilder(256);
 
 		List<PersistentBean> elementBeans = null;
@@ -2589,8 +2605,9 @@ public void doWorkOnConnection(Session session) {
 										" from bean " + owningBean, e);
 		}
 		
+		
 		for (Bean elementBean : elementBeans) {
-			query.append("select * from ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
+			query.append("select * from ").append(persistentIdentifier).append('_').append(collectionName);
 			query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
 			query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
 			query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
@@ -2602,7 +2619,7 @@ public void doWorkOnConnection(Session session) {
 			boolean notExists = sql.tupleResults().isEmpty();
 			query.setLength(0);
 			if (notExists) {
-				query.append("insert into ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
+				query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
 				query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
 				query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
 				query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
@@ -2622,8 +2639,13 @@ public void doWorkOnConnection(Session session) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
+		if (! document.isPersistable()) {
+			throw new MetaDataException("Document " + module.getName() + '.' + document.getName() + " is not persistable");
+		}
+		@SuppressWarnings("null") // tested above
+		String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
 		StringBuilder query = new StringBuilder(256);
-		query.append("insert into ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
+		query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
 		query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
 		query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
 		query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');

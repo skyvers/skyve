@@ -29,6 +29,7 @@ public class Interpreter {
 	private static final String DB_PWD = "password";
 	private static final String CONTENT_DIRECTORY = "content/";
 
+	@SuppressWarnings("resource")
 	public static void main(String[] args) throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;

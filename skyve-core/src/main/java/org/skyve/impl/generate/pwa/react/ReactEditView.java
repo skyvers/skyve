@@ -56,18 +56,32 @@ public class ReactEditView extends ReactComponent {
 		fw.write("import {View} from '../../View';\n");
 		
 		for (String key : imports.keySet()) {
-			fw.append("import ").append(key).append(" from '").append(imports.get(key)).append("';\n");
+			fw.write("import ");
+			fw.write(key);
+			fw.write(" from '");
+			fw.write(imports.get(key));
+			fw.write("';\n");
 		}
 		fw.write("\n");
 		
-		fw.append("export class ").append(moduleName).append(componentName).append(" extends View {\n");
+		fw.write("export class ");
+		fw.write(moduleName);
+		fw.write(componentName);
+		fw.write(" extends View {\n");
+		
 		fw.write("\tconstructor() {\n");
 		fw.write("\t\tsuper();\n");
 		fw.write("\t\tthis.state = {};\n");
 		fw.write("\t}\n\n");
 		
 		fw.write("\tcomponentDidMount() {\n");
-		fw.append("\t\tthis.edit('").append(moduleName).append("', '").append(document.getName()).append("', this.props.match.params.bizId)\n");
+		
+		fw.write("\t\tthis.edit('");
+		fw.write(moduleName);
+		fw.write("', '");
+		fw.write(document.getName());
+		fw.write("', this.props.match.params.bizId)\n");
+		
 		fw.write("\t\t\t.then(data => this.setState(data[0]));\n");
 	    fw.write("\t}\n\n");
 

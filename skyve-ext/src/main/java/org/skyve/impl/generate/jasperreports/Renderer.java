@@ -21,6 +21,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -561,7 +562,6 @@ public class Renderer {
 	}
 
 	public static String renderDesign(DesignSpecification design) {
-
 		StringBuilder sb = new StringBuilder();
 
 		if (design.getModuleName() != null && design.getDocumentName() != null) {
@@ -630,7 +630,8 @@ public class Renderer {
 				if (e != null) {
 					String extDocumentName = e.getDocumentName();
 					Document extDocument = null;
-					if ((extDocumentName != null) && ExtensionStrategy.joined.equals(document.getPersistent().getStrategy())) {
+					Persistent persistent = document.getPersistent();
+					if ((extDocumentName != null) && (persistent != null) && ExtensionStrategy.joined.equals(persistent.getStrategy())) {
 						extDocument = module.getDocument(customer, extDocumentName);
 						design.setAlias(design.getAlias() + 1);
 					}
@@ -794,10 +795,11 @@ public class Renderer {
 
 		StringBuilder sb = new StringBuilder();
 
-		if (document.getPersistent() != null) {
-			sb.append(document.getPersistent().getCatalog() == null ? "" : document.getPersistent().getCatalog() + ".");
-			sb.append(document.getPersistent().getSchema() == null ? "" : document.getPersistent().getSchema() + ".");
-			sb.append(document.getPersistent().getName());
+		Persistent persistent = document.getPersistent();
+		if (persistent != null) {
+			sb.append(persistent.getCatalog() == null ? "" : persistent.getCatalog() + ".");
+			sb.append(persistent.getSchema() == null ? "" : persistent.getSchema() + ".");
+			sb.append(persistent.getName());
 		}
 
 		return sb.toString();

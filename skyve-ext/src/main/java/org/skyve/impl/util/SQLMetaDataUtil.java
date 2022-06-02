@@ -81,12 +81,18 @@ public class SQLMetaDataUtil {
 			Customer customer = user.getCustomer();
 			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			Module admin = repository.getModule(customer, ADMIN_MODULE_NAME);
+			@SuppressWarnings("null")
 			String ADM_SecurityUser = admin.getDocument(customer, USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			@SuppressWarnings("null")
 			String ADM_SecurityUserRole = admin.getDocument(customer, USER_ROLE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			@SuppressWarnings("null")
 			String ADM_Contact = admin.getDocument(customer, CONTACT_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			String ADM_SecurityUser_groups = ADM_SecurityUser + "_groups";
+			@SuppressWarnings("null")
 			String ADM_SecurityGroup = admin.getDocument(customer, "Group").getPersistent().getPersistentIdentifier();
+			@SuppressWarnings("null")
 			String ADM_SecurityGroupRole = admin.getDocument(customer, "GroupRole").getPersistent().getPersistentIdentifier();
+			@SuppressWarnings("null")
 			String ADM_Configuration = admin.getDocument(customer, CONFIGURATION_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			
 			StringBuilder sql = new StringBuilder(512);
@@ -234,7 +240,9 @@ public class SQLMetaDataUtil {
 		
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Module admin = repository.getModule(null, "admin");
+		@SuppressWarnings("null")
 		String ADM_JobSchedule = admin.getDocument(null, "JobSchedule").getPersistent().getPersistentIdentifier();
+		@SuppressWarnings("null")
 		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
 
 		StringBuilder sql = new StringBuilder(256);
@@ -279,7 +287,9 @@ public class SQLMetaDataUtil {
 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Module admin = repository.getModule(null, "admin");
+		@SuppressWarnings("null")
 		String ADM_ReportTemplate = admin.getDocument(null, "ReportTemplate").getPersistent().getPersistentIdentifier();
+		@SuppressWarnings("null")
 		String ADM_SecurityUser = admin.getDocument(null, "User").getPersistent().getPersistentIdentifier();
 
 		StringBuilder sql = new StringBuilder(256);

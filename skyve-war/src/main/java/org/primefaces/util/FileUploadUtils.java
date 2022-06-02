@@ -118,7 +118,7 @@ public class FileUploadUtils {
                 throw new ValidationException("Invalid directory", "Invalid directory name does not match the canonical path");
             }
         }
-        catch (IOException ex) {
+        catch (@SuppressWarnings("unused") IOException ex) {
             throw new ValidationException("Invalid directory", "Failure to validate directory path");
         }
 
@@ -291,13 +291,13 @@ public class FileUploadUtils {
     public static boolean isValidFile(FacesContext context, FileUpload fileUpload, UploadedFile uploadedFile) throws IOException {
         Long sizeLimit = fileUpload.getSizeLimit();
         PrimeApplicationContext appContext = PrimeApplicationContext.getCurrentInstance(context);
-        boolean valid = (sizeLimit == null || uploadedFile.getSize() <= sizeLimit)
-                && isValidType(appContext, fileUpload, uploadedFile);
+        boolean valid = (sizeLimit == null || (uploadedFile.getSize() <= sizeLimit.longValue())) &&
+        					isValidType(appContext, fileUpload, uploadedFile);
         if (valid && fileUpload.isPerformVirusScan()) {
             try (InputStream input = uploadedFile.getInputStream()) {
                 performVirusScan(context, input);
             }
-            catch (VirusException ex) {
+            catch (@SuppressWarnings("unused") VirusException ex) {
                 return false;
             }
         }
@@ -309,12 +309,12 @@ public class FileUploadUtils {
         Long sizeLimit = fileUpload.getSizeLimit();
         for (UploadedFile file : files) {
             totalPartSize += file.getSize();
-            if (!isValidFile(context, fileUpload, file)) {
+            if (! isValidFile(context, fileUpload, file)) {
                 return false;
             }
         }
 
-        return sizeLimit == null || totalPartSize <= sizeLimit;
+        return (sizeLimit == null) || (totalPartSize <= sizeLimit.longValue());
     }
 
     /**

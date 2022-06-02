@@ -224,10 +224,12 @@ public final class StandardGenerator {
 							}
 							
 							Document parentDocument = currentDocument.getParentDocument(customer);
-							Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
-							if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered()) &&
-									columnBindings.contains(Bean.ORDINAL_NAME)) {
-								sheet.setValue(Bean.ORDINAL_NAME, BindUtil.get(bean, Bean.ORDINAL_NAME));
+							if (parentDocument != null) {
+								Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
+								if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered()) &&
+										columnBindings.contains(Bean.ORDINAL_NAME)) {
+									sheet.setValue(Bean.ORDINAL_NAME, BindUtil.get(bean, Bean.ORDINAL_NAME));
+								}
 							}
 						}
 					}
@@ -312,17 +314,19 @@ public final class StandardGenerator {
 			}
 			else {
 				Document parentDocument = currentDocument.getParentDocument(customer);
-				String localisedSingularAlias = parentDocument.getSingularAlias();
-				column = new BizPortColumn(localisedSingularAlias + " ID (Parent)",
-												"The 'Parent' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.", 
-												AttributeType.text);
-				column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
-				sheet.addColumn(ChildBean.PARENT_NAME, column);
-	
-				Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
-				if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered())) {
-					column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
-					sheet.addColumn(Bean.ORDINAL_NAME, column);
+				if (parentDocument != null) {
+					String localisedSingularAlias = parentDocument.getLocalisedSingularAlias();
+					column = new BizPortColumn(localisedSingularAlias + " ID (Parent)",
+													"The 'Parent' link of the relationship.  Populate this with " + localisedSingularAlias + " IDs.", 
+													AttributeType.text);
+					column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
+					sheet.addColumn(ChildBean.PARENT_NAME, column);
+		
+					Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
+					if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered())) {
+						column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
+						sheet.addColumn(Bean.ORDINAL_NAME, column);
+					}
 				}
 			}
 		}

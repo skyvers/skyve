@@ -354,25 +354,26 @@ public class StandardLoader {
 		}
 
 		Document parentDocument = childDocument.getParentDocument(customer);
-		Reference childReference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(childDocument.getName());
-		String collectionBinding = childReference.getName();
-		Bean parentBean = beansBySheetKey.get(createSheetKey(parentDocument, parentSheetId));
-		if (parentBean == null) {
-			sheet.addErrorAtCurrentRow(problems, 
-										sheet.getColumn(ChildBean.PARENT_NAME), 
-										"The parent ID " + parentSheetId + " does not match any row in the parent (target) sheet.");
-			return;
+		if (parentDocument != null) {
+			Reference childReference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(childDocument.getName());
+			String collectionBinding = childReference.getName();
+			Bean parentBean = beansBySheetKey.get(createSheetKey(parentDocument, parentSheetId));
+			if (parentBean == null) {
+				sheet.addErrorAtCurrentRow(problems, 
+											sheet.getColumn(ChildBean.PARENT_NAME), 
+											"The parent ID " + parentSheetId + " does not match any row in the parent (target) sheet.");
+				return;
+			}
+			@SuppressWarnings("unchecked")
+			ChildBean<Bean> childBean = (ChildBean<Bean>) beansBySheetKey.get(createSheetKey(childDocument, childSheetId));
+			if (childBean == null) {
+				sheet.addErrorAtCurrentRow(problems, 
+											sheet.getColumn(Bean.DOCUMENT_ID),
+											"The child ID " + childSheetId + " does not match any row in the current sheet.");
+				return;
+			}
+			BindUtil.ensureElementIsInCollection(parentBean, collectionBinding, childBean);
 		}
-		@SuppressWarnings("unchecked")
-		ChildBean<Bean> childBean = (ChildBean<Bean>) beansBySheetKey.get(createSheetKey(childDocument, childSheetId));
-		if (childBean == null) {
-			sheet.addErrorAtCurrentRow(problems, 
-										sheet.getColumn(Bean.DOCUMENT_ID),
-										"The child ID " + childSheetId + " does not match any row in the current sheet.");
-			return;
-		}
-
-		BindUtil.ensureElementIsInCollection(parentBean, collectionBinding, childBean);
 	}
 	
 	/**

@@ -272,7 +272,7 @@ public final class JasperReportUtil {
 									ReportFormat format,
 									OutputStream out)
 	throws Exception {
-		final JRAbstractExporter exporter = getExporter(format);
+		final JRAbstractExporter<?, ?, ?, ?> exporter = getExporter(format);
 
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
@@ -283,15 +283,15 @@ public final class JasperReportUtil {
 								 ReportFormat format,
 								 OutputStream out)
 			throws Exception {
-		final JRAbstractExporter exporter = getExporter(format);
+		final JRAbstractExporter<?, ?, ?, ?> exporter = getExporter(format);
 
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT_LIST, jasperPrintList);
 		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
 		exporter.exportReport();
 	}
 
-	private static JRAbstractExporter getExporter(ReportFormat format) {
-		JRAbstractExporter exporter;
+	private static JRAbstractExporter<?, ?, ?, ?> getExporter(ReportFormat format) {
+		JRAbstractExporter<?, ?, ?, ?> exporter;
 		switch (format) {
 			case txt:
 				exporter = new JRTextExporter();

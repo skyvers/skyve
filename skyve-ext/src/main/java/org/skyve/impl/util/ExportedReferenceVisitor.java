@@ -125,7 +125,8 @@ public abstract class ExportedReferenceVisitor {
 									ExportedReference ref,
 									Document referenceDocument)
 	throws Exception {
-		if (ExtensionStrategy.mapped.equals(referenceDocument.getPersistent().getStrategy())) {
+		Persistent referencePersistent = referenceDocument.getPersistent();
+		if ((referencePersistent != null) && ExtensionStrategy.mapped.equals(referencePersistent.getStrategy())) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
 			populateImmediateMapImplementingDerivations(customer, referenceDocument, derivations);
@@ -240,7 +241,9 @@ public abstract class ExportedReferenceVisitor {
 					StringBuilder statement = new StringBuilder(64);
 					if ((newBizId != null) && (exportedReference.isRequired())) {
 						statement.append("update ");
-						statement.append(referenceDocument.getPersistent().getPersistentIdentifier());
+						@SuppressWarnings("null") // tested early in CascadeDeleteBeanVisitor
+						String persistentIdentifier = referenceDocument.getPersistent().getPersistentIdentifier();
+						statement.append(persistentIdentifier);
 						statement.append('_').append(exportedReference.getReferenceFieldName());
 						statement.append(" set ").append(PersistentBean.OWNER_COLUMN_NAME);
 						statement.append(" = :").append(PersistentBean.OWNER_COLUMN_NAME);
@@ -255,7 +258,9 @@ public abstract class ExportedReferenceVisitor {
 					}
 					else {
 						statement.append("delete from ");
-						statement.append(referenceDocument.getPersistent().getPersistentIdentifier());
+						@SuppressWarnings("null") // tested early in CascadeDeleteBeanVisitor
+						String persistentIdentifier = referenceDocument.getPersistent().getPersistentIdentifier();
+						statement.append(persistentIdentifier);
 						statement.append('_').append(exportedReference.getReferenceFieldName());
 						statement.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :").append(Bean.DOCUMENT_ID);
 						if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
@@ -267,7 +272,9 @@ public abstract class ExportedReferenceVisitor {
 			else {
 				String referenceFieldName = exportedReference.getReferenceFieldName();
 				StringBuilder statement = new StringBuilder(64);
-				statement.append("update ").append(referenceDocument.getPersistent().getPersistentIdentifier());
+				@SuppressWarnings("null") // tested early in CascadeDeleteBeanVisitor
+				String persistentIdentifier = referenceDocument.getPersistent().getPersistentIdentifier();
+				statement.append("update ").append(persistentIdentifier);
 				statement.append(" set ").append(referenceFieldName).append("_id = :newBizId");
 				statement.append(" where ").append(referenceFieldName).append("_id = :").append(Bean.DOCUMENT_ID);
 				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
@@ -288,7 +295,9 @@ public abstract class ExportedReferenceVisitor {
 				String newBizId = newBizIds.get(parentDocument.getOwningModuleName() + '.' + parentDocument.getName());
 
 				StringBuilder statement = new StringBuilder(64);
-				statement.append("update ").append(document.getPersistent().getPersistentIdentifier());
+				@SuppressWarnings("null") // tested early in CascadeDeleteBeanVisitor if hierarchical
+				String persistentIdentifier = document.getPersistent().getPersistentIdentifier();
+				statement.append("update ").append(persistentIdentifier);
 				statement.append(" set ").append(HierarchicalBean.PARENT_ID).append(" = :newBizId");
 				statement.append(" where ").append(HierarchicalBean.PARENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
 				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());

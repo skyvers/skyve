@@ -23,7 +23,11 @@ public class ReactMapView extends ReactComponent {
 		fw.write("import {DataTable} from 'primereact/datatable';\n");
 		fw.write("import {Column} from 'primereact/column'\n\n");
 
-		fw.append("export class ").append(moduleName).append(componentName).append(" extends View {\n");
+		fw.write("export class ");
+		fw.write(moduleName);
+		fw.write(componentName);
+		fw.write(" extends View {\n");
+		
 		fw.write("\tconstructor() {\n");
 		fw.write("\t\tsuper();\n");
 		fw.write("\t\tthis.state = {};\n");

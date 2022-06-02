@@ -158,8 +158,10 @@ public final class POISheet implements BizPortSheet {
 			if (collectionBinding == null) { // have a document sheet
 				if (ChildBean.PARENT_NAME.equals(binding)) { // cater for the parent binding
 					Document parentDocument = document.getParentDocument(customer);
-					column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(),
-															parentDocument.getName()));
+					if (parentDocument != null) {
+						column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(),
+																parentDocument.getName()));
+					}
 				}
 				else { // check if we are dealing with a reference
 					TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, binding);

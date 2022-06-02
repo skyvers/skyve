@@ -47,7 +47,11 @@ class ReactListView extends ReactComponent {
 		fw.write("import {DataTable} from 'primereact/datatable';\n");
 		fw.write("import {Column} from 'primereact/column';\n\n");
 
-		fw.append("export class ").append(moduleName).append(componentName).append(" extends View {\n");
+		fw.write("export class ");
+		fw.write(moduleName);
+		fw.write(componentName);
+		fw.write(" extends View {\n");
+		
 		fw.write("\tconstructor() {\n");
 		fw.write("\t\tsuper();\n");
 		fw.write("\t\tthis.state = {};\n");
@@ -67,12 +71,18 @@ class ReactListView extends ReactComponent {
 	private void renderComponentDidMount(FileWriter fw) throws IOException {
 		fw.write("\tcomponentDidMount() {\n");
 		if (model != null) {
-			fw.append("\t\tthis.fetchModel('").append(model.getDrivingDocument().getOwningModuleName()).append("', '");
-			fw.append(modelName).append("', 0, 75).then(data => this.setState({data: data}));\n");
+			fw.write("\t\tthis.fetchModel('");
+			fw.write(model.getDrivingDocument().getOwningModuleName());
+			fw.write("', '");
+			fw.write(modelName);
+			fw.write("', 0, 75).then(data => this.setState({data: data}));\n");
 		}
 		else if (query != null) {
-			fw.append("\t\tthis.fetchQuery('").append(query.getOwningModule().getName()).append("', '");
-			fw.append(query.getName()).append("', 0, 75).then(data => this.setState({data: data}));\n");
+			fw.write("\t\tthis.fetchQuery('");
+			fw.write(query.getOwningModule().getName());
+			fw.write("', '");
+			fw.write(query.getName());
+			fw.write("', 0, 75).then(data => this.setState({data: data}));\n");
 		}
 		fw.write("\t}\n\n");
 	}
@@ -101,7 +111,11 @@ class ReactListView extends ReactComponent {
 				if (columnName == null) {
 					columnName = column.getName();
 				}
-				fw.append("\t\t\t\t<Column field=\"").append(columnName).append("\" header=\"").append(column.getDisplayName()).append("\" />\n");
+				fw.write("\t\t\t\t<Column field=\"");
+				fw.write(columnName);
+				fw.write("\" header=\"");
+				fw.write(column.getDisplayName());
+				fw.write("\" />\n");
 // TODO Fix	            fw.append("\t\t\t\t<Column field=\"").append(def.getName()).append("\" header=\"").append(def.getTitle()).append("\" />\n");
 			}
 		}

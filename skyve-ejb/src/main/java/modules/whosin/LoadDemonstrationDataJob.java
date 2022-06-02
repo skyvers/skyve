@@ -4,12 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.CORE;
-import org.skyve.domain.types.DateOnly;
-import org.skyve.impl.util.TimeUtil;
 import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -17,10 +12,8 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.Contact;
-import modules.admin.domain.Contact.ContactType;
 import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
-import modules.whosin.domain.Staff.Status;
 
 /**
  * Load Demonstration Data for the Who's In? module
@@ -28,7 +21,7 @@ import modules.whosin.domain.Staff.Status;
  * @author rob
  */
 public class LoadDemonstrationDataJob extends Job {
-	private static String[] roles = { "Manager", "Sales Manager", "Sales Consultant", "Sales Support Technician", "Accountant", "Receptionist" };
+//	private static String[] roles = { "Manager", "Sales Manager", "Sales Consultant", "Sales Support Technician", "Accountant", "Receptionist" };
 
 	private volatile boolean cancelled = false;
 	
@@ -59,7 +52,7 @@ public class LoadDemonstrationDataJob extends Job {
 		}
 	}
 
-	private void generateRandomData() throws InterruptedException {
+	private void generateRandomData() {
 		
 		//generate a random number of staff
 		int staffCount = new Random().nextInt(1000) + 50;
@@ -76,8 +69,8 @@ public class LoadDemonstrationDataJob extends Job {
 	
 	/**
 	 * Generates a set of example data for demonstration
-	 * 
 	 */
+/*
 	private static void generateExampleData(Persistence persistence) throws Exception {
 
 		// create example offices
@@ -233,7 +226,7 @@ public class LoadDemonstrationDataJob extends Job {
 		staff = persistence.save(staff);
 
 	}
-
+*/
 	private void clearPreviousData(Persistence persistence) throws Exception {
 
 		// try to delete all staff (some may fail if users have been created)
@@ -255,7 +248,7 @@ public class LoadDemonstrationDataJob extends Job {
 
 				// after evicting start a new transaction
 				persistence.begin();
-			} catch (Exception e) {
+			} catch (@SuppressWarnings("unused") Exception e) {
 				// I figure these are probably not intended to be deleted, so
 				// just fail and move on
 			}
@@ -275,7 +268,7 @@ public class LoadDemonstrationDataJob extends Job {
 				persistence.commit(false);
 				persistence.evictCached(o);
 				persistence.begin();
-			} catch (Exception e) {
+			} catch (@SuppressWarnings("unused") Exception e) {
 				// I figure these are probably not intended to be deleted, so
 				// just fail and move on
 			}

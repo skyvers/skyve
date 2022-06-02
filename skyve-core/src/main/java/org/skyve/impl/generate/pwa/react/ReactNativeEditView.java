@@ -56,11 +56,18 @@ public class ReactNativeEditView extends ReactComponent {
 		fw.write("import { useNavigation } from '@react-navigation/native';\n");
 
 		for (String key : imports.keySet()) {
-			fw.append("import ").append(key).append(" from '").append(imports.get(key)).append("';\n");
+			fw.write("import ");
+			fw.write(key);
+			fw.write(" from '");
+			fw.write(imports.get(key));
+			fw.write("';\n");
 		}
 		fw.write("\n");
 
-		fw.append("export default function ").append(moduleName).append(componentName).append("(props) {\n");
+		fw.write("export default function ");
+		fw.write(moduleName);
+		fw.write(componentName);
+		fw.write("(props) {\n");
 
 		if (bothViews) {
 			fw.write("\t\tif (this.state.created) {\n");
@@ -96,11 +103,16 @@ public class ReactNativeEditView extends ReactComponent {
 		fw.write("}\n");
 	}
 
-	private void addNavigationOptions(FileWriter fw, View view, String startingIndent) throws IOException {
-		fw.append(startingIndent).append("const navigation = useNavigation();\n");
-		fw.append(startingIndent).append("navigation.setOptions({\n");
-		fw.append(startingIndent).append("\ttitle: '").append(view.getLocalisedTitle()).append("'").append(",\n");
-		fw.append(startingIndent).append("});\n");
-		fw.write("\n");
+	private static void addNavigationOptions(FileWriter fw, View view, String startingIndent) throws IOException {
+		fw.write(startingIndent);
+		fw.write("const navigation = useNavigation();\n");
+		fw.write(startingIndent);
+		fw.write("navigation.setOptions({\n");
+		fw.write(startingIndent);
+		fw.write("\ttitle: '");
+		fw.write(view.getLocalisedTitle());
+		fw.write("',\n");
+		fw.write(startingIndent);
+		fw.write("});\n\n");
 	}
 }

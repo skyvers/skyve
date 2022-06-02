@@ -1,5 +1,6 @@
 package modules.whosin.Staff.actions;
 
+import java.io.InputStream;
 import java.util.List;
 
 import org.skyve.content.MimeType;
@@ -23,36 +24,40 @@ public class UploadQualifications extends UploadAction<Staff> {
 
 		List<StaffQualification> quals = null;
 		if (upload.getFileName().endsWith(MimeType.xlsx.getStandardFileSuffix())) {
-			int sheetIndex = 0;
-			POISheetLoader pl = new POISheetLoader(LoaderActivityType.CREATE_ALL, upload.getInputStream(), sheetIndex, exception,
-					StaffQualification.MODULE_NAME, 
-					StaffQualification.DOCUMENT_NAME);
-			
-			pl.addFields(StaffQualification.namePropertyName, 
-			StaffQualification.typePropertyName,
-			StaffQualification.issuingOrganisationPropertyName, 
-			StaffQualification.descriptionPropertyName,
-			StaffQualification.dateAttainedPropertyName, 
-			StaffQualification.dateExpiryPropertyName);
-			
-			pl.setDebugMode(true);
-			pl.setDataIndex(1); // has headers
-
-			quals = pl.beanResults();
+			try (InputStream is = upload.getInputStream()) {
+				int sheetIndex = 0;
+				POISheetLoader pl = new POISheetLoader(LoaderActivityType.CREATE_ALL, is, sheetIndex, exception,
+						StaffQualification.MODULE_NAME, 
+						StaffQualification.DOCUMENT_NAME);
+				
+				pl.addFields(StaffQualification.namePropertyName, 
+				StaffQualification.typePropertyName,
+				StaffQualification.issuingOrganisationPropertyName, 
+				StaffQualification.descriptionPropertyName,
+				StaffQualification.dateAttainedPropertyName, 
+				StaffQualification.dateExpiryPropertyName);
+				
+				pl.setDebugMode(true);
+				pl.setDataIndex(1); // has headers
+	
+				quals = pl.beanResults();
+			}
 		} else if (upload.getFileName().endsWith(MimeType.csv.getStandardFileSuffix())) {
-			CSVLoader dl = new CSVLoader(LoaderActivityType.CREATE_ALL, upload.getInputStream(), exception,
-					StaffQualification.MODULE_NAME, 
-					StaffQualification.DOCUMENT_NAME,
-					StaffQualification.namePropertyName, 
-					StaffQualification.typePropertyName,
-					StaffQualification.issuingOrganisationPropertyName, 
-					StaffQualification.descriptionPropertyName,
-					StaffQualification.dateAttainedPropertyName, 
-					StaffQualification.dateExpiryPropertyName);
-			dl.setDebugMode(true);
-			dl.setDataIndex(1); // has headers
-
-			quals = dl.beanResults();
+			try (InputStream is = upload.getInputStream()) {
+				CSVLoader dl = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception,
+						StaffQualification.MODULE_NAME, 
+						StaffQualification.DOCUMENT_NAME,
+						StaffQualification.namePropertyName, 
+						StaffQualification.typePropertyName,
+						StaffQualification.issuingOrganisationPropertyName, 
+						StaffQualification.descriptionPropertyName,
+						StaffQualification.dateAttainedPropertyName, 
+						StaffQualification.dateExpiryPropertyName);
+				dl.setDebugMode(true);
+				dl.setDataIndex(1); // has headers
+	
+				quals = dl.beanResults();
+			}
 		} else {
 			throw new ValidationException(new Message("Only csv or xlsx file types are supported"));
 		}
@@ -64,5 +69,4 @@ public class UploadQualifications extends UploadAction<Staff> {
 
 		return bean;
 	}
-
 }

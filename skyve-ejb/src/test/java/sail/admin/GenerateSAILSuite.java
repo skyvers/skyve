@@ -1,25 +1,13 @@
 package sail.admin;
 
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
-
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.StringWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
 
 import org.skyve.CORE;
 import org.skyve.impl.generate.sail.Generator;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.job.Job;
 import org.skyve.metadata.repository.Repository;
@@ -28,7 +16,6 @@ import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.UserAgentType;
-import org.xml.sax.SAXException;
 
 import modules.admin.domain.User;
 
@@ -88,49 +75,18 @@ public class GenerateSAILSuite extends Job {
 		Automation menuSail = Generator.visitMenu(user, moduleName, uxui.getName(), uat, testStrategy);
 		String xmlMenuSail = XMLMetaData.marshalSAIL(menuSail);
 		String menuFileName = String.format("sail_menu_%s_%s_%s.xml", uxui.getName(), uat.name(), user.getName());
-		Path menuPath = Paths.get(String.format("%s%s%s", module_directory, File.separator, menuFileName));
-		FileOutputStream menuOutputStream = new FileOutputStream(menuFileName);
-		menuOutputStream.write(xmlMenuSail.getBytes());
-		menuOutputStream.close();
-
+//		Path menuPath = Paths.get(String.format("%s%s%s", module_directory, File.separator, menuFileName));
+		try (FileOutputStream menuOutputStream = new FileOutputStream(menuFileName)) {
+			menuOutputStream.write(xmlMenuSail.getBytes());
+		}
+/*
 		Automation moduleSail = Generator.visitMenu(user, moduleName, uxui.getName(), uat, testStrategy);
 		String xmlModouleSail = XMLMetaData.marshalSAIL(moduleSail);
 		String moduleFileName = String.format("sail_menu_%s_%s_%s.xml", uxui.getName(), uat.name(), user.getName());
 		Path modulePath = Paths.get(String.format("%s%s%s", module_directory, File.separator, moduleFileName));
-		FileOutputStream moduleOutputStream = new FileOutputStream(menuFileName);
-		moduleOutputStream.write(xmlMenuSail.getBytes());
-		moduleOutputStream.close();
-
-	}
-
-	
-	private static String marshalSAIL(Automation automation) throws Exception{
-		JAXBContext SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
-		Schema SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
-		String SAIL_NAMESPACE = "http://www.skyve.org/xml/sail";
-		
-		Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-		marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
-								SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
-		marshaller.setSchema(SAIL_SCHEMA);
-		StringWriter sos = new StringWriter(1024);
-		marshaller.marshal(automation, sos);
-		return sos.toString();
-	}
-	
-	/*
-	 * returns a JAXP 1.3 schema by parsing the specified resource.
-	 */
-	private static Schema getSchema(String schemaFileName) 
-	throws JAXBException {
-		SchemaFactory sf = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
-		try {
-			return sf.newSchema(new File(schemaFileName));
+		try (FileOutputStream moduleOutputStream = new FileOutputStream(menuFileName)) {
+			moduleOutputStream.write(xmlMenuSail.getBytes());
 		}
-		catch (SAXException se) {
-			// this can only happen if there's a deployment error and the resource is missing.
-			throw new JAXBException("Could not find XML Schema for " + schemaFileName, se);
-		}
+*/
 	}
 }

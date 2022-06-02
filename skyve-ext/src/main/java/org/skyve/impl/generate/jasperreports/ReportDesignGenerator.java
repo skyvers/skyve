@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
@@ -38,7 +39,7 @@ public abstract class ReportDesignGenerator {
 
     protected abstract ReportDesignGenerator getSubreportGenerator();
 
-    private void clearDesign(DesignSpecification design) {
+    private static void clearDesign(DesignSpecification design) {
         design.getBands().clear();
         design.getFields().clear();
         design.getParameters().clear();
@@ -46,7 +47,7 @@ public abstract class ReportDesignGenerator {
         design.getSubReports().clear();
     }
 
-    protected void addParameters(DesignSpecification design) {
+    protected static void addParameters(DesignSpecification design) {
         ReportParameter p1 = new ReportParameter();
         p1.setName("SUBREPORT_DIR");
         p1.setTypeClass("java.lang.String");
@@ -67,7 +68,8 @@ public abstract class ReportDesignGenerator {
         design.getParameters().add(p3);
     }
 
-    protected void addFields(DesignSpecification design) {
+    @SuppressWarnings("static-method") // overridable
+	protected void addFields(DesignSpecification design) {
         final Customer customer = design.getCustomer();
         final Module module = design.getModule();
         final Document document = design.getDocument();
@@ -94,7 +96,12 @@ public abstract class ReportDesignGenerator {
             fbK.setImplicit(Boolean.TRUE);
 
             Document extDocument = null;
-            if (document.getExtends() != null && document.getExtends().getDocumentName() != null && Persistent.ExtensionStrategy.joined.equals(document.getPersistent().getStrategy())) {
+            Extends inherits = document.getExtends();
+            Persistent persistent = document.getPersistent();
+            if (inherits != null && 
+	    			inherits.getDocumentName() != null && 
+	    			persistent != null && 
+	    			Persistent.ExtensionStrategy.joined.equals(persistent.getStrategy())) {
                 extDocument = module.getDocument(customer, document.getExtends().getDocumentName());
 
                 design.setAlias(design.getAlias() + 1);
@@ -113,7 +120,7 @@ public abstract class ReportDesignGenerator {
         }
     }
 
-    protected void addVariables(DesignSpecification design) {
+    protected static void addVariables(DesignSpecification design) {
         if (DesignSpecification.ReportType.subreport.equals(design.getReportType())) {
             for (ReportField a : design.getFields()) {
                 if (!Attribute.AttributeType.collection.name().equals(a.getSkyveType()) && !Boolean.TRUE.equals(a.getImplicit())) {
@@ -145,7 +152,7 @@ public abstract class ReportDesignGenerator {
         }
     }
 
-    protected void addBands(DesignSpecification design) {
+	protected void addBands(DesignSpecification design) {
         ReportBand background = new ReportBand();
         background.setBandType(ReportBand.BandType.background);
         background.setParent(design);
@@ -215,7 +222,8 @@ public abstract class ReportDesignGenerator {
         design.getBands().add(noData);
     }
 
-    protected ReportBand createTitleBand(DesignSpecification design) {
+    @SuppressWarnings("static-method") // overridable
+	protected ReportBand createTitleBand(DesignSpecification design) {
         final ReportBand title = new ReportBand();
         title.setName("Title");
         title.setBandType(ReportBand.BandType.title);
@@ -224,7 +232,7 @@ public abstract class ReportDesignGenerator {
         return title;
     }
 
-    protected ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {
+    protected static ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {
         ReportField f = new ReportField();
         f.setParent(bean);
         switch (a.getAttributeType()) {
@@ -294,7 +302,7 @@ public abstract class ReportDesignGenerator {
      * @return
      * @throws Exception
      */
-    protected ReportField fieldFromBinding(DesignSpecification design, Customer customer, Document document, String binding) {
+    protected static ReportField fieldFromBinding(DesignSpecification design, Customer customer, Document document, String binding) {
 
         ReportField result = null;
         StringBuilder sJoin = new StringBuilder();
@@ -307,32 +315,35 @@ public abstract class ReportDesignGenerator {
                 String uniqueJoinIdentifier = "";
                 for (int i = 0; i < bindings.length; i++) {
                     Attribute a = document.getAttribute(bindings[i]);
-
-                    if (DesignSpecification.Mode.sql.equals(design.getMode()) && !a.isPersistent()) {
-                        // abandon creating a field - sql reports can't report on non persistent fields
-                        break;
-					}
-
-					// build up join string
-					if (Attribute.AttributeType.association.equals(a.getAttributeType())) {
-						uniqueJoinIdentifier = uniqueJoinIdentifier + ":" + a.getName();
-
-						sJoin = addJoinForAssociation(sJoin, customer, design, document, a, uniqueJoinIdentifier);
-						prefix.append(bindings[i]).append("_");
-					} else {
-						result = fieldFromAttribute(design, customer, document, a, sJoin, prefix);
-					}
+                    if (a != null) {
+	                    if (DesignSpecification.Mode.sql.equals(design.getMode()) && !a.isPersistent()) {
+	                        // abandon creating a field - sql reports can't report on non persistent fields
+	                        break;
+						}
+	
+						// build up join string
+						if (Attribute.AttributeType.association.equals(a.getAttributeType())) {
+							uniqueJoinIdentifier = uniqueJoinIdentifier + ":" + a.getName();
+	
+							sJoin = addJoinForAssociation(sJoin, customer, design, document, a, uniqueJoinIdentifier);
+							prefix.append(bindings[i]).append("_");
+						} else {
+							result = fieldFromAttribute(design, customer, document, a, sJoin, prefix);
+						}
+                    }
                 }
             } else {
                 Attribute a = document.getAttribute(binding);
-                if (DesignSpecification.Mode.sql.equals(design.getMode())
-                        && !a.isPersistent()) {
-                    // do nothing for sql report with non persistent attribute
-                } else {
-                    result = fieldFromAttribute(design, customer, document, a, new StringBuilder(), new StringBuilder());
+                if (a != null) {
+	                if (DesignSpecification.Mode.sql.equals(design.getMode())
+	                        && !a.isPersistent()) {
+	                    // do nothing for sql report with non persistent attribute
+	                } else {
+	                    result = fieldFromAttribute(design, customer, document, a, new StringBuilder(), new StringBuilder());
+	                }
                 }
             }
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             Util.LOGGER.warning("COULD NOT CONSTRUCT FIELD FROM BINDING " + binding + " FOR DOCUMENT " + document.getName());
         }
         if (result != null) {
@@ -342,7 +353,7 @@ public abstract class ReportDesignGenerator {
         return result;
     }
 
-    protected StringBuilder addJoinForAssociation(StringBuilder sJoin, Customer customer, DesignSpecification bean,
+    protected static StringBuilder addJoinForAssociation(StringBuilder sJoin, Customer customer, DesignSpecification bean,
                                                          Document document, Attribute a, String uniqueJoinIdentifier) {
 
         if (!bean.getJoins().containsKey(document.getName())) {

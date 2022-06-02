@@ -36,6 +36,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public JRDataSource createDatasource() 
 	throws JRException {
 		try {

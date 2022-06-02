@@ -217,6 +217,7 @@ final class BackupUtil {
 	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
+			@SuppressWarnings("null") // test above
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			Table table = tables.get(persistentIdentifier);
 			if (table == null) {
@@ -254,7 +255,9 @@ final class BackupUtil {
 											Document derivedDocument = derivedModule.getDocument(customer, derivedModoc.substring(dotIndex + 1));
 	
 											if (derivedDocument.isPersistable()) {
-												ownerTableName = derivedDocument.getPersistent().getName();
+												@SuppressWarnings("null") // tested above
+												String persistentName = derivedDocument.getPersistent().getName();
+												ownerTableName = persistentName;
 												String tableName = ownerTableName + '_' + referenceFieldName;
 												if (! tables.containsKey(tableName)) {
 													JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
@@ -275,6 +278,7 @@ final class BackupUtil {
 											currentInherits = null;
 		
 											if (baseDocument.isPersistable()) {
+												@SuppressWarnings("null") // tested above
 												ExtensionStrategy baseStrategy = baseDocument.getPersistent().getStrategy();
 												// keep looking if joined
 												if (ExtensionStrategy.joined.equals(baseStrategy)) {
@@ -289,7 +293,10 @@ final class BackupUtil {
 											}
 										}
 
-										ownerTableName = ultimateDocument.getPersistent().getName();
+										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
+										String ultimatePersistentName = ultimateDocument.getPersistent().getName();
+										ownerTableName = ultimatePersistentName;
+										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
 										String tableName = referencedDocument.getPersistent().getName() + '_' + referenceFieldName;
 										if (! tables.containsKey(tableName)) {
 											JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
