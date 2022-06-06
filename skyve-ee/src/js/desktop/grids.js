@@ -55,6 +55,8 @@ isc.BizGrid.addMethods({
 			this.padding = 10;
 			this.groupLabelBackgroundColor = 'transparent';
 		}
+		// change the default of 'enabled' coz it clashes
+		this.recordEnabledProperty = '_enabled';
 
 		this.Super("initWidget", config);
 		// NB style isnt applied unless I use the setter here - makes no sense
