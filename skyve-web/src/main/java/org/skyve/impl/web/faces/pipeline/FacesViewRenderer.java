@@ -1126,7 +1126,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			if (target != null) {
 				Attribute attribute = target.getAttribute();
 				if (attribute != null) {
-					ultimateValue = String.format("%s %s:", value, attribute.isRequired() ? "*" : ""); 
+					ultimateValue = value + (attribute.isRequired() ? " *:" : " :");
 				}
 			}
 		}
