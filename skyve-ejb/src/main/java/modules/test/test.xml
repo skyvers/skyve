@@ -149,5 +149,25 @@
 				<column binding="aggregatedAssociation.aggregatedAssociation" displayName="aggregatedAssociation.aggregatedAssociation" />
 			</columns>
 		</query>
+		<query name="qRDBMSDynamic" documentName="AllAttributesDynamicPersistent">
+			<description>Test Associations and association of association etc work for dynamic documents</description>
+			<columns>
+				<column binding="bizId" displayName="bizId" />
+				<column binding="bizVersion" displayName="bizVersion" />
+				<column binding="colour" displayName="colour" />
+				<column binding="dynamicAggregatedAssociation" displayName="dynamicAggregatedAssociation" />
+				<column binding="dynamicAggregatedAssociation.bizVersion" displayName="dynamicAggregatedAssociation.bizVersion" />
+				<column binding="dynamicAggregatedAssociation.colour" displayName="dynamicAggregatedAssociation.colour" />
+				<column binding="dynamicAggregatedAssociation.dynamicAggregatedAssociation" displayName="dynamicAggregatedAssociation.dynamicAggregatedAssociation" />
+				<column binding="dynamicAggregatedAssociation.dynamicAggregatedAssociation.bizVersion" displayName="dynamicAggregatedAssociation.dynamicAggregatedAssociation.bizVersion" />
+				<column binding="dynamicAggregatedAssociation.dynamicAggregatedAssociation.colour" displayName="dynamicAggregatedAssociation.dynamicAggregatedAssociation.colour" />
+				<column binding="aggregatedAssociation" displayName="aggregatedAssociation" />
+				<column binding="aggregatedAssociation.bizVersion" displayName="aggregatedAssociation.bizVersion" />
+				<column binding="aggregatedAssociation.colour" displayName="aggregatedAssociation.colour" />
+				<column binding="aggregatedAssociation.aggregatedAssociation" displayName="aggregatedAssociation.aggregatedAssociation" />
+				<column binding="aggregatedAssociation.aggregatedAssociation.bizVersion" displayName="aggregatedAssociation.aggregatedAssociation.bizVersion" />
+				<column binding="aggregatedAssociation.aggregatedAssociation.colour" displayName="aggregatedAssociation.aggregatedAssociation.colour" />
+			</columns>
+		</query>
 	</queries>
 </module>

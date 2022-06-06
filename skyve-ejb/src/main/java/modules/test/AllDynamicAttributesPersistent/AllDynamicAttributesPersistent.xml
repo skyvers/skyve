@@ -64,6 +64,7 @@
 		<colour name="colour">
 			<displayName>Colour</displayName>
 			<dynamic>true</dynamic>
+			<defaultValue>#000000</defaultValue>
 		</colour>
 		<date name="date">
 			<displayName>Date</displayName>

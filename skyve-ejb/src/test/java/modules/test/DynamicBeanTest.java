@@ -102,6 +102,9 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		Assert.assertEquals("Text default value", "Text", Binder.get(bean, AllAttributesPersistent.textPropertyName));
 		Assert.assertEquals("Time default value", new TimeOnly("07:51:26"), Binder.get(bean, AllAttributesPersistent.timePropertyName));
 		Assert.assertEquals("Timestamp default value", new Timestamp("2021-10-21T07:48:29Z"), Binder.get(bean, AllAttributesPersistent.timestampPropertyName));
+		
+		bean = adapd.newInstance(u);
+		Assert.assertEquals("Colour default value", "#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName));
 	}
 	
 	@Test
