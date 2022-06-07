@@ -53,7 +53,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
 
-	private Persistence persistence;
+	protected Persistence persistence;
 	
 	// Cache that points to each DynamicBean ever populated.
 	// This cache is not concerned with dynamic static beans as hibernate caching controls them.
