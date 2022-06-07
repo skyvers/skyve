@@ -349,7 +349,7 @@ public class EXT {
 
 		try {
 			if (d.isDynamic()) {
-				if (AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS.equals(RDBMSDynamicPersistence.class)) {
+				if ((AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS != null) && RDBMSDynamicPersistence.class.isAssignableFrom(AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS)) {
 					RDBMSDynamicPersistenceListModel<T> result = new RDBMSDynamicPersistenceListModel<>();
 					result.setQuery(query);
 					return result;
