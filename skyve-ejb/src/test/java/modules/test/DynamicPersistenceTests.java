@@ -4,10 +4,18 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Decimal10;
+import org.skyve.domain.types.Decimal2;
+import org.skyve.domain.types.Decimal5;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
@@ -67,6 +75,29 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertEquals(Integer.valueOf(0), list.get(1).getBizVersion());
 	}
 
+	@Test
+	public void testCoercionOfDynamicAttributes() throws Exception {
+		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 1);
+		test.setDynamic(AllDynamicAttributesPersistent.enum3PropertyName, "one");
+		test = p.save(test);
+		
+		p.evictAllCached();
+		test = p.retrieve(adapd, test.getBizId());
+		
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.booleanFlagPropertyName) instanceof Boolean);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.datePropertyName) instanceof DateOnly);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.dateTimePropertyName) instanceof DateTime);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal10PropertyName) instanceof Decimal10);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal2PropertyName) instanceof Decimal2);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.decimal5PropertyName) instanceof Decimal5);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.enum3PropertyName) instanceof String);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.geometryPropertyName) instanceof Geometry);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.longIntegerPropertyName) instanceof Long);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.normalIntegerPropertyName) instanceof Integer);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.timePropertyName) instanceof TimeOnly);
+		Assert.assertTrue(test.getDynamic(AllDynamicAttributesPersistent.timestampPropertyName) instanceof Timestamp);
+	}
+	
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testRetrievalOfDynamicAttributes() throws Exception {

@@ -13,7 +13,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
@@ -27,6 +29,7 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
+import org.skyve.util.Util;
 
 /**
  * An in-memory list model that can generate the appropriate select statement to join across static and dynamic references and fields
@@ -101,17 +104,41 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		private Document relatedDocument; // the document for this relation
 	}
 	
+	private static class FieldInfo {
+		private int fieldIndex;
+		private Class<?> fieldType;
+		
+		private FieldInfo(int fieldIndex, Class<?> fieldType) {
+			this.fieldIndex = fieldIndex;
+			this.fieldType = fieldType;
+		}
+	}
+	
 	// Reference binding -> Table Info (see directly above)
 	// A reference binding of "" is used for the driving document
 	private Map<String, TableInfo> referenceBindingToTableInfo = new TreeMap<>();
 	// Projection binding -> Tuple field index
 	// A project may point to a "fields" field in which case it is read out of the JSON Map in the tuple.
-	private Map<String, Integer> projectionBindingToFieldIndex = new TreeMap<>();
+	private Map<String, FieldInfo> projectionBindingToFieldInfo = new TreeMap<>();
 	
 	// The SQL projection clause
-	private StringBuilder selectClause = new StringBuilder(128);
-	// The SQL from caluse
-	private StringBuilder fromClause = new StringBuilder(128);
+	private StringBuilder projectedColumns = new StringBuilder(128);
+	// The SQL from clause
+	private StringBuilder joinedTables = new StringBuilder(128);
+	
+	/**
+	 * Performs the query but also servers as an overriding point for extension classes.
+	 * @param projectedColumns
+	 * @param joinedTables
+	 * @return	the results.
+	 */
+	public AutoClosingIterable<Object[]> query(@SuppressWarnings("hiding") StringBuilder projectedColumns, @SuppressWarnings("hiding") StringBuilder joinedTables) {
+		Persistence p = CORE.getPersistence();
+		StringBuilder sql = new StringBuilder(projectedColumns.length() + joinedTables.length() + 90);
+		sql.append("select ").append(projectedColumns).append(" from ").append(joinedTables);
+		sql.append(" where t0.moduleName = :moduleName and t0.documentName = :documentName");
+		return p.newSQL(sql.toString()).putParameter("moduleName", module.getName(), false).putParameter("documentName", document.getName(), false).tupleIterable();
+	}
 	
 	@Override
 	public List<Bean> getRows() throws Exception {
@@ -120,12 +147,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		
 		// Execute the SQL generated above
 		List<Bean> result = new ArrayList<>(128);
-		Persistence p = CORE.getPersistence();
-		try (AutoClosingIterable<Object[]> i = p.newSQL(selectClause + " " + fromClause + " " +
-															"where t0.moduleName = :moduleName and t0.documentName = :documentName order by t0.bizId")
-												.putParameter("moduleName", module.getName(), false)
-												.putParameter("documentName", document.getName(), false)
-												.tupleIterable()) {
+		try (AutoClosingIterable<Object[]> i = query(projectedColumns, joinedTables)) {
 			// For each row...
 			for (Object[] tuple : i) {
 				// Convert all "fields" fields to a map and place back in the tuple
@@ -143,20 +165,32 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				
 				// Now extract the values out of the tuple.
 				Map<String, Object> values = new TreeMap<>();
-				for (Entry<String, Integer> entry : projectionBindingToFieldIndex.entrySet()) {
+				for (Entry<String, FieldInfo> entry : projectionBindingToFieldInfo.entrySet()) {
 					String projection = entry.getKey();
-					Object value = tuple[entry.getValue().intValue()];
-					// If we have a map we know we need to get the binding out of that mpa (its a "fields" field)
+					// NB Set bizTagged null always
+					Object value = PersistentBean.TAGGED_NAME.equals(projection) ? null : tuple[entry.getValue().fieldIndex];
+
+					// If we have a map we know we need to get the binding out of that map (its a "fields" field)
 					if (value instanceof Map) {
 						@SuppressWarnings("unchecked")
 						Map<String, Object> fields = (Map<String, Object>) value;
 						String simpleBinding = projection.substring(projection.lastIndexOf('.') + 1);
-						values.put(projection, fields.get(simpleBinding));
+						value = fields.get(simpleBinding);
 					}
-					// otherwise we lift it out of the tuple directly
-					else {
-						values.put(projection, value);
+
+					Class<?> fieldType = entry.getValue().fieldType;
+					if ((value != null) && (! fieldType.equals(value.getClass()))) {
+						try {
+							value = BindUtil.fromSerialised(fieldType, value.toString());
+						}
+						catch (Exception e) {
+							Document d = getDrivingDocument();
+							Util.LOGGER.warning("RDBMSDynamicPersistenceListModel: Schema evolution problem on projection of binding " + projection + " within document " + d.getOwningModuleName() + "." + d.getName() + " :- [" + value + "] cannot be coerced to type " + fieldType);
+							e.printStackTrace();
+						}
 					}
+
+					values.put(projection, value);
 				}
 				result.add(new DynamicBean(module.getName(), document.getName(), values));
 			}
@@ -170,22 +204,22 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	// Used to make unique field aliases (never used as we extract by position)
 	private int fieldAliasNumber = 0; // nothing aliased at the start
 	// The position in each tuple array
-	private int fieldIndex = 5; // 5 implicit fields projected by default
+	private int fieldIndex = 4; // 4 implicit fields projected by default
 	
 	private void prepare() {
 		// add alias zero - the driving table
 		TableInfo info = new TableInfo();
 		info.dynamicEntityTableAliasNumber = Integer.valueOf(0);
 		referenceBindingToTableInfo.put("", info);
-		// First 5 fields are the implicit fields required by any data model
-		selectClause.append("select t0.bizId, t0.bizLock, 0 as bizTagged, t0.bizFlagComment, t0.bizKey");
-		fromClause.append("from ADM_DynamicEntity t0");
+		// First 4 fields are the implicit fields required by any data model
+		projectedColumns.append("t0.bizId, t0.bizLock, t0.bizFlagComment, t0.bizKey");
+		joinedTables.append("ADM_DynamicEntity t0");
 		
 		// Now process each projection
 		Set<String> projections = getProjections();
 		for (String projection : projections) {
-			// If we already have this one dont process it again
-			if (projectionBindingToFieldIndex.containsKey(projection)) {
+			// If we already have this one don't process it again
+			if (projectionBindingToFieldInfo.containsKey(projection)) {
 				continue;
 			}
 			
@@ -194,25 +228,24 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 			if (simpleBindings.length == 1) { 
 				// Take care of default projected implicit fields
 				if (Bean.DOCUMENT_ID.equals(projection)) {
-					projectionBindingToFieldIndex.put(projection, Integer.valueOf(0));
+					projectionBindingToFieldInfo.put(projection, new FieldInfo(0, String.class));
 				}
 				else if (PersistentBean.LOCK_NAME.equals(projection)) {
-					projectionBindingToFieldIndex.put(projection, Integer.valueOf(1));
-				}
-				else if (PersistentBean.TAGGED_NAME.equals(projection)) {
-					projectionBindingToFieldIndex.put(projection, Integer.valueOf(2));
+					projectionBindingToFieldInfo.put(projection, new FieldInfo(1, OptimisticLock.class));
 				}
 				else if (PersistentBean.FLAG_COMMENT_NAME.equals(projection)) {
-					projectionBindingToFieldIndex.put(projection, Integer.valueOf(3));
+					projectionBindingToFieldInfo.put(projection, new FieldInfo(2, String.class));
 				}
 				else if (Bean.BIZ_KEY.equals(projection)) {
-					projectionBindingToFieldIndex.put(projection, Integer.valueOf(4));
+					projectionBindingToFieldInfo.put(projection, new FieldInfo(3, String.class));
 				}
-				else { // NB driving document is always dynamic
+				else if (! PersistentBean.TAGGED_NAME.equals(projection)) { // not bizTagged
+					// NB driving document is always dynamic
+					
 					// Add implicit field projections
 					if (BindUtil.isImplicit(projection)) {
-						selectClause.append(", t0.").append(projection).append(" as f").append(fieldAliasNumber++);
-						projectionBindingToFieldIndex.put(projection, Integer.valueOf(fieldIndex++));
+						projectedColumns.append(", t0.").append(projection).append(" as f").append(fieldAliasNumber++);
+						projectionBindingToFieldInfo.put(projection, new FieldInfo(fieldIndex++, BindUtil.implicitAttributeType(projection)));
 					}
 					else {
 						// Process simple references
@@ -220,16 +253,16 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 						if (a instanceof Relation) {
 							prepareReferences(simpleBindings);
 							info = referenceBindingToTableInfo.get(projection);
-							processProjectionThroughReferences(info, projection, Bean.DOCUMENT_ID, false, false);
+							processProjectionThroughReferences(info, projection, Bean.DOCUMENT_ID, false, false, null);
 						}
 						// Process anything else
 						else {
 							info = referenceBindingToTableInfo.get("");
 							if (info.fieldsIndex == null) {
 								info.fieldsIndex = Integer.valueOf(fieldIndex++);
-								selectClause.append(", t0.fields as f").append(fieldAliasNumber++);
+								projectedColumns.append(", t0.fields as f").append(fieldAliasNumber++);
 							}
-							projectionBindingToFieldIndex.put(projection, info.fieldsIndex);
+							addField(a, projection, info.fieldsIndex.intValue());
 						}
 					}
 				}
@@ -246,7 +279,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				Document relatedDocument = info.relatedDocument;
 				Module relatedModule = customer.getModule(relatedDocument.getOwningModuleName());
 				Attribute a = info.relatedDocument.getPolymorphicAttribute(customer, simpleBinding);
-				processProjectionThroughReferences(info, projection, simpleBinding, BindUtil.isDynamic(customer, relatedModule, relatedDocument, a), a instanceof Relation);
+				processProjectionThroughReferences(info, projection, simpleBinding, BindUtil.isDynamic(customer, relatedModule, relatedDocument, a), a instanceof Relation, a);
 			}
 		}
 	}
@@ -286,24 +319,24 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					// Add dynamic relation left join, if applicable
 					if (Binder.isDynamic(customer, simpleBindingModule, simpleBindingDocument, a)) {
 						info.dynamicRelationTableAliasNumber = Integer.valueOf(tableAliasNumber);
-						fromClause.append("\nleft join ADM_DynamicRelation t").append(tableAliasNumber);
-						fromClause.append(" on t").append(tableAliasNumber).append(".parent_id = t").append(ownerInfo.dynamicEntityTableAliasNumber.intValue()).append(".bizId and t");
-						fromClause.append(tableAliasNumber).append(".attributeName = '").append(simpleBinding);
+						joinedTables.append("\nleft join ADM_DynamicRelation t").append(tableAliasNumber);
+						joinedTables.append(" on t").append(tableAliasNumber).append(".parent_id = t").append(ownerInfo.dynamicEntityTableAliasNumber.intValue()).append(".bizId and t");
+						joinedTables.append(tableAliasNumber).append(".attributeName = '").append(simpleBinding);
 						tableAliasNumber++;
 
 						// If relation target document is dynamic join ADM_DynamicEntity
 						if (relatedDocument.isDynamic()) {
 							// Add entity left join
-							fromClause.append("'\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
-							fromClause.append(" on t").append(tableAliasNumber).append(".bizId = t").append(tableAliasNumber - 1).append(".relatedId");
+							joinedTables.append("'\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
+							joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(tableAliasNumber - 1).append(".relatedId");
 	
 							info.dynamicEntityTableAliasNumber = Integer.valueOf(tableAliasNumber);
 						}
 						// Else relation target is static - join in the persistent identifier
 						else {
 							// Add entity left join
-							fromClause.append("'\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
-							fromClause.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.dynamicRelationTableAliasNumber).append(".relatedId");
+							joinedTables.append("'\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
+							joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.dynamicRelationTableAliasNumber).append(".relatedId");
 							info.staticTableAliasNumber = Integer.valueOf(tableAliasNumber);
 						}
 						
@@ -318,8 +351,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					// Its a static relation
 					else {
 						// Add entity left join
-						fromClause.append("\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
-						fromClause.append(" on t").append(tableAliasNumber).append(".bizId = t").append(ownerInfo.staticTableAliasNumber.intValue()).append('.').append(simpleBinding).append("_id");
+						joinedTables.append("\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
+						joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(ownerInfo.staticTableAliasNumber.intValue()).append('.').append(simpleBinding).append("_id");
 						info.staticTableAliasNumber = Integer.valueOf(tableAliasNumber);
 
 						tableAliasNumber++;
@@ -355,33 +388,51 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param dynamicAttribute
 	 * @param relationAttribute
 	 */
-	private void processProjectionThroughReferences(TableInfo info, String projection, String simpleBinding, boolean dynamicAttribute, boolean relationAttribute) {
+	private void processProjectionThroughReferences(TableInfo info, String projection, String simpleBinding, boolean dynamicAttribute, boolean relationAttribute, Attribute a) {
 		// Implicit static/dynamic attribute
 		if (BindUtil.isImplicit(simpleBinding)) {
-			selectClause.append(", t").append(info.relatedDocument.isDynamic() ? info.dynamicEntityTableAliasNumber : info.staticTableAliasNumber).append('.').append(simpleBinding).append(" as f").append(fieldAliasNumber++);
-			projectionBindingToFieldIndex.put(projection, Integer.valueOf(fieldIndex++));
+			projectedColumns.append(", t").append(info.relatedDocument.isDynamic() ? info.dynamicEntityTableAliasNumber : info.staticTableAliasNumber).append('.').append(simpleBinding).append(" as f").append(fieldAliasNumber++);
+			projectionBindingToFieldInfo.put(projection, new FieldInfo(fieldIndex++, BindUtil.implicitAttributeType(simpleBinding)));
 		}
 		else {
 			// Select from the "fields" field on the dynamic table if a dynamic attribute or a dynamic document
 			if (dynamicAttribute || (info.relatedDocument.isDynamic())) {
 				if (info.fieldsIndex == null) {
 					info.fieldsIndex = Integer.valueOf(fieldIndex++);
-					selectClause.append(", t").append(info.dynamicEntityTableAliasNumber).append(".fields as f").append(fieldAliasNumber++);
+					projectedColumns.append(", t").append(info.dynamicEntityTableAliasNumber).append(".fields as f").append(fieldAliasNumber++);
 				}
-				projectionBindingToFieldIndex.put(projection, info.fieldsIndex);
+				addField(a, projection, info.fieldsIndex.intValue());
 			}
 			// Select from the static table if a static attribute on a static document
 			else {
-				selectClause.append(", t").append(info.staticTableAliasNumber).append('.').append(simpleBinding);
+				projectedColumns.append(", t").append(info.staticTableAliasNumber).append('.').append(simpleBinding);
 				if (relationAttribute) {
-					selectClause.append("_id");
+					projectedColumns.append("_id");
 				}
-				selectClause.append(" as f").append(fieldAliasNumber++);
-				projectionBindingToFieldIndex.put(projection, Integer.valueOf(fieldIndex++));
+				projectedColumns.append(" as f").append(fieldAliasNumber++);
+				addField(a, projection, fieldIndex++);
 			}
 		}
 	}
 	
+	private void addField(Attribute a, String projection, int index) {
+		Class<?> type = String.class;
+		if (a instanceof Enumeration) {
+			Enumeration e = (Enumeration) a;
+			e = e.getTarget();
+			if (e.isDynamic()) {
+				type = String.class;
+			}
+			else {
+				type = e.getEnum();
+			}
+		}
+		else if (a != null) {
+			type = a.getAttributeType().getImplementingType();
+		}
+		projectionBindingToFieldInfo.put(projection, new FieldInfo(index, type));
+	}
+
 	/**
 	 * If we are projecting a dynamic attribute on a static document, ensure ADM_DynamicEntity is also joined in.
 	 * If we are projecting a static attribute on a dynamic document, ensure the Persistent Identifier is joined in.
@@ -394,8 +445,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		if (dynamicAttribute) {
 			if ((info.staticTableAliasNumber != null) && (info.dynamicEntityTableAliasNumber == null)) {
 				// Add dynamic entity left join from static table
-				fromClause.append("\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
-				fromClause.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.staticTableAliasNumber).append(".bizId");
+				joinedTables.append("\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
+				joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.staticTableAliasNumber).append(".bizId");
 
 				info.dynamicEntityTableAliasNumber = Integer.valueOf(tableAliasNumber);
 				tableAliasNumber++;
@@ -409,8 +460,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					throw new DomainException("Can't join to a non-persistent document " + info.relatedDocument.getOwningModuleName() + '.' + info.relatedDocument.getName());
 				}
 				// Add static table left join from dynamic entity
-				fromClause.append("\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
-				fromClause.append(" on t").append(info.dynamicEntityTableAliasNumber).append(".bizId = t").append(tableAliasNumber).append(".bizId");
+				joinedTables.append("\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
+				joinedTables.append(" on t").append(info.dynamicEntityTableAliasNumber).append(".bizId = t").append(tableAliasNumber).append(".bizId");
 				
 				info.staticTableAliasNumber = Integer.valueOf(tableAliasNumber);
 				tableAliasNumber++;

@@ -1605,6 +1605,15 @@ public final class BindUtil {
 						Attribute a = d.getPolymorphicAttribute(c, attributeName);
 						if (a != null) {
 							try {
+								// Dynamic enumerations are strings, otherwise get the Enum class
+								if (a instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
+									org.skyve.impl.metadata.model.document.field.Enumeration e = (org.skyve.impl.metadata.model.document.field.Enumeration) a;
+									e = e.getTarget();
+									if (e.isDynamic()) {
+										return String.class;
+									}
+									return e.getEnum();
+								}
 								// binding expression to Association or InverseOne
 								if ((a instanceof Association) || (a instanceof InverseOne)) {
 									d = m.getDocument(c, ((Reference) a).getDocumentName());

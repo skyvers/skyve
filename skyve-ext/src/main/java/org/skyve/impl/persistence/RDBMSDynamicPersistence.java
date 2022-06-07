@@ -43,6 +43,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
+import org.skyve.util.Util;
 
 // TODO Need to replicate HibernateListener functions for dynamic beans
 // TODO Need to treat bizVersion and bizLock which requirees change detection in DynamicBean.
@@ -459,7 +460,18 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				}
 				if (dynamicAttribute) {
 					String name = a.getName();
-					bean.setDynamic(name, json.get(name));
+					Object value = json.get(name);
+					Class<?> type = a.getAttributeType().getImplementingType();
+					if ((value != null) && (! type.equals(value.getClass()))) {
+						try {
+							value = BindUtil.fromSerialised(type, value.toString());
+						}
+						catch (Exception e) {
+							Util.LOGGER.warning("RDBMSDynamicPersistence: Schema evolution problem on populate of " + d.getOwningModuleName() + "." + d.getName() + "#" + bean.getBizId() + " :- [" + value + "] cannot be coerced to type " + type);
+							e.printStackTrace();
+						}
+					}
+					bean.setDynamic(name, value);
 				}
 			}
 			else if (a instanceof Reference) {
