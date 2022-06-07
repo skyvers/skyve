@@ -1230,7 +1230,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Document drivingDocument = model.getDrivingDocument();
 		String owningModuleName = drivingDocument.getOwningModuleName();
 		Customer customer = CORE.getUser().getCustomer();
-		Module owningModule = customer.getModule(drivingDocument.getOwningModuleName());
+		Module owningModule = customer.getModule(owningModuleName);
 		String drivingDocumentName = drivingDocument.getName();
 
 		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));

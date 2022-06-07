@@ -117,17 +117,17 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 			}
 	        model = EXT.newListModel(query);
 		}
-		d = model.getDrivingDocument();
-		
-		if (! u.canReadDocument(d)) {
-			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
-		}
-		
+
 		if (view != null) {
 			BeanMapAdapter<?> currentBean = view.getCurrentBean();
 			if (currentBean != null) {
 				model.setBean(currentBean.getBean());
 			}
+		}
+		d = model.getDrivingDocument();
+		
+		if (! u.canReadDocument(d)) {
+			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
 		}
 		
 		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("LOAD %s : %s", String.valueOf(first), String.valueOf(pageSize)));
