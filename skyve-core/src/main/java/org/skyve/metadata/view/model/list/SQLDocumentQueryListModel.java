@@ -16,7 +16,7 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 	}
 
 	@Override
-	public Filter getFilter() throws Exception {
+	public Filter getFilter() {
 		if (filter == null) {
 			establishQueries();
 			filter = new SQLFilter(detailSQL, summarySQL);
@@ -25,7 +25,7 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 	}
 
 	@Override
-	public Filter newFilter() throws Exception {
+	public Filter newFilter() {
 		establishQueries();
 		return new SQLFilter(detailSQL, summarySQL);
 	}

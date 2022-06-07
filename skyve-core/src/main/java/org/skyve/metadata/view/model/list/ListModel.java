@@ -331,8 +331,8 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	
 	public abstract Set<String> getProjections();
 	
-	public abstract Filter getFilter() throws Exception;
-	public abstract Filter newFilter() throws Exception;
+	public abstract Filter getFilter();
+	public abstract Filter newFilter();
 	public abstract void putParameter(String name, Object value);
 	public abstract Page fetch() throws Exception;
 	public abstract AutoClosingIterable<Bean> iterate() throws Exception;

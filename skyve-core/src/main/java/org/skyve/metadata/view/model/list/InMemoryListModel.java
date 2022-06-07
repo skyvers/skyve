@@ -37,10 +37,8 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	 * 
 	 * @param module
 	 * @param document
-	 * @throws Exception
 	 */
-	public void setDrivingDocument(Module module, Document drivingDocument)
-	throws Exception {
+	public void setDrivingDocument(Module module, Document drivingDocument) {
 		customer = CORE.getUser().getCustomer();
 		this.module = module;
 		this.drivingDocument = drivingDocument;
@@ -96,7 +94,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	private InMemoryFilter filter;
 	
 	@Override
-	public final Filter getFilter() throws Exception {
+	public final Filter getFilter() {
 		if (filter == null) {
 			filter = (InMemoryFilter) newFilter();
 		}
@@ -104,7 +102,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	}
 
 	@Override
-	public Filter newFilter() throws Exception {
+	public Filter newFilter() {
 		return new InMemoryFilter();
 	}
 

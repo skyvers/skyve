@@ -44,7 +44,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	}
 
 	@Override
-	public Filter newFilter() throws Exception {
+	public Filter newFilter() {
 		// This filter adds the rows for the bizParentId given
 		return new RelationTreeModelFilter<>(getBean(), stopDocuments);
 	}

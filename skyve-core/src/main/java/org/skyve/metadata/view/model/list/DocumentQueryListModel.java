@@ -106,7 +106,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private DocumentQueryFilter filter;
 	
 	@Override
-	public Filter getFilter() throws Exception {
+	public Filter getFilter() {
 		if (filter == null) {
 			establishQueries();
 			filter = new DocumentQueryFilter(detailQuery.getFilter(), summaryQuery.getFilter());
@@ -115,7 +115,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 
 	@Override
-	public Filter newFilter() throws Exception {
+	public Filter newFilter() {
 		establishQueries();
 		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter());
 	}

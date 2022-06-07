@@ -65,13 +65,13 @@ public class BatchesModel extends ListModel<Communication> {
 	}
 
 	@Override
-	public Filter getFilter() throws Exception {
+	public Filter getFilter() {
 		// not required
 		return null;
 	}
 
 	@Override
-	public Filter newFilter() throws Exception {
+	public Filter newFilter() {
 		// not required
 		return null;
 	}
