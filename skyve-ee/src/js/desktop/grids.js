@@ -55,8 +55,6 @@ isc.BizGrid.addMethods({
 			this.padding = 10;
 			this.groupLabelBackgroundColor = 'transparent';
 		}
-		// change the default of 'enabled' coz it clashes
-		this.recordEnabledProperty = '_enabled';
 
 		this.Super("initWidget", config);
 		// NB style isnt applied unless I use the setter here - makes no sense
@@ -1118,6 +1116,8 @@ isc.BizListGrid.addMethods({
 			canFreezeFields: false,
 			contextMenu: me._config.isRepeater ? null : me._contextMenu,
 			showRollOver: true,
+			// change the default of 'enabled' coz it clashes
+			recordEnabledProperty: '_enabled',
 			canExpandRecords: false,
 			expansionMode: 'details',
 //			autoFitWidthApproach: 'both', - The summary row doesn't scroll in sync with the list
@@ -2120,6 +2120,8 @@ isc.BizDataGrid.addMethods({
 			validateByCell: true,
 			saveByCell: false,
 			validateOnChange: false,
+			// change the default of 'enabled' coz it clashes
+			recordEnabledProperty: '_enabled',
 			canHover: me.isRepeater ? false : true,
 			wrapCells: me.wordWrap ? true : false,
 		    fixedRecordHeights: me.wordWrap ? false : true,
