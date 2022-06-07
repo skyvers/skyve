@@ -75,6 +75,18 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		setDrivingDocument(module, document);
 	}
 	
+	public void setModel(String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
+		this.description = description;
+		this.columns = columns;
+		
+		user = CORE.getUser();
+		customer = user.getCustomer();
+		document = drivingDocument;
+		module = customer.getModule(document.getOwningModuleName());
+
+		setDrivingDocument(module, document);
+	}
+	
 	@Override
 	public String getDescription() {
 		return description;
