@@ -1,7 +1,6 @@
 package org.skyve.metadata.view.model.list;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +12,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl.OrderingImpl;
-import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
@@ -22,6 +20,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.persistence.AutoClosingIterableAdpater;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -269,16 +268,6 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 
 		filterAndSort();
 		
-		return new AutoClosingIterable<>() {
-			@Override
-			public Iterator<Bean> iterator() {
-				return new LoggingIteratorAdapter<>(rows.iterator());
-			}
-
-			@Override
-			public void close() throws Exception {
-				// nothing to close here
-			}
-		};
+		return new AutoClosingIterableAdpater<>(rows);
 	}
 }
