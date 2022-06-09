@@ -1179,7 +1179,6 @@ public class FacesViewRenderer extends ViewRenderer {
 										document,
 										title,
 										grid,
-										user.canCreateDocument(getCurrentListWidgetDrivingDocument()),
 										aggregateQuery);
 		addToContainer(l,
 						grid.getPixelWidth(),

@@ -152,6 +152,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
@@ -1217,19 +1218,27 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String moduleName,
 									String modelDocumentName,
 									String modelName,
-									ListModel<? extends Bean> model,
+									ListModel<Bean> model,
 									Document owningDocument,
 									String title,
 									ListGrid grid,
-									boolean canCreateDocument,
 									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
 		}
 
+		if (managedBean != null) {
+			BeanMapAdapter<? extends Bean> currentBean = managedBean.getCurrentBean();
+			if (currentBean != null) {
+				Bean bean = currentBean.getBean();
+				model.setBean(bean);
+			}
+		}
 		Document drivingDocument = model.getDrivingDocument();
+		User user = CORE.getUser();
+		boolean canCreateDocument = user.canCreateDocument(drivingDocument);
 		String owningModuleName = drivingDocument.getOwningModuleName();
-		Customer customer = CORE.getUser().getCustomer();
+		Customer customer = user.getCustomer();
 		Module owningModule = customer.getModule(owningModuleName);
 		String drivingDocumentName = drivingDocument.getName();
 
@@ -1801,7 +1810,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
-										ListModel<? extends Bean> model,
+										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
 										String title,
@@ -1811,7 +1820,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		Document drivingDocument =  model.getDrivingDocument();
+		if (managedBean != null) {
+			BeanMapAdapter<? extends Bean> currentBean = managedBean.getCurrentBean();
+			if (currentBean != null) {
+				Bean bean = currentBean.getBean();
+				model.setBean(bean);
+			}
+		}
+		Document drivingDocument = model.getDrivingDocument();
 		String moduleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 

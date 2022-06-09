@@ -270,11 +270,10 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									String moduleName,
 									String modelDocumentName,
 									String modelName,
-									ListModel<? extends Bean> model,
+									ListModel<Bean> model,
 									Document owningDocument,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument,
 									boolean aggregateQuery) {
 		return component;
 	}
@@ -283,7 +282,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
-										ListModel<? extends Bean> model,
+										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
 										String title,

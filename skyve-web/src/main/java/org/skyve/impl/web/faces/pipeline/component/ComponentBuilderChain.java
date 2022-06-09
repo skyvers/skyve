@@ -494,11 +494,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									String moduleName,
 									String modelDocumentName,
 									String modelName,
-									ListModel<? extends Bean> model,
+									ListModel<Bean> model,
 									Document owningDocument,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument,
 									boolean aggregateQuery) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -510,7 +509,6 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										owningDocument,
 										title,
 										listGrid,
-										canCreateDocument,
 										aggregateQuery);
 		}
 		return result;
@@ -520,7 +518,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
-										ListModel<? extends Bean> model,
+										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
 										String title,

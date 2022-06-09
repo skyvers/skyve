@@ -832,7 +832,6 @@ public class PWAViewRenderer extends ViewRenderer {
 											getCurrentListWidgetModel(),
 											title,
 											grid,
-											(user == null) ? true : user.canCreateDocument(getCurrentListWidgetDrivingDocument()),
 											aggregateQuery);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}

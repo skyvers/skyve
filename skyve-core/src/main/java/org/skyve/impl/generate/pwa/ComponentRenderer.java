@@ -149,10 +149,9 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	public abstract RenderedComponent listGrid(RenderedComponent component,
 												String modelDocumentName,
 												String modelName,
-												ListModel<? extends Bean> model,
+												ListModel<Bean> model,
 												String title,
 												ListGrid listGrid,
-												boolean canCreateDocument,
 												boolean aggregateQuery);
 
 	/*
@@ -167,7 +166,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	public abstract RenderedComponent listRepeater(RenderedComponent component,
 													String modelDocumentName,
 													String modelName,
-													ListModel<? extends Bean> model, 
+													ListModel<Bean> model, 
 													List<FilterParameter> filterParameters,
 													List<Parameter> parameters,
 													String title,

@@ -18,11 +18,10 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 									String moduleName,
 									String modelDocumentName,
 									String modelName,
-									ListModel<? extends Bean> model,
+									ListModel<Bean> model,
 									Document owningDocument,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument,
 									boolean aggregateQuery) {
 		if (component != null) {
 			((DataTable) component).setStickyHeader(true);
@@ -34,7 +33,7 @@ public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
-										ListModel<? extends Bean> model,
+										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
 										String title,

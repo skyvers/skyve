@@ -14,11 +14,10 @@ public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 									String moduleName,
 									String modelDocumentName,
 									String modelName,
-									ListModel<? extends Bean> model,
+									ListModel<Bean> model,
 									Document owningDocument,
 									String title,
 									ListGrid listGrid,
-									boolean canCreateDocument,
 									boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {

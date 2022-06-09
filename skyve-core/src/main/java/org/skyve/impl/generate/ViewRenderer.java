@@ -940,13 +940,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public String getCurrentListWidgetModelDocumentName() {
 		return currentListWidgetModelDocumentName;
 	}
-	private ListModel<? extends Bean> currentListWidgetModel;
-	public ListModel<? extends Bean> getCurrentListWidgetModel() {
+	private ListModel<Bean> currentListWidgetModel;
+	public ListModel<Bean> getCurrentListWidgetModel() {
 		return currentListWidgetModel;
-	}
-	private Document currentListWidgetDrivingDocument;
-	public Document getCurrentListWidgetDrivingDocument() {
-		return currentListWidgetDrivingDocument;
 	}
 	private boolean currentListWidgetAggregateQuery;
 	
@@ -960,7 +956,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentListWidgetModelName = modelName;
 			currentListWidgetModelDocumentName = document.getName();
 			currentListWidgetModel = document.getListModel(customer, currentListWidgetModelName, true);
-			currentListWidgetDrivingDocument = currentListWidgetModel.getDrivingDocument();
 			currentListWidgetAggregateQuery = false;
 		}
 		else {
@@ -970,7 +965,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 			}
 			currentListWidgetModelName = queryName;
 			currentListWidgetModelDocumentName = query.getDocumentName();
-			currentListWidgetDrivingDocument = query.getDocumentModule(customer).getDocument(customer, currentListWidgetModelDocumentName);
 			// Don't need the real list model here and EXT is not available.
 			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 	        queryModel.setQuery(query);
@@ -984,7 +978,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentListWidgetModelName = null;
 		currentListWidgetModelDocumentName = null;
 		currentListWidgetModel = null;
-		currentListWidgetDrivingDocument = null;
 		currentListWidgetAggregateQuery = false;
 	}
 

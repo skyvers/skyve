@@ -229,11 +229,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String moduleName,
 											String modelDocumentName,
 											String modelName,
-											ListModel<? extends Bean> model,
+											ListModel<Bean> model,
 											Document owningDocument,
 											String title,
 											ListGrid listGrid,
-											boolean canCreateDocument,
 											boolean aggregateQuery);
 
 	/*
@@ -248,7 +247,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent listRepeater(UIComponent component,
 												String modelDocumentName,
 												String modelName,
-												ListModel<? extends Bean> model, 
+												ListModel<Bean> model, 
 												List<FilterParameter> filterParameters,
 												List<Parameter> parameters,
 												String title,

@@ -294,10 +294,9 @@ System.out.println("action column " + current);
 	public RenderedComponent listGrid(RenderedComponent component,
 										String modelDocumentName,
 										String modelName,
-										ListModel<? extends Bean> model,
+										ListModel<Bean> model,
 										String title,
 										ListGrid listGrid,
-										boolean canCreateDocument,
 										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
@@ -309,7 +308,7 @@ System.out.println("action column " + current);
 	public RenderedComponent listRepeater(RenderedComponent component,
 											String modelDocumentName,
 											String modelName,
-											ListModel<? extends Bean> model,
+											ListModel<Bean> model,
 											List<FilterParameter> filterParameters,
 											List<Parameter> parameters,
 											String title,

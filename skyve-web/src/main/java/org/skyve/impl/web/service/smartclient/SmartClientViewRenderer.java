@@ -2955,7 +2955,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
 		ListModel<Bean> model = owningDocument.getListModel(customer, modelName, true);
+		// Note we cannot set the bean on the model here as we are only generating out the UI.
 		Document drivingDocument = model.getDrivingDocument();
+		if (drivingDocument == null) {
+			throw new MetaDataException("List Model" + model + " has no driving document defined and smart client does not support dynamic/late list grid generation");
+		}
 		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
 
 		return appendDataSourceDefinition(user, 

@@ -110,7 +110,7 @@ public class ListGrid extends HtmlPanelGroup {
 										boolean zoomDisabled,
 										Boolean filterRendered,
 										ComponentBuilder componentBuilder) {
-		ListModel<? extends Bean> model = null;
+		ListModel<Bean> model = null;
 		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
 		String name = null;
 
@@ -150,7 +150,6 @@ public class ListGrid extends HtmlPanelGroup {
 											null,
 											model.getLocalisedDescription(),
 											listGrid,
-											user.canCreateDocument(model.getDrivingDocument()),
 											aggregateQuery);
 	}
 }

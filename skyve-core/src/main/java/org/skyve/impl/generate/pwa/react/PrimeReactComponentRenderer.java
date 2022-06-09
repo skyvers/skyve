@@ -283,10 +283,9 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	public RenderedComponent listGrid(RenderedComponent component,
 										String modelDocumentName,
 										String modelName,
-										ListModel<? extends Bean> model,
+										ListModel<Bean> model,
 										String title,
 										ListGrid listGrid,
-										boolean canCreateDocument,
 										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent();
 		StringBuilder output = result.getOutput();
@@ -298,7 +297,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	public RenderedComponent listRepeater(RenderedComponent component,
 											String modelDocumentName,
 											String modelName,
-											ListModel<? extends Bean> model,
+											ListModel<Bean> model,
 											List<FilterParameter> filterParameters,
 											List<Parameter> parameters,
 											String title,
