@@ -33,8 +33,12 @@ public class ListGrid extends HtmlPanelGroup {
 
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
+		Map<String, Object> attributes = getAttributes();
+
+		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {
+			getChildren().clear();
+		}
 		if (getChildCount() == 0) {
-			Map<String, Object> attributes = getAttributes();
 			final String moduleName = (String) attributes.get("module");
 			final String queryName = (String) attributes.get("query");
 			final String documentName = (String) attributes.get("document");

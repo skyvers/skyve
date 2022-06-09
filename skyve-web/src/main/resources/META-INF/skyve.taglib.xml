@@ -128,6 +128,12 @@
 			<required>false</required>
 			<type>java.lang.String</type>
 		</attribute>
+		<attribute>
+			<description>Boolean value to specify that each rendering of the view will be from scratch - dynamically rendered each time.</description>
+			<name>dynamic</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
 	</tag>
 	<tag>
 		<tag-name>phoneMenu</tag-name>
@@ -226,6 +232,12 @@
 			<name>componentBuilderClass</name>
 			<required>false</required>
 			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify that each rendering of the listGrid will be from scratch - dynamically rendered each time.</description>
+			<name>dynamic</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
 		</attribute>
 	</tag>
 	<tag>

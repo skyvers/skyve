@@ -38,9 +38,13 @@ public class View extends HtmlPanelGroup {
 
     @Override
     public void encodeBegin(FacesContext context) throws IOException {
-    	if (getChildCount() == 0) {
- 			Map<String, Object> attributes = getAttributes();
-			final String moduleName = (String) attributes.get("module");
+		Map<String, Object> attributes = getAttributes();
+   	
+		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {
+			getChildren().clear();
+		}
+		if (getChildCount() == 0) {
+ 			final String moduleName = (String) attributes.get("module");
 			final String documentName = (String) attributes.get("document");
 	    	final String managedBeanName = (String) attributes.get("managedBean");
 	    	final String widgetId = (String) attributes.get("widgetId");

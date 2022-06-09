@@ -67,8 +67,11 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 					sb.append(binding).append('.').append(Bean.BIZ_KEY);
 					projections.add(sb.toString());
 				}
+				projections.add(binding);
 			}
-			projections.add((binding != null) ? binding : column.getName());
+			else {
+				projections.add(column.getName());
+			}
 		}
 	}
 	
