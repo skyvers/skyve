@@ -465,7 +465,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				sb.append(MODULES_NAMESPACE);
 			}
 			else {
-				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(MODULES_NAMESPACE);
 			}
 			sb.append(moduleName).append('/');
 			sb.append(documentName).append('/').append(documentName).append(".xml");
