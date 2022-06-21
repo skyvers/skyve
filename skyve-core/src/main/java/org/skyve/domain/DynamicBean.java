@@ -1,5 +1,6 @@
 package org.skyve.domain;
 
+import java.beans.Introspector;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -174,9 +175,23 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 						Customer c = CORE.getCustomer();
 						Module m = c.getModule(getBizModule());
 						Document d = m.getDocument(c, getBizDocument());
-						Condition condition = d.getCondition(binding);
+						// Handle "not" conditions
+						String candidateConditionName = binding;
+						boolean negated = candidateConditionName.startsWith("not");
+						if (negated) {
+							candidateConditionName = Introspector.decapitalize(candidateConditionName.substring(3));
+						}
+						Condition condition = d.getCondition(candidateConditionName);
 						if (condition != null) {
 							result = Boolean.valueOf(BindUtil.evaluateCondition(this, condition.getExpression()));
+							if (negated) {
+								if (Boolean.TRUE.equals(result)) {
+									result = Boolean.FALSE;
+								}
+								else if (Boolean.FALSE.equals(result)) {
+									result = Boolean.TRUE;
+								}
+							}
 						}
 						else if (Bean.CREATED_KEY.equals(binding)) { // default created condition value
 							result = Boolean.TRUE;
