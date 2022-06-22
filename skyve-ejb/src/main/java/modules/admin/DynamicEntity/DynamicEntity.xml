@@ -10,7 +10,7 @@
 			So this is manipulated outside of Hibernate O/R mapping.
 		]]>
 	</documentation>
-	<!-- Abstract so that Persistence cant be used with domain objects -->
+	<!-- Abstract so that Persistence can't be used with domain objects -->
 	<abstract>true</abstract>
 	<persistent name="ADM_DynamicEntity" />
 	<singularAlias>Dynamic Entity</singularAlias>

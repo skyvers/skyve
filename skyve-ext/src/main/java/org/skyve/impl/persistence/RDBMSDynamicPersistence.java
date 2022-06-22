@@ -8,32 +8,33 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.logging.Level;
 
-import org.hibernate.LockMode;
-import org.hibernate.ScrollMode;
-import org.hibernate.ScrollableResults;
-import org.hibernate.query.Query;
-import org.hibernate.type.StringType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.domain.messages.SkyveException;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.customer.ExportedReference;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.ValidationUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
-import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -46,7 +47,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 // TODO Need to replicate HibernateListener functions for dynamic beans
-// TODO Need to treat bizVersion and bizLock which requirees change detection in DynamicBean.
+// TODO Need to treat bizVersion and bizLock which requires change detection in DynamicBean.
 // The idea here is to completely persist all beans reachable, no matter the relationship.
 public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = -6445760028486705253L;
@@ -72,9 +73,8 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
 		
-		if (bean.isPersisted()) {
-			delete(c, d, bean, true);
-		}
+		// Do this even if bean is transient as there might be some persistent part in the graph somewhere
+		delete(c, d, bean, true);
 
 		new BeanVisitor(false, false, false) {
 			@Override
@@ -279,7 +279,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	// Otherwise if its an actual delete, just cascade all but aggregations.
 	// NB We don't check that the document hasDynamic here so we can clean up anything that has gone from dynamic to static
 	private void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
-		final Set<String> bizIdsToDelete = new TreeSet<>();
+		final Map<String, Bean> bizIdsToDelete = new TreeMap<>();
 		
 		new BeanVisitor(false, false, false) {
 			@Override
@@ -291,36 +291,34 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			throws Exception {
 				if (owningRelation == null) {
 					if (visitedBean.isPersisted()) {
-						bizIdsToDelete.add(visitedBean.getBizId());
+						bizIdsToDelete.put(visitedBean.getBizId(), visitedBean);
 					}
+					return true;
 				}
-				else {
-					if (beforeSave) {
-						if (visitedBean.isPersisted()) {
-							bizIdsToDelete.add(visitedBean.getBizId());
-						}
+
+				if (beforeSave) {
+					if (visitedBean.isPersisted()) {
+						bizIdsToDelete.put(visitedBean.getBizId(), visitedBean);
 					}
-					else {
-						if (owningRelation instanceof Collection) {
-							// cascade
-							if (((Collection) owningRelation).getType() != CollectionType.aggregation) {
-								if (visitedBean.isPersisted()) {
-									bizIdsToDelete.add(visitedBean.getBizId());
-								}
+					return true;
+				}
+
+				if (owningRelation instanceof Reference) {
+					Reference reference = (Reference) owningRelation;
+					ReferenceType type = reference.getType();
+					// Requires cascading
+					if (! (AssociationType.aggregation.equals(type) || CollectionType.aggregation.equals(type))) {
+						if (visitedBean.isPersisted()) {
+							if (visitedDocument.isDynamic()) {
+								callBizletPreDelete(customer, visitedDocument, (PersistentBean) visitedBean);
 							}
-						}
-						else if (owningRelation instanceof Association) {
-							// cascade
-							if (((Association) owningRelation).getType() != AssociationType.aggregation) {
-								if (visitedBean.isPersisted()) {
-									bizIdsToDelete.add(visitedBean.getBizId());
-								}
-							}
+							bizIdsToDelete.put(visitedBean.getBizId(), visitedBean);
+							return true;
 						}
 					}
 				}
 				
-				return true;
+				return false;
 			}
 		}.visit(document, bean, customer);
 
@@ -329,7 +327,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		int i = 0;
 		int l = bizIdsToDelete.size();
 		List<String> batch = new ArrayList<>(100);
-		for (String bizId : bizIdsToDelete) {
+		for (String bizId : bizIdsToDelete.keySet()) {
 			batch.add(bizId);
 			i++;
 			if ((i == l) || // last element reached
@@ -340,15 +338,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				SQL sql = persistence.newSQL("delete from ADM_DynamicRelation where parent_id in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
 				sql.execute();
-/*
-				// delete all incoming DynamicRelation for the DynamicEntity where bizId in (bizIdsToDelete)
-				// NB Could be extra relations left over from schema evolution
-				// NB No need to worry about clashing bizIds as it needs to be a PK in ADM_DynamicEntity (no duplicates)
-// TODO cant delete incoming relatiosn!
-				sql = persistence.newSQL("delete from ADM_DynamicRelation where relatedId in (:bizId)");
-				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
-				sql.execute();
-*/
+
 				// delete the DynamicEntity
 				sql = persistence.newSQL("delete from ADM_DynamicEntity where bizId in (:bizId)");
 				sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
@@ -359,14 +349,66 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}
 
 		if (! beforeSave) {
+			// Check referential integrity
+			i = 0;
+			for (String bizId : bizIdsToDelete.keySet()) {
+				batch.add(bizId);
+				i++;
+				if ((i == l) || // last element reached
+						((i % 100) == 0)) { // multiple of 100
+					SQL sql = persistence.newSQL("select de.moduleName, de.documentName, dr.relatedId, de.bizId, dr.attributeName from ADM_DynamicRelation dr inner join ADM_DynamicEntity de on dr.parent_id = de.bizId where dr.relatedId in (:bizId)");
+					sql.putParameter(Bean.DOCUMENT_ID, batch, AttributeType.id);
+					Object[] result = sql.tupleResult();
+					if (result != null) {
+						Bean missingBean = bizIdsToDelete.get(result[2]);
+						Module m = customer.getModule(missingBean.getBizModule());
+						Document d = m.getDocument(customer, missingBean.getBizDocument());
+						String documentAlias = d.getLocalisedSingularAlias();
+						m = customer.getModule((String) result[0]);
+						d = m.getDocument(customer, (String) result[1]);
+						String referencingDocumentAlias = d.getLocalisedSingularAlias();
+						throw new ReferentialConstraintViolationException(documentAlias, bean.getBizKey(), referencingDocumentAlias);
+					}
+					batch.clear();
+				}
+			}
+			
 			// Flush above was successful, remove from the first level cache now
-			for (String bizId : bizIdsToDelete) {
+			for (String bizId : bizIdsToDelete.keySet()) {
 				dynamicFirstLevelCache.remove(bizId);
 			}
 		}
 
 		batch.clear();
 		bizIdsToDelete.clear();
+	}
+
+	private static void callBizletPreDelete(Customer customer, Document document, PersistentBean bean) {
+		try {
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreDelete(bean);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				if (bizlet != null) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+					bizlet.preDelete(bean);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+				}
+				internalCustomer.interceptAfterPreDelete(bean);
+			}
+		}
+		catch (ValidationException e) {
+			for (Message message : e.getMessages()) {
+				ValidationUtil.processMessageBindings(customer, message, bean, bean);
+			}
+			throw e;
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 	
 	@Override
@@ -525,60 +567,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			}
 		}
 	}
-	
-	@Override
-	public boolean hasReferentialIntegrity(Document documentToDelete,
-											PersistentBean beanToDelete,
-											ExportedReference exportedReference,
-											Document referenceDocument,
-											Set<Bean> beansToBeExcluded) {
-		StringBuilder queryString = new StringBuilder(128);
-		queryString.append("select bean from ");
-		queryString.append("adminDynamicRelation as bean");
-		// Take into account atributeName and the owning dynamic entity matches the reference document.
-		queryString.append(" where bean.attributeName = '").append(exportedReference.getReferenceFieldName());
-		queryString.append("' and bean.parent.moduleName = '").append(referenceDocument.getOwningModuleName());
-		queryString.append("' and bean.parent.documentName = '").append(referenceDocument.getName());
-		// Take the relatedModuleName / relatedDocumentName into account if its a static reference
-		// as the bizId does not have to be unique across database tables.
-		if (! (referenceDocument.isDynamic() || documentToDelete.isDynamic())) { // static reference
-			queryString.append("' and bean.relatedModuleName = '").append(referenceDocument.getOwningModuleName());
-			queryString.append("' and bean.relatedDocumentName = '").append(referenceDocument.getName());
-		}
-		queryString.append("' and bean.relatedId = :referencedBeanId");
 
-		if (beansToBeExcluded != null) {
-			int i = 0;
-			for (@SuppressWarnings("unused") Bean beanToBeExcluded : beansToBeExcluded) {
-				queryString.append(" and bean.relatedId != :deletedBeanId").append(i++);
-			}
-		}
-		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
-
-		@SuppressWarnings("resource")
-		Query<?> query = ((AbstractHibernatePersistence) persistence).getSession().createQuery(queryString.toString());
-		query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
-
-		// Set timeout if applicable
-		int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
-		if (timeout > 0) {
-			query.setTimeout(timeout);
-		}
-
-		query.setParameter("referencedBeanId", beanToDelete.getBizId(), StringType.INSTANCE);
-		if (beansToBeExcluded != null) {
-			int i = 0;
-			for (Bean thisBeanToBeCascaded : beansToBeExcluded) {
-				// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-				query.setParameter("deletedBeanId" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
-			}
-		}
-
-		try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
-			return (! results.next());
-		}
-	}
-	
 	@Override
 	public void evictAllCached() {
 		dynamicFirstLevelCache.clear();

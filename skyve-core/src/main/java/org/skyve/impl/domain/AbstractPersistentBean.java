@@ -168,7 +168,7 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 		return String.format("%s (%s)", bizKey, bizId);
 	}
 
-	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
+	// Need the callback because an element removed from a collection will be deleted and only this event will pick it up
 	@PreRemove
 	private void preRemove() throws Exception {
 		AbstractPersistence.get().preRemove(this);

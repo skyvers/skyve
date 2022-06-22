@@ -16,7 +16,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  * <br/>
  * All dynamic attributes in a persistent document.
  * 
- * @navhas n composedCollection 0..n AllDynamicAttributesPersistent
+ * @navcomposed n composedCollection 0..n AllDynamicAttributesPersistent
  * @navhas n dynamicAggregatedCollection 0..n AllAttributesDynamicPersistent
  * @navcomposed n dynamicEmbeddedAssociation 0..1 AllAttributesDynamicEmbedded
  * @navcomposed n composedAssociation 0..1 AllDynamicAttributesPersistent

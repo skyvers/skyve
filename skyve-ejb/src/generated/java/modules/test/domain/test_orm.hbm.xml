@@ -176,7 +176,7 @@
 			<property name="time" type="TimeOnly" column="embedded_time" />
 			<property name="timestamp" type="Timestamp" column="embedded_timestamp" />
 		</component>
-		<bag name="composedCollection" table="TEST_AllDynamicAttributesPersistent_composedCollection" cascade="persist,save-update,refresh,merge">
+		<bag name="composedCollection" table="TEST_AllDynamicAttributesPersistent_composedCollection" cascade="all-delete-orphan">
 			<key column="owner_id" foreign-key="FK_TEST_AllDynamicAttributesPersistent_composedCollection_owner_id" />
 			<many-to-many entity-name="testAllDynamicAttributesPersistent" foreign-key="FK_TEST_AllDynamicAttributesPersistent_composedCollection_element_id" column="element_id" />
 		</bag>

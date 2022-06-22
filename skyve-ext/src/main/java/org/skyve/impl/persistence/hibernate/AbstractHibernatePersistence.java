@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -70,13 +71,13 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
+import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
-import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -108,6 +109,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
+import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
@@ -1095,7 +1097,7 @@ t.printStackTrace();
 				vetoed = internalCustomer.interceptBeforeSave(document, bean);
 				if (! vetoed) {
 					// Start a new save context
-					beansToMerge = new TreeMap<>();
+					beansToMerge = new LinkedHashMap<>();
 					saveContext.push(beansToMerge);
 					
 					preMerge(document, bean, beansToMerge);
@@ -1193,7 +1195,7 @@ t.printStackTrace();
 				}
 				if (! vetoed) {
 					// Start a new save context
-					beansToMerge = new TreeMap<>();
+					beansToMerge = new LinkedHashMap<>();
 					saveContext.push(beansToMerge);
 					
 					for (PersistentBean bean : beans) {
@@ -1651,53 +1653,111 @@ if (document.isDynamic()) return;
 	 * Delete a document bean from the data store.
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public final <T extends PersistentBean> void delete(Document document, T bean) {
-		Map<String, Set<Bean>> beansToDelete = null;
-		T beanToDelete = bean;
-		
-		if (isPersisted(beanToDelete)) {
+		if (isPersisted(bean)) {
 			try {
 				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
-				boolean vetoed = internalCustomer.interceptBeforeDelete(document, beanToDelete);
+				boolean vetoed = internalCustomer.interceptBeforeDelete(document, bean);
 				if (! vetoed) {
-					// need to merge before validation to ensure that the FK constraints
-					// can check for members of collections etc - need the persistent version for this
-					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-					beanToDelete = (T) session.merge(entityName, beanToDelete);
-					em.flush();
-					UtilImpl.populateFully(beanToDelete);
-	
-					// Push a new delete context on
-					beansToDelete = new TreeMap<>();
-					beansToDelete.put("", Collections.singleton(beanToDelete));
-					deleteContext.push(beansToDelete);
-					
-					// Call preDelete()
-					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(internalCustomer);
-					if (bizlet != null) {
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + beanToDelete);
-						bizlet.preDelete(beanToDelete);
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+					Set<PersistentBean> staticBeansToDelete = new TreeSet<>();
+					boolean dynamic = document.isDynamic();
+
+					if (! dynamic) {
+						String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
+						PersistentBean beanToDelete = (PersistentBean) session.merge(entityName, bean);
+						em.flush();
+						UtilImpl.populateFully(beanToDelete);
+						
+						staticBeansToDelete.add(beanToDelete);
 					}
 					
-					Set<String> documentsVisited = new TreeSet<>();
-					// Check composed collections/associations here in case we are 
-					// deleting a composed collection element or an association directly using p.delete().
-					checkReferentialIntegrityOnDelete(document,
-														beanToDelete,
-														documentsVisited,
-														beansToDelete,
-														false);
+					// Find any other static beans referenced by dynamic relations
+					new BeanVisitor(false, true, false) {
+						@Override
+						protected boolean accept(String binding,
+													Document visitedDocument,
+													Document owningDocument,
+													Relation owningRelation,
+													Bean visitedBean) throws Exception {
+							if (owningRelation == null) { // top level bean or parent
+								return true;
+							}
+							
+							if (visitedBean.isPersisted()) {
+								if (owningRelation instanceof Reference) {
+									Reference reference = (Reference) owningRelation;
+									ReferenceType type = reference.getType();
+									// Requires cascading
+									if (! (AssociationType.aggregation.equals(type) || CollectionType.aggregation.equals(type))) {
+										if ((visitedBean != bean) && // not a reference to the top level bean
+												(! visitedDocument.isDynamic()) && // visitedBean is not dynamic
+												owningRelation.isPersistent() && // persistent relation
+												owningDocument.isDynamic()) { // dynamic relation
+											staticBeansToDelete.add((PersistentBean) visitedBean);
+										}
+										return true;
+									}
+								}
+							}
 
-					session.delete(entityName, beanToDelete);
-					em.flush();
-				
-					internalCustomer.interceptAfterDelete(document, beanToDelete);
+							return false;
+						}
+					}.visit(document, bean, internalCustomer);
+					
+					deleteStatic(staticBeansToDelete);
+						
+					if (document.isDynamic() || document.hasDynamic()) { // document with dynamism somewhere
+						dynamicPersistence.delete(bean);
+					}
+
+					internalCustomer.interceptAfterDelete(document, bean);
 				}
 			}
 			catch (Throwable t) {
-				treatPersistenceThrowable(t, OperationType.update, beanToDelete);
+				treatPersistenceThrowable(t, OperationType.update, bean);
+			}
+		}
+	}
+	
+	private void deleteStatic(Set<PersistentBean> beans) throws Exception {
+		Map<String, Set<Bean>> beansToDelete = null;
+		for (PersistentBean bean : beans) {
+			try {
+				// need to merge before validation to ensure that the FK constraints
+				// can check for members of collections etc - need the persistent version for this
+					
+				// Push a new delete context on
+				beansToDelete = new TreeMap<>();
+				beansToDelete.put("", Collections.singleton(bean));
+				deleteContext.push(beansToDelete);
+					
+				// Call Bizlet preDelete()
+				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
+				Module m = internalCustomer.getModule(bean.getBizModule());
+				Document document = m.getDocument(internalCustomer, bean.getBizDocument());
+				boolean vetoed = internalCustomer.interceptBeforePreDelete(bean);
+				if (! vetoed) {
+					Bizlet<Bean> bizlet = document.getBizlet(internalCustomer);
+					if (bizlet != null) {
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + bean);
+						bizlet.preDelete(bean);
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+					}
+					internalCustomer.interceptAfterPreDelete(bean);
+				}
+					
+				Set<String> documentsVisited = new TreeSet<>();
+				// Check composed collections/associations here in case we are 
+				// deleting a composed collection element or an association directly using p.delete().
+				checkReferentialIntegrityOnDelete(document,
+													bean,
+													documentsVisited,
+													beansToDelete,
+													false);
+				
+				String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
+				session.delete(entityName, bean);
+				em.flush();
 			}
 			finally {
 				if (beansToDelete != null) { // delete context was pushed
@@ -1792,16 +1852,11 @@ if (document.isDynamic()) return;
 		else {
 			Set<Bean> beansToBeExcluded = beansToBeCascaded.get(modoc);
 			
-			// This will be a dynamic reference (ie belongs to a dynamic document or refers to a dynamic document)
-			boolean referentialIntegrity = false;
-			if (referenceDocument.isDynamic() || documentToDelete.isDynamic()) {
-				referentialIntegrity = dynamicPersistence.hasReferentialIntegrity(documentToDelete, beanToDelete, ref, referenceDocument, beansToBeExcluded);
-			}
-			else {
-				referentialIntegrity = hasReferentialIntegrity(beanToDelete, ref, referenceDocument, beansToBeExcluded);
-			}
-			if (! referentialIntegrity) {
-				throw new ReferentialConstraintViolationException(documentToDelete.getLocalisedSingularAlias(), beanToDelete.getBizKey(), ref.getLocalisedDocumentAlias());
+			// Check static references only - dynamic ones are checked in DynamicPersistence implementation
+			if (! (referenceDocument.isDynamic() || documentToDelete.isDynamic())) {
+				if (! hasReferentialIntegrity(beanToDelete, ref, referenceDocument, beansToBeExcluded)) {
+					throw new ReferentialConstraintViolationException(documentToDelete.getLocalisedSingularAlias(), beanToDelete.getBizKey(), ref.getLocalisedDocumentAlias());
+				}
 			}
 		}
 	}
@@ -2223,7 +2278,7 @@ if (document.isDynamic()) return;
 		}
 	}
 
-	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
+	// Need the callback because an element removed from a collection will be deleted and only this event will pick it up
 	@Override
 	public void preRemove(PersistentBean bean)
 	throws Exception {

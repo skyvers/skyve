@@ -1,11 +1,7 @@
-package org.skyve.impl.domain.messages;
+package org.skyve.domain.messages;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.MessageException;
-import org.skyve.domain.messages.Message;
 
 public class ReferentialConstraintViolationException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 4458169944531617791L;

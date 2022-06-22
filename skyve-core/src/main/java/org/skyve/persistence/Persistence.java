@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -172,14 +173,16 @@ public interface Persistence extends Serializable {
 	 * 
 	 * @param document
 	 * @param bean
+	 * @throws ReferentialConstraintViolationException	When the bean cannot be deleted because something is referencing it.
 	 */
-	public <T extends PersistentBean> void delete(Document document, T bean);
+	public <T extends PersistentBean> void delete(Document document, T bean) throws ReferentialConstraintViolationException;
 	
 	/**
 	 * 
 	 * @param bean
+	 * @throws ReferentialConstraintViolationException	When the bean cannot be deleted because something is referencing it.
 	 */
-	public <T extends PersistentBean> void delete(T bean);
+	public <T extends PersistentBean> void delete(T bean) throws ReferentialConstraintViolationException;
 
 	/**
 	 * 

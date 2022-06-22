@@ -59,7 +59,7 @@
 			<documentName>AllAttributesDynamicPersistent</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
-		<collection name="dynamicComposedCollection" type="aggregation">
+		<collection name="dynamicComposedCollection" type="composition">
 			<displayName>Dynamic Composed Collection</displayName>
 			<documentName>AllAttributesDynamicPersistent</documentName>
 			<minCardinality>0</minCardinality>
