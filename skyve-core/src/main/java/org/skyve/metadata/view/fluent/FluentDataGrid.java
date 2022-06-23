@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 
 public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	private DataGrid grid = null;
@@ -152,13 +153,46 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		return this;
 	}
 
+	public FluentDataGrid addBoundColumn(int index, FluentDataGridBoundColumn column) {
+		grid.getColumns().add(index, column.get());
+		return this;
+	}
+
+	public FluentDataGridBoundColumn getBoundColumn(int index) {
+		return new FluentDataGridBoundColumn((DataGridBoundColumn) grid.getColumns().get(index));
+	}
+	
 	public FluentDataGrid addContainerColumn(FluentDataGridContainerColumn column) {
 		grid.getColumns().add(column.get());
 		return this;
 	}
 
+	public FluentDataGrid addContainerColumn(int index, FluentDataGridContainerColumn column) {
+		grid.getColumns().add(index, column.get());
+		return this;
+	}
+
+	public FluentDataGridContainerColumn getContainerColumn(int index) {
+		return new FluentDataGridContainerColumn((DataGridContainerColumn) grid.getColumns().get(index));
+	}
+
+	public FluentDataGrid removeColumn(int index) {
+		grid.getColumns().remove(index);
+		return this;
+	}
+	
+	public FluentDataGrid clearColumns() {
+		grid.getColumns().clear();
+		return this;
+	}
+	
 	public FluentDataGrid addAddedAction(FluentEventAction action) {
 		grid.getAddedActions().add(action.get());
+		return this;
+	}
+
+	public FluentDataGrid clearAddedActions() {
+		grid.getAddedActions().clear();
 		return this;
 	}
 
@@ -167,13 +201,28 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		return this;
 	}
 
+	public FluentDataGrid clearEditedActions() {
+		grid.getEditedActions().clear();
+		return this;
+	}
+
 	public FluentDataGrid addRemovedAction(FluentEventAction action) {
 		grid.getRemovedActions().add(action.get());
 		return this;
 	}
 
+	public FluentDataGrid clearRemovedActions() {
+		grid.getRemovedActions().clear();
+		return this;
+	}
+
 	public FluentDataGrid addSelectedAction(FluentEventAction action) {
 		grid.getSelectedActions().add(action.get());
+		return this;
+	}
+
+	public FluentDataGrid clearSelectedActions() {
+		grid.getSelectedActions().clear();
 		return this;
 	}
 

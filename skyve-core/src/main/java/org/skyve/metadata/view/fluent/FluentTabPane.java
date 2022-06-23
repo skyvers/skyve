@@ -131,6 +131,25 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 		return this;
 	}
 
+	public FluentTabPane addTab(int index, FluentTab tab) {
+		pane.getTabs().add(index, tab.get());
+		return this;
+	}
+	
+	public FluentTab getTab(int index) {
+		return new FluentTab(pane.getTabs().get(index));
+	}
+
+	public FluentTabPane removeTab(int index) {
+		pane.getTabs().remove(index);
+		return this;
+	}
+	
+	public FluentTabPane clearTabs() {
+		pane.getTabs().clear();
+		return this;
+	}
+	
 	@Override
 	public TabPane get() {
 		return pane;

@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewParameter;
 
 public class FluentView extends FluentContainer<FluentView> {
 	private ViewMetaData view = null;
@@ -97,6 +98,24 @@ public class FluentView extends FluentContainer<FluentView> {
 	public FluentView addParameter(FluentViewParameter parameter) {
 		view.getParameters().add(parameter.get());
 		return this;
+	}
+
+	public FluentView removeParameter(String binding) {
+		view.getParameters().removeIf(p -> (binding.equals(p.getBoundTo()) || binding.equals(p.getFromBinding())));
+		return this;
+	}
+	
+	public FluentView clearParameters() {
+		view.getParameters().clear();
+		return this;
+	}
+
+	public FluentViewParameter findParameter(String binding) {
+		ViewParameter result = view.getParameters().stream().filter(p -> (binding.equals(p.getBoundTo()) || binding.equals(p.getFromBinding()))).findAny().orElse(null);
+		if (result != null) {
+			return new FluentViewParameter(result);
+		}
+		return null;
 	}
 
 	@Override

@@ -1,7 +1,14 @@
 package org.skyve.metadata.view.fluent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormItem;
+import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.metadata.MetaData;
+import org.skyve.metadata.view.widget.bound.Bound;
 
 public class FluentForm extends FluentWidget implements FluentRelativeSize<FluentForm> {
 	private Form form = null;
@@ -146,9 +153,62 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		return this;
 	}
 
+	public FluentForm addColumn(int index, FluentFormColumn column) {
+		form.getColumns().add(index, column.get());
+		return this;
+	}
+
+	public FluentFormColumn getColumn(int index) {
+		return new FluentFormColumn(form.getColumns().get(index));
+	}
+	
+	public FluentForm removeColumn(int index) {
+		form.getColumns().remove(index);
+		return this;
+	}
+
+	public FluentForm clearColumns() {
+		form.getColumns().clear();
+		return this;
+	}
+
 	public FluentForm addRow(FluentFormRow row) {
 		form.getRows().add(row.get());
 		return this;
+	}
+	
+	public FluentForm addRow(int index, FluentFormRow row) {
+		form.getRows().add(index, row.get());
+		return this;
+	}
+
+	public FluentFormRow getRow(int index) {
+		return new FluentFormRow(form.getRows().get(index));
+	}
+	
+	public FluentForm removeRow(int index) {
+		form.getRows().remove(index);
+		return this;
+	}
+
+	public FluentForm clearRows() {
+		form.getRows().clear();
+		return this;
+	}
+
+	public List<FluentFormItem> findItems(String binding) {
+		List<FluentFormItem> result = new ArrayList<>();
+		for (FormRow row : form.getRows()) {
+			for (FormItem item : row.getItems()) {
+				MetaData widget = item.getWidget();
+				if (widget instanceof Bound) {
+					if (binding.equals(((Bound) widget).getBinding())) {
+						result.add(new FluentFormItem(item));
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	@Override

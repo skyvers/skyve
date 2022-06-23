@@ -23,6 +23,25 @@ public class FluentFormRow {
 		return this;
 	}
 	
+	public FluentFormRow addItem(int index, FluentFormItem item) {
+		row.getItems().add(index, item.get());
+		return this;
+	}
+	
+	public FluentFormItem getItem(int index) {
+		return new FluentFormItem(row.getItems().get(index));
+	}
+	
+	public FluentFormRow removeItem(int index) {
+		row.getItems().remove(index);
+		return this;
+	}
+
+	public FluentFormRow clearItems() {
+		row.getItems().clear();
+		return this;
+	}
+	
 	public FormRow get() {
 		return row;
 	}
