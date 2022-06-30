@@ -4,6 +4,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -46,17 +47,24 @@ public class BeanValidator {
 	 * 
 	 * @param document The document to validate.
 	 * @param bean The bean to validate.
-	 * @param e The exception to populate.
+	 * @throws ValidationException where the bean fails validation against its metadata
 	 */
 	public static void validateBeanAgainstDocument(Document document, Bean bean) {
 		ValidationUtil.validateBeanAgainstDocument(document, bean);
 	}
 
 	/**
-	 * Validate a document instance against its metadata.
+	 * <p>
+	 * Validate all the attributes of a document instance against its metadata.
+	 * Note: this will not traverse associations, collections and inverses.
+	 * </p>
+	 * <p>
+	 * For example, it will validate that an required association is set, but will
+	 * not traverse and validate the associated document and its attributes as well.
+	 * </p>
 	 * 
-	 * @param bean The bean to validate.
-	 * @param e The exception to populate.
+	 * @param bean The bean to validate
+	 * @throws ValidationException where the bean fails validation against its metadata
 	 */
 	public static void validateBeanAgainstDocument(Bean bean) {
 		Customer c = CORE.getUser().getCustomer();
@@ -109,13 +117,14 @@ public class BeanValidator {
 	
 	
 	/**
-	 * Validate a bean against its bizlet .validate().
+	 * Validate a bean against the supplied bizlet <code>.validate()</code>.
 	 * NB This validation method does NOT recursively validate using bizlets through
 	 * the base document hierarchy as the bizlet class should be arranged in such a way as to extend the
 	 * bizlet methods required of the base bizlet classes through the standard java extension mechanism.
 	 * 
-	 * @param bizlet	To validate against
-	 * @param bean	To validate
+	 * @param bizlet The specific bizlet to validate against
+	 * @param bean The bean to validate
+	 * @throws ValidationException where the bean fails validation against the bizlet
 	 */
 	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) {
 		ValidationUtil.validateBeanAgainstBizlet(bizlet, bean);
@@ -123,13 +132,14 @@ public class BeanValidator {
 
 	
 	/**
-	 * Validate a bean against its bizlet .validate().
+	 * Validate a bean against the specified document's bizlet <code>.validate()</code>.
 	 * NB This validation method does NOT recursively validate using bizlets through
 	 * the base document hierarchy as the bizlet class should be arranged in such a way as to extend the
 	 * bizlet methods required of the base bizlet classes through the standard java extension mechanism.
 	 * 
-	 * @param document	To get the bizlet to validate against
-	 * @param bean	To validate
+	 * @param document The specific document to get the bizlet to validate against
+	 * @param bean The bean to validate
+	 * @throws ValidationException where the bean fails validation against the document's bizlet
 	 */
 	public static <T extends Bean> void validateBeanAgainstBizlet(Document document, T bean) {
 		Bizlet<T> bizlet = ((DocumentImpl) document).getBizlet(CORE.getUser().getCustomer());
@@ -139,12 +149,13 @@ public class BeanValidator {
 	}
 	
 	/**
-	 * Validate a bean against its bizlet .validate().
+	 * Validate a bean against its bizlet <code>.validate()</code>.
 	 * NB This validation method does NOT recursively validate using bizlets through
 	 * the base document hierarchy as the bizlet class should be arranged in such a way as to extend the
 	 * bizlet methods required of the base bizlet classes through the standard java extension mechanism.
 	 * 
-	 * @param bean	To validate
+	 * @param bean The bean to be validated against its Bizlet
+	 * @throws ValidationException where the bean fails validation against its bizlet
 	 */
 	public static <T extends Bean> void validateBeanAgainstBizlet(T bean) {
 		Customer c = CORE.getUser().getCustomer();
@@ -154,31 +165,31 @@ public class BeanValidator {
 	}
 
 	/**
-	 * Updates the bindings in the error message 
-	 * based on the binding of the validatedBean in relation to the masterBean.
+	 * Updates the bindings in the error message based on the binding of the
+	 * <code>validatedBean</code> in relation to the <code>masterBean</code>.
 	 * 
-	 * @param m
+	 * @param m The message containing the bindings to be updated
 	 * @param masterBean
 	 * @param validatedBean
 	 */
 	public static void processMessageBindings(Message m,
 												Bean masterBean,
 												Bean validatedBean) {
-		ValidationUtil.processMessageBindings(CORE.getUser().getCustomer(), m, masterBean, validatedBean);
+		ValidationUtil.processMessageBindings(CORE.getCustomer(), m, masterBean, validatedBean);
 	}
 
 	/**
-	 * Updates the bindings in the messages in the exception 
-	 * based on the binding of the validatedBean in relation to the masterBean.
+	 * Updates the bindings within the Messages in the exception based on the binding
+	 * of the <code>validatedBean</code> in relation to the <code>masterBean</code>.
 	 * 
-	 * @param m
+	 * @param e The exception containing the messages to be updated
 	 * @param masterBean
 	 * @param validatedBean
 	 */
 	public static void processMessageBindings(MessageException e,
 												Bean masterBean,
 												Bean validatedBean) {
-		Customer c = CORE.getUser().getCustomer();
+		Customer c = CORE.getCustomer();
 		for (Message m : e.getMessages()) {
 			ValidationUtil.processMessageBindings(c, m, masterBean, validatedBean);
 		}
@@ -198,19 +209,27 @@ public class BeanValidator {
 	}
 
 	/**
+	 * For every <code>collection</code> defined in metadata for the given <code>bean</code>,
+	 * check that all the values pass the defined unique constraints in all the collections.
 	 * 
-	 * @param customer
-	 * @param document
-	 * @param bean
+	 * @param customer The customer to validate the bean against
+	 * @param document The document defining the collections to be validated
+	 * @param bean The bean containing the collection records to be validated
+	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
+	 *         the defined constraints in any collection
 	 */
 	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
 		ValidationUtil.checkCollectionUniqueConstraints(customer, document, bean);
 	}
 	
 	/**
+	 * For every <code>collection</code> defined in metadata for the given <code>bean</code>,
+	 * check that all the values pass the defined unique constraints in all the collections.
 	 * 
-	 * @param customer
-	 * @param bean
+	 * @param customer The customer to validate the bean against
+	 * @param bean The bean containing the collection records to be validated
+	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
+	 *         the defined constraints in any collection
 	 */
 	public static void checkCollectionUniqueConstraints(Customer customer, Bean bean) {
 		Module m = customer.getModule(bean.getBizModule());
@@ -219,18 +238,25 @@ public class BeanValidator {
 	}
 
 	/**
+	 * For every <code>collection</code> defined in metadata for the given <code>bean</code>,
+	 * check that all the values pass the defined unique constraints in all the collections.
 	 * 
-	 * @param document
-	 * @param bean
+	 * @param document The document defining the collections to be validated
+	 * @param bean The bean containing the collection records to be validated
+	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
+	 *         the defined constraints in any collection
 	 */
 	public static void checkCollectionUniqueConstraints(Document document, Bean bean) {
 		checkCollectionUniqueConstraints(CORE.getUser().getCustomer(), document, bean);
 	}
 	
 	/**
+	 * For every <code>collection</code> defined in metadata for the given <code>bean</code>,
+	 * check that all the values pass the defined unique constraints in all the collections.
 	 * 
-	 * @param document
-	 * @param bean
+	 * @param bean The bean containing the collection records to be validated
+	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
+	 *         the defined constraints in any collection
 	 */
 	public static void checkCollectionUniqueConstraints(Bean bean) {
 		checkCollectionUniqueConstraints(CORE.getUser().getCustomer(), bean);
