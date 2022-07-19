@@ -20,10 +20,10 @@ public enum DialectOptions {
 	private final int dataStoreBizKeyLength;
 
 	DialectOptions(final String description,
-			final boolean dataStoreIndexForeignKeys,
-			final boolean dataStoreIndexNamesInGlobalNamespace,
-			final int dataStoreIdentifierCharacterLimit,
-			final int dataStoreBizKeyLength) {
+					final boolean dataStoreIndexForeignKeys,
+					final boolean dataStoreIndexNamesInGlobalNamespace,
+					final int dataStoreIdentifierCharacterLimit,
+					final int dataStoreBizKeyLength) {
 		this.description = description;
 		this.dataStoreIndexForeignKeys = dataStoreIndexForeignKeys;
 		this.dataStoreIndexNamesInGlobalNamespace = dataStoreIndexNamesInGlobalNamespace;

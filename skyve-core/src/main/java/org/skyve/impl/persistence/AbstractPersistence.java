@@ -18,6 +18,8 @@ public abstract class AbstractPersistence implements Persistence {
 	public static Class<? extends AbstractPersistence> IMPLEMENTATION_CLASS;
 	public static Class<? extends DynamicPersistence> DYNAMIC_IMPLEMENTATION_CLASS;
 	
+	protected static int bizKeyLength = Integer.MIN_VALUE;
+
 	public static AbstractPersistence get() {
 		return threadLocalPersistence.get();
 	}
@@ -60,6 +62,14 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	protected DynamicPersistence dynamicPersistence;
+	
+	/**
+	 * The bizKey length as determined from hibernate metadata.
+	 * @return	The bizKey length.
+	 */
+	public static int getBizKeyLength() {
+		return bizKeyLength;
+	}
 	
 	/*
 	 * A place (thread-local as it's on persistence), where state can be placed for the duration of the conversation.

@@ -52,6 +52,7 @@ import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
+import org.hibernate.mapping.Column;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
@@ -68,6 +69,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.admin.Contact;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
@@ -135,7 +137,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static SessionFactory sf = null;
 	private static Metadata metadata = null;
 	private static final Map<String, SkyveDialect> DIALECTS = new TreeMap<>();
-	
+
 	static {
 		try {
 			configure();
@@ -354,6 +356,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 		metadata = sources.getMetadataBuilder().build();
 		SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
+
+		bizKeyLength = ((Column) metadata.getEntityBinding(Contact.MODULE_NAME + Contact.DOCUMENT_NAME).getProperty(Bean.BIZ_KEY).getValue().getColumnIterator().next()).getLength();
 		
 		try {
 			sf = sessionFactoryBuilder.build();

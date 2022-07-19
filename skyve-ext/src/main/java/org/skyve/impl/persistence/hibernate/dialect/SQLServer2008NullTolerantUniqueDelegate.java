@@ -32,7 +32,7 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 		StringBuilder result = new StringBuilder(128);
 		result.append("CREATE UNIQUE NONCLUSTERED INDEX ").append(constraintName).append(" ON ");
 		result.append(tableName).append(" (");
-		final Iterator<Column> i = uniqueKey.columnIterator();
+		final Iterator<Column> i = uniqueKey.getColumnIterator();
 		while (i.hasNext()) {
 			final Column column = i.next();
 			result.append(column.getQuotedName(dialect));

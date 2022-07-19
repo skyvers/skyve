@@ -545,22 +545,41 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public void setBizKeyExpression(String bizKeyExpression) {
 		this.bizKeyExpression = bizKeyExpression;
 	}
-	
+
+	/**
+	 * Set the bizKey value on the given persistent bean.
+	 * Note that Skyve may truncate the bizKey to the particular max data store length base don the Skyve Database Dialect.
+	 */
 	@Override
 	public void setBizKey(PersistentBean bean) {
+		// Get the bizKey value
+		String bizKey = null;
 		if (isDynamic()) {
-			String bizKey = null;
 			try {
 				bizKey = BindUtil.formatMessage(getBizKeyExpression(), bean);
 			}
 			catch (@SuppressWarnings("unused") Exception e) {
-				bizKey = "Unknown";
+				bizKey = null;
 			}
-			bean.setBizKey(UtilImpl.processStringValue(bizKey));
 		}
 		else {
-			bean.setBizKey(UtilImpl.processStringValue(bean.getBizKey()));
+			bizKey = bean.getBizKey();
 		}
+		
+		// Process the value
+		bizKey = UtilImpl.processStringValue(bizKey);
+		if (bizKey == null) {
+			bizKey = "Unknown";
+		}
+		else {
+			int bizKeyLength = AbstractPersistence.getBizKeyLength();
+			if (bizKey.length() > bizKeyLength) {
+				bizKey = bizKey.substring(0, bizKeyLength);
+			}
+		}
+
+		// Set the value
+		bean.setBizKey(bizKey);
 	}
 	
 	@Override
