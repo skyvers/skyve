@@ -1,15 +1,15 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.EditItem;
+import org.skyve.impl.metadata.repository.module.EditItemMetaData;
 
 public class FluentEditItem extends FluentMenuItem<FluentEditItem> {
-	private EditItem item = null;
+	private EditItemMetaData item = null;
 	
 	public FluentEditItem() {
-		item = new EditItem();
+		item = new EditItemMetaData();
 	}
 
-	public FluentEditItem(EditItem item) {
+	public FluentEditItem(EditItemMetaData item) {
 		this.item = item;
 	}
 
@@ -25,7 +25,7 @@ public class FluentEditItem extends FluentMenuItem<FluentEditItem> {
 	}
 	
 	@Override
-	public EditItem get() {
+	public EditItemMetaData get() {
 		return item;
 	}
 }

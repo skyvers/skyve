@@ -10,8 +10,8 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-public abstract class Item extends Action {
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "item")
+public abstract class ItemMetaData extends ActionMetaData {
 	private static final long serialVersionUID = -2533938765989721342L;
 
 	private List<GrantedTo> roles = new ArrayList<>();

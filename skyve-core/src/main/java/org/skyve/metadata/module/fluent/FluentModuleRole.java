@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
+import org.skyve.impl.metadata.repository.module.DocumentPrivilegeMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.DocumentPrivilege;
@@ -87,7 +88,7 @@ public class FluentModuleRole {
 	}
 
 	public FluentDocumentPrivilege findPrivilege(String documentName) {
-		org.skyve.impl.metadata.repository.module.DocumentPrivilege result = role.getPrivileges().stream().filter(p -> documentName.equals(p.getDocumentName())).findAny().orElse(null);
+		DocumentPrivilegeMetaData result = role.getPrivileges().stream().filter(p -> documentName.equals(p.getDocumentName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentDocumentPrivilege(result);
 		}

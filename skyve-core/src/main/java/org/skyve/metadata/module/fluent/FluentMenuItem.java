@@ -1,7 +1,7 @@
 package org.skyve.metadata.module.fluent;
 
 import org.skyve.impl.metadata.repository.module.GrantedTo;
-import org.skyve.impl.metadata.repository.module.Item;
+import org.skyve.impl.metadata.repository.module.ItemMetaData;
 import org.skyve.metadata.module.menu.MenuItem;
 
 abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAction<T> {
@@ -38,5 +38,5 @@ abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends FluentMenuAct
 	}
 
 	@Override
-	public abstract Item get();
+	public abstract ItemMetaData get();
 }

@@ -1,26 +1,26 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.ActionPrivilege;
+import org.skyve.impl.metadata.repository.module.ActionPrivilegeMetaData;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
-import org.skyve.impl.metadata.repository.module.DocumentPrivilege;
+import org.skyve.impl.metadata.repository.module.DocumentPrivilegeMetaData;
 import org.skyve.metadata.user.DocumentPermission;
 
 public class FluentDocumentPrivilege {
-	private DocumentPrivilege privilege = null;
+	private DocumentPrivilegeMetaData privilege = null;
 	
 	public FluentDocumentPrivilege() {
-		privilege = new DocumentPrivilege();
+		privilege = new DocumentPrivilegeMetaData();
 	}
 
-	public FluentDocumentPrivilege(DocumentPrivilege privilege) {
+	public FluentDocumentPrivilege(DocumentPrivilegeMetaData privilege) {
 		this.privilege = privilege;
 	}
 	
-	public FluentDocumentPrivilege from(@SuppressWarnings("hiding") DocumentPrivilege privilege) {
+	public FluentDocumentPrivilege from(@SuppressWarnings("hiding") DocumentPrivilegeMetaData privilege) {
 		documentName(privilege.getDocumentName());
 		permission(privilege.getPermission());
-		for (ActionPrivilege action : privilege.getActions()) {
+		for (ActionPrivilegeMetaData action : privilege.getActions()) {
 			addActionPrivilege(action.getActionName());
 		}
 		for (ContentPermission permission : privilege.getContentPermissions()) {
@@ -43,7 +43,7 @@ public class FluentDocumentPrivilege {
 	}
 	
 	public FluentDocumentPrivilege addActionPrivilege(String actionName) {
-		ActionPrivilege action = new ActionPrivilege();
+		ActionPrivilegeMetaData action = new ActionPrivilegeMetaData();
 		action.setActionName(actionName);
 		privilege.getActions().add(action);
 		return this;
@@ -93,7 +93,7 @@ public class FluentDocumentPrivilege {
 		return this;
 	}
 
-	public DocumentPrivilege get() {
+	public DocumentPrivilegeMetaData get() {
 		return privilege;
 	}
 }

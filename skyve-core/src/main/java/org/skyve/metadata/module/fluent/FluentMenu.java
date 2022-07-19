@@ -6,20 +6,26 @@ import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
-import org.skyve.impl.metadata.repository.module.Action;
-import org.skyve.impl.metadata.repository.module.Group;
-import org.skyve.impl.metadata.repository.module.Menu;
+import org.skyve.impl.metadata.repository.module.ActionMetaData;
+import org.skyve.impl.metadata.repository.module.CalendarItemMetaData;
+import org.skyve.impl.metadata.repository.module.EditItemMetaData;
+import org.skyve.impl.metadata.repository.module.GroupMetaData;
+import org.skyve.impl.metadata.repository.module.LinkItemMetaData;
+import org.skyve.impl.metadata.repository.module.ListItemMetaData;
+import org.skyve.impl.metadata.repository.module.MapItemMetaData;
+import org.skyve.impl.metadata.repository.module.MenuMetaData;
+import org.skyve.impl.metadata.repository.module.TreeItemMetaData;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 
 public class FluentMenu {
-	private Menu menu = null;
+	private MenuMetaData menu = null;
 	
 	public FluentMenu() {
-		menu = new Menu();
+		menu = new MenuMetaData();
 	}
 
-	public FluentMenu(Menu menu) {
+	public FluentMenu(MenuMetaData menu) {
 		this.menu = menu;
 	}
 
@@ -53,7 +59,7 @@ public class FluentMenu {
 		return this;
 	}
 	
-	private Action findAction(String name) {
+	private ActionMetaData findAction(String name) {
 		return menu.getActions().stream().filter(a -> name.equals(a.getName())).findAny().orElse(null);
 	}
 	
@@ -63,7 +69,7 @@ public class FluentMenu {
 	}
 
 	public FluentMenuGroup findGroup(String name) {
-		Group result = (Group) findAction(name);
+		GroupMetaData result = (GroupMetaData) findAction(name);
 		if (result != null) {
 			return new FluentMenuGroup(result);
 		}
@@ -76,7 +82,7 @@ public class FluentMenu {
 	}
 
 	public FluentCalendarItem findCalendarItem(String name) {
-		org.skyve.impl.metadata.repository.module.CalendarItem result = (org.skyve.impl.metadata.repository.module.CalendarItem) findAction(name);
+		CalendarItemMetaData result = (CalendarItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentCalendarItem(result);
 		}
@@ -89,7 +95,7 @@ public class FluentMenu {
 	}
 
 	public FluentEditItem findEditItem(String name) {
-		org.skyve.impl.metadata.repository.module.EditItem result = (org.skyve.impl.metadata.repository.module.EditItem) findAction(name);
+		EditItemMetaData result = (EditItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentEditItem(result);
 		}
@@ -102,7 +108,7 @@ public class FluentMenu {
 	}
 
 	public FluentLinkItem findLinkItem(String name) {
-		org.skyve.impl.metadata.repository.module.LinkItem result = (org.skyve.impl.metadata.repository.module.LinkItem) findAction(name);
+		LinkItemMetaData result = (LinkItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentLinkItem(result);
 		}
@@ -115,7 +121,7 @@ public class FluentMenu {
 	}
 
 	public FluentListItem findListItem(String name) {
-		org.skyve.impl.metadata.repository.module.ListItem result = (org.skyve.impl.metadata.repository.module.ListItem) findAction(name);
+		ListItemMetaData result = (ListItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentListItem(result);
 		}
@@ -128,7 +134,7 @@ public class FluentMenu {
 	}
 
 	public FluentMapItem findMapItem(String name) {
-		org.skyve.impl.metadata.repository.module.MapItem result = (org.skyve.impl.metadata.repository.module.MapItem) findAction(name);
+		MapItemMetaData result = (MapItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentMapItem(result);
 		}
@@ -141,7 +147,7 @@ public class FluentMenu {
 	}
 	
 	public FluentTreeItem findTreeItem(String name) {
-		org.skyve.impl.metadata.repository.module.TreeItem result = (org.skyve.impl.metadata.repository.module.TreeItem) findAction(name);
+		TreeItemMetaData result = (TreeItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentTreeItem(result);
 		}
@@ -158,7 +164,7 @@ public class FluentMenu {
 		return this;
 	}	
 
-	public Menu get() {
+	public MenuMetaData get() {
 		return menu;
 	}
 }

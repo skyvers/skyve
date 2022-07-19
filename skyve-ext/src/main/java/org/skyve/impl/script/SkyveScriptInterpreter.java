@@ -27,12 +27,13 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
-import org.skyve.impl.metadata.repository.module.Action;
-import org.skyve.impl.metadata.repository.module.DocumentPrivilege;
-import org.skyve.impl.metadata.repository.module.EditItem;
+import org.skyve.impl.metadata.repository.module.ActionMetaData;
+import org.skyve.impl.metadata.repository.module.DocumentPrivilegeMetaData;
+import org.skyve.impl.metadata.repository.module.EditItemMetaData;
 import org.skyve.impl.metadata.repository.module.GrantedTo;
-import org.skyve.impl.metadata.repository.module.Menu;
-import org.skyve.impl.metadata.repository.module.ModuleDocument;
+import org.skyve.impl.metadata.repository.module.ListItemMetaData;
+import org.skyve.impl.metadata.repository.module.MenuMetaData;
+import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.impl.script.SkyveScriptException.ExceptionType;
@@ -368,7 +369,7 @@ public class SkyveScriptInterpreter {
 					initialiseDefaultModule();
 				}
 
-				ModuleDocument md = new ModuleDocument();
+				ModuleDocumentMetaData md = new ModuleDocumentMetaData();
 				md.setRef(currentDocument.getName());
 				currentModule.getDocuments().add(md);
 
@@ -427,14 +428,14 @@ public class SkyveScriptInterpreter {
 	 */
 	private static void addModuleRef(String module, String document) {
 		// don't add if this has already been added to the module
-		for (ModuleDocument md : currentModule.getDocuments()) {
+		for (ModuleDocumentMetaData md : currentModule.getDocuments()) {
 			if (md.getModuleRef() != null && md.getModuleRef().equals(module) && md.getRef().equals(document)) {
 				return;
 			}
 		}
 
 		// add a new module reference
-		ModuleDocument md = new ModuleDocument();
+		ModuleDocumentMetaData md = new ModuleDocumentMetaData();
 		md.setRef(document);
 		md.setModuleRef(module);
 		currentModule.getDocuments().add(md);
@@ -449,10 +450,10 @@ public class SkyveScriptInterpreter {
 	 * Appends a new list menu item to the module for the specified document.
 	 */
 	private static void appendMenu(ModuleMetaData module, DocumentMetaData document) {
-		Menu menu = module.getMenu();
+		MenuMetaData menu = module.getMenu();
 
 		if (menu == null) {
-			menu = new Menu();
+			menu = new MenuMetaData();
 			module.setMenu(menu);
 		}
 
@@ -462,10 +463,10 @@ public class SkyveScriptInterpreter {
 		GrantedTo viewer = new GrantedTo();
 		viewer.setRoleName(ROLE_VIEWER);
 
-		List<Action> actions = menu.getActions();
+		List<ActionMetaData> actions = menu.getActions();
 
 		if (document.getPersistent() != null) {
-			org.skyve.impl.metadata.repository.module.ListItem action = new org.skyve.impl.metadata.repository.module.ListItem();
+			ListItemMetaData action = new ListItemMetaData();
 			action.setDocumentName(document.getName());
 			action.setName(document.getPluralAlias());
 
@@ -474,7 +475,7 @@ public class SkyveScriptInterpreter {
 
 			actions.add(action);
 		} else {
-			EditItem action = new EditItem();
+			EditItemMetaData action = new EditItemMetaData();
 			action.setDocumentName(document.getName());
 			action.setName(document.getPluralAlias());
 
@@ -513,14 +514,14 @@ public class SkyveScriptInterpreter {
 		}
 
 		if (viewer != null) {
-			DocumentPrivilege p = new DocumentPrivilege();
+			DocumentPrivilegeMetaData p = new DocumentPrivilegeMetaData();
 			p.setDocumentName(document.getName());
 			p.setPermission(document.getPersistent() != null ? DocumentPermission._R__C : DocumentPermission._____);
 			viewer.getPrivileges().add(p);
 		}
 
 		if (maintainer != null) {
-			DocumentPrivilege p = new DocumentPrivilege();
+			DocumentPrivilegeMetaData p = new DocumentPrivilegeMetaData();
 			p.setDocumentName(document.getName());
 			p.setPermission(document.getPersistent() != null ? DocumentPermission.CRUDC : DocumentPermission._____);
 			maintainer.getPrivileges().add(p);

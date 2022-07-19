@@ -1,15 +1,15 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.MapItem;
+import org.skyve.impl.metadata.repository.module.MapItemMetaData;
 
 public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
-	private MapItem item = null;
+	private MapItemMetaData item = null;
 	
 	public FluentMapItem() {
-		item = new MapItem();
+		item = new MapItemMetaData();
 	}
 
-	public FluentMapItem(MapItem item) {
+	public FluentMapItem(MapItemMetaData item) {
 		this.item = item;
 	}
 
@@ -61,7 +61,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	}
 
 	@Override
-	public MapItem get() {
+	public MapItemMetaData get() {
 		return item;
 	}
 }

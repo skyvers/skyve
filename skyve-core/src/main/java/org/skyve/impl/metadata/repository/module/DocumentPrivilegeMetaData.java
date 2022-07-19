@@ -18,12 +18,12 @@ import org.skyve.metadata.user.DocumentPermission;
 							"actions",
 							"contentRestrictions", 
 							"contentPermissions"})
-public class DocumentPrivilege implements SerializableMetaData {
+public class DocumentPrivilegeMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = -300528846187141003L;
 
 	private String documentName;
 	private DocumentPermission permission;
-	private List<ActionPrivilege> actions = new ArrayList<>();
+	private List<ActionPrivilegeMetaData> actions = new ArrayList<>();
 	private List<ContentRestriction> contentRestrictions = new ArrayList<>();
 	private List<ContentPermission> contentPermissions = new ArrayList<>();
 
@@ -46,7 +46,7 @@ public class DocumentPrivilege implements SerializableMetaData {
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "action", required = false)
-	public List<ActionPrivilege> getActions() {
+	public List<ActionPrivilegeMetaData> getActions() {
 		return actions;
 	}
 

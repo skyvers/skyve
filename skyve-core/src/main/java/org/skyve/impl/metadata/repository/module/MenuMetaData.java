@@ -11,13 +11,13 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public class Menu implements SerializableMetaData {
+public class MenuMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = 8381343095222755228L;
 
-	private List<Action> actions = new ArrayList<>();
+	private List<ActionMetaData> actions = new ArrayList<>();
 
-	@XmlElementRefs({@XmlElementRef(type = Item.class), @XmlElementRef(type = Group.class)})
-	public List<Action> getActions() {
+	@XmlElementRefs({@XmlElementRef(type = ItemMetaData.class), @XmlElementRef(type = GroupMetaData.class)})
+	public List<ActionMetaData> getActions() {
 		return actions;
 	}
 }

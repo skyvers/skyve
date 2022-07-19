@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.repository.module.BizQLMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryMetaData;
-import org.skyve.impl.metadata.repository.module.ModuleDocument;
+import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
@@ -142,7 +142,7 @@ public class FluentModule {
 	}
 
 	public FluentModuleDocument findDocument(String name) {
-		ModuleDocument result = module.getDocuments().stream().filter(d -> name.equals(d.getRef())).findAny().orElse(null);
+		ModuleDocumentMetaData result = module.getDocuments().stream().filter(d -> name.equals(d.getRef())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentModuleDocument(result);
 		}

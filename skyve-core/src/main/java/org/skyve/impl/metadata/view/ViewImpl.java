@@ -39,6 +39,8 @@ public class ViewImpl extends Container implements View {
 	private String documentation;
 	// map of modelId -> model metadata used to instantiate models on the server-side
 	private List<ModelMetaData> inlineModels = new ArrayList<>();
+	private String overriddenCustomerName;
+	private String overriddenUxUiName;
 	private Map<String, String> properties = new TreeMap<>();
 	
 	@Override
@@ -172,6 +174,24 @@ public class ViewImpl extends Container implements View {
 		return inlineModels.get(modelIndex);
 	}
 	
+	@Override
+	public String getOverriddenCustomerName() {
+		return overriddenCustomerName;
+	}
+
+	public void setOverriddenCustomerName(String overriddenCustomerName) {
+		this.overriddenCustomerName = overriddenCustomerName;
+	}
+
+	@Override
+	public String getOverriddenUxUiName() {
+		return overriddenUxUiName;
+	}
+
+	public void setOverriddenUxUiName(String overriddenUxUiName) {
+		this.overriddenUxUiName = overriddenUxUiName;
+	}
+
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;

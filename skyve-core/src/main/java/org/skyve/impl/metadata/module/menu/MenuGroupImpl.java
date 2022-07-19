@@ -3,13 +3,14 @@ package org.skyve.impl.metadata.module.menu;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 
 /**
  * Represents a menu group (composite of {@link MenuItem}s). 
  * This class comprises the Composite part of the GoF composite pattern.
  */
-public final class MenuGroup extends Menu implements org.skyve.metadata.module.menu.MenuGroup {
+public final class MenuGroupImpl extends MenuImpl implements MenuGroup {
 	/**
 	 * For Serialization
 	 */
@@ -38,7 +39,7 @@ public final class MenuGroup extends Menu implements org.skyve.metadata.module.m
 	} // setName
 
 	/**
-	 * From {@link Menu}.
+	 * From {@link MenuImpl}.
 	 */
 	@Override
 	public final String toString() {

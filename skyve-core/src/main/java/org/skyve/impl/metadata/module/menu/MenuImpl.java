@@ -3,12 +3,13 @@ package org.skyve.impl.metadata.module.menu;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
 
 /**
  * Represents a menu.
  */
-public class Menu implements org.skyve.metadata.module.menu.Menu {
+public class MenuImpl implements Menu {
 	private static final long serialVersionUID = -8289343836260930093L;
 
 	private List<MenuItem> menuItemList = new ArrayList<>();

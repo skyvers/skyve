@@ -9,7 +9,7 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(name = "tree", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "tree", namespace = XMLMetaData.MODULE_NAMESPACE)
-public class TreeItem extends Item {
+public class TreeItemMetaData extends ItemMetaData {
 	private static final long serialVersionUID = 6569811887401452181L;
 
 	private String documentName;

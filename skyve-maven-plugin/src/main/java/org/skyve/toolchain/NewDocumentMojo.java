@@ -16,7 +16,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
-import org.skyve.impl.metadata.repository.module.ModuleDocument;
+import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.util.PluralUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -98,10 +98,10 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 			}
 
 			final ModuleMetaData moduleMetaData = XMLMetaData.unmarshalModuleFile(moduleMetaDataFile.toFile().getAbsolutePath());
-			final ModuleDocument moduleDocument = new ModuleDocument();
+			final ModuleDocumentMetaData moduleDocument = new ModuleDocumentMetaData();
 			moduleDocument.setRef(documentName);
 			moduleMetaData.getDocuments().add(moduleDocument);
-			moduleMetaData.getDocuments().sort(Comparator.comparing(ModuleDocument::getRef));
+			moduleMetaData.getDocuments().sort(Comparator.comparing(ModuleDocumentMetaData::getRef));
 			XMLMetaData.marshalModule(moduleMetaData, false, modulesDirectory.toFile().getAbsolutePath());
 			LOGGER.info("Successfully added document {} to module metadata {}.", documentName, moduleName);
 

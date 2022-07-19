@@ -10,7 +10,7 @@ import org.skyve.metadata.SerializableMetaData;
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "document",
 			propOrder = {"ref", "defaultQueryName", "moduleRef"})
-public class ModuleDocument implements SerializableMetaData {
+public class ModuleDocumentMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = -5925139560927455582L;
 
 	private String ref;

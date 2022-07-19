@@ -186,6 +186,15 @@ public interface User extends NamedMetaData {
 	public boolean canExecuteAction(Document document, String actionName);
 	
 	/**
+	 * Does the given router UX/UI have access to the given UserAccess.
+	 * @param access The user access to test.
+	 * @param uxui	The UX/UI name to test for.
+	 * 
+	 * @return	true if the user is able to access the application in this way.
+	 */
+	public boolean canAccess(UserAccess access, String uxui);
+	
+	/**
 	 * User (session) attributes. Keep this small since the user is in the web session.
 	 */
 	public Map<String, Object> getAttributes();

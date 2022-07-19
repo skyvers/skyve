@@ -1,15 +1,15 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.TreeItem;
+import org.skyve.impl.metadata.repository.module.TreeItemMetaData;
 
 public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
-	private TreeItem item = null;
+	private TreeItemMetaData item = null;
 	
 	public FluentTreeItem() {
-		item = new TreeItem();
+		item = new TreeItemMetaData();
 	}
 
-	public FluentTreeItem(TreeItem item) {
+	public FluentTreeItem(TreeItemMetaData item) {
 		this.item = item;
 	}
 
@@ -43,7 +43,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	}
 
 	@Override
-	public TreeItem get() {
+	public TreeItemMetaData get() {
 		return item;
 	}
 }

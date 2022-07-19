@@ -20,6 +20,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
@@ -89,6 +90,12 @@ public class UserImpl implements User {
 	 */
 	private Set<String> contentPermissions = new TreeSet<>();
 
+	/**
+	 * A set of navigations in string form that are allowed, per UX/UI.
+	 * This is derived from the metadata or defined in the router.
+	 */
+	private Map<String, Set<String>> accesses = new TreeMap<>();
+	
 	@Override
 	public String getId() {
 		return id;
@@ -242,8 +249,8 @@ public class UserImpl implements User {
 	}
 
 	public void addRole(RoleImpl role) {
-		//If role is super user, add an early exit
-		if(SUPER_ROLE.equals(role.getName())) {
+		// If role is super user, add an early exit
+		if (SUPER_ROLE.equals(role.getName())) {
 			roleNames.add(SUPER_ROLE);
 			return;
 		}
@@ -252,7 +259,7 @@ public class UserImpl implements User {
 		sb.append(role.getOwningModule().getName()).append('.').append(role.getName());
 		
 		// Only continue if role hasn't been added already
-		if(!roleNames.contains(sb.toString())) {
+		if (! roleNames.contains(sb.toString())) {
 			roleNames.add(sb.toString());
 			
 			for (Privilege privilege : role.getPrivileges()) {
@@ -357,16 +364,16 @@ public class UserImpl implements User {
 	 * @param moduleName the module
 	 * @param menu the menu for that module
 	 */
-	public void putModuleMenu(String moduleName, Menu menu) {
-		moduleMenuMap.put(moduleName, menu);
+	public void putModuleMenu(Module module, Menu menu) {
+		moduleMenuMap.put(module.getName(), menu);
 	}
 
-	
 	/**
 	 * Clear all module menus
 	 */
 	public void clearModuleMenus() {
 		moduleMenuMap.clear();
+		accesses.clear();
 	}
 
 	@Override
@@ -383,6 +390,11 @@ public class UserImpl implements User {
 		return result;
 	}
 
+	public void determineAccess() {
+		accesses.clear();
+		new AccessProcessor(this, moduleMenuMap, accesses).process();
+	}
+	
 	@Override
 	public boolean isInRole(String moduleName, String roleName) {
 		String fullyQualifiedRoleName = new StringBuilder(32).append(moduleName).append('.').append(roleName).toString();
@@ -675,6 +687,21 @@ public class UserImpl implements User {
 	}
 
 	/**
+	 * If access string key DNE then no access.
+	 * If access string key DNE and yields null, then access for every UX/UI.
+	 * Otherwise, check access at UX/UI level.
+	 */
+	@Override
+	public boolean canAccess(UserAccess access, String uxui) {
+		String accessString = access.toString();
+		if (! accesses.containsKey(accessString)) {
+			return false;
+		}
+		Set<String> uxuis = accesses.get(accessString);
+		return (uxuis == null) || (uxuis.contains(uxui));
+	}
+	
+	/**
 	 * Return the client representation of the logged in user.
 	 * 
 	 * @return A new ClientUserData
@@ -704,6 +731,7 @@ public class UserImpl implements User {
 		result.setDocumentPermissions(newPermissions);
 		result.setActions(actions);
 		result.setModuleMenuMap(moduleMenuMap);
+		// NB accessVectors not required for ClientUserData as these are only used by the server.
 
 		return result;
 	}
@@ -721,5 +749,6 @@ public class UserImpl implements User {
 		contentRestrictions.clear();
 		contentPermissions.clear();
 		moduleMenuMap.clear();
+		accesses.clear();
 	}
 }

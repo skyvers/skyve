@@ -155,4 +155,16 @@ public interface View extends NamedMetaData, DecoratedMetaData {
 	 * @return
 	 */
 	public String getDocumentation();
+	
+	/**
+	 * The customer name for this overridden view, or null if not overridden.
+	 * @return The overridden customer name or null. 
+	 */
+	public String getOverriddenCustomerName();
+	
+	/**
+	 * The ux/ui name for this overridden view, or null if not overridden.
+	 * @return The overridden ux/ui name or null. 
+	 */
+	public String getOverriddenUxUiName();
 }

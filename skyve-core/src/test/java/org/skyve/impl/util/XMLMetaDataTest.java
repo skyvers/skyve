@@ -23,7 +23,7 @@ import org.skyve.impl.metadata.repository.customer.HTMLResourcesMetaData;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
-import org.skyve.impl.metadata.repository.module.ModuleDocument;
+import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.model.document.Association.AssociationType;
@@ -509,7 +509,7 @@ public class XMLMetaDataTest {
 		ModuleMetaData module = createModule();
 		DocumentMetaData document = createDocument();
 
-		ModuleDocument md = new ModuleDocument();
+		ModuleDocumentMetaData md = new ModuleDocumentMetaData();
 		md.setRef(document.getName());
 		module.getDocuments().add(md);
 

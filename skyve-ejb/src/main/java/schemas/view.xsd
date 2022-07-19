@@ -2103,6 +2103,7 @@
 
   <xs:simpleType name="temporalBucketType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="quarter"/>
       <xs:enumeration value="dayMonthYear"/>
       <xs:enumeration value="day"/>
       <xs:enumeration value="month"/>

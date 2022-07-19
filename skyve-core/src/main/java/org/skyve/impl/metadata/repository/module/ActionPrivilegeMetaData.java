@@ -8,7 +8,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public class ActionPrivilege implements SerializableMetaData {
+public class ActionPrivilegeMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = 1294697285074132505L;
 
 	private String actionName;

@@ -1,15 +1,15 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.CalendarItem;
+import org.skyve.impl.metadata.repository.module.CalendarItemMetaData;
 
 public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
-	private CalendarItem item = null;
+	private CalendarItemMetaData item = null;
 	
 	public FluentCalendarItem() {
-		item = new CalendarItem();
+		item = new CalendarItemMetaData();
 	}
 
-	public FluentCalendarItem(CalendarItem item) {
+	public FluentCalendarItem(CalendarItemMetaData item) {
 		this.item = item;
 	}
 
@@ -49,7 +49,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	}
 
 	@Override
-	public CalendarItem get() {
+	public CalendarItemMetaData get() {
 		return item;
 	}
 }

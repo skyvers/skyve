@@ -11,6 +11,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.
@@ -183,6 +184,11 @@ public class UserInjectable implements User {
 		return CORE.getUser().canExecuteAction(document, actionName);
 	}
 
+	@Override
+	public boolean canAccess(UserAccess access, String uxui) {
+		return CORE.getUser().canAccess(access, uxui);
+	}
+	
 	@Override
 	public Map<String, Object> getAttributes() {
 		return CORE.getUser().getAttributes();

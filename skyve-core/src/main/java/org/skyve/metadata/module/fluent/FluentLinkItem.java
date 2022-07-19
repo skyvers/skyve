@@ -1,15 +1,15 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.LinkItem;
+import org.skyve.impl.metadata.repository.module.LinkItemMetaData;
 
 public class FluentLinkItem extends FluentMenuItem<FluentLinkItem> {
-	private LinkItem item = null;
+	private LinkItemMetaData item = null;
 	
 	public FluentLinkItem() {
-		item = new LinkItem();
+		item = new LinkItemMetaData();
 	}
 
-	public FluentLinkItem(LinkItem item) {
+	public FluentLinkItem(LinkItemMetaData item) {
 		this.item = item;
 	}
 
@@ -25,7 +25,7 @@ public class FluentLinkItem extends FluentMenuItem<FluentLinkItem> {
 	}
 	
 	@Override
-	public LinkItem get() {
+	public LinkItemMetaData get() {
 		return item;
 	}
 }

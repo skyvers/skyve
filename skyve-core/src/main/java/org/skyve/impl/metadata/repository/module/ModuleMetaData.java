@@ -18,7 +18,8 @@ import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.AbstractMenuItem;
-import org.skyve.impl.metadata.module.menu.MenuGroup;
+import org.skyve.impl.metadata.module.menu.MenuGroupImpl;
+import org.skyve.impl.metadata.module.menu.MenuImpl;
 import org.skyve.impl.metadata.module.query.AbstractMetaDataQueryColumn;
 import org.skyve.impl.metadata.module.query.BizQLDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
@@ -64,10 +65,10 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private ViewType homeRef;
 	private String homeDocument;
 	private List<JobMetaDataImpl> jobs = new ArrayList<>();
-	private List<ModuleDocument> documents = new ArrayList<>();
+	private List<ModuleDocumentMetaData> documents = new ArrayList<>();
 	private List<QueryMetaData> queries = new ArrayList<>();
 	private List<ModuleRoleMetaData> roles = new ArrayList<>();
-	private Menu menu;
+	private MenuMetaData menu;
 	private String documentation;
 
 	public String getTitle() {
@@ -114,7 +115,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documents")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "document", required = true)
-	public List<ModuleDocument> getDocuments() {
+	public List<ModuleDocumentMetaData> getDocuments() {
 		return documents;
 	}
 
@@ -132,12 +133,12 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		return roles;
 	}
 
-	public Menu getMenu() {
+	public MenuMetaData getMenu() {
 		return menu;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
-	public void setMenu(Menu menu) {
+	public void setMenu(MenuMetaData menu) {
 		this.menu = menu;
 	}
 
@@ -183,10 +184,10 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 		// Populate document refs
 
-		List<ModuleDocument> repositoryDocuments = getDocuments();
+		List<ModuleDocumentMetaData> repositoryDocuments = getDocuments();
 		Set<String> documentNames = new TreeSet<>();
 		if (repositoryDocuments != null) {
-			for (ModuleDocument document : repositoryDocuments) {
+			for (ModuleDocumentMetaData document : repositoryDocuments) {
 				DocumentRef documentRef = new DocumentRef();
 				documentRef.setDefaultQueryName(document.getDefaultQueryName());
 				value = document.getRef();
@@ -440,9 +441,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				role.setDocumentation(roleMetaData.getDocumentation());
 				
 				Set<String> docPrivNames = new TreeSet<>();
-				List<DocumentPrivilege> repositoryDocPrivileges = roleMetaData.getPrivileges();
+				List<DocumentPrivilegeMetaData> repositoryDocPrivileges = roleMetaData.getPrivileges();
 				if (repositoryDocPrivileges != null) {
-					for (DocumentPrivilege documentPrivilegeMetaData : repositoryDocPrivileges) {
+					for (DocumentPrivilegeMetaData documentPrivilegeMetaData : repositoryDocPrivileges) {
 						org.skyve.impl.metadata.user.DocumentPrivilege documentPrivilege = new org.skyve.impl.metadata.user.DocumentPrivilege();
 						value = documentPrivilegeMetaData.getDocumentName();
 						if (value == null) {
@@ -477,9 +478,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 						role.getPrivileges().add(documentPrivilege);
 
 						// Add the action privileges also
-						List<ActionPrivilege> repositoryActionPrivileges = documentPrivilegeMetaData.getActions();
+						List<ActionPrivilegeMetaData> repositoryActionPrivileges = documentPrivilegeMetaData.getActions();
 						if (repositoryActionPrivileges != null) {
-							for (ActionPrivilege actionPrivilegeMetaData : repositoryActionPrivileges) {
+							for (ActionPrivilegeMetaData actionPrivilegeMetaData : repositoryActionPrivileges) {
 								org.skyve.impl.metadata.user.ActionPrivilege actionPrivilege = new org.skyve.impl.metadata.user.ActionPrivilege();
 								value = actionPrivilegeMetaData.getActionName();
 								if (value == null) {
@@ -531,7 +532,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 		// Populate the menu
 
-		org.skyve.impl.metadata.module.menu.Menu resultMenu = new org.skyve.impl.metadata.module.menu.Menu();
+		MenuImpl resultMenu = new MenuImpl();
 		List<MenuItem> items = resultMenu.getItems();
 
 		populateModuleMenu(metaDataName, items, getMenu().getActions(), roleNames);
@@ -544,24 +545,24 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 	private void populateModuleMenu(String metaDataName, 
 										List<MenuItem> items, 
-										List<Action> actions, 
+										List<ActionMetaData> actions, 
 										Set<String> validRoleNames) {
-		for (Action action : actions) {
-			if (action instanceof Group) {
+		for (ActionMetaData action : actions) {
+			if (action instanceof GroupMetaData) {
 				String value = action.getName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The [name] for a menu group is required");
 				}
-				Group group = (Group) action;
-				MenuGroup menuGroup = new MenuGroup();
+				GroupMetaData group = (GroupMetaData) action;
+				MenuGroupImpl menuGroup = new MenuGroupImpl();
 				menuGroup.setName(value);
 				populateUxuis(metaDataName, value, group.getUxuis(), menuGroup.getUxUis());
 				populateModuleMenu(metaDataName, menuGroup.getItems(), group.getActions(), validRoleNames);
 				
 				items.add(menuGroup);
 			}
-			else if (action instanceof CalendarItem) {
-				CalendarItem item = (CalendarItem) action;
+			else if (action instanceof CalendarItemMetaData) {
+				CalendarItemMetaData item = (CalendarItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.CalendarItem result = new org.skyve.impl.metadata.module.menu.CalendarItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -606,8 +607,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				items.add(result);
 			}
-			else if (action instanceof LinkItem) {
-				LinkItem item = (LinkItem) action;
+			else if (action instanceof LinkItemMetaData) {
+				LinkItemMetaData item = (LinkItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.LinkItem result = new org.skyve.impl.metadata.module.menu.LinkItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 				
@@ -619,8 +620,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				items.add(result);
 			}
-			else if (action instanceof EditItem) {
-				EditItem item = (EditItem) action;
+			else if (action instanceof EditItemMetaData) {
+				EditItemMetaData item = (EditItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.EditItem result = new org.skyve.impl.metadata.module.menu.EditItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 				
@@ -632,8 +633,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				items.add(result);
 			}
-			else if (action instanceof ListItem) {
-				ListItem item = (ListItem) action;
+			else if (action instanceof ListItemMetaData) {
+				ListItemMetaData item = (ListItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.ListItem result = new org.skyve.impl.metadata.module.menu.ListItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -670,8 +671,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				items.add(result);
 			}
-			else if (action instanceof MapItem) {
-				MapItem item = (MapItem) action;
+			else if (action instanceof MapItemMetaData) {
+				MapItemMetaData item = (MapItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.MapItem result = new org.skyve.impl.metadata.module.menu.MapItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -716,8 +717,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				items.add(result);
 			}
-			else if (action instanceof TreeItem) {
-				TreeItem item = (TreeItem) action;
+			else if (action instanceof TreeItemMetaData) {
+				TreeItemMetaData item = (TreeItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.TreeItem result = new org.skyve.impl.metadata.module.menu.TreeItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
@@ -763,7 +764,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private void populateItem(String metaDataName,
 								Set<String> validRoleNames,
 								AbstractMenuItem result,
-								Item metadata) {
+								ItemMetaData metadata) {
 		String value = metadata.getName();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [name] for a menu item is required");

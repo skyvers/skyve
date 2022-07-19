@@ -384,15 +384,15 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return result;
 	}
 
-	private View getViewInternal(String customerName, // the name of the customer to try to load
+	private View getViewInternal(String searchCustomerName, // the name of the customer to try to load
 									String seachUxUi, // the uxui to try to load {from getView()}
 									Customer customer,
 									Document document,
 									String uxui, // the current uxui
 									String viewName) {
 		StringBuilder viewKey = new StringBuilder(128);
-		if (customerName != null) {
-			viewKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		if (searchCustomerName != null) {
+			viewKey.append(CUSTOMERS_NAMESPACE).append(searchCustomerName).append('/');
 		}
 		viewKey.append(MODULES_NAMESPACE);
 		String documentModuleName = document.getOwningModuleName();
@@ -403,21 +403,21 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		}
 		viewKey.append(viewName);
 		
-		View result = null;
+		ViewImpl result = null;
 		if (UtilImpl.DEV_MODE) {
 			// Cater for the situation where setView has been called
 			Optional<MetaData> o = cache.get(viewKey.toString());
 			if (o != null) { // not a cache miss
 				if (o.isEmpty()) { // preloaded key but not loaded yet
 					// Load the view using the searchUxUi
-					ViewMetaData viewMetaData = loadView(customerName, documentModuleName, documentName, seachUxUi, viewName);
+					ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
 					if (viewMetaData != null) {
 						// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-						result = this.convertView(customerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
+						result = convertView(searchCustomerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
 					}
 				}
 				else { // loaded through a DynamicRepository
-					result = (View) o.get();
+					result = (ViewImpl) o.get();
 				}
 			}
 		}
@@ -425,25 +425,25 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			Optional<MetaData> o = cache.computeIfPresent(viewKey.toString(), (k, v) -> {
 				if (v.isEmpty()) {
 					// Load the view using the searchUxUi
-					ViewMetaData viewMetaData = loadView(customerName, documentModuleName, documentName, seachUxUi, viewName);
+					ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
 					View view = null;
 					if (viewMetaData != null) {
 						// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-						view = this.convertView(customerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
+						view = convertView(searchCustomerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
 					}
 					return Optional.ofNullable(view);
 				}
 				return v;
 			});
 			if ((o != null) && o.isPresent()) {
-				result = (View) o.get();
+				result = (ViewImpl) o.get();
 			}
 		}
 		
 		return result;
 	}
 
-	private View convertView(String customerName,
+	private ViewImpl convertView(String searchCustomerName,
 								String searchUxUi, // only used to make the metadata name
 								Customer customer,
 								String moduleName,
@@ -457,11 +457,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			metaDataName.append(searchUxUi).append('.');
 		}
 		metaDataName.append(view.getName());
-		if (customerName != null) {
-			metaDataName.append(" (").append(customerName).append(')');
+		if (searchCustomerName != null) {
+			metaDataName.append(" (").append(searchCustomerName).append(')');
 		}
 		
 		ViewImpl result = view.convert(metaDataName.toString(), getDelegator());
+		result.setOverriddenCustomerName(searchCustomerName);
+		result.setOverriddenUxUiName(searchUxUi);
 		// Resolve the view ensuring view components within vanilla views are resolved with the current uxui
 		result.resolve(uxui, customer, document);
 		return result;

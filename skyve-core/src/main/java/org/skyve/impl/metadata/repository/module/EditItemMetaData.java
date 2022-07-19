@@ -9,7 +9,7 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(name = "edit", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "edit", namespace = XMLMetaData.MODULE_NAMESPACE)
-public class EditItem extends Item {
+public class EditItemMetaData extends ItemMetaData {
 	private static final long serialVersionUID = -810769802744111708L;
 
 	private String documentName;

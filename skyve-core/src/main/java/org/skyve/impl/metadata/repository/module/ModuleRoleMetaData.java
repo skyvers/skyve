@@ -20,7 +20,7 @@ public class ModuleRoleMetaData extends NamedMetaData {
 	private static final long serialVersionUID = -7824222183005636350L;
 
 	private String description;
-	private List<DocumentPrivilege> privileges = new ArrayList<>();
+	private List<DocumentPrivilegeMetaData> privileges = new ArrayList<>();
 	private String documentation;
 	
 	public String getDescription() {
@@ -35,7 +35,7 @@ public class ModuleRoleMetaData extends NamedMetaData {
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "privileges")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "document", required = true)
-	public List<DocumentPrivilege> getPrivileges() {
+	public List<DocumentPrivilegeMetaData> getPrivileges() {
 		return privileges;
 	}
 

@@ -83,7 +83,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 	@Override
 	public void populatePermissions(User user) {
 		throw new UnsupportedOperationException();
-		
 	}
 
 	@Override
@@ -97,8 +96,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		for (Module module : user.getCustomer().getModules()) {
 			Menu menu = UtilImpl.cloneBySerialization(module.getMenu());
 			removeInaccessibleItems(module.getName(), menu, user);
-			internalUser.putModuleMenu(module.getName(), menu);
+			internalUser.putModuleMenu(module, menu);
 		}
+		internalUser.determineAccess();
 	}
 
 	private static void removeInaccessibleItems(String moduleName, Menu menu, User user) {
@@ -120,10 +120,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 			else { // we are dealing with menu items (not a group)
 				// item is secured by at least 1 role
-				boolean secureMenuItem = ( !menuItem.getRoleNames().isEmpty());
+				boolean secureMenuItem = (! menuItem.getRoleNames().isEmpty());
 
 				// if not a secured item then it is automatically accessible
-				boolean accessibleMenuItem = ( !secureMenuItem);
+				boolean accessibleMenuItem = (! secureMenuItem);
 
 				if (! accessibleMenuItem) {
 					// check for a role name in the menu item that the user has permissions to.

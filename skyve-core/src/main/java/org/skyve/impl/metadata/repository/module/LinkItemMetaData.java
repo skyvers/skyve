@@ -9,7 +9,7 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(name = "link", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "link", namespace = XMLMetaData.MODULE_NAMESPACE)
-public class LinkItem extends Item {
+public class LinkItemMetaData extends ItemMetaData {
 	private static final long serialVersionUID = 4058261818028726112L;
 
 	private String href;

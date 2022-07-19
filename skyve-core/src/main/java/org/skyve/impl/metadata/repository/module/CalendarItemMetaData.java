@@ -9,7 +9,7 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(name = "calendar", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "calendar", namespace = XMLMetaData.MODULE_NAMESPACE)
-public class CalendarItem extends Item {
+public class CalendarItemMetaData extends ItemMetaData {
 	private static final long serialVersionUID = -6472812043264486704L;
 
 	private String documentName;

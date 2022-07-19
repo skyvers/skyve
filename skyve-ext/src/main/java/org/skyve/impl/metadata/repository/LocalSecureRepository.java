@@ -27,12 +27,10 @@ public class LocalSecureRepository extends LocalDesignRepository {
 		return result;
 	}
 	
-	
 	@Override
 	public void populatePermissions(User user) {
 		SQLMetaDataUtil.populateUser(user);
 	}
-	
 	
 	@Override
 	public void resetUserPermissions(User user) {

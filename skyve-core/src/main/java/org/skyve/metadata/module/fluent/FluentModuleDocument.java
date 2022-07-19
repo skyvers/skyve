@@ -1,16 +1,16 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.ModuleDocument;
+import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.metadata.module.Module.DocumentRef;
 
 public class FluentModuleDocument {
-	private ModuleDocument document = null;
+	private ModuleDocumentMetaData document = null;
 	
 	public FluentModuleDocument() {
-		document = new ModuleDocument();
+		document = new ModuleDocumentMetaData();
 	}
 
-	public FluentModuleDocument(ModuleDocument document) {
+	public FluentModuleDocument(ModuleDocumentMetaData document) {
 		this.document = document;
 	}
 
@@ -36,7 +36,7 @@ public class FluentModuleDocument {
 		return this;
 	}
 
-	public ModuleDocument get() {
+	public ModuleDocumentMetaData get() {
 		return document;
 	}
 }

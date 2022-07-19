@@ -1,6 +1,6 @@
 package org.skyve.metadata.module.fluent;
 
-import org.skyve.impl.metadata.repository.module.Action;
+import org.skyve.impl.metadata.repository.module.ActionMetaData;
 import org.skyve.impl.metadata.repository.module.ApplicableTo;
 import org.skyve.metadata.module.menu.MenuItem;
 
@@ -42,5 +42,5 @@ abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 		return (T) this;
 	}
 
-	public abstract Action get();
+	public abstract ActionMetaData get();
 }
