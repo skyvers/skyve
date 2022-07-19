@@ -98,7 +98,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			for (CustomerModuleMetaData module : customer.getModules().getModules()) {
 				String moduleName = module.getName();
 				// populate the module XML file from the customer overridden area.
-				populateModuleLocation(customerName, customerName);
+				populateModuleLocation(customerName, moduleName);
 
 				// Populate modules from the customer overridden area
 				sb.setLength(0);
@@ -430,12 +430,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		try {
 			StringBuilder sb = new StringBuilder(256);
 			sb.append(absolutePath);
-			if (customerName == null) {
-				sb.append(MODULES_NAMESPACE);
-			}
-			else {
+			if (customerName != null) {
 				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 			}
+			sb.append(MODULES_NAMESPACE);
 			sb.append(moduleName).append('/').append(moduleName).append(".xml");
 			result = XMLMetaData.unmarshalModuleFile(sb.toString());
 			if (! moduleName.equals(result.getName())) {
@@ -461,12 +459,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			StringBuilder sb = new StringBuilder(256);
 			sb.setLength(0);
 			sb.append(absolutePath);
-			if (customerName == null) {
-				sb.append(MODULES_NAMESPACE);
+			if (customerName != null) {
+				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 			}
-			else {
-				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(MODULES_NAMESPACE);
-			}
+			sb.append(MODULES_NAMESPACE);
 			sb.append(moduleName).append('/');
 			sb.append(documentName).append('/').append(documentName).append(".xml");
 			result = XMLMetaData.unmarshalDocumentFile(sb.toString());
@@ -493,12 +489,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			StringBuilder sb = new StringBuilder(256);
 			sb.setLength(0);
 			sb.append(absolutePath);
-			if (customerName == null) {
-				sb.append(MODULES_NAMESPACE);
-			}
-			else {
+			if (customerName != null) {
 				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 			}
+			sb.append(MODULES_NAMESPACE);
 			sb.append(moduleName).append('/');
 			sb.append(documentName).append('/').append(VIEWS_NAMESPACE);
 			if (uxui != null) {
