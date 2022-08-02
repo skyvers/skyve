@@ -140,6 +140,9 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String evictOptionPropertyName = "evictOption";
 
+	/** @hidden */
+	public static final String flagFailedPropertyName = "flagFailed";
+
 	/**
 	 * Pre-Process
 	 **/
@@ -690,6 +693,13 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 <p>Evicting beans will free memory for large data jobs, however there may be impacts if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	private EvictOption evictOption = EvictOption.bean;
+
+	/**
+	 * Flag Failed 
+	 * <br/>
+	 * Flag records that fail to Save/Upsert
+	 **/
+	private Boolean flagFailed = Boolean.valueOf(false);
 
 	@Override
 	@XmlTransient
@@ -1306,6 +1316,23 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setEvictOption(EvictOption evictOption) {
 		this.evictOption = evictOption;
+	}
+
+	/**
+	 * {@link #flagFailed} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getFlagFailed() {
+		return flagFailed;
+	}
+
+	/**
+	 * {@link #flagFailed} mutator.
+	 * @param flagFailed	The new value.
+	 **/
+	@XmlElement
+	public void setFlagFailed(Boolean flagFailed) {
+		this.flagFailed = flagFailed;
 	}
 
 	/**

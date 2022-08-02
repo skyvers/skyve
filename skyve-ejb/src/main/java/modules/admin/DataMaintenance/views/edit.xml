@@ -162,10 +162,18 @@
 						<combo binding="evictOption" />
 					</item>
 					<item>
-						<checkBox binding="notification" triState="false" />
+						<checkBox binding="flagFailed" triState="false" />
 					</item>
 					<item>
 						<button action="RefreshDocumentTuples" />
+					</item>
+				</row>
+				<row>
+					<item colspan="4">
+						<spacer />
+					</item>
+					<item>
+						<checkBox binding="notification" triState="false" />
 					</item>
 				</row>
 			</form>
