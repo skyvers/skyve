@@ -9,6 +9,8 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 
+import modules.admin.User.UserExtension;
+import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
 public class UserProxyExtension extends UserProxy {
@@ -31,5 +33,15 @@ public class UserProxyExtension extends UserProxy {
 		}
 		
 		return metaDataUser;
+	}
+	
+	/**
+	 * Return the user from the user proxy
+	 * 
+	 * @param userProxy
+	 * @return
+	 */
+	public UserExtension userFromUserProxy() {
+		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, this.getBizId());
 	}
 }
