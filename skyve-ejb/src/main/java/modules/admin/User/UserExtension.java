@@ -214,7 +214,7 @@ public class UserExtension extends User {
 	 * @return
 	 */
 	public UserProxyExtension userProxyFromUser() {
-		return CORE.getPersistence().retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, this.getBizId());
+		return CORE.getPersistence().retrieve(UserProxyExtension.MODULE_NAME, UserProxyExtension.DOCUMENT_NAME, this.getBizId());
 	}
 
 	/**
