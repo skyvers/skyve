@@ -169,7 +169,7 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						if (param.getReportInputValue() != null) {
-							bql.putParameter(param.getName(), Integer.getInteger(param.getReportInputValue()));
+							bql.putParameter(param.getName(), Integer.valueOf(param.getReportInputValue()));
 						} else {
 							bql.putParameter(param.getName(), (param.getNumericalDefaultValue() == null ? null
 									: Integer.valueOf(param.getNumericalDefaultValue().intValue())));
@@ -229,7 +229,7 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						if (param.getReportInputValue() != null) {
-							sql.putParameter(param.getName(), Integer.getInteger(param.getReportInputValue()));
+							sql.putParameter(param.getName(), Integer.valueOf(param.getReportInputValue()));
 						} else {
 							sql.putParameter(param.getName(), (param.getNumericalDefaultValue() == null ? null
 									: Integer.valueOf(param.getNumericalDefaultValue().intValue())));
