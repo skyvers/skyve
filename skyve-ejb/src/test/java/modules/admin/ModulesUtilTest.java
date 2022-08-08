@@ -1,6 +1,8 @@
 package modules.admin;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -120,5 +122,22 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 
 		assertThat(result, is(notNullValue()));
 		assertThat(result.getContact(), is(contact));
+	}
+
+	@Test
+	void configureGroup() {
+		// New Group
+		GroupExtension newGroup = ModulesUtil.configureGroup("TestGroup", "admin.BasicUser", "admin.ContactManager");
+		assertThat(newGroup, is(notNullValue()));
+		
+		// Attempting to create new group with name and roles of existing group
+		GroupExtension testExistingGroup = ModulesUtil.configureGroup("TestGroup", "admin.BasicUser", "admin.ContactManager");
+		assertThat(testExistingGroup, is(notNullValue()));
+		assertThat(testExistingGroup, is(newGroup));
+
+		// Attempting to create new group with name of existing group but missing role
+		GroupExtension testExistingGroupWithMissingRole = ModulesUtil.configureGroup("TestGroup", "admin.ContactManager");
+		assertThat(testExistingGroup, is(notNullValue()));
+		assertThat(testExistingGroup, is(testExistingGroupWithMissingRole));
 	}
 }
