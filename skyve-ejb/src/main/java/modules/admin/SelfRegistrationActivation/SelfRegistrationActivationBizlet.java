@@ -7,6 +7,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
 
+import modules.admin.User.UserExtension;
+
 public class SelfRegistrationActivationBizlet extends Bizlet<SelfRegistrationActivationExtension> {
 
 	@Override
@@ -16,7 +18,7 @@ public class SelfRegistrationActivationBizlet extends Bizlet<SelfRegistrationAct
 			HttpServletRequest request = (HttpServletRequest) webContext.getHttpServletRequest();
 			String activationCode = request.getParameter("code");
 
-			bean.activateUser(activationCode);
+			bean.setUser((UserExtension) bean.activateUser(activationCode));
 		}
 		return bean;
 	}
