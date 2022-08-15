@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <document name="DataMaintenance"
 			xmlns="http://www.skyve.org/xml/document"
+			xmlns:v="http://www.skyve.org/xml/view"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<persistent name="ADM_DataMaintenance">
@@ -164,6 +165,12 @@
 				<value code="All" />
 			</values>
 		</enum>
+		<boolean name="flagFailed" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.flagFailed.displayName</displayName>
+			<description>admin.dataMaintenance.flagFailed.description</description>
+			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
+			<defaultValue>false</defaultValue>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">

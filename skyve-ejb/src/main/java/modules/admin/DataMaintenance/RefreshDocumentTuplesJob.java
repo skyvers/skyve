@@ -51,6 +51,7 @@ public class RefreshDocumentTuplesJob extends Job {
 
 		RefreshOption refresh = dm.getRefreshOption();
 		EvictOption evict = dm.getEvictOption();
+		Boolean flagFailedData = dm.getFlagFailed();
 
 		// iterate
 		for (ModuleDocument doc : dm.getRefreshDocuments()) {
@@ -89,6 +90,10 @@ public class RefreshDocumentTuplesJob extends Job {
 												sb.toString(),
 												dm.getRefreshOption().toLocalisedDescription(),
 												bean.getBizId()));
+						if (Boolean.TRUE.equals(flagFailedData)) {
+							bean.setBizFlagComment("Data refresh failed - Please validate data and try again.");
+							CORE.getPersistence().upsertBeanTuple(bean);
+						}
 					}
 					processed++;
 					setPercentComplete((int) (((float) processed) / ((float) size) * 100F));
