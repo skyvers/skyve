@@ -38,6 +38,7 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 
 	@AfterEach
 	void tearDownTeats() {
+		// nothing to see here
 	}
 
 	@Test
@@ -72,8 +73,8 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 	@Test
 	void createAdminUserFromContactWithGroupShouldFailIfNoValidGroupName() {
 		// given
-		Contact contact = Contact.newInstance();
-		GroupExtension group = GroupExtension.newInstance();
+		contact = Contact.newInstance();
+		GroupExtension group = Group.newInstance();
 		group.setName("Admin");
 
 		// when
@@ -88,7 +89,7 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 	@Test
 	void createAdminUserFromContactWithGroupShouldFailIfNoValidHomeModuleName() {
 		// given
-		Contact contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 
 		String homeModuleName = "homeModuleName";
 
@@ -107,7 +108,7 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 	@Test
 	void createAdminUserFromContactWithGroupShould() {
 		// given
-		Contact contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 
 		GroupExtension group = db.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
 		group.setName("TestGroup");
@@ -126,6 +127,7 @@ public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void configureGroup() {
 		// Create test roles 
 		GroupRole testRole1 = GroupRole.newInstance();

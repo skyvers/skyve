@@ -1062,8 +1062,8 @@ public class ModulesUtil {
 	 */
 	public static GroupExtension configureGroup(String name, String... roleNames) {
 		// Configure required Staff permissions group
-		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(GroupExtension.MODULE_NAME, GroupExtension.DOCUMENT_NAME);
-		qGroup.getFilter().addEquals(GroupExtension.namePropertyName, name);
+		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
+		qGroup.getFilter().addEquals(Group.namePropertyName, name);
 		boolean saveRequired = false;
 		GroupExtension g = qGroup.beanResult();
 		if (g == null) {
