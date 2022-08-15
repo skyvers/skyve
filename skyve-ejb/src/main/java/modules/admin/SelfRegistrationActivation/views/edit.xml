@@ -8,11 +8,11 @@
 					<![CDATA[
 						<div style="width:100%; text-align:center">
 							<h4 style="margin: 2px auto;">
-								{i18n:admin.selfRegistrationActivation.pleaseSignIn}
+								{pleaseSignIn}
 							</h4>
 						</div>
 						<div style="width:100%; text-align:center; text-size: 120%;">
-							{i18n:admin.selfRegistrationActivation.signInLink}
+							{signInLink}
 						</div>
 					]]>
 				</blurb>
@@ -27,7 +27,7 @@
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
-								{i18n:admin.selfRegistrationActivation.alreadyActivated}
+								{alreadyActivated}
 							</strong>
 						</div>
 					]]>
@@ -43,7 +43,7 @@
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
-								{i18n:admin.selfRegistrationActivation.noLongerValid}
+								{noLongerValid}
 							</strong>
 						</div>
 					]]>
@@ -59,7 +59,7 @@
 					<![CDATA[
 						<div style="width:100%;text-align:center">
 							<strong style="margin: 2px auto;">
-								{i18n:admin.selfRegistrationActivation.notRecognised}
+								{notRecognised}
 							</strong>
 						</div>
 					]]>

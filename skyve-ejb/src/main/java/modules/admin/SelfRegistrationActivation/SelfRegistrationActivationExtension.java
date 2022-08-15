@@ -80,4 +80,31 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 		return Util.getSkyveContextUrl() + "/login";
 	}
 
+	@Override
+	public String getPleaseSignIn() {
+		return Util.i18n("admin.selfRegistrationActivation.pleaseSignIn", this.getUser().getContact().getName(), this.getLoginUrl(),
+				this.getUser().getContact().getEmail1());
+	}
+
+	@Override
+	public String getSignInLink() {
+		return Util.i18n("admin.selfRegistrationActivation.signInLink", this.getLoginUrl());
+	}
+
+	@Override
+	public String getAlreadyActivated() {
+		return Util.i18n("admin.selfRegistrationActivation.alreadyActivated", this.getUser().getContact().getName(),
+				this.getLoginUrl());
+	}
+
+	@Override
+	public String getNoLongerValid() {
+		return Util.i18n("admin.selfRegistrationActivation.noLongerValid", this.getLoginUrl());
+	}
+
+	@Override
+	public String getNotRecognised() {
+		return Util.i18n("admin.selfRegistrationActivation.notRecognised", this.getLoginUrl());
+	}
+
 }
