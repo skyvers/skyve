@@ -239,7 +239,7 @@ public class UtilImpl {
 	public static String SUPPORT_EMAIL_ADDRESS = null;
 
 	// Should the support user receive email notification on problem backups
-	public static boolean NOTIFY_BACKUP_PROBLEM_EMAIL = true;
+	public static boolean NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM = true;
 
 	// Should scheduled jobs be manipulated by the database.
 	public static boolean JOB_SCHEDULER = true;

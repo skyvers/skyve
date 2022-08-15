@@ -370,7 +370,7 @@ public class BackupJob extends CancellableJob {
 						Util.LOGGER.info(uploadLogMessage);
 					}
 					if (problem) {
-						Boolean sendProblemEmail = UtilImpl.NOTIFY_BACKUP_PROBLEM_EMAIL;
+						boolean sendProblemEmail = UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM;
 						if (sendProblemEmail) {
 							Bean bean = getBean();
 							Communication c = CommunicationUtil
@@ -381,8 +381,12 @@ public class BackupJob extends CancellableJob {
 							}
 							if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
 								c.setSendToOverride(UtilImpl.SUPPORT_EMAIL_ADDRESS);
+								CommunicationUtil.send(c, RunMode.ACTION, ResponseMode.SILENT, null, bean);
 							}
-							CommunicationUtil.send(c, RunMode.ACTION, ResponseMode.SILENT, null, bean);
+							else {
+								EXT.push(new PushMessage().user().growl(MessageSeverity.warn,
+										"Support email address not supplied. Cannot notify support email of backup problems."));
+							}
 						}
 					}
 				} finally {

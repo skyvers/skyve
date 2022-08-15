@@ -68,7 +68,7 @@ public class StartupExtension extends Startup {
 
 		setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);
 		setEnvironmentSupportEmail(UtilImpl.SUPPORT_EMAIL_ADDRESS);
-		setNotifyBackupProblemEmail(UtilImpl.NOTIFY_BACKUP_PROBLEM_EMAIL);
+		setNotifyBackupProblemEmail(UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM);
 
 		setMailBogusSend(Boolean.valueOf(UtilImpl.SMTP_TEST_BOGUS_SEND));
 		setMailPassword(UtilImpl.SMTP_PWD);
@@ -241,9 +241,9 @@ public class StartupExtension extends Startup {
 			UtilImpl.SUPPORT_EMAIL_ADDRESS = getEnvironmentSupportEmail();
 		}
 
-		if (UtilImpl.NOTIFY_BACKUP_PROBLEM_EMAIL != getNotifyBackupProblemEmail().booleanValue()) {
+		if (UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM != getNotifyBackupProblemEmail().booleanValue()) {
 			environment.put(ENVIRONMENT_NOTIFY_PROBLEM_BACKUP_EMAIL_KEY, getNotifyBackupProblemEmail());
-			UtilImpl.NOTIFY_BACKUP_PROBLEM_EMAIL = getNotifyBackupProblemEmail().booleanValue();
+			UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM = getNotifyBackupProblemEmail().booleanValue();
 		}
 
 		if (Boolean.TRUE.equals(getDontShowAgain())) {
