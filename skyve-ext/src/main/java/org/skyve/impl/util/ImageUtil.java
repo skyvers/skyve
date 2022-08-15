@@ -7,7 +7,6 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,13 +25,11 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.CORE;
-import org.skyve.content.MimeType;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 
-import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.util.exif.ExifFilterUtils;
 import net.coobird.thumbnailator.util.exif.ExifUtils;
 import net.coobird.thumbnailator.util.exif.Orientation;
@@ -206,28 +203,5 @@ public class ImageUtil {
 			ImageIO.write(image, ImageFormat.png.toString(), output); 
 			return output.toByteArray();
 		}
-	}
-	
-	public static byte[] reduceImageSize(MimeType mimeType, byte[] bytes) throws Exception {
-		// Convert max image upload size from MegaBytes to Bytes (/1024^2)
-		Integer maxImageSizeBytes = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB / 1048576;
-
-		if (MimeType.jpeg.equals(mimeType) || MimeType.png.equals(mimeType)) {
-			if (bytes.length > maxImageSizeBytes) {
-				try (InputStream is = new ByteArrayInputStream(bytes)) {
-					BufferedImage image = ImageUtil.read(is, UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE);
-					int width = image.getWidth();
-					int height = image.getHeight();
-					// change width and height to a fraction of it width and height somehow (keeping aspect ratio)
-					image = Thumbnails.of(image).size(width, height).keepAspectRatio(true).asBufferedImage();
-					try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-						// Create the thumb nail
-						Thumbnails.of(image).scale(1.0).outputFormat(MimeType.jpeg.getStandardFileSuffix()).toOutputStream(baos);
-						return baos.toByteArray();
-					}
-				}
-			}
-		}
-		return bytes;
 	}
 }
