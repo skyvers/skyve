@@ -24,6 +24,7 @@ import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.Util;
 
+import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
@@ -203,6 +204,22 @@ public class UserExtension extends User {
 			bean.setBizUserId(bizUserId);
 			return true;
 		}
+	}
+	
+	/**
+	 * Return the user proxy from the user
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public UserProxyExtension userProxyFromUser() {
+		UserProxyExtension upe = UserProxyExtension.newInstance();
+		upe.setUserName(getUserName());
+		upe.setCreatedDateTime(new DateTime());
+		upe.setContact(getContact());
+		upe.setInactive(getInactive());
+
+		return upe;
 	}
 
 	/**
