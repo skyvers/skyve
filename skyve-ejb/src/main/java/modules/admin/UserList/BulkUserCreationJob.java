@@ -177,8 +177,9 @@ public class BulkUserCreationJob extends Job {
 			newUser.setContact(contact);
 
 			// set default module
-			if (bean.getDefaultModuleName() != null) {
-				newUser.setHomeModule(bean.getDefaultModuleName());
+			String defaultModuleName = bean.getDefaultModuleName();
+			if (defaultModuleName != null) {
+				newUser.setHomeModule(defaultModuleName);
 			}
 
 			// assign groups as selected
