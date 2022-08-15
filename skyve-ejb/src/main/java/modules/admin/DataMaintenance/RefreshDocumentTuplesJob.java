@@ -90,7 +90,7 @@ public class RefreshDocumentTuplesJob extends Job {
 												sb.toString(),
 												dm.getRefreshOption().toLocalisedDescription(),
 												bean.getBizId()));
-						if (flagFailedData) {
+						if (Boolean.TRUE.equals(flagFailedData)) {
 							bean.setBizFlagComment("Data refresh failed - Please validate data and try again.");
 							CORE.getPersistence().upsertBeanTuple(bean);
 						}
