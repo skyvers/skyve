@@ -31,6 +31,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.admin.Communication;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -38,6 +39,9 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.util.CommunicationUtil;
+import org.skyve.util.CommunicationUtil.ResponseMode;
+import org.skyve.util.CommunicationUtil.RunMode;
 import org.skyve.util.FileUtil;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
@@ -57,6 +61,10 @@ import org.supercsv.prefs.CsvPreference;
  */
 public class BackupJob extends CancellableJob {
 	private File backupZip;
+
+	public static final String SYSTEM_BACKUP_PROBLEM_NOTIFICATION = "SYSTEM Backup Problem Notification";
+	public static final String SYSTEM_BACKUP_PROBLEM_DEFAULT_SUBJECT = "Problems with recent backup.";
+	public static final String SYSTEM_BACKUP_PROBLEM_DEFAULT_BODY = "The backup taken at {DATETIME} has problems.";
 
 	public File getBackupZip() {
 		return backupZip;
@@ -362,6 +370,17 @@ public class BackupJob extends CancellableJob {
 						final String uploadLogMessage = "Uploaded compressed backup";
 						log.add(uploadLogMessage);
 						Util.LOGGER.info(uploadLogMessage);
+					}
+
+					if (problem) {
+						Bean bean = getBean();
+						Communication c = CommunicationUtil.getSystemCommunicationByDescription(SYSTEM_BACKUP_PROBLEM_NOTIFICATION);
+						if (c == null) {
+							c = CommunicationUtil.initialiseSystemCommunication(SYSTEM_BACKUP_PROBLEM_NOTIFICATION,
+									SYSTEM_BACKUP_PROBLEM_DEFAULT_SUBJECT, SYSTEM_BACKUP_PROBLEM_DEFAULT_BODY);
+							c.setSendTo(UtilImpl.SUPPORT_EMAIL_ADDRESS);
+						}
+						CommunicationUtil.send(c, RunMode.ACTION, ResponseMode.SILENT, null, bean);
 					}
 				}
 				finally {
