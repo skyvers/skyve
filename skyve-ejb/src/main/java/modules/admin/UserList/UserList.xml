@@ -30,9 +30,14 @@
 			<displayName>admin.userList.userInvitationEmailList.displayName</displayName>
 			<description><![CDATA[admin.userList.userInvitationEmailList.description]]></description>
 		</memo>	
-		<boolean name="bulkCreateWithEmail" >
+		<boolean name="bulkCreateWithEmail">
 			<displayName>admin.userList.bulkCreateWithEmail.displayName</displayName>
 		</boolean>
+		<text name="defaultModuleName">
+			<displayName>admin.userList.defaultModuleName.displayName</displayName>
+			<domain>variant</domain>
+			<length>100</length>
+		</text>
 	</attributes>
 	<conditions>
 		<condition name="emailConfigured">
