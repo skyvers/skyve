@@ -17,6 +17,11 @@
 	                <default binding="environmentSupportEmail"/>
 	            </item>
 	        </row>
+	        <row>
+	            <item>
+	                <default binding="notifyBackupProblemEmail"/>
+	            </item>
+	        </row>
 		</form>
 	</vbox>
 

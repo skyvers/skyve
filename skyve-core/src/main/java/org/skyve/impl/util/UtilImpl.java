@@ -238,6 +238,9 @@ public class UtilImpl {
 	// email address for error.jsp
 	public static String SUPPORT_EMAIL_ADDRESS = null;
 
+	// Should the support user receive email notification on problem backups
+	public static boolean NOTIFY_BACKUP_PROBLEM_EMAIL = true;
+
 	// Should scheduled jobs be manipulated by the database.
 	public static boolean JOB_SCHEDULER = true;
 
