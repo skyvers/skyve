@@ -41,7 +41,7 @@
 			<displayName>admin.startup.notifyBackupProblemByEmail.displayName</displayName>
 			<description>admin.startup.notifyBackupProblemByEmail.description</description>
 			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
-			<defaultValue>false</defaultValue>
+			<defaultValue>true</defaultValue>
 		</boolean>
 		
 		<!-- map settings -->

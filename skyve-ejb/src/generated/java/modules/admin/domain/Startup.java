@@ -213,7 +213,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 * <br/>
 	 * Whether to notify the support email for the application that there was an issue with the backup
 	 **/
-	private Boolean notifyBackupProblemEmail = Boolean.valueOf(false);
+	private Boolean notifyBackupProblemEmail = Boolean.valueOf(true);
 
 	/**
 	 * Type
