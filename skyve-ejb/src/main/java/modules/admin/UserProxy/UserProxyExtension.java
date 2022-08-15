@@ -11,6 +11,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DocumentQuery;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
 public class UserProxyExtension extends UserProxy {
@@ -37,21 +38,13 @@ public class UserProxyExtension extends UserProxy {
 	}
 
 	/**
-	 * Return the user from the user proxy
+	 * Return the user from this user proxy.
 	 * 
-	 * @param userProxy
-	 * @return
-	 * @throws Exception
+	 * @return	The User.
 	 */
-	public UserExtension userFromUserProxy() throws Exception {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(UserExtension.MODULE_NAME, UserExtension.DOCUMENT_NAME);
+	public UserExtension toUser() throws Exception {
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		q.getFilter().addEquals(contactPropertyName, this.getContact());
-		UserExtension ue = q.beanResult();
-
-		if (ue == null) {
-			throw new Exception("No User exists for this User Proxy");
-		}
-
-		return ue;
+		return q.retrieveBean();
 	}
 }
