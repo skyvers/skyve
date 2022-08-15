@@ -45,6 +45,7 @@ import modules.admin.UserList.UserListUtil;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
+import modules.admin.domain.GroupRole;
 import modules.admin.domain.UserProxy;
 
 /**
@@ -1052,4 +1053,47 @@ public class ModulesUtil {
 		q.setDistinct(true);
 		return q.scalarResults(String.class);
 	}
+
+	/**
+	 * Configure a permissions group with at least the roleNames specified
+	 * 
+	 * @param name
+	 * @param roleNames
+	 */
+	public static GroupExtension configureGroup(String name, String... roleNames) {
+		// Configure required Staff permissions group
+		DocumentQuery qGroup = CORE.getPersistence().newDocumentQuery(GroupExtension.MODULE_NAME, GroupExtension.DOCUMENT_NAME);
+		qGroup.getFilter().addEquals(GroupExtension.namePropertyName, name);
+		boolean saveRequired = false;
+		GroupExtension g = qGroup.beanResult();
+		if (g == null) {
+			g = Group.newInstance();
+			g.setName(name);
+			saveRequired = true;
+		}
+		// check roles
+		for (String s : roleNames) {
+			boolean found = false;
+			for (GroupRole gr : g.getRoles()) {
+				if (s.equals(gr.getRoleName())) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				GroupRole gr = GroupRole.newInstance();
+				gr.setRoleName(s);
+				g.addRolesElement(gr);
+				saveRequired = true;
+			}
+		}
+
+		// and Save the group
+		if (saveRequired) {
+			g = CORE.getPersistence().save(g);
+		}
+
+		return g;
+	}
+
 }
