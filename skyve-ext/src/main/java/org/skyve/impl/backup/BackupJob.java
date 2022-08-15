@@ -371,7 +371,7 @@ public class BackupJob extends CancellableJob {
 					}
 					if (problem) {
 						Boolean sendProblemEmail = UtilImpl.NOTIFY_BACKUP_PROBLEM_EMAIL;
-						if (Boolean.TRUE.equals(sendProblemEmail)) {
+						if (sendProblemEmail) {
 							Bean bean = getBean();
 							Communication c = CommunicationUtil
 									.getSystemCommunicationByDescription(SYSTEM_BACKUP_PROBLEM_NOTIFICATION);
@@ -379,7 +379,9 @@ public class BackupJob extends CancellableJob {
 								c = CommunicationUtil.initialiseSystemCommunication(SYSTEM_BACKUP_PROBLEM_NOTIFICATION,
 										SYSTEM_BACKUP_PROBLEM_DEFAULT_SUBJECT, SYSTEM_BACKUP_PROBLEM_DEFAULT_BODY);
 							}
-							c.setSendToOverride(UtilImpl.SUPPORT_EMAIL_ADDRESS);
+							if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
+								c.setSendToOverride(UtilImpl.SUPPORT_EMAIL_ADDRESS);
+							}
 							CommunicationUtil.send(c, RunMode.ACTION, ResponseMode.SILENT, null, bean);
 						}
 					}
