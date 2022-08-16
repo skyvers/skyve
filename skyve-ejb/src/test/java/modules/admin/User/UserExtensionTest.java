@@ -2,7 +2,7 @@ package modules.admin.User;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -28,9 +28,19 @@ public class UserExtensionTest extends AbstractH2Test {
 		// convert user to user proxy
 		UserProxyExtension upe = ue.toUserProxy();
 
-		// validate test data
+		// validate User Proxy
 		assertThat(upe, is(notNullValue()));
 		assertTrue(upe instanceof UserProxyExtension);
+
+		// convert user proxy to user
+		UserExtension ue2 = upe.toUser();
+
+		// validate test data
+		assertThat(ue2, is(notNullValue()));
+		assertTrue(ue2 instanceof UserExtension);
+
+		// check user returned is original user
+		assertThat(ue2, is(ue));
 
 		// Delete persisted user
 		CORE.getPersistence().delete(ue);
