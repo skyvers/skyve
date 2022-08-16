@@ -37,7 +37,7 @@
 			<length>200</length>
 			<validator type="email"/>
 		</text>
-		<boolean name="notifyBackupProblemEmail">
+		<boolean name="notifyBackupProblemByEmail">
 			<displayName>admin.startup.notifyBackupProblemByEmail.displayName</displayName>
 			<description>admin.startup.notifyBackupProblemByEmail.description</description>
 			<defaultWidget><v:checkBox triState="false" /></defaultWidget>

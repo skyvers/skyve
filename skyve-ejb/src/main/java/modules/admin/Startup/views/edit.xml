@@ -19,7 +19,7 @@
 	        </row>
 	        <row>
 	            <item>
-	                <default binding="notifyBackupProblemEmail"/>
+	                <default binding="notifyBackupProblemByEmail"/>
 	            </item>
 	        </row>
 		</form>

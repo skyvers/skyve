@@ -52,7 +52,7 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String environmentSupportEmailPropertyName = "environmentSupportEmail";
 
 	/** @hidden */
-	public static final String notifyBackupProblemEmailPropertyName = "notifyBackupProblemEmail";
+	public static final String notifyBackupProblemByEmailPropertyName = "notifyBackupProblemByEmail";
 
 	/** @hidden */
 	public static final String mapTypePropertyName = "mapType";
@@ -209,11 +209,11 @@ public abstract class Startup extends AbstractTransientBean {
 	private String environmentSupportEmail;
 
 	/**
-	 * Notify support email after problem backup
+	 * Notify support after problem backup
 	 * <br/>
 	 * Whether to notify the support email for the application that there was an issue with the backup
 	 **/
-	private Boolean notifyBackupProblemEmail = Boolean.valueOf(true);
+	private Boolean notifyBackupProblemByEmail = Boolean.valueOf(true);
 
 	/**
 	 * Type
@@ -421,21 +421,21 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #notifyBackupProblemEmail} accessor.
+	 * {@link #notifyBackupProblemByEmail} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getNotifyBackupProblemEmail() {
-		return notifyBackupProblemEmail;
+	public Boolean getNotifyBackupProblemByEmail() {
+		return notifyBackupProblemByEmail;
 	}
 
 	/**
-	 * {@link #notifyBackupProblemEmail} mutator.
-	 * @param notifyBackupProblemEmail	The new value.
+	 * {@link #notifyBackupProblemByEmail} mutator.
+	 * @param notifyBackupProblemByEmail	The new value.
 	 **/
 	@XmlElement
-	public void setNotifyBackupProblemEmail(Boolean notifyBackupProblemEmail) {
-		preset(notifyBackupProblemEmailPropertyName, notifyBackupProblemEmail);
-		this.notifyBackupProblemEmail = notifyBackupProblemEmail;
+	public void setNotifyBackupProblemByEmail(Boolean notifyBackupProblemByEmail) {
+		preset(notifyBackupProblemByEmailPropertyName, notifyBackupProblemByEmail);
+		this.notifyBackupProblemByEmail = notifyBackupProblemByEmail;
 	}
 
 	/**
