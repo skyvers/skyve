@@ -42,7 +42,7 @@ public class UserProxyExtension extends UserProxy {
 	 * @return User
 	 * @throws Exception
 	 */
-	public UserExtension toUser() throws Exception {
+	public UserExtension toUser() {
 		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, this.getBizId());
 	}
 }
