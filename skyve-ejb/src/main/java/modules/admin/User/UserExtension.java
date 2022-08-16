@@ -28,6 +28,7 @@ import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
+import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
 
 public class UserExtension extends User {
@@ -209,17 +210,11 @@ public class UserExtension extends User {
 	/**
 	 * Return the user proxy from the user
 	 * 
-	 * @param user
+	 * @param UserProxy
 	 * @return
 	 */
-	public UserProxyExtension userProxyFromUser() {
-		UserProxyExtension upe = UserProxyExtension.newInstance();
-		upe.setUserName(getUserName());
-		upe.setCreatedDateTime(new DateTime());
-		upe.setContact(getContact());
-		upe.setInactive(getInactive());
-
-		return upe;
+	public UserProxyExtension toUserProxy() {
+		return CORE.getPersistence().retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, this.getBizId());
 	}
 
 	/**

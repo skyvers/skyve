@@ -8,9 +8,9 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.persistence.DocumentQuery;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.User;
 import modules.admin.domain.UserProxy;
 
 public class UserProxyExtension extends UserProxy {
@@ -39,19 +39,10 @@ public class UserProxyExtension extends UserProxy {
 	/**
 	 * Return the user from the user proxy
 	 * 
-	 * @param userProxy
-	 * @return
+	 * @return User
 	 * @throws Exception
 	 */
-	public UserExtension userFromUserProxy() throws Exception {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(UserExtension.MODULE_NAME, UserExtension.DOCUMENT_NAME);
-		q.getFilter().addEquals(contactPropertyName, this.getContact());
-		UserExtension ue = q.beanResult();
-
-		if (ue == null) {
-			throw new Exception("No User exists for this User Proxy");
-		}
-
-		return ue;
+	public UserExtension toUser() throws Exception {
+		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, this.getBizId());
 	}
 }
