@@ -18,7 +18,7 @@ public class UserProxyExtensionTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testUserFromUserProxy() throws Exception {
+	public void testToUser() throws Exception {
 		// setup test data
 		UserExtension ue = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
 
@@ -26,14 +26,14 @@ public class UserProxyExtensionTest extends AbstractH2Test {
 		ue = CORE.getPersistence().save(ue);
 
 		// convert user to user proxy
-		UserProxyExtension upe = ue.userProxyFromUser();
+		UserProxyExtension upe = ue.toUserProxy();
 
 		// validate User Proxy
 		assertThat(upe, is(notNullValue()));
 		assertTrue(upe instanceof UserProxyExtension);
 
 		// convert user proxy to user
-		UserExtension ue2 = upe.userFromUserProxy();
+		UserExtension ue2 = upe.toUser();
 
 		// validate test data
 		assertThat(ue2, is(notNullValue()));
