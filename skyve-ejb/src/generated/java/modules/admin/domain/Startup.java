@@ -52,9 +52,6 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String environmentSupportEmailPropertyName = "environmentSupportEmail";
 
 	/** @hidden */
-	public static final String notifyBackupProblemByEmailPropertyName = "notifyBackupProblemByEmail";
-
-	/** @hidden */
 	public static final String mapTypePropertyName = "mapType";
 
 	/** @hidden */
@@ -207,13 +204,6 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Email address for system support
 	 **/
 	private String environmentSupportEmail;
-
-	/**
-	 * Notify support after problem backup
-	 * <br/>
-	 * Whether to notify the support email for the application that there was an issue with the backup
-	 **/
-	private Boolean notifyBackupProblemByEmail = Boolean.valueOf(true);
 
 	/**
 	 * Type
@@ -418,24 +408,6 @@ public abstract class Startup extends AbstractTransientBean {
 	public void setEnvironmentSupportEmail(String environmentSupportEmail) {
 		preset(environmentSupportEmailPropertyName, environmentSupportEmail);
 		this.environmentSupportEmail = environmentSupportEmail;
-	}
-
-	/**
-	 * {@link #notifyBackupProblemByEmail} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getNotifyBackupProblemByEmail() {
-		return notifyBackupProblemByEmail;
-	}
-
-	/**
-	 * {@link #notifyBackupProblemByEmail} mutator.
-	 * @param notifyBackupProblemByEmail	The new value.
-	 **/
-	@XmlElement
-	public void setNotifyBackupProblemByEmail(Boolean notifyBackupProblemByEmail) {
-		preset(notifyBackupProblemByEmailPropertyName, notifyBackupProblemByEmail);
-		this.notifyBackupProblemByEmail = notifyBackupProblemByEmail;
 	}
 
 	/**

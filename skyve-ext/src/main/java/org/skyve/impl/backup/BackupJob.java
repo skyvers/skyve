@@ -370,23 +370,16 @@ public class BackupJob extends CancellableJob {
 						Util.LOGGER.info(uploadLogMessage);
 					}
 					if (problem) {
-						boolean sendProblemEmail = UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM;
-						if (sendProblemEmail) {
+						Communication c = CommunicationUtil
+								.getSystemCommunicationByDescription(SYSTEM_BACKUP_PROBLEM_NOTIFICATION);
+						if (c == null) {
+							c = CommunicationUtil.initialiseSystemCommunication(SYSTEM_BACKUP_PROBLEM_NOTIFICATION,
+									SYSTEM_BACKUP_PROBLEM_DEFAULT_SUBJECT, SYSTEM_BACKUP_PROBLEM_DEFAULT_BODY);
+						}
+						if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
 							Bean bean = getBean();
-							Communication c = CommunicationUtil
-									.getSystemCommunicationByDescription(SYSTEM_BACKUP_PROBLEM_NOTIFICATION);
-							if (c == null) {
-								c = CommunicationUtil.initialiseSystemCommunication(SYSTEM_BACKUP_PROBLEM_NOTIFICATION,
-										SYSTEM_BACKUP_PROBLEM_DEFAULT_SUBJECT, SYSTEM_BACKUP_PROBLEM_DEFAULT_BODY);
-							}
-							if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
-								c.setSendToOverride(UtilImpl.SUPPORT_EMAIL_ADDRESS);
-								CommunicationUtil.send(c, RunMode.ACTION, ResponseMode.SILENT, null, bean);
-							}
-							else {
-								EXT.push(new PushMessage().user().growl(MessageSeverity.warn,
-										"Support email address not supplied. Cannot notify support email of backup problems."));
-							}
+							c.setSendToOverride(UtilImpl.SUPPORT_EMAIL_ADDRESS);
+							CommunicationUtil.send(c, RunMode.ACTION, ResponseMode.SILENT, null, bean);
 						}
 					}
 				} finally {

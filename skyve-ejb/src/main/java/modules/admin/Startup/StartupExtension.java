@@ -41,7 +41,6 @@ public class StartupExtension extends Startup {
 	static final String ENVIRONMENT_IDENTIFIER_KEY = "identifier";
 	static final String ENVIRONMENT_SHOW_SETUP_KEY = "showSetup";
 	static final String ENVIRONMENT_SUPPORT_EMAIL_ADDRESS_KEY = "supportEmailAddress";
-	static final String ENVIRONMENT_NOTIFY_PROBLEM_BACKUP_EMAIL_KEY = "notifyProblemBackupEmail";
 
 	static final String MAP_STANZA_KEY = "map";
 	static final String MAP_CENTRE_KEY = "centre";
@@ -68,7 +67,6 @@ public class StartupExtension extends Startup {
 
 		setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);
 		setEnvironmentSupportEmail(UtilImpl.SUPPORT_EMAIL_ADDRESS);
-		setNotifyBackupProblemEmail(UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM);
 
 		setMailBogusSend(Boolean.valueOf(UtilImpl.SMTP_TEST_BOGUS_SEND));
 		setMailPassword(UtilImpl.SMTP_PWD);
@@ -239,11 +237,6 @@ public class StartupExtension extends Startup {
 				|| !StringUtils.equals(UtilImpl.SUPPORT_EMAIL_ADDRESS, getEnvironmentSupportEmail())) {
 			environment.put(ENVIRONMENT_SUPPORT_EMAIL_ADDRESS_KEY, getEnvironmentSupportEmail());
 			UtilImpl.SUPPORT_EMAIL_ADDRESS = getEnvironmentSupportEmail();
-		}
-
-		if (UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM != getNotifyBackupProblemEmail().booleanValue()) {
-			environment.put(ENVIRONMENT_NOTIFY_PROBLEM_BACKUP_EMAIL_KEY, getNotifyBackupProblemEmail());
-			UtilImpl.NOTIFY_SUPPORT_EMAIL_BACKUP_PROBLEM = getNotifyBackupProblemEmail().booleanValue();
 		}
 
 		if (Boolean.TRUE.equals(getDontShowAgain())) {
