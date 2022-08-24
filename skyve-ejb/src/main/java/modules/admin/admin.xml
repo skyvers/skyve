@@ -83,7 +83,9 @@
 				The App User role is intended for retail and public users interacting through the "front office". 
 				These users are assumed to operate within their own scope and have only visibility to their own data.
 				
-				App Users can create their own contacts, and change their own passwords.			
+				App Users can create their own contacts, and change their own passwords.
+				
+				App Users can execute reports if given access via another module.			
 			</documentation>
 			<description>admin.adminRoles.appUser.description</description>
 			<privileges>
@@ -94,7 +96,10 @@
 				<document name="DynamicEntity" permission="CRUDD" />
 				<document name="DynamicRelation" permission="CRUDD" />
 				<document name="Generic" permission="CRUDG" />
-				<document name="ReportTemplate" permission="_R__C" />
+				<document name="ReportTemplate" permission="_R__C">
+					<action name="DownloadJasperReport" />
+					<action name="DownloadReport" />
+				</document>
 				<document name="User" permission="_RU_U" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
