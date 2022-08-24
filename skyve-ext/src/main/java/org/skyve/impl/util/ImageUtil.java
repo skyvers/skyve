@@ -209,8 +209,8 @@ public class ImageUtil {
 	}
 	
 	public static byte[] reduceImageSize(MimeType mimeType, byte[] bytes) throws Exception {
-		// Convert max image upload size from MegaBytes to Bytes (/1024^2)
-		Integer maxImageSizeBytes = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB / 1048576;
+		// Convert max image upload size from MegaBytes to Bytes (*1024^2)
+		Integer maxImageSizeBytes = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB * 1048576;
 
 		if (MimeType.jpeg.equals(mimeType) || MimeType.png.equals(mimeType)) {
 			if (bytes.length > maxImageSizeBytes) {
@@ -221,8 +221,10 @@ public class ImageUtil {
 					// change width and height to a fraction of it width and height somehow (keeping aspect ratio)
 					image = Thumbnails.of(image).size(width, height).keepAspectRatio(true).asBufferedImage();
 					try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+						// calculate scale from image size and max image size in bytes
+						double scale = bytes.length / (maxImageSizeBytes + 1);
 						// Create the thumb nail
-						Thumbnails.of(image).scale(1.0).outputFormat(MimeType.jpeg.getStandardFileSuffix()).toOutputStream(baos);
+						Thumbnails.of(image).scale(scale).outputFormat(mimeType.getStandardFileSuffix()).toOutputStream(baos);
 						return baos.toByteArray();
 					}
 				}
