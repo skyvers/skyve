@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <document name="Startup" 
 			xmlns="http://www.skyve.org/xml/document"
-			xmlns:v="http://www.skyve.org/xml/view"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>

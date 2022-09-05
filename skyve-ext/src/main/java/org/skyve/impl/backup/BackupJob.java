@@ -145,93 +145,99 @@ public class BackupJob extends CancellableJob {
 															if ("".equals(value)) {
 																// bizId is mandatory
 																if (name.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
-																	throw new IllegalStateException(table.name + " is missing a "
-																			+ Bean.DOCUMENT_ID + " value.");
+																	throw new IllegalStateException(table.name + " is missing a " + Bean.DOCUMENT_ID + " value.");
 																}
 																// bizLock is mandatory
 																if (name.equalsIgnoreCase(PersistentBean.LOCK_NAME)) {
 																	throw new IllegalStateException(table.name + " with " +
-																			Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID)
-																			+
-																			" is missing a " + PersistentBean.LOCK_NAME
-																			+ " value.");
+																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
+																										" is missing a " + PersistentBean.LOCK_NAME + " value.");
 																}
 																// bizKey is mandatory
 																if (name.equalsIgnoreCase(Bean.BIZ_KEY)) {
 																	throw new IllegalStateException(table.name + " with " +
-																			Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID)
-																			+
+																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																			" is missing a " + Bean.BIZ_KEY + " value.");
 																}
 																// bizCustomer is mandatory
 																if (name.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
 																	throw new IllegalStateException(table.name + " with " +
-																			Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID)
-																			+
+																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																			" is missing a " + Bean.CUSTOMER_NAME + " value.");
 																}
 																// bizUserId is mandatory
 																if (name.equalsIgnoreCase(Bean.USER_ID)) {
 																	throw new IllegalStateException(table.name + " with " +
-																			Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID)
-																			+
+																										Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																			" is missing a " + Bean.USER_ID + " value.");
 																}
 															}
-														} else if (AttributeType.geometry.equals(attributeType)) {
+														}
+														else if (AttributeType.geometry.equals(attributeType)) {
 															@SuppressWarnings("resource")
-															SessionImplementor sessionImpl = (SessionImplementor) ((AbstractHibernatePersistence) p)
-																	.getSession();
-															Geometry geometry = AbstractHibernatePersistence.getDialect()
-																	.getGeometryType().nullSafeGet(resultSet, name, sessionImpl);
+															SessionImplementor sessionImpl = (SessionImplementor) ((AbstractHibernatePersistence) p).getSession();
+															Geometry geometry = AbstractHibernatePersistence.getDialect().getGeometryType().nullSafeGet(resultSet, name, sessionImpl);
 															if (geometry == null) {
 																value = "";
-															} else {
+															}
+															else {
 																value = new WKTWriter().write(geometry);
 															}
-														} else if (AttributeType.bool.equals(attributeType)) {
+														}
+														else if (AttributeType.bool.equals(attributeType)) {
 															boolean booleanValue = resultSet.getBoolean(name);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = Boolean.valueOf(booleanValue);
 															}
-														} else if (AttributeType.date.equals(attributeType)) {
+														}
+														else if (AttributeType.date.equals(attributeType)) {
 															Date date = resultSet.getDate(name, BackupUtil.GMT);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = Long.valueOf(date.getTime());
 															}
-														} else if (AttributeType.time.equals(attributeType)) {
+														}
+														else if (AttributeType.time.equals(attributeType)) {
 															Time time = resultSet.getTime(name, BackupUtil.GMT);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = Long.valueOf(time.getTime());
 															}
-														} else if (AttributeType.dateTime.equals(attributeType) ||
+														}
+														else if (AttributeType.dateTime.equals(attributeType) ||
 																AttributeType.timestamp.equals(attributeType)) {
 															Timestamp timestamp = resultSet.getTimestamp(name, BackupUtil.GMT);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = Long.valueOf(timestamp.getTime());
 															}
-														} else if (AttributeType.decimal2.equals(attributeType) ||
+														}
+														else if (AttributeType.decimal2.equals(attributeType) ||
 																AttributeType.decimal5.equals(attributeType) ||
 																AttributeType.decimal10.equals(attributeType)) {
 															BigDecimal bigDecimal = resultSet.getBigDecimal(name);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = bigDecimal;
 															}
-														} else if (AttributeType.integer.equals(attributeType)) {
+														}
+														else if (AttributeType.integer.equals(attributeType)) {
 															int intValue = resultSet.getInt(name);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = Integer.valueOf(intValue);
 															}
 															// bizVersion is mandatory
@@ -242,69 +248,63 @@ public class BackupJob extends CancellableJob {
 																		" is missing a " + PersistentBean.VERSION_NAME + " value.");
 															}
 
-														} else if (AttributeType.longInteger.equals(attributeType)) {
+														}
+														else if (AttributeType.longInteger.equals(attributeType)) {
 															long longValue = resultSet.getLong(name);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = Long.valueOf(longValue);
 															}
-														} else if (AttributeType.content.equals(attributeType) ||
+														}
+														else if (AttributeType.content.equals(attributeType) ||
 																AttributeType.image.equals(attributeType)) {
 															String stringValue = resultSet.getString(name);
 															if (resultSet.wasNull()) {
 																value = "";
-															} else {
+															}
+															else {
 																value = stringValue;
 																AttachmentContent content = null;
 																try {
 																	content = cm.getAttachment(stringValue);
 																	if (content == null) {
 																		problem = true;
-																		problems.write(String.format(
-																				"Table [%s] with [%s] = %s is missing content for attribute [%s] = %s",
+																		problems.write(String.format("Table [%s] with [%s] = %s is missing content for attribute [%s] = %s",
 																				table.name,
 																				Bean.DOCUMENT_ID,
 																				values.get(Bean.DOCUMENT_ID),
 																				name,
 																				stringValue));
 																		// See if the content file exists
-																		final File contentDirectory = Paths
-																				.get(UtilImpl.CONTENT_DIRECTORY,
-																						ContentManager.FILE_STORE_NAME)
-																				.toFile();
-																		final StringBuilder contentAbsolutePath = new StringBuilder(
-																				contentDirectory.getAbsolutePath())
-																						.append(File.separator);
-																		AbstractContentManager
-																				.appendBalancedFolderPathFromContentId(stringValue,
-																						contentAbsolutePath, false);
-																		final File contentFile = Paths
-																				.get(contentAbsolutePath.toString()).toFile();
+																		final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
+																		final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath()).append(File.separator);
+																		AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, false);
+																		final File contentFile = Paths.get(contentAbsolutePath.toString()).toFile();
 																		if (contentFile.exists()) {
-																			problems.write(
-																					" but the matching file was found for this missing content at ");
+																			problems.write(" but the matching file was found for this missing content at ");
 																			problems.write(contentFile.getAbsolutePath());
 																		}
 																		problems.newLine();
-																	} else {
-																		StringBuilder contentPath = new StringBuilder(256);
-																		contentPath.append(directory.getAbsolutePath()).append('/')
-																				.append(ContentManager.FILE_STORE_NAME).append('/');
-																		AbstractContentManager.writeContentFiles(contentPath,
-																				content, content.getContentBytes());
 																	}
-																} catch (Exception e) {
+																	else {
+																		StringBuilder contentPath = new StringBuilder(256);
+																		contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
+																		AbstractContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
+																	}
+																}
+																catch (Exception e) {
 																	if (e instanceof FileNotFoundException) {
-																		problems.write(String.format(
-																				"Table [%s] with [%s] = %s is missing a file in the content store for attribute [%s] = %s",
+																		problems.write(String.format("Table [%s] with [%s] = %s is missing a file in the content store for attribute [%s] = %s",
 																				table.name,
 																				Bean.DOCUMENT_ID,
 																				values.get(Bean.DOCUMENT_ID),
 																				name,
 																				stringValue));
 																		problems.newLine();
-																	} else {
+																	}
+																	else {
 																		throw e;
 																	}
 																}
@@ -342,13 +342,15 @@ public class BackupJob extends CancellableJob {
 					}
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			problem = true;
 			trace = "A problem backing up was encountered : " + e.getLocalizedMessage();
 			log.add(trace);
 			Util.LOGGER.info(trace);
 			throw e;
-		} finally {
+		}
+		finally {
 			if (directory.exists()) {
 				trace = "Created backup folder " + directory.getAbsolutePath();
 				log.add(trace);
@@ -369,27 +371,34 @@ public class BackupJob extends CancellableJob {
 						log.add(uploadLogMessage);
 						Util.LOGGER.info(uploadLogMessage);
 					}
+					
 					if (problem) {
-						Communication c = CommunicationUtil
-								.getSystemCommunicationByDescription(SYSTEM_BACKUP_PROBLEM_NOTIFICATION);
-						if (c == null) {
-							c = CommunicationUtil.initialiseSystemCommunication(SYSTEM_BACKUP_PROBLEM_NOTIFICATION,
-									SYSTEM_BACKUP_PROBLEM_DEFAULT_SUBJECT, SYSTEM_BACKUP_PROBLEM_DEFAULT_BODY);
-						}
 						if (UtilImpl.SUPPORT_EMAIL_ADDRESS != null) {
+							Communication c = CommunicationUtil.getSystemCommunicationByDescription(SYSTEM_BACKUP_PROBLEM_NOTIFICATION);
+							if (c == null) {
+								c = CommunicationUtil.initialiseSystemCommunication(SYSTEM_BACKUP_PROBLEM_NOTIFICATION,
+																						SYSTEM_BACKUP_PROBLEM_DEFAULT_SUBJECT,
+																						SYSTEM_BACKUP_PROBLEM_DEFAULT_BODY);
+							}
+
 							Bean bean = getBean();
 							c.setSendToOverride(UtilImpl.SUPPORT_EMAIL_ADDRESS);
 							CommunicationUtil.send(c, RunMode.ACTION, ResponseMode.SILENT, null, bean);
 						}
+						else {
+							trace = "Could not send a backup problem email as there is not support email address defined.";
+							log.add(trace);
+							Util.LOGGER.info(trace);
+						}
 					}
-				} finally {
+				}
+				finally {
 					FileUtil.delete(directory);
 					trace = "Deleted backup folder " + directory.getAbsolutePath();
 					log.add(trace);
 					Util.LOGGER.info(trace);
 					setPercentComplete(100);
-					EXT.push(new PushMessage().user().growl(MessageSeverity.info,
-							"Backup Completed" + (problem ? " with problems" : "")));
+					EXT.push(new PushMessage().user().growl(MessageSeverity.info, "Backup Completed" + (problem ? " with problems" : "")));
 				}
 			}
 		}
