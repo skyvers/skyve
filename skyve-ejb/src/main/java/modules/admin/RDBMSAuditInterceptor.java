@@ -110,6 +110,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 				AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) AbstractPersistence.newInstance();
 				try {
 					tempP.setUser(p.getUser());
+					tempP.begin();
 					PersistentBean oldBean = tempP.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 					// oldBean can be null when the bean was inserted and updated within this transaction but not yet committed
 					// ie tempP can't see the bean yet on another DB connection
@@ -121,8 +122,13 @@ public class RDBMSAuditInterceptor extends Interceptor {
 					}
 				}
 				finally {
-					// Can't call tempP.commit(true) here as it would remove the current thread's Persistence as well
-					tempP.close();
+					try {
+						tempP.rollback();
+					}
+					finally {
+						// Can't call tempP.commit(true) here as it would remove the current thread's Persistence as well
+						tempP.close();
+					}
 				}
 			}
 		}
