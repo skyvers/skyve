@@ -506,12 +506,19 @@ t.printStackTrace();
 
 	@Override
 	public final void begin() {
-		EntityTransaction et = em.getTransaction();
-		if (! et.isActive()) {
-			// FROM THE HIBERNATE_REFERENCE DOCS Page 190
-            // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-            // These methods are deprecated, as beginning and ending a transaction has the same effect.
-			et.begin();
+		try {
+			EntityTransaction et = em.getTransaction();
+			if (! et.isActive()) {
+				// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+	            // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+	            // These methods are deprecated, as beginning and ending a transaction has the same effect.
+				et.begin();
+			}
+		}
+		finally {
+			if (dynamicPersistence != null) {
+				dynamicPersistence.begin();
+			}
 		}
 	}
 
@@ -647,7 +654,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void setRollbackOnly() {
+	public final void setRollbackOnly() {
 		if (em != null) {
 			EntityTransaction et = em.getTransaction();
 			if ((et != null) && et.isActive()) {
@@ -660,13 +667,24 @@ t.printStackTrace();
 	// So we have to ensure its robust as all fuck
 	@Override
 	public final void rollback() {
-		if (em != null) {
-			EntityTransaction et = em.getTransaction();
-			if ((et != null) && et.isActive() && (! et.getRollbackOnly())) {
-                // FROM THE HIBERNATE_REFERENCE DOCS Page 190
-                // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-                // These methods are deprecated, as beginning and ending a transaction has the same effect.
-				et.rollback();
+		boolean rollbackOnly = false;
+		try {
+			if (em != null) {
+				EntityTransaction et = em.getTransaction();
+				if ((et != null) && et.isActive()) {
+					rollbackOnly = et.getRollbackOnly();
+					if (! rollbackOnly) {
+						// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+		                // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+		                // These methods are deprecated, as beginning and ending a transaction has the same effect.
+						et.rollback();
+					}
+				}
+			}
+		}
+		finally {
+			if ((! rollbackOnly) && (dynamicPersistence != null)) {
+				dynamicPersistence.rollback();
 			}
 		}
 	}
@@ -701,25 +719,48 @@ t.printStackTrace();
 		}
 		finally {
 			try {
-				closeContent();
-			}
-			catch (Exception e) {
-				UtilImpl.LOGGER.warning("Cannot commit content manager - " + e.getLocalizedMessage());
-				e.printStackTrace();
+				if (dynamicPersistence != null) {
+					if (rollbackOnly) {
+						dynamicPersistence.rollback();
+					}
+					else {
+						dynamicPersistence.commit();
+					}
+				}
 			}
 			finally {
-				if (close) {
-					if (em != null) { // can be null after a relogin
-						em.close();
+				try {
+					closeContent();
+				}
+				catch (Exception e) {
+					UtilImpl.LOGGER.warning("Cannot commit content manager - " + e.getLocalizedMessage());
+					e.printStackTrace();
+				}
+				finally {
+					if (close) {
+						close();
+						threadLocalPersistence.remove();
 					}
-					em = null;
-					session = null;
-					threadLocalPersistence.remove();
 				}
 			}
 		}
 	}
 
+	public void close() {
+		try {
+			if (em != null) { // can be null after a relogin
+				em.close();
+			}
+			em = null;
+			session = null;
+		}
+		finally {
+			if (dynamicPersistence != null) {
+				dynamicPersistence.close();
+			}
+		}
+	}
+	
 	@Override
 	public void evictAllCached() {
 		session.clear();

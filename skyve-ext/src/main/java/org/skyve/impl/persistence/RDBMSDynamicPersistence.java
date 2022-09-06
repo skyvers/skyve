@@ -582,4 +582,24 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	public boolean cached(Bean bean) {
 		return dynamicFirstLevelCache.containsKey(bean.getBizId());
 	}
+
+	@Override
+	public void begin() {
+		// nothing to do as we use the parent persistence's connection
+	}
+
+	@Override
+	public void rollback() {
+		// nothing to do as we use the parent persistence's connection
+	}
+
+	@Override
+	public void commit() {
+		// nothing to do as we use the parent persistence's connection
+	}
+	
+	@Override
+	public void close() {
+		// nothing to do as we use the parent persistence's connection
+	}
 }

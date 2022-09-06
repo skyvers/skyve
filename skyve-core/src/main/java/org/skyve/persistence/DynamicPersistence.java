@@ -1,5 +1,6 @@
 package org.skyve.persistence;
 
+import java.io.Closeable;
 import java.io.Serializable;
 
 import org.skyve.domain.Bean;
@@ -10,7 +11,7 @@ import org.skyve.domain.messages.ReferentialConstraintViolationException;
 /**
  * Implemented for various types of data stores that can support dynamic domain persistence.
  */
-public interface DynamicPersistence extends Serializable {
+public interface DynamicPersistence extends Serializable, Closeable {
 	/**
 	 * Hook used to setup the state of this DynamicPersistence in relation to the Persistence which created it.
 	 */
@@ -51,4 +52,11 @@ public interface DynamicPersistence extends Serializable {
 	public void evictAllCached();
 	public void evictCached(Bean bean);
 	public boolean cached(Bean bean);
+	
+	// Persistence Transaction methods
+	public void begin();
+	public void rollback();
+	public void commit();
+	@Override
+	public void close();
 }

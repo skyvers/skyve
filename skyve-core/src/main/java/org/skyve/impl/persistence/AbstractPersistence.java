@@ -24,25 +24,31 @@ public abstract class AbstractPersistence implements Persistence {
 		return threadLocalPersistence.get();
 	}
 
+	public static AbstractPersistence newInstance() {
+		AbstractPersistence result = null;
+		
+		try {
+			result = IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
+		}
+		catch (Exception e) {
+			throw new IllegalArgumentException(IMPLEMENTATION_CLASS + " was not a good choice.", e);
+		}
+		
+		try {
+			result.dynamicPersistence = DYNAMIC_IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
+			result.dynamicPersistence.postConstruct(result);
+		}
+		catch (Exception e) {
+			throw new IllegalArgumentException(DYNAMIC_IMPLEMENTATION_CLASS + " was not a good choice.", e);
+		}
+
+		return result;
+	}
+	
 	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<>() {
 		@Override
 		protected synchronized AbstractPersistence initialValue() throws IllegalArgumentException {
-			AbstractPersistence persistence = null;
-			try {
-				persistence = IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
-			}
-			catch (Exception e) {
-				throw new IllegalArgumentException(IMPLEMENTATION_CLASS + " was not a good choice.", e);
-			}
-			
-			try {
-				persistence.dynamicPersistence = DYNAMIC_IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
-				persistence.dynamicPersistence.postConstruct(persistence);
-			}
-			catch (Exception e) {
-				throw new IllegalArgumentException(DYNAMIC_IMPLEMENTATION_CLASS + " was not a good choice.", e);
-			}
-
+			AbstractPersistence persistence = newInstance();
 			set(persistence);
 			return persistence;
 		}
