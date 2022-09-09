@@ -94,7 +94,7 @@
 							<spacer />
 						</item>
 						<item colspan="2">
-							<blurb>
+							<blurb escape="false">
 								<![CDATA[<em>{combinationExplanation}</em>]]>
 							</blurb>
 						</item>
