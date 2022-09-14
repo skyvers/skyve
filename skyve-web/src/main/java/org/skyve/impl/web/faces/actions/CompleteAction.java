@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
@@ -87,14 +88,22 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 		List<String> result = Collections.emptyList();
 
 		if (complete == CompleteType.previous) {
+			final String userName = user.getName();
+			final String moduleName = document.getOwningModuleName();
+			final String documentName = document.getName();
+			if (! user.canAccess(UserAccess.previousComplete(moduleName, documentName, binding), facesView.getUxUi().getName())) {
+				UtilImpl.LOGGER.info("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
+				throw new SecurityException("the previous data", userName);
+			}
+			
 	    	if (! user.canReadDocument(document)) {
-				throw new SecurityException("read this data", user.getName());
+				throw new SecurityException("read this data", userName);
 			}
 
 			if (document.isPersistable()) { // persistent document
 				if ((attribute == null) || // implicit attribute or
 						attribute.isPersistent()) { // explicit and persistent attribute
-					DocumentQuery q = persistence.newDocumentQuery(document.getOwningModuleName(), document.getName());
+					DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 					q.addBoundProjection(attributeName, attributeName);
 					q.setDistinct(true);
 					if (query != null) {

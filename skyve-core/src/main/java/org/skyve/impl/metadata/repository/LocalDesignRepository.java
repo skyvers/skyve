@@ -98,7 +98,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 			removeInaccessibleItems(module.getName(), menu, user);
 			internalUser.putModuleMenu(module, menu);
 		}
-		internalUser.determineAccess();
 	}
 
 	private static void removeInaccessibleItems(String moduleName, Menu menu, User user) {

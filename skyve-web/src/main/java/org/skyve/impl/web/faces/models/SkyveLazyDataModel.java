@@ -36,6 +36,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
@@ -87,6 +88,11 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 
 		// model type of request
 		if (modelName != null) {
+			if (! u.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), view.getUxUi().getName())) {
+				final String userName = u.getName();
+				UtilImpl.LOGGER.info("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+				throw new SecurityException("this data", userName);
+			}
 			d = m.getDocument(c, documentName);
 			model = d.getListModel(c, modelName, true);
 			if (model == null) {
@@ -99,10 +105,27 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 				query = m.getMetaDataQuery(queryName);
 				if (query == null) {
 					if (documentName == null) { // query name is the document name
+						if (! u.canAccess(UserAccess.documentAggregate(moduleName, queryName), view.getUxUi().getName())) {
+							final String userName = u.getName();
+							UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + queryName);
+							throw new SecurityException("this data", userName);
+						}
 						query = m.getDocumentDefaultQuery(c, queryName);
 					}
 					else {
+						if (! u.canAccess(UserAccess.documentAggregate(moduleName, documentName), view.getUxUi().getName())) {
+							final String userName = u.getName();
+							UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + documentName);
+							throw new SecurityException("this data", userName);
+						}
 						query = m.getDocumentDefaultQuery(c, documentName);
+					}
+				}
+				else {
+					if (! u.canAccess(UserAccess.queryAggregate(moduleName, queryName), view.getUxUi().getName())) {
+						final String userName = u.getName();
+						UtilImpl.LOGGER.info("User " + userName + " cannot access query " + moduleName + '.' + queryName);
+						throw new SecurityException("this data", userName);
 					}
 				}
 				if (query == null) {
@@ -110,6 +133,11 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 				}
 			}
 			else {
+				if (! u.canAccess(UserAccess.documentAggregate(moduleName, documentName), view.getUxUi().getName())) {
+					final String userName = u.getName();
+					UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + documentName);
+					throw new SecurityException("this data", userName);
+				}
 				query = m.getDocumentDefaultQuery(c, documentName);
 				if (query == null) {
 					throw new MetaDataException(documentName + " is not a valid document for a default query.");
@@ -127,6 +155,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		d = model.getDrivingDocument();
 		
 		if (! u.canReadDocument(d)) {
+			UtilImpl.LOGGER.info("User " + u.getName() + " cannot read document " + d.getOwningModuleName() + '.' + d.getName());
 			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
 		}
 		

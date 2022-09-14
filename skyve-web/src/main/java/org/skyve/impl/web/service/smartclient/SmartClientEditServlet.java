@@ -59,6 +59,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
@@ -254,9 +255,14 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			processBean = formBean;
 		    		}
 			    	
+					if (! user.canAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName())) {
+						final String userName = user.getName();
+						UtilImpl.LOGGER.info("User " + userName + " cannot access document view " + processModule.getName() + '.' + processDocument.getName());
+						throw new SecurityException("this page", userName);
+					}
+
 					if (! user.canAccessDocument(processDocument)) {
-						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(),
-														user.getName());
+						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(), user.getName());
 					}
 	
 					HttpSession session = request.getSession();

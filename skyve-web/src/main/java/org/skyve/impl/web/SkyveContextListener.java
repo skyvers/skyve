@@ -599,6 +599,7 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
+		UtilImpl.ACCESS_CONTROL = getBoolean("environment", "accessControl", environment);
 		UtilImpl.CUSTOMER = getString("environment", "customer", environment, false);
 		UtilImpl.JOB_SCHEDULER = getBoolean("environment", "jobScheduler", environment);
 		UtilImpl.APPS_JAR_DIRECTORY = getString("environment", "appsJarDirectory", environment, false);

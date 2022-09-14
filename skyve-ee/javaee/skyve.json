@@ -287,6 +287,8 @@
 		"identifier": "local",
 		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
 		"devMode": true,
+		// Check Skyve URLs and endpoints against the metadata and what can be navigated to
+		"accessControl": true,
 		// Customer Default
 		"customer": "demo",
 		// Run the jobs scheduled in the data store or not - set false for slave skyve instances

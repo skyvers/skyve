@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -92,9 +93,11 @@ public class UserImpl implements User {
 
 	/**
 	 * A set of navigations in string form that are allowed, per UX/UI.
+	 * ie UserAccess String -> UX/UIs (or null if valid for any UX/UI)
 	 * This is derived from the metadata or defined in the router.
+	 * It is thread safe as many threads can populate as it is populated on the fly in canAccess().
 	 */
-	private Map<String, Set<String>> accesses = new TreeMap<>();
+	private ConcurrentHashMap<String, Set<String>> accesses = new ConcurrentHashMap<>();
 	
 	@Override
 	public String getId() {
@@ -390,11 +393,6 @@ public class UserImpl implements User {
 		return result;
 	}
 
-	public void determineAccess() {
-		accesses.clear();
-		new AccessProcessor(this, moduleMenuMap, accesses).process();
-	}
-	
 	@Override
 	public boolean isInRole(String moduleName, String roleName) {
 		String fullyQualifiedRoleName = new StringBuilder(32).append(moduleName).append('.').append(roleName).toString();
@@ -687,18 +685,66 @@ public class UserImpl implements User {
 	}
 
 	/**
+	 * If ! UtilImpl.ACCESS_CONTROL, allow access.
 	 * If access string key DNE then no access.
-	 * If access string key DNE and yields null, then access for every UX/UI.
+	 * If access string key exists and yields null, then access for every UX/UI.
 	 * Otherwise, check access at UX/UI level.
 	 */
 	@Override
 	public boolean canAccess(UserAccess access, String uxui) {
-		String accessString = access.toString();
-		if (! accesses.containsKey(accessString)) {
-			return false;
+		// If access control is switched off then everything is accessible
+		if (! UtilImpl.ACCESS_CONTROL) {
+			return true;
 		}
-		Set<String> uxuis = accesses.get(accessString);
-		return (uxuis == null) || (uxuis.contains(uxui));
+
+		boolean aclCreated = (! accesses.isEmpty());
+		boolean result = canAccessWithDevMode(access, uxui);
+		// If no access and we're in dev mode and the ACL was established before this call,
+		// clear the ACL and retry just in case there was a UI, menu or router change that is picked up.
+		if (UtilImpl.DEV_MODE && aclCreated && (! result)) { // dev mode and no established ACL and no access
+			accesses.clear(); // clear the ACL
+			result = canAccessWithDevMode(access, uxui); // retry
+		}
+
+		return result;
+	}
+	
+	private boolean canAccessWithDevMode(UserAccess access, String uxui) {
+		// Create the ACL if not already created
+		if (accesses.isEmpty()) {
+			new AccessProcessor(getCustomer(), moduleMenuMap, accesses).process();
+		}
+
+		// Check access exists by key
+		String accessString = access.toString();
+		boolean foundAccess = accesses.containsKey(accessString);
+		// If not found and a singular access, do polymorphic check for acccess
+		// NB UserAccess used is closest to given document access
+		if ((! foundAccess) && access.isSingular()) {
+			// Check if we have access to a base document if one exists
+			UserAccess baseAccess = access.determineSingularBaseDocument();
+			while (baseAccess != null) { // a base document exists
+				// Check access to the base document
+				accessString = baseAccess.toString();
+				foundAccess = accesses.containsKey(accessString);
+				if (foundAccess) {
+					// bug out next iteration
+					baseAccess = null;
+				}
+				else {
+					// Check if the base document has a base document
+					baseAccess = baseAccess.determineSingularBaseDocument();
+				}
+			}
+		}
+		// If we found there is access defined somewhere, check the current UXUI has access
+		if (foundAccess) {
+			Set<String> uxuis = accesses.get(accessString);
+			return (uxuis == AccessProcessor.ALL_UX_UIS) || uxuis.contains(uxui);
+		}
+
+		// No access found
+		return false;
 	}
 	
 	/**

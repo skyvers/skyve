@@ -30,6 +30,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.Util;
 
 public class EditAction<T extends Bean> extends FacesAction<Void> {
@@ -62,18 +63,35 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				bean = (T) webContext.getCurrentBean();
 
 				Bean current = (viewBinding == null) ? bean : (T) BindUtil.get(bean, facesView.getViewBinding());
-				facesView.setBizModuleParameter(current.getBizModule());
-				facesView.setBizDocumentParameter(current.getBizDocument());
+				
+				final String bizModule = current.getBizModule();
+				final String bizDocument = current.getBizDocument();
+
+				if (! user.canAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName())) {
+					final String userName = user.getName();
+					UtilImpl.LOGGER.info("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
+					throw new SecurityException("this page", userName);
+				}
+				
+				facesView.setBizModuleParameter(bizModule);
+				facesView.setBizDocumentParameter(bizDocument);
 			}
 			else {
-				String bizModule = facesView.getBizModuleParameter();
+				final String bizModule = facesView.getBizModuleParameter();
 				if (bizModule == null) {
 					throw new IllegalStateException("bizModule is required");
 				}
-				String bizDocument = facesView.getBizDocumentParameter();
+				final String bizDocument = facesView.getBizDocumentParameter();
 				if (bizDocument == null) {
 					throw new IllegalStateException("bizDocument is required");
 				}
+
+				if (! user.canAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName())) {
+					final String userName = user.getName();
+					UtilImpl.LOGGER.info("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
+					throw new SecurityException("this page", userName);
+				}
+
 				Module module = customer.getModule(bizModule);
 				Document document = module.getDocument(customer, bizDocument);
 				if (! user.canAccessDocument(document)) {

@@ -43,6 +43,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.SortParameterImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -55,7 +56,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -169,12 +172,22 @@ public class SmartClientListServlet extends HttpServlet {
 			        	// >3 - module_query_attribute (picklist), module_document_attribute (default query picklist)
 			        	// '__' - module_document__model
 			        	String[] tokens = dataSource.split("_");
-						module = customer.getModule(tokens[0]);
+						String moduleName = tokens[0];
+			        	module = customer.getModule(moduleName);
 						
 						// model type of request
+						UxUi uxui = UserAgent.getUxUi(request);
 						if (dataSource.contains("__")) {
-							drivingDocument = module.getDocument(customer, tokens[1]);
-							model = drivingDocument.getListModel(customer, tokens[3], true);
+							final String documentName = tokens[1];
+							final String modelName = tokens[3];
+							if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
+								final String userName = user.getName();
+								UtilImpl.LOGGER.info("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+								throw new SecurityException("this data", userName);
+							}
+							
+							drivingDocument = module.getDocument(customer, documentName);
+							model = drivingDocument.getListModel(customer, modelName, true);
 							if (model == null) {
 								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
 							}
@@ -183,11 +196,23 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 						// query type of request
 						else {
-							String documentOrQueryName = tokens[1];
+							final String documentOrQueryName = tokens[1];
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
+								if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName())) {
+									final String userName = user.getName();
+									UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
+									throw new SecurityException("this data", userName);
+								}
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+							}
+							else {
+								if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName())) {
+									final String userName = user.getName();
+									UtilImpl.LOGGER.info("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
+									throw new SecurityException("this data", userName);
+								}
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);

@@ -26,13 +26,16 @@ import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
@@ -91,7 +94,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						throw new ServletException("Mal-formed URL");
 					}
 					attributeName = BindUtil.unsanitiseBinding(attributeName);
-
+					final String binding = attributeName;
+					
 					String webId = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME));
 			        if (webId == null) {
 			        	throw new ConversationEndedException(request.getLocale());
@@ -152,8 +156,17 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					int endRow = (_endRow == null) ? Integer.MAX_VALUE : Integer.parseInt(_endRow);
 
 					if (complete == CompleteType.previous) {
+						final String userName = user.getName();
+						final String moduleName = document.getOwningModuleName();
+						final String documentName = document.getName();
+						final UxUi uxui = UserAgent.getUxUi(request);
+						if (! user.canAccess(UserAccess.previousComplete(moduleName, documentName, binding), uxui.getName())) {
+							UtilImpl.LOGGER.info("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
+							throw new SecurityException("the previous data", userName);
+						}
+
 						if (! user.canReadDocument(document)) {
-							throw new SecurityException("read this data", user.getName());
+							throw new SecurityException("read this data", userName);
 						}
 						
 						long totalRows = 0L;
@@ -162,8 +175,6 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						if (document.isPersistable()) { // persistent document
 							if ((attribute == null) || // implicit attribute or
 									attribute.isPersistent()) { // explicit and persistent attribute
-								String moduleName = document.getOwningModuleName();
-								String documentName = document.getName();
 								DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 								StringBuilder sb = new StringBuilder(128);
 								q.addExpressionProjection(sb.append("count(distinct bean.").append(attributeName).append(')').toString(), "totalRows");
