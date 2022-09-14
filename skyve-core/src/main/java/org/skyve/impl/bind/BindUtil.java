@@ -728,6 +728,7 @@ public final class BindUtil {
 			Attribute attribute = null;
 			try {
 				target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+				document = target.getDocument();
 				attribute = target.getAttribute();
 			}
 			catch (@SuppressWarnings("unused") MetaDataException e) {
@@ -760,7 +761,6 @@ public final class BindUtil {
 							if (lastDotIndex >= 0) {
 								Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
 								if ((owningBean != null) && (target != null)) {
-									internalDocument = (DocumentImpl) target.getDocument();
 									domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
 								}
 							}
