@@ -86,9 +86,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		if (UtilImpl.DEV_MODE) {
 			// Cater for the situation where setRouter has been called
 			Optional<MetaData> o = cache.get(ROUTER_KEY);
-			if ((o != null) && o.isEmpty()) { // not a cache miss
-				result = loadRouter();
-				result = result.convert(ROUTER_NAME, getDelegator());
+			if (o != null) { // not a cache miss
+				if (o.isEmpty()) { // preloaded key but not loaded yet
+					result = loadRouter();
+					result = result.convert(ROUTER_NAME, getDelegator());
+				}
+				else { // loaded through a DynamicRepository
+					result = (Router) o.get();
+				}
 			}
 		}
 		else {

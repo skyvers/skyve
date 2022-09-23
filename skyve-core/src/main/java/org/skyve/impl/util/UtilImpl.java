@@ -157,7 +157,7 @@ public class UtilImpl {
 	public static boolean DEV_MODE = false;
 
 	// If true, determine everything accessible to a user based on the skyve metadata and block access to anything else
-	public static boolean ACCESS_CONTROL = true;
+	public static boolean ACCESS_CONTROL = false; // TODO true;
 	
 	// If it is null, then the login infrastructure will prompt for the customer name.
 	// If it is set, the customer will be set to that value always.

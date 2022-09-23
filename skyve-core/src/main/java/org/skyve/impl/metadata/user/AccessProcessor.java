@@ -59,10 +59,6 @@ class AccessProcessor {
 	private Map<String, Set<String>> accesses;
 	private Router router;
 
-	private Module module;
-	private String moduleName;
-	private Menu menu;
-	
 	AccessProcessor(Customer customer, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
 		this.customer = customer;
 		this.moduleMenuMap = moduleMenuMap;
@@ -77,12 +73,12 @@ class AccessProcessor {
 	void process() {
 		synchronized (Thread.currentThread()) {
 			for (Entry<String, Menu> entry : moduleMenuMap.entrySet()) {
-				moduleName = entry.getKey();
-				module = customer.getModule(moduleName);
-				processModuleHome();
+				final String moduleName = entry.getKey();
+				final Module module = customer.getModule(moduleName);
+				processModuleHome(module, moduleName);
 				
-				menu = entry.getValue();
-				processMenuItems(menu.getItems());
+				final Menu menu = entry.getValue();
+				processMenuItems(menu.getItems(), module, moduleName);
 			}
 			processedUxUiViews.clear();
 		}
@@ -96,7 +92,7 @@ class AccessProcessor {
 
 	private Set<String> processedUxUiViews = new TreeSet<>();
 
-	private void processModuleHome() {
+	private void processModuleHome(final Module module, final String moduleName) {
 		String homeDocumentName = module.getHomeDocumentName();
 		ViewType homeRef = module.getHomeRef();
 		if (homeRef == ViewType.list) {
@@ -116,11 +112,11 @@ class AccessProcessor {
 		}
 	}
 	
-	private void processMenuItems(List<MenuItem> items) {
+	private void processMenuItems(final List<MenuItem> items, final Module module, final String moduleName) {
 		for (MenuItem item : items) {
 			// NB Disregard LinkItem as it is outside of accesses
 			if (item instanceof MenuGroup) {
-				processMenuItems(((MenuGroup) item).getItems());
+				processMenuItems(((MenuGroup) item).getItems(), module, moduleName);
 			}
 			else if (item instanceof EditItem) {
 				EditItem edit = (EditItem) item;
@@ -174,22 +170,22 @@ class AccessProcessor {
 			if (ViewType.edit.toString().equals(createView.getName())) {
 				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + createView.getOverriddenUxUiName();
 				if (! processedUxUiViews.contains(uxuiViewKey)) {
-					processView(document, createView);
 					processedUxUiViews.add(uxuiViewKey);
+					processView(document, createView);
 				}
 			}
 			else {
 				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + ViewType.create.toString() + createView.getOverriddenUxUiName();
 				if (! processedUxUiViews.contains(uxuiViewKey)) {
-					processView(document, createView);
 					processedUxUiViews.add(uxuiViewKey);
+					processView(document, createView);
 				}
 
 				View editView = document.getView(uxuiName, customer, ViewType.edit.toString());
 				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + editView.getOverriddenUxUiName();
 				if (! processedUxUiViews.contains(uxuiViewKey)) {
-					processView(document, editView);
 					processedUxUiViews.add(uxuiViewKey);
+					processView(document, editView);
 				}
 			}
 		}
@@ -198,7 +194,9 @@ class AccessProcessor {
 	private void processView(Document document, View view) {
 		final String overriddenUxUi = view.getOverriddenUxUiName();
 		final String documentName = document.getName();
-
+		final Module module = customer.getModule(document.getOwningModuleName());
+		final String moduleName = module.getName();
+		
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view) {
 			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
@@ -228,13 +226,21 @@ class AccessProcessor {
 				}
 			}
 
+			private String dataGridBinding = null;
+			
 			@Override
 			public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 				if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
-					accessThroughBinding(grid.getBinding());
+					dataGridBinding = grid.getBinding();
+					accessThroughBinding(dataGridBinding);
 				}
 			}
 
+			@Override
+			public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+				dataGridBinding = null;
+			}
+			
 			// NB DataRepeater cannot zoom in
 
 			@Override
@@ -292,6 +298,17 @@ class AccessProcessor {
 			@Override
 			public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				String binding = lookup.getBinding();
+				if (dataGridBinding != null) {
+					if (binding == null) { // binding can be null when placed in a data grid
+						binding = dataGridBinding;
+					}
+					else {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+				}
+				
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 				Reference targetReference = (Reference) target.getAttribute();
 				String targetDocumentName = targetReference.getDocumentName();
@@ -334,7 +351,13 @@ class AccessProcessor {
 			public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
 				CompleteType type = text.getComplete();
 				if (type == CompleteType.previous) {
-					addAccessFromView(UserAccess.previousComplete(moduleName, documentName, text.getBinding()), overriddenUxUi);
+					String binding = text.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					addAccessFromView(UserAccess.previousComplete(moduleName, documentName, binding), overriddenUxUi);
 				}
 			}
 			
