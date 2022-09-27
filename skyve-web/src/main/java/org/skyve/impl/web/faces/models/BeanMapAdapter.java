@@ -93,38 +93,12 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 				String binding = (String) key;
 				Object result = null;
 				
-				int curlyBraceIndex = binding.indexOf('{');
-				if (curlyBraceIndex > -1) {
-					if (curlyBraceIndex == 0) {
-						curlyBraceIndex = binding.indexOf('{', 1);
-						int lastCharIndex = binding.length() - 1;
-						// no more occurrences of '{' after the '{' at char 0, and ends with '}'
-						if ((curlyBraceIndex == -1) && (binding.charAt(lastCharIndex) == '}')) {
-							String string = Binder.getDisplay(CORE.getUser().getCustomer(), bean, binding.substring(1, lastCharIndex));
-							if ((sanitise != null) && (! Sanitisation.none.equals(sanitise))) {
-								string = OWASP.sanitise(sanitise, string);
-							}
-							if (escape) {
-								string = OWASP.escapeHtml(string);
-							}
-							result = string;
-						}
-						else {
-							if (escape) {
-								result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitise, displayValue), bean);
-							}
-							else {
-								result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitise(sanitise, displayValue), bean);
-							}
-						}
+				if (BindUtil.containsSkyveExpressions(binding)) {
+					if (escape) {
+						result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitise, displayValue), bean);
 					}
 					else {
-						if (escape) {
-							result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitiseAndEscapeHtml(sanitise, displayValue), bean);
-						}
-						else {
-							result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitise(sanitise, displayValue), bean);
-						}
+						result = BindUtil.formatMessage(binding, displayValue -> OWASP.sanitise(sanitise, displayValue), bean);
 					}
 				}
 				else {
@@ -132,6 +106,8 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 					
 					if (result instanceof String) {
 						String string = (String) result;
+						// NB Take care of escaped {
+						string = string.replace("\\{", "{");
 						if ((sanitise != null) && (! Sanitisation.none.equals(sanitise))) {
 							string = OWASP.sanitise(sanitise, string);
 						}
