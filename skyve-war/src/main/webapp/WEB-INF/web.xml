@@ -239,9 +239,32 @@
 			<param-value>31536000000</param-value>
 		</init-param>
 	</filter>
+	<!-- Javascript -->
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.js</url-pattern>
+	</filter-mapping>
+	<!-- Fonts -->
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.ttf</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.otf</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.woff</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.woff2</url-pattern>
+	</filter-mapping>
+	<!-- WASM -->
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.wasm</url-pattern>
 	</filter-mapping>
 
 	<!-- Firefox requires public to cache resources to disk when using SSL -->
