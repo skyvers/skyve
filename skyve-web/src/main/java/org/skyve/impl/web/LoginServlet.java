@@ -74,9 +74,11 @@ public class LoginServlet extends HttpServlet {
 				String url = "/pages/login.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String value = customer.getLoginResources().getLoginPageURL();
-					if (value != null) {
-						url = value;
+					if (customer != null) {
+						String value = customer.getLoginResources().getLoginPageURL();
+						if (value != null) {
+							url = value;
+						}
 					}
 				}
 
