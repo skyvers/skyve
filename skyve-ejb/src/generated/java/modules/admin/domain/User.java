@@ -967,7 +967,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean addRolesElement(UserRole element) {
 		boolean result = roles.add(element);
-		element.setParent((UserExtension) this);
+		if (result) {
+			element.setParent((UserExtension) this);
+		}
 		return result;
 	}
 
@@ -987,7 +989,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean removeRolesElement(UserRole element) {
 		boolean result = roles.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1088,7 +1092,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean addCandidateContactsElement(UserCandidateContact element) {
 		boolean result = candidateContacts.add(element);
-		element.setParent((UserExtension) this);
+		if (result) {
+			element.setParent((UserExtension) this);
+		}
 		return result;
 	}
 
@@ -1108,7 +1114,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean removeCandidateContactsElement(UserCandidateContact element) {
 		boolean result = candidateContacts.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 

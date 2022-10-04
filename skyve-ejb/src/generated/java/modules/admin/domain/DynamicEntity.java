@@ -195,7 +195,9 @@ public abstract class DynamicEntity extends AbstractPersistentBean {
 	 **/
 	public boolean addRelationsElement(DynamicRelation element) {
 		boolean result = relations.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -215,7 +217,9 @@ public abstract class DynamicEntity extends AbstractPersistentBean {
 	 **/
 	public boolean removeRelationsElement(DynamicRelation element) {
 		boolean result = relations.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 

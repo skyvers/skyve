@@ -986,7 +986,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addContainerGridElement(ContainerGrid element) {
 		boolean result = containerGrid.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1006,7 +1008,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeContainerGridElement(ContainerGrid element) {
 		boolean result = containerGrid.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1053,7 +1057,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addInlineGridElement(InlineGrid element) {
 		boolean result = inlineGrid.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1073,7 +1079,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeInlineGridElement(InlineGrid element) {
 		boolean result = inlineGrid.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1120,7 +1128,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addOrderedGridElement(OrderedGrid element) {
 		boolean result = orderedGrid.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1140,7 +1150,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeOrderedGridElement(OrderedGrid element) {
 		boolean result = orderedGrid.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1187,7 +1199,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addDataRepeaterElement(DataRepeater element) {
 		boolean result = dataRepeater.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1207,7 +1221,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeDataRepeaterElement(DataRepeater element) {
 		boolean result = dataRepeater.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 

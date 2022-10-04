@@ -680,7 +680,9 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 **/
 	public boolean addImportExportColumnsElement(ImportExportColumn element) {
 		boolean result = importExportColumns.add(element);
-		element.setParent((ImportExportExtension) this);
+		if (result) {
+			element.setParent((ImportExportExtension) this);
+		}
 		return result;
 	}
 
@@ -700,7 +702,9 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 **/
 	public boolean removeImportExportColumnsElement(ImportExportColumn element) {
 		boolean result = importExportColumns.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 

@@ -2252,20 +2252,24 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													((referenceParentDocumentName == null) ? " no parent document (not a child document)" : " a parent document of " + referenceParentDocumentName));
 				}
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
-				methods.append("\t\telement.setParent(");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.setParent(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else if (inverse != null) {
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
-				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else {
@@ -2312,12 +2316,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("Element(").append(referenceClassName).append(" element) {\n");
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
-				methods.append("\t\telement.setParent(null);\n");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.setParent(null);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else if (inverse != null) {
 				methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
-				methods.append("\t\telement.get").append(inverseMethodName).append("().remove(this);\n");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().remove(this);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else {

@@ -503,7 +503,9 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 **/
 	public boolean addQualificationsElement(StaffQualification element) {
 		boolean result = qualifications.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -523,7 +525,9 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 **/
 	public boolean removeQualificationsElement(StaffQualification element) {
 		boolean result = qualifications.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
