@@ -1,6 +1,8 @@
 package org.skyve.impl.web.filter;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.security.Principal;
 import java.util.Enumeration;
 
@@ -34,7 +36,7 @@ public class SkyveFilter implements Filter {
 		}
 		
 		if (UtilImpl.HTTP_TRACE) {
-			UtilImpl.LOGGER.info("************************** REQUEST ***************************");
+			UtilImpl.LOGGER.info("*********************************** REQUEST ************************************");
 			UtilImpl.LOGGER.info("ContextPath=" + httpRequest.getContextPath());
 			UtilImpl.LOGGER.info("LocalAddr=" + request.getLocalAddr());
 			UtilImpl.LOGGER.info("LocalName=" + request.getLocalName());
@@ -57,7 +59,7 @@ public class SkyveFilter implements Filter {
 			UtilImpl.LOGGER.info("ServletPath=" + httpRequest.getServletPath());
 			Principal principal = httpRequest.getUserPrincipal();
 			UtilImpl.LOGGER.info("UserPrincipal=" + ((principal == null) ? "<null>" : principal.getName()));
-			UtilImpl.LOGGER.info("************************* PARAMETERS *************************");
+			UtilImpl.LOGGER.info("********************************** PARAMETERS **********************************");
 			Enumeration<String> parameterNames = request.getParameterNames();
 			while (parameterNames.hasMoreElements()) {
 				String parameterName = parameterNames.nextElement();
@@ -84,13 +86,13 @@ public class SkyveFilter implements Filter {
 					}
 				}
 			}
-			UtilImpl.LOGGER.info("************************** HEADERS ***************************");
+			UtilImpl.LOGGER.info("*********************************** HEADERS ************************************");
 			Enumeration<String> headerNames = httpRequest.getHeaderNames();
 			while (headerNames.hasMoreElements()) {
 				String headerName = headerNames.nextElement();
 				UtilImpl.LOGGER.info(headerName + "=" + httpRequest.getHeader(headerName));
 			}
-			UtilImpl.LOGGER.info("******************** SESSION/CONVERSATION ********************");
+			UtilImpl.LOGGER.info("***************************** SESSION/CONVERSATION *****************************");
 			StateUtil.logStateStats();
 		}
 
@@ -114,9 +116,30 @@ public class SkyveFilter implements Filter {
 			throw new ServletException(e);
 		}
 		finally {
+			// Determine CPU and MEM before
+			OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+			Runtime runtime = Runtime.getRuntime();
+			double loadPre = os.getSystemLoadAverage();
+			long total = runtime.totalMemory();
+			long free = runtime.freeMemory();
+			double memPctPre  = (double) (total - free) / total * 100d;
+			long millis = System.currentTimeMillis();
+			
 			// pass the request/response on
 			chain.doFilter(request, response);
-			if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("**************************************************************");
+
+			// Determine CPU and MEM after
+			double loadPost = os.getSystemLoadAverage();
+			total = runtime.totalMemory();
+			free = runtime.freeMemory();
+			double memPctPost = (double) (total - free) / total * 100d;
+
+			UtilImpl.LOGGER.info("******************************* TIMING/RESOURCES *******************************");
+			UtilImpl.LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
+													Long.valueOf(System.currentTimeMillis() - millis),
+													Double.valueOf(loadPre), Double.valueOf(loadPost), Double.valueOf(loadPost - loadPre),
+													Double.valueOf(memPctPre), Double.valueOf(memPctPost), Double.valueOf(memPctPost - memPctPre)));
+			if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("********************************************************************************");
 		}
 	}
 

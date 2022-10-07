@@ -157,7 +157,7 @@ public class StateUtil {
 		logCacheStats(UtilImpl.CONVERSATION_CACHE.getName(), "Conversation");
 		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Session");
 		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
-		UtilImpl.LOGGER.info("**************************************************************");
+		UtilImpl.LOGGER.info("********************************************************************************");
 	}
 	
 	private static void logCacheStats(String cacheName, String cacheDescription) {
