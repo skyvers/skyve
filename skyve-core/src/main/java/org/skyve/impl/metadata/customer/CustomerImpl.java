@@ -91,6 +91,8 @@ public class CustomerImpl implements Customer {
 	 * Customer name.
 	 */
 	private String name;
+	
+	private long lastModifiedMillis = Long.MAX_VALUE;
 
 	private String languageTag;
 	
@@ -153,6 +155,15 @@ public class CustomerImpl implements Customer {
 		this.name = name;
 	}
 	
+	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
 	@Override
 	public String getLanguageTag() {
 		return languageTag;

@@ -11,13 +11,14 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
 /**
  * 
  */
-public interface View extends NamedMetaData, DecoratedMetaData {
+public interface View extends NamedMetaData, PersistentMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 */

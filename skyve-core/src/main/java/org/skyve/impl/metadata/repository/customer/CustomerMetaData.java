@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.types.DateOnly;
@@ -17,8 +18,8 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
@@ -45,7 +46,7 @@ import org.skyve.util.Util;
 							"observers",
 							"JFreeChartPostProcessorClassName",
 							"primeFacesChartPostProcessorClassName"})
-public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
+public class CustomerMetaData extends NamedMetaData implements ConvertableMetaData<Customer> {
 	private static final long serialVersionUID = 4281621343439667457L;
 
 	private String language;
@@ -62,6 +63,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private List<ObserverMetaDataImpl> observers = new ArrayList<>();
 	private String fullyQualifiedJFreeChartPostProcessorClassName;
 	private String fullyQualifiedPrimeFacesChartPostProcessorClassName;
+	private long lastModifiedMillis = Long.MAX_VALUE;
 
 	public String getLanguage() {
 		return language;
@@ -184,8 +186,19 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	@XmlTransient
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
 	public CustomerImpl convert(String metaDataName, ProvidedRepository repository) {
 		CustomerImpl result = new CustomerImpl(repository);
+		result.setLastModifiedMillis(getLastModifiedMillis());
 		String value = getName();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The customer [name] is required");

@@ -25,6 +25,7 @@ public class ViewImpl extends Container implements View {
 	private static final long serialVersionUID = -2621201277538515637L;
 
 	private String name;
+	private long lastModifiedMillis = Long.MAX_VALUE;
 	private String icon32x32RelativeFileName;
 	private String iconStyleClass;
 	private String helpRelativeFileName;
@@ -79,6 +80,15 @@ public class ViewImpl extends Container implements View {
 		this.name = name;
 	}
 
+	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+	
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+	
 	@Override
 	public String getIcon32x32RelativeFileName() {
 		return icon32x32RelativeFileName;

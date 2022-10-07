@@ -13,15 +13,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.metadata.repository.PersistentMetaData;
+import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
-@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
-public class Router implements PersistentMetaData<Router> {
+@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes"})
+public class Router implements ConvertableMetaData<Router> {
 	private static final long serialVersionUID = 670690452538129424L;
+
+	private long lastModifiedMillis = Long.MAX_VALUE;
+	
+	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	@XmlTransient
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
 
 	private String uxuiSelectorClassName;
 	private TaggingUxUiSelector uxuiSelector;

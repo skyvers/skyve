@@ -13,6 +13,8 @@
 
   <xs:element name="content" type="tns:metaDataQueryContentColumnMetaData"/>
 
+  <xs:element name="documentAggregate" type="tns:documentAggregateUserAccessMetaData"/>
+
   <xs:element name="edit" type="tns:edit"/>
 
   <xs:element name="group" type="tns:groupMetaData"/>
@@ -25,9 +27,17 @@
 
   <xs:element name="map" type="tns:map"/>
 
+  <xs:element name="modelAggregate" type="tns:modelAggregateUserAccessMetaData"/>
+
   <xs:element name="module" type="tns:module"/>
 
+  <xs:element name="previousComplete" type="tns:previousCompleteUserAccessMetaData"/>
+
   <xs:element name="query" type="tns:query"/>
+
+  <xs:element name="queryAggregate" type="tns:queryAggregateUserAccessMetaData"/>
+
+  <xs:element name="singular" type="tns:singularUserAccessMetaData"/>
 
   <xs:element name="sql" type="tns:sql"/>
 
@@ -111,6 +121,19 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="access" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:singular"/>
+                  <xs:element ref="tns:documentAggregate"/>
+                  <xs:element ref="tns:modelAggregate"/>
+                  <xs:element ref="tns:previousComplete"/>
+                  <xs:element ref="tns:queryAggregate"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -143,6 +166,65 @@
       <xs:element name="documentName" type="xs:string" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="attribute" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="singularUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:userAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="userAccessMetaData" abstract="true">
+    <xs:sequence>
+      <xs:element name="uxui" type="tns:userAccessUxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="userAccessUxUiMetadata">
+    <xs:complexContent>
+      <xs:extension base="ns2:namedMetaData">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="documentAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:singularUserAccessMetaData">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="queryAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:userAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="query" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="modelAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:documentAggregateUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="model" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="previousCompleteUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:documentAggregateUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="menuMetaData">

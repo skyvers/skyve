@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -15,14 +17,26 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE,
 			name = "role",
-			propOrder = {"documentation", "description", "privileges"})
+			propOrder = {"documentation", "description", "privileges", "access"})
 public class ModuleRoleMetaData extends NamedMetaData {
 	private static final long serialVersionUID = -7824222183005636350L;
 
+	private String documentation;
 	private String description;
 	private List<DocumentPrivilegeMetaData> privileges = new ArrayList<>();
-	private String documentation;
+	private List<UserAccessMetaData> access = new ArrayList<>();
+
 	
+	public String getDocumentation() {
+		return documentation;
+	}
+
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
+	@XmlJavaTypeAdapter(CDATAAdapter.class)
+	public void setDocumentation(String documentation) {
+		this.documentation = UtilImpl.processStringValue(documentation);
+	}
+
 	public String getDescription() {
 		return description;
 	}
@@ -39,13 +53,13 @@ public class ModuleRoleMetaData extends NamedMetaData {
 		return privileges;
 	}
 
-	public String getDocumentation() {
-		return documentation;
-	}
-
-	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
-		this.documentation = UtilImpl.processStringValue(documentation);
+	@XmlElementWrapper(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "access")
+	@XmlElementRefs({@XmlElementRef(type = SingularUserAccessMetaData.class), 
+						@XmlElementRef(type = DocumentAggregateUserAccessMetaData.class),
+						@XmlElementRef(type = QueryAggregateUserAccessMetaData.class),
+						@XmlElementRef(type = ModelAggregateUserAccessMetaData.class),
+						@XmlElementRef(type = PreviousCompleteUserAccessMetaData.class)})
+	public List<UserAccessMetaData> getAccess() {
+		return access;
 	}
 }

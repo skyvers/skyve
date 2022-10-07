@@ -153,13 +153,16 @@ public class XMLMetaData {
 	public static Router unmarshalRouterFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
-		try (FileInputStream fis = new FileInputStream(file)) {
+		File f = new File(file);
+		try (FileInputStream fis = new FileInputStream(f)) {
 			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
 				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						Unmarshaller unmarshaller = ROUTER_CONTEXT.createUnmarshaller();
 						unmarshaller.setSchema(ROUTER_SCHEMA);
-						return (Router) unmarshaller.unmarshal(br);
+						Router result = (Router) unmarshaller.unmarshal(br);
+						result.setLastModifiedMillis(f.lastModified());
+						return result;
 					}
 				}
 			}
@@ -243,13 +246,16 @@ public class XMLMetaData {
 	public static CustomerMetaData unmarshalCustomerFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
-		try (FileInputStream fis = new FileInputStream(file)) {
+		File f = new File(file);
+		try (FileInputStream fis = new FileInputStream(f)) {
 			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
 				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						Unmarshaller unmarshaller = CUSTOMER_CONTEXT.createUnmarshaller();
 						unmarshaller.setSchema(CUSTOMER_SCHEMA);
-						return (CustomerMetaData) unmarshaller.unmarshal(br);
+						CustomerMetaData result = (CustomerMetaData) unmarshaller.unmarshal(br);
+						result.setLastModifiedMillis(f.lastModified());
+						return result;
 					}
 				}
 			}
@@ -340,13 +346,16 @@ public class XMLMetaData {
 	public static ModuleMetaData unmarshalModuleFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
-		try (FileInputStream fis = new FileInputStream(file)) {
+		File f = new File(file);
+		try (FileInputStream fis = new FileInputStream(f)) {
 			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
 				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						Unmarshaller unmarshaller = MODULE_CONTEXT.createUnmarshaller();
 						unmarshaller.setSchema(MODULE_SCHEMA);
-						return (ModuleMetaData) unmarshaller.unmarshal(br);
+						ModuleMetaData result = (ModuleMetaData) unmarshaller.unmarshal(br);
+						result.setLastModifiedMillis(f.lastModified());
+						return result;
 					}
 				}
 			}
@@ -436,13 +445,16 @@ public class XMLMetaData {
 	public static DocumentMetaData unmarshalDocumentFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
-		try (FileInputStream fis = new FileInputStream(file)) {
+		File f = new File(file);
+		try (FileInputStream fis = new FileInputStream(f)) {
 			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
 				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						Unmarshaller unmarshaller = DOCUMENT_CONTEXT.createUnmarshaller();
 						unmarshaller.setSchema(DOCUMENT_SCHEMA);
-						return (DocumentMetaData) unmarshaller.unmarshal(br);
+						DocumentMetaData result = (DocumentMetaData) unmarshaller.unmarshal(br);
+						result.setLastModifiedMillis(f.lastModified());
+						return result;
 					}
 				}
 			}
@@ -538,13 +550,16 @@ public class XMLMetaData {
 	public static ViewMetaData unmarshalViewFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
-		try (FileInputStream fis = new FileInputStream(file)) {
+		File f = new File(file);
+		try (FileInputStream fis = new FileInputStream(f)) {
 			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
 				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						Unmarshaller unmarshaller = VIEW_CONTEXT.createUnmarshaller();
 						unmarshaller.setSchema(VIEW_SCHEMA);
-						return (ViewMetaData) unmarshaller.unmarshal(br);
+						ViewMetaData result = (ViewMetaData) unmarshaller.unmarshal(br);
+						result.setLastModifiedMillis(f.lastModified());
+						return result;
 					}
 				}
 			}

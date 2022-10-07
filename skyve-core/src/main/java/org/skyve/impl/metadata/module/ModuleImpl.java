@@ -43,6 +43,8 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private String name;
 
+	private long lastModifiedMillis = Long.MAX_VALUE;
+	
 	private String title;
 	
 	private boolean prototype;
@@ -91,6 +93,15 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
 	}
 
 	@Override

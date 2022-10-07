@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -27,8 +28,8 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
+import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -57,7 +58,7 @@ import org.skyve.metadata.view.View.ViewType;
 							"roles",
 							"menu",
 							"queries"})
-public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<org.skyve.metadata.module.Module> {
+public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData<Module> {
 	private static final long serialVersionUID = -6257431975403255783L;
 
 	private String title;
@@ -70,6 +71,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private List<ModuleRoleMetaData> roles = new ArrayList<>();
 	private MenuMetaData menu;
 	private String documentation;
+	private long lastModifiedMillis = Long.MAX_VALUE;
 
 	public String getTitle() {
 		return title;
@@ -153,8 +155,19 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	@XmlTransient
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
 	public Module convert(String metaDataName, ProvidedRepository repository) {
 		ModuleImpl result = new ModuleImpl(repository);
+		result.setLastModifiedMillis(getLastModifiedMillis());
 
 		String value = getName();
 		if (value == null) {

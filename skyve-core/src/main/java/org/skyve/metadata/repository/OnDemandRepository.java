@@ -17,4 +17,10 @@ public interface OnDemandRepository {
 	@Nonnull ModuleMetaData loadModule(@Nullable String customerName, @Nonnull String moduleName);
 	@Nonnull DocumentMetaData loadDocument(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
 	@Nonnull ViewMetaData loadView(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String uxui, @Nonnull String viewName); 
+
+	long routerLastModifiedMillis();
+	long customerLastModifiedMillis(@Nonnull String customerName);
+	long moduleLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName);
+	long documentLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName);
+	long viewLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String uxui, @Nonnull String viewName);
 }

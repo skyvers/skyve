@@ -75,6 +75,8 @@ import org.skyve.util.ExpressionEvaluator;
 public final class DocumentImpl extends ModelImpl implements Document {
 	private static final long serialVersionUID = 9091172268741052691L;
 
+	private long lastModifiedMillis = Long.MAX_VALUE;
+	
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 
 	private Flow flow;
@@ -132,6 +134,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	// NB This class should never be serialized.
 	public DocumentImpl() {
 		repository = ProvidedRepositoryFactory.get();
+	}
+
+	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
 	}
 
 	@Override

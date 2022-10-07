@@ -27,11 +27,23 @@ public class DynamicRepository extends AbstractDynamicOnDemandRepository {
 	}
 
 	@Override
+	public long routerLastModifiedMillis() {
+		// never reload as metadata will be added programmatically
+		return Long.MIN_VALUE;
+	}
+	
+	@Override
 	public CustomerMetaData loadCustomer(String customerName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
 
+	@Override
+	public long customerLastModifiedMillis(String customerName) {
+		// never reload as metadata will be added programmatically
+		return Long.MIN_VALUE;
+	}
+	
 	@Override
 	public ModuleMetaData loadModule(String customerName, String moduleName) {
 		// nothing to do as metadata will be added programmatically
@@ -39,17 +51,35 @@ public class DynamicRepository extends AbstractDynamicOnDemandRepository {
 	}
 
 	@Override
+	public long moduleLastModifiedMillis(String customerName, String moduleName) {
+		// never reload as metadata will be added programmatically
+		return Long.MIN_VALUE;
+	}
+	
+	@Override
 	public DocumentMetaData loadDocument(String customerName, String moduleName, String documentName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
 
 	@Override
+	public long documentLastModifiedMillis(String customerName, String moduleName, String documentName) {
+		// never reload as metadata will be added programmatically
+		return Long.MIN_VALUE;
+	}
+	
+	@Override
 	public ViewMetaData loadView(String customerName, String moduleName, String documentName, String uxui, String viewName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
 
+	@Override
+	public long viewLastModifiedMillis(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+		// never reload as metadata will be added programmatically
+		return Long.MIN_VALUE;
+	}
+	
 	@Override
 	public List<String> getAllCustomerNames() {
 		// TODO should I find the customer cache keys?

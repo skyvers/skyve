@@ -17,6 +17,10 @@ public class RouterMerger {
 	public Router mergeRouters(List<Router> routersToMerge) {
 		final Router mergedRouter = routersToMerge.get(0);
 		for (Router routerToMerge : routersToMerge.subList(1, routersToMerge.size())) {
+			// Set the last modified to the latest timestamp of any router to be merged
+			mergedRouter.setLastModifiedMillis(Math.max(mergedRouter.getLastModifiedMillis(), routerToMerge.getLastModifiedMillis()));
+
+			// Merge UX/UIs
 			final List<UxUiMetadata> uxuiMetadata = routerToMerge.getUxUis();
 			final List<UxUiMetadata> newUxUis = new ArrayList<>();
 			for (UxUiMetadata uxuiMetadatum : uxuiMetadata) {
@@ -42,6 +46,7 @@ public class RouterMerger {
 			}
 			mergedRouter.getUxUis().addAll(newUxUis);
 
+			// Add any extra unsecured URL prefixes
 			mergedRouter.getUnsecuredUrlPrefixes().addAll(routerToMerge.getUnsecuredUrlPrefixes());
 		}
 		

@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -22,7 +23,7 @@ import org.skyve.util.Util;
 /**
  * 
  */
-public interface Module extends NamedMetaData {
+public interface Module extends NamedMetaData, PersistentMetaData {
 	/**
 	 * 
 	 */

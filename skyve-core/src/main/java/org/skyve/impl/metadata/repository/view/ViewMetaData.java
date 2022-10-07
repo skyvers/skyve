@@ -9,12 +9,13 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.repository.PersistentMetaData;
+import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
@@ -43,7 +44,7 @@ import org.skyve.metadata.view.View.ViewParameter;
 							"refreshActionName",
 							"parameters",
 							"properties"})
-public class ViewMetaData extends Container implements NamedMetaData, PersistentMetaData<ViewImpl>, DecoratedMetaData {
+public class ViewMetaData extends Container implements NamedMetaData, ConvertableMetaData<ViewImpl>, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
 
 	private String name;
@@ -58,6 +59,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 	private String refreshActionName;
 	private List<ViewParameter> parameters = new ArrayList<>();
 	private String documentation;
+	private long lastModifiedMillis = Long.MAX_VALUE;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -177,8 +179,20 @@ public class ViewMetaData extends Container implements NamedMetaData, Persistent
 	}
 
 	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	@XmlTransient
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
 	public ViewImpl convert(String metaDataName, ProvidedRepository repository) {
 		ViewImpl result = new ViewImpl();
+		result.setLastModifiedMillis(getLastModifiedMillis());
+		
 		String value = getTitle();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The view [title] is required for view " + metaDataName);

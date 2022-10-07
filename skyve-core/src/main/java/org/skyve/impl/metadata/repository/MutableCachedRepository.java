@@ -83,31 +83,29 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	public Router getRouter() {
 		Router result = null;
 		
-		if (UtilImpl.DEV_MODE) {
-			// Cater for the situation where setRouter has been called
-			Optional<MetaData> o = cache.get(ROUTER_KEY);
-			if (o != null) { // not a cache miss
-				if (o.isEmpty()) { // preloaded key but not loaded yet
-					result = loadRouter();
-					result = result.convert(ROUTER_NAME, getDelegator());
-				}
-				else { // loaded through a DynamicRepository
-					result = (Router) o.get();
-				}
+		Optional<MetaData> o = cache.computeIfPresent(ROUTER_KEY, (k, v) -> {
+			// Load if empty
+			if (v.isEmpty()) {
+				Router router = loadRouter();
+				router = router.convert(ROUTER_NAME, getDelegator());
+				return Optional.of(router);
 			}
-		}
-		else {
-			Optional<MetaData> o = cache.computeIfPresent(ROUTER_KEY, (k, v) -> {
-				if (v.isEmpty()) {
+
+			// Load if dev mode and new repository version
+			if (UtilImpl.DEV_MODE) {
+				Router r = (Router) v.get();
+				if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
 					Router router = loadRouter();
 					router = router.convert(ROUTER_NAME, getDelegator());
 					return Optional.of(router);
 				}
-				return v;
-			});
-			if ((o != null) && o.isPresent()) {
-				result = (Router) o.get();
 			}
+			
+			// Return the cached value
+			return v;
+		});
+		if ((o != null) && o.isPresent()) {
+			result = (Router) o.get();
 		}
 		
 		return result;
@@ -125,11 +123,24 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	public Customer getCustomer(String customerName) {
 		String customerKey = CUSTOMERS_NAMESPACE + customerName;
 		Optional<MetaData> o = cache.computeIfPresent(customerKey, (k, v) -> {
+			// Load if empty
 			if (v.isEmpty()) {
 				CustomerMetaData customerMetaData = loadCustomer(customerName);
 				Customer customer = customerMetaData.convert(customerName, getDelegator());
 				return Optional.of(customer);
 			}
+			
+			// Load if dev mode and new repository version
+			if (UtilImpl.DEV_MODE) {
+				Customer c = (Customer) v.get();
+				if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
+					CustomerMetaData customerMetaData = loadCustomer(customerName);
+					Customer customer = customerMetaData.convert(customerName, getDelegator());
+					return Optional.of(customer);
+				}
+			}
+			
+			// Return the cached value
 			return v;
 		});
 		return ((o == null) || o.isEmpty()) ? null : (Customer) o.get();
@@ -169,11 +180,24 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		moduleKey.append(MODULES_NAMESPACE).append(moduleName);
 		
 		Optional<MetaData> result = cache.computeIfPresent(moduleKey.toString(), (k, v) -> {
+			// Load if empty
 			if (v.isEmpty()) {
 				ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
 				Module module = this.convertModule(customerName, moduleName, moduleMetaData);
 				return Optional.of(module);
 			}
+
+			// Load if dev mode and new repository version
+			if (UtilImpl.DEV_MODE) {
+				Module m = (Module) v.get();
+				if (m.getLastModifiedMillis() < moduleLastModifiedMillis(customerName, moduleName)) {
+					ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
+					Module module = this.convertModule(customerName, moduleName, moduleMetaData);
+					return Optional.of(module);
+				}
+			}
+			
+			// Return the cached value
 			return v;
 		});
 		if ((result != null) && result.isPresent()) {
@@ -245,14 +269,26 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		documentKey.append(MODULES_NAMESPACE).append(documentModuleName).append('/').append(documentName);
 		
 		Optional<MetaData> result = cache.computeIfPresent(documentKey.toString(), (k, v) -> {
+			// Load if empty
 			if (v.isEmpty()) {
-				DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null,
-																	documentModuleName,
-																	documentName);
+				DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
 				Module documentModule = getModule(customer, documentModuleName);
 				Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
 				return Optional.of(document);
 			}
+
+			// Load if dev mode and new repository version
+			if (UtilImpl.DEV_MODE) {
+				Document d = (Document) v.get();
+				if (d.getLastModifiedMillis() < documentLastModifiedMillis(customerOverride ? customerName : null, documentModuleName, documentName)) {
+					DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
+					Module documentModule = getModule(customer, documentModuleName);
+					Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
+					return Optional.of(document);
+				}
+			}
+			
+			// Return the cached value
 			return v;
 		});
 		if ((result != null) && result.isPresent()) {
@@ -409,26 +445,23 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		viewKey.append(viewName);
 		
 		ViewImpl result = null;
-		if (UtilImpl.DEV_MODE) {
-			// Cater for the situation where setView has been called
-			Optional<MetaData> o = cache.get(viewKey.toString());
-			if (o != null) { // not a cache miss
-				if (o.isEmpty()) { // preloaded key but not loaded yet
-					// Load the view using the searchUxUi
-					ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
-					if (viewMetaData != null) {
-						// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-						result = convertView(searchCustomerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
-					}
+		Optional<MetaData> o = cache.computeIfPresent(viewKey.toString(), (k, v) -> {
+			// Load if empty
+			if (v.isEmpty()) {
+				// Load the view using the searchUxUi
+				ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
+				View view = null;
+				if (viewMetaData != null) {
+					// Convert the view ensuring view components within vanilla views are resolved with the current uxui
+					view = convertView(searchCustomerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
 				}
-				else { // loaded through a DynamicRepository
-					result = (ViewImpl) o.get();
-				}
+				return Optional.ofNullable(view);
 			}
-		}
-		else {
-			Optional<MetaData> o = cache.computeIfPresent(viewKey.toString(), (k, v) -> {
-				if (v.isEmpty()) {
+
+			// Load if dev mode and new repository version
+			if (UtilImpl.DEV_MODE) {
+				ViewImpl c = (ViewImpl) v.get();
+				if (c.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName)) {
 					// Load the view using the searchUxUi
 					ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
 					View view = null;
@@ -438,11 +471,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 					}
 					return Optional.ofNullable(view);
 				}
-				return v;
-			});
-			if ((o != null) && o.isPresent()) {
-				result = (ViewImpl) o.get();
 			}
+			
+			// Return the cached value
+			return v;
+		});
+		if ((o != null) && o.isPresent()) {
+			result = (ViewImpl) o.get();
 		}
 		
 		return result;
