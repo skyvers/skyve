@@ -133,6 +133,13 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			bean.setGenerateExisting(null);
 			bean.setGenerateModuleName(null);
 			bean.setGenerateDocumentName(null);
+		} else if (ReportTemplate.scheduledPropertyName.equals(source)) {
+			// check if this report can be scheduled
+			if (Boolean.TRUE.equals(bean.getScheduled())) {
+				if (bean.hasRequiredParameters()) {
+					throw new ValidationException(new Message("This report has required parameters and cannot be scheduled"));
+				}
+			}
 		}
 
 		super.preRerender(source, bean, webContext);

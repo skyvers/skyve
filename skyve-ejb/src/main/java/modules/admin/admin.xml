@@ -143,6 +143,7 @@
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="_R__U" />
 				<document name="ReportTemplate" permission="_RU_C">
+					<action name="AddUserToEmail" />
 					<action name="DownloadJasperReport" />
 					<action name="DownloadReport" />
 				</document>

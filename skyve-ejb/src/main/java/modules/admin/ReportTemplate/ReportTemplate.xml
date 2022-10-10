@@ -464,6 +464,16 @@
 		</condition>
 		
 		<!-- scheduling conditions -->
+		<condition name="canSchedule" usage="view">
+			<description>Shows the Scheduling tab if the user has permissions to save changes to reports.</description>
+			<expression>
+				<![CDATA[
+					isUserInOwningModuleRole("BasicUser") 
+						|| isUserInOwningModuleRole("DevOps")
+						|| isUserInOwningModuleRole("SecurityAdministrator")
+				]]>
+			 </expression>
+		</condition>
 		<condition name="schedulingEnabled" usage="view">
 			<description>True when scheduling is enabled, shows the scheduling fields in the UI.</description>
 			<expression>Boolean.TRUE.equals(getScheduled())</expression>
