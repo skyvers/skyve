@@ -48,7 +48,7 @@
 				<boundColumn binding="reportInputValue"/>
 			</dataGrid>
 		</tab>
-		<tab title="Schedule Details">
+		<tab title="Schedule Details" visible="canSchedule">
 			<form>
 				<column responsiveWidth="2"/>
 				<column/>

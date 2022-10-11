@@ -3425,6 +3425,27 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	}
 
 	/**
+	 * Shows the Scheduling tab if the user has permissions to save changes to reports.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCanSchedule() {
+		return (isUserInOwningModuleRole("BasicUser") 
+						|| isUserInOwningModuleRole("DevOps")
+						|| isUserInOwningModuleRole("SecurityAdministrator"));
+	}
+
+	/**
+	 * {@link #isCanSchedule} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCanSchedule() {
+		return (! isCanSchedule());
+	}
+
+	/**
 	 * True when this ReportTemplate has been created, used to determine when to show create vs edit view.
 	 *
 	 * @return The condition
