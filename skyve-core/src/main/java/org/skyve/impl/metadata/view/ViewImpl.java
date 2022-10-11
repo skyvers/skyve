@@ -5,8 +5,13 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
+import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -15,11 +20,27 @@ import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
+import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
+import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.util.Binder.TargetMetaData;
 
 public class ViewImpl extends Container implements View {
 	private static final long serialVersionUID = -2621201277538515637L;
@@ -43,6 +64,9 @@ public class ViewImpl extends Container implements View {
 	private String overriddenCustomerName;
 	private String overriddenUxUiName;
 	private Map<String, String> properties = new TreeMap<>();
+	
+	// components clone its target view by Serialization - accesses are not required
+	private transient Set<UserAccess> accesses;
 	
 	@Override
 	public String getRefreshConditionName() {
@@ -210,15 +234,28 @@ public class ViewImpl extends Container implements View {
 	/**
 	 * Ensure that any component loaded matches the given UX/UI.
 	 * Ensure that inlined metadata model definitions are added to the implicit models map.
+	 * If accesses is not defined {through metadata convert()} then determine them.
 	 */
 	public void resolve(String uxui, Customer customer, Document document) {
-		Module module = customer.getModule(document.getOwningModuleName());
+		boolean determineAccesses = (accesses == null);
+		if (determineAccesses) {
+			accesses = new TreeSet<>();
+		}
+		
+		final String moduleName = document.getOwningModuleName();
+		final Module module = customer.getModule(moduleName);
+		final String documentName = document.getName();
+		
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
 			// Overrides visitComponent standard behaviour to load the component
-			// Note that the component children are not traversed here.
 			@Override
 			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
 				component.setContained(uxui, customer, module, document, name);
+				
+				if (determineAccesses) {
+					// Now visit the component guts
+					super.visitComponent(component, parentVisible, parentEnabled);
+				}
 			}
 			
 			@Override
@@ -228,7 +265,221 @@ public class ViewImpl extends Container implements View {
 					inlineModels.add(model);
 					model.setModelIndex(inlineModels.size() - 1);
 				}
+
+				if (! determineAccesses) {
+					return;
+				}
+
+				ChartBuilderMetaData metaDataModel = chart.getModel();
+				if (metaDataModel != null) {
+					String modelModuleName = metaDataModel.getModuleName();
+					String modelQueryName = metaDataModel.getQueryName();
+					if (modelQueryName != null) {
+						accesses.add(UserAccess.queryAggregate(modelModuleName, modelQueryName));
+					}
+					else {
+						Module modelModule = customer.getModule(modelModuleName);
+						String moduleDocumentName = metaDataModel.getDocumentName();
+						DocumentRef ref = modelModule.getDocumentRefs().get(documentName);
+						modelQueryName = ref.getDefaultQueryName();
+						if (modelQueryName != null) {
+							accesses.add(UserAccess.queryAggregate(modelModuleName, modelQueryName));
+						}
+						else {
+							accesses.add(UserAccess.documentAggregate(modelModuleName, moduleDocumentName));
+						}
+					}
+				}
+				else {
+					String modelName = chart.getModelName();
+					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
+				}
+			}
+
+			private String dataGridBinding = null;
+			
+			@Override
+			public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+				if (! determineAccesses) {
+					return;
+				}
+
+				if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
+					dataGridBinding = grid.getBinding();
+					accessThroughBinding(dataGridBinding);
+				}
+			}
+
+			@Override
+			public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+				dataGridBinding = null;
+			}
+			
+			// NB DataRepeater cannot zoom in
+
+			@Override
+			public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+				if (! determineAccesses) {
+					return;
+				}
+
+				String modelName = grid.getModelName();
+				String queryName = grid.getQueryName();
+				if (modelName != null) {
+					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
+				}
+				else {
+					accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+				}
+
+				if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
+					Document drivingDocument = null;
+					String drivingModuleName = null;
+					String drivingDocumentName = null;
+					
+					if (modelName != null) {
+						ListModel<Bean> model = document.getListModel(customer, modelName, true);
+						drivingDocument = model.getDrivingDocument();
+						drivingModuleName = drivingDocument.getOwningModuleName();
+						drivingDocumentName = drivingDocument.getName();
+					}
+					else {
+						MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+						drivingDocumentName = query.getDocumentName();
+						Module drivingModule = query.getDocumentModule(customer);
+						drivingModuleName = drivingModule.getName();
+						drivingDocument = drivingModule.getDocument(customer, drivingDocumentName);
+					}
+
+					accesses.add(UserAccess.singular(drivingModuleName, drivingDocumentName));
+				}
+			}
+			
+			@Override
+			public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+				if (! determineAccesses) {
+					return;
+				}
+				
+				String modelName = repeater.getModelName();
+				if (modelName != null) {
+					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
+				}
+				else {
+					String queryName = repeater.getQueryName();
+					accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+				}
+				// NB ListRepeater cannot zoom in
+			}
+			
+			@Override
+			public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+				if (! determineAccesses) {
+					return;
+				}
+				
+				String binding = lookup.getBinding();
+				if (dataGridBinding != null) {
+					if (binding == null) { // binding can be null when placed in a data grid
+						binding = dataGridBinding;
+					}
+					else {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+				}
+				
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+				Reference targetReference = (Reference) target.getAttribute();
+				String targetDocumentName = targetReference.getDocumentName();
+
+				// Check lookup query
+				String queryName = lookup.getQuery();
+				// Maybe the reference has a query
+				if (queryName == null) {
+					queryName = targetReference.getQueryName();
+				}
+				// Look for the default query
+				if (queryName == null) {
+					queryName = module.getDocumentDefaultQuery(customer, targetDocumentName).getName();
+				}
+				// Otherwise use the document name
+				queryName = targetDocumentName;
+				accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+
+				if (! Boolean.FALSE.equals(lookup.getEditable())) {
+					Document targetDocument = module.getDocument(customer, targetDocumentName);
+					String targetModuleName = targetDocument.getOwningModuleName();
+					accesses.add(UserAccess.singular(targetModuleName, targetDocumentName));
+				}
+			}
+			
+			@Override
+			public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+				if (! determineAccesses) {
+					return;
+				}
+				
+				String modelName = map.getModelName();
+				accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
+
+				// NB Can't work out what the map can navigate to - needs to be added to the router manually.
+			}
+			
+			@Override
+			public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+				if (! determineAccesses) {
+					return;
+				}
+
+				CompleteType type = text.getComplete();
+				if (type == CompleteType.previous) {
+					String binding = text.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.previousComplete(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
+			public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+				visitListGrid(grid, parentVisible, parentEnabled);
+			}
+			
+			@Override
+			public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+				if (! determineAccesses) {
+					return;
+				}
+
+				accessThroughBinding(zoomIn.getBinding());
+			}
+
+			private void accessThroughBinding(String binding) {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+
+				Document relatedDocument = null;
+				if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+					relatedDocument = target.getDocument().getParentDocument(customer);
+				}
+				else {
+					Relation targetRelation = (Relation) target.getAttribute();
+					String relatedDocumentName = targetRelation.getDocumentName();
+					relatedDocument = module.getDocument(customer, relatedDocumentName);
+				}
+				@SuppressWarnings("null")
+				String relatedModuleName = relatedDocument.getOwningModuleName();
+				accesses.add(UserAccess.singular(relatedModuleName, relatedDocument.getName()));
 			}
 		}.visit();
+	}
+
+	@Override
+	public Set<UserAccess> getAccesses() {
+		return accesses;
 	}
 }

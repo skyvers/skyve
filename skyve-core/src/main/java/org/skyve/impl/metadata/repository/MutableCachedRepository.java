@@ -405,7 +405,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		// scaffold
 		if ((result == null) && getUseScaffoldedViews()) {
 			if (UtilImpl.DEV_MODE) {
-				result = scaffoldView(customer, document, name);
+				result = scaffoldView(customer, document, name, uxui);
 			}
 			else {
 				StringBuilder key = new StringBuilder(128);
@@ -414,7 +414,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				key.append(MODULES_NAMESPACE).append(documentModuleName).append('/');
 				key.append(documentName).append('/').append(VIEWS_NAMESPACE).append(name);
 				Optional<MetaData> o = cache.computeIfAbsent(key.toString(), k -> {
-					View view = scaffoldView(customer, document, name);
+					View view = scaffoldView(customer, document, name, uxui);
 					return (view == null) ? null : Optional.of(view);
 				});
 				if ((o != null) && o.isPresent()) {
@@ -509,11 +509,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return result;
 	}
 	
-	private View scaffoldView(Customer customer, Document document, String viewName) {
+	private View scaffoldView(Customer customer, Document document, String viewName, String uxui) {
 		if (ViewType.edit.toString().equals(viewName) || 
 				ViewType.pick.toString().equals(viewName) || 
 				ViewType.params.toString().equals(viewName)) {
-			return new ViewGenerator(this).generate(customer, document, viewName);
+			ViewImpl result = new ViewGenerator(this).generate(customer, document, viewName);
+			result.resolve(uxui, customer, document);
+			return result;
 		}
 		return null;
 	}

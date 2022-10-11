@@ -2,6 +2,7 @@ package org.skyve.metadata.view;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
@@ -13,6 +14,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.SerializableMetaData;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.Util;
 
 /**
@@ -168,4 +170,10 @@ public interface View extends NamedMetaData, PersistentMetaData, DecoratedMetaDa
 	 * @return The overridden ux/ui name or null. 
 	 */
 	public String getOverriddenUxUiName();
+	
+	/**
+	 * Get the UserAccesses required for this view to operate.
+	 * These can be defined in the view definition or determine by Skyve if no definitions are specified.
+	 */
+	public Set<UserAccess> getAccesses();
 }
