@@ -4,18 +4,11 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.UUID;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 
@@ -26,7 +19,6 @@ import modules.admin.domain.Subscription;
 public class SubscriptionBizlet extends Bizlet<Subscription> {
 
 	private static final String SUBSCRIPTION_PUBLIC_USERNAME = "SkyveSubscriptionUser";
-
 	private static final String SUBSCRIPTION_PUBLIC_USER_ID = "SkyveSubscriptionUser";
 
 	/**
