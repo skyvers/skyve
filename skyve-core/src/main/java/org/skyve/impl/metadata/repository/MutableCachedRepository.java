@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
+import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
@@ -491,21 +492,30 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 								Document document,
 								String uxui, // the current uxui used to resolve view components
 								ViewMetaData view) {
-		StringBuilder metaDataName = new StringBuilder(128);
-		metaDataName.append(moduleName).append('.').append(documentName).append('.');
+		StringBuilder metaDataNameSB = new StringBuilder(128);
+		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		if (searchUxUi != null) {
-			metaDataName.append(searchUxUi).append('.');
+			metaDataNameSB.append(searchUxUi).append('.');
 		}
-		metaDataName.append(view.getName());
+		metaDataNameSB.append(view.getName());
 		if (searchCustomerName != null) {
-			metaDataName.append(" (").append(searchCustomerName).append(')');
+			metaDataNameSB.append(" (").append(searchCustomerName).append(')');
 		}
+		String metaDataName = metaDataNameSB.toString();
 		
-		ViewImpl result = view.convert(metaDataName.toString(), getDelegator());
+		// Convert the view
+		ViewImpl result = view.convert(metaDataName, getDelegator());
 		result.setOverriddenCustomerName(searchCustomerName);
 		result.setOverriddenUxUiName(searchUxUi);
+
+		final Module documentModule = customer.getModule(document.getOwningModuleName());
+		
+		// Convert accesses in ViewMetaData to view, which requires customer/module/document context
+		ViewUserAccessesMetaData accesses = view.getAccesses();
+		result.convertAccesses(documentModule, documentName, metaDataName, accesses);
+		
 		// Resolve the view ensuring view components within vanilla views are resolved with the current uxui
-		result.resolve(uxui, customer, document);
+		result.resolve(uxui, customer, documentModule, document, (accesses == null) ? true : accesses.isGenerate());
 		return result;
 	}
 	
@@ -514,7 +524,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				ViewType.pick.toString().equals(viewName) || 
 				ViewType.params.toString().equals(viewName)) {
 			ViewImpl result = new ViewGenerator(this).generate(customer, document, viewName);
-			result.resolve(uxui, customer, document);
+			final Module documentModule = customer.getModule(document.getOwningModuleName());
+			result.resolve(uxui, customer, documentModule, document, true);
 			return result;
 		}
 		return null;

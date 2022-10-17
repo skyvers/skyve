@@ -1,12 +1,20 @@
 package org.skyve.metadata.user;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Set;
+
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
-public class UserAccess implements Comparable<UserAccess> {
+public class UserAccess implements Serializable, Comparable<UserAccess> {
+	private static final long serialVersionUID = 103193454372180990L;
+
+	public static final Set<String> ALL_UX_UIS = Collections.emptySet();
+
 	private char type;
 	private String moduleName;
 	private String documentName;
@@ -42,13 +50,25 @@ public class UserAccess implements Comparable<UserAccess> {
 	public boolean isSingular() {
 		return (type == 'S');
 	}
-	
+
+	public boolean isModelAggregate() {
+		return ((type == 'A') && (moduleName != null) && (documentName != null) && (component != null));
+	}
+
+	public boolean isPreviousComplete() {
+		return (type == 'C');
+	}
+
 	public String getModuleName() {
 		return moduleName;
 	}
 
 	public String getDocumentName() {
 		return documentName;
+	}
+	
+	public String getComponent() {
+		return component;
 	}
 	
 	public UserAccess determineSingularBaseDocument() {

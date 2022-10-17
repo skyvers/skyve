@@ -17,14 +17,14 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE,
 			name = "role",
-			propOrder = {"documentation", "description", "privileges", "access"})
+			propOrder = {"documentation", "description", "privileges", "accesses"})
 public class ModuleRoleMetaData extends NamedMetaData {
 	private static final long serialVersionUID = -7824222183005636350L;
 
 	private String documentation;
 	private String description;
 	private List<DocumentPrivilegeMetaData> privileges = new ArrayList<>();
-	private List<UserAccessMetaData> access = new ArrayList<>();
+	private List<ModuleRoleUserAccessMetaData> accesses = new ArrayList<>();
 
 	
 	public String getDocumentation() {
@@ -53,13 +53,13 @@ public class ModuleRoleMetaData extends NamedMetaData {
 		return privileges;
 	}
 
-	@XmlElementWrapper(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "access")
-	@XmlElementRefs({@XmlElementRef(type = SingularUserAccessMetaData.class), 
-						@XmlElementRef(type = DocumentAggregateUserAccessMetaData.class),
-						@XmlElementRef(type = QueryAggregateUserAccessMetaData.class),
-						@XmlElementRef(type = ModelAggregateUserAccessMetaData.class),
-						@XmlElementRef(type = PreviousCompleteUserAccessMetaData.class)})
-	public List<UserAccessMetaData> getAccess() {
-		return access;
+	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "accesses")
+	@XmlElementRefs({@XmlElementRef(type = ModuleRoleSingularUserAccessMetaData.class), 
+						@XmlElementRef(type = ModuleRoleDocumentAggregateUserAccessMetaData.class),
+						@XmlElementRef(type = ModuleRoleQueryAggregateUserAccessMetaData.class),
+						@XmlElementRef(type = ModuleRoleModelAggregateUserAccessMetaData.class),
+						@XmlElementRef(type = ModuleRolePreviousCompleteUserAccessMetaData.class)})
+	public List<ModuleRoleUserAccessMetaData> getAccesses() {
+		return accesses;
 	}
 }

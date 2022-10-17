@@ -24,13 +24,12 @@ import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
 class AccessProcessor {
-	static final Set<String> ALL_UX_UIS = Collections.emptySet();
-	
 	private Customer customer;
 	private Map<String, Menu> moduleMenuMap;
 	private Map<String, Set<String>> accesses;
@@ -54,6 +53,8 @@ class AccessProcessor {
 			
 			final Menu menu = entry.getValue();
 			processMenuItems(menu.getItems(), module, moduleName);
+			
+			processRoles(module);
 		}
 		processedUxUiViews.clear();
 //for (String a : accesses.keySet()) {
@@ -73,14 +74,14 @@ class AccessProcessor {
 			DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
 			String queryName = ref.getDefaultQueryName();
 			if (queryName != null) {
-				addAccessFromMenuItem(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
+				addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
 			}
 			else {
-				addAccessFromMenuItem(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
+				addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
 			}
 		}
 		else if (homeRef == ViewType.edit) {
-			addAccessFromMenuItem(UserAccess.singular(moduleName, homeDocumentName), Collections.emptySet());
+			addAccessForUxUis(UserAccess.singular(moduleName, homeDocumentName), Collections.emptySet());
 			Document document = module.getDocument(customer, homeDocumentName);
 			processViews(document);
 		}
@@ -95,7 +96,7 @@ class AccessProcessor {
 			else if (item instanceof EditItem) {
 				EditItem edit = (EditItem) item;
 				String documentName = edit.getDocumentName();
-				addAccessFromMenuItem(UserAccess.singular(moduleName, documentName), edit.getUxUis());
+				addAccessForUxUis(UserAccess.singular(moduleName, documentName), edit.getUxUis());
 				Document document = module.getDocument(customer, documentName);
 				processViews(document);
 			}
@@ -105,7 +106,7 @@ class AccessProcessor {
 				String queryName = aggregate.getQueryName();
 				Set<String> uxuis = aggregate.getUxUis();
 				if (queryName != null) {
-					addAccessFromMenuItem(UserAccess.queryAggregate(moduleName, queryName), uxuis);
+					addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), uxuis);
 					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 					documentName = query.getDocumentName();
 				}
@@ -114,20 +115,20 @@ class AccessProcessor {
 					DocumentRef ref = module.getDocumentRefs().get(documentName);
 					queryName = ref.getDefaultQueryName();
 					if (queryName != null) {
-						addAccessFromMenuItem(UserAccess.queryAggregate(moduleName, queryName), uxuis);
+						addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), uxuis);
 					}
 					else {
 						String modelName = aggregate.getModelName();
 						if (modelName != null) {
-							addAccessFromMenuItem(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuis);
+							addAccessForUxUis(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuis);
 						}
 						else {
-							addAccessFromMenuItem(UserAccess.documentAggregate(moduleName, documentName), uxuis);
+							addAccessForUxUis(UserAccess.documentAggregate(moduleName, documentName), uxuis);
 						}
 					}
 				}
 				
-				addAccessFromMenuItem(UserAccess.singular(moduleName, documentName), uxuis);
+				addAccessForUxUis(UserAccess.singular(moduleName, documentName), uxuis);
 				Document document = module.getDocument(customer, documentName);
 				processViews(document);
 			}
@@ -165,25 +166,37 @@ class AccessProcessor {
 		}
 	}
 	
-	private void processView(Document document, View view) {
-		final String overriddenUxUi = view.getOverriddenUxUiName();
-		final Module module = customer.getModule(document.getOwningModuleName());
-		
-		for (UserAccess viewAccess : view.getAccesses()) {
-			if (viewAccess.isSingular()) {
-				boolean has = hasViewAccess(viewAccess);
-				addAccessFromView(viewAccess, overriddenUxUi);
-				if (! has) {
-					processViews(module.getDocument(customer, viewAccess.getDocumentName()));
-				}
-			}
-			else {
-				addAccessFromView(viewAccess, overriddenUxUi);
+	private void processRoles(final Module module) {
+		for (Role role : module.getRoles()) {
+			Map<UserAccess, Set<String>> roleAccesses = ((RoleImpl) role).getAccesses();
+			for (Entry<UserAccess, Set<String>> entry : roleAccesses.entrySet()) {
+				addAccessForUxUis(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 	
-	private void addAccessFromMenuItem(@NotNull UserAccess access, @NotNull Set<String> uxuis) {
+	private void processView(Document document, View view) {
+		final String overriddenUxUi = view.getOverriddenUxUiName();
+		final Module module = customer.getModule(document.getOwningModuleName());
+		
+		Set<UserAccess> viewAccesses = view.getAccesses();
+		if (viewAccesses != null) { // can be null when access control is turned off
+			for (UserAccess viewAccess : viewAccesses) {
+				if (viewAccess.isSingular()) {
+					boolean has = hasViewAccess(viewAccess);
+					addAccessForUxUi(viewAccess, overriddenUxUi);
+					if (! has) {
+						processViews(module.getDocument(customer, viewAccess.getDocumentName()));
+					}
+				}
+				else {
+					addAccessForUxUi(viewAccess, overriddenUxUi);
+				}
+			}
+		}
+	}
+	
+	private void addAccessForUxUis(@NotNull UserAccess access, @NotNull Set<String> uxuis) {
 		String accessString = access.toString();
 		Set<String> accessUxUis = accesses.get(accessString);
 		if (accessUxUis == null) { // DNE
@@ -192,20 +205,20 @@ class AccessProcessor {
 				accesses.put(accessString, accessUxUis);
 			}
 			else {
-				accesses.putIfAbsent(accessString, ALL_UX_UIS);
+				accesses.putIfAbsent(accessString, UserAccess.ALL_UX_UIS);
 			}
 		}
-		else if (accessUxUis != ALL_UX_UIS) {
+		else if (accessUxUis != UserAccess.ALL_UX_UIS) {
 			if (! uxuis.isEmpty()) {
 				accessUxUis.addAll(uxuis);
 			}
 			else {
-				accesses.put(accessString, ALL_UX_UIS);
+				accesses.put(accessString, UserAccess.ALL_UX_UIS);
 			}
 		}
 	}
 
-	private void addAccessFromView(@NotNull UserAccess access, @Nullable String uxui) {
+	private void addAccessForUxUi(@NotNull UserAccess access, @Nullable String uxui) {
 		String accessString = access.toString();
 		Set<String> accessUxUis = accesses.get(accessString);
 		if (accessUxUis == null) {
@@ -215,15 +228,15 @@ class AccessProcessor {
 				accesses.put(accessString, accessUxUis);
 			}
 			else {
-				accesses.putIfAbsent(accessString, ALL_UX_UIS);
+				accesses.putIfAbsent(accessString, UserAccess.ALL_UX_UIS);
 			}
 		}
-		else if (accessUxUis != ALL_UX_UIS){
+		else if (accessUxUis != UserAccess.ALL_UX_UIS){
 			if (uxui != null) {
 				accessUxUis.add(uxui);
 			}
 			else {
-				accesses.put(accessString, ALL_UX_UIS);
+				accesses.put(accessString, UserAccess.ALL_UX_UIS);
 			}
 		}
 	}

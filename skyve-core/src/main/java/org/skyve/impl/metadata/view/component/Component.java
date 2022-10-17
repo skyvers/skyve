@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view.component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -26,6 +27,7 @@ import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.View;
 import org.skyve.util.Binder.TargetMetaData;
@@ -175,6 +177,12 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		}
 		
 		ViewImpl view = (ViewImpl) UtilImpl.cloneBySerialization(originalView);
+		// User Accesses are not required on the cloned view
+		// NB may be null if access control is turned off
+		Set<UserAccess> accesses = view.getAccesses();
+		if (accesses != null) {
+			accesses.clear();
+		}
 
 		ComponentViewVisitor visitor = new ComponentViewVisitor(customer, m, d, view, binding, names, widgetId);
 		visitor.visit();

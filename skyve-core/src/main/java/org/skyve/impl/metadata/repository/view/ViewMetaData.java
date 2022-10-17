@@ -17,6 +17,7 @@ import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
+import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -43,6 +44,7 @@ import org.skyve.metadata.view.View.ViewParameter;
 							"refreshConditionName", 
 							"refreshActionName",
 							"parameters",
+							"accesses",
 							"properties"})
 public class ViewMetaData extends Container implements NamedMetaData, ConvertableMetaData<ViewImpl>, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
@@ -58,6 +60,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 	private String refreshConditionName;
 	private String refreshActionName;
 	private List<ViewParameter> parameters = new ArrayList<>();
+	private ViewUserAccessesMetaData accesses = null;
 	private String documentation;
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	
@@ -168,6 +171,15 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 		return parameters;
 	}
 	
+	public ViewUserAccessesMetaData getAccesses() {
+		return accesses;
+	}
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = false)
+	public void setAccesses(ViewUserAccessesMetaData accesses) {
+		this.accesses = accesses ;
+	}
+
 	public String getDocumentation() {
 		return documentation;
 	}

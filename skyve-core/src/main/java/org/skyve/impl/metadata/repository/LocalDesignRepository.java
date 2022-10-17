@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.repository;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -47,6 +48,7 @@ import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
@@ -261,7 +263,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// check action privilege references an action in the given document view
 		for (Role role : module.getRoles()) {
-			for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
+			RoleImpl roleImpl = (RoleImpl) role;
+			for (Privilege privilege : roleImpl.getPrivileges()) {
 				if (privilege instanceof ActionPrivilege) {
 					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
 					String actionPrivilegeName = actionPrivilege.getName();
@@ -273,6 +276,38 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" for document " + actionDocument.getName() + 
 														" for role " + role.getName() +
 														" does not reference a valid action");
+					}
+				}
+			}
+			
+			// Check modelAggregate and previousComplete UserAccesses
+			for (UserAccess access : roleImpl.getAccesses().keySet()) {
+				if (access.isModelAggregate()) {
+/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
+					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					try {
+						getModel(customer, accessDocument, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" is for model " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+*/
+				}
+				else if (access.isPreviousComplete()) {
+					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					String binding = access.getComponent();
+					try {
+						BindUtil.getMetaDataForBinding(customer, module, accessDocument, binding);
+					}
+					catch (MetaDataException e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" with binding " + binding +
+														" is not a valid binding.", e);
 					}
 				}
 			}
@@ -617,10 +652,47 @@ public class LocalDesignRepository extends FileSystemRepository {
 	@Override
 	@SuppressWarnings("unused")
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
-		new ViewValidator((ViewImpl) view,
+		ViewImpl viewImpl = (ViewImpl) view;
+		new ViewValidator(viewImpl,
 							this,
 							(CustomerImpl) customer,
 							(DocumentImpl) document,
 							uxui);
+		
+		// Check modelAggregate and previousComplete UserAccesses
+		Set<UserAccess> accesses = viewImpl.getAccesses();
+		if (accesses != null) { // can be null if access control is turned off
+			for (UserAccess access : accesses) {
+				if (access.isModelAggregate()) {
+/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
+					try {
+						getModel(customer, document, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException(""User Access [" + access.toString() + 
+														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" is for model " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+*/
+				}
+				else if (access.isPreviousComplete()) {
+					final Module module = customer.getModule(document.getOwningModuleName());
+					final String binding = access.getComponent();
+					try {
+						BindUtil.getMetaDataForBinding(customer, module, document, binding);
+					}
+					catch (MetaDataException e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module.document " + module.getName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" with binding " + binding +
+														" is not a valid binding.", e);
+					}
+				}
+			}
+		}
 	}
 }

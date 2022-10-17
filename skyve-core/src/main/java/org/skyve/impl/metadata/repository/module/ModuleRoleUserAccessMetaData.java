@@ -3,31 +3,25 @@ package org.skyve.impl.metadata.repository.module;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.SerializableMetaData;
+import org.skyve.metadata.user.UserAccess;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public abstract class UserAccessMetaData implements SerializableMetaData {
+public abstract class ModuleRoleUserAccessMetaData implements SerializableMetaData {
 	private static final long serialVersionUID = -6274893418024546257L;
 
-	private String moduleName;
-	private List<UserAccessUxUiMetadata> uxuis = new ArrayList<>();
-
-	public String getModuleName() {
-		return moduleName;
-	}
-
-	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(String moduleName) {
-		this.moduleName = moduleName;
-	}
+	private List<ModuleRoleUserAccessUxUiMetadata> uxuis = new ArrayList<>();
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "uxui")
-	public List<UserAccessUxUiMetadata> getUxuis() {
+	public List<ModuleRoleUserAccessUxUiMetadata> getUxuis() {
 		return uxuis;
 	}
+	
+	public abstract void validate(String metaDataName, String roleName, Module module);
+	public abstract UserAccess toUserAccess(String moduleName);
 }

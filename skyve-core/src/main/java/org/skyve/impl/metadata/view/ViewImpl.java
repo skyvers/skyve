@@ -16,6 +16,9 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
+import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata;
+import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
@@ -29,6 +32,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
@@ -65,8 +70,7 @@ public class ViewImpl extends Container implements View {
 	private String overriddenUxUiName;
 	private Map<String, String> properties = new TreeMap<>();
 	
-	// components clone its target view by Serialization - accesses are not required
-	private transient Set<UserAccess> accesses;
+	private Set<UserAccess> accesses = null;
 	
 	@Override
 	public String getRefreshConditionName() {
@@ -230,19 +234,66 @@ public class ViewImpl extends Container implements View {
 	public Map<String, String> getProperties() {
 		return properties;
 	}
+
+	@Override
+	public Set<UserAccess> getAccesses() {
+		return accesses;
+	}
+
+	public void convertAccesses(Module module,
+									String documentName,
+									String metaDataName,
+									ViewUserAccessesMetaData accessesMetaData) {
+		final String moduleName = module.getName();
+		
+		// Populate User Accesses
+		if (accessesMetaData != null) {
+			accesses = new TreeSet<>();
+
+			for (ViewUserAccessMetaData accessMetaData : accessesMetaData.getAccesses()) {
+				// Validate access metadata
+				accessMetaData.validate(metaDataName, module);
+
+				// Validate and add ux/uis
+				Set<String> uxuis = null;
+				List<ViewUserAccessUxUiMetadata> uxuisMetaData = accessMetaData.getUxuis();
+				if (uxuisMetaData.isEmpty()) {
+					uxuis = UserAccess.ALL_UX_UIS;
+				}
+				else {
+					uxuis = new TreeSet<>();
+					for (ViewUserAccessUxUiMetadata uxuiMetaData : uxuisMetaData) {
+						String uxuiName = uxuiMetaData.getName();
+						if (uxuiName == null) {
+							throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + " in view");
+						}
+						if (! uxuis.add(uxuiMetaData.getName())) {
+							throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + " in view");
+						}
+					}
+				}
+
+				// Put into accesses
+				if (! accesses.add(accessMetaData.toUserAccess(moduleName, documentName))) {
+					throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName, documentName).toString() + " in view");
+				}
+			}
+		}
+	}
 	
 	/**
 	 * Ensure that any component loaded matches the given UX/UI.
 	 * Ensure that inlined metadata model definitions are added to the implicit models map.
-	 * If accesses is not defined {through metadata convert()} then determine them.
+	 * Convert and validate any accesses defined in the view metadata.
+	 * If accesses are not defined then determine them.
 	 */
-	public void resolve(String uxui, Customer customer, Document document) {
+	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate) {
+		final String moduleName = module.getName();
+		final String documentName = document.getName();
+
 		// First clone all components referenced
 		// NB The 2 visitors below cannot be combined as cloning the components and visiting them
 		// causes a stack overflow.
-
-		final String moduleName = document.getOwningModuleName();
-		final Module module = customer.getModule(moduleName);
 
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
 			// Overrides visitComponent standard behaviour to load the component
@@ -260,13 +311,14 @@ public class ViewImpl extends Container implements View {
 				}
 			}
 		}.visit();
-		
-		// If there are no accesses defined in view metadata, then determine them
-		boolean determineAccesses = (accesses == null);
-		if (determineAccesses) {
-			accesses = new TreeSet<>();
 
-			final String documentName = document.getName();
+		// If there are no accesses defined in view metadata, or the view says to generate them, and access control is turned on, determine them
+		boolean determineAccesses = UtilImpl.ACCESS_CONTROL && generate;
+		if (determineAccesses) {
+			if (accesses == null) {
+				accesses = new TreeSet<>();
+			}
+
 			new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
 				@Override
 				public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
@@ -375,14 +427,16 @@ public class ViewImpl extends Container implements View {
 					}
 					
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-					Reference targetReference = (Reference) target.getAttribute();
-					String targetDocumentName = targetReference.getDocumentName();
+					Relation targetRelation = (Relation) target.getAttribute();
+					String targetDocumentName = targetRelation.getDocumentName();
 	
 					// Check lookup query
 					String queryName = lookup.getQuery();
-					// Maybe the reference has a query
+					// Maybe the relation is a reference and has a query
 					if (queryName == null) {
-						queryName = targetReference.getQueryName();
+						if (targetRelation instanceof Reference) {
+							queryName = ((Reference) targetRelation).getQueryName();
+						}
 					}
 					// Look for the default query
 					if (queryName == null) {
@@ -401,10 +455,6 @@ public class ViewImpl extends Container implements View {
 				
 				@Override
 				public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
-					if (! determineAccesses) {
-						return;
-					}
-					
 					String modelName = map.getModelName();
 					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 	
@@ -413,10 +463,6 @@ public class ViewImpl extends Container implements View {
 				
 				@Override
 				public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
-					if (! determineAccesses) {
-						return;
-					}
-	
 					CompleteType type = text.getComplete();
 					if (type == CompleteType.previous) {
 						String binding = text.getBinding();
@@ -436,10 +482,6 @@ public class ViewImpl extends Container implements View {
 				
 				@Override
 				public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
-					if (! determineAccesses) {
-						return;
-					}
-	
 					accessThroughBinding(zoomIn.getBinding());
 				}
 	
@@ -461,10 +503,5 @@ public class ViewImpl extends Container implements View {
 				}
 			}.visit();
 		}
-	}
-
-	@Override
-	public Set<UserAccess> getAccesses() {
-		return accesses;
 	}
 }

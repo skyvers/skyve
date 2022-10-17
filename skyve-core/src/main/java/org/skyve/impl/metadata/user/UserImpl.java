@@ -740,7 +740,7 @@ public class UserImpl implements User {
 		// If we found there is access defined somewhere, check the current UXUI has access
 		if (foundAccess) {
 			Set<String> uxuis = accesses.get(accessString);
-			return (uxuis == AccessProcessor.ALL_UX_UIS) || uxuis.contains(uxui);
+			return (uxuis == UserAccess.ALL_UX_UIS) || uxuis.contains(uxui);
 		}
 
 		// No access found

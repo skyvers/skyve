@@ -96,28 +96,30 @@ public class RouteCriteria implements SerializableMetaData {
 	}
 
 	public void canonicalise(Customer customer, String binding) {
-		String b = UtilImpl.processStringValue(binding);
-		if (b != null) {
-			if (moduleName == null) {
-				throw new IllegalStateException("RouteCriteria - Set moduleName before calling canonicalise()");
-			}
-			if (documentName == null) {
-				throw new IllegalStateException("RouteCriteria - Set documentName before calling canonicalise()");
-			}
-			// Cater for FacesView.zoomInBindings stack written out as comma separated - convert to the view binding
-			b = b.replace(',', '.');
-
-			ProvidedRepository r = ProvidedRepositoryFactory.get();
-			Customer c = (customer == null) ? ((customerName != null) ? r.getCustomer(customerName) : null) : customer;
-			Module m = r.getModule(c, moduleName);
-			Document d = r.getDocument(c, m, documentName);
-			TargetMetaData t = BindUtil.getMetaDataForBinding(c, m, d, b);
-			d = t.getDocument();
-			moduleName = d.getOwningModuleName();
-			documentName = d.getName();
-			Attribute a = t.getAttribute();
-			if (a instanceof Relation) {
-				documentName = ((Relation) a).getDocumentName();
+		if (webAction != WebAction.m) { // exclude maps
+			String b = UtilImpl.processStringValue(binding);
+			if (b != null) {
+				if (moduleName == null) {
+					throw new IllegalStateException("RouteCriteria - Set moduleName before calling canonicalise()");
+				}
+				if (documentName == null) {
+					throw new IllegalStateException("RouteCriteria - Set documentName before calling canonicalise()");
+				}
+				// Cater for FacesView.zoomInBindings stack written out as comma separated - convert to the view binding
+				b = b.replace(',', '.');
+	
+				ProvidedRepository r = ProvidedRepositoryFactory.get();
+				Customer c = (customer == null) ? ((customerName != null) ? r.getCustomer(customerName) : null) : customer;
+				Module m = r.getModule(c, moduleName);
+				Document d = r.getDocument(c, m, documentName);
+				TargetMetaData t = BindUtil.getMetaDataForBinding(c, m, d, b);
+				d = t.getDocument();
+				moduleName = d.getOwningModuleName();
+				documentName = d.getName();
+				Attribute a = t.getAttribute();
+				if (a instanceof Relation) {
+					documentName = ((Relation) a).getDocumentName();
+				}
 			}
 		}
 	}

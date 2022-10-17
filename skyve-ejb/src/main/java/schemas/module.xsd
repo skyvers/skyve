@@ -13,7 +13,7 @@
 
   <xs:element name="content" type="tns:metaDataQueryContentColumnMetaData"/>
 
-  <xs:element name="documentAggregate" type="tns:documentAggregateUserAccessMetaData"/>
+  <xs:element name="documentAggregate" type="tns:moduleRoleDocumentAggregateUserAccessMetaData"/>
 
   <xs:element name="edit" type="tns:edit"/>
 
@@ -27,17 +27,17 @@
 
   <xs:element name="map" type="tns:map"/>
 
-  <xs:element name="modelAggregate" type="tns:modelAggregateUserAccessMetaData"/>
+  <xs:element name="modelAggregate" type="tns:moduleRoleModelAggregateUserAccessMetaData"/>
 
   <xs:element name="module" type="tns:module"/>
 
-  <xs:element name="previousComplete" type="tns:previousCompleteUserAccessMetaData"/>
+  <xs:element name="previousComplete" type="tns:moduleRolePreviousCompleteUserAccessMetaData"/>
 
   <xs:element name="query" type="tns:query"/>
 
-  <xs:element name="queryAggregate" type="tns:queryAggregateUserAccessMetaData"/>
+  <xs:element name="queryAggregate" type="tns:moduleRoleQueryAggregateUserAccessMetaData"/>
 
-  <xs:element name="singular" type="tns:singularUserAccessMetaData"/>
+  <xs:element name="singular" type="tns:moduleRoleSingularUserAccessMetaData"/>
 
   <xs:element name="sql" type="tns:sql"/>
 
@@ -121,7 +121,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
-          <xs:element name="access" form="qualified" minOccurs="0">
+          <xs:element name="accesses" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
                 <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -168,23 +168,30 @@
     <xs:attribute name="attribute" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="singularUserAccessMetaData">
+  <xs:complexType name="moduleRoleSingularUserAccessMetaData">
     <xs:complexContent>
-      <xs:extension base="tns:userAccessMetaData">
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleDocumentAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleUserAccessMetaData">
         <xs:sequence/>
         <xs:attribute name="document" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="userAccessMetaData" abstract="true">
+  <xs:complexType name="moduleRoleUserAccessMetaData" abstract="true">
     <xs:sequence>
-      <xs:element name="uxui" type="tns:userAccessUxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="uxui" type="tns:moduleRoleUserAccessUxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="module" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="userAccessUxUiMetadata">
+  <xs:complexType name="moduleRoleUserAccessUxUiMetadata">
     <xs:complexContent>
       <xs:extension base="ns2:namedMetaData">
         <xs:sequence/>
@@ -192,35 +199,27 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="documentAggregateUserAccessMetaData">
+  <xs:complexType name="moduleRoleQueryAggregateUserAccessMetaData">
     <xs:complexContent>
-      <xs:extension base="tns:singularUserAccessMetaData">
-        <xs:sequence/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="queryAggregateUserAccessMetaData">
-    <xs:complexContent>
-      <xs:extension base="tns:userAccessMetaData">
+      <xs:extension base="tns:moduleRoleUserAccessMetaData">
         <xs:sequence/>
         <xs:attribute name="query" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="modelAggregateUserAccessMetaData">
+  <xs:complexType name="moduleRoleModelAggregateUserAccessMetaData">
     <xs:complexContent>
-      <xs:extension base="tns:documentAggregateUserAccessMetaData">
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
         <xs:sequence/>
         <xs:attribute name="model" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="previousCompleteUserAccessMetaData">
+  <xs:complexType name="moduleRolePreviousCompleteUserAccessMetaData">
     <xs:complexContent>
-      <xs:extension base="tns:documentAggregateUserAccessMetaData">
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
         <xs:sequence/>
         <xs:attribute name="binding" type="xs:string" use="required"/>
       </xs:extension>

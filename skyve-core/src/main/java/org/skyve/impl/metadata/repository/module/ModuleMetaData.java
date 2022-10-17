@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.repository.module;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -42,6 +43,7 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -169,19 +171,21 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 		ModuleImpl result = new ModuleImpl(repository);
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
-		String value = getName();
-		if (value == null) {
+		String moduleName = getName();
+		if (moduleName == null) {
 			throw new MetaDataException(metaDataName + " : The module [name] is required");
 		}
-		result.setName(value);
+		result.setName(moduleName);
 
-		value = getTitle();
+		String value = getTitle();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The module [title] is required");
 		}
 		result.setTitle(value);
 
 		result.setPrototype(Boolean.TRUE.equals(prototype));
+		
+		result.setDocumentation(documentation);
 		
 		value = getHomeDocument();
 		if (value == null) {
@@ -230,6 +234,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 		}
 
 		// Populate Jobs
+		
 		List<JobMetaDataImpl> repositoryJobs = getJobs();
 		if (repositoryJobs != null) {
 			Set<String> jobNames = new TreeSet<>();
@@ -434,25 +439,27 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 		}
 
 		// Populate Roles
+		
 		Set<String> roleNames = new TreeSet<>();
 		List<ModuleRoleMetaData> repositoryRoles = getRoles();
 		if (repositoryRoles != null) {
 			for (ModuleRoleMetaData roleMetaData : repositoryRoles) {
 				RoleImpl role = new RoleImpl();
-				value = roleMetaData.getName();
-				if (value == null) {
+				String roleName = roleMetaData.getName();
+				if (roleName == null) {
 					throw new MetaDataException(metaDataName + " : The [name] for a role is required");
 				}
-				if (! roleNames.add(value)) {
-					throw new MetaDataException(metaDataName + " : Duplicate role named " + value);
+				if (! roleNames.add(roleName)) {
+					throw new MetaDataException(metaDataName + " : Duplicate role named " + roleName);
 				}
-				if (documentNames.contains(value)) {
-					throw new MetaDataException(metaDataName + " : The role named " + value + " is a module document name.");
+				if (documentNames.contains(roleName)) {
+					throw new MetaDataException(metaDataName + " : The role named " + roleName + " is a module document name.");
 				}
-				role.setName(value);
+				role.setName(roleName);
 				role.setDescription(roleMetaData.getDescription());
 				role.setDocumentation(roleMetaData.getDocumentation());
 				
+				// Populate privileges
 				Set<String> docPrivNames = new TreeSet<>();
 				List<DocumentPrivilegeMetaData> repositoryDocPrivileges = roleMetaData.getPrivileges();
 				if (repositoryDocPrivileges != null) {
@@ -460,23 +467,20 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 						org.skyve.impl.metadata.user.DocumentPrivilege documentPrivilege = new org.skyve.impl.metadata.user.DocumentPrivilege();
 						value = documentPrivilegeMetaData.getDocumentName();
 						if (value == null) {
-							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + 
-															role.getName());
+							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + roleName);
 						}
-						if (!docPrivNames.add(value)) {
-							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value +
-															" in role " + role.getName());
+						if (! docPrivNames.add(value)) {
+							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value + " in role " + roleName);
 						}
-						if (!documentNames.contains(value)) {
-							String message = String.format(
-									"%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. "
-											+ "Expected %2$s to be defined in the <documents> section of %4$s.xml",
-									metaDataName, value, role.getName(), result.getName());
+						if (! documentNames.contains(value)) {
+							String message = String.format("%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. " +
+																"Expected %2$s to be defined in the <documents> section of %4$s.xml",
+															metaDataName, value, roleName, result.getName());
 							throw new MetaDataException(message);
 						}
 						if (result.getDocumentRefs().get(value).getReferencedModuleName() != null) {
 							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
-															" in role " + role.getName() +
+															" in role " + roleName +
 															" cannot be for a document referenced from another module.  Document Privileges are to be made on the owning module only.");
 						}
 
@@ -484,7 +488,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 						DocumentPermission docPermission = documentPrivilegeMetaData.getPermission();
 						if (docPermission == null) {
 							throw new MetaDataException(metaDataName + " : Document permission is required for document " +
-															documentPrivilege.getName() + " in role " + role.getName());
+															documentPrivilege.getName() + " in role " + roleName);
 						}
 						documentPrivilege.setPermission(docPermission);
 
@@ -498,7 +502,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 								value = actionPrivilegeMetaData.getActionName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +
-																	documentPrivilege.getName() + " in role " + role.getName());
+																	documentPrivilege.getName() + " in role " + roleName);
 								}
 								actionPrivilege.setName(value);
 								actionPrivilege.setDocumentName(documentPrivilege.getName());
@@ -514,7 +518,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 								value = contentRestriction.getAttributeName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [attribute] for a content restriction is required for document " +
-																	documentPrivilege.getName() + " in role " + role.getName());
+																	documentPrivilege.getName() + " in role " + roleName);
 								}
 								contentRestriction.setDocumentName(documentPrivilege.getName());
 
@@ -529,12 +533,46 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 								value = contentPermission.getAttributeName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [attribute] for a content permission is required for document " +
-																	documentPrivilege.getName() + " in role " + role.getName());
+																	documentPrivilege.getName() + " in role " + roleName);
 								}
 								contentPermission.setDocumentName(documentPrivilege.getName());
 
 								role.getContentPermissions().add(contentPermission);
 							}
+						}
+					}
+				}
+				
+				// Populate User Accesses
+				List<ModuleRoleUserAccessMetaData> repositoryAccesses = roleMetaData.getAccesses();
+				if (repositoryAccesses != null) {
+					Map<UserAccess, Set<String>> accesses = role.getAccesses();
+					for (ModuleRoleUserAccessMetaData accessMetaData : repositoryAccesses) {
+						// Validate access metadata
+						accessMetaData.validate(metaDataName, roleName, result);
+
+						// Validate and add ux/uis
+						Set<String> uxuis = null;
+						List<ModuleRoleUserAccessUxUiMetadata> uxuisMetaData = accessMetaData.getUxuis();
+						if (uxuisMetaData.isEmpty()) {
+							uxuis = UserAccess.ALL_UX_UIS;
+						}
+						else {
+							uxuis = new TreeSet<>();
+							for (ModuleRoleUserAccessUxUiMetadata uxuiMetaData : uxuisMetaData) {
+								String uxuiName = uxuiMetaData.getName();
+								if (uxuiName == null) {
+									throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
+								}
+								if (! uxuis.add(uxuiMetaData.getName())) {
+									throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
+								}
+							}
+						}
+
+						// Put into accesses
+						if (accesses.put(accessMetaData.toUserAccess(moduleName), uxuis) != null) {
+							throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
 						}
 					}
 				}
@@ -551,8 +589,6 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 		populateModuleMenu(metaDataName, items, getMenu().getActions(), roleNames);
 		result.setMenu(resultMenu);
 
-		result.setDocumentation(documentation);
-		
 		return result;
 	}
 

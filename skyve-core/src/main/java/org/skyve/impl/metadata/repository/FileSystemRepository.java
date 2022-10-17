@@ -663,7 +663,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
-	private <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
+	protected <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
 		// If dynamic, use the models map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
