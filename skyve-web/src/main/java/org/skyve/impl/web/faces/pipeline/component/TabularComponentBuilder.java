@@ -1408,7 +1408,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		List<UIComponent> children = result.getChildren();
         addListGridDataColumns(model, children, showFilter, result.getWidgetVar());
-        if ((canCreateDocument && createRendered) || zoomRendered) {
+        if ((canCreateDocument && createRendered) || zoomRendered || showFilter) {
         	final UIComponent actionColumn = createListGridActionColumn(owningModuleName,
 									        								drivingDocumentName,
 									        								canCreateDocument,
@@ -1417,6 +1417,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									        								(createUrlParams == null) ? null : createUrlParams.toString(),
 									        								zoomRendered,
 									        								grid.getDisableZoomConditionName(),
+									        								showFilter,
 																			result.getId(),
 																			grid.getProperties());
 			children.add(actionColumn);
@@ -1720,6 +1721,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   String createUrlParams,
 													   boolean zoomRendered,
 													   String zoomDisabledConditionName,
+													   boolean showFilter,
 													   String parentId,
 													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
@@ -1734,9 +1736,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		column.getFacets().put("header", columnHeader);
 		List<UIComponent> columnHeaderChildren = columnHeader.getChildren();
 
-		final UIComponent filterToggle = createDataTableFilterToggle(parentId);
-		columnHeaderChildren.add(filterToggle);
-
+		if (showFilter) {
+			final UIComponent filterToggle = createDataTableFilterToggle(parentId);
+			columnHeaderChildren.add(filterToggle);
+		}
+			
 		if (canCreateDocument && createRendered) {
 			CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 			setId(button, null);
@@ -1770,10 +1774,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			column.setHeaderText("");
 		}
+		
 		if (zoomRendered) {
 			final UIComponent button = createListGridZoomButton(zoomDisabledConditionName, properties);
 			column.getChildren().add(button);
 		}
+		
 		return column;
 	}
 
