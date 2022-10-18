@@ -533,53 +533,10 @@ public class FacesView<T extends Bean> extends Harness {
 												queryName,
 												modelName,
 												filterParameters,
-												parameters);
+												parameters,
+												true);
 			lazyDataModels.put(key, result);
 		}
- 		
-		return result;
-	}
-	
-	// Note - this is also called from EL in ListGrid tag
- 	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule,
- 												final String bizDocument,
-												final String queryName,
-												@SuppressWarnings("hiding") final String modelName,
-												final List<FilterParameter> filterParameters,
-												final List<Parameter> parameters) {
- 		List<BeanMapAdapter<Bean>> result = null;
- 		
- 		// these are ultimately web parameters that may not be present in the request
- 		if ((queryName == null) || queryName.isEmpty()) {
- 			result = new ArrayList<>();
- 		}
- 		else {
-	 		StringBuilder key = new StringBuilder(64).append(bizModule).append('.').append(queryName);
-	 		if (filterParameters != null) {
-	 			for (FilterParameter parameter : filterParameters) {
-	 				String valueOrBinding = parameter.getValue();
-	 				if (valueOrBinding == null) {
-	 					valueOrBinding = parameter.getValueBinding();
-	 				}
-	 				key.append('.').append(parameter.getFilterBinding()).append(parameter.getOperator()).append(valueOrBinding);
-	 			}
-	 		}
-	 		if (parameters != null) {
-	 			for (Parameter parameter : parameters) {
-	 				String valueOrBinding = parameter.getValue();
-	 				if (valueOrBinding == null) {
-	 					valueOrBinding = parameter.getValueBinding();
-	 				}
-	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
-	 			}
-	 		}
-	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
-			result = beans.get(key.toString());
-			if (result == null) {
-				result = new GetBeansAction(this, bizModule, bizDocument, queryName, modelName, filterParameters, parameters).execute();
-				beans.put(key.toString(), result);
-			}
- 		}
  		
 		return result;
 	}
@@ -722,7 +679,40 @@ public class FacesView<T extends Bean> extends Harness {
 		List<Parameter> parameters = (List<Parameter>) attributes.get("parameters");
 
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
-		return getBeans(completeModule, completeDocument, completeQuery, completeModel, filterParameters, parameters);
+
+ 		List<BeanMapAdapter<Bean>> result = null;
+ 		
+ 		// these are ultimately web parameters that may not be present in the request
+ 		if ((completeQuery == null) || completeQuery.isEmpty()) {
+ 			result = new ArrayList<>();
+ 		}
+ 		else {
+	 		StringBuilder key = new StringBuilder(64).append(completeModule).append('.').append(completeQuery);
+ 			for (FilterParameter parameter : filterParameters) {
+ 				String valueOrBinding = parameter.getValue();
+ 				if (valueOrBinding == null) {
+ 					valueOrBinding = parameter.getValueBinding();
+ 				}
+ 				key.append('.').append(parameter.getFilterBinding()).append(parameter.getOperator()).append(valueOrBinding);
+ 			}
+	 		if (parameters != null) {
+	 			for (Parameter parameter : parameters) {
+	 				String valueOrBinding = parameter.getValue();
+	 				if (valueOrBinding == null) {
+	 					valueOrBinding = parameter.getValueBinding();
+	 				}
+	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
+	 			}
+	 		}
+	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
+			result = beans.get(key.toString());
+			if (result == null) {
+				result = new GetBeansAction(this, completeModule, completeDocument, completeQuery, modelName, filterParameters, parameters, false).execute();
+				beans.put(key.toString(), result);
+			}
+ 		}
+ 		
+		return result;
 	}
  	
  	/**

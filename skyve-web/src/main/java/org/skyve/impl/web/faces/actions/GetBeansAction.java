@@ -20,6 +20,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter<Bean>>> {
 	private String modelName;
 	private List<FilterParameter> filterParameters;
 	private List<Parameter> parameters;
+	private boolean escape;
 
 	public GetBeansAction(FacesView<? extends Bean> facesView,
 							String bizModule,
@@ -27,7 +28,8 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter<Bean>>> {
 							String queryName,
 							String modelName,
 							List<FilterParameter> filterParameters,
-							List<Parameter> parameters) {
+							List<Parameter> parameters,
+							boolean escape) {
 		this.facesView = facesView;
 		this.bizModule = bizModule;
 		this.bizDocument = bizDocument;
@@ -35,6 +37,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter<Bean>>> {
 		this.modelName = modelName;
 		this.filterParameters = filterParameters;
 		this.parameters = parameters;
+		this.escape = escape;
 	}
 	
 	@Override
@@ -44,7 +47,8 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter<Bean>>> {
 														" : queryName=" + queryName + 
 														" : modelName=" + modelName);
 
-		SkyveLazyDataModel model = new SkyveLazyDataModel(facesView, bizModule, bizDocument, queryName, modelName, filterParameters, parameters);
-		return model.load(0, 250, null, null);
+		SkyveLazyDataModel model = new SkyveLazyDataModel(facesView, bizModule, bizDocument, queryName, modelName, filterParameters, parameters, escape);
+		List<BeanMapAdapter<Bean>> result = model.load(0, 250, null, null);
+		return result;
 	}
 }

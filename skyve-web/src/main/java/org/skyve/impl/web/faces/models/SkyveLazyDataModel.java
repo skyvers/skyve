@@ -57,6 +57,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	private String modelName;
 	private List<FilterParameter> filterParameters;
 	private List<Parameter> parameters;
+	private boolean escape;
 	
 	public SkyveLazyDataModel(FacesView<? extends Bean> view,
 								String moduleName, 
@@ -64,7 +65,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 								String queryName,
 								String modelName,
 								List<FilterParameter> filterParameters,
-								List<Parameter> parameters) {
+								List<Parameter> parameters,
+								boolean escape) {
 		this.view = view;
 		this.moduleName = moduleName;
 		this.documentName = documentName;
@@ -72,6 +74,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		this.modelName = modelName;
 		this.filterParameters = filterParameters;
 		this.parameters = parameters;
+		this.escape = escape;
 	}
 	
 	@Override
@@ -185,7 +188,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		setRowCount((int) page.getTotalRows());
 		
 		List<Bean> beans = page.getRows();
-		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), true);
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), escape);
 		List<BeanMapAdapter<Bean>> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
 			result.add(new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext()));

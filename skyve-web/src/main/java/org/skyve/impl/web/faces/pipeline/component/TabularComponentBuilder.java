@@ -3862,6 +3862,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
+		// Escaped here because the column can't escaped and sanitised in SkyveLazyDataModel,
+		// otherwise it'll be copied into the autocomplete text field with escaped values.
+		// We have to leave it to PF to escape in the drop down and unescape when putting into the input element.
+		result.setEscape(true);
 		result.setForceSelection(true);
 		result.setDropdown(true);
 		String var = BindUtil.sanitiseBinding(binding) + "Row";
@@ -3919,6 +3923,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
+		// Escaped here because Skyve doesn't have an option to escape or sanitise complete values
+		// We have to leave it to PF to escape and unescape.
+		// Anyway, even if we could escape, it'll be copied into the autocomplete text field with the escaped values.
+		result.setEscape(true);
 		result.setForceSelection(complete == CompleteType.constrain);
 		result.setDropdown(true);
 		if (length != null) {
