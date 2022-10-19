@@ -136,7 +136,7 @@ public class ContentGarbageCollectionJob implements Job {
 											UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId " + contentId + "/" + bizId);
 										}
 										else {
-											UtilImpl.LOGGER.severe("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizid/contentId " + contentId + "/" + bizId + " as it is actually referenced by Table#BizId " + bogusContentReference);
+											UtilImpl.LOGGER.severe("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizId/contentId " + contentId + "/" + bizId + " and owning document of " + moduleName + "." + documentName + " as it is actually referenced by Table#BizId " + bogusContentReference);
 										}
 									}
 									else {
