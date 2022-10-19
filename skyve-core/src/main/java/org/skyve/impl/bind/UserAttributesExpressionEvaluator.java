@@ -28,4 +28,9 @@ public class UserAttributesExpressionEvaluator extends ExpressionEvaluator {
 											Document document) {
 		return null; // any key is valid
 	}
+	
+	@Override
+	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+		// nothing to do here as user uses keys
+	}
 }

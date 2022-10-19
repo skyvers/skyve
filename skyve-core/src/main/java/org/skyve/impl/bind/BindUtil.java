@@ -229,22 +229,31 @@ public final class BindUtil {
 	 * @param bindingPrefix	The binding prefix to prefix with.
 	 * @return	The prefixed message or null if message argument was null.
 	 */
-	public static String prefixMessageBindings(String message, String bindingPrefix) {
+	public static String prefixMessageExpressions(String message, String bindingPrefix) {
 		if (message == null) {
 			return null;
 		}
 
-		String bindingPrefixAndDot = bindingPrefix + '.';
-		
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
 		while (openCurlyBraceIndex >= 0) {
 			if ((openCurlyBraceIndex == 0) || // first char is '{' 
 					// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
 					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
-				result.insert(openCurlyBraceIndex + 1, bindingPrefixAndDot);
-				openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+
+				int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
+				if (closedCurlyBraceIndex < 0) {
+					throw new MetaDataException("Expression [" + message + "] has an unescaped opening '{' with no closing '}'");
+				}
+
+				String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
+				if (expression.length() == 2) {
+					throw new MetaDataException("Expression [" + message + "] is empty");
+				}
+				String prefixedExpression = ExpressionEvaluator.prefixBinding(expression, bindingPrefix);
+				result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, prefixedExpression);
 			}
+			openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 		}
 		return result.toString();
 	}

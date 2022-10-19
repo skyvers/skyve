@@ -35,4 +35,9 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 		}
 		return null;
 	}
+	
+	@Override
+	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+		// nothing to do here as the binding has nothing to do with role expressions
+	}
 }

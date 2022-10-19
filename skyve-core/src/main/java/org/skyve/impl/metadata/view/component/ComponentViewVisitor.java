@@ -883,7 +883,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 		if (bindingPrefix == null) {
 			return expression;
 		}
-		return BindUtil.prefixMessageBindings(expression, bindingPrefix);
+		return BindUtil.prefixMessageExpressions(expression, bindingPrefix);
 	}
 
 	private String translate(String name) {
@@ -918,6 +918,6 @@ public class ComponentViewVisitor extends ViewVisitor {
 		if (bindingPrefix == null) {
 			return binding;
 		}
-		return String.format("%s.%s", bindingPrefix, binding);
+		return bindingPrefix + '.' + binding;
 	}
 }

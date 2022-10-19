@@ -144,6 +144,45 @@ public abstract class ExpressionEvaluator {
 		return eval.validateWithoutPrefix(expressionWithoutPrefix, returnType, customer, module, document);
 	}
 	
+	public static String prefixBinding(String expression, String binding) {
+		int colonIndex = expression.indexOf(':');
+		if (colonIndex < 0) {
+			String expressionWithoutPrefix = expression.substring(1, expression.length() - 1).trim();
+
+			if (USER_EXPRESSION.equals(expressionWithoutPrefix) ||
+					USERID_EXPRESSION.equals(expressionWithoutPrefix) ||
+					USERNAME_EXPRESSION.equals(expressionWithoutPrefix) ||
+					DATAGROUPID_EXPRESSION.equals(expressionWithoutPrefix) ||
+					CONTACTID_EXPRESSION.equals(expressionWithoutPrefix) ||
+					CUSTOMER_EXPRESSION.equals(expressionWithoutPrefix) ||
+					DATE_EXPRESSION.equals(expressionWithoutPrefix) ||
+					TIME_EXPRESSION.equals(expressionWithoutPrefix) ||
+					DATETIME_EXPRESSION.equals(expressionWithoutPrefix) ||
+					TIMESTAMP_EXPRESSION.equals(expressionWithoutPrefix) ||
+					URL_EXPRESSION.equals(expressionWithoutPrefix)) {
+				return expression; // no change for these implicit expressions
+			}
+
+			StringBuilder result = new StringBuilder(expressionWithoutPrefix);
+			DEFAULT_EVALUATOR.prefixBindingWithoutPrefix(result, binding);
+			result.insert(0, '{').append('}');
+			return result.toString();
+		}
+		
+		String prefix = expression.substring(1, colonIndex).trim();
+		String expressionWithoutPrefix = expression.substring(colonIndex + 1, expression.length() - 1).trim();
+
+		ExpressionEvaluator eval = evaluators.get(prefix);
+		if (eval == null) {
+			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
+		}
+		
+		StringBuilder result = new StringBuilder(expressionWithoutPrefix);
+		eval.prefixBindingWithoutPrefix(result, binding);
+		result.insert(0, ':').insert(0, prefix).insert(0, '{').append('}');
+		return result.toString();
+	}
+	
 	private static Object process(String expression, Bean bean, boolean format) {
 		int colonIndex = expression.indexOf(':');
 		if (colonIndex < 0) {
@@ -250,4 +289,5 @@ public abstract class ExpressionEvaluator {
 															@Nullable Customer customer,
 															@Nullable Module module,
 															@Nullable Document document);
+	public abstract void prefixBindingWithoutPrefix(@Nonnull StringBuilder expression, @Nonnull String binding);
 }

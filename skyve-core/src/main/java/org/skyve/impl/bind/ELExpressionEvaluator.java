@@ -89,6 +89,23 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		return result;
 	}
 	
+	@Override
+	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+		// Append binding to "bean."
+		int beanIndex = expression.indexOf("bean.");
+		while (beanIndex >= 0) {
+			beanIndex += 5;
+			expression.insert(beanIndex, '.');
+			expression.insert(beanIndex, binding);
+			beanIndex = expression.indexOf("bean.", beanIndex);
+		}
+		// check if ends with "bean" and append binding
+		int length = expression.length();
+		if ((length >= 4) && "bean".equals(expression.substring(length - 4, length))) {
+			expression.append('.').append(binding);
+		}
+	}
+	
 	public static ELProcessor newSkyveValidationProcessor(@Nonnull Customer customer, @Nullable Document document) {
 		ELProcessor result = setupProcessor(customer, document, UserImpl.class, Map.class);
 		result.getELManager().addELResolver(new ValidationELResolver(customer));
