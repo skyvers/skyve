@@ -394,6 +394,9 @@
 				<document name="UserProxy" permission="_RU_C" />
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
+			<accesses>
+				<singular document="Startup" />
+			</accesses>
 		</role>
 		<role name="ViewUser">
 			<documentation>
