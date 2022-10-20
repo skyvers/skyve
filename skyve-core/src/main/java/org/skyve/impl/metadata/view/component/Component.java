@@ -60,6 +60,8 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	@XmlElement(name = "name", namespace = XMLMetaData.VIEW_NAMESPACE)
 	private List<ComponentNameMap> names = new ArrayList<>();
 
+	private ComponentTarget target = null;
+	
 	public String getModuleName() {
 		return moduleName;
 	}
@@ -133,14 +135,18 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		return contained;
 	}
 
+	public ComponentTarget getTarget() {
+		return target;
+	}
+	
 	public void setContained(String uxui, CustomerImpl customer, ModuleImpl owningModule, DocumentImpl owningDocument, String viewName) {
 		String binding = getBinding();
 		ModuleImpl m = null;
 		DocumentImpl d = null;
 		if (binding != null) {
 			try {
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, binding);
-				Association a = (Association) target.getAttribute();
+				TargetMetaData targetMetaData = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, binding);
+				Association a = (Association) targetMetaData.getAttribute();
 				d = (DocumentImpl) owningModule.getDocument(customer, a.getDocumentName());
 				m = (ModuleImpl) customer.getModule(d.getOwningModuleName());
 			}
@@ -175,7 +181,14 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 											" for uxui " + uxui + " does not reference a valid view " +
 											((name == null) ? viewName : name) + " in document " + m.getName() + '.' + d.getName());
 		}
-		
+
+		target = new ComponentTarget(originalView.getOverriddenCustomerName(),
+										d.getOwningModuleName(),
+										d.getName(),
+										originalView.getOverriddenUxUiName(),
+										originalView.getName(),
+										originalView.getLastModifiedMillis());
+
 		ViewImpl view = (ViewImpl) UtilImpl.cloneBySerialization(originalView);
 		// User Accesses are not required on the cloned view
 		// NB may be null if access control is turned off
