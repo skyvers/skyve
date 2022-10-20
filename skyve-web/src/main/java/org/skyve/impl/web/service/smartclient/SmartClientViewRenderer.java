@@ -898,7 +898,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 
 		if (binding == null) {
-			code.append("defaultValue:'").append(OWASP.escapeJsString(value, false, false));
+			String defaultValue = (label.getFor() == null) ? value : value + " :";
+			code.append("defaultValue:'").append(OWASP.escapeJsString(defaultValue, false, false));
 		}
 		else {
 			code.append("name:'").append(BindUtil.sanitiseBinding(binding));
@@ -920,7 +921,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderLabel(String value, Label label) {
-		// does the value have binding expressions in them? - (?s) means mutliline match
+		// does the value have binding expressions in them? - (?s) means multi-line match
 		boolean boundValue = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value); 
 		if (boundValue) {
 			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
@@ -944,7 +945,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		String binding = label.getBinding();
 		if (binding == null) {
-			code.append("value:'").append(OWASP.escapeJsString(value, false, false));
+			String defaultValue = (label.getFor() == null) ? value : value + " :";
+			code.append("value:'").append(OWASP.escapeJsString(defaultValue, false, false));
 		}
 		else {
 			code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
