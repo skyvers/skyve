@@ -447,7 +447,8 @@ System.out.println("LB="+lookup.getBinding()+":DGB="+dataGridBinding+":OB="+bind
 					queryName = targetDocumentName;
 					accesses.add(UserAccess.queryAggregate(moduleName, queryName));
 	
-					if (! Boolean.FALSE.equals(lookup.getEditable())) {
+					// If not in a grid and is editable, add the zoom in access
+					if ((dataGridBinding == null) && (! Boolean.FALSE.equals(lookup.getEditable()))) {
 						Document targetDocument = module.getDocument(customer, targetDocumentName);
 						String targetModuleName = targetDocument.getOwningModuleName();
 						accesses.add(UserAccess.singular(targetModuleName, targetDocumentName));
