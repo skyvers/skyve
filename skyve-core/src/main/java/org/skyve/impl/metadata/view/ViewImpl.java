@@ -352,8 +352,8 @@ public class ViewImpl extends Container implements View {
 				
 				@Override
 				public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+					dataGridBinding = grid.getBinding();
 					if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
-						dataGridBinding = grid.getBinding();
 						accessThroughBinding(dataGridBinding);
 					}
 				}
@@ -425,6 +425,7 @@ public class ViewImpl extends Container implements View {
 							binding = sb.toString();
 						}
 					}
+System.out.println("LB="+lookup.getBinding()+":DGB="+dataGridBinding+":OB="+binding+":DOC="+((customer == null) ? "null" : customer.getName()) + '.' + module.getName() + '.' + document.getName());
 					
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					Relation targetRelation = (Relation) target.getAttribute();
