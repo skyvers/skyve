@@ -425,7 +425,6 @@ public class ViewImpl extends Container implements View {
 							binding = sb.toString();
 						}
 					}
-System.out.println("LB="+lookup.getBinding()+":DGB="+dataGridBinding+":OB="+binding+":DOC="+((customer == null) ? "null" : customer.getName()) + '.' + module.getName() + '.' + document.getName());
 					
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					Relation targetRelation = (Relation) target.getAttribute();
