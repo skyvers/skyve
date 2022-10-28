@@ -210,7 +210,8 @@ public class SkyveContextListener implements ServletContextListener {
 		if (gcEligibleAgeMinutes != null) {
 			UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES = gcEligibleAgeMinutes.intValue();
 		}
-		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
+		UtilImpl.CONTENT_JDBC_SERVER_ARGS = getString("content", "serverArgs", content, false);
+		UtilImpl.CONTENT_REST_SERVER_URL = getString("content", "serverUrl", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
 		// Uploads settings

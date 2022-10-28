@@ -42,7 +42,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
-@Path("/")
+@Path("/api")
 @RequestScoped
 public class RestService {
 	@Context
