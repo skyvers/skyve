@@ -731,11 +731,17 @@ public class XMLMetaData {
 						removeDefaultAttributes(node, attributesToRemove);
 					}
 					
-					// remove transient element from attributes where transient is false
 					ListIterator<?> childNodes = node.elements().listIterator();
 					while (childNodes.hasNext()) {
 						Element child = (Element) childNodes.next();
-						if ("transient".equals(child.getName()) && "false".equals(child.getText())) {
+						String name = child.getName();
+						String text = child.getText();
+						// remove transient element from attributes where transient is false
+						if ("transient".equals(name) && "false".equals(text)) {
+							childNodes.remove();
+						}
+						// remove dynamic element from attributes where dynamic is false
+						if ("dynamic".equals(name) && "false".equals(text)) {
 							childNodes.remove();
 						}
 					}
