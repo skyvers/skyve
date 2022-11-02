@@ -10,6 +10,16 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 
+/**
+ * An implementation of MapModel that is driven by a meta data query.
+ * NB Skyve cannot determine the access control required to zoom in on features
+ * since they are programmatically defined and potentially hetrogeneous, so you may need to add
+ * some "singular" accesses to either the encapsulating view or to various module roles. 
+ * 
+ * @author mike
+ *
+ * @param <T>	The encapsulating bean.
+ */
 public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	private MetaDataQueryDefinition query;
 	private DocumentQuery documentQuery; // from query
