@@ -19,6 +19,7 @@ import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -161,8 +162,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						final String documentName = document.getName();
 						final UxUi uxui = UserAgent.getUxUi(request);
 						if (! user.canAccess(UserAccess.previousComplete(moduleName, documentName, binding), uxui.getName())) {
-							UtilImpl.LOGGER.info("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
-							throw new SecurityException("the previous data", userName);
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("the previous data", userName);
 						}
 
 						if (! user.canReadDocument(document)) {

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -69,8 +70,9 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 
 				if (! user.canAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName())) {
 					final String userName = user.getName();
-					UtilImpl.LOGGER.info("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
-					throw new SecurityException("this page", userName);
+					UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
+					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+					throw new AccessException("this page", userName);
 				}
 				
 				facesView.setBizModuleParameter(bizModule);
@@ -88,8 +90,9 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 
 				if (! user.canAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName())) {
 					final String userName = user.getName();
-					UtilImpl.LOGGER.info("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
-					throw new SecurityException("this page", userName);
+					UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
+					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+					throw new AccessException("this page", userName);
 				}
 
 				Module module = customer.getModule(bizModule);

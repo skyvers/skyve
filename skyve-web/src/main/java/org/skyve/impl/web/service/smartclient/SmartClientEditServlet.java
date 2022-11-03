@@ -33,6 +33,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -93,12 +94,13 @@ public class SmartClientEditServlet extends HttpServlet {
 														Module module, 
 														Document document, 
 														View view,
+														String uxui,
 														Bean bean,
 														int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
 														int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
 														boolean forApply) {
 		if (MANIPULATOR_CLASS == null) {
-			return new ViewJSONManipulator(user, module, document, view, bean, editIdCounter, createIdCounter, forApply);
+			return new ViewJSONManipulator(user, module, document, view, uxui, bean, editIdCounter, createIdCounter, forApply);
 		}
 
 		try {
@@ -257,8 +259,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	
 					if (! user.canAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName())) {
 						final String userName = user.getName();
-						UtilImpl.LOGGER.info("User " + userName + " cannot access document view " + processModule.getName() + '.' + processDocument.getName());
-						throw new SecurityException("this page", userName);
+						UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + processModule.getName() + '.' + processDocument.getName());
+						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+						throw new AccessException("this page", userName);
 					}
 
 					if (! user.canAccessDocument(processDocument)) {
@@ -737,6 +740,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																							processBean.isCreated() ? 
 																								ViewType.edit.toString() : 
 																								ViewType.create.toString()),
+																uxui,
 																processBean,
 																editIdCounter,
 																createIdCounter,
@@ -921,6 +925,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																						formBean.isCreated() ? 
 																							ViewType.edit.toString() : 
 																							ViewType.create.toString()),
+																uxui,
 																formBean, 
 																editIdCounter,
 																createIdCounter,
@@ -1078,6 +1083,7 @@ public class SmartClientEditServlet extends HttpServlet {
 							formModule,
 							formDocument,
 							renderView,
+							uxui,
 							beanToRender,
 							editIdCounter,
 							createIdCounter,
@@ -1090,6 +1096,7 @@ public class SmartClientEditServlet extends HttpServlet {
 											Module formModule,
 											Document formDocument,
 											View formView,
+											String uxui,
 											Bean formBean,
 											int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 											int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
@@ -1103,6 +1110,7 @@ public class SmartClientEditServlet extends HttpServlet {
 															formModule, 
 															formDocument, 
 															formView,
+															uxui,
 															formBean,
 															editIdCounter,
 															createIdCounter,
