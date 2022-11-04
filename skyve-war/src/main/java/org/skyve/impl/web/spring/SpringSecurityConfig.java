@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
@@ -98,6 +99,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement()
 				.sessionFixation().changeSessionId()
 				.and()
+			.addFilterBefore(new TwoFactorAuthPushEmailFilter(this.authenticationManager()),
+					UsernamePasswordAuthenticationFilter.class)
+			
 			.rememberMe()
 				.key("remember")
 				.tokenValiditySeconds(1209600)

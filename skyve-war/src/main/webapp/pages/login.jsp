@@ -1,3 +1,4 @@
+<%@page import="com.google.common.base.Strings"%>
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.Locale"%>
 <%@ page import="org.skyve.CORE"%>
@@ -8,12 +9,25 @@
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%
+	
+	String tfaToken = (String) request.getAttribute("tfaToken");
+	boolean show2FA = !Strings.isNullOrEmpty(tfaToken);
+	String user = null;
+	
+
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
-
+	
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
 
+	
+	if (show2FA) {	
+		//customer = (String) request.getAttribute("customer");
+		loginError = "1".equals(request.getAttribute("error"));
+		user = (String) request.getAttribute("user");
+	}
+	
 	// Clear the user object from the session if it exists
 	// If there is a public user set, this will ensure it doesn't get in the way.
 
@@ -165,6 +179,10 @@
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
+<div><p>show2FA : <%=show2FA%></p></div>
+<div><p>tfaToken is : <%=tfaToken%></p></div>
+<div><p>customer is : <%=customer%></p></div>
+<div><p>loginError : <%=loginError%></p></div>
 
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
@@ -204,6 +222,10 @@
 							</div>
 						<% } %>
 		                <div class="field">
+		                <% if (show2FA) { %>
+		                	<input type="password" id="user" name="user" hidden="true" value="<%=user%>"/>
+		                	<input type="password" id="customer" name="customer" hidden="true" value="<%=customer%>"/>
+		                <% } else { %>
 		                    <div class="ui left icon input">
 	                    	<% if(allowRegistration) { %>
 	                    		<i class="envelope icon"></i>
@@ -216,12 +238,15 @@
 								<input type="hidden" name="customer" value="<%=customer%>" />
 							<% } %>
 		                    </div>
+		                <% } %>
 		                </div>
 		                <div class="field">
-		                    <div class="ui left icon input">
-		                        <i class="lock icon"></i>
-		                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
-		                    </div>
+		                	<% if (!show2FA) { %>
+			                    <div class="ui left icon input">
+			                        <i class="lock icon"></i>
+			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
+			                    </div>
+		                    <% } %>
 		                </div>
 		                <div class="equal width fields">
 			                <div class="field" style="text-align: left">
@@ -234,6 +259,18 @@
 								<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
 	    					</div>
     					</div>
+    					
+    					 <div class="field">
+		                    
+		                    <% if (show2FA) { %>
+								<div class="ui left icon input">
+			                        <i class="lock icon"></i>
+			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="2FA Code"/>
+			                    </div>
+			                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
+							<% } %>
+		                </div>
+		                
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
 		            </div>
 

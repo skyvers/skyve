@@ -73,6 +73,26 @@ public class SkyveSpringSecurity {
 		return new InMemoryUserDetailsManager(user);
 	}
 	
+	/**
+	 * Email 2FA has more steps as the user needs to submit credentials twice
+	 * (first time the email is sent, second time to the 2fa code)
+	 * i.e skyve has to push the multifactor auth
+	 * 
+	 * Other 2FA services like Authenticator apps should not require this step.
+	 * 
+	 * @param createdTimestamp
+	 * @return
+	 */
+	private static boolean expectingTFAPushCode(Timestamp createdTimestamp) {
+		
+//		full implemetation needs to check not null and time as well.
+//		if (createdTimestamp == null) {
+//			return false;
+//		}
+		
+		return true;
+	}
+	
 	public UserDetailsService jdbcUserDetailsService() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;
@@ -89,16 +109,16 @@ public class SkyveSpringSecurity {
 				RDBMS rdbms = dialect.getRDBMS();
 
 				if (RDBMS.h2.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
-					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.sqlserver.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.postgresql.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 			}
 			
@@ -138,6 +158,17 @@ public class SkyveSpringSecurity {
 									authenticationFailures = 0;
 								}
 								Timestamp lastAuthenticationFailure = rs.getTimestamp(5);
+								
+								String twoFactorCode = rs.getString(6);
+								Timestamp twoFactorGenerated = rs.getTimestamp(7);
+								
+								if (expectingTFAPushCode(twoFactorGenerated)) {
+									UtilImpl.LOGGER.info("ELTRACEDEV two factor code is password");
+									password = twoFactorCode;
+								} else {
+									UtilImpl.LOGGER.info("ELTRACEDEV two factor code is NOT password");
+								}
+								
 								if ((lastAuthenticationFailure != null) &&
 										(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) && 
 										(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS > 0)) {
@@ -154,7 +185,7 @@ public class SkyveSpringSecurity {
 										}
 									}
 								}
-
+								
 								return new User(user,
 													password,
 													enabled,
