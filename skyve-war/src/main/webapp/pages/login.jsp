@@ -23,8 +23,8 @@
 
 	
 	if (show2FA) {	
-		//customer = (String) request.getAttribute("customer");
-		loginError = "1".equals(request.getAttribute("error"));
+		customer = (String) request.getAttribute("customer");
+		loginError = "1".equals(request.getAttribute("tfaerror"));
 		user = (String) request.getAttribute("user");
 	}
 	
@@ -179,10 +179,6 @@
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
-<div><p>show2FA : <%=show2FA%></p></div>
-<div><p>tfaToken is : <%=tfaToken%></p></div>
-<div><p>customer is : <%=customer%></p></div>
-<div><p>loginError : <%=loginError%></p></div>
 
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">

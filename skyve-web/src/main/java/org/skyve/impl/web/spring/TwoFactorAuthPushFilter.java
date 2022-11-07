@@ -14,6 +14,8 @@ import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -21,44 +23,21 @@ import com.google.common.base.Strings;
 
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
 	
-	
-	protected class UserDB {
-		protected String username;
-		protected String password;
-		protected String twoFactorCode; // hashed
-		protected DateTime twoFactorCodeGeneratedDateTime;
-		protected String twoFactorToken;
-		protected String bizCustomer;
-		
-		protected boolean tfaExpected() {
-			return 
-			 !Strings.isNullOrEmpty(twoFactorCode) &&
-			 !Strings.isNullOrEmpty(twoFactorToken) &&
-			 twoFactorCodeGeneratedDateTime != null;
-		}
-	}
-
-	// potentially need to do one for smartclient as well
 	private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/loginAttempt",
 			"POST");
 
 	public static final String SKYVE_SECURITY_FORM_CUSTOMER_KEY = "customer";
 	
-//	private String TWOFAParameter = "tfaCode";
 	public static String TWO_FACTOR_TOKEN_ATTRIBUTE = "tfaToken";
-	public static String USER_ATTRIBUTE = "user";
-	public static String AUTH_ERROR_ATTRIBUTE = "error";
+	public static String USER_ATTRIBUTE = "user"; 
+	public static String CUSTOMER_ATTRIBUTE = "customer";
 	
-	
-	// probably dont need this, login.jsp can just use if TWO_FACTOR_ID_ATTRIBUTE exists/null
-	public static String IS_TWO_FACTOR_ATTRIBUTE = "2FA";
-	
-	
+	private JdbcUserDetailsManager userDetailsService;
 
-	public TwoFactorAuthPushFilter(AuthenticationManager authenticationManager) {
+	public TwoFactorAuthPushFilter(AuthenticationManager authenticationManager, JdbcUserDetailsManager userDetailsService) {
 		super(authenticationManager);
 		this.setRequiresAuthenticationRequestMatcher(DEFAULT_ANT_PATH_REQUEST_MATCHER);
-		this.setUsernameParameter("user");
+		this.userDetailsService = userDetailsService;
 	}
 	
 	
@@ -69,23 +48,21 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		doFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
 	}
 
-	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
+	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
+			throws IOException, ServletException{
 		
 		if (!DEFAULT_ANT_PATH_REQUEST_MATCHER.matches(request)) {
 			chain.doFilter(request, response);
 			return;
 		}
 		
-		String username = obtainUsername(request);
-		String customer = obtainCustomer(request);
-		String password = obtainPassword(request);
-		UtilImpl.LOGGER.info("ELTRACEDEV params customer|user|password "  + customer + "|" + username + "|" + password); 
-		
-		
 		String twoFactorToken = request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE);
-		if (twoFactorToken != null) {
-			doTFACodeCheckProcess(request,response);
+		if (!Strings.isNullOrEmpty(twoFactorToken)) {
+			boolean stopSecFilterChain = doTFACodeCheckProcess(request,response);
+			
+			if (!stopSecFilterChain) {
+				chain.doFilter(request, response);
+			}
 			return;
 		}
 		
@@ -93,11 +70,14 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		// if it gets to here, there is no two factor token.
 		// take the opportunity in this method to clear the old TFA details if they exist;
 		if (customerRequiresTFAPushNotification() ) {
-			doPushNotificationProcess(request, response);
+			boolean stopSecFilterChain = doPushNotificationProcess(request, response);
+			
+			if (!stopSecFilterChain) {
+				chain.doFilter(request, response);
+			}
 			return;
 		}
 
-		UtilImpl.LOGGER.info("ELTRACEDEV pass onto normal authentication"); 
 		chain.doFilter(request, response);
 
 	}
@@ -111,48 +91,50 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * 
 	 * @param request
 	 * @param response
+	 * @return true: halt at this filter. false: continue to next security filter.
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void doPushNotificationProcess(HttpServletRequest request, HttpServletResponse response) 
+	private boolean doPushNotificationProcess(HttpServletRequest request, HttpServletResponse response) 
 			throws IOException, ServletException {
 		
 		String username = obtainUsername(request);
 		String customer = obtainCustomer(request);
 		
-		UserDB user = getUserDB(customer, username);
+		UserTFA user = getUserDB(username);
 		
 		// if cannot authenticate, let the security chain continue
 		// don't send the push notification
 		// let whoever handles incorrect credentials take over
 		// i.e fall out of this filter without doing anything (call chain.doFilter(...))
 		if (canAuthenticateWithPassword(request, user)) {
-			UtilImpl.LOGGER.info("ELTRACEDEV send 2fa code push notification"); 
+			UtilImpl.LOGGER.info("Sending 2fa code push notification"); 
 			
 			
 			String twoFactorCodeClearText = generateTFACode();
 			
 			DateTime generatedDateTime = new DateTime();
-			user.twoFactorCodeGeneratedDateTime = generatedDateTime;
-			user.twoFactorCode = EXT.hashPassword(twoFactorCodeClearText);
-			user.twoFactorToken = generateTFAPushId(generatedDateTime);
+			user.setTfaCodeGeneratedDateTime(generatedDateTime);
+			user.setTfaCode(EXT.hashPassword(twoFactorCodeClearText));
+			user.setTfaToken(generateTFAPushId(generatedDateTime));
 			
-			updateUserDB(user);
+			updateUserTFADetails(user);
 			
 			pushNotifcation(twoFactorCodeClearText);
 
 			// redirect to 2FA code entry page
 			TwoFactorAuthenticationForwardHandler handler = new TwoFactorAuthenticationForwardHandler("/login");
-//			this should be on the page/cookie?
-//			request.setAttribute("customer", "demo");
-			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.twoFactorToken);
-			request.setAttribute(IS_TWO_FACTOR_ATTRIBUTE, "1");
-			request.setAttribute(USER_ATTRIBUTE, super.obtainUsername(request));
+
+			request.setAttribute(CUSTOMER_ATTRIBUTE, customer);
+			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
+			request.setAttribute(USER_ATTRIBUTE, user.getUser());
 			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", false));
-			return;
+			return true;
 		} else {
 			clearTFADetails(user);
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -161,53 +143,65 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * 
 	 * @param request
 	 * @param response
+	 * @return true: halt at this filter. false: continue to next security filter.
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private void doTFACodeCheckProcess(HttpServletRequest request, HttpServletResponse response) 
+	private boolean doTFACodeCheckProcess(HttpServletRequest request, HttpServletResponse response) 
 			throws IOException, ServletException {
 		
 		String twoFactorToken = request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE);
-		
-		if (Strings.isNullOrEmpty(twoFactorToken)) {
-			// should not have entered this method
-			return;
-		}
-		
 		String username = obtainUsername(request);
-		String customer = obtainCustomer(request);
 		String tfaCode = obtainPassword(request);
-		UserDB user = getUserDB(customer, username);
+		UserTFA user = getUserDB(username);
 		
-		if (!user.tfaExpected() || !twoFactorToken.equals(user.twoFactorToken) || tfaCodeExpired(user.twoFactorCodeGeneratedDateTime)) {
-			// fall straight through and do default auth failure
-			
-			// maybe we can do something nice if the code has expired
-			return;
+		if (!tfaCodesPopulated(user) || !twoFactorToken.equals(user.getTfaToken()) || tfaCodeExpired(user.getTfaCodeGeneratedDateTime())) {
+			UtilImpl.LOGGER.info(String.format("Inconsistent TFA details. TFA Codes populated : %s, TFA Token matches: %s, TFA Code Expired: %s", 
+					String.valueOf(tfaCodesPopulated(user)),
+					String.valueOf(twoFactorToken.equals(user.getTfaToken())),
+					String.valueOf(tfaCodeExpired(user.getTfaCodeGeneratedDateTime()))
+					));
+			return false;
 		}
-		
 		
 		// have the right token, check the code, if the code is wrong, show a nice error message and allow them to retry
-		if (!EXT.checkPassword(tfaCode, user.password)) {
+		if (!EXT.checkPassword(tfaCode, user.getTfaCode())) {
+			UtilImpl.LOGGER.info("Provided TFA code does not match."); 
+			
 			// check if this keeps the old attributes (if not set them again)
 			TwoFactorAuthenticationForwardHandler handler = new TwoFactorAuthenticationForwardHandler("/login");
-			request.setAttribute(AUTH_ERROR_ATTRIBUTE, "1");
+			
+			request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
+			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
+			request.setAttribute(USER_ATTRIBUTE, user.getUser());
 			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", true));
-			return;
+			return true;
 		}
+		
+		return false;
 	}
 	
-	private void clearTFADetails(UserDB user) {
+	private void clearTFADetails(UserTFA user) {
+		boolean edited = false;
 		
-		if (user.twoFactorCodeGeneratedDateTime != null) {
-			user.twoFactorCodeGeneratedDateTime = null;
-			user.twoFactorCode = null;
-			user.twoFactorToken = null;
-			
-			updateUserDB(user);
+		if (user.getTfaCodeGeneratedDateTime() != null) {
+			user.setTfaCodeGeneratedDateTime(null);
+			edited = true;
 		}
 		
+		if (user.getTfaCode() != null) {
+			user.setTfaCode(null);
+			edited = true;
+		}
 		
+		if (user.getTfaToken() != null) {
+			user.setTfaToken(null);
+			edited = true;
+		}
+
+		if (edited) {
+			updateUserTFADetails(user);
+		}
 	}
 	
 	private String obtainCustomer(HttpServletRequest request) {
@@ -222,15 +216,30 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	/**
 	 * Get the user details required for this filter
 	 * 
-	 * @param customerName
-	 * @param username
+	 * @param username	customer/username
 	 * @return
+	 * @throws Exception 
 	 */
-	protected abstract UserDB getUserDB(String customerName, String username);
+	protected UserTFA getUserDB(String username) {
+		
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		
+		if (userDetails instanceof UserTFA) {
+			return (UserTFA) userDetails;
+		} else {
+			Exception e = new Exception("Two Factor Authentication expects the user details service : skyve.jdbcUserTFADetailsService()");
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
-	protected abstract void updateUserDB(UserDB user);
+	protected void updateUserTFADetails(UserTFA user) {
+		userDetailsService.updateUser(user);
+	}
 	
-	protected abstract boolean customerRequiresTFAPushNotification() ;
+	protected boolean customerRequiresTFAPushNotification() {
+		return true;
+	}
 	
 	protected String generateTFAPushId(DateTime generatedDateTime) {
 		return UUID.randomUUID().toString() + "-" + Long.toString(generatedDateTime.getTime());
@@ -247,20 +256,34 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param request
 	 * @return
 	 */
-	protected boolean canAuthenticateWithPassword(HttpServletRequest request, UserDB user) {
+	protected boolean canAuthenticateWithPassword(HttpServletRequest request, UserTFA user) {
 		String password = obtainPassword(request);
 		password = (password != null) ? password : "";
 		
-		return EXT.checkPassword(password, user.password);
+		return EXT.checkPassword(password, user.getPassword());
 	}
 	
 	protected boolean tfaCodeExpired(DateTime generatedDateTime) {
 		// 5min worth of milliseconds
-		long expiryMillis = 300000l;
+		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT;
 		
 		long generatedTime = generatedDateTime.getTime();
 		long currentTime = new DateTime().getTime();
 		
 		return currentTime > generatedTime + expiryMillis;
 	}
+	
+	/**
+	 * Check the user and see if they have the necessary TFA codes populated
+	 * 
+	 * @param user
+	 * @return
+	 */
+	protected boolean tfaCodesPopulated(UserTFA user) {
+		return 
+		 !Strings.isNullOrEmpty(user.getTfaCode()) &&
+		 !Strings.isNullOrEmpty(user.getTfaToken()) &&
+		 user.getTfaCodeGeneratedDateTime() != null;
+	}
+	
 }

@@ -14,12 +14,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * This class supplies named spring beans to the OOTB security.xml
@@ -99,9 +101,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement()
 				.sessionFixation().changeSessionId()
 				.and()
-			.addFilterBefore(new TwoFactorAuthPushEmailFilter(this.authenticationManager()),
-					UsernamePasswordAuthenticationFilter.class)
-			
+			.addFilterBefore(getTwoFactorAuthPushFilter(),UsernamePasswordAuthenticationFilter.class)
+			.addFilterAfter(getTwoFactorAuthCleanupFilter(),UsernamePasswordAuthenticationFilter.class)
 			.rememberMe()
 				.key("remember")
 				.tokenValiditySeconds(1209600)
@@ -175,6 +176,28 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     public ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();
     }
+ 	
+ 	private JdbcUserDetailsManager getUserTFAService() {
+ 		return skyve.jdbcUserTFADetailsService();
+ 	}
+ 	
+ 	private GenericFilterBean getTwoFactorAuthPushFilter() throws Exception {
+ 		
+ 		if ("EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE)) {
+ 			return new TwoFactorAuthPushEmailFilter(this.authenticationManager(),this.getUserTFAService());
+ 		}
+
+ 		return new NoopFilter();
+ 	}
+ 	
+ 	private GenericFilterBean getTwoFactorAuthCleanupFilter() throws Exception {
+ 		
+ 		if ("EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE)) {
+ 			return new TwoFactorAuthCleanupFilter(this.getUserTFAService());
+ 		}
+
+ 		return new NoopFilter();
+ 	}
 }
 /*
     <!-- WAFFLE Configuration -->

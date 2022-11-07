@@ -681,6 +681,9 @@
 		<property name="activated" />
 		<property name="activationCode" length="36" />
 		<property name="activationCodeCreationDateTime" type="DateTime" />
+		<property name="twoFactorCode" length="100" />
+		<property name="twoFactorCodeGeneratedDateTime" type="DateTime" />
+		<property name="twoFactorToken" length="100" />
 		<filter name="adminUserNoneFilter" condition="1=0"/>
 		<filter name="adminUserCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
