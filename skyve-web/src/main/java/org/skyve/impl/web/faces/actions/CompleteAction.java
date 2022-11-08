@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -92,8 +93,9 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 			final String moduleName = document.getOwningModuleName();
 			final String documentName = document.getName();
 			if (! user.canAccess(UserAccess.previousComplete(moduleName, documentName, binding), facesView.getUxUi().getName())) {
-				UtilImpl.LOGGER.info("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
-				throw new SecurityException("the previous data", userName);
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("the previous data", userName);
 			}
 			
 	    	if (! user.canReadDocument(document)) {

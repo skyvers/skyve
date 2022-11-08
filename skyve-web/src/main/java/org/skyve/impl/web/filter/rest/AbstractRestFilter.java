@@ -19,16 +19,19 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 
 public abstract class AbstractRestFilter implements Filter {
+	protected static final String REALM_INIT_PARAMETER = "realm";
+	protected static final String UNSECURED_INIT_PARAMETER = "unsecured";
+	
 	protected String realm = "Skyve";
 	protected String[] unsecuredURLPrefixes;
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		String param = Util.processStringValue(config.getInitParameter("realm"));
+		String param = Util.processStringValue(config.getInitParameter(REALM_INIT_PARAMETER));
 		if (param != null) {
 			realm = param;
 		}
-		param = Util.processStringValue(config.getInitParameter("unsecured"));
+		param = Util.processStringValue(config.getInitParameter(UNSECURED_INIT_PARAMETER));
 		if (param != null) {
 			unsecuredURLPrefixes = param.split("\n");
 			for (int i = 0, l = unsecuredURLPrefixes.length; i < l; i++) {
@@ -62,10 +65,20 @@ public abstract class AbstractRestFilter implements Filter {
         return false;
 	}
 	
+	public static void error(HttpServletResponse response, String message) {
+			error(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
+	}
+
 	public static void error(Persistence persistence, 
 								HttpServletResponse response, 
 								String message) {
 		error(persistence, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
+	}
+
+	public static void error(HttpServletResponse response, 
+								int status,
+								String message) {
+		error(null, response, status, null, message);
 	}
 
 	public static void error(Persistence persistence, 

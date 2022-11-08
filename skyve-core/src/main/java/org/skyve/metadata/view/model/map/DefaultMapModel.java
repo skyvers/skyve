@@ -8,6 +8,16 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
+/**
+ * Extend to add map features to a map.
+ * NB Skyve cannot determine the access control required to zoom in on features
+ * since they are programmatically defined and hetrogeneous, so you may need to add
+ * some "singular" accesses to either the encapsulating view or to various module roles. 
+ * 
+ * @author mike
+ *
+ * @param <T>	The encapsulating bean.
+ */
 public abstract class DefaultMapModel<T extends Bean> extends MapModel<T> {
 	private String geometryBinding;
 	public final String getGeometryBinding() {

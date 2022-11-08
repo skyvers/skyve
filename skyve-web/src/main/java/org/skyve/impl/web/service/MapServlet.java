@@ -21,7 +21,7 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -142,16 +142,18 @@ public class MapServlet extends HttpServlet {
 		if (query == null) {
 			if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName())) {
 				final String userName = user.getName();
-				UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
-				throw new SecurityException("this data", userName);
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("this data", userName);
 			}
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 		}
 		else {
 			if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName())) {
 				final String userName = user.getName();
-				UtilImpl.LOGGER.info("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
-				throw new SecurityException("this data", userName);
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("this data", userName);
 			}
 		}
 		if (query == null) {
@@ -194,8 +196,9 @@ public class MapServlet extends HttpServlet {
 		UxUi uxui = UserAgent.getUxUi(request);
 		if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
 			final String userName = user.getName();
-			UtilImpl.LOGGER.info("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
-			throw new SecurityException("this data", userName);
+			UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+			UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+			throw new AccessException("this data", userName);
 		}
 
 		// Invoke the model

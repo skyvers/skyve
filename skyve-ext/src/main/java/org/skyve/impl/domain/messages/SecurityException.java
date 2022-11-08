@@ -2,10 +2,11 @@ package org.skyve.impl.domain.messages;
 
 import org.skyve.domain.messages.DomainException;
 
+/**
+ * Thrown when the current user does not have privileges to 
+ * a perform an operation on a data entity or web resource.
+ */
 public class SecurityException extends DomainException {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 2941808458696267548L;
 
 	public SecurityException(String resource, String userName) {

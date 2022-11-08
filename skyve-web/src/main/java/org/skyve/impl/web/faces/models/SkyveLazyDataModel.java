@@ -21,6 +21,7 @@ import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.util.UtilImpl;
@@ -93,8 +94,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		if (modelName != null) {
 			if (! u.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), view.getUxUi().getName())) {
 				final String userName = u.getName();
-				UtilImpl.LOGGER.info("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
-				throw new SecurityException("this data", userName);
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("this data", userName);
 			}
 			d = m.getDocument(c, documentName);
 			model = d.getListModel(c, modelName, true);
@@ -110,16 +112,18 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 					if (documentName == null) { // query name is the document name
 						if (! u.canAccess(UserAccess.documentAggregate(moduleName, queryName), view.getUxUi().getName())) {
 							final String userName = u.getName();
-							UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + queryName);
-							throw new SecurityException("this data", userName);
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + queryName);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("this data", userName);
 						}
 						query = m.getDocumentDefaultQuery(c, queryName);
 					}
 					else {
 						if (! u.canAccess(UserAccess.documentAggregate(moduleName, documentName), view.getUxUi().getName())) {
 							final String userName = u.getName();
-							UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + documentName);
-							throw new SecurityException("this data", userName);
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentName);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("this data", userName);
 						}
 						query = m.getDocumentDefaultQuery(c, documentName);
 					}
@@ -127,8 +131,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 				else {
 					if (! u.canAccess(UserAccess.queryAggregate(moduleName, queryName), view.getUxUi().getName())) {
 						final String userName = u.getName();
-						UtilImpl.LOGGER.info("User " + userName + " cannot access query " + moduleName + '.' + queryName);
-						throw new SecurityException("this data", userName);
+						UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + queryName);
+						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+						throw new AccessException("this data", userName);
 					}
 				}
 				if (query == null) {
@@ -138,8 +143,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 			else {
 				if (! u.canAccess(UserAccess.documentAggregate(moduleName, documentName), view.getUxUi().getName())) {
 					final String userName = u.getName();
-					UtilImpl.LOGGER.info("User " + userName + " cannot access document " + moduleName + '.' + documentName);
-					throw new SecurityException("this data", userName);
+					UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentName);
+					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+					throw new AccessException("this data", userName);
 				}
 				query = m.getDocumentDefaultQuery(c, documentName);
 				if (query == null) {

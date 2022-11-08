@@ -69,12 +69,12 @@ public class JDBCRemoteContentManagerServer {
 	
 	public static void startup() {
 		// Start TCP server
-		if (UtilImpl.CONTENT_SERVER_ARGS == null) {
+		if (UtilImpl.CONTENT_JDBC_SERVER_ARGS == null) {
 			throw new IllegalStateException("JDBCRemoteContentManagerServer is configured for the contentManager in the factories section of the json config but there are no server arguments defined in the content section.");
 		}
 
 		try {
-			server = Server.createTcpServer(UtilImpl.CONTENT_SERVER_ARGS.split("\\s+")).start();
+			server = Server.createTcpServer(UtilImpl.CONTENT_JDBC_SERVER_ARGS.split("\\s+")).start();
 			
 			// register the database functions
 			Util.LOGGER.info("REGISTER DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");

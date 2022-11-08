@@ -12,6 +12,9 @@ import org.skyve.util.Binder;
 /**
  * A class to extend to make a quick model based on a collection or an association within the edited bean.
  * The referenceBinding can be compound.
+ * NB Skyve cannot determine the access control required to zoom in on features
+ * since they are programmatically defined and potentially hetrogeneous, so you may need to add
+ * some "singular" accesses to either the encapsulating view or to various module roles. 
  * 
  * @author mike
  *
