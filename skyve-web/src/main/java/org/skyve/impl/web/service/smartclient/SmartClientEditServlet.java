@@ -100,7 +100,7 @@ public class SmartClientEditServlet extends HttpServlet {
 														int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
 														boolean forApply) {
 		if (MANIPULATOR_CLASS == null) {
-			return new ViewJSONManipulator(user, module, document, view, uxui, bean, editIdCounter, createIdCounter, forApply);
+			return new ViewJSONManipulator(user, module, document, view, bean, editIdCounter, createIdCounter, forApply);
 		}
 
 		try {

@@ -58,7 +58,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	
 	public static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, String uxui, boolean noCreateView) {
 		if (RENDERER_CLASS == null) {
-			return new SmartClientViewRenderer(user, module, document, view, uxui, noCreateView);
+			return new SmartClientViewRenderer(user, module, document, view, noCreateView);
 		}
 		
 		try {
