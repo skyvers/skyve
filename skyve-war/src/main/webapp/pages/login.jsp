@@ -13,6 +13,7 @@
 	String tfaToken = (String) request.getAttribute("tfaToken");
 	boolean show2FA = !Strings.isNullOrEmpty(tfaToken);
 	String user = null;
+	boolean error2FA = false;
 	
 
 	String basePath = Util.getSkyveContextUrl() + "/";
@@ -24,7 +25,7 @@
 	
 	if (show2FA) {	
 		customer = (String) request.getAttribute("customer");
-		loginError = "1".equals(request.getAttribute("tfaerror"));
+		error2FA = "1".equals(request.getAttribute("tfaerror"));
 		user = (String) request.getAttribute("user");
 	}
 	
@@ -63,7 +64,15 @@
 	boolean mobile = UserAgent.getType(request).isMobile();
 	
 	// is self-registration enabled
-	boolean allowRegistration = UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION;
+	boolean allowRegistration = UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && !show2FA;
+	
+	String passwordEmptyError = show2FA ? 
+			Util.i18n("page.login.password.error.2FACode.required", locale) : 
+				Util.i18n("page.login.password.error.required", locale);
+	
+	String loginBanner = show2FA ? 
+			Util.i18n("page.login.2FACode.banner", locale) :
+				Util.i18n("page.login.banner", locale);
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -141,7 +150,7 @@
 			                rules: [
 			                    {
 			                        type   : 'empty',
-			                        prompt : '<%=Util.i18n("page.login.password.error.required", locale)%>'
+			                        prompt : '<%=passwordEmptyError%>'
 			                    }
 			                ]
 			            }
@@ -200,13 +209,21 @@
 			        	</p>
             		</div>
 				<% } %>
+				<% if (error2FA) { %>
+            		<div class="ui error message">
+	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
+			        	<p>
+			        		<%=Util.i18n("page.loginError.2FACode.invalid", locale)%>
+			        	</p>
+            		</div>
+				<% } %>
 		        <form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 		            <div class="ui segment">
 		            	<div class="ui header">
 		            		<% if (request.getUserPrincipal() != null) { %>
 								<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
 							<% } else { %>
-								<%=Util.i18n("page.login.banner", locale)%>
+								<%=loginBanner%>
 							<% } %>
 		            	</div>
 						<% if (customer == null) { %>
@@ -245,6 +262,7 @@
 		                    <% } %>
 		                </div>
 		                <div class="equal width fields">
+		                	<% if (!show2FA) { %>
 			                <div class="field" style="text-align: left">
 			                	<div class="ui checkbox">
 			                		<input type="checkbox" tabindex="0" class="hidden" id="remember" name="remember">
@@ -254,6 +272,7 @@
 							<div class="field" style="text-align: right;">
 								<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
 	    					</div>
+	    					 <% } %>
     					</div>
     					
     					 <div class="field">

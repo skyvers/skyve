@@ -102,7 +102,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.sessionFixation().changeSessionId()
 				.and()
 			.addFilterBefore(getTwoFactorAuthPushFilter(),UsernamePasswordAuthenticationFilter.class)
-			.addFilterAfter(getTwoFactorAuthCleanupFilter(),UsernamePasswordAuthenticationFilter.class)
 			.rememberMe()
 				.key("remember")
 				.tokenValiditySeconds(1209600)
@@ -116,7 +115,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
-				.successHandler(new SkyveAuthenticationSuccessHandler())
+				.successHandler(new SkyveAuthenticationSuccessHandler(this.getUserTFAService()))
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getLoggedOutUrl())
@@ -185,15 +184,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
  		
  		if ("EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE)) {
  			return new TwoFactorAuthPushEmailFilter(this.authenticationManager(),this.getUserTFAService());
- 		}
-
- 		return new NoopFilter();
- 	}
- 	
- 	private GenericFilterBean getTwoFactorAuthCleanupFilter() throws Exception {
- 		
- 		if ("EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE)) {
- 			return new TwoFactorAuthCleanupFilter(this.getUserTFAService());
  		}
 
  		return new NoopFilter();

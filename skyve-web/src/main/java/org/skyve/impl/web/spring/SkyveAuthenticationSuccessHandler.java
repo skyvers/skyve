@@ -9,7 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
@@ -23,6 +25,13 @@ import org.springframework.security.web.savedrequest.SavedRequest;
  * @author mike
  */
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+	
+	private JdbcUserDetailsManager userDetailsService;
+	
+	public SkyveAuthenticationSuccessHandler(JdbcUserDetailsManager userDetailsService) {
+		this.userDetailsService = userDetailsService;
+	}
+	
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request,
 											HttpServletResponse response,
@@ -69,9 +78,23 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			redirectUrl = Util.getHomeUrl();
 		}
 		
+		if (SkyveSpringSecurity.isTFAPush() && userDetailsService != null) {
+			UtilImpl.LOGGER.info("Clearing up 2fa codes.");
+			cleanupTFACodes(request);
+		}
+		
 		UtilImpl.LOGGER.info("Redirected to " + redirectUrl);
 		requestCache.removeRequest(request, response);
 		clearAuthenticationAttributes(request);
 		getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+	}
+	
+	private void cleanupTFACodes(HttpServletRequest request) {
+		String username =  request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
+		UserTFA user = (UserTFA) this.userDetailsService.loadUserByUsername(username);
+		user.setTfaCodeGeneratedDateTime(null);
+		user.setTfaCode(null);
+		user.setTfaToken(null);
+		userDetailsService.updateUser(user);
 	}
 }
