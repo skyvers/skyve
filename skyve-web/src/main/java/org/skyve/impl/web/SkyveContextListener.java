@@ -603,6 +603,10 @@ public class SkyveContextListener implements ServletContextListener {
 		if (value != null) {
 			UtilImpl.TWO_FACTOR_AUTH_TYPE = value;
 		}
+		value = getString("account", "2faEmailFromAddress", account, false);
+		if (value != null) {
+			UtilImpl.TWO_FACTOR_FROM_EMAIL = value;
+		}
 		
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);

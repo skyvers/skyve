@@ -275,6 +275,7 @@ public class UtilImpl {
 	//2fa auth type, null for none. Possible values null/EMAIL
 	public static String TWO_FACTOR_AUTH_TYPE = null;
 	public static long TWO_FACTOR_CODE_TIMEOUT = 0;
+	public static String TWO_FACTOR_FROM_EMAIL = null;
 
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;

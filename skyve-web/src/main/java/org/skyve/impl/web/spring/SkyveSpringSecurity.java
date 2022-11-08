@@ -320,29 +320,40 @@ public class SkyveSpringSecurity {
 			// Set the skyve query
 			{
 				// Don't include bizCustomer in the where clause if single customer to allow for better data store index usage.
-				String whereClause = "where userName = ?";
+				String whereClause = "where u.userName = ?";
 				if (UtilImpl.CUSTOMER == null) { // multi-tennant
-					whereClause = "where bizCustomer = ? and userName = ?";
+					whereClause = "where u.bizCustomer = ? and u.userName = ?";
 				}
 				
 				// this should be the same for all dialects
-				skyveUserTFAUpdate = "update ADM_SecurityUser set twoFactorCode = ? , twoFactorToken = ?, twoFactorCodeGeneratedDateTime = ? " + whereClause;
+				skyveUserTFAUpdate = "update ADM_SecurityUser as u set u.twoFactorCode = ? , u.twoFactorToken = ?, u.twoFactorCodeGeneratedDateTime = ? " + whereClause;
 					
 				SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 				RDBMS rdbms = dialect.getRDBMS();
-
+				
 				if (RDBMS.h2.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorToken, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
-					
+					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
+							+ " left join ADM_Contact as c on u.contact_id = c.bizId " 
+							+ whereClause;
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
-					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorToken, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select concat(u.bizCustomer, '/', u.userName), u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true),  u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
+							+ " left join ADM_Contact as c on u.contact_id = c.bizId " 
+							+ whereClause;
 				}
 				else if (RDBMS.sqlserver.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorToken, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select u.bizCustomer + '/' + u.userName, u.password, case when coalesce(u.inactive, 0) = 0 and coalesce(u.activated, 1) = 1 then 1 else 0 end, u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
+							+ " left join ADM_Contact c on u.contact_id = c.bizId " 
+							+ whereClause;
 				}
 				else if (RDBMS.postgresql.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorToken, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not coalesce(u.inactive, false) and coalesce(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
+							+ " left join ADM_Contact c on u.contact_id = c.bizId " 
+							+ whereClause;
 				}
 			}
 			
@@ -401,7 +412,7 @@ public class SkyveSpringSecurity {
 								String twoFactorToken = rs.getString(7);
 								Timestamp twoFactorGenerated = rs.getTimestamp(8);
 								DateTime tfaGenTime = twoFactorGenerated == null ? null : new DateTime(twoFactorGenerated.getTime());
-								
+								String email = rs.getString(9);
 								
 								if ((lastAuthenticationFailure != null) &&
 										(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) && 
@@ -432,7 +443,8 @@ public class SkyveSpringSecurity {
 													usernameOnly,
 													twoFactorCode,
 													twoFactorToken,
-													tfaGenTime);
+													tfaGenTime,
+													email);
 							}
 						},
 						// 2 params for multi-tennant

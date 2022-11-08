@@ -120,7 +120,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			
 			updateUserTFADetails(user);
 			
-			pushNotifcation(twoFactorCodeClearText);
+			pushNotifcation(user, twoFactorCodeClearText);
 
 			// redirect to 2FA code entry page
 			TwoFactorAuthenticationForwardHandler handler = new TwoFactorAuthenticationForwardHandler("/login");
@@ -211,7 +211,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	/**
 	 * send the push notification
 	 */
-	protected abstract void pushNotifcation(String code);
+	protected abstract void pushNotifcation(UserTFA user, String code);
 	
 	/**
 	 * Get the user details required for this filter

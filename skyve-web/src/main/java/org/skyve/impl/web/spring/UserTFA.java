@@ -19,17 +19,19 @@ public class UserTFA extends User {
 	// "super.username" customer/user 
 	// skye customer needs to be passed in with username so we know what to query 
 	private String user;
+	private String email;
 
 	public UserTFA(String username, String password, boolean enabled, boolean accountNonExpired,
 			boolean credentialsNonExpired, boolean accountNonLocked,
 			Collection<? extends GrantedAuthority> authorities,
-			String customer,  String user, String tfaCode, String tfaToken,  DateTime tfaCodeGeneratedDateTime ) {
+			String customer,  String user, String tfaCode, String tfaToken,  DateTime tfaCodeGeneratedDateTime, String email ) {
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 		this.tfaCode = tfaCode;
 		this.tfaToken = tfaToken;
 		this.tfaCodeGeneratedDateTime = tfaCodeGeneratedDateTime;
 		this.customer = customer;
 		this.user = user;
+		this.email = email;
 	}
 
 
@@ -72,5 +74,10 @@ public class UserTFA extends User {
 	public void setUser(String user) {
 		this.user = user;
 	}
-	
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
 }
