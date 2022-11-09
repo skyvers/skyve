@@ -52,7 +52,7 @@ public class SkyveSpringSecurity {
 		result.setDataSource(dataSource());
 		return result;
 	}
-
+	
 	@SuppressWarnings("static-method")
 	public DataSource dataSource() {
 		try {
@@ -90,7 +90,7 @@ public class SkyveSpringSecurity {
 			return false;
 		}
 		
-		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT;
+		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT_SECONDS * 1000;
 		
 		long generatedTime = createdTimestamp.getTime();
 		long currentTime = new DateTime().getTime();

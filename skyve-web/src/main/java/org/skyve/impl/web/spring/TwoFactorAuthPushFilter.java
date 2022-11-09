@@ -113,7 +113,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		// let whoever handles incorrect credentials take over
 		// i.e fall out of this filter without doing anything (call chain.doFilter(...))
 		if (canAuthenticateWithPassword(request, user)) {
-			UtilImpl.LOGGER.info("Sending 2fa code push notification"); 
+			UtilImpl.LOGGER.info("Sending 2fa code push notification "); 
 			
 			// save previous selected remember me token so it can be sent back
 			boolean rememberMe = request.getParameter(REMEMBER_PARAMETER) != null;
@@ -273,7 +273,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	protected boolean tfaCodeExpired(DateTime generatedDateTime) {
 		// 5min worth of milliseconds
-		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT;
+		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT_SECONDS * 1000;
 		
 		long generatedTime = generatedDateTime.getTime();
 		long currentTime = new DateTime().getTime();

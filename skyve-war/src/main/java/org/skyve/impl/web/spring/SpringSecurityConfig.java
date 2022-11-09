@@ -104,7 +104,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			
 			.rememberMe()
 				.key("remember")
-				.tokenValiditySeconds(1209600)
+				.tokenValiditySeconds(getRememberMeTokenTimeout())
 				.rememberMeParameter("remember")
 				.rememberMeCookieName("remember")
 				.tokenRepository(tokenRepository())
@@ -188,6 +188,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
  		}
 
  		return new NoopFilter();
+ 	}
+ 	
+ 	private int getRememberMeTokenTimeout() {
+ 		return UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60;
  	}
 }
 /*
