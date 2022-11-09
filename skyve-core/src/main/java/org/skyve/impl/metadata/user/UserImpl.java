@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
@@ -701,7 +702,7 @@ public class UserImpl implements User {
 		boolean result = canAccessWithDevMode(access, uxui);
 		// If no access and we're in dev mode and the ACL was established before this call,
 		// clear the ACL and retry just in case there was a UI, menu or router change that is picked up.
-		if (UtilImpl.DEV_MODE && aclCreated && (! result)) { // dev mode and no established ACL and no access
+		if (UtilImpl.DEV_MODE && aclCreated && (! result)) { // dev mode and established ACL and no access
 			accesses.clear(); // clear the ACL
 			result = canAccessWithDevMode(access, uxui); // retry
 		}
@@ -712,7 +713,7 @@ public class UserImpl implements User {
 	private boolean canAccessWithDevMode(UserAccess access, String uxui) {
 		// Create the ACL if not already created
 		if (accesses.isEmpty()) {
-			new AccessProcessor(getCustomer(), moduleMenuMap, accesses).process();
+			new AccessProcessor((CustomerImpl) getCustomer(), moduleMenuMap, accesses).process();
 		}
 
 		// Check access exists by key

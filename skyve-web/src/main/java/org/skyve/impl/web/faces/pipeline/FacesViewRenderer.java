@@ -189,10 +189,11 @@ public class FacesViewRenderer extends ViewRenderer {
 								Module module,
 								Document document,
 								View view,
+								String uxui,
 								String widgetId,
 								ComponentBuilder cb,
 								LayoutBuilder lb) {
-		super(user, module, document, view);
+		super(user, module, document, view, uxui);
 		String viewName = view.getName();
 		createView = ViewType.create.toString().equals(viewName);
 		this.widgetId = widgetId;

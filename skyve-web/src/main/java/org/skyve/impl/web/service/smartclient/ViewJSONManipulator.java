@@ -282,6 +282,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 									Module module, 
 									Document document, 
 									View view,
+									String uxui,
 									Bean bean,
 									int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
 									int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
@@ -289,7 +290,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 		super((CustomerImpl) user.getCustomer(),
 				(ModuleImpl) module,
 				(DocumentImpl) document,
-				(ViewImpl) view);
+				(ViewImpl) view,
+				uxui);
 		this.user = user;
 		this.bean = bean;
 		this.editIdCounter = editIdCounter;

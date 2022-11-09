@@ -16,13 +16,15 @@ import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
 public class ViewJSONManipulatorTest extends AbstractSkyveTest {
+	private static final String TEST_UXUI = "external";
+	
 	@Test
 	public void testAllFormatsVisible()
 			throws Exception {
 		View view = createView();
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, bean, 0, 0, false);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
@@ -39,7 +41,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		b2.setInvisibleConditionName("true");
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, bean, 0, 0, false);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
@@ -56,7 +58,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		b1.setInvisibleConditionName("true");
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, bean, 0, 0, false);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
@@ -73,7 +75,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		view.getContained().add(createForm());
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
-		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, bean, 0, 0, false);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);

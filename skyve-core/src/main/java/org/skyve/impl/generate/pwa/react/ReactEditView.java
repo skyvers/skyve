@@ -42,12 +42,12 @@ public class ReactEditView extends ReactComponent {
 
 		User u = CORE.getUser();
 		if (editView != null) {
-			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, editView, imports, bothViews);
+			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, editView, generator.uxui, imports, bothViews);
 			v.visit();
 			editJsx = v.getResult().toString();
 		}
 		if (createView != null) {
-			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, createView, imports, bothViews);
+			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, createView, generator.uxui, imports, bothViews);
 			v.visit();
 			createJsx = v.getResult().toString();
 		}

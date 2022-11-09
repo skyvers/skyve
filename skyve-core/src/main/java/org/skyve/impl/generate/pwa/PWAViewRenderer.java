@@ -119,8 +119,8 @@ public class PWAViewRenderer extends ViewRenderer {
 	private RenderedComponent result; // the result of construction
 	private List<RenderedComponent> toolbarLayouts; // the toolbar layouts
 
-	public PWAViewRenderer(User user, Module module, Document document, View view) {
-		super(user, module, document, view);
+	public PWAViewRenderer(User user, Module module, Document document, View view, String uxui) {
+		super(user, module, document, view, uxui);
 		createView = ViewType.create.toString().equals(view.getName());
 	}
 	

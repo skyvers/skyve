@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.view.component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
@@ -23,15 +22,28 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.Association;
-import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.View;
 import org.skyve.util.Binder.TargetMetaData;
 
+/**
+ * Implements a component.
+ * A component can refer to another named view 
+ * directly via a view name, a document name and view name, or a module name, document name and view name or
+ * indirectly via a binding (can be compound)
+ * A component can refer to a part of a view via a widgetId.
+ * 
+ * Note that equals and hash code are left as default - ie based on heap memory location.
+ * This component is potentially used as a key in ComponentFragments (a concurrent WeakHashMap) on ViewImpl.
+ * When the ViewImpl containing this component is evicted from the repository cache (in dev mode),
+ * a new component is reloaded and the WeakHashMap entry in the component's target ViewImpl will be garbage collected.
+ * If the target view is evicted from the repository cache, the ComponentFragments (ie the entire WeakHashMap) will go.
+ *
+ * @author mike
+ */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"moduleName", 
@@ -50,8 +62,6 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 
 	private String invisibleConditionName;
 	
-	private List<MetaData> contained = null;
-
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
@@ -60,8 +70,6 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	@XmlElement(name = "name", namespace = XMLMetaData.VIEW_NAMESPACE)
 	private List<ComponentNameMap> names = new ArrayList<>();
 
-	private ComponentTarget target = null;
-	
 	public String getModuleName() {
 		return moduleName;
 	}
@@ -131,15 +139,26 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		return names;
 	}
 
-	public List<MetaData> getContained() {
-		return contained;
+	// target module/document/view that this component points at
+	private String targetModule;
+	private String targetDocument;
+	private String targetView;
+	
+	public ViewImpl getFragment(CustomerImpl customer, String uxui) {
+		ModuleImpl m = (ModuleImpl) customer.getModule(targetModule);
+		DocumentImpl d = (DocumentImpl) m.getDocument(customer, targetDocument);
+		ViewImpl v = (ViewImpl) d.getView(uxui, customer, targetView);
+
+		// A component binding, widgetId or name mappings requires the view to be cloned and mutated.
+		// If no binding or widgetId or name mappings then just use the view as found
+		if ((getBinding() == null) && (widgetId == null) && names.isEmpty()) {
+			return v;
+		}
+
+		return v.getFragment(customer, m, d, uxui, this);
 	}
 
-	public ComponentTarget getTarget() {
-		return target;
-	}
-	
-	public void setContained(String uxui, CustomerImpl customer, ModuleImpl owningModule, DocumentImpl owningDocument, String viewName) {
+	public void link(String uxui, CustomerImpl customer, ModuleImpl owningModule, DocumentImpl owningDocument, String viewName) {
 		String binding = getBinding();
 		ModuleImpl m = null;
 		DocumentImpl d = null;
@@ -172,33 +191,17 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 				d = owningDocument;
 			}
 		}
-		View originalView = (name == null) ? 
-								d.getView(uxui, customer, viewName) : 
-								d.getView(uxui, customer, name);
+		
+		targetModule = m.getName();
+		targetDocument = d.getName();
+		targetView = (name == null) ? viewName : name;
+		
+		View originalView = d.getView(uxui, customer, targetView);
 		if (originalView == null) {
 			throw new MetaDataException("Component named " + name + " in view " + viewName + " for document " +
 											owningModule.getName() + '.' + owningDocument.getName() +
 											" for uxui " + uxui + " does not reference a valid view " +
 											((name == null) ? viewName : name) + " in document " + m.getName() + '.' + d.getName());
 		}
-
-		target = new ComponentTarget(originalView.getOverriddenCustomerName(),
-										d.getOwningModuleName(),
-										d.getName(),
-										originalView.getOverriddenUxUiName(),
-										originalView.getName(),
-										originalView.getLastModifiedMillis());
-
-		ViewImpl view = (ViewImpl) UtilImpl.cloneBySerialization(originalView);
-		// User Accesses are not required on the cloned view
-		// NB may be null if access control is turned off
-		Set<UserAccess> accesses = view.getAccesses();
-		if (accesses != null) {
-			accesses.clear();
-		}
-
-		ComponentViewVisitor visitor = new ComponentViewVisitor(customer, m, d, view, binding, names, widgetId);
-		visitor.visit();
-		contained = visitor.getContained();
 	}
 }

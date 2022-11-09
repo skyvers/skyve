@@ -97,11 +97,13 @@ public class ExecutionDelegate {
 			bean = new DataBuilder().fixture(fixture).build(d);
 		}
 		
-        ViewImpl view = (ViewImpl) d.getView(context.getUxui(), c, context.getViewType().toString());
+		final String uxui = context.getUxui();
+		ViewImpl view = (ViewImpl) d.getView(uxui, c, context.getViewType().toString());
 		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor((CustomerImpl) c,
 																			(ModuleImpl) m,
 																			(DocumentImpl) d,
 																			view,
+																			uxui,
 																			bean);
 		visitor.visit();
 		

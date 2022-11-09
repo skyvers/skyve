@@ -29,7 +29,6 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class GenerateViewVisitor extends NoOpViewVisitor {
-	private String uxui;
 	private List<Step> populateSteps = new ArrayList<>();
 	private List<Step> actionSteps = new ArrayList<>();
 	private boolean hasSave = false;
@@ -46,8 +45,8 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		super((CustomerImpl) customer, 
 				(ModuleImpl) module,
 				(DocumentImpl) document,
-				determineView(customer, document, uxui));
-		this.uxui = uxui;
+				determineView(customer, document, uxui),
+				uxui);
 		breadcrumbs = new TreeSet<>();
 		populateSteps.add(new TestDataEnter());
 	}
@@ -60,8 +59,8 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		super((CustomerImpl) customer, 
 				(ModuleImpl) module,
 				(DocumentImpl) document,
-				determineView(customer, document, uxui));
-		this.uxui = uxui;
+				determineView(customer, document, uxui),
+				uxui);
 		this.breadcrumbs = breadcrumbs;
 		populateSteps.add(new TestDataEnter());
 	}
@@ -104,7 +103,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		Relation relation = (Relation) target.getAttribute();
 		Document gridDocument = module.getDocument(customer, relation.getDocumentName());
 		Module gridModule = customer.getModule(gridDocument.getOwningModuleName());
-		GenerateViewVisitor gridVisitor = new GenerateViewVisitor(customer, gridModule, gridDocument, uxui, breadcrumbs);
+		GenerateViewVisitor gridVisitor = new GenerateViewVisitor(customer, gridModule, gridDocument, currentUxUi, breadcrumbs);
 		gridVisitor.visit();
 		populateSteps.addAll(gridVisitor.populateSteps);
 

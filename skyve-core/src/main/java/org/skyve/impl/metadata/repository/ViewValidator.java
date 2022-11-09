@@ -124,7 +124,6 @@ class ViewValidator extends ViewVisitor {
 	private ProvidedRepository repository;
 	
 	private String viewIdentifier;
-	private String uxui;
 	
 	// These 2 variables are used when validating the contents of a data grid / data repeater
 	private String dataWidgetIdentifier;
@@ -135,10 +134,9 @@ class ViewValidator extends ViewVisitor {
 					CustomerImpl customer, 
 					DocumentImpl document, 
 					String uxui) {
-		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view);
+		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view, uxui);
 		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
-		this.uxui = uxui;
 		visit();
 	}
 
@@ -1797,7 +1795,7 @@ class ViewValidator extends ViewVisitor {
 						DocumentImpl targetDocument = (DocumentImpl) targetModule.getDocument(customer, targetReference.getDocumentName());
 						
 						// This is a container column of an existing row in a table/grid - so get the edit view
-						ViewImpl targetView = (ViewImpl) targetDocument.getView(uxui, customer, ViewType.edit.toString());
+						ViewImpl targetView = (ViewImpl) targetDocument.getView(currentUxUi, customer, ViewType.edit.toString());
 						if (targetView.getAction(actionName) == null) {
 							throw new MetaDataException(actionName + " DNE");
 						}
