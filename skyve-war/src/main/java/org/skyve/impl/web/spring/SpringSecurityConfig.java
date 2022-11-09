@@ -101,7 +101,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement()
 				.sessionFixation().changeSessionId()
 				.and()
-			.addFilterBefore(getTwoFactorAuthPushFilter(),UsernamePasswordAuthenticationFilter.class)
+			
 			.rememberMe()
 				.key("remember")
 				.tokenValiditySeconds(1209600)
@@ -110,6 +110,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.tokenRepository(tokenRepository())
 				.useSecureCookie(Util.isSecureUrl())
 				.and()
+			.addFilterBefore(getTwoFactorAuthPushFilter(),UsernamePasswordAuthenticationFilter.class)
 			.formLogin()
 				.defaultSuccessUrl(Util.getHomeUrl())
 				.loginPage(Util.getLoginUrl())
@@ -164,7 +165,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	public PersistentTokenRepository tokenRepository() throws Exception {
 		return skyve.tokenRepository();
 	}
-
+	
 	@Bean
 	@Override
 	public UserDetailsService userDetailsService() {

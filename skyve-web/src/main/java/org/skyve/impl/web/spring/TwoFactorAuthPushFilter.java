@@ -32,6 +32,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	public static String USER_ATTRIBUTE = "user"; 
 	public static String CUSTOMER_ATTRIBUTE = "customer";
 	
+	public static String REMEMBER_ATTRIBUTE = "remember";
+	
+	// this is from the SpringSecurityConfig.remember me.
+	public static String REMEMBER_PARAMETER = "remember";
+	
 	private JdbcUserDetailsManager userDetailsService;
 
 	public TwoFactorAuthPushFilter(AuthenticationManager authenticationManager, JdbcUserDetailsManager userDetailsService) {
@@ -110,6 +115,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		if (canAuthenticateWithPassword(request, user)) {
 			UtilImpl.LOGGER.info("Sending 2fa code push notification"); 
 			
+			// save previous selected remember me token so it can be sent back
+			boolean rememberMe = request.getParameter(REMEMBER_PARAMETER) != null;
 			
 			String twoFactorCodeClearText = generateTFACode();
 			
@@ -128,6 +135,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			request.setAttribute(CUSTOMER_ATTRIBUTE, customer);
 			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
 			request.setAttribute(USER_ATTRIBUTE, user.getUser());
+			request.setAttribute(REMEMBER_ATTRIBUTE, rememberMe);
 			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", false));
 			return true;
 		} else {
