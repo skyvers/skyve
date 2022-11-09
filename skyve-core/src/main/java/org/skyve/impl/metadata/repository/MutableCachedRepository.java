@@ -9,11 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
@@ -23,10 +21,7 @@ import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
-import org.skyve.impl.metadata.view.NoOpViewVisitor;
 import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.component.Component;
-import org.skyve.impl.metadata.view.component.ComponentTarget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
@@ -467,27 +462,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 			if (UtilImpl.DEV_MODE) {
 				ViewImpl view = (ViewImpl) v.get();
 				// check last modified for the view
-				MutableBoolean reload = new MutableBoolean(view.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName));
-				// check last modified for any component
-				if (reload.isFalse()) {
-					new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), (DocumentImpl) document, view) {
-						@Override
-						public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-							if (reload.isFalse()) {
-								ComponentTarget target = component.getTarget();
-								reload.setValue(target.getLastModifiedMillis() < viewLastModifiedMillis(target.getOverriddenCustomerName(),
-																											target.getModuleName(),
-																											target.getDocumentName(),
-																											target.getOverriddenUxUi(),
-																											target.getViewName()));
-								if (reload.isFalse()) {
-									super.visitComponent(component, parentVisible, parentEnabled);
-								}
-							}
-						}
-					}.visit();
-				}
-				if (reload.isTrue()) {
+				if (view.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName)) {
 					// Load the view using the searchUxUi
 					ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
 					View newView = null;

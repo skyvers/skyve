@@ -171,6 +171,7 @@ public class View extends HtmlPanelGroup {
 										module, 
 										document,
 										view,
+										uxui,
 										widgetId,
 										componentBuilder,
 										layoutBuilder);
@@ -184,6 +185,7 @@ public class View extends HtmlPanelGroup {
                                           module, 
                                           document,
                                           view,
+                                          uxui,
                                           widgetId,
                                           componentBuilder,
                                           layoutBuilder);

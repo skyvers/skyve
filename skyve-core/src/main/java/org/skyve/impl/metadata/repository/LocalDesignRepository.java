@@ -652,15 +652,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 	@Override
 	@SuppressWarnings("unused")
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
+		CustomerImpl customerImpl = (CustomerImpl) customer;
 		ViewImpl viewImpl = (ViewImpl) view;
-		new ViewValidator(viewImpl,
-							this,
-							(CustomerImpl) customer,
-							(DocumentImpl) document,
-							uxui);
+		new ViewValidator(viewImpl, this, customerImpl, (DocumentImpl) document, uxui);
 		
 		// Check modelAggregate and previousComplete UserAccesses
-		Set<UserAccess> accesses = viewImpl.getAccesses();
+		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, uxui);
 		if (accesses != null) { // can be null if access control is turned off
 			for (UserAccess access : accesses) {
 				if (access.isModelAggregate()) {

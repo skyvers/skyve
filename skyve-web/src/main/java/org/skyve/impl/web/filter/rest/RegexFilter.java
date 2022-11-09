@@ -38,6 +38,14 @@ public class RegexFilter extends AbstractRestFilter {
 		}
 	}
 	
+	/**
+	 * Exposed to perform initialisation programmatically if required.
+	 * @return	The init parameters.
+	 */
+	protected Map<String, String> getInitParameters() {
+		return initParameters;
+	}
+	
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {

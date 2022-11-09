@@ -15,8 +15,9 @@ public class ReactViewRenderer extends PWAViewRenderer {
 								Module module,
 								Document document,
 								View view,
+								String uxui,
 								Map<String, String> imports) {
-		super(user, module, document, view);
+		super(user, module, document, view, uxui);
 		this.imports = imports;
 	}
 }

@@ -16,9 +16,10 @@ public class PrimeReactViewRenderer extends ReactViewRenderer {
 										Module module,
 										Document document,
 										View view,
+										String uxui,
 										Map<String, String> imports,
 										boolean extraIndent) {
-		super(user, module, document, view, imports);
+		super(user, module, document, view, uxui, imports);
 		final String startingIndent = (extraIndent ? STARTING_INDENT + "\t" : STARTING_INDENT);
 		PrimeReactComponentRenderer newCR = new PrimeReactComponentRenderer(imports, startingIndent);
 		newCR.setUserAgentType(UserAgentType.desktop);

@@ -98,8 +98,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// Attributes pushed and popped during internal processing
 	private Stack<String> renderAttributes = new Stack<>();
 	
-	protected ViewRenderer(User user, Module module, Document document, View view) {
-		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view);
+	protected ViewRenderer(User user, Module module, Document document, View view, String uxui) {
+		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);
 		this.user = user;
 	}
 

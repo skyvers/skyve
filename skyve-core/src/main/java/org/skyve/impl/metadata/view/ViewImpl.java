@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.view;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,8 +70,6 @@ public class ViewImpl extends Container implements View {
 	private String overriddenCustomerName;
 	private String overriddenUxUiName;
 	private Map<String, String> properties = new TreeMap<>();
-	
-	private Set<UserAccess> accesses = null;
 	
 	@Override
 	public String getRefreshConditionName() {
@@ -235,9 +234,23 @@ public class ViewImpl extends Container implements View {
 		return properties;
 	}
 
-	@Override
-	public Set<UserAccess> getAccesses() {
-		return accesses;
+	// Accesses for this view only (not component fragments)
+	private Set<UserAccess> accesses = null;
+	
+	/**
+	 * Get accesses for this view and any component fragments recursively.
+	 */
+	public Set<UserAccess> getAccesses(CustomerImpl customer, String uxui) {
+		Set<UserAccess> result = accesses;
+		
+		if (result != null) { // accesses were generated
+			for (Component component : components) {
+				ViewImpl fragment = component.getFragment(customer, uxui);
+				result.addAll(fragment.getAccesses(customer, uxui));
+			}
+		}
+
+		return result;
 	}
 
 	public void convertAccesses(Module module,
@@ -295,13 +308,15 @@ public class ViewImpl extends Container implements View {
 		// NB The 2 visitors below cannot be combined as cloning the components and visiting them
 		// causes a stack overflow.
 
-		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
-			// Overrides visitComponent standard behaviour to load the component
+		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this, uxui) {
+			// Overrides visitComponent standard behaviour to link to the component
 			@Override
 			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-				component.setContained(uxui, customer, module, document, name);
+				component.link(currentUxUi, customer, module, document, name);
+				components.add(component);
 			}
 			
+			// TODO - a chart in a component could have a different index
 			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 				ChartBuilderMetaData model = chart.getModel();
@@ -319,7 +334,12 @@ public class ViewImpl extends Container implements View {
 				accesses = new TreeSet<>();
 			}
 
-			new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
+			new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this, uxui) {
+				@Override
+				public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
+					// stop recursing through the component as we only want immediate (not recursive) accesses for this view
+				}
+				
 				@Override
 				public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 					ChartBuilderMetaData metaDataModel = chart.getModel();
@@ -438,13 +458,19 @@ public class ViewImpl extends Container implements View {
 							queryName = ((Reference) targetRelation).getQueryName();
 						}
 					}
-					// Look for the default query
+					// Look for the default query for the relation document name
 					if (queryName == null) {
-						queryName = module.getDocumentDefaultQuery(customer, targetDocumentName).getName();
+						DocumentRef ref = module.getDocumentRefs().get(targetDocumentName);
+						queryName = ref.getDefaultQueryName();
 					}
-					// Otherwise use the document name
-					queryName = targetDocumentName;
-					accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+
+					// add the query aggregate or a document aggregate
+					if (queryName == null) {
+						accesses.add(UserAccess.documentAggregate(moduleName, targetDocumentName));
+					}
+					else {
+						accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+					}
 	
 					// If not in a grid and is editable, add the zoom in access
 					if ((dataGridBinding == null) && (! Boolean.FALSE.equals(lookup.getEditable()))) {
@@ -504,5 +530,35 @@ public class ViewImpl extends Container implements View {
 				}
 			}.visit();
 		}
+	}
+	
+	// Not required to be Serialized as ViewImpls are cloned by serialization to populate this
+	private transient ComponentFragments fragments = new ComponentFragments(this);
+	
+	// All components in this view (one level deep)
+	// Not required to be Serialized as ViewImpls are cloned by serialization to populate this
+	private transient Set<Component> components = new HashSet<>();
+	
+	/**
+	 * Reinstate transients after Deserialization
+	 * @return	this
+	 */
+	private Object readResolve() {
+		fragments = new ComponentFragments(this);
+		components = new HashSet<>();
+		return this;
+	}
+	
+	/**
+	 * Get a UI fragment for a component
+	 * @param c	The customer
+	 * @param m	The module
+	 * @param d	The document
+	 * @param uxui	The UX/UI
+	 * @param component	The component
+	 * @return	The fragment
+	 */
+	public ViewImpl getFragment(CustomerImpl c, ModuleImpl m, DocumentImpl d, String uxui, Component component) {
+		return fragments.get(c, m, d, uxui, component, (accesses != null));
 	}
 }

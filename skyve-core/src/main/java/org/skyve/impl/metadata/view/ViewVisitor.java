@@ -87,12 +87,18 @@ public abstract class ViewVisitor extends ActionVisitor {
 	protected ModuleImpl module;
 	protected DocumentImpl document;
 	protected ViewImpl view;
+	protected String currentUxUi; // for resolving components
 	
-	protected ViewVisitor(CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
+	protected ViewVisitor(CustomerImpl customer,
+							ModuleImpl module,
+							DocumentImpl document,
+							ViewImpl view,
+							String currentUxUi) {
 		this.customer = customer;
 		this.module = module;
 		this.document = document;
 		this.view = view;
+		this.currentUxUi = currentUxUi;
 	}
 
 	public final void visit() {
@@ -737,7 +743,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public void visitComponent(Component component,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		for (MetaData widget : component.getContained()) {
+		for (MetaData widget : component.getFragment(customer, currentUxUi).getContained()) {
 			visitWidget(widget, parentVisible, parentEnabled);
 		}
 	}

@@ -12,11 +12,12 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import org.skyve.CORE;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
-import org.skyve.metadata.customer.Customer;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -26,16 +27,15 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
-import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
 class AccessProcessor {
-	private Customer customer;
+	private CustomerImpl customer;
 	private Map<String, Menu> moduleMenuMap;
 	private Map<String, Set<String>> accesses;
 	private Router router;
 
-	AccessProcessor(Customer customer, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
+	AccessProcessor(CustomerImpl customer, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
 		this.customer = customer;
 		this.moduleMenuMap = moduleMenuMap;
 		this.accesses = accesses;
@@ -138,7 +138,7 @@ class AccessProcessor {
 	private void processViews(Document document) {
 		for (UxUiMetadata uxui : router.getUxUis()) {
 			String uxuiName = uxui.getName();
-			View createView = document.getView(uxuiName, customer, ViewType.create.toString());
+			ViewImpl createView = (ViewImpl) document.getView(uxuiName, customer, ViewType.create.toString());
 			String uxuiViewKey = null;
 
 			// create and edit view are the same - use edit view
@@ -146,21 +146,21 @@ class AccessProcessor {
 				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + createView.getOverriddenUxUiName();
 				if (! processedUxUiViews.contains(uxuiViewKey)) {
 					processedUxUiViews.add(uxuiViewKey);
-					processView(document, createView);
+					processView(document, createView, uxuiName);
 				}
 			}
 			else {
 				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + ViewType.create.toString() + createView.getOverriddenUxUiName();
 				if (! processedUxUiViews.contains(uxuiViewKey)) {
 					processedUxUiViews.add(uxuiViewKey);
-					processView(document, createView);
+					processView(document, createView, uxuiName);
 				}
 
-				View editView = document.getView(uxuiName, customer, ViewType.edit.toString());
+				ViewImpl editView = (ViewImpl) document.getView(uxuiName, customer, ViewType.edit.toString());
 				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + editView.getOverriddenUxUiName();
 				if (! processedUxUiViews.contains(uxuiViewKey)) {
 					processedUxUiViews.add(uxuiViewKey);
-					processView(document, editView);
+					processView(document, editView, uxuiName);
 				}
 			}
 		}
@@ -175,11 +175,11 @@ class AccessProcessor {
 		}
 	}
 	
-	private void processView(Document document, View view) {
+	private void processView(Document document, ViewImpl view, String uxui) {
 		final String overriddenUxUi = view.getOverriddenUxUiName();
 		final Module module = customer.getModule(document.getOwningModuleName());
 		
-		Set<UserAccess> viewAccesses = view.getAccesses();
+		Set<UserAccess> viewAccesses = view.getAccesses(customer, uxui);
 		if (viewAccesses != null) { // can be null when access control is turned off
 			for (UserAccess viewAccess : viewAccesses) {
 				if (viewAccess.isSingular()) {

@@ -99,11 +99,12 @@ public class ComponentViewVisitor extends ViewVisitor {
 	public ComponentViewVisitor(CustomerImpl customer, 
 									ModuleImpl module, 
 									DocumentImpl document, 
-									ViewImpl view, 
+									ViewImpl view,
+									String currentUxUi,
 									String bindingPrefix,
 									List<ComponentNameMap> names,
 									String widgetId) {
-		super(customer, module, document, view);
+		super(customer, module, document, view, currentUxUi);
 		this.bindingPrefix = bindingPrefix;
 		this.names = new TreeMap<>();
 		for (ComponentNameMap name : names) {
