@@ -11,6 +11,7 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateTime;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
@@ -51,7 +52,7 @@ public class SkyveSpringSecurity {
 		result.setDataSource(dataSource());
 		return result;
 	}
-
+	
 	@SuppressWarnings("static-method")
 	public DataSource dataSource() {
 		try {
@@ -73,6 +74,36 @@ public class SkyveSpringSecurity {
 		return new InMemoryUserDetailsManager(user);
 	}
 	
+	/**
+	 * Email 2FA has more steps as the user needs to submit credentials twice
+	 * (first time the email is sent, second time to the 2fa code)
+	 * i.e skyve has to push the multifactor auth
+	 * 
+	 * Other 2FA services like Authenticator apps should not require this step.
+	 * 
+	 * @param createdTimestamp
+	 * @return
+	 */
+	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp) {
+		
+		if (createdTimestamp == null || !isTFAPush()) {
+			return false;
+		}
+		
+		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT_SECONDS * 1000;
+		
+		long generatedTime = createdTimestamp.getTime();
+		long currentTime = new DateTime().getTime();
+		
+		return currentTime < generatedTime + expiryMillis;
+	}
+	
+	public static boolean isTFAPush() {
+		
+		//UtilImpl.CUSTOMER
+		return "EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE);
+	}
+	
 	public UserDetailsService jdbcUserDetailsService() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;
@@ -89,16 +120,16 @@ public class SkyveSpringSecurity {
 				RDBMS rdbms = dialect.getRDBMS();
 
 				if (RDBMS.h2.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
-					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.sqlserver.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.postgresql.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
 				}
 			}
 			
@@ -138,6 +169,15 @@ public class SkyveSpringSecurity {
 									authenticationFailures = 0;
 								}
 								Timestamp lastAuthenticationFailure = rs.getTimestamp(5);
+								
+								String twoFactorCode = rs.getString(6);
+								Timestamp twoFactorGenerated = rs.getTimestamp(7);
+								
+								if (useTFAPushCodeAsPassword( twoFactorGenerated)) {
+									UtilImpl.LOGGER.info("Using two factor code for password.");
+									password = twoFactorCode;
+								} 
+								
 								if ((lastAuthenticationFailure != null) &&
 										(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) && 
 										(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS > 0)) {
@@ -154,7 +194,7 @@ public class SkyveSpringSecurity {
 										}
 									}
 								}
-
+								
 								return new User(user,
 													password,
 													enabled,
@@ -269,4 +309,185 @@ public class SkyveSpringSecurity {
 									.clientName("GitHub")
 									.build();
 	}
+ 	
+ 	public JdbcUserDetailsManager jdbcUserTFADetailsService() {
+		
+		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
+			private String skyveUserQuery;
+			
+			private String skyveUserTFAUpdate;
+			
+			// Set the skyve query
+			{
+				// Don't include bizCustomer in the where clause if single customer to allow for better data store index usage.
+				String whereClause = "where u.userName = ?";
+				if (UtilImpl.CUSTOMER == null) { // multi-tennant
+					whereClause = "where u.bizCustomer = ? and u.userName = ?";
+				}
+				
+				// this should be the same for all dialects
+				skyveUserTFAUpdate = "update ADM_SecurityUser as u set u.twoFactorCode = ? , u.twoFactorToken = ?, u.twoFactorCodeGeneratedDateTime = ? " + whereClause;
+					
+				SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
+				RDBMS rdbms = dialect.getRDBMS();
+				
+				if (RDBMS.h2.equals(rdbms)) {
+					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
+							+ " left join ADM_Contact as c on u.contact_id = c.bizId " 
+							+ whereClause;
+				}
+				else if (RDBMS.mysql.equals(rdbms)) {
+					skyveUserQuery = "select concat(u.bizCustomer, '/', u.userName), u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true),  u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
+							+ " left join ADM_Contact as c on u.contact_id = c.bizId " 
+							+ whereClause;
+				}
+				else if (RDBMS.sqlserver.equals(rdbms)) {
+					skyveUserQuery = "select u.bizCustomer + '/' + u.userName, u.password, case when coalesce(u.inactive, 0) = 0 and coalesce(u.activated, 1) = 1 then 1 else 0 end, u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
+							+ " left join ADM_Contact c on u.contact_id = c.bizId " 
+							+ whereClause;
+				}
+				else if (RDBMS.postgresql.equals(rdbms)) {
+					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not coalesce(u.inactive, false) and coalesce(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
+							+ " left join ADM_Contact c on u.contact_id = c.bizId " 
+							+ whereClause;
+				}
+			}
+			
+			// return the user just queried (with all the expiration details queried too)
+			@Override
+			protected UserDetails createUserDetails(String username,
+														UserDetails userFromUserQuery,
+														List<GrantedAuthority> combinedAuthorities) {
+				return userFromUserQuery;
+			}
+			
+			private String getCustomerName(String springUsername) {
+				String customerName = null;
+				int slashIndex = springUsername.indexOf('/');
+				if (slashIndex > 0) {
+					customerName = springUsername.substring(0, slashIndex);
+				}
+				return customerName;
+			}
+			
+			private String getUsernameOnly(String springUsername) {
+				String userName = springUsername;
+				int slashIndex = userName.indexOf('/');
+				if (slashIndex > 0) {
+					userName = userName.substring(slashIndex + 1);
+				}
+				
+				return userName;
+			}
+			
+			@Override
+			protected List<UserDetails> loadUsersByUsername(String springUsername) {
+				final String customerName = getCustomerName(springUsername);
+				final String usernameOnly = getUsernameOnly(springUsername);
+				
+				return getJdbcTemplate().query(
+						skyveUserQuery,
+						new RowMapper<UserDetails>() {
+							@Override
+							public UserDetails mapRow(ResultSet rs, int rowNum)
+							throws SQLException {
+								String user = rs.getString(1);
+								String password = rs.getString(2);
+								boolean enabled = rs.getBoolean(3);
+								
+								// Determine if the account is locked
+								// if at the threshold each subsequent failed attempt adds another lockout duration
+								boolean locked = false;
+								int authenticationFailures = rs.getInt(4);
+								if (rs.wasNull()) {
+									authenticationFailures = 0;
+								}
+								Timestamp lastAuthenticationFailure = rs.getTimestamp(5);
+								
+								String twoFactorCode = rs.getString(6);
+								String twoFactorToken = rs.getString(7);
+								Timestamp twoFactorGenerated = rs.getTimestamp(8);
+								DateTime tfaGenTime = twoFactorGenerated == null ? null : new DateTime(twoFactorGenerated.getTime());
+								String email = rs.getString(9);
+								
+								if ((lastAuthenticationFailure != null) &&
+										(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) && 
+										(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS > 0)) {
+									if (authenticationFailures >= UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) {
+										long lockoutMillis = authenticationFailures * UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS * 1000;
+										long millisRemaining = (lastAuthenticationFailure.getTime() + lockoutMillis) - System.currentTimeMillis();
+										if (millisRemaining > 0) {
+											long secondsRemaining = millisRemaining / 1000;
+											if (secondsRemaining == 0) {
+												secondsRemaining++;
+											}
+											locked = true;
+											UtilImpl.LOGGER.warning("Account " + springUsername + " is locked for another " + secondsRemaining + " seconds");
+										}
+									}
+								}
+								
+								
+								return new UserTFA( user,
+													password,
+													enabled,
+													true,
+													true,
+													! locked,
+													AuthorityUtils.NO_AUTHORITIES,
+													customerName,
+													usernameOnly,
+													twoFactorCode,
+													twoFactorToken,
+													tfaGenTime,
+													email);
+							}
+						},
+						// 2 params for multi-tennant
+						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, usernameOnly} : new String[] {usernameOnly});
+			}
+			
+			@Override
+			protected List<GrantedAuthority> loadUserAuthorities(String username) {
+				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
+			}
+
+			@Override
+			protected List<GrantedAuthority> loadGroupAuthorities(String username) {
+				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
+			}
+
+			@Override
+			public void updateUser(UserDetails user) {
+				UserTFA tfa = (UserTFA) user;
+				
+				Timestamp codeGenTS = tfa.getTfaCodeGeneratedDateTime() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedDateTime().getTime());
+				
+				int update = getJdbcTemplate().update(this.skyveUserTFAUpdate, (ps) -> {
+					ps.setString(1, tfa.getTfaCode());
+					ps.setString(2, tfa.getTfaToken());
+					ps.setTimestamp(3, codeGenTS);
+					ps.setString(4, tfa.getCustomer());
+					ps.setString(5, tfa.getUser());
+				});
+				UtilImpl.LOGGER.info("Successful write TFA codes to database ? " + update); 
+			}
+			
+			
+		};
+		
+		// These 3 queries only allow for 1 username JDBC parameter value, so we wont use them,
+		result.setUsersByUsernameQuery(null);
+		result.setAuthoritiesByUsernameQuery(null);
+		result.setGroupAuthoritiesByUsernameQuery(null);
+
+		result.setDataSource(dataSource());
+		result.setRolePrefix("none");
+		return result;
+	}
+ 	
 }

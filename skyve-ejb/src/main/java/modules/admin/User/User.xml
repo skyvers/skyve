@@ -223,6 +223,22 @@
 			<displayName>Activation Url</displayName>
 			<length>2083</length>
 		</text>	
+		
+		<!-- 2FA -->
+		<text name="twoFactorCode" audited="false">
+			<documentation>this is hashed</documentation>
+			<displayName>Two Factor Code</displayName>
+			<length>100</length>
+		</text>
+		<dateTime name="twoFactorCodeGeneratedDateTime" audited="false">
+			<documentation>used to invalidate the 2fa code when X amount of time has passed. Not displayed to the user</documentation>
+			<displayName>2FA Code DateTime</displayName>
+		</dateTime>
+		<text name="twoFactorToken" audited="false">
+			<documentation>Used to identify the user is in the same session for 2FA code entry, this is for the system</documentation>
+			<displayName>Two Factor Token</displayName>
+			<length>100</length>
+		</text>
 	</attributes>
 	<conditions>
 		<!-- Evaluation of Wizard State -->

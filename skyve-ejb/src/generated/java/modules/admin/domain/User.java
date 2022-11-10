@@ -148,6 +148,15 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	/** @hidden */
 	public static final String activateUrlPropertyName = "activateUrl";
 
+	/** @hidden */
+	public static final String twoFactorCodePropertyName = "twoFactorCode";
+
+	/** @hidden */
+	public static final String twoFactorCodeGeneratedDateTimePropertyName = "twoFactorCodeGeneratedDateTime";
+
+	/** @hidden */
+	public static final String twoFactorTokenPropertyName = "twoFactorToken";
+
 	/**
 	 * Wizard State
 	 * <br/>
@@ -541,6 +550,27 @@ which are implied from the groups to which they belong.
 	 * Activation Url
 	 **/
 	private String activateUrl;
+
+	/**
+	 * Two Factor Code
+	 * <br/>
+	 * this is hashed
+	 **/
+	private String twoFactorCode;
+
+	/**
+	 * 2FA Code DateTime
+	 * <br/>
+	 * used to invalidate the 2fa code when X amount of time has passed. Not displayed to the user
+	 **/
+	private DateTime twoFactorCodeGeneratedDateTime;
+
+	/**
+	 * Two Factor Token
+	 * <br/>
+	 * Used to identify the user is in the same session for 2FA code entry, this is for the system
+	 **/
+	private String twoFactorToken;
 
 	@Override
 	@XmlTransient
@@ -1350,6 +1380,62 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	@XmlElement
 	public void setActivateUrl(String activateUrl) {
 		this.activateUrl = activateUrl;
+	}
+
+	/**
+	 * {@link #twoFactorCode} accessor.
+	 * @return	The value.
+	 **/
+	public String getTwoFactorCode() {
+		return twoFactorCode;
+	}
+
+	/**
+	 * {@link #twoFactorCode} mutator.
+	 * @param twoFactorCode	The new value.
+	 **/
+	@XmlElement
+	public void setTwoFactorCode(String twoFactorCode) {
+		preset(twoFactorCodePropertyName, twoFactorCode);
+		this.twoFactorCode = twoFactorCode;
+	}
+
+	/**
+	 * {@link #twoFactorCodeGeneratedDateTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getTwoFactorCodeGeneratedDateTime() {
+		return twoFactorCodeGeneratedDateTime;
+	}
+
+	/**
+	 * {@link #twoFactorCodeGeneratedDateTime} mutator.
+	 * @param twoFactorCodeGeneratedDateTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setTwoFactorCodeGeneratedDateTime(DateTime twoFactorCodeGeneratedDateTime) {
+		preset(twoFactorCodeGeneratedDateTimePropertyName, twoFactorCodeGeneratedDateTime);
+		this.twoFactorCodeGeneratedDateTime = twoFactorCodeGeneratedDateTime;
+	}
+
+	/**
+	 * {@link #twoFactorToken} accessor.
+	 * @return	The value.
+	 **/
+	public String getTwoFactorToken() {
+		return twoFactorToken;
+	}
+
+	/**
+	 * {@link #twoFactorToken} mutator.
+	 * @param twoFactorToken	The new value.
+	 **/
+	@XmlElement
+	public void setTwoFactorToken(String twoFactorToken) {
+		preset(twoFactorTokenPropertyName, twoFactorToken);
+		this.twoFactorToken = twoFactorToken;
 	}
 
 	/**

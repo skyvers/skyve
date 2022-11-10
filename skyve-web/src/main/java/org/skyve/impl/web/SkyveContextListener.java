@@ -596,6 +596,22 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getString("account", "facebookAuthSecret", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getString("account", "githubAuthClientId", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getString("account", "githubAuthSecret", account, false);
+		number = getNumber("account", "2faCodeTimeOut", account, false);
+		if (number != null) {
+			UtilImpl.TWO_FACTOR_CODE_TIMEOUT_SECONDS = number.longValue();
+		}
+		value = getString("account", "2faType", account, false);
+		if (value != null) {
+			UtilImpl.TWO_FACTOR_AUTH_TYPE = value;
+		}
+		value = getString("account", "2faEmailFromAddress", account, false);
+		if (value != null) {
+			UtilImpl.TWO_FACTOR_FROM_EMAIL = value;
+		}
+		number = getNumber("account", "rememberMeTokenTimeout", account, false);
+		if (number != null) {
+			UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS = number.intValue();
+		}
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);

@@ -1,3 +1,6 @@
+<%@page import="org.skyve.impl.web.spring.TwoFactorAuthenticationForwardHandler"%>
+<%@page import="org.skyve.impl.web.spring.TwoFactorAuthPushFilter"%>
+<%@page import="com.google.common.base.Strings"%>
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.Locale"%>
 <%@ page import="org.skyve.CORE"%>
@@ -8,12 +11,30 @@
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%
+	
+	String tfaToken = (String) request.getAttribute(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE);
+	boolean show2FA = !Strings.isNullOrEmpty(tfaToken);
+	boolean rmChecked = false;
+	String user = null;
+	boolean error2FA = false;
+	
+
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
-
+	
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
 
+	
+	if (show2FA) {	
+		customer = (String) request.getAttribute(TwoFactorAuthPushFilter.CUSTOMER_ATTRIBUTE);
+		error2FA = "1".equals(request.getAttribute(TwoFactorAuthenticationForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE));
+		user = (String) request.getAttribute(TwoFactorAuthPushFilter.USER_ATTRIBUTE);
+		rmChecked = Boolean.TRUE.equals( (Boolean) request.getAttribute(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE));
+	}
+	
+	String rememberMeChecked = rmChecked ? "checked" : "";
+	
 	// Clear the user object from the session if it exists
 	// If there is a public user set, this will ensure it doesn't get in the way.
 
@@ -49,7 +70,15 @@
 	boolean mobile = UserAgent.getType(request).isMobile();
 	
 	// is self-registration enabled
-	boolean allowRegistration = UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION;
+	boolean allowRegistration = UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && !show2FA;
+	
+	String passwordEmptyError = show2FA ? 
+			Util.i18n("page.login.password.error.2FACode.required", locale) : 
+				Util.i18n("page.login.password.error.required", locale);
+	
+	String loginBanner = show2FA ? 
+			Util.i18n("page.login.2FACode.banner", locale) :
+				Util.i18n("page.login.banner", locale);
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -127,7 +156,7 @@
 			                rules: [
 			                    {
 			                        type   : 'empty',
-			                        prompt : '<%=Util.i18n("page.login.password.error.required", locale)%>'
+			                        prompt : '<%=passwordEmptyError%>'
 			                    }
 			                ]
 			            }
@@ -165,7 +194,6 @@
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
-
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
 		    	<div style="text-align: center; margin: 0 auto; margin-bottom: 10px;">
@@ -186,13 +214,21 @@
 			        	</p>
             		</div>
 				<% } %>
+				<% if (error2FA) { %>
+            		<div class="ui error message">
+	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
+			        	<p>
+			        		<%=Util.i18n("page.loginError.2FACode.invalid", locale)%>
+			        	</p>
+            		</div>
+				<% } %>
 		        <form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 		            <div class="ui segment">
 		            	<div class="ui header">
 		            		<% if (request.getUserPrincipal() != null) { %>
 								<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
 							<% } else { %>
-								<%=Util.i18n("page.login.banner", locale)%>
+								<%=loginBanner%>
 							<% } %>
 		            	</div>
 						<% if (customer == null) { %>
@@ -204,6 +240,10 @@
 							</div>
 						<% } %>
 		                <div class="field">
+		                <% if (show2FA) { %>
+		                	<input type="password" id="user" name="user" hidden="true" value="<%=user%>"/>
+		                	<input type="password" id="customer" name="customer" hidden="true" value="<%=customer%>"/>
+		                <% } else { %>
 		                    <div class="ui left icon input">
 	                    	<% if(allowRegistration) { %>
 	                    		<i class="envelope icon"></i>
@@ -216,24 +256,39 @@
 								<input type="hidden" name="customer" value="<%=customer%>" />
 							<% } %>
 		                    </div>
+		                <% } %>
 		                </div>
 		                <div class="field">
-		                    <div class="ui left icon input">
-		                        <i class="lock icon"></i>
-		                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
-		                    </div>
+		                
+		                	<% if (show2FA) { %>
+								<div class="ui left icon input">
+			                        <i class="lock icon"></i>
+			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.2FACode.label", locale)%>"/>
+			                    </div>
+			                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
+							<% } else { %>
+			                    <div class="ui left icon input">
+			                        <i class="lock icon"></i>
+			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
+			                    </div>
+		                    <% } %>
 		                </div>
 		                <div class="equal width fields">
+		                	
 			                <div class="field" style="text-align: left">
 			                	<div class="ui checkbox">
-			                		<input type="checkbox" tabindex="0" class="hidden" id="remember" name="remember">
+			                		<input type="checkbox" tabindex="0" class="hidden" id="remember" name="remember" <%=rememberMeChecked%>>
 									<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
 								</div>
 							</div>
+							
+							<% if (!show2FA) { %>
 							<div class="field" style="text-align: right;">
 								<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
 	    					</div>
+	    					 <% } %>
     					</div>
+		                
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
 		            </div>
 

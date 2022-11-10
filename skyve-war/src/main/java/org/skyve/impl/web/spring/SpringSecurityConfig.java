@@ -14,11 +14,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * This class supplies named spring beans to the OOTB security.xml
@@ -98,20 +101,22 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement()
 				.sessionFixation().changeSessionId()
 				.and()
+			
 			.rememberMe()
 				.key("remember")
-				.tokenValiditySeconds(1209600)
+				.tokenValiditySeconds(getRememberMeTokenTimeout())
 				.rememberMeParameter("remember")
 				.rememberMeCookieName("remember")
 				.tokenRepository(tokenRepository())
 				.useSecureCookie(Util.isSecureUrl())
 				.and()
+			.addFilterBefore(getTwoFactorAuthPushFilter(),UsernamePasswordAuthenticationFilter.class)
 			.formLogin()
 				.defaultSuccessUrl(Util.getHomeUrl())
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
-				.successHandler(new SkyveAuthenticationSuccessHandler())
+				.successHandler(new SkyveAuthenticationSuccessHandler(this.getUserTFAService()))
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getLoggedOutUrl())
@@ -160,7 +165,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	public PersistentTokenRepository tokenRepository() throws Exception {
 		return skyve.tokenRepository();
 	}
-
+	
 	@Bean
 	@Override
 	public UserDetailsService userDetailsService() {
@@ -171,6 +176,23 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     public ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();
     }
+ 	
+ 	private JdbcUserDetailsManager getUserTFAService() {
+ 		return skyve.jdbcUserTFADetailsService();
+ 	}
+ 	
+ 	private GenericFilterBean getTwoFactorAuthPushFilter() throws Exception {
+ 		
+ 		if ("EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE)) {
+ 			return new TwoFactorAuthPushEmailFilter(this.authenticationManager(),this.getUserTFAService());
+ 		}
+
+ 		return new NoopFilter();
+ 	}
+ 	
+ 	private int getRememberMeTokenTimeout() {
+ 		return UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60;
+ 	}
 }
 /*
     <!-- WAFFLE Configuration -->
