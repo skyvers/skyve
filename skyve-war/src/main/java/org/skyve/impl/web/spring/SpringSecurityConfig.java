@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.TFAType;
 import org.skyve.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,14 +15,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * This class supplies named spring beans to the OOTB security.xml
@@ -104,19 +103,18 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			
 			.rememberMe()
 				.key("remember")
-				.tokenValiditySeconds(getRememberMeTokenTimeout())
+				.tokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60)
 				.rememberMeParameter("remember")
 				.rememberMeCookieName("remember")
 				.tokenRepository(tokenRepository())
 				.useSecureCookie(Util.isSecureUrl())
 				.and()
-			.addFilterBefore(getTwoFactorAuthPushFilter(),UsernamePasswordAuthenticationFilter.class)
 			.formLogin()
 				.defaultSuccessUrl(Util.getHomeUrl())
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
-				.successHandler(new SkyveAuthenticationSuccessHandler(this.getUserTFAService()))
+				.successHandler(new SkyveAuthenticationSuccessHandler(skyve.jdbcUserTFADetailsService()))
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getLoggedOutUrl())
@@ -128,6 +126,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.httpStrictTransportSecurity().disable()
 				.frameOptions().disable()
 				.contentTypeOptions().disable();
+
+			if (UtilImpl.TWO_FACTOR_AUTH_TYPE == TFAType.email) {
+				http.addFilterBefore(new TwoFactorAuthPushEmailFilter(authenticationManager(), skyve.jdbcUserTFADetailsService()),
+										UsernamePasswordAuthenticationFilter.class);
+			}
 
 			if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) ||
 					(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) ||
@@ -176,23 +179,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     public ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();
     }
- 	
- 	private JdbcUserDetailsManager getUserTFAService() {
- 		return skyve.jdbcUserTFADetailsService();
- 	}
- 	
- 	private GenericFilterBean getTwoFactorAuthPushFilter() throws Exception {
- 		
- 		if ("EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE)) {
- 			return new TwoFactorAuthPushEmailFilter(this.authenticationManager(),this.getUserTFAService());
- 		}
-
- 		return new NoopFilter();
- 	}
- 	
- 	private int getRememberMeTokenTimeout() {
- 		return UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60;
- 	}
 }
 /*
     <!-- WAFFLE Configuration -->

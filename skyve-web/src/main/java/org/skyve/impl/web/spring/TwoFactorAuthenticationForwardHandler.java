@@ -9,8 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.ForwardAuthenticationFailureHandler;
 
-public class TwoFactorAuthenticationForwardHandler  extends ForwardAuthenticationFailureHandler {
-
+public class TwoFactorAuthenticationForwardHandler extends ForwardAuthenticationFailureHandler {
 	public static String TWO_FACTOR_AUTH_ERROR_ATTRIBUTE = "tfaerror";
 	
 	public TwoFactorAuthenticationForwardHandler(String forwardUrl) {
@@ -18,9 +17,10 @@ public class TwoFactorAuthenticationForwardHandler  extends ForwardAuthenticatio
 	}
 
 	@Override
-	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException exception) throws IOException, ServletException {
-		
+	public void onAuthenticationFailure(HttpServletRequest request,
+											HttpServletResponse response,
+											AuthenticationException exception)
+	throws IOException, ServletException {
 		if (exception instanceof TwoFactorAuthRequiredException) {
 			TwoFactorAuthRequiredException tfaEx = (TwoFactorAuthRequiredException) exception;
 			
@@ -31,7 +31,4 @@ public class TwoFactorAuthenticationForwardHandler  extends ForwardAuthenticatio
 		
 		super.onAuthenticationFailure(request, response, exception);
 	}
-	
-	
-
 }

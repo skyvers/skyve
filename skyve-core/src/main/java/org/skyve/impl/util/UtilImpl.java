@@ -257,6 +257,8 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_THRESHOLD = 3;
 	// Number of seconds per failed sign in attempt to lock the account for - Only relevant if account lockout is in use.
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+	// How long to remember a login on a device (if checked)
+	public static int REMEMBER_ME_TOKEN_TIMEOUT_HOURS = 336; // 336hrs = 14 days
 	// Enables new users to register for an account when true, requires email
 	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
 	// google auth client id
@@ -275,11 +277,14 @@ public class UtilImpl {
 	public static String AUTHENTICATION_LOGIN_URI = "/login";
 	// The Logged Out URI to forward to
 	public static String AUTHENTICATION_LOGGED_OUT_URI = "/loggedOut";
-	//2fa auth type, null for none. Possible values null/EMAIL
-	public static String TWO_FACTOR_AUTH_TYPE = null;
-	public static long TWO_FACTOR_CODE_TIMEOUT_SECONDS = 0;
+
+	// 2fa auth type, null for none. Possible values null/email
+	public static enum TFAType {
+		email
+	}
+	public static TFAType TWO_FACTOR_AUTH_TYPE = null;
+	public static long TWO_FACTOR_CODE_TIMEOUT_SECONDS = 300; // 5 mins
 	public static String TWO_FACTOR_FROM_EMAIL = null;
-	public static int REMEMBER_ME_TOKEN_TIMEOUT_HOURS = 0;
 
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
