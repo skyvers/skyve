@@ -646,7 +646,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("chartType:'").append(chart.getType()).append("'});");
 		String dataSource = chart.getModelName();
 		if (dataSource == null) {
-			dataSource = String.valueOf(chart.getModel().getModelIndex());
+			dataSource = String.valueOf(chart.getModel().getModelName());
 		}
 		code.append(variable).append(".setDataSource('").append(dataSource).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");

@@ -139,12 +139,12 @@ public interface View extends NamedMetaData, PersistentMetaData, DecoratedMetaDa
 	public Collection<Action> getActions();
 
 	/**
-	 * Get an implicit inlined model - ie a chart model from a given modelId.
+	 * Get an implicit inlined model - ie a chart model from a given modelName.
 	 * 
-	 * @param modelIndex	The index of the model to get
+	 * @param modelName	The name of the model to get
 	 * @return	Model meta data.
 	 */
-	public ModelMetaData getInlineModel(int modelIndex);
+	public ModelMetaData getInlineModel(String modelName);
 	
 	/**
 	 * These represent parameters that are allowed to be populated when creating a new record.

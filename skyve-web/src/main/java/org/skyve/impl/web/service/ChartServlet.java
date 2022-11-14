@@ -153,10 +153,8 @@ public class ChartServlet extends HttpServlet {
 
 		String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 		ChartData data = null;
-		// Check for builder if the modelName could be an index
-		ChartBuilderMetaData builder = modelName.matches("^[0-9]*$") ?
-										(ChartBuilderMetaData) view.getInlineModel(Integer.parseInt(modelName)) :
-										null;
+		// Check for an inline model builder
+		ChartBuilderMetaData builder = (ChartBuilderMetaData) view.getInlineModel(modelName);
 		if (builder == null) {
 			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);

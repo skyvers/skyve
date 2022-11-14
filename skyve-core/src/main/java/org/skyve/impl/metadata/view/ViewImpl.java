@@ -65,8 +65,8 @@ public class ViewImpl extends Container implements View {
 	private String refreshActionName;
 	private List<ViewParameter> parameters = new ArrayList<>();
 	private String documentation;
-	// map of modelId -> model metadata used to instantiate models on the server-side
-	private List<ModelMetaData> inlineModels = new ArrayList<>();
+	// map of modelName -> model metadata used to instantiate models on the server-side
+	private Map<String, ModelMetaData> inlineModels = new TreeMap<>();
 	private String overriddenCustomerName;
 	private String overriddenUxUiName;
 	private Map<String, String> properties = new TreeMap<>();
@@ -201,14 +201,9 @@ public class ViewImpl extends Container implements View {
 		this.documentation = documentation;
 	}
 	
-	/**
-	 * Get an implicit inlined model - ie a chart model from a given modelId.
-	 * @param modelIndex	The index of the model to get
-	 * @return	The model.
-	 */
 	@Override
-	public ModelMetaData getInlineModel(int modelIndex) {
-		return inlineModels.get(modelIndex);
+	public ModelMetaData getInlineModel(String modelName) {
+		return inlineModels.get(modelName);
 	}
 	
 	@Override
@@ -304,10 +299,7 @@ public class ViewImpl extends Container implements View {
 		final String moduleName = module.getName();
 		final String documentName = document.getName();
 
-		// First clone all components referenced
-		// NB The 2 visitors below cannot be combined as cloning the components and visiting them
-		// causes a stack overflow.
-
+		// First link all components referenced and add any inlined models to the view.
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this, uxui) {
 			// Overrides visitComponent standard behaviour to link to the component
 			@Override
@@ -321,8 +313,7 @@ public class ViewImpl extends Container implements View {
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 				ChartBuilderMetaData model = chart.getModel();
 				if (model != null) {
-					inlineModels.add(model);
-					model.setModelIndex(inlineModels.size() - 1);
+					inlineModels.put(model.getModelName(), model);
 				}
 			}
 		}.visit();
