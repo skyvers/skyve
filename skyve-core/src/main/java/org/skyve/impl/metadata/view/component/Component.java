@@ -149,12 +149,14 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		DocumentImpl d = (DocumentImpl) m.getDocument(customer, targetDocument);
 		ViewImpl v = (ViewImpl) d.getView(uxui, customer, targetView);
 
-		// A component binding, widgetId or name mappings requires the view to be cloned and mutated.
-		// If no binding or widgetId or name mappings then just use the view as found
-		if ((getBinding() == null) && (widgetId == null) && names.isEmpty()) {
-			return v;
-		}
-
+		// Ensure views are always cloned.
+		// NB You might think that something like  
+		// if ((getBinding() == null) && (widgetId == null) && names.isEmpty()) {
+		//	return v;
+		// }
+		// would be good to reduce cloning overhead,
+		// but consider where a component has a binding to a view that has a named component.
+		// The named component will have the outer components binding prefix added to it by side-effect
 		return v.getFragment(customer, m, d, uxui, this);
 	}
 
