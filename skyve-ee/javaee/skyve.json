@@ -1,4 +1,7 @@
 {
+	// NOTE: the values in this file may be overridden by an override file in the content directory.
+	// The override file will hold settings changes made by the user at run-time, via the Setup and Configuration views.
+
 	// Trace settings
 	"trace": {
 		// XML metadata parsing
@@ -24,7 +27,9 @@
 	},
 	// Content settings
 	"content": {
-		// directory path
+		// Directory path to the location for storage of content, caching and working files
+		// Note that if you are running on Windows do not use backslashes
+		// The value must be terminated with a slash - e.g. "C:/Workspace/content/"
 		"directory": "${SKYVE_CONTENT:/C:/skyve/skyve-ee/content/}",
 		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
 		"gcCron": "0 7 0/1 1/1 * ? *", 
@@ -236,11 +241,11 @@
 		"type": "leaflet",
 		// gmap or leafet layers to show for the map backdrop (use single-quoted strings)
 		"layers": "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\"https://www.openstreetmap.org/copyright\\\">OpenStreetMap</a> contributors'})]"
-		//layers: "google.maps.MapTypeId.ROADMAP",
+		//"layers": "google.maps.MapTypeId.ROADMAP",
 		// opening a new empty map will centre here - ie "POINT(lng lat)"
-		// centre: "POINT(0 0)",
+		// "centre": "POINT(0 0)",
 		// opening a new empty map will apply this zoom level - ie 1 - 19
-		// zoom: 1
+		// "zoom": 1
 	},
 	// API Settings
 	"api": {
@@ -293,7 +298,7 @@
 	"environment": {
 		// test, sit, uat, dev etc: null = prod
 		"identifier": "local",
-		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
+		// Dev Mode will drop cached metadata allowing the effects of any changes to be observed without redeploying
 		"devMode": true,
 		// Check Skyve URLs and endpoints against the metadata and what can be navigated to
 		"accessControl": true,
@@ -312,6 +317,7 @@
 		"showSetup": true
 	},
 	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
+	// NOTE: the user will NOT be created for production environments (where the environment identifier above is null)
 	"bootstrap": {
 		"customer": "demo",
 		"user": "admin",
