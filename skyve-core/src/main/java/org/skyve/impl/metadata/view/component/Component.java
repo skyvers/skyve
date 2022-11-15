@@ -149,7 +149,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		DocumentImpl d = (DocumentImpl) m.getDocument(customer, targetDocument);
 		ViewImpl v = (ViewImpl) d.getView(uxui, customer, targetView);
 
-		// Ensure views are always cloned.
+		// Ensure views are always a cloned fragment.
 		// NB You might think that something like  
 		// if ((getBinding() == null) && (widgetId == null) && names.isEmpty()) {
 		//	return v;
@@ -157,6 +157,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		// would be good to reduce cloning overhead,
 		// but consider where a component has a binding to a view that has a named component.
 		// The named component will have the outer components binding prefix added to it by side-effect
+		// unless a fragment for that particular usage is created.
 		return v.getFragment(customer, m, d, uxui, this);
 	}
 
