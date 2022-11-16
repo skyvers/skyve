@@ -114,7 +114,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
-				.successHandler(new SkyveAuthenticationSuccessHandler(skyve.jdbcUserTFADetailsService()))
+				.successHandler(new SkyveAuthenticationSuccessHandler(this.userDetailsService()))
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getLoggedOutUrl())
@@ -128,7 +128,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.contentTypeOptions().disable();
 
 			if (UtilImpl.TWO_FACTOR_AUTH_TYPE == TFAType.email) {
-				http.addFilterBefore(new TwoFactorAuthPushEmailFilter(authenticationManager(), skyve.jdbcUserTFADetailsService()),
+				http.addFilterBefore(new TwoFactorAuthPushEmailFilter(authenticationManager(), this.userDetailsService()),
 										UsernamePasswordAuthenticationFilter.class);
 			}
 

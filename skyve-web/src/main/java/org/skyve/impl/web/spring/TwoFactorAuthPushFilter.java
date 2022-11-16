@@ -16,6 +16,7 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -36,10 +37,15 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	private JdbcUserDetailsManager userDetailsService;
 
-	public TwoFactorAuthPushFilter(AuthenticationManager authenticationManager, JdbcUserDetailsManager userDetailsService) {
+	public TwoFactorAuthPushFilter(AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
 		super(authenticationManager);
 		this.setRequiresAuthenticationRequestMatcher(DEFAULT_ANT_PATH_REQUEST_MATCHER);
-		this.userDetailsService = userDetailsService;
+		
+		if (userDetailsService instanceof JdbcUserDetailsManager) {
+			this.userDetailsService = (JdbcUserDetailsManager) userDetailsService;
+		} else {
+			UtilImpl.LOGGER.warning("UserDetailsService is the wrong type for TFA");
+		}
 	}
 	
 	@Override
@@ -256,7 +262,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		String password = obtainPassword(request);
 		password = (password != null) ? password : "";
 		
-		return EXT.checkPassword(password, user.getPassword());
+		return EXT.checkPassword(password, user.getUserPassword());
 	}
 	
 	@SuppressWarnings("static-method")

@@ -4,14 +4,14 @@ import org.skyve.EXT;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	public static final String SYSTEM_TWO_FACTOR_CODE = "SYSTEM Two Factor Code";
 	public static final String SYSTEM_TWO_FACTOR_CODE_SUBJECT = "Please verify your email security code";
 	public static final String SYSTEM_TWO_FACTOR_CODE_BODY = "Hi %s,<br /><br />Your verification code is: %s<br />"; 
 
-	public TwoFactorAuthPushEmailFilter(AuthenticationManager authenticationManager, JdbcUserDetailsManager userDetailsService) {
+	public TwoFactorAuthPushEmailFilter(AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
 		super(authenticationManager, userDetailsService);
 	}
 

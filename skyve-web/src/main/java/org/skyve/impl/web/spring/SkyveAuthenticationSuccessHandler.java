@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -27,8 +28,13 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	private JdbcUserDetailsManager userDetailsService;
 	
-	public SkyveAuthenticationSuccessHandler(JdbcUserDetailsManager userDetailsService) {
-		this.userDetailsService = userDetailsService;
+	public SkyveAuthenticationSuccessHandler(UserDetailsService userDetailsService) {
+		if (userDetailsService instanceof JdbcUserDetailsManager) {
+			this.userDetailsService = (JdbcUserDetailsManager) userDetailsService;
+		} else {
+			UtilImpl.LOGGER.warning("UserDetailsService is the wrong type for TFA");
+		}
+		
 	}
 	
 	@Override

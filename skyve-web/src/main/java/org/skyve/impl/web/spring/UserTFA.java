@@ -16,6 +16,7 @@ public class UserTFA extends User {
 	private String customer;
 	private String user;
 	private String email;
+	private String userPassword;
 
 	public UserTFA(String username,
 					String password,
@@ -29,7 +30,8 @@ public class UserTFA extends User {
 					String tfaCode,
 					String tfaToken,
 					Timestamp tfaCodeGeneratedTimestamp,
-					String email ) {
+					String email,
+					String userPassword) {
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 		this.tfaCode = UtilImpl.processStringValue(tfaCode);
 		this.tfaToken = UtilImpl.processStringValue(tfaToken);
@@ -37,6 +39,7 @@ public class UserTFA extends User {
 		this.customer = UtilImpl.processStringValue(customer);
 		this.user = UtilImpl.processStringValue(user);
 		this.email = UtilImpl.processStringValue(email);
+		this.userPassword = userPassword;
 	}
 
 	public String getTfaCode() {
@@ -73,5 +76,9 @@ public class UserTFA extends User {
 
 	public String getEmail() {
 		return email;
+	}
+
+	public String getUserPassword() {
+		return userPassword;
 	}
 }
