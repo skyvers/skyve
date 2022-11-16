@@ -18,6 +18,7 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.TFAType;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.GrantedAuthority;
@@ -85,8 +86,7 @@ public class SkyveSpringSecurity {
 	 * @return
 	 */
 	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp) {
-		
-		if (createdTimestamp == null || !isTFAPush()) {
+		if (createdTimestamp == null || (! isTFAPush())) {
 			return false;
 		}
 		
@@ -95,13 +95,11 @@ public class SkyveSpringSecurity {
 		long generatedTime = createdTimestamp.getTime();
 		long currentTime = new DateTime().getTime();
 		
-		return currentTime < generatedTime + expiryMillis;
+		return currentTime < (generatedTime + expiryMillis);
 	}
 	
 	public static boolean isTFAPush() {
-		
-		//UtilImpl.CUSTOMER
-		return "EMAIL".equals(UtilImpl.TWO_FACTOR_AUTH_TYPE);
+		return UtilImpl.TWO_FACTOR_AUTH_TYPE == TFAType.email;
 	}
 	
 	public UserDetailsService jdbcUserDetailsService() {
@@ -334,25 +332,25 @@ public class SkyveSpringSecurity {
 				if (RDBMS.h2.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
 							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
-							+ " left join ADM_Contact as c on u.contact_id = c.bizId " 
+							+ " inner join ADM_Contact as c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
 					skyveUserQuery = "select concat(u.bizCustomer, '/', u.userName), u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true),  u.authenticationFailures, u.lastAuthenticationFailure, "
 							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
-							+ " left join ADM_Contact as c on u.contact_id = c.bizId " 
+							+ " inner join ADM_Contact as c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.sqlserver.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer + '/' + u.userName, u.password, case when coalesce(u.inactive, 0) = 0 and coalesce(u.activated, 1) = 1 then 1 else 0 end, u.authenticationFailures, u.lastAuthenticationFailure, "
 							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
-							+ " left join ADM_Contact c on u.contact_id = c.bizId " 
+							+ " inner join ADM_Contact c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.postgresql.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not coalesce(u.inactive, false) and coalesce(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
 							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
-							+ " left join ADM_Contact c on u.contact_id = c.bizId " 
+							+ " inner join ADM_Contact c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 			}
@@ -432,7 +430,7 @@ public class SkyveSpringSecurity {
 								}
 								
 								
-								return new UserTFA( user,
+								return new UserTFA(user,
 													password,
 													enabled,
 													true,
@@ -467,17 +465,14 @@ public class SkyveSpringSecurity {
 				
 				Timestamp codeGenTS = tfa.getTfaCodeGeneratedDateTime() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedDateTime().getTime());
 				
-				int update = getJdbcTemplate().update(this.skyveUserTFAUpdate, (ps) -> {
+				getJdbcTemplate().update(this.skyveUserTFAUpdate, (ps) -> {
 					ps.setString(1, tfa.getTfaCode());
 					ps.setString(2, tfa.getTfaToken());
 					ps.setTimestamp(3, codeGenTS);
 					ps.setString(4, tfa.getCustomer());
 					ps.setString(5, tfa.getUser());
 				});
-				UtilImpl.LOGGER.info("Successful write TFA codes to database ? " + update); 
 			}
-			
-			
 		};
 		
 		// These 3 queries only allow for 1 username JDBC parameter value, so we wont use them,
@@ -489,5 +484,4 @@ public class SkyveSpringSecurity {
 		result.setRolePrefix("none");
 		return result;
 	}
- 	
 }

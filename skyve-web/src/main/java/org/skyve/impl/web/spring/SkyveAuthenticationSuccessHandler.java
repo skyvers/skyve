@@ -25,7 +25,6 @@ import org.springframework.security.web.savedrequest.SavedRequest;
  * @author mike
  */
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
-	
 	private JdbcUserDetailsManager userDetailsService;
 	
 	public SkyveAuthenticationSuccessHandler(JdbcUserDetailsManager userDetailsService) {
@@ -79,7 +78,6 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		}
 		
 		if (SkyveSpringSecurity.isTFAPush() && userDetailsService != null) {
-			UtilImpl.LOGGER.info("Clearing up 2fa codes.");
 			cleanupTFACodes(request);
 		}
 		
@@ -90,7 +88,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	}
 	
 	private void cleanupTFACodes(HttpServletRequest request) {
-		String username =  request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
+		String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
 		UserTFA user = (UserTFA) this.userDetailsService.loadUserByUsername(username);
 		user.setTfaCodeGeneratedDateTime(null);
 		user.setTfaCode(null);
