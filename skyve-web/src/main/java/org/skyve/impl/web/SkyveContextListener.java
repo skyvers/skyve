@@ -605,7 +605,6 @@ public class SkyveContextListener implements ServletContextListener {
 		if (value != null) {
 			UtilImpl.TWO_FACTOR_AUTH_TYPE = TFAType.valueOf(value);
 		}
-		UtilImpl.TWO_FACTOR_FROM_EMAIL = getString("account", "tfaEmailFromAddress", account, false);
 		number = getNumber("account", "rememberMeTokenTimeoutHours", account, false);
 		if (number != null) {
 			UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS = number.intValue();

@@ -291,8 +291,7 @@
 		// at the moment only "email" is available, null for none
 		"tfaType" : "email",
 		// how long should the code be valid before the user has to login again. (in seconds 300 = 5min)
-		"tfaCodeTimeOutSeconds" : 300,
-		"tfaEmailFromAddress" : "info@bizhub.com.au"
+		"tfaCodeTimeOutSeconds" : 300
 	},
 	// Environment settings
 	"environment": {

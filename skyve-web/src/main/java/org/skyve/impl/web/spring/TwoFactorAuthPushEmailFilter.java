@@ -28,7 +28,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 		String emailBody = String.format(SYSTEM_TWO_FACTOR_CODE_BODY, user.getUser(), code);
 		
 		EXT.sendMail(new Mail().addTo(emailAddress)
-								.from(UtilImpl.TWO_FACTOR_FROM_EMAIL)
+								.from(UtilImpl.SMTP_SENDER)
 								.subject(SYSTEM_TWO_FACTOR_CODE_SUBJECT)
 								.body(emailBody));
 	}

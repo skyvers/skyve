@@ -277,19 +277,13 @@ public class UtilImpl {
 	public static String AUTHENTICATION_LOGIN_URI = "/login";
 	// The Logged Out URI to forward to
 	public static String AUTHENTICATION_LOGGED_OUT_URI = "/loggedOut";
-	//2fa auth type, null for none. Possible values null/EMAIL
-	public static String TWO_FACTOR_AUTH_TYPE = null;
-	public static long TWO_FACTOR_CODE_TIMEOUT_SECONDS = 0;
-	public static String TWO_FACTOR_FROM_EMAIL = null;
-	public static int REMEMBER_ME_TOKEN_TIMEOUT_HOURS = 0;
-
+	
 	// 2fa auth type, null for none. Possible values null/email
 	public static enum TFAType {
 		email
 	}
 	public static TFAType TWO_FACTOR_AUTH_TYPE = null;
 	public static long TWO_FACTOR_CODE_TIMEOUT_SECONDS = 300; // 5 mins
-	public static String TWO_FACTOR_FROM_EMAIL = null;
 
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
