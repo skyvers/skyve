@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -110,10 +111,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			
 			String twoFactorCodeClearText = generateTFACode();
 			
-			DateTime generatedDateTime = new DateTime();
-			user.setTfaCodeGeneratedDateTime(generatedDateTime);
+			Timestamp generatedTS = new Timestamp();
+			user.setTfaCodeGeneratedTimestamp(generatedTS);
 			user.setTfaCode(EXT.hashPassword(twoFactorCodeClearText));
-			user.setTfaToken(generateTFAPushId(generatedDateTime));
+			user.setTfaToken(generateTFAPushId(generatedTS));
 			
 			updateUserTFADetails(user);
 			
@@ -150,11 +151,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		String tfaCode = obtainPassword(request);
 		UserTFA user = getUserDB(username);
 		
-		if (! tfaCodesPopulated(user) || ! twoFactorToken.equals(user.getTfaToken()) || tfaCodeExpired(user.getTfaCodeGeneratedDateTime())) {
+		if (! tfaCodesPopulated(user) || ! twoFactorToken.equals(user.getTfaToken()) || tfaCodeExpired(user.getTfaCodeGeneratedTimestamp())) {
 			UtilImpl.LOGGER.info(String.format("Inconsistent TFA details. TFA Codes populated : %s, TFA Token matches: %s, TFA Code Expired: %s", 
 												String.valueOf(tfaCodesPopulated(user)),
 												String.valueOf(twoFactorToken.equals(user.getTfaToken())),
-												String.valueOf(tfaCodeExpired(user.getTfaCodeGeneratedDateTime()))));
+												String.valueOf(tfaCodeExpired(user.getTfaCodeGeneratedTimestamp()))));
 			return false;
 		}
 		
@@ -178,8 +179,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	private void clearTFADetails(UserTFA user) {
 		boolean edited = false;
 		
-		if (user.getTfaCodeGeneratedDateTime() != null) {
-			user.setTfaCodeGeneratedDateTime(null);
+		if (user.getTfaCodeGeneratedTimestamp() != null) {
+			user.setTfaCodeGeneratedTimestamp(null);
 			edited = true;
 		}
 		
@@ -235,8 +236,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	}
 	
 	@SuppressWarnings("static-method")
-	protected String generateTFAPushId(DateTime generatedDateTime) {
-		return UUID.randomUUID().toString() + "-" + Long.toString(generatedDateTime.getTime());
+	protected String generateTFAPushId(Timestamp generatedTS) {
+		return UUID.randomUUID().toString() + "-" + Long.toString(generatedTS.getTime());
 	}
 	
 	@SuppressWarnings("static-method")
@@ -259,11 +260,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	}
 	
 	@SuppressWarnings("static-method")
-	protected boolean tfaCodeExpired(DateTime generatedDateTime) {
+	protected boolean tfaCodeExpired(Timestamp generatedTS) {
 		// timeout worth of milliseconds
 		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT_SECONDS * 1000;
 		
-		long generatedTime = generatedDateTime.getTime();
+		long generatedTime = generatedTS.getTime();
 		long currentTime = new DateTime().getTime();
 		
 		return currentTime > (generatedTime + expiryMillis);
@@ -279,6 +280,6 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	protected boolean tfaCodesPopulated(UserTFA user) {
 		return ((user.getTfaCode() != null) &&
 				(user.getTfaToken() != null) &&
-				(user.getTfaCodeGeneratedDateTime() != null));
+				(user.getTfaCodeGeneratedTimestamp() != null));
 	}
 }

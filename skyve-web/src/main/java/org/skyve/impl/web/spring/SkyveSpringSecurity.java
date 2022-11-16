@@ -118,16 +118,16 @@ public class SkyveSpringSecurity {
 				RDBMS rdbms = dialect.getRDBMS();
 
 				if (RDBMS.h2.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedTimestamp from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
-					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select concat(bizCustomer, '/', userName), password, not ifNull(inactive, false) and ifNull(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedTimestamp from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.sqlserver.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer + '/' + userName, password, case when coalesce(inactive, 0) = 0 and coalesce(activated, 1) = 1 then 1 else 0 end, authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedTimestamp from ADM_SecurityUser " + whereClause;
 				}
 				else if (RDBMS.postgresql.equals(rdbms)) {
-					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedDateTime from ADM_SecurityUser " + whereClause;
+					skyveUserQuery = "select bizCustomer || '/' || userName, password, not coalesce(inactive, false) and coalesce(activated, true), authenticationFailures, lastAuthenticationFailure, twoFactorCode, twoFactorCodeGeneratedTimestamp from ADM_SecurityUser " + whereClause;
 				}
 			}
 			
@@ -324,32 +324,32 @@ public class SkyveSpringSecurity {
 				}
 				
 				// this should be the same for all dialects
-				skyveUserTFAUpdate = "update ADM_SecurityUser as u set u.twoFactorCode = ? , u.twoFactorToken = ?, u.twoFactorCodeGeneratedDateTime = ? " + whereClause;
+				skyveUserTFAUpdate = "update ADM_SecurityUser as u set u.twoFactorCode = ? , u.twoFactorToken = ?, u.twoFactorCodeGeneratedTimestamp = ? " + whereClause;
 					
 				SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 				RDBMS rdbms = dialect.getRDBMS();
 				
 				if (RDBMS.h2.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser as u "
 							+ " inner join ADM_Contact as c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
 					skyveUserQuery = "select concat(u.bizCustomer, '/', u.userName), u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true),  u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser as u "
+							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser as u "
 							+ " inner join ADM_Contact as c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.sqlserver.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer + '/' + u.userName, u.password, case when coalesce(u.inactive, 0) = 0 and coalesce(u.activated, 1) = 1 then 1 else 0 end, u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser u "
 							+ " inner join ADM_Contact c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
 				else if (RDBMS.postgresql.equals(rdbms)) {
 					skyveUserQuery = "select u.bizCustomer || '/' || u.userName, u.password, not coalesce(u.inactive, false) and coalesce(u.activated, true), u.authenticationFailures, u.lastAuthenticationFailure, "
-							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedDateTime, c.email1 from ADM_SecurityUser u "
+							+ " u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser u "
 							+ " inner join ADM_Contact c on u.contact_id = c.bizId " 
 							+ whereClause;
 				}
@@ -409,7 +409,7 @@ public class SkyveSpringSecurity {
 								String twoFactorCode = rs.getString(6);
 								String twoFactorToken = rs.getString(7);
 								Timestamp twoFactorGenerated = rs.getTimestamp(8);
-								DateTime tfaGenTime = twoFactorGenerated == null ? null : new DateTime(twoFactorGenerated.getTime());
+								org.skyve.domain.types.Timestamp tfaGenTime = twoFactorGenerated == null ? null : new org.skyve.domain.types.Timestamp(twoFactorGenerated.getTime());
 								String email = rs.getString(9);
 								
 								if ((lastAuthenticationFailure != null) &&
@@ -463,7 +463,7 @@ public class SkyveSpringSecurity {
 			public void updateUser(UserDetails user) {
 				UserTFA tfa = (UserTFA) user;
 				
-				Timestamp codeGenTS = tfa.getTfaCodeGeneratedDateTime() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedDateTime().getTime());
+				Timestamp codeGenTS = tfa.getTfaCodeGeneratedTimestamp() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedTimestamp().getTime());
 				
 				getJdbcTemplate().update(this.skyveUserTFAUpdate, (ps) -> {
 					ps.setString(1, tfa.getTfaCode());

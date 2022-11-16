@@ -90,7 +90,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	private void cleanupTFACodes(HttpServletRequest request) {
 		String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
 		UserTFA user = (UserTFA) this.userDetailsService.loadUserByUsername(username);
-		user.setTfaCodeGeneratedDateTime(null);
+		user.setTfaCodeGeneratedTimestamp(null);
 		user.setTfaCode(null);
 		user.setTfaToken(null);
 		userDetailsService.updateUser(user);
