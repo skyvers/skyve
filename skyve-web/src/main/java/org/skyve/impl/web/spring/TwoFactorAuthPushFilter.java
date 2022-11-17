@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.UUID;
 
 import javax.servlet.FilterChain;
@@ -17,6 +18,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -105,6 +107,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		UserTFA user = getUserDB(username);
 		
+		if (user == null) {
+			return false;
+		}
+		
 		// if cannot authenticate, let the security chain continue
 		// don't send the push notification
 		// let whoever handles incorrect credentials take over
@@ -138,8 +144,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		clearTFADetails(user);
-		// incorrect creds, follow thorugh for normal incorrect creds path.
-		return true;
+		return false;
 	}
 	
 	/**
@@ -223,7 +228,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @throws Exception 
 	 */
 	protected UserTFA getUserDB(String username) {
-		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+		UserDetails userDetails;
+		try {
+			userDetails = userDetailsService.loadUserByUsername(username);
+		} catch (UsernameNotFoundException e1) {
+			//incorrect username
+			return null;
+		}
 		
 		if (userDetails instanceof UserTFA) {
 			return (UserTFA) userDetails;
@@ -249,7 +260,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	@SuppressWarnings("static-method")
 	protected String generateTFACode() {
-		return UUID.randomUUID().toString();
+		DecimalFormat df = new DecimalFormat("000000");
+		String result = df.format(Math.random()*1000000);
+		
+		return result;
 	}
 	
 	/**
@@ -289,4 +303,5 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 				(user.getTfaToken() != null) &&
 				(user.getTfaCodeGeneratedTimestamp() != null));
 	}
+	
 }
