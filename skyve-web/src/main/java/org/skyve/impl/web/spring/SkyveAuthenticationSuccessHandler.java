@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,8 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
+import com.google.common.base.Strings;
+
 /**
  * This class will redirect to the saved URL after login unless that URL is not a regular url.
  * Like smart client AJAX request and omnifaces web sockets etc must redirect to the home URL after login.
@@ -34,7 +37,6 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		} else {
 			UtilImpl.LOGGER.warning("UserDetailsService is the wrong type for TFA");
 		}
-		
 	}
 	
 	@Override
@@ -82,9 +84,18 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			// no saved request, so go home
 			redirectUrl = Util.getHomeUrl();
 		}
-		
-		if (SkyveSpringSecurity.isTFAPush() && userDetailsService != null) {
-			cleanupTFACodes(request);
+	
+		try {
+			String customer = request.getParameter(TwoFactorAuthPushFilter.SKYVE_SECURITY_FORM_CUSTOMER_KEY);
+			if (userDetailsService != null && !Strings.isNullOrEmpty(customer)) {
+				TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
+				if (SkyveSpringSecurity.isTFAPush(config)) {
+					cleanupTFACodes(request);
+				}
+			}
+		} catch (SQLException e) {
+			// if it errors here, DB has error?.
+			e.printStackTrace();
 		}
 		
 		UtilImpl.LOGGER.info("Redirected to " + redirectUrl);
@@ -96,6 +107,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	private void cleanupTFACodes(HttpServletRequest request) {
 		String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
 		UserTFA user = (UserTFA) this.userDetailsService.loadUserByUsername(username);
+		
 		user.setTfaCodeGeneratedTimestamp(null);
 		user.setTfaCode(null);
 		user.setTfaToken(null);

@@ -1,7 +1,6 @@
 package org.skyve.impl.web.spring;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.UtilImpl.TFAType;
 import org.skyve.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -127,10 +126,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.frameOptions().disable()
 				.contentTypeOptions().disable();
 
-			if (UtilImpl.TWO_FACTOR_AUTH_TYPE == TFAType.email) {
-				http.addFilterBefore(new TwoFactorAuthPushEmailFilter(authenticationManager(), this.userDetailsService()),
-										UsernamePasswordAuthenticationFilter.class);
-			}
+			http.addFilterBefore(new TwoFactorAuthPushEmailFilter(authenticationManager(), this.userDetailsService()),
+									UsernamePasswordAuthenticationFilter.class);
 
 			if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) ||
 					(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) ||
@@ -142,6 +139,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //					.loginPage(Util.getLoginUrl())
 //					.defaultSuccessUrl(Util.getHomeUrl());
 	}
+	
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {

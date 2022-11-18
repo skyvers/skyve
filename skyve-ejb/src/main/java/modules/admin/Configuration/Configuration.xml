@@ -82,6 +82,32 @@
  			</values>
 		</enum>
 		
+		<!-- Two Factor Authentication -->
+		<enum name="twoFactorType" required="true">
+			<displayName>admin.configuration.twoFactorType.displayName</displayName>
+			<description>admin.configuration.twoFactorType.description</description>
+			<defaultValue>off</defaultValue>
+			<values>
+				<value code="OFF" description="Off" />
+				<value code="EMAIL" description="Email"/>
+			</values>
+			
+		</enum>
+		<integer name="twofactorPushCodeTimeOutSeconds">
+			<displayName>admin.configuration.twoFactorPushTimeOutSeconds.displayName</displayName>
+			<description>admin.configuration.twoFactorPushTimeOutSeconds.description</description>
+			<defaultValue>300</defaultValue>
+		</integer>
+		<text name="twoFactorEmailSubject">
+			<displayName>admin.configuration.twoFactorEmailSubject.displayName</displayName>
+			<description>admin.configuration.twoFactorEmailSubject.description</description>
+			<length>128</length>
+		</text>
+		<markup name="twoFactorEmailBody">
+			<displayName>admin.configuration.twoFactorEmailBody.displayName</displayName>
+			<description>admin.configuration.twoFactorEmailBody.description</description>
+		</markup>
+		
 		<association name="publicUser" type="aggregation">
 			<displayName>admin.configuration.association.publicUser.displayName</displayName>
 			<description>admin.configuration.association.publicUser.description</description>
@@ -188,6 +214,15 @@
 			<expression>
 				<![CDATA[
 					getStartup() != null && getStartup().isSingleTenant()
+				]]>
+			</expression>
+		</condition>
+		
+		<condition name="tfaEmailSelected" usage="view">
+			<description>True when the user has selected Two Factor Auth Email type</description>
+			<expression>
+				<![CDATA[
+					TwoFactorType.email == getTwoFactorType()
 				]]>
 			</expression>
 		</condition>

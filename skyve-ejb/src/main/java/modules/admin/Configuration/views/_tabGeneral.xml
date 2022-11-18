@@ -92,6 +92,9 @@
 		</form>
 	</vbox>
 	
+	<!-- TFA has a different component for desktop and external -->
+	<component name="_twoFactorAuthentication" />
+	
 	<form border="true" borderTitle="admin.configuration.edit.general.userSelfRegistration.borderTitle">
 		<column/>
 		<column/>

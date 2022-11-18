@@ -16,6 +16,7 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Startup;
 import modules.admin.domain.User;
+import modules.admin.domain.Configuration.TwoFactorType;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
 	@Override
@@ -107,6 +108,15 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 					break;
 				default:
 					break;
+			}
+		}
+		
+		if (Configuration.twoFactorTypePropertyName.equals(source) && bean.getTwoFactorType() == TwoFactorType.email) {
+			if (bean.getTwoFactorEmailBody() == null) {
+				bean.setTwoFactorEmailBody("Hi,<br /><br />Your verification code is: {tfaCode}<br />");
+			}
+			if (bean.getTwoFactorEmailSubject() == null) {
+				bean.setTwoFactorEmailSubject("Please verify your email security code");
 			}
 		}
 

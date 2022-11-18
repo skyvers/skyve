@@ -22,6 +22,7 @@ import org.skyve.util.Util;
  * Setup
  * 
  * @depend - - - PasswordComplexityModel
+ * @depend - - - TwoFactorType
  * @navhas n publicUser 0..1 UserProxy
  * @navhas n emailToContact 0..1 Contact
  * @navhas n startup 0..1 Startup
@@ -83,6 +84,18 @@ public abstract class Configuration extends AbstractPersistentBean {
 	/** @hidden */
 	@Deprecated
 	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
+
+	/** @hidden */
+	public static final String twoFactorTypePropertyName = "twoFactorType";
+
+	/** @hidden */
+	public static final String twofactorPushCodeTimeOutSecondsPropertyName = "twofactorPushCodeTimeOutSeconds";
+
+	/** @hidden */
+	public static final String twoFactorEmailSubjectPropertyName = "twoFactorEmailSubject";
+
+	/** @hidden */
+	public static final String twoFactorEmailBodyPropertyName = "twoFactorEmailBody";
 
 	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
@@ -208,6 +221,85 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * Two Factor Type
+	 * <br/>
+	 * The type of two factor authentication to be used for all users.
+	 **/
+	@XmlEnum
+	public static enum TwoFactorType implements Enumeration {
+		off("OFF", "Off"),
+		email("EMAIL", "Email");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private TwoFactorType(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static TwoFactorType fromCode(String code) {
+			TwoFactorType result = null;
+
+			for (TwoFactorType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static TwoFactorType fromLocalisedDescription(String description) {
+			TwoFactorType result = null;
+
+			for (TwoFactorType value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				TwoFactorType[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (TwoFactorType value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
 	 * Minimum Password Length
 	 * <br/>
 	 * The minimum number of characters for new passwords
@@ -303,6 +395,34 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 **/
 	@Deprecated
 	private PasswordComplexityModel passwordComplexityModel;
+
+	/**
+	 * Two Factor Type
+	 * <br/>
+	 * The type of two factor authentication to be used for all users.
+	 **/
+	private TwoFactorType twoFactorType = TwoFactorType.off;
+
+	/**
+	 * Two Factor Code Timeout (seconds)
+	 * <br/>
+	 * The time out in seconds before a Skyve generated two factor code expires.
+	 **/
+	private Integer twofactorPushCodeTimeOutSeconds = Integer.valueOf(300);
+
+	/**
+	 * Two Factor Email Subject
+	 * <br/>
+	 * The subject of the two factor authentication email to be sent to clients.
+	 **/
+	private String twoFactorEmailSubject;
+
+	/**
+	 * Two Factor Email Body
+	 * <br/>
+	 * The body of the two factor authentication email to be sent to clients. Insert {tfaCode} where the TFA code should go.
+	 **/
+	private String twoFactorEmailBody;
 
 	/**
 	 * Anonymous Public User
@@ -672,6 +792,78 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #twoFactorType} accessor.
+	 * @return	The value.
+	 **/
+	public TwoFactorType getTwoFactorType() {
+		return twoFactorType;
+	}
+
+	/**
+	 * {@link #twoFactorType} mutator.
+	 * @param twoFactorType	The new value.
+	 **/
+	@XmlElement
+	public void setTwoFactorType(TwoFactorType twoFactorType) {
+		preset(twoFactorTypePropertyName, twoFactorType);
+		this.twoFactorType = twoFactorType;
+	}
+
+	/**
+	 * {@link #twofactorPushCodeTimeOutSeconds} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getTwofactorPushCodeTimeOutSeconds() {
+		return twofactorPushCodeTimeOutSeconds;
+	}
+
+	/**
+	 * {@link #twofactorPushCodeTimeOutSeconds} mutator.
+	 * @param twofactorPushCodeTimeOutSeconds	The new value.
+	 **/
+	@XmlElement
+	public void setTwofactorPushCodeTimeOutSeconds(Integer twofactorPushCodeTimeOutSeconds) {
+		preset(twofactorPushCodeTimeOutSecondsPropertyName, twofactorPushCodeTimeOutSeconds);
+		this.twofactorPushCodeTimeOutSeconds = twofactorPushCodeTimeOutSeconds;
+	}
+
+	/**
+	 * {@link #twoFactorEmailSubject} accessor.
+	 * @return	The value.
+	 **/
+	public String getTwoFactorEmailSubject() {
+		return twoFactorEmailSubject;
+	}
+
+	/**
+	 * {@link #twoFactorEmailSubject} mutator.
+	 * @param twoFactorEmailSubject	The new value.
+	 **/
+	@XmlElement
+	public void setTwoFactorEmailSubject(String twoFactorEmailSubject) {
+		preset(twoFactorEmailSubjectPropertyName, twoFactorEmailSubject);
+		this.twoFactorEmailSubject = twoFactorEmailSubject;
+	}
+
+	/**
+	 * {@link #twoFactorEmailBody} accessor.
+	 * @return	The value.
+	 **/
+	public String getTwoFactorEmailBody() {
+		return twoFactorEmailBody;
+	}
+
+	/**
+	 * {@link #twoFactorEmailBody} mutator.
+	 * @param twoFactorEmailBody	The new value.
+	 **/
+	@XmlElement
+	public void setTwoFactorEmailBody(String twoFactorEmailBody) {
+		preset(twoFactorEmailBodyPropertyName, twoFactorEmailBody);
+		this.twoFactorEmailBody = twoFactorEmailBody;
+	}
+
+	/**
 	 * {@link #publicUser} accessor.
 	 * @return	The value.
 	 **/
@@ -1020,5 +1212,24 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotSingleTenant() {
 		return (! isSingleTenant());
+	}
+
+	/**
+	 * True when the user has selected Two Factor Auth Email type
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isTfaEmailSelected() {
+		return (TwoFactorType.email == getTwoFactorType());
+	}
+
+	/**
+	 * {@link #isTfaEmailSelected} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotTfaEmailSelected() {
+		return (! isTfaEmailSelected());
 	}
 }
