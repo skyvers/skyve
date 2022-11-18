@@ -83,6 +83,9 @@ public class DeleteAction extends FacesAction<Void> {
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
 
 			persistence.delete(document, persistentBeanToDelete);
+			
+			// We want to call post render
+			facesView.setPostRender(bizlet, persistentBeanToDelete);
 		}
 		
 		return null;

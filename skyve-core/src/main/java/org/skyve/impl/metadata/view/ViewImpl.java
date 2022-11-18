@@ -308,7 +308,6 @@ public class ViewImpl extends Container implements View {
 				components.add(component);
 			}
 			
-			// TODO - a chart in a component could have a different index
 			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 				ChartBuilderMetaData model = chart.getModel();

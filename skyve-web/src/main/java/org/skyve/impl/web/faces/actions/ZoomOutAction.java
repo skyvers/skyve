@@ -86,14 +86,14 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 				}
 				
 				// now zoom out to owning view
-				zoomOut(facesView);
+				zoomOut(facesView, internalCustomer);
 			}
 		}
 		
 		return null;
 	}
 	
-	static void zoomOut(FacesView<? extends Bean> facesView) throws Exception {
+	static void zoomOut(FacesView<? extends Bean> facesView, CustomerImpl internalCustomer) throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		Stack<String> zoomInBindings = facesView.getZoomInBindings();
 		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();
@@ -131,6 +131,12 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("zoomOut - newViewBinding = " + newViewBinding);
 		facesView.setViewBinding(newViewBinding);
 
+		Bean currentBean = ActionUtil.getTargetBeanForView(facesView);
+		Module m = internalCustomer.getModule(currentBean.getBizModule());
+		Document d = m.getDocument(internalCustomer, currentBean.getBizDocument());
+		Bizlet<? extends Bean> b = d.getBizlet(internalCustomer);
+		facesView.setPostRender(b, currentBean);
+		
  		ActionUtil.redirectViewScopedConversation(facesView, false);
 	}
 }

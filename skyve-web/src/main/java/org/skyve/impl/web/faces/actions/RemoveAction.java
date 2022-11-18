@@ -95,7 +95,7 @@ public class RemoveAction extends FacesAction<Void> {
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, beanToRemove, null, webContext);
 
 				BindUtil.removeElementFromCollection(bean, viewBinding.substring(0, lastCollectionindex), beanToRemove);
-				ZoomOutAction.zoomOut(facesView);
+				ZoomOutAction.zoomOut(facesView, internalCustomer);
 			}
 		}
 

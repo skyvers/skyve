@@ -65,6 +65,7 @@ import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -821,7 +822,7 @@ public class FacesView<T extends Bean> extends Harness {
 		BindUtil.set(getCurrentBean().getBean(), binding, null);
 	}
 	
-	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()
+	// Used to hydrate the state after dehydration in SkyveFacesPhaseListener.afterRestoreView()
  	// NB This is only set when the bean is dehydrated
 	private String dehydratedWebId;
 	public String getDehydratedWebId() {
@@ -849,8 +850,30 @@ public class FacesView<T extends Bean> extends Harness {
 		dualListModels.clear();
 		beans.clear();
 		currentBean = null;
+		postRenderBizlet = null;
+		postRenderBean = null;
 	}
 	
+	// This is used to ensure the same bizlet instance is used to call postRender() when required.
+	// If this is null, postRender isn't called in SkyveFacesPhaseListener.
+	// This enables state in the bizlet to be kept between preExecute(), preRerender() and postRender().
+	private transient Bizlet<? extends Bean> postRenderBizlet = null;
+	public Bizlet<? extends Bean> getPostRenderBizlet() {
+		return postRenderBizlet;
+	}
+
+	// If not null, indicates that we wanna call postRender() on the postRenderBizlet in SkyveFacesPhaseListener.
+	// The bizlet may still be null but we wanna make the interceptor calls anyway.
+	private transient Bean postRenderBean = null;
+	public Bean getPostRenderBean() {
+		return postRenderBean;
+	}
+
+	public void setPostRender(Bizlet<? extends Bean> bizlet, Bean bean) {
+		this.postRenderBizlet = bizlet;
+		this.postRenderBean = bean;
+	}
+
 	/**
 	 * This method produces a style class that implements 
 	 * the form column/row contract in the skyve view metadata.

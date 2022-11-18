@@ -15,7 +15,7 @@
     </factory>
     	
 	<lifecycle>
-		<phase-listener>org.skyve.impl.web.faces.SkyvePhaseListener</phase-listener>
+		<phase-listener>org.skyve.impl.web.faces.SkyveFacesPhaseListener</phase-listener>
 	</lifecycle>
 
 	<!-- Converters -->

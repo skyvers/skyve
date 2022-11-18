@@ -85,6 +85,9 @@ public class ZoomInAction extends FacesAction<Void> {
 				}
 				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 
+				// We want to call post render on the zoomed in bean
+				facesView.setPostRender(bizlet, currentBean);
+
 				ActionUtil.redirectViewScopedConversation(facesView, true);
 			}
 		}
