@@ -252,7 +252,6 @@ public class SkyveSpringSecurity {
 								
 								String password = userPassword;
 								if (useTFAPushCodeAsPassword( twoFactorGenerated, customerName)) {
-									UtilImpl.LOGGER.info("Using two factor code for password.");
 									password = twoFactorCode;
 								} 
 								
