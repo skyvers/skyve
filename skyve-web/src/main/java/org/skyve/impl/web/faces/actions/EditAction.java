@@ -137,6 +137,9 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
+							
+							// We want to call post render
+							facesView.setPostRender(bizlet, bean);
 						}
 					}
 				}
@@ -179,13 +182,16 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
+							
+							// We want to call post render
+							facesView.setPostRender(bizlet, bean);
 			    		}
 					}
 				}
 			}
 		}
 		// ensure that we always do this stuff even if an exception occurs 
-		// so that faces has a chance to render the current page and error off the FaceView.
+		// so that faces has a chance to render the current page and error off the FacesView.
 		finally {
 			facesView.setWebContext(webContext);
 			facesView.setBean(bean);

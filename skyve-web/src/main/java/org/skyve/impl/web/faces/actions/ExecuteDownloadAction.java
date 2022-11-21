@@ -73,6 +73,9 @@ public class ExecuteDownloadAction<T extends Bean> extends FacesAction<Void> {
 														dataWidgetBinding,
 														elementBizId);
 			PrimeFaces.current().executeScript("window.location.assign(\"" + url + "\")");
+			
+			// We want to call post render
+			facesView.setPostRender(targetDocument.getBizlet(customer), targetBean);
 		}
 
 	    return null;

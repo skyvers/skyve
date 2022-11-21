@@ -99,6 +99,9 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 						PrimeFaces.current().executeScript(script.toString());
 					}
 				}
+				
+				// We want to call post render
+				facesView.setPostRender(targetDocument.getBizlet(customer), resultBean);
 			}
 		}
 

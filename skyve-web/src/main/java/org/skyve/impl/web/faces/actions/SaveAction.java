@@ -76,6 +76,9 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 		
 				targetBean = persistence.save(targetDocument, targetBean);
 				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
+				
+				// We want to call post render
+				facesView.setPostRender(bizlet, targetBean);
 			}
 		}
 		

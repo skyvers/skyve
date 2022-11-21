@@ -250,4 +250,14 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	public void preRerender(String source, T bean, WebContext webContext) throws Exception {
 		// do nothing
 	}
+	
+	/**
+	 * Provides a point to manipulate the bean after the client response payload has been rendered and sent but before it is cached in its conversation.
+	 * Note that this method should not throw any exceptions and should always succeed to enable correct state management after the render response.
+	 * @param bean	The bean rendered in the view.
+	 * @param webContext	The web context.
+	 */
+	public void postRender(T bean, WebContext webContext) {
+		// do nothing
+	}
 }

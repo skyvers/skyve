@@ -870,4 +870,20 @@ public class CustomerImpl implements Customer {
 			interceptor.getInterceptor().afterBizExportAction(document, actionName, result, webContext);
 		}
 	}
+	
+	public boolean interceptBeforePostRender(Bean bean, WebContext webContext) {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor().beforePostRender(bean, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterPostRender(Bean result, WebContext webContext) {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor().afterPostRender(result, webContext);
+		}
+	}
 }
+       

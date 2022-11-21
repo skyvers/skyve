@@ -110,7 +110,7 @@ public class BizportImport extends AbstractUpload {
 			return;
 		}
 
-		// NB Persistence has been set with the restore processing inside the SkyvePhaseListener
+		// NB Persistence has been set with the restore processing inside the SkyveFacesPhaseListener
 		Persistence persistence = CORE.getPersistence();
 		try {
 			User user = persistence.getUser();
@@ -202,6 +202,6 @@ public class BizportImport extends AbstractUpload {
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failure", t.getMessage());
 			fc.addMessage(null, msg);
 		}
-		// NB No need to disconnect Persistence as it is done in the SkyvePhaseListener after the response is rendered.
+		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
 	}
 }
