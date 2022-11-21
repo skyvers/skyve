@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
@@ -13,14 +14,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.EXT;
+import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -204,6 +209,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return false;
 		}
 		
+		if (tfaCodeExpired(user.getCustomer(),twoFactorToken)) {
+			UtilImpl.LOGGER.info("Users TFA Code has timed out.");
+			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
+			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
+			return true;
+		}
+		
 		
 		try {
 			this.attemptAuthentication(request, response);
@@ -312,16 +324,40 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return EXT.checkPassword(password, user.getUserPassword());
 	}
 	
-//	@SuppressWarnings("static-method")
-//	protected boolean tfaCodeExpired(Timestamp generatedTS) {
-//		// timeout worth of milliseconds
-//		long expiryMillis = UtilImpl.TWO_FACTOR_CODE_TIMEOUT_SECONDS * 1000;
-//		
-//		long generatedTime = generatedTS.getTime();
-//		long currentTime = new DateTime().getTime();
-//		
-//		return currentTime > (generatedTime + expiryMillis);
-//	}
+	@SuppressWarnings("static-method")
+	protected boolean tfaCodeExpired(String customer, String twoFactorCode) {
+		
+		long generatedTime;
+		try {
+			String [] splitParts = twoFactorCode.split("-");
+			String timeComponent = splitParts[splitParts.length-1];
+			
+			generatedTime = Long.valueOf(timeComponent);
+		} catch (NumberFormatException e) {
+			//code tampered with?
+			return true;
+		}
+		
+		long expiryMillis = getTwoFactorTimeoutMillis(customer);
+		long currentTime = new DateTime().getTime();
+		
+		return currentTime > (generatedTime + expiryMillis);
+	}
+	
+	private long getTwoFactorTimeoutMillis(String customer) {
+		
+		long timeoutMillis = 0;
+		
+		try {
+			TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
+			int timeoutSeconds = config.getTfaTimeOutSeconds();
+			timeoutMillis =  timeoutSeconds * 1000;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return timeoutMillis;
+	}
 	
 	/**
 	 * Check the user and see if they have the necessary TFA codes populated
