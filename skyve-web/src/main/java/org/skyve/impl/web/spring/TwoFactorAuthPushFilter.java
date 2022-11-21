@@ -16,6 +16,7 @@ import org.skyve.EXT;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -193,7 +194,6 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	throws IOException, ServletException {
 		String twoFactorToken = request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE);
 		String username = obtainUsername(request);
-		String tfaCode = obtainPassword(request);
 		UserTFA user = getUserDB(username);
 		
 		if (! tfaCodesPopulated(user) || ! twoFactorToken.equals(user.getTfaToken()) ) {
@@ -205,17 +205,18 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		
-		// have the right token, check the code, if the code is wrong, show a nice error message and allow them to retry
-		if (! EXT.checkPassword(tfaCode, user.getTfaCode())) {
+		try {
+			this.attemptAuthentication(request, response);
+		} catch (AuthenticationException e) {
+//			throws error if authentication failed, catch so we want to handle it
 			UtilImpl.LOGGER.info("Provided TFA code does not match."); 
 			
-			// check if this keeps the old attributes (if not set them again)
 			TwoFactorAuthenticationForwardHandler handler = new TwoFactorAuthenticationForwardHandler("/login");
-			
 			request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
 			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
 			request.setAttribute(USER_ATTRIBUTE, user.getUser());
 			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", true));
+
 			return true;
 		}
 		return false;

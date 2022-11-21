@@ -213,10 +213,15 @@
             		</div>
 				<% } %>
 				<% if (error2FA) { %>
-            		<div class="ui error message">
+					<div class="ui error message">
 	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
 			        	<p>
 			        		<%=Util.i18n("page.loginError.2FACode.invalid", locale)%>
+			        		<% if (UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) { %>
+			        			<div style="text-align:left;">
+				        			<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD), String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS))%>
+				        		</div>
+				        	<% } %>
 			        	</p>
             		</div>
 				<% } %>
@@ -277,11 +282,9 @@
 									<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
 								</div>
 							</div>
-							<% if (! show2FA) { %>
 								<div class="field" style="text-align: right;">
 									<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
 		    					</div>
-	    					 <% } %>
     					</div>
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
 		            </div>
