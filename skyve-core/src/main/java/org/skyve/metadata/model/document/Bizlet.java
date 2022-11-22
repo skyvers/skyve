@@ -215,6 +215,19 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	}
 	
 	/**
+	 * Called after a bean is deleted on Persitence.delete().
+	 * This is the place to cleanup after a delete has successfully completed.
+	 * This method is called after flush and can still cause a rollback 
+	 * when an exception is thrown but usually preDelete() is the place for validation.
+	 * 
+	 * @param bean	The bean that has been deleted.
+	 * @throws Exception
+	 */
+	public void postDelete(T bean) throws Exception {
+		// do nothing
+	}
+
+	/**
 	 * Called after the bean is loaded (in view or edit) in Persistence.retrieve().
 	 * Don't do too much in this method as it is called alot.
 	 * This is the place to ensure that transient derived fields are populated

@@ -151,6 +151,18 @@ public abstract class Interceptor implements MetaData {
 	}
 
 	@SuppressWarnings({"unused", "static-method"})
+	public boolean beforePostDelete(PersistentBean bean)
+	throws Exception {
+		return false;
+	}
+	
+	@SuppressWarnings("unused")
+	public void afterPostDelete(PersistentBean bean)
+	throws Exception {
+		// no-op
+	}
+
+	@SuppressWarnings({"unused", "static-method"})
 	public boolean beforePostLoad(PersistentBean bean)
 	throws Exception {
 		return false;
