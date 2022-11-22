@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_twoFactorAuthentication" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.skyve.org/xml/common">
+	
+	<vbox border="true" borderTitle="admin.configuration.twofactor.twofactor.borderTitle" widgetId="tfaWidgetId">
+		<form >
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="1"/>
+	        <row>
+	            <item>
+	                <combo binding="twoFactorType">
+	                	<onChangedHandlers>
+	                		<rerender clientValidation="false">
+	                			<properties>
+						            <c:property key="update">tfaWidgetId</c:property>
+	                			</properties>
+	                		</rerender>
+	                	</onChangedHandlers>
+	                </combo>
+	            </item>
+	        </row>
+	    </form>
+	    
+	    <form visible="tfaEmailSelected">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="1"/>
+	        <row>
+	        	<item>
+	        		<spacer/>
+	        	</item>
+	        	<item>
+	        		<blurb><![CDATA[<b>Please contact Biz Hub to enable Two Factor Authentication.</b>]]></blurb>
+	        	</item>
+	        </row>
+	        <row>
+	            <item required="true">
+	                <default binding="twoFactorEmailSubject" />
+	            </item>
+	        </row>
+	        <row>
+	            <item required="true">
+	                <textArea binding="twoFactorEmailBody"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item required="true">
+	                <default binding="twofactorPushCodeTimeOutSeconds"/>
+	            </item>
+	        </row>
+	    </form>
+    </vbox>
+</view>

@@ -152,7 +152,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String twoFactorCodePropertyName = "twoFactorCode";
 
 	/** @hidden */
-	public static final String twoFactorCodeGeneratedDateTimePropertyName = "twoFactorCodeGeneratedDateTime";
+	public static final String twoFactorCodeGeneratedTimestampPropertyName = "twoFactorCodeGeneratedTimestamp";
 
 	/** @hidden */
 	public static final String twoFactorTokenPropertyName = "twoFactorToken";
@@ -563,7 +563,7 @@ which are implied from the groups to which they belong.
 	 * <br/>
 	 * used to invalidate the 2fa code when X amount of time has passed. Not displayed to the user
 	 **/
-	private DateTime twoFactorCodeGeneratedDateTime;
+	private Timestamp twoFactorCodeGeneratedTimestamp;
 
 	/**
 	 * Two Factor Token
@@ -1401,23 +1401,23 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * {@link #twoFactorCodeGeneratedDateTime} accessor.
+	 * {@link #twoFactorCodeGeneratedTimestamp} accessor.
 	 * @return	The value.
 	 **/
-	public DateTime getTwoFactorCodeGeneratedDateTime() {
-		return twoFactorCodeGeneratedDateTime;
+	public Timestamp getTwoFactorCodeGeneratedTimestamp() {
+		return twoFactorCodeGeneratedTimestamp;
 	}
 
 	/**
-	 * {@link #twoFactorCodeGeneratedDateTime} mutator.
-	 * @param twoFactorCodeGeneratedDateTime	The new value.
+	 * {@link #twoFactorCodeGeneratedTimestamp} mutator.
+	 * @param twoFactorCodeGeneratedTimestamp	The new value.
 	 **/
 	@XmlElement
 	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(DateTimeMapper.class)
-	public void setTwoFactorCodeGeneratedDateTime(DateTime twoFactorCodeGeneratedDateTime) {
-		preset(twoFactorCodeGeneratedDateTimePropertyName, twoFactorCodeGeneratedDateTime);
-		this.twoFactorCodeGeneratedDateTime = twoFactorCodeGeneratedDateTime;
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	public void setTwoFactorCodeGeneratedTimestamp(Timestamp twoFactorCodeGeneratedTimestamp) {
+		preset(twoFactorCodeGeneratedTimestampPropertyName, twoFactorCodeGeneratedTimestamp);
+		this.twoFactorCodeGeneratedTimestamp = twoFactorCodeGeneratedTimestamp;
 	}
 
 	/**

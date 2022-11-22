@@ -2,7 +2,7 @@ package org.skyve.impl.web.spring;
 
 import java.util.Collection;
 
-import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -12,10 +12,11 @@ public class UserTFA extends User {
 	
 	private String tfaCode;
 	private String tfaToken;
-	private DateTime tfaCodeGeneratedDateTime;
+	private Timestamp tfaCodeGeneratedTimestamp;
 	private String customer;
 	private String user;
 	private String email;
+	private String userPassword;
 
 	public UserTFA(String username,
 					String password,
@@ -28,15 +29,17 @@ public class UserTFA extends User {
 					String user,
 					String tfaCode,
 					String tfaToken,
-					DateTime tfaCodeGeneratedDateTime,
-					String email ) {
+					Timestamp tfaCodeGeneratedTimestamp,
+					String email,
+					String userPassword) {
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 		this.tfaCode = UtilImpl.processStringValue(tfaCode);
 		this.tfaToken = UtilImpl.processStringValue(tfaToken);
-		this.tfaCodeGeneratedDateTime = tfaCodeGeneratedDateTime;
+		this.tfaCodeGeneratedTimestamp = tfaCodeGeneratedTimestamp;
 		this.customer = UtilImpl.processStringValue(customer);
 		this.user = UtilImpl.processStringValue(user);
 		this.email = UtilImpl.processStringValue(email);
+		this.userPassword = userPassword;
 	}
 
 	public String getTfaCode() {
@@ -55,12 +58,12 @@ public class UserTFA extends User {
 		this.tfaToken = UtilImpl.processStringValue(tfaToken);
 	}
 
-	public DateTime getTfaCodeGeneratedDateTime() {
-		return tfaCodeGeneratedDateTime;
+	public Timestamp getTfaCodeGeneratedTimestamp() {
+		return tfaCodeGeneratedTimestamp;
 	}
 
-	public void setTfaCodeGeneratedDateTime(DateTime tfaCodeGeneratedDateTime) {
-		this.tfaCodeGeneratedDateTime = tfaCodeGeneratedDateTime;
+	public void setTfaCodeGeneratedTimestamp(Timestamp tfaCodeGeneratedTimestamp) {
+		this.tfaCodeGeneratedTimestamp = tfaCodeGeneratedTimestamp;
 	}
 
 	public String getCustomer() {
@@ -73,5 +76,9 @@ public class UserTFA extends User {
 
 	public String getEmail() {
 		return email;
+	}
+
+	public String getUserPassword() {
+		return userPassword;
 	}
 }

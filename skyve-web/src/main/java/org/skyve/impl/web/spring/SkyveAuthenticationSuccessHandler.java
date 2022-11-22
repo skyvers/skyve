@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -16,6 +18,8 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
+
+import com.google.common.base.Strings;
 
 /**
  * This class will redirect to the saved URL after login unless that URL is not a regular url.
@@ -27,8 +31,12 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	private JdbcUserDetailsManager userDetailsService;
 	
-	public SkyveAuthenticationSuccessHandler(JdbcUserDetailsManager userDetailsService) {
-		this.userDetailsService = userDetailsService;
+	public SkyveAuthenticationSuccessHandler(UserDetailsService userDetailsService) {
+		if (userDetailsService instanceof JdbcUserDetailsManager) {
+			this.userDetailsService = (JdbcUserDetailsManager) userDetailsService;
+		} else {
+			UtilImpl.LOGGER.warning("UserDetailsService is the wrong type for TFA");
+		}
 	}
 	
 	@Override
@@ -76,9 +84,18 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			// no saved request, so go home
 			redirectUrl = Util.getHomeUrl();
 		}
-		
-		if (SkyveSpringSecurity.isTFAPush() && userDetailsService != null) {
-			cleanupTFACodes(request);
+	
+		try {
+			String customer = request.getParameter(TwoFactorAuthPushFilter.SKYVE_SECURITY_FORM_CUSTOMER_KEY);
+			if (userDetailsService != null && !Strings.isNullOrEmpty(customer)) {
+				TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
+				if (SkyveSpringSecurity.isTFAPush(config)) {
+					cleanupTFACodes(request);
+				}
+			}
+		} catch (SQLException e) {
+			// if it errors here, DB has error?.
+			e.printStackTrace();
 		}
 		
 		UtilImpl.LOGGER.info("Redirected to " + redirectUrl);
@@ -90,7 +107,8 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	private void cleanupTFACodes(HttpServletRequest request) {
 		String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
 		UserTFA user = (UserTFA) this.userDetailsService.loadUserByUsername(username);
-		user.setTfaCodeGeneratedDateTime(null);
+		
+		user.setTfaCodeGeneratedTimestamp(null);
 		user.setTfaCode(null);
 		user.setTfaToken(null);
 		userDetailsService.updateUser(user);

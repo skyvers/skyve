@@ -42,7 +42,6 @@ import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
-import org.skyve.impl.util.UtilImpl.TFAType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -597,19 +596,13 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getString("account", "facebookAuthSecret", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getString("account", "githubAuthClientId", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getString("account", "githubAuthSecret", account, false);
-		number = getNumber("account", "tfaCodeTimeOutSeconds", account, false);
-		if (number != null) {
-			UtilImpl.TWO_FACTOR_CODE_TIMEOUT_SECONDS = number.longValue();
-		}
-		value = getString("account", "tfaType", account, false);
-		if (value != null) {
-			UtilImpl.TWO_FACTOR_AUTH_TYPE = TFAType.valueOf(value);
-		}
-		UtilImpl.TWO_FACTOR_FROM_EMAIL = getString("account", "tfaEmailFromAddress", account, false);
+
 		number = getNumber("account", "rememberMeTokenTimeoutHours", account, false);
 		if (number != null) {
 			UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS = number.intValue();
 		}
+		
+		UtilImpl.TFA_CUSTOMER = getString("account", "tfaCustomer", account, false);
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
