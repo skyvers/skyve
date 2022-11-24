@@ -12,7 +12,6 @@ import java.util.List;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -41,6 +40,7 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 public class SkyveSpringSecurity {
@@ -88,12 +88,10 @@ public class SkyveSpringSecurity {
 	 * @param createdTimestamp
 	 * @return
 	 */
-	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customer) throws SQLException {
+	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customerName) {
+		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customerName);
 		
-		
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
-		
-		if (config == null || createdTimestamp == null || (! isTFAPush(config))) {
+		if ((config == null) || (createdTimestamp == null) || (! isTFAPush(config))) {
 			return false;
 		}
 		
@@ -106,47 +104,36 @@ public class SkyveSpringSecurity {
 	}
 	
 	public static boolean isTFAPush(TwoFactorCustomerConfiguration config) {
-		return "EMAIL".equals(config.getTfaType());
+		return ((config != null) && "EMAIL".equals(config.getTfaType()));
 	}
 	
-	public static TwoFactorCustomerConfiguration getCustomerTFAConfig(String customerName) throws SQLException {
-		
-		if (StringUtils.isBlank(customerName)) {
-			throw new SQLException("Customer is blank");
-		}
-		
+	public static TwoFactorCustomerConfiguration getCustomerTFAConfig(String customerName) {
 		TwoFactorCustomerConfiguration config = null;
-		try (Connection c = EXT.getDataStoreConnection()) {
-			
-			String query = String.format("select %s,%s,%s,%s from ADM_Configuration where %s = ?",
-					"twoFactorType",
-					"twofactorPushCodeTimeOutSeconds",
-					"twoFactorEmailSubject",
-					"twoFactorEmailBody",
-					"bizCustomer");
-			
-			
-			try (PreparedStatement s = c.prepareStatement(query)) {
-				s.setString(1, customerName);
-				try (ResultSet rs = s.executeQuery()) {
-					while (rs.next()) {
-						config = new TwoFactorCustomerConfiguration(
-								rs.getString(1), 
-								rs.getInt(2), 
-								rs.getString(3),
-								rs.getString(4)
-								);
+		try {
+			try (Connection c = EXT.getDataStoreConnection()) {
+				String query = "select twoFactorType, twofactorPushCodeTimeOutSeconds, twoFactorEmailSubject, twoFactorEmailBody " + 
+									"from ADM_Configuration where bizCustomer = ?";
+				try (PreparedStatement s = c.prepareStatement(query)) {
+					s.setString(1, customerName);
+					try (ResultSet rs = s.executeQuery()) {
+						if (rs.next()) {
+							config = new TwoFactorCustomerConfiguration(rs.getString(1), 
+																			rs.getInt(2), 
+																			rs.getString(3),
+																			rs.getString(4));
+						}
 					}
 				}
 			}
+		}
+		catch (SQLException e) {
+			throw new DomainException("Cannot get TFA Config", e);
 		}
 		
 		return config;
 	}
 	
-	
-	public UserDetailsService jdbcUserDetailsService() {
-		
+	public UserDetailsManager jdbcUserDetailsManager() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;
 			
@@ -200,29 +187,17 @@ public class SkyveSpringSecurity {
 				return userFromUserQuery;
 			}
 			
-			private String getCustomerName(String springUsername) {
-				String customerName = null;
-				int slashIndex = springUsername.indexOf('/');
-				if (slashIndex > 0) {
-					customerName = springUsername.substring(0, slashIndex);
-				}
-				return customerName;
-			}
-			
-			private String getUsernameOnly(String springUsername) {
-				String userName = springUsername;
-				int slashIndex = userName.indexOf('/');
-				if (slashIndex > 0) {
-					userName = userName.substring(slashIndex + 1);
-				}
-				
-				return userName;
-			}
-			
 			@Override
 			protected List<UserDetails> loadUsersByUsername(String springUsername) {
-				final String customerName = getCustomerName(springUsername);
-				final String usernameOnly = getUsernameOnly(springUsername);
+				String tempCustomerName = null;
+				String tempUserName = springUsername;
+				int slashIndex = tempUserName.indexOf('/');
+				if (slashIndex > 0) {
+					tempCustomerName = tempUserName.substring(0, slashIndex);
+					tempUserName = tempUserName.substring(slashIndex + 1);
+				}
+				final String customerName = tempCustomerName;
+				final String userName = tempUserName;
 				
 				return getJdbcTemplate().query(
 						skyveUserQuery,
@@ -251,7 +226,7 @@ public class SkyveSpringSecurity {
 								
 								
 								String password = userPassword;
-								if (useTFAPushCodeAsPassword( twoFactorGenerated, customerName)) {
+								if (useTFAPushCodeAsPassword(twoFactorGenerated, customerName)) {
 									password = twoFactorCode;
 								} 
 								
@@ -270,8 +245,7 @@ public class SkyveSpringSecurity {
 											UtilImpl.LOGGER.warning("Account " + springUsername + " is locked for another " + secondsRemaining + " seconds");
 										}
 									}
-								}
-								
+								}		
 								
 								return new UserTFA(user,
 													password,
@@ -281,7 +255,7 @@ public class SkyveSpringSecurity {
 													! locked,
 													AuthorityUtils.NO_AUTHORITIES,
 													customerName,
-													usernameOnly,
+													userName,
 													twoFactorCode,
 													twoFactorToken,
 													tfaGenTime,
@@ -290,7 +264,7 @@ public class SkyveSpringSecurity {
 							}
 						},
 						// 2 params for multi-tennant
-						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, usernameOnly} : new String[] {usernameOnly});
+						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, userName} : new String[] {userName});
 			}
 			
 			@Override

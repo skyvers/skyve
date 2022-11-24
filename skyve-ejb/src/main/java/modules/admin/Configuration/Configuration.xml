@@ -91,7 +91,6 @@
 				<value code="OFF" description="Off" />
 				<value code="EMAIL" description="Email"/>
 			</values>
-			
 		</enum>
 		<integer name="twofactorPushCodeTimeOutSeconds">
 			<displayName>admin.configuration.twoFactorPushTimeOutSeconds.displayName</displayName>
@@ -182,8 +181,9 @@
 		<condition name="selfRegistrationConfiguredEmailOrGroupNotConfigured">
 			<expression>
 				<![CDATA[
+					(startup != null) && 
 					startup.getAccountAllowUserSelfRegistration().equals(Boolean.TRUE) &&
-					(!modules.admin.Configuration.ConfigurationExtension.validSMTPHost() || userSelfRegistrationGroup == null)
+					((! modules.admin.Configuration.ConfigurationExtension.validSMTPHost()) || (userSelfRegistrationGroup == null))
 				]]>
 			</expression>
 		</condition>
