@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
@@ -311,8 +312,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	@SuppressWarnings("static-method")
 	protected String generateTFACode() {
-		DecimalFormat df = new DecimalFormat("000000");
-		return df.format(Math.random()*1000000);
+	    // Get 128 random bytes - move past first seed sequence
+		SecureRandom random = new SecureRandom();
+	    byte[] randomBytes = new byte[128];
+	    random.nextBytes(randomBytes);
+	    
+		return new DecimalFormat("000000").format(random.nextDouble() * 1000000d);
 	}
 	
 	/**
