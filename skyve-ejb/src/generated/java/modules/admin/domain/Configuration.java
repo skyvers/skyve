@@ -1182,8 +1182,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isSelfRegistrationConfiguredEmailOrGroupNotConfigured() {
-		return (startup.getAccountAllowUserSelfRegistration().equals(Boolean.TRUE) &&
-					(!modules.admin.Configuration.ConfigurationExtension.validSMTPHost() || userSelfRegistrationGroup == null));
+		return ((startup != null) && 
+					startup.getAccountAllowUserSelfRegistration().equals(Boolean.TRUE) &&
+					((! modules.admin.Configuration.ConfigurationExtension.validSMTPHost()) || (userSelfRegistrationGroup == null)));
 	}
 
 	/**

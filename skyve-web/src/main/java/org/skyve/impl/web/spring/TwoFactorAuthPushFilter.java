@@ -1,7 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
-import java.sql.SQLException;
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
@@ -12,25 +12,21 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AccountExpiredException;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
-	private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/loginAttempt", "POST");
+	private static final AntPathRequestMatcher DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/loginAttempt", "POST");
 
 	public static final String SKYVE_SECURITY_FORM_CUSTOMER_KEY = "customer";
 	
@@ -43,65 +39,69 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	// this is from the SpringSecurityConfig.remember me.
 	public static String REMEMBER_PARAMETER = "remember";
 	
-	private JdbcUserDetailsManager userDetailsService;
+	private UserDetailsManager userDetailsManager;
 
-	public TwoFactorAuthPushFilter(AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
-		super(authenticationManager);
-		this.setRequiresAuthenticationRequestMatcher(DEFAULT_ANT_PATH_REQUEST_MATCHER);
-		
-		if (userDetailsService instanceof JdbcUserDetailsManager) {
-			this.userDetailsService = (JdbcUserDetailsManager) userDetailsService;
-		} else {
-			UtilImpl.LOGGER.warning("UserDetailsService is the wrong type for a Push TFA");
-		}
+	public TwoFactorAuthPushFilter(UserDetailsManager userDetailsManager) {
+		setRequiresAuthenticationRequestMatcher(DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER);
+		this.userDetailsManager = userDetailsManager;
 	}
 	
 	@Override
 	public void doFilter(ServletRequest iRequest, ServletResponse iResponse, FilterChain chain)
 	throws IOException, ServletException {
-		
 		HttpServletRequest request = (HttpServletRequest) iRequest;
 		HttpServletResponse response = (HttpServletResponse) iResponse;
 		
-		try {
-			if (skipPushFilter(request, response)) {
-				chain.doFilter(request, response);
-				return;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		} 
-		
-		doFilter( request, response, chain);
-	}
-	
-	protected boolean skipPushFilter(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
-		String customer = obtainCustomer(request);
-		
-		if (StringUtils.isBlank(customer) || !this.requiresAuthentication(request, response)) {
-			return true;
-		}
-		if (UtilImpl.TFA_CUSTOMER == null || !UtilImpl.TFA_CUSTOMER.contains(customer)) {
-			return true;
-		}
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
-		if (config == null) {
-			// unknown customer
-			return true;
-		}
-		
-		return !SkyveSpringSecurity.isTFAPush(config);
-	}
-
-	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
-	throws IOException, ServletException{
-		if (! DEFAULT_ANT_PATH_REQUEST_MATCHER.matches(request)) {
+		if (skipPushFilter(request, response)) {
 			chain.doFilter(request, response);
 			return;
 		}
 		
+		doFilter(request, response, chain);
+	}
+	
+	protected boolean skipPushFilter(HttpServletRequest request, HttpServletResponse response) {
+		// No two factor customers defined
+		if (UtilImpl.TFA_CUSTOMER == null) {
+			return true;
+		}
+		
+		// Not a login attempt
+		if (! DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER.matches(request)) {
+			return true;
+		}
+		
+		String customerName = obtainCustomer(request);
+		if (customerName == null) {
+			customerName = UtilImpl.CUSTOMER;
+		}
+		
+		// No customer given or set in JSON
+		if (customerName == null) {
+			return true;
+		}
+
+		// TFA customer not in json
+		if (! UtilImpl.TFA_CUSTOMER.contains(customerName)) {
+			return true;
+		}
+
+		// No authentication required
+		if (! requiresAuthentication(request, response)) {
+			return true;
+		}
+		
+		// No customer config
+		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customerName);
+		if (config == null) {
+			return true;
+		}
+		
+		return (! SkyveSpringSecurity.isTFAPush(config));
+	}
+
+	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
+	throws IOException, ServletException{
 		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
 		if (twoFactorToken != null) {
 			boolean stopSecFilterChain = doTFACodeCheckProcess(request,response);
@@ -197,40 +197,39 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 */
 	private boolean doTFACodeCheckProcess(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException, ServletException {
-		String twoFactorToken = request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE);
+		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
 		String username = obtainUsername(request);
 		UserTFA user = getUserDB(username);
 		
-		if (! tfaCodesPopulated(user) || ! twoFactorToken.equals(user.getTfaToken()) ) {
-			UtilImpl.LOGGER.info(String.format("Inconsistent TFA details. TFA Codes populated : %s, TFA Token matches: %s",
-												String.valueOf(tfaCodesPopulated(user)),
-												String.valueOf(twoFactorToken.equals(user.getTfaToken()))
-												));
+		if ((! tfaCodesPopulated(user)) || (! twoFactorToken.equals(user.getTfaToken())) ) {
+			UtilImpl.LOGGER.info("Inconsistent TFA details. TFA Codes populated : " + 
+									String.valueOf(tfaCodesPopulated(user)) +
+									", TFA Token matches: " + 
+									String.valueOf(twoFactorToken.equals(user.getTfaToken())));
 			return false;
 		}
 		
-		if (tfaCodeExpired(user.getCustomer(),twoFactorToken)) {
+		if (tfaCodeExpired(user.getCustomer(), twoFactorToken)) {
 			UtilImpl.LOGGER.info("Users TFA Code has timed out.");
 			SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/login");
 			handler.onAuthenticationFailure(request, response, new AccountExpiredException("TFA timeout"));
 			return true;
 		}
 		
-		
 		try {
-			this.attemptAuthentication(request, response);
-		} catch (AuthenticationException e) {
-//			throws error if authentication failed, catch so we want to handle it
+			attemptAuthentication(request, response);
+		}
+		catch (@SuppressWarnings("unused") AuthenticationException e) {
+			// throws error if authentication failed, catch so we want to handle it
 			UtilImpl.LOGGER.info("Provided TFA code does not match."); 
-			
 			TwoFactorAuthenticationForwardHandler handler = new TwoFactorAuthenticationForwardHandler("/login");
 			request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
 			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
 			request.setAttribute(USER_ATTRIBUTE, user.getUser());
 			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", true));
-
 			return true;
 		}
+		
 		return false;
 	}
 	
@@ -257,8 +256,14 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 	}
 	
-	protected static String obtainCustomer(HttpServletRequest request) {
-		return request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY);
+	@Override
+	protected String obtainUsername(HttpServletRequest request) {
+		return UtilImpl.processStringValue(super.obtainUsername(request));
+	}
+	
+	@SuppressWarnings("static-method")
+	protected String obtainCustomer(HttpServletRequest request) {
+		return UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
 	}
 	
 	/**
@@ -276,22 +281,23 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	protected UserTFA getUserDB(String username) {
 		UserDetails userDetails;
 		try {
-			userDetails = userDetailsService.loadUserByUsername(username);
-		} catch (UsernameNotFoundException e1) {
-			//incorrect username
+			userDetails = userDetailsManager.loadUserByUsername(username);
+		}
+		catch (@SuppressWarnings("unused") UsernameNotFoundException e) {
+			// incorrect username
 			return null;
 		}
 		
 		if (userDetails instanceof UserTFA) {
 			return (UserTFA) userDetails;
 		}
-		Exception e = new Exception("Two Factor Authentication expects the user details service : skyve.jdbcUserTFADetailsService()");
+		Exception e = new Exception("Two Factor Authentication expects the user details service : skyve.jdbcUserDetailsService()");
 		e.printStackTrace();
 		return null;
 	}
 	
 	protected void updateUserTFADetails(UserTFA user) {
-		userDetailsService.updateUser(user);
+		userDetailsManager.updateUser(user);
 	}
 	
 	@SuppressWarnings("static-method")
@@ -306,8 +312,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	@SuppressWarnings("static-method")
 	protected String generateTFACode() {
-		DecimalFormat df = new DecimalFormat("000000");
-		return df.format(Math.random()*1000000);
+	    // Get 128 random bytes - move past first seed sequence
+		SecureRandom random = new SecureRandom();
+	    byte[] randomBytes = new byte[128];
+	    random.nextBytes(randomBytes);
+	    
+		return new DecimalFormat("000000").format(random.nextDouble() * 1000000d);
 	}
 	
 	/**
@@ -332,8 +342,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			String [] splitParts = twoFactorCode.split("-");
 			String timeComponent = splitParts[splitParts.length-1];
 			
-			generatedTime = Long.valueOf(timeComponent);
-		} catch (NumberFormatException e) {
+			generatedTime = Long.parseLong(timeComponent);
+		} 
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
 			//code tampered with?
 			return true;
 		}
@@ -344,19 +355,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return currentTime > (generatedTime + expiryMillis);
 	}
 	
-	private long getTwoFactorTimeoutMillis(String customer) {
-		
-		long timeoutMillis = 0;
-		
-		try {
-			TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
-			int timeoutSeconds = config.getTfaTimeOutSeconds();
-			timeoutMillis =  timeoutSeconds * 1000;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return timeoutMillis;
+	private static long getTwoFactorTimeoutMillis(String customer) {
+		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
+		int timeoutSeconds = config.getTfaTimeOutSeconds();
+		return timeoutSeconds * 1000;
 	}
 	
 	/**

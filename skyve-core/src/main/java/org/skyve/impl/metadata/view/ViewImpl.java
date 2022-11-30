@@ -299,40 +299,31 @@ public class ViewImpl extends Container implements View {
 		final String moduleName = module.getName();
 		final String documentName = document.getName();
 
-		// First link all components referenced and add any inlined models to the view.
+		// If there are no accesses defined in view metadata, or the view says to generate them, and access control is turned on, determine them
+		boolean determineAccesses = UtilImpl.ACCESS_CONTROL && generate;
+		if (determineAccesses && (accesses == null)) {
+			accesses = new TreeSet<>();
+		}
+
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this, uxui) {
-			// Overrides visitComponent standard behaviour to link to the component
 			@Override
 			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
+				// Overrides visitComponent standard behaviour to link to the component
 				component.link(currentUxUi, customer, module, document, name);
 				components.add(component);
+
+				// stop recursing through the component as we only want immediate (not recursive) accesses for this view
 			}
 			
 			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
-				ChartBuilderMetaData model = chart.getModel();
-				if (model != null) {
-					inlineModels.put(model.getModelName(), model);
+				// Add any inlined models to the view
+				ChartBuilderMetaData metaDataModel = chart.getModel();
+				if (metaDataModel != null) {
+					inlineModels.put(metaDataModel.getModelName(), metaDataModel);
 				}
-			}
-		}.visit();
 
-		// If there are no accesses defined in view metadata, or the view says to generate them, and access control is turned on, determine them
-		boolean determineAccesses = UtilImpl.ACCESS_CONTROL && generate;
-		if (determineAccesses) {
-			if (accesses == null) {
-				accesses = new TreeSet<>();
-			}
-
-			new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this, uxui) {
-				@Override
-				public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-					// stop recursing through the component as we only want immediate (not recursive) accesses for this view
-				}
-				
-				@Override
-				public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
-					ChartBuilderMetaData metaDataModel = chart.getModel();
+				if (determineAccesses) {
 					if (metaDataModel != null) {
 						String modelModuleName = metaDataModel.getModuleName();
 						String modelQueryName = metaDataModel.getQueryName();
@@ -357,26 +348,32 @@ public class ViewImpl extends Container implements View {
 						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 					}
 				}
-	
-				private String dataGridBinding = null;
-				
-				@Override
-				public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+			}
+
+			private String dataGridBinding = null;
+			
+			@Override
+			public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					dataGridBinding = grid.getBinding();
 					if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
 						accessThroughBinding(dataGridBinding);
 					}
 				}
-	
-				@Override
-				public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+			}
+
+			@Override
+			public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					dataGridBinding = null;
 				}
-				
-				// NB DataRepeater cannot zoom in
-	
-				@Override
-				public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+			}
+			
+			// NB DataRepeater cannot zoom in
+
+			@Override
+			public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					String modelName = grid.getModelName();
 					String queryName = grid.getQueryName();
 					if (modelName != null) {
@@ -408,9 +405,11 @@ public class ViewImpl extends Container implements View {
 						accesses.add(UserAccess.singular(drivingModuleName, drivingDocumentName));
 					}
 				}
-				
-				@Override
-				public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+			}
+			
+			@Override
+			public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					String modelName = repeater.getModelName();
 					if (modelName != null) {
 						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
@@ -421,9 +420,11 @@ public class ViewImpl extends Container implements View {
 					}
 					// NB ListRepeater cannot zoom in
 				}
-				
-				@Override
-				public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+			}
+			
+			@Override
+			public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					String binding = lookup.getBinding();
 					if (dataGridBinding != null) {
 						if (binding == null) { // binding can be null when placed in a data grid
@@ -453,7 +454,7 @@ public class ViewImpl extends Container implements View {
 						DocumentRef ref = module.getDocumentRefs().get(targetDocumentName);
 						queryName = ref.getDefaultQueryName();
 					}
-
+	
 					// add the query aggregate or a document aggregate
 					if (queryName == null) {
 						accesses.add(UserAccess.documentAggregate(moduleName, targetDocumentName));
@@ -469,17 +470,21 @@ public class ViewImpl extends Container implements View {
 						accesses.add(UserAccess.singular(targetModuleName, targetDocumentName));
 					}
 				}
-				
-				@Override
-				public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+			}
+			
+			@Override
+			public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					String modelName = map.getModelName();
 					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 	
 					// NB Can't work out what the map can navigate to - needs to be added to the router manually.
 				}
-				
-				@Override
-				public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+			}
+			
+			@Override
+			public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					CompleteType type = text.getComplete();
 					if (type == CompleteType.previous) {
 						String binding = text.getBinding();
@@ -491,35 +496,39 @@ public class ViewImpl extends Container implements View {
 						accesses.add(UserAccess.previousComplete(moduleName, documentName, binding));
 					}
 				}
-				
-				@Override
-				public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+			}
+			
+			@Override
+			public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					visitListGrid(grid, parentVisible, parentEnabled);
 				}
-				
-				@Override
-				public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+			}
+			
+			@Override
+			public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
 					accessThroughBinding(zoomIn.getBinding());
 				}
-	
-				private void accessThroughBinding(String binding) {
-					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-	
-					Document relatedDocument = null;
-					if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-						relatedDocument = target.getDocument().getParentDocument(customer);
-					}
-					else {
-						Relation targetRelation = (Relation) target.getAttribute();
-						String relatedDocumentName = targetRelation.getDocumentName();
-						relatedDocument = module.getDocument(customer, relatedDocumentName);
-					}
-					@SuppressWarnings("null")
-					String relatedModuleName = relatedDocument.getOwningModuleName();
-					accesses.add(UserAccess.singular(relatedModuleName, relatedDocument.getName()));
+			}
+
+			private void accessThroughBinding(String binding) {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+
+				Document relatedDocument = null;
+				if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+					relatedDocument = target.getDocument().getParentDocument(customer);
 				}
-			}.visit();
-		}
+				else {
+					Relation targetRelation = (Relation) target.getAttribute();
+					String relatedDocumentName = targetRelation.getDocumentName();
+					relatedDocument = module.getDocument(customer, relatedDocumentName);
+				}
+				@SuppressWarnings("null")
+				String relatedModuleName = relatedDocument.getOwningModuleName();
+				accesses.add(UserAccess.singular(relatedModuleName, relatedDocument.getName()));
+			}
+		}.visit();
 	}
 	
 	// Not required to be Serialized as ViewImpls are cloned by serialization to populate this

@@ -281,6 +281,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
 		final Map<String, Bean> bizIdsToDelete = new TreeMap<>();
 		
+		// Call Bizlet.preDelete() on anything that will cascade delete
 		new BeanVisitor(false, false, false) {
 			@Override
 			protected boolean accept(String binding,
@@ -373,6 +374,17 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				}
 			}
 			
+			// Call Bizlet.postDelete() on all the deleted beans (except the bean being deleted)
+			for (Bean deletedBean : bizIdsToDelete.values()) {
+				if (! deletedBean.equals(bean)) {
+					final Module m = customer.getModule(deletedBean.getBizModule());
+					final Document d = m.getDocument(customer, deletedBean.getBizDocument());
+					if (d.isDynamic()) {
+						callBizletPostDelete(customer, d, (PersistentBean) deletedBean);
+					}
+				}
+			}
+			
 			// Flush above was successful, remove from the first level cache now
 			for (String bizId : bizIdsToDelete.keySet()) {
 				dynamicFirstLevelCache.remove(bizId);
@@ -411,6 +423,34 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}
 	}
 	
+	private static void callBizletPostDelete(Customer customer, Document document, PersistentBean bean) {
+		try {
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePostDelete(bean);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				if (bizlet != null) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+					bizlet.postDelete(bean);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Exiting " + bizlet.getClass().getName() + ".postDelete");
+				}
+				internalCustomer.interceptAfterPostDelete(bean);
+			}
+		}
+		catch (ValidationException e) {
+			for (Message message : e.getMessages()) {
+				ValidationUtil.processMessageBindings(customer, message, bean, bean);
+			}
+			throw e;
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+	}
+
 	@Override
 	public void populate(PersistentBean bean) {
 		try {

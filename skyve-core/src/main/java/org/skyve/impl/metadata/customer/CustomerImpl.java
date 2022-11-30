@@ -702,6 +702,21 @@ public class CustomerImpl implements Customer {
 		}
 	}
 
+	public boolean interceptBeforePostDelete(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor().beforePostDelete(bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterPostDelete(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor().afterPostDelete(bean);
+		}
+	}
+
 	public boolean interceptBeforePostLoad(PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePostLoad(bean)) {

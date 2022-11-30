@@ -7,13 +7,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
@@ -27,14 +28,18 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 @Configuration
 @Import(SkyveSpringSecurityConfig.class)
 @EnableWebSecurity
-public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+public class SpringSecurityConfig {
 	@Autowired
 	private SkyveSpringSecurity skyve;
 	
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.authorizeRequests()
+				// Permit H2 servlet if enabled
+				.antMatchers("/h2/**").permitAll()
+				// Enable access to all rest endpoints as these will have Servlet Filters to secure.
+				.antMatchers("/rest/**").permitAll()
 				// Permit the login servlet resource
 				.antMatchers(HttpMethod.GET, "/login", "/loggedOut").permitAll()
 				// Permit the spring login mechanism and the SC JS login mechanism
@@ -113,7 +118,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
-				.successHandler(new SkyveAuthenticationSuccessHandler(this.userDetailsService()))
+				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getLoggedOutUrl())
@@ -126,25 +131,26 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.frameOptions().disable()
 				.contentTypeOptions().disable();
 
-			http.addFilterBefore(new TwoFactorAuthPushEmailFilter(authenticationManager(), this.userDetailsService()),
-									UsernamePasswordAuthenticationFilter.class);
+		TwoFactorAuthPushEmailFilter tfaEmail = new TwoFactorAuthPushEmailFilter(userDetailsManager());
+		http.addFilterBefore(tfaEmail, UsernamePasswordAuthenticationFilter.class);
 
-			if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) ||
-					(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) ||
-					(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) {
-				http.oauth2Login().loginPage(Util.getLoginUrl());
-			}
+		if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) ||
+				(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) ||
+				(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) {
+			http.oauth2Login().loginPage(Util.getLoginUrl());
+		}
 			
-//			http.saml2Login()
-//					.loginPage(Util.getLoginUrl())
-//					.defaultSuccessUrl(Util.getHomeUrl());
+//		http.saml2Login()
+//				.loginPage(Util.getLoginUrl())
+//				.defaultSuccessUrl(Util.getHomeUrl());
+
+		DefaultSecurityFilterChain result = http.build();
+		// Note AuthenticationManager is not available as a shared object until after build()
+		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+		tfaEmail.setAuthenticationManager(authenticationManager);
+		return result;
 	}
 	
-
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/h2/**", "/rest/**");
-	}
 /*
 	@Bean
 	public RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
@@ -157,6 +163,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new InMemoryRelyingPartyRegistrationRepository(relyingPartyRegistration);
 	}
 */
+    
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return skyve.passwordEncoder();
@@ -168,9 +175,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	
 	@Bean
-	@Override
-	public UserDetailsService userDetailsService() {
-		return skyve.jdbcUserDetailsService();
+	public UserDetailsManager userDetailsManager() {
+		return skyve.jdbcUserDetailsManager();
 	}
 	
  	@Bean

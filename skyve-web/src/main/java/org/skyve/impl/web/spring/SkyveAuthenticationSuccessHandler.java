@@ -1,7 +1,6 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,16 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
-
-import com.google.common.base.Strings;
 
 /**
  * This class will redirect to the saved URL after login unless that URL is not a regular url.
@@ -29,14 +24,10 @@ import com.google.common.base.Strings;
  * @author mike
  */
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
-	private JdbcUserDetailsManager userDetailsService;
+	private UserDetailsManager userDetailsManager;
 	
-	public SkyveAuthenticationSuccessHandler(UserDetailsService userDetailsService) {
-		if (userDetailsService instanceof JdbcUserDetailsManager) {
-			this.userDetailsService = (JdbcUserDetailsManager) userDetailsService;
-		} else {
-			UtilImpl.LOGGER.warning("UserDetailsService is the wrong type for TFA");
-		}
+	public SkyveAuthenticationSuccessHandler(UserDetailsManager userDetailsManager) {
+		this.userDetailsManager = userDetailsManager;
 	}
 	
 	@Override
@@ -51,7 +42,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			if (redirectUrl != null) {
 				UtilImpl.LOGGER.info("Redirect after login requested to " + redirectUrl);
 				// its http behind proxy server terminating TLS or some other edge case
-				if (Util.isSecureUrl() && redirectUrl.startsWith("http://")) { // could https:// or ws://
+				if (Util.isSecureUrl() && redirectUrl.startsWith("http://")) { // could be https:// or ws:// or wss://
 					if (savedRequest instanceof DefaultSavedRequest) {
 						// Remake the url from the skyve server URL, the request URI and any query parameters
 						DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) savedRequest;
@@ -85,17 +76,13 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			redirectUrl = Util.getHomeUrl();
 		}
 	
-		try {
-			String customer = request.getParameter(TwoFactorAuthPushFilter.SKYVE_SECURITY_FORM_CUSTOMER_KEY);
-			if (userDetailsService != null && !Strings.isNullOrEmpty(customer)) {
-				TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
-				if (SkyveSpringSecurity.isTFAPush(config)) {
-					cleanupTFACodes(request);
-				}
+		UserTFA principal = (UserTFA) authentication.getPrincipal();
+		String customerName = principal.getCustomer();
+		if ((userDetailsManager != null) && (customerName != null)) {
+			TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customerName);
+			if (SkyveSpringSecurity.isTFAPush(config)) {
+				cleanupTFACodes(principal);
 			}
-		} catch (SQLException e) {
-			// if it errors here, DB has error?.
-			e.printStackTrace();
 		}
 		
 		UtilImpl.LOGGER.info("Redirected to " + redirectUrl);
@@ -104,13 +91,10 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 	}
 	
-	private void cleanupTFACodes(HttpServletRequest request) {
-		String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
-		UserTFA user = (UserTFA) this.userDetailsService.loadUserByUsername(username);
-		
-		user.setTfaCodeGeneratedTimestamp(null);
-		user.setTfaCode(null);
-		user.setTfaToken(null);
-		userDetailsService.updateUser(user);
+	private void cleanupTFACodes(UserTFA principal) {
+		principal.setTfaCodeGeneratedTimestamp(null);
+		principal.setTfaCode(null);
+		principal.setTfaToken(null);
+		userDetailsManager.updateUser(principal);
 	}
 }
