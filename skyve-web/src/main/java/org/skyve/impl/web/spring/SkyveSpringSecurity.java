@@ -1,7 +1,5 @@
 package org.skyve.impl.web.spring;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -12,8 +10,6 @@ import java.util.List;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import org.apache.commons.lang3.StringUtils;
-import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -21,6 +17,8 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
+import org.skyve.impl.util.TFAConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
@@ -44,6 +42,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 public class SkyveSpringSecurity {
+	
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
 		DelegatingPasswordEncoder result = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -88,12 +87,12 @@ public class SkyveSpringSecurity {
 	 * @param createdTimestamp
 	 * @return
 	 */
-	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customer) throws SQLException {
+	private boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customer) throws SQLException {
 		
 		
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
+		TwoFactorCustomerConfiguration config = TFAConfigurationSingleton.getInstance().getConfig(customer);
 		
-		if (config == null || createdTimestamp == null || (! isTFAPush(config))) {
+		if (config == null || createdTimestamp == null || (! TFAConfigurationSingleton.isPushTfa(config) )) {
 			return false;
 		}
 		
@@ -104,46 +103,6 @@ public class SkyveSpringSecurity {
 		
 		return currentTime < (generatedTime + expiryMillis);
 	}
-	
-	public static boolean isTFAPush(TwoFactorCustomerConfiguration config) {
-		return "EMAIL".equals(config.getTfaType());
-	}
-	
-	public static TwoFactorCustomerConfiguration getCustomerTFAConfig(String customerName) throws SQLException {
-		
-		if (StringUtils.isBlank(customerName)) {
-			throw new SQLException("Customer is blank");
-		}
-		
-		TwoFactorCustomerConfiguration config = null;
-		try (Connection c = EXT.getDataStoreConnection()) {
-			
-			String query = String.format("select %s,%s,%s,%s from ADM_Configuration where %s = ?",
-					"twoFactorType",
-					"twofactorPushCodeTimeOutSeconds",
-					"twoFactorEmailSubject",
-					"twoFactorEmailBody",
-					"bizCustomer");
-			
-			
-			try (PreparedStatement s = c.prepareStatement(query)) {
-				s.setString(1, customerName);
-				try (ResultSet rs = s.executeQuery()) {
-					while (rs.next()) {
-						config = new TwoFactorCustomerConfiguration(
-								rs.getString(1), 
-								rs.getInt(2), 
-								rs.getString(3),
-								rs.getString(4)
-								);
-					}
-				}
-			}
-		}
-		
-		return config;
-	}
-	
 	
 	public UserDetailsService jdbcUserDetailsService() {
 		

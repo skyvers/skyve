@@ -13,8 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.EXT;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.util.TFAConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.AuthenticationException;
@@ -76,6 +79,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			customerName = UtilImpl.CUSTOMER;
 		}
 		
+		if (!UtilImpl.TFA_CUSTOMER.contains(customerName)) {
+			return true;
+		}
+		
 		// No customer given or set in JSON
 		if (customerName == null) {
 			return true;
@@ -90,14 +97,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		if (! requiresAuthentication(request, response)) {
 			return true;
 		}
-		
-		// No customer config
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customerName);
-		if (config == null) {
-			return true;
-		}
-		
-		return (! SkyveSpringSecurity.isTFAPush(config));
+				
+		return !TFAConfigurationSingleton.getInstance().isPushTfa(customerName);
 	}
 
 	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
@@ -291,9 +292,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		if (userDetails instanceof UserTFA) {
 			return (UserTFA) userDetails;
 		}
-		Exception e = new Exception("Two Factor Authentication expects the user details service : skyve.jdbcUserDetailsService()");
-		e.printStackTrace();
-		return null;
+		throw new DomainException("Two Factor Authentication expects the user details service : skyve.jdbcUserDetailsService()");
 	}
 	
 	protected void updateUserTFADetails(UserTFA user) {
@@ -355,8 +354,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return currentTime > (generatedTime + expiryMillis);
 	}
 	
-	private static long getTwoFactorTimeoutMillis(String customer) {
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
+	private long getTwoFactorTimeoutMillis(String customer) {
+		TwoFactorCustomerConfiguration config = TFAConfigurationSingleton.getInstance().getConfig(customer);
 		int timeoutSeconds = config.getTfaTimeOutSeconds();
 		return timeoutSeconds * 1000;
 	}

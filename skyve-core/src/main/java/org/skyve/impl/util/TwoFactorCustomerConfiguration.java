@@ -1,6 +1,9 @@
-package org.skyve.impl.web.spring;
+package org.skyve.impl.util;
 
-public class TwoFactorCustomerConfiguration {
+public class TwoFactorCustomerConfiguration implements java.io.Serializable {
+
+	private static final long serialVersionUID = -4834211404762691050L;
+
 	private String tfaType;
 	private int tfaTimeOutSeconds;
 	private String twoFactorEmailSubject;
@@ -14,6 +17,7 @@ public class TwoFactorCustomerConfiguration {
 		this.tfaTimeOutSeconds = tfaTimeOutSeconds;
 		this.twoFactorEmailSubject = twoFactorEmailSubject;
 		this.twoFactorEmailBody = twoFactorEmailBody;
+		
 	}
 	
 	public String getTfaType() {
@@ -27,5 +31,9 @@ public class TwoFactorCustomerConfiguration {
 	}
 	public String getTwoFactorEmailBody() {
 		return twoFactorEmailBody;
+	}
+	
+	public boolean isTfaEmail() {
+		return "EMAIL".equals(tfaType);
 	}
 }

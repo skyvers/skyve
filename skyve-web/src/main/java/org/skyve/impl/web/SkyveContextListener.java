@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -40,6 +41,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.util.TFAConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
@@ -117,6 +119,8 @@ public class SkyveContextListener implements ServletContextListener {
 				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 				internalCustomer.notifyStartup();
 			}
+			
+			TFAConfigurationSingleton.getInstance().startup(EXT.getDataStoreConnection());
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
@@ -602,7 +606,17 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS = number.intValue();
 		}
 		
-		UtilImpl.TFA_CUSTOMER = getString("account", "tfaCustomer", account, false);
+		UtilImpl.TFA_CUSTOMER = new HashSet<>();
+		String tfaCustomer = getString("account", "tfaCustomer", account, false);
+		if (tfaCustomer != null) {
+			String [] customers = tfaCustomer.split(";");
+			for (String customerName : customers) {
+				String name = UtilImpl.processStringValue(customerName);
+				if (name != null) {
+					UtilImpl.TFA_CUSTOMER.add(name);
+				}
+			}
+		}
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
