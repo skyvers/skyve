@@ -124,11 +124,9 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 
 		super.preRerender(source, bean, webContext);
 	}
-
+	
 	@Override
 	public void postSave(ConfigurationExtension bean) throws Exception {
-		
-		UtilImpl.LOGGER.info("ELTRACEDEV adding bizlet called");
 		
 		if (bean.originalValues().containsKey(Configuration.twoFactorTypePropertyName) || 
 				bean.originalValues().containsKey(Configuration.twofactorPushCodeTimeOutSecondsPropertyName) || 
@@ -140,11 +138,20 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 					bean.getTwoFactorEmailSubject(), 
 					bean.getTwoFactorEmailBody());
 			
-			UtilImpl.LOGGER.info("ELTRACEDEV save config");
 			TFAConfigurationSingleton.getInstance().add(tfaConfig);
 		}
 		
-		UtilImpl.LOGGER.info("ELTRACEDEV adding bizlet exit");
+		// if the bean is new ( just new)
+		if (bean.getBizVersion().equals(Integer.valueOf(0)) && bean.getTwoFactorType() != null) {
+			TwoFactorCustomerConfiguration tfaConfig = new TwoFactorCustomerConfiguration(
+					bean.getTwoFactorType().toCode(), 
+					bean.getTwofactorPushCodeTimeOutSeconds(), 
+					bean.getTwoFactorEmailSubject(), 
+					bean.getTwoFactorEmailBody());
+			
+			TFAConfigurationSingleton.getInstance().add(tfaConfig);
+		}
+		
 		super.postSave(bean);
 	}
 	
