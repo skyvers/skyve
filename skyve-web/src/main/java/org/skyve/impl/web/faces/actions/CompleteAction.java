@@ -49,6 +49,8 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("CompleteAction - EXECUTE complete " + query + " for binding " + binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean bean = ActionUtil.getTargetBeanForView(facesView);
+		final String formModuleName = bean.getBizModule();
+		final String formDocumentName = bean.getBizDocument();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Document document = null;
@@ -90,10 +92,8 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 
 		if (complete == CompleteType.previous) {
 			final String userName = user.getName();
-			final String moduleName = document.getOwningModuleName();
-			final String documentName = document.getName();
-			if (! user.canAccess(UserAccess.previousComplete(moduleName, documentName, binding), facesView.getUxUi().getName())) {
-				UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
+			if (! user.canAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName())) {
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + formModuleName + '.' + formDocumentName + " for " + binding);
 				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
 				throw new AccessException("the previous data", userName);
 			}
@@ -105,6 +105,8 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 			if (document.isPersistable()) { // persistent document
 				if ((attribute == null) || // implicit attribute or
 						attribute.isPersistent()) { // explicit and persistent attribute
+					final String moduleName = document.getOwningModuleName();
+					final String documentName = document.getName();
 					DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 					q.addBoundProjection(attributeName, attributeName);
 					q.setDistinct(true);

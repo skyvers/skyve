@@ -102,6 +102,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 			        	throw new ConversationEndedException(request.getLocale());
 			        }
 
+			        String formModuleName = null;
+			        String formDocumentName = null;
 			        try {
 						complete = CompleteType.valueOf(request.getParameter(AbstractWebContext.ACTION_NAME));
 
@@ -114,7 +116,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 				    		formBinding = BindUtil.unsanitiseBinding(formBinding);
 				    		bean = (Bean) BindUtil.get(bean, formBinding);
 				    	}
-
+				    	formModuleName = bean.getBizModule();
+				    	formDocumentName = bean.getBizDocument();
+				    	
 				    	// if attributeName is compound, get the parent bean and adjust the attributeName
 				    	// prefer the module and document name determination polymorphically from the bean, otherwise use the metadata
 				    	int lastDotIndex = attributeName.lastIndexOf('.');
@@ -158,11 +162,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 
 					if (complete == CompleteType.previous) {
 						final String userName = user.getName();
-						final String moduleName = document.getOwningModuleName();
-						final String documentName = document.getName();
 						final UxUi uxui = UserAgent.getUxUi(request);
-						if (! user.canAccess(UserAccess.previousComplete(moduleName, documentName, binding), uxui.getName())) {
-							UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + moduleName + '.' + documentName + " for " + binding);
+						if (! user.canAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName())) {
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + formModuleName + '.' + formDocumentName + " for " + binding);
 							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
 							throw new AccessException("the previous data", userName);
 						}
@@ -177,6 +179,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						if (document.isPersistable()) { // persistent document
 							if ((attribute == null) || // implicit attribute or
 									attribute.isPersistent()) { // explicit and persistent attribute
+								final String moduleName = document.getOwningModuleName();
+								final String documentName = document.getName();
 								DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 								StringBuilder sb = new StringBuilder(128);
 								q.addExpressionProjection(sb.append("count(distinct bean.").append(attributeName).append(')').toString(), "totalRows");
