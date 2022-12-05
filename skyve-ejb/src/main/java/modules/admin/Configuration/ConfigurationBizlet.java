@@ -2,6 +2,8 @@ package modules.admin.Configuration;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.TFAConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
@@ -62,7 +64,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			StartupExtension startup = Startup.newInstance();
 			result.setStartup(startup);
 		}
-
+		
 		return result;
 	}
 
@@ -122,5 +124,31 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 
 		super.preRerender(source, bean, webContext);
 	}
+
+	@Override
+	public void postSave(ConfigurationExtension bean) throws Exception {
+		
+		UtilImpl.LOGGER.info("ELTRACEDEV adding bizlet called");
+		
+		if (bean.originalValues().containsKey(Configuration.twoFactorTypePropertyName) || 
+				bean.originalValues().containsKey(Configuration.twofactorPushCodeTimeOutSecondsPropertyName) || 
+				bean.originalValues().containsKey(Configuration.twoFactorEmailSubjectPropertyName) ||
+				bean.originalValues().containsKey(Configuration.twoFactorEmailBodyPropertyName) ) {
+			TwoFactorCustomerConfiguration tfaConfig = new TwoFactorCustomerConfiguration(
+					bean.getTwoFactorType().toCode(), 
+					bean.getTwofactorPushCodeTimeOutSeconds(), 
+					bean.getTwoFactorEmailSubject(), 
+					bean.getTwoFactorEmailBody());
+			
+			UtilImpl.LOGGER.info("ELTRACEDEV save config");
+			TFAConfigurationSingleton.getInstance().add(tfaConfig);
+		}
+		
+		UtilImpl.LOGGER.info("ELTRACEDEV adding bizlet exit");
+		super.postSave(bean);
+	}
+	
+	
+	
 
 }
