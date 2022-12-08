@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,8 +25,8 @@ import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
@@ -115,11 +114,11 @@ public class SmartClientListServlet extends HttpServlet {
 		// If this is a mutating request, we'll definitely need a new CSRF Token
 		if (Operation.fetch.toString().equals(operationType)) {
 			if (newCsrfToken == null) {
-				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+				newCsrfToken = StateUtil.createToken();
 			}
 		}
 		else {
-			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			newCsrfToken = StateUtil.createToken();
 		}
     	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 

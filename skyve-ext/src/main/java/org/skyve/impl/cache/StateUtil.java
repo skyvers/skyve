@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -151,6 +152,15 @@ public class StateUtil {
 //System.out.println("tokens size =" + values.size());
 		// Note that EHCache puts are thread-safe
 		tokens.put(sessionId, values);
+	}
+	
+	public static Integer createToken() {
+	    // Get 128 random bytes - move past first seed sequence
+		SecureRandom random = new SecureRandom();
+	    byte[] randomBytes = new byte[128];
+	    random.nextBytes(randomBytes);
+	    
+		return Integer.valueOf(random.nextInt());
 	}
 	
 	public static void logStateStats() {
