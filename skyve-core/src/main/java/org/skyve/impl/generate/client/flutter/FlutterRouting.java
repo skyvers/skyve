@@ -18,11 +18,10 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.menu.MenuRenderer;
 
 public class FlutterRouting {
-	private static String[] EDIT_VIEW_PARAMS = new String[] {"bizId"};
-	
 	private FlutterGenerator generator;
 	private Set<String> imports = new TreeSet<>();
 	private Set<String> routes = new TreeSet<>();
@@ -57,7 +56,7 @@ public class FlutterRouting {
 		sb.append(INDENT).append("};\n");
 		substitutions.put("##ROUTES##", sb.toString());
 
-		generator.refreshFile("lib/main.dart", "main.dart", substitutions);
+		generator.refreshFile("lib/main.dart", "lib/main.dart", substitutions);
 	}
 	
 	private void viewImportsAndRoutes() {
@@ -72,7 +71,6 @@ public class FlutterRouting {
 					FlutterEditView view = new FlutterEditView(generator, moduleName, documentName);
 					view.setViews(m, d);
 					processItem(view, null);
-					processItem(view, EDIT_VIEW_PARAMS);
 				}
 			}
 		}
@@ -91,8 +89,8 @@ public class FlutterRouting {
 											String iconStyleClass) {
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
-				String componentName = ((modelName == null) ? itemQueryName : modelName) + "Cal";
-				processItem(new FlutterCalendarView(generator, moduleName, componentName), null);
+				String viewName = ((modelName == null) ? itemQueryName : modelName) + "Cal";
+				processItem(new FlutterCalendarView(generator, moduleName, viewName), item);
 			}
 			
 			@Override
@@ -103,11 +101,10 @@ public class FlutterRouting {
 										String icon16,
 										String iconStyleClass) {
 				String moduleName = itemModule.getName();
-				String componentName = itemDocument.getName();
-				FlutterEditView view = new FlutterEditView(generator, moduleName, componentName);
+				String viewName = itemDocument.getName();
+				FlutterEditView view = new FlutterEditView(generator, moduleName, viewName);
 				view.setViews(itemModule, itemDocument);
-				processItem(view, null);
-				processItem(view, EDIT_VIEW_PARAMS);
+				processItem(view, item);
 			}
 
 			@Override
@@ -120,8 +117,8 @@ public class FlutterRouting {
 										String iconStyleClass) {
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
-				String componentName = ((modelName == null) ? itemQueryName : modelName) + "List";
-				FlutterListView component = new FlutterListView(generator, moduleName, componentName);
+				String viewName = ((modelName == null) ? itemQueryName : modelName) + "List";
+				FlutterListView component = new FlutterListView(generator, moduleName, viewName);
 				if (modelName != null) { // model driven
 					component.setModel(itemModule,
 										itemDocument,
@@ -138,7 +135,7 @@ public class FlutterRouting {
 										itemDocument,
 										menuModule.getDocumentDefaultQuery(c, itemDocument.getName()));
 				}
-				processItem(component, null);
+				processItem(component, item);
 			}
 			
 			@Override
@@ -151,8 +148,8 @@ public class FlutterRouting {
 										String iconStyleClass) {
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
-				String componentName = ((modelName == null) ? itemQueryName : modelName) + "Map";
-				processItem(new FlutterMapView(generator, moduleName, componentName), null);
+				String viewName = ((modelName == null) ? itemQueryName : modelName) + "Map";
+				processItem(new FlutterMapView(generator, moduleName, viewName), item);
 			}
 			
 			@Override
@@ -165,13 +162,13 @@ public class FlutterRouting {
 										String iconStyleClass) {
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
-				String componentName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
-				processItem(new FlutterTreeView(generator, moduleName, componentName), null);
+				String viewName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
+				processItem(new FlutterTreeView(generator, moduleName, viewName), item);
 			}
 		}.render(c);
 	}
 	
-	private void processItem(FlutterView view, String[] params) {
+	private void processItem(FlutterView view, MenuItem item) {
 		final String className = view.className;
 
 		// Add the import
@@ -179,8 +176,8 @@ public class FlutterRouting {
 		sb.append("import 'package:").append(generator.projectName).append("/views/").append(view.moduleName).append('/').append(view.fileName).append("';");
 		imports.add(sb.toString());
 
-		if (params == null) { // edit view is processed twice (once with params) but the rest are done once.
-			menu.append(INDENT).append("SkyveMenuData(label: '").append("Poo").append("', routeName: ").append(className).append(".routeName),\n");
+		if (item != null) {
+			menu.append(INDENT).append("SkyveMenuData(label: '").append(item.getLocalisedName()).append("', routeName: ").append(className).append(".routeName),\n");
 		}
 		
 		sb.setLength(0);

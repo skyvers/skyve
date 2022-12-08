@@ -1,4 +1,4 @@
-import 'package:flutest/main.dart';
+import 'package:##PROJECT##/main.dart';
 import 'package:flutter/material.dart';
 
 class SkyveMenu extends StatelessWidget {

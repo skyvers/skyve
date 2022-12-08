@@ -20,7 +20,7 @@ class App extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        initialRoute: AdminContact.routeName,
+        initialRoute: AdminqContactsList.routeName,
         routes: routes);
   }
 }

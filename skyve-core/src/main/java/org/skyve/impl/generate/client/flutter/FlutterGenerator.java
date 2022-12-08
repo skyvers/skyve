@@ -64,11 +64,13 @@ public class FlutterGenerator {
 
 	public void generate() throws IOException {
 		libViewsPath.mkdirs();
-
+		
 		Map<String, String> substitutions = Collections.singletonMap("##PROJECT##", projectName);
 		refreshFile("pubspec.yaml", "pubspec.yaml", substitutions);
 
+		new File(projectPath, "lib/util/").mkdir();
 		refreshFile("lib/util/skyve_rest_client.dart", "lib/util/skyve_rest_client.dart", substitutions);
+		new File(projectPath, "lib/widgets/").mkdir();
 		refreshFile("lib/widgets/skyve_hbox.dart", "lib/widgets/skyve_hbox.dart", substitutions);
 		refreshFile("lib/widgets/skyve_menu.dart", "lib/widgets/skyve_menu.dart", substitutions);
 		refreshFile("lib/widgets/skyve_vbox.dart", "lib/widgets/skyve_vbox.dart", substitutions);

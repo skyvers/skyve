@@ -1,4 +1,4 @@
-import 'package:flutest/widgets/skyve_menu.dart';
+import 'package:##PROJECT##/widgets/skyve_menu.dart';
 import 'package:flutter/material.dart';
 
 class SkyveView {
