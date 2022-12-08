@@ -1,12 +1,5 @@
 package org.skyve.impl.backup;
 
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.azure.storage.blob.models.BlobItem;
-import com.azure.storage.blob.sas.BlobContainerSasPermission;
-import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
-
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
@@ -15,35 +8,46 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.skyve.CORE;
+
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.sas.BlobContainerSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+
 public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
 	public List<String> listBackups() {
 		final Comparator<BlobItem> byLastModifiedDate = Comparator.comparing(blobItem -> blobItem.getProperties().getLastModified());
-		return getBlobContainerClient().listBlobs().stream()
+		return getBlobContainerClient().listBlobsByHierarchy(getDirectoryName()).stream()
 				.sorted(byLastModifiedDate.reversed())
-				.map(BlobItem::getName)
+				.map(b -> b.getName().replace(getDirectoryName(), ""))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public boolean exists(String backupName) {
-		return getBlobContainerClient().listBlobs().stream().anyMatch(blob -> Objects.equals(backupName, blob.getName()));
+		return getBlobContainerClient().listBlobsByHierarchy(getDirectoryName()).stream()
+				.anyMatch(blob -> Objects.equals(backupName, blob.getName().replace(getDirectoryName(), "")));
 	}
 
 	@Override
 	public void downloadBackup(String backupName, OutputStream outputStream) {
-		getBlobContainerClient().getBlobClient(backupName).download(outputStream);
+		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).download(outputStream);
 	}
 
 	@Override
 	public void uploadBackup(String backupFilePath) {
-		getBlobContainerClient().getBlobClient(Paths.get(backupFilePath).getFileName().toString()).uploadFromFile(backupFilePath);
+		getBlobContainerClient().getBlobClient(getDirectoryName() + Paths.get(backupFilePath).getFileName().toString())
+				.uploadFromFile(backupFilePath);
 	}
 
 	@Override
 	public void deleteBackup(String backupName) {
-		getBlobContainerClient().getBlobClient(backupName).delete();
+		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).delete();
 	}
 
 	private BlobContainerClient getBlobContainerClient() {
@@ -75,7 +79,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		deleteBackup(srcBackupName);
 	}
 
-	private String getConnectionString() {
+	private static String getConnectionString() {
 		final String connectionString = (String) ExternalBackup.getProperties().get("connectionString");
 		if (connectionString == null) {
 			throw new IllegalStateException("Missing JSON property connectionString under backup.");
@@ -83,7 +87,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		return connectionString;
 	}
 
-	private String getContainerName() {
+	private static String getContainerName() {
 		final String containerName = (String) ExternalBackup.getProperties().get("containerName");
 		if (containerName == null) {
 			throw new IllegalStateException("Missing JSON property containerName under backup.");
@@ -91,4 +95,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		return containerName;
 	}
 
+	private static String getDirectoryName() {
+		return "backup-" + CORE.getCustomer().getName().toLowerCase() + "/";
+	}
 }
