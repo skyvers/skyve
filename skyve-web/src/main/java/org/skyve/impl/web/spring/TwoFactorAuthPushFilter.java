@@ -75,9 +75,6 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		String customerName = obtainCustomer(request);
-		if (customerName == null) {
-			customerName = UtilImpl.CUSTOMER;
-		}
 		
 		if (!UtilImpl.TFA_CUSTOMER.contains(customerName)) {
 			return true;
@@ -115,7 +112,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		// if it gets to here, there is no two factor token.
 		// take the opportunity in this method to clear the old TFA details if they exist;
-		if (customerRequiresTFAPushNotification() ) {
+		if ( TFAConfigurationSingleton.getInstance().getConfig(obtainCustomer(request)).isTfaEmail()) {
 			boolean stopSecFilterChain = doPushNotificationProcess(request, response);
 			
 			if (! stopSecFilterChain) {
@@ -264,7 +261,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	@SuppressWarnings("static-method")
 	protected String obtainCustomer(HttpServletRequest request) {
-		return UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
+		String customerName = UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
+		if (customerName == null) {
+			customerName = UtilImpl.CUSTOMER;
+		}
+		
+		return customerName;
 	}
 	
 	/**
@@ -297,11 +299,6 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	protected void updateUserTFADetails(UserTFA user) {
 		userDetailsManager.updateUser(user);
-	}
-	
-	@SuppressWarnings("static-method")
-	protected boolean customerRequiresTFAPushNotification() {
-		return true;
 	}
 	
 	@SuppressWarnings("static-method")
