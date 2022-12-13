@@ -19,11 +19,10 @@ public class FlutterViewRenderer extends ClientViewRenderer {
 									Document document,
 									View view,
 									String uxui,
-									String projectName,
 									Set<String> imports) {
 		super(user, module, document, view, uxui);
 		this.imports = imports;
-		FlutterComponentRenderer newCR = new FlutterComponentRenderer(projectName, imports, STARTING_INDENT);
+		FlutterComponentRenderer newCR = new FlutterComponentRenderer(imports, STARTING_INDENT);
 		newCR.setUserAgentType(UserAgentType.desktop);
 		FlutterLayoutRenderer newLR = new FlutterLayoutRenderer(imports);
 		newLR.setUserAgentType(UserAgentType.desktop);

@@ -800,7 +800,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		else { // boilerplate value or a binding
 			ultimateValue = value;
 		}
-		RenderedComponent c = cr.label(null, dataWidgetVar, value, binding, label);
+		RenderedComponent c = cr.label(null, dataWidgetVar, ultimateValue, binding, label);
 	    addComponent(null, 
 	    				false, 
 	    				label.getInvisibleConditionName(), 

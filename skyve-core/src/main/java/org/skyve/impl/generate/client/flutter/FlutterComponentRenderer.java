@@ -48,51 +48,56 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class FlutterComponentRenderer extends ComponentRenderer {
-	private String projectName;
+	public static final String BORDER_IMPORT = "widgets/skyve_border";
+	public static final String BUTTON_IMPORT = "widgets/skyve_button";
+	public static final String DATA_GRID_IMPORT = "widgets/skyve_datagrid";
+	public static final String LABEL_IMPORT = "widgets/skyve_label";
+	public static final String SPACER_IMPORT = "widgets/skyve_spacer";
+	public static final String TAB_PANE_IMPORT = "widgets/skyve_tabpane";
+	public static final String TAB_IMPORT = "widgets/skyve_tab";
+	public static final String TOOLBAR_IMPORT = "widgets/skyve_toolbar";
+	
 	private Set<String> imports;
 	private String startingIndent;
 
-	public final String VBOX_IMPORT = projectName + "/widgets/skyve_vbox.dart";
-	public final String HBOX_IMPORT = projectName + "/widgets/skyve_hbox.dart";
-	
-	public FlutterComponentRenderer(String projectName, Set<String> imports, String startingIndent) {
-		this.projectName = projectName;
+	public FlutterComponentRenderer(Set<String> imports, String startingIndent) {
 		this.imports = imports;
 		this.startingIndent = startingIndent;
 	}
 	
 	@Override
 	public RenderedComponent view(RenderedComponent component, String invisibleConditionName) {
-		imports.add(VBOX_IMPORT);
-		RenderedComponent result = new RenderedComponent().setAfter("</VBox>").setIndent(startingIndent);
+		imports.add(FlutterLayoutRenderer.VBOX_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
-		output.append("<VBox>");
+		output.append("SkyveVBox(children: [");
 		return result;
 	}
 
 	@Override
 	public List<RenderedComponent> toolbars(List<RenderedComponent> components, String widgetId) {
-		imports.add("{Toolbar}");
-		RenderedComponent result = new RenderedComponent().setAfter("</Toolbar>");
+		imports.add(TOOLBAR_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
-		output.append("<Toolbar>");
+		output.append("SkyveToolbar(children: [");
 		return Collections.singletonList(result);
 	}
 
 	@Override
 	public RenderedComponent tabPane(RenderedComponent component, TabPane tabPane) {
-		imports.add("{TabView, TabPanel}");
-		RenderedComponent result = new RenderedComponent().setAfter("</TabView>");
+		imports.add(TAB_PANE_IMPORT);
+		imports.add(TAB_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
-		output.append("<TabView>");
+		output.append("SkyveTabPane(children: [");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent tab(RenderedComponent component, String title, Tab tab) {
-		RenderedComponent result = new RenderedComponent().setAfter("</TabPanel>");
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
-		output.append("<TabPanel header=\"").append(title).append("\">");
+		output.append("SkyveTab(title: '").append(title).append("', children: [");
 		return result;
 	}
 
@@ -101,31 +106,33 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String title,
 										String invisibileConditionName,
 										Integer pixelWidth) {
-		imports.add("{Card}");
-		RenderedComponent result = new RenderedComponent();
+		imports.add(BORDER_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<Card");
+		output.append("SkyveBorder(");
 		if (title != null) {
-			output.append(" title=\"").append(title).append('"');
+			output.append("title: '").append(title).append("', ");
 		}
-		output.append('>');
-		result.setAfter("</Card>");
+		output.append("children: [");
+		result.setAfter("]),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent label(RenderedComponent component, String value) {
-		RenderedComponent result = new RenderedComponent();
+		imports.add(LABEL_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("label");
+		output.append("const SkyveLabel('").append(value).append("'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent spacer(RenderedComponent component, Spacer spacer) {
-		RenderedComponent result = new RenderedComponent();
+		imports.add(SPACER_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span />");
+		output.append("const SkyveSpacer(),");
 		return result;
 	}
 
@@ -135,19 +142,19 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											Button button,
 											Action action) {
-		imports.add("{Button}");
-		RenderedComponent result = new RenderedComponent();
+		imports.add(BUTTON_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
+		output.append("const SkyveButton(name: '").append(button.getActionName()).append("', label: '").append(action.getLocalisedDisplayName()).append("'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent reportButton(RenderedComponent component, Button button, Action action) {
-		imports.add("{Button}");
-		RenderedComponent result = new RenderedComponent();
+		imports.add(BUTTON_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
+		output.append("const SkyveButton(name: '").append(button.getActionName()).append("', label: '").append(action.getLocalisedDisplayName()).append("'),");
 		return result;
 	}
 
@@ -157,18 +164,18 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												Action action,
 												String moduleName,
 												String documentName) {
-		imports.add("{Button}");
-		RenderedComponent result = new RenderedComponent();
+		imports.add(BUTTON_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<Button label=\"").append(action.getLocalisedDisplayName()).append("\" />");
+		output.append("const SkyveButton(name: '").append(button.getActionName()).append("', label: '").append(action.getLocalisedDisplayName()).append("'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent staticImage(RenderedComponent component, String fileUrl, StaticImage image) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>StaticImage</span>");
+		output.append("const Text('StaticImage'),");
 		return result;
 	}
 
@@ -177,9 +184,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											DynamicImage image,
 											String moduleName,
 											String documentName) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>DynamicImage</span>");
+		output.append("const Text('DynamicImage'),");
 		return result;
 	}
 
@@ -189,9 +196,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									String value,
 									String binding,
 									Blurb blurb) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>Blurb</span>");
+		output.append("const Text('Blurb'),");
 		return result;
 	}
 
@@ -201,9 +208,15 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									String value,
 									String binding,
 									Label label) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>Label</span>");
+		if (value != null) {
+			output.append("const SkyveLabel('").append(value).append("'),");
+		}
+		else {
+			// TODO handle expressions coming through as bindings
+			output.append("SkyveLabel('${_bean[\"").append(BindUtil.sanitiseBinding(binding)).append("\"]}'),");	
+		}
 		return result;
 	}
 
@@ -213,11 +226,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										boolean ordered,
 										String title,
 										DataGrid grid) {
-		imports.add("{DataTable}");
-		RenderedComponent result = new RenderedComponent().setAfter("</DataTable>").setIndent("");
+		imports.add(DATA_GRID_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<DataTable value={this.state.").append(BindUtil.sanitiseBinding(grid.getBinding()));
-		output.append("} selectionMode=\"single\" onSelectionChange={e => alert(e.data.bizModule + '.' + e.data.bizDocument + '.' + e.data.bizId)}>");
+		output.append("SkyveDataGrid(rows: _bean['").append(BindUtil.sanitiseBinding(grid.getBinding()));
+		output.append("'], children: [");
 		return result;
 	}
 
@@ -226,9 +239,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											String title,
 											DataRepeater repeater) {
-		RenderedComponent result = new RenderedComponent().setAfter("</div>").setIndent("");
+		imports.add(DATA_GRID_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<div>dataRepeater");
+		output.append("SkyveDataGrid(rows: _bean['").append(BindUtil.sanitiseBinding(repeater.getBinding()));
+		output.append("'], children: [");
 		return result;
 	}
 
@@ -241,18 +256,22 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 														String columnTitle,
 														String columnBinding,
 														StringBuilder gridColumnExpression) {
+/*
 		imports.add("{Column}");
-		RenderedComponent result = new RenderedComponent().setIndent("");
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setIndent("");
 		StringBuilder output = result.getOutput();
 		output.append("<Column field=\"").append(BindUtil.sanitiseBinding(columnBinding));
 		output.append("\" header=\"").append(columnTitle).append("\" />");
 		current.addChild(result);
 		return result;
+*/
+		return current;
 	}
 
 	@Override
 	public RenderedComponent addedDataGridBoundColumn(RenderedComponent component, RenderedComponent current) {
-		return current.getParent();
+//		return current.getParent();
+		return current;
 	}
 
 	@Override
@@ -261,16 +280,12 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 															AbstractDataWidget widget,
 															String columnTitle,
 															DataGridContainerColumn column) {
-		RenderedComponent result = new RenderedComponent();
-		StringBuilder output = result.getOutput();
-		output.append("<span>addDataGridContainerColumn</span>");
-		current.addChild(result);
-		return result;
+		return current;
 	}
 
 	@Override
 	public RenderedComponent addedDataGridContainerColumn(RenderedComponent component, RenderedComponent current) {
-		return current.getParent();
+		return current;
 	}
 
 	@Override
@@ -292,9 +307,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String title,
 										ListGrid listGrid,
 										boolean aggregateQuery) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>ListGrid</span>");
+		output.append("const Text('ListGrid'),");
 		return result;
 	}
 
@@ -308,17 +323,17 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String title,
 											boolean showColumnHeaders,
 											boolean showGrid) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>listRepeater</span>");
+		output.append("const Text('ListRepeater'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent listMembership(RenderedComponent component, ListMembership membership) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("listMembership");
+		output.append("const Text('ListMembership'),");
 		return result;
 	}
 
@@ -328,9 +343,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										CheckBox checkBox,
 										String title,
 										boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("checkBox");
+		output.append("Text('CheckBox ${_bean[\"").append(BindUtil.sanitiseBinding(checkBox.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -340,9 +355,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											ColourPicker colour,
 											String title,
 											boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("colourPicker");
+		output.append("Text('ColourPicker ${_bean[\"").append(BindUtil.sanitiseBinding(colour.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -352,10 +367,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Combo combo,
 									String title,
 									boolean required) {
-		imports.add("{Dropdown}");
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<Dropdown />");
+		output.append("Text('Combo ${_bean[\"").append(BindUtil.sanitiseBinding(combo.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -365,9 +379,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											ContentImage image,
 											String title,
 											boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("contentImage");
+		output.append("Text('ContentImage ${_bean[\"").append(BindUtil.sanitiseBinding(image.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -377,9 +391,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											ContentLink link,
 											String title,
 											boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>ContentLink</span>");
+		output.append("Text('ContentLink ${_bean[\"").append(BindUtil.sanitiseBinding(link.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -389,9 +403,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												ContentSignature signature,
 												String title,
 												boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("contentSignature");
+		output.append("Text('ContentSignature ${_bean[\"").append(BindUtil.sanitiseBinding(signature.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -401,9 +415,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									HTML html,
 									String title,
 									boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("html");
+		output.append("Text('HTML ${_bean[\"").append(BindUtil.sanitiseBinding(html.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -415,9 +429,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												boolean required,
 												String displayBinding,
 												QueryDefinition query) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("lookupDescription");
+		output.append("Text('LookupDescription ${_bean[\"").append(BindUtil.sanitiseBinding(lookup.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -427,10 +441,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Password password,
 										String title,
 										boolean required) {
-		imports.add("{Password}");
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<Password />");
+		output.append("const Text('Password'),");
 		return result;
 	}
 
@@ -440,9 +453,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Radio radio,
 									String title,
 									boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("radio");
+		output.append("Text('Radio ${_bean[\"").append(BindUtil.sanitiseBinding(radio.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -452,9 +465,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										RichText text,
 										String title,
 										boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("richText");
+		output.append("Text('RichText ${_bean[\"").append(BindUtil.sanitiseBinding(text.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -464,9 +477,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Spinner spinner,
 										String title,
 										boolean required) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("spinner");
+		output.append("Text('Spinner ${_bean[\"").append(BindUtil.sanitiseBinding(spinner.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -479,12 +492,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
-		imports.add("{InputText}");
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		String sanitisedBinding = BindUtil.sanitiseBinding(text.getBinding());
-		output.append("<InputText value={this.state.").append(sanitisedBinding).append("} onChange={(e) => this.change('");
-		output.append(sanitisedBinding).append("', e)} />");
+		output.append("TextFormField(decoration: const InputDecoration(labelText: '").append(title);
+		output.append("'), initialValue: '${_bean[\"").append(BindUtil.sanitiseBinding(text.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -495,12 +506,9 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String title,
 										boolean required,
 										Integer length) {
-		imports.add("{InputTextarea}");
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		String sanitisedBinding = BindUtil.sanitiseBinding(text.getBinding());
-		output.append("<InputTextarea value={this.state.").append(sanitisedBinding).append("} onChange={(e) => this.change('");
-		output.append(sanitisedBinding).append("', e)} />");
+		output.append("Text('TextArea ${_bean[\"").append(BindUtil.sanitiseBinding(text.getBinding())).append("\"]}'),");
 		return result;
 	}
 
@@ -510,17 +518,17 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											Link link,
 											Action action) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<span>ActionLink</span>");
+		output.append("const Text('ActionLink'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent report(RenderedComponent component, Action action) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("report");
+		output.append("const Text('Report'),");
 		return result;
 	}
 
@@ -529,17 +537,17 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Action action,
 										String moduleName,
 										String documentName) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("download");
+		output.append("const Text('Download'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent upload(RenderedComponent component, Action action) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("upload");
+		output.append("const Text('Upload'),");
 		return result;
 	}
 	
@@ -550,15 +558,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Action action,
 										ImplicitActionName name,
 										String title) {
-		imports.add("{Button}");
-		RenderedComponent result = new RenderedComponent();
+		imports.add(BUTTON_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		if (ImplicitActionName.Cancel.equals(name)) {
-			output.append("<Button label=\"").append(title).append("\" onClick={(e) => this.props.history.goBack()} />");
-		}
-		else {
-			output.append("action " + name);
-		}
+		output.append("const SkyveButton(name: '").append(name).append("', label: '").append(title).append("'),");
 		return result;
 	}
 }

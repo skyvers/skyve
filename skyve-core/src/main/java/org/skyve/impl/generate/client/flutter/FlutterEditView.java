@@ -46,12 +46,12 @@ public class FlutterEditView extends FlutterView {
 
 		User u = CORE.getUser();
 		if (editView != null) {
-			FlutterViewRenderer v = new FlutterViewRenderer(u, module, document, editView, generator.uxui, generator.projectName, imports);
+			FlutterViewRenderer v = new FlutterViewRenderer(u, module, document, editView, generator.uxui, imports);
 			v.visit();
 			editDart = v.getResult().toString();
 		}
 		if (createView != null) {
-			FlutterViewRenderer v = new FlutterViewRenderer(u, module, document, createView, generator.uxui, generator.projectName, imports);
+			FlutterViewRenderer v = new FlutterViewRenderer(u, module, document, createView, generator.uxui, imports);
 			v.visit();
 			createDart = v.getResult().toString();
 		}
@@ -62,6 +62,36 @@ public class FlutterEditView extends FlutterView {
 		subs.put("##DOCUMENT##", document.getName());
 		subs.put("##CLASS##", className);
 		
+		StringBuilder sb = new StringBuilder(256);
+		for (String key : imports) {
+			sb.append("import 'package:").append(generator.projectName).append("/").append(key).append(".dart';\n");
+		}
+		subs.put("##IMPORTS##", sb.toString());
+		
+//		if (bothViews) {
+//		fw.write("\t\tif (this.state.created) {\n");
+//		fw.write("\t\t\treturn (\n");
+//		fw.write((editJsx == null) ? "" : editJsx.toString());
+//		fw.write("\t\t\t);\n");
+//		fw.write("\t\t}\n");
+//		fw.write("\t\telse {\n");
+//		fw.write("\t\t\treturn (\n");
+//		fw.write((createJsx == null) ? "" : createJsx.toString());
+//		fw.write("\t\t\t);\n");
+//		fw.write("\t\t}\n");
+//	}
+//	else {
+		subs.put("##DART##", editDart);
+		//		fw.write("\t\treturn (\n");
+//		if (editView != null) {
+//			fw.write((editJsx == null) ? "" : editJsx.toString());
+//		}
+//		if (createView != null) {
+//			fw.write((createJsx == null) ? "" : createJsx.toString());
+//		}
+//		fw.write("\t\t);\n");
+//	}
+
 		fw.write(substitute("templates/edit.dart", subs));
 
 //		fw.write("import React from 'react';\n");

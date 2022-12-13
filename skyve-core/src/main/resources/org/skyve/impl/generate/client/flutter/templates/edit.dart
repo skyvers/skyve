@@ -1,6 +1,8 @@
 import 'package:##PROJECT##/util/skyve_rest_client.dart';
 import 'package:##PROJECT##/widgets/skyve_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bootstrap/flutter_bootstrap.dart';
+##IMPORTS##
 
 class ##CLASS## extends StatefulWidget {
   static const routeName = '/##MODULE##/##DOCUMENT##';
@@ -28,7 +30,8 @@ class _##CLASS##State extends State<##CLASS##> {
             visible: (_bean['bizId'] != null),
             replacement: const Center(child: CircularProgressIndicator()),
             child: Column(
-                children: [Text('EDIT $bizId'), Text('_c=${_bean["_c"]}')])));
+                children: [Text('EDIT $bizId'), Text('_c=${_bean["_c"]}'),
+                			##DART##])));
   }
 
   void _load(String? bizId) async {

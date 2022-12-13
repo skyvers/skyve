@@ -4,12 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RenderedComponent {
+	private String indentation = "\t";
 	private String indent = null;
 	private StringBuilder output = new StringBuilder(128);
 	private String after = null;
 	private RenderedComponent parent = null;
 	private List<RenderedComponent> children = new ArrayList<>();
 
+	public RenderedComponent() {
+		// nothing to see here
+	}
+	
+	public RenderedComponent(String indentation) {
+		this.indentation = indentation;
+	}
+	
 	public StringBuilder getOutput() {
 		return output;
 	}
@@ -23,6 +32,7 @@ public class RenderedComponent {
 		this.indent = indent;
 		return this;
 	}
+	
 	public RenderedComponent getParent() {
 		return parent;
 	}
@@ -62,7 +72,7 @@ public class RenderedComponent {
 		}
 		for (RenderedComponent c : children) {
 			if (indent != null) {
-				c.setIndent(indent + "\t");
+				c.setIndent(indent + indentation);
 			}
 			result.append(c.toString());
 		}

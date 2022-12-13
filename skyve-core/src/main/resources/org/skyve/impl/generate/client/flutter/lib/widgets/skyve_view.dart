@@ -21,8 +21,12 @@ class SkyveView {
         body = Row(children: [
           SizedBox(
               width: 240,
-              child: SkyveMenu(currentRoute: currentRoute, inDrawer: false)),
-          view
+              child: Column(children: [
+                Expanded(
+                    child:
+                        SkyveMenu(currentRoute: currentRoute, inDrawer: false))
+              ])),
+          Expanded(child: view)
         ]);
       }
 

@@ -15,6 +15,10 @@ import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
  
 public class FlutterLayoutRenderer extends LayoutRenderer {
+	public static final String VBOX_IMPORT = "widgets/skyve_vbox";
+	public static final String HBOX_IMPORT = "widgets/skyve_hbox";
+	public static final String FORM_IMPORT = "widgets/skyve_form";
+
 	private Set<String> imports;
 
 	public FlutterLayoutRenderer(Set<String> imports) {
@@ -28,9 +32,10 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public List<RenderedComponent> toolbarLayouts(List<RenderedComponent> components) {
-		RenderedComponent result = new RenderedComponent();
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("toolbarLayout");
+		output.append("Wrap(spacing: 8.0, children: [");
+		result.setAfter("]),");
 		return Collections.singletonList(result);
 	}
 
@@ -48,11 +53,12 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public RenderedComponent tabLayout(RenderedComponent component) {
-		imports.add("{VBox}");
-		RenderedComponent result = new RenderedComponent();
+		imports.add(VBOX_IMPORT);
+		
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("<VBox>");
-		result.setAfter("</VBox>");
+		output.append("SkyveVBox(children: [");
+		result.setAfter("]),");
 		return result;
 	}
 
@@ -86,37 +92,36 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public RenderedComponent vboxLayout(RenderedComponent component, VBox vbox) {
-		imports.add("{VBox}");
-		RenderedComponent result = new RenderedComponent().setAfter("</VBox>").setIndent("");
+		imports.add(VBOX_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<VBox>");
+		output.append("SkyveVBox(children: [");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent hboxLayout(RenderedComponent component, HBox hbox) {
-		imports.add("{HBox}");
-		RenderedComponent result = new RenderedComponent().setAfter("</HBox>").setIndent("");
+		imports.add(HBOX_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<HBox>");
+		output.append("SkyveHBox(children: [");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent formLayout(RenderedComponent component, Form form) {
-		imports.add("{Form}");
-		RenderedComponent result = new RenderedComponent().setAfter("</Form>").setIndent("");
+		imports.add(FORM_IMPORT);
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("<Form>");
+		output.append("SkyveForm(children: [");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent formRowLayout(RenderedComponent component, FormRow row) {
-		imports.add("{HBox}");
-		RenderedComponent result = new RenderedComponent().setAfter("</HBox>");
+		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
-		output.append("<HBox>");
+		output.append("BootstrapRow(children: [");
 		return result;
 	}
 
@@ -143,9 +148,9 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {
-		imports.add("{Cell}");
-		RenderedComponent cell = new RenderedComponent();
-		cell.getOutput().append("<Cell>").append(widgetLabel).append("</Cell>");
+		imports.add(FlutterComponentRenderer.LABEL_IMPORT);
+		RenderedComponent cell = new RenderedComponent(FlutterGenerator.INDENT);
+		cell.getOutput().append("BootstrapCol(sizes: 'col-4', child: const SkyveLabel('").append(widgetLabel).append("')),");
 		formOrRowLayout.addChild(cell);
 	}
 
@@ -159,12 +164,10 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {
-		imports.add("{Cell}");
-		RenderedComponent cell = new RenderedComponent();
-		cell.getOutput().append("<Cell>");
-		cell.setAfter("</Cell>");
-		formOrRowLayout.addChild(cell);
-		cell.addChild(formItemComponent);
+		RenderedComponent col = new RenderedComponent(FlutterGenerator.INDENT).setAfter("),").setIndent("");
+		col.getOutput().append("BootstrapCol(sizes: 'col-8', child: ");
+		formOrRowLayout.addChild(col);
+		col.addChild(formItemComponent);
 	}
 
 	@Override
@@ -179,15 +182,18 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 		if (component != null) {
 			return component;
 		}
-
+/*
 		// add a cell for either HBox or VBox, it doesn't matter as the parent controls horizontal or vertical
 		imports.add("{Cell}");
-		RenderedComponent cell = new RenderedComponent();
+		RenderedComponent cell = new RenderedComponent(FlutterGenerator.INDENT);
 		cell.getOutput().append("<Cell>");
 		cell.setAfter("</Cell>");
 		container.addChild(cell);
 		cell.addChild(componentToAdd);
+*/
 
+		container.addChild(componentToAdd);
+		
 		return componentToAdd;
 	}
 
@@ -195,6 +201,8 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 	public RenderedComponent addedToContainer(RenderedComponent component,
 												Container viewContainer,
 												RenderedComponent container) {
-		return container.getParent().getParent();
+// NB add another getParent() if a Cell like intermediate layout object is added in above addToContainer method.
+//		return container.getParent().getParent();
+		return container.getParent();
 	}
 }
