@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SkyveButton extends StatelessWidget {
   final String name;
   final String label;
-  
+
   const SkyveButton({Key? key, required this.name, required this.label})
       : super(key: key);
 
@@ -18,7 +18,14 @@ class SkyveButton extends StatelessWidget {
             }
           });
     } else {
-      return ElevatedButton(child: Text(label), onPressed: () => debugPrint('Pressed button $label; action $name'));
+      return ElevatedButton(
+          child: Text(label),
+          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              duration: const Duration(seconds: 1),
+              content: SizedBox(
+                  height: 50.0,
+                  child: Center(
+                      child: Text('Pressed button $label; action $name'))))));
     }
   }
 }

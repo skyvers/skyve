@@ -34,8 +34,8 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 	public List<RenderedComponent> toolbarLayouts(List<RenderedComponent> components) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Wrap(spacing: 8.0, children: [");
-		result.setAfter("]),");
+		output.append("Container(padding: const EdgeInsets.symmetric(horizontal: 10.0), child: Wrap(alignment: WrapAlignment.center, spacing: 8.0, children: [");
+		result.setAfter("])),");
 		return Collections.singletonList(result);
 	}
 
@@ -121,7 +121,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 	public RenderedComponent formRowLayout(RenderedComponent component, FormRow row) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
-		output.append("BootstrapRow(children: [");
+		output.append("BootstrapRow(decoration: BoxDecoration(border: Border.all(color: Colors.transparent, width: 10.0)), children: [");
 		return result;
 	}
 
@@ -150,7 +150,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 										String widgetHelpText) {
 		imports.add(FlutterComponentRenderer.LABEL_IMPORT);
 		RenderedComponent cell = new RenderedComponent(FlutterGenerator.INDENT);
-		cell.getOutput().append("BootstrapCol(sizes: 'col-4', child: const SkyveLabel('").append(widgetLabel).append("')),");
+		cell.getOutput().append("BootstrapCol(sizes: 'col-12 col-md-4', invisibleForSizes: 'xs sm', child: const SkyveLabel('").append(widgetLabel).append("')),");
 		formOrRowLayout.addChild(cell);
 	}
 
@@ -165,7 +165,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 										String widgetInvisible,
 										String widgetHelpText) {
 		RenderedComponent col = new RenderedComponent(FlutterGenerator.INDENT).setAfter("),").setIndent("");
-		col.getOutput().append("BootstrapCol(sizes: 'col-8', child: ");
+		col.getOutput().append("BootstrapCol(sizes: 'col-12 col-md-8', child: ");
 		formOrRowLayout.addChild(col);
 		col.addChild(formItemComponent);
 	}

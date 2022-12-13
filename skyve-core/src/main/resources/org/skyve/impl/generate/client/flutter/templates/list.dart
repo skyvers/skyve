@@ -26,22 +26,47 @@ class _##CLASS##State extends State<##CLASS##> {
 
   @override
   Widget build(BuildContext context) {
+    const delete = SizedBox(
+      width: 45.0,
+      height: 70.0,
+      child:
+          Center(child: Icon(Icons.delete, color: Colors.white, size: 40.0)));
+
     return SkyveView.responsiveView(
         context,
         ##CLASS##.routeName,
-        '##MODULE####QUERY##',
+        '##DESCRIPTION##',
         Visibility(
             visible: _loaded,
             replacement: const Center(child: CircularProgressIndicator()),
             child: ListView.builder(
                 itemCount: _rows.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                      title: Text(_rows[index]['bizId']),
-                      onTap: () {
-                        Navigator.pushNamed(context, ##EDIT_CLASS##.routeName,
-                            arguments: _rows[index]['bizId']);
-                      });
+                  return Dismissible(
+                      key: Key(_rows[index]['bizId']),
+                      background: Container(
+                          color: Colors.red,
+                          child: Wrap(
+                              alignment: WrapAlignment.spaceBetween,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: const [delete, delete])),
+                      onDismissed: (direction) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: SizedBox(
+                                    height: 50.0,
+                                    child: Center(child: Text('Deleted')))));
+                      },
+                      child: Card(
+                          child: ListTile(
+                              title: Text(nvl(_rows[index]['##COLUMN1##'])),
+                              subtitle: Text(nvl(_rows[index]['##COLUMN2##'])),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () {
+                                Navigator.pushNamed(context,
+                                    ##EDIT_CLASS##.routeName,
+                                    arguments: _rows[index]['bizId']);
+                              })));
                 })));
   }
 

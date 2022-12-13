@@ -29,9 +29,11 @@ class _##CLASS##State extends State<##CLASS##> {
         Visibility(
             visible: (_bean['bizId'] != null),
             replacement: const Center(child: CircularProgressIndicator()),
-            child: Column(
-                children: [Text('EDIT $bizId'), Text('_c=${_bean["_c"]}'),
-                			##DART##])));
+            child: SingleChildScrollView(
+                child: Column(
+                    children: [
+                        ##DART##
+                    ]))));
   }
 
   void _load(String? bizId) async {

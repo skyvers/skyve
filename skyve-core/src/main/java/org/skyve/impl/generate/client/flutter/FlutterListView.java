@@ -6,16 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 
 class FlutterListView extends FlutterView {
@@ -55,6 +52,8 @@ class FlutterListView extends FlutterView {
 		subs.put("##EDIT_CLASS##", BindUtil.toJavaTypeIdentifier(moduleName + documentName));
 		subs.put("##CLASS##", className);
 		
+		addQuerySubstitutes(subs);
+		
 		fw.write(substitute("templates/list.dart", subs));
 
 //		fw.write("import React from 'react';\n");
@@ -83,6 +82,60 @@ class FlutterListView extends FlutterView {
 //		fw.write("}\n");
 	}
 
+	private void addQuerySubstitutes(Map<String, String> subs) {
+		String description = "";
+		String column1 = null;
+		String column2 = null;
+		
+		List<MetaDataQueryColumn> columns = null;
+		if (query != null) {
+			columns = query.getColumns();
+			description = query.getLocalisedDescription();
+		}
+		else if (model != null) {
+			columns = model.getColumns();
+			description = model.getLocalisedDescription();
+		}
+
+		if (columns != null) {
+			for (MetaDataQueryColumn column : columns) {
+				if ((column1 != null) && (column2 != null)) {
+					break;
+				}
+				// don't show hidden columns
+				if (column.isHidden()) {
+					continue;
+				}
+				// don't show unprojected columns
+				if ((column instanceof MetaDataQueryProjectedColumn) && 
+						(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+					continue;
+				}
+
+				String columnName = column.getBinding();
+				if (columnName == null) {
+					columnName = column.getName();
+				}
+				if (column1 == null) {
+					column1 = columnName;
+				}
+				else {
+					column2 = columnName;
+				}
+			}
+		}
+		
+		subs.put("##DESCRIPTION##", description);
+		if (column1 == null) {
+			column1 = Bean.DOCUMENT_ID;
+		}
+		subs.put("##COLUMN1##", column1);
+		if (column2 == null) {
+			column2 = Bean.DOCUMENT_ID;
+		}
+		subs.put("##COLUMN2##", column2);
+	}
+/*	
 	private void renderComponentDidMount(FileWriter fw) throws IOException {
 		fw.write("\tcomponentDidMount() {\n");
 		if (model != null) {
@@ -140,4 +193,5 @@ class FlutterListView extends FlutterView {
 		}
 		fw.write("\t\t\t</DataTable>\n");
 	}
+*/
 }

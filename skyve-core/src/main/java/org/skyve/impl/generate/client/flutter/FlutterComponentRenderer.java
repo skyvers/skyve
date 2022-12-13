@@ -70,7 +70,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		imports.add(FlutterLayoutRenderer.VBOX_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
-		output.append("SkyveVBox(children: [");
+		output.append("Wrap(children: [");
 		return result;
 	}
 
@@ -494,8 +494,8 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Format<?> format) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("TextFormField(decoration: const InputDecoration(labelText: '").append(title);
-		output.append("'), initialValue: '${_bean[\"").append(BindUtil.sanitiseBinding(text.getBinding())).append("\"]}'),");
+		output.append("TextFormField(decoration: const InputDecoration(border: OutlineInputBorder(), labelText: '").append(title);
+		output.append("'), initialValue: nvl(_bean['").append(BindUtil.sanitiseBinding(text.getBinding())).append("'])),");
 		return result;
 	}
 

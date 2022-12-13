@@ -1,6 +1,10 @@
 import 'package:##PROJECT##/widgets/skyve_menu.dart';
 import 'package:flutter/material.dart';
 
+String nvl(dynamic? value) {
+  return (value == null) ? '' : value.toString();
+}
+
 class SkyveView {
   static const int sm = 576;
   static const int md = 768;
