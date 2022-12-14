@@ -39,35 +39,46 @@ class _##CLASS##State extends State<##CLASS##> {
         Visibility(
             visible: _loaded,
             replacement: const Center(child: CircularProgressIndicator()),
-            child: ListView.builder(
-                itemCount: _rows.length,
-                itemBuilder: (context, index) {
-                  return Dismissible(
-                      key: Key(_rows[index]['bizId']),
-                      background: Container(
-                          color: Colors.red,
-                          child: Wrap(
-                              alignment: WrapAlignment.spaceBetween,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: const [delete, delete])),
-                      onDismissed: (direction) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: SizedBox(
-                                    height: 50.0,
-                                    child: Center(child: Text('Deleted')))));
-                      },
-                      child: Card(
-                          child: ListTile(
-                              title: Text(nvl(_rows[index]['##COLUMN1##'])),
-                              subtitle: Text(nvl(_rows[index]['##COLUMN2##'])),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                Navigator.pushNamed(context,
-                                    ##EDIT_CLASS##.routeName,
-                                    arguments: _rows[index]['bizId']);
-                              })));
-                })));
+            child: Stack(children: [
+              ListView.builder(
+                  itemCount: _rows.length,
+                  itemBuilder: (context, index) {
+                    return Dismissible(
+                        key: Key(_rows[index]['bizId']),
+                        background: Container(
+                            color: Colors.red,
+                            child: Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: const [delete, delete])),
+                        onDismissed: (direction) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: SizedBox(
+                                      height: 50.0,
+                                      child: Center(child: Text('Deleted')))));
+                        },
+                        child: Card(
+                            child: ListTile(
+                                title: Text(nvl(_rows[index]['##COLUMN1##'])),
+                                subtitle: Text(nvl(_rows[index]['##COLUMN2##'])),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () {
+                                  Navigator.pushNamed(context,
+                                      ##EDIT_CLASS##.routeName,
+                                      arguments: _rows[index]['bizId']);
+                                })));
+                  }),
+              Positioned(
+                bottom: 40.0,
+                right: 40.0,
+                child: FloatingActionButton(
+                    child: const Icon(Icons.add),
+                    onPressed: () {
+                      Navigator.pushNamed(context, ##EDIT_CLASS##.routeName);
+                    }),
+              )
+            ])));
   }
 
   void _load() async {

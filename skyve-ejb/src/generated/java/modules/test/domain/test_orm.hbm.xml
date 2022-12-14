@@ -269,6 +269,22 @@
 		<filter name="testArcOneToOneUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.test.domain.DeleteDuringPostDelete" table="TEST_DeleteDuringPostDelete" entity-name="testDeleteDuringPostDelete">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_DeleteDuringPostDelete_aggregatedAssociation"/>
+		<filter name="testDeleteDuringPostDeleteNoneFilter" condition="1=0"/>
+		<filter name="testDeleteDuringPostDeleteCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testDeleteDuringPostDeleteDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testDeleteDuringPostDeleteUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.test.domain.Hierarchical" table="TEST_Hierarchical" entity-name="testHierarchical">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -627,6 +643,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testArcOneToOneUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testDeleteDuringPostDeleteNoneFilter" />
+	<filter-def name="testDeleteDuringPostDeleteCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testDeleteDuringPostDeleteDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testDeleteDuringPostDeleteUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testHierarchicalNoneFilter" />

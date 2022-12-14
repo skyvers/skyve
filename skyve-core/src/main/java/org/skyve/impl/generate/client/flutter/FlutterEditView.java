@@ -1,7 +1,5 @@
 package org.skyve.impl.generate.client.flutter;
 
-import static org.skyve.impl.generate.client.flutter.FlutterGenerator.INDENT;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;

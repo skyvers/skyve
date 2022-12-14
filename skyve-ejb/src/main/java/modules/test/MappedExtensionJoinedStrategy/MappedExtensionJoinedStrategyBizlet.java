@@ -12,4 +12,14 @@ public class MappedExtensionJoinedStrategyBizlet extends Bizlet<MappedExtensionJ
 	public void postSave(MappedExtensionJoinedStrategyExtension bean) throws Exception {
 		bean.setPostSaveCalled(true);
 	}
+
+	@Override
+	public void preDelete(MappedExtensionJoinedStrategyExtension bean) throws Exception {
+		bean.setPreDeleteCalled(true);
+	}
+
+	@Override
+	public void postDelete(MappedExtensionJoinedStrategyExtension bean) throws Exception {
+		bean.setPostDeleteCalled(true);
+	}
 }
