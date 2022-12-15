@@ -3,6 +3,7 @@ package org.skyve.impl.web;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -78,6 +79,23 @@ public class WebUtil {
 				}
 				AbstractPersistence.get().setUser(user);
 				WebStatsUtil.recordLogin(user);
+			}
+			// TODO hack!
+			else { // check basic auth
+				final String authorization = request.getHeader("Authorization");
+				if ((authorization != null) && authorization.startsWith("Basic")) {
+					// Authorization: Basic base64credentials
+					final String base64Credentials = authorization.substring("Basic".length()).trim();
+					String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), Util.UTF8);
+	
+					// credentials = username:password or customer/username:password
+					final String[] values = credentials.split(":", 2);
+					final String username = UtilImpl.processStringValue(values[0]);
+					final String password = UtilImpl.processStringValue(values[1]);
+					// TODO check password...
+					user = ProvidedRepositoryFactory.get().retrieveUser(username);
+					AbstractPersistence.get().setUser(user);
+				}				
 			}
 		}
 		else {

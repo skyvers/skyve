@@ -6,7 +6,7 @@ import org.skyve.impl.generate.client.flutter.FlutterGenerator;
 
 import util.AbstractH2Test;
 
-@Ignore("fix this")
+// TODO hack! @Ignore("fix this")
 public class FlutterGeneratorTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
