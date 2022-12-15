@@ -306,7 +306,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 
 	@Test
-	public void testDeleteInPostDelete() throws Exception {
+	public void testDeleteDuringPostDelete() throws Exception {
 		Document dupdd = m.getDocument(c, DeleteDuringPostDelete.DOCUMENT_NAME);
 		DeleteDuringPostDelete test = Util.constructRandomInstance(u, m, dupdd, 2);
 		test = p.save(test);
