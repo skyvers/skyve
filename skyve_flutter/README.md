@@ -61,9 +61,21 @@ To run in Android (there must be an already created emulator):
 flutter run -d android
 ```
 
+### CORS issues running in a browser
+
+To run inside chrome and connect to your localhost skyve server without CORS issues use the following project...
+
+https://pub.dev/packages/flutter_cors
+
+```bash
+dart pub global activate flutter_cors
+fluttercors --disable
+fluttercors --enable
+```
+
 ## Flutter in VS Code
 
-## Getting Setup
+### Getting Setup
 
 You will need to install some extensions. These might be useful:
 
