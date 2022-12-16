@@ -1,11 +1,14 @@
 package modules.admin.DataMaintenance;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -43,6 +46,13 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 			}
 		}
 
+		// epoch date defaults to beginning of earliest Skyve applications so it can be used with all Skyve applications
+		if (result.getEpochDate() == null) {
+			LocalDate epochDate = LocalDate.of(2010, Month.JANUARY, 1);
+			result.setEpochDate(new DateOnly(epochDate));
+			result = CORE.getPersistence().save(result);
+		}
+
 		return result;
 	}
 
@@ -63,14 +73,6 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 				}
 			}
 			Collections.sort(result, new DomainValueSortByDescription());
-		}
-		else if(DataMaintenance.auditModuleNamePropertyName.equals(attributeName)){
-			result = new ArrayList<>();
-			Customer c = CORE.getUser().getCustomer();
-			for (Module m : c.getModules()) {
-				result.add(new DomainValue(m.getName(), m.getLocalisedTitle()));
-			}
-			Collections.sort(result, new DomainValueSortByDescription());			
 		}
 		else if(DataMaintenance.restorePreProcessPropertyName.equals(attributeName)){
 			result = new ArrayList<>();
@@ -126,32 +128,8 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 			}
 			bean.setInstructionHint(instructionHint);
 		}
-		
+
 		super.preRerender(source, bean, webContext);
-	}
-
-
-	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, DataMaintenance bean)
-			throws Exception {
-
-		
-		if(DataMaintenance.auditDocumentNamePropertyName.equals(attributeName) && bean.getAuditModuleName()!=null){
-			List<DomainValue> result = new ArrayList<>();
-			Customer c = CORE.getUser().getCustomer();
-			Module m = c.getModule(bean.getAuditModuleName());
-			for (String k : m.getDocumentRefs().keySet()) {
-				Document d = m.getDocument(c, k);
-				if (d.isPersistable()) {
-					result.add(new DomainValue(d.getName(), d.getLocalisedSingularAlias()));
-				}
-			}
-
-			Collections.sort(result, new DomainValueSortByDescription());
-			return result;
-		}
-		
-		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
 	@Override
@@ -163,7 +141,5 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
-
-
 
 }

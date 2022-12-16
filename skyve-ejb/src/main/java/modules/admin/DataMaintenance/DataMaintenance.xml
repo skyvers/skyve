@@ -117,36 +117,17 @@
 		</memo>
 		
 		<!-- Audit Truncation -->
-		<text name="auditModuleName">
-			<displayName>admin.dataMaintenance.auditModuleName.displayName</displayName>
-			<domain>constant</domain>
-			<length>128</length>
-		</text>
-		<text name="auditDocumentName">
-			<displayName>admin.dataMaintenance.auditDocumentName.displayName</displayName>
-			<domain>dynamic</domain>
-			<length>128</length>
-		</text>
-		<enum name="auditOperation" documentRef="Audit" attributeRef="operation">
-			<displayName>admin.dataMaintenance.auditOperation.displayName</displayName>
-		</enum>
-		<timestamp name="auditTimestampStart">
-			<displayName>admin.dataMaintenance.auditTimestampStart.displayName</displayName>
-		</timestamp>
-		<timestamp name="auditTimestampEnd">
-			<displayName>admin.dataMaintenance.auditTimestampEnd.displayName</displayName>
-		</timestamp>
-		<association type="aggregation" name="auditUser">
-			<displayName>admin.dataMaintenance.association.auditUser.displayName</displayName>
-			<documentName>UserProxy</documentName>
-		</association>
-		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
-			<displayName>admin.dataMaintenance.auditMatchCount.displayName</displayName>
+		<date name="epochDate">
+			<displayName>admin.dataMaintenance.epochDate.displayName</displayName>
+		</date>
+		<integer name="auditLogRetentionDays">
+			<displayName>admin.dataMaintenance.auditLogRetentionDays.displayName</displayName>
+			<description>admin.dataMaintenance.auditLogRetentionDays.description</description>
 		</integer>
 		<memo name="auditResponse" persistent="false" trackChanges="false" audited="false">
 			<displayName>admin.dataMaintenance.auditResponse.displayName</displayName>
 		</memo>
-
+		
 		<!-- Data Refresh -->
 		<enum name="refreshOption" persistent="false" trackChanges="false" audited="false">
 			<displayName>admin.dataMaintenance.refreshOption.displayName</displayName>

@@ -112,7 +112,6 @@
 			<privileges>
 				<document name="Audit" permission="_R_DC"/>
 				<document name="DataMaintenance" permission="CRUDC">
-					<action name="CheckAuditMatches"/>
 					<action name="TruncateAuditLog"/>
 				</document>
 			</privileges>

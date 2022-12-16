@@ -219,16 +219,8 @@
 				<param name="enumClass">modules.admin.domain.DataMaintenance$RestoreIndexingOption</param>
 			</type>
 		</property>
-		<property name="auditModuleName" length="128" />
-		<property name="auditDocumentName" length="128" />
-		<property name="auditOperation" length="1">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.Audit$Operation</param>
-			</type>
-		</property>
-		<property name="auditTimestampStart" type="Timestamp" />
-		<property name="auditTimestampEnd" type="Timestamp" />
-		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser"/>
+		<property name="epochDate" type="DateOnly" />
+		<property name="auditLogRetentionDays" />
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

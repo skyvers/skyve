@@ -18,8 +18,6 @@ public class DataMaintenanceFactory {
 
 		bean.setModDocName(null);
 		bean.setRestorePreProcess(null);
-		bean.setAuditModuleName(null);
-		bean.setAuditDocumentName(null);
 
 		return bean;
 	}

@@ -200,7 +200,6 @@
 			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" />
 		<action className="TruncateAuditLog" displayName="admin.dataMaintenance.actions.truncateLog.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.truncateLog.confirm" 
 			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" disabled="jobCommenced" />
-		<action className="CheckAuditMatches" displayName="admin.dataMaintenance.actions.checkAuditMatches.displayName" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fa fa-search" />
 		<action className="RefreshDocumentTuples" displayName="admin.dataMaintenance.actions.refreshDocumentTuples.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.refreshDocumentTuples.confirm"
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs" />
 

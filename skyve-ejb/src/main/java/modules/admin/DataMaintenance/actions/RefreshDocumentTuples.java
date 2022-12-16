@@ -33,7 +33,7 @@ public class RefreshDocumentTuples implements ServerSideAction<DataMaintenance> 
 		
 		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 	
-		bean.setAuditResponse("Job commenced.");
+		bean.setAuditResponse("Refresh Document Tuples Job commenced.");
 		webContext.growl(MessageSeverity.info, "Refresh Job has been started");
 
 		return new ServerSideActionResult<>(bean);

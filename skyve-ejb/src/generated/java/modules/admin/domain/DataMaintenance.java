@@ -10,15 +10,13 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.DataMaintenance.DataMaintenanceExtension;
-import modules.admin.UserProxy.UserProxyExtension;
-import modules.admin.domain.Audit.Operation;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Enumeration;
-import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
-import org.skyve.impl.domain.types.jaxb.TimestampMapper;
+import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
@@ -28,10 +26,8 @@ import org.skyve.util.Util;
  * @depend - - - RestorePreProcess
  * @depend - - - ContentRestoreOption
  * @depend - - - RestoreIndexingOption
- * @depend - - - Operation
  * @depend - - - RefreshOption
  * @depend - - - EvictOption
- * @navhas n auditUser 0..1 UserProxy
  * @navhas n refreshDocuments 0..n ModuleDocument
  * @stereotype "persistent"
  */
@@ -111,25 +107,10 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	public static final String contentLinkPropertyName = "contentLink";
 
 	/** @hidden */
-	public static final String auditModuleNamePropertyName = "auditModuleName";
+	public static final String epochDatePropertyName = "epochDate";
 
 	/** @hidden */
-	public static final String auditDocumentNamePropertyName = "auditDocumentName";
-
-	/** @hidden */
-	public static final String auditOperationPropertyName = "auditOperation";
-
-	/** @hidden */
-	public static final String auditTimestampStartPropertyName = "auditTimestampStart";
-
-	/** @hidden */
-	public static final String auditTimestampEndPropertyName = "auditTimestampEnd";
-
-	/** @hidden */
-	public static final String auditUserPropertyName = "auditUser";
-
-	/** @hidden */
-	public static final String auditMatchCountPropertyName = "auditMatchCount";
+	public static final String auditLogRetentionDaysPropertyName = "auditLogRetentionDays";
 
 	/** @hidden */
 	public static final String auditResponsePropertyName = "auditResponse";
@@ -642,42 +623,19 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	private String contentLink;
 
 	/**
-	 * Module
+	 * Epoch Date
 	 **/
-	private String auditModuleName;
+	private DateOnly epochDate;
 
 	/**
-	 * Document
+	 * Audit Log Retention Days
+	 * <br/>
+	 * How many days worth of Audits to keep. Audits earlier than this many days back will be pruned.
 	 **/
-	private String auditDocumentName;
+	private Integer auditLogRetentionDays;
 
 	/**
-	 * Operation
-	 **/
-	private Operation auditOperation;
-
-	/**
-	 * From
-	 **/
-	private Timestamp auditTimestampStart;
-
-	/**
-	 * To
-	 **/
-	private Timestamp auditTimestampEnd;
-
-	/**
-	 * User
-	 **/
-	private UserProxyExtension auditUser = null;
-
-	/**
-	 * Found
-	 **/
-	private Integer auditMatchCount;
-
-	/**
-	 * Status
+	 * Audit Response
 	 **/
 	private String auditResponse;
 
@@ -1137,134 +1095,41 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #auditModuleName} accessor.
+	 * {@link #epochDate} accessor.
 	 * @return	The value.
 	 **/
-	public String getAuditModuleName() {
-		return auditModuleName;
+	public DateOnly getEpochDate() {
+		return epochDate;
 	}
 
 	/**
-	 * {@link #auditModuleName} mutator.
-	 * @param auditModuleName	The new value.
+	 * {@link #epochDate} mutator.
+	 * @param epochDate	The new value.
 	 **/
 	@XmlElement
-	public void setAuditModuleName(String auditModuleName) {
-		preset(auditModuleNamePropertyName, auditModuleName);
-		this.auditModuleName = auditModuleName;
+	@XmlSchemaType(name = "date")
+	@XmlJavaTypeAdapter(DateOnlyMapper.class)
+	public void setEpochDate(DateOnly epochDate) {
+		preset(epochDatePropertyName, epochDate);
+		this.epochDate = epochDate;
 	}
 
 	/**
-	 * {@link #auditDocumentName} accessor.
+	 * {@link #auditLogRetentionDays} accessor.
 	 * @return	The value.
 	 **/
-	public String getAuditDocumentName() {
-		return auditDocumentName;
+	public Integer getAuditLogRetentionDays() {
+		return auditLogRetentionDays;
 	}
 
 	/**
-	 * {@link #auditDocumentName} mutator.
-	 * @param auditDocumentName	The new value.
+	 * {@link #auditLogRetentionDays} mutator.
+	 * @param auditLogRetentionDays	The new value.
 	 **/
 	@XmlElement
-	public void setAuditDocumentName(String auditDocumentName) {
-		preset(auditDocumentNamePropertyName, auditDocumentName);
-		this.auditDocumentName = auditDocumentName;
-	}
-
-	/**
-	 * {@link #auditOperation} accessor.
-	 * @return	The value.
-	 **/
-	public Operation getAuditOperation() {
-		return auditOperation;
-	}
-
-	/**
-	 * {@link #auditOperation} mutator.
-	 * @param auditOperation	The new value.
-	 **/
-	@XmlElement
-	public void setAuditOperation(Operation auditOperation) {
-		preset(auditOperationPropertyName, auditOperation);
-		this.auditOperation = auditOperation;
-	}
-
-	/**
-	 * {@link #auditTimestampStart} accessor.
-	 * @return	The value.
-	 **/
-	public Timestamp getAuditTimestampStart() {
-		return auditTimestampStart;
-	}
-
-	/**
-	 * {@link #auditTimestampStart} mutator.
-	 * @param auditTimestampStart	The new value.
-	 **/
-	@XmlElement
-	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(TimestampMapper.class)
-	public void setAuditTimestampStart(Timestamp auditTimestampStart) {
-		preset(auditTimestampStartPropertyName, auditTimestampStart);
-		this.auditTimestampStart = auditTimestampStart;
-	}
-
-	/**
-	 * {@link #auditTimestampEnd} accessor.
-	 * @return	The value.
-	 **/
-	public Timestamp getAuditTimestampEnd() {
-		return auditTimestampEnd;
-	}
-
-	/**
-	 * {@link #auditTimestampEnd} mutator.
-	 * @param auditTimestampEnd	The new value.
-	 **/
-	@XmlElement
-	@XmlSchemaType(name = "dateTime")
-	@XmlJavaTypeAdapter(TimestampMapper.class)
-	public void setAuditTimestampEnd(Timestamp auditTimestampEnd) {
-		preset(auditTimestampEndPropertyName, auditTimestampEnd);
-		this.auditTimestampEnd = auditTimestampEnd;
-	}
-
-	/**
-	 * {@link #auditUser} accessor.
-	 * @return	The value.
-	 **/
-	public UserProxyExtension getAuditUser() {
-		return auditUser;
-	}
-
-	/**
-	 * {@link #auditUser} mutator.
-	 * @param auditUser	The new value.
-	 **/
-	@XmlElement
-	public void setAuditUser(UserProxyExtension auditUser) {
-		if (this.auditUser != auditUser) {
-			preset(auditUserPropertyName, auditUser);
-			this.auditUser = auditUser;
-		}
-	}
-
-	/**
-	 * {@link #auditMatchCount} accessor.
-	 * @return	The value.
-	 **/
-	public Integer getAuditMatchCount() {
-		return auditMatchCount;
-	}
-
-	/**
-	 * {@link #auditMatchCount} mutator.
-	 * @param auditMatchCount	The new value.
-	 **/
-	@XmlElement
-	public void setAuditMatchCount(Integer auditMatchCount) {
-		this.auditMatchCount = auditMatchCount;
+	public void setAuditLogRetentionDays(Integer auditLogRetentionDays) {
+		preset(auditLogRetentionDaysPropertyName, auditLogRetentionDays);
+		this.auditLogRetentionDays = auditLogRetentionDays;
 	}
 
 	/**

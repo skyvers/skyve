@@ -218,65 +218,19 @@
 			</hbox>
 		</tab>
 		<tab title="admin.dataMaintenance.edit.manageAudits.tabTitle" visible="auditManager">
-			<form border="true" responsiveWidth="12" borderTitle="admin.dataMaintenance.edit.filter.borderTitle">
-				<column percentageWidth="20" responsiveWidth="2" />
-				<column responsiveWidth="4" />
-				<column />
-				<row>
-					<item>
-						<combo binding="auditModuleName" >
-							<onChangedHandlers><rerender/></onChangedHandlers>
-						</combo>
-					</item>
-				</row>
-				<row>
-					<item>
-						<combo binding="auditDocumentName" >
-							<onChangedHandlers><rerender/></onChangedHandlers>
-						</combo>
-					</item>
-				</row>
-				<row>
-					<item>
-						<combo binding="auditOperation" >
-							<onChangedHandlers><rerender/></onChangedHandlers>
-						</combo>
-					</item>
-				</row>
-				<row>
-					<item>
-						<textField binding="auditTimestampStart" >
-							<onBlurHandlers><rerender/>	</onBlurHandlers>
-						</textField>
-					</item>
-				</row>
-				<row>
-					<item>
-						<textField binding="auditTimestampEnd" >
-						<onBlurHandlers><rerender/>	</onBlurHandlers>
-						</textField>
-					</item>
-				</row>
-				<row>
-					<item>
-						<lookupDescription binding="auditUser"  descriptionBinding="bizKey" enableAdd="false">
-							<onPickedHandlers><rerender/></onPickedHandlers>
-							<onClearedHandlers><rerender/></onClearedHandlers>
-						</lookupDescription>
-					</item>
-				</row>
-				<row>
-					<item>
-						<textField binding="auditMatchCount" disabled="true" />
-					</item>
-					<item>
-						<button action="CheckAuditMatches" pixelWidth="150" />
-					</item>
-				</row>
-			</form>
 			<form border="true" responsiveWidth="12" borderTitle="admin.dataMaintenance.edit.truncate.borderTitle">
 				<column percentageWidth="20" responsiveWidth="2" />
-				<column />
+				<column responsiveWidth="4" />
+				<column percentageWidth="20" responsiveWidth="2" />
+				<column responsiveWidth="4" />
+				<row>
+					<item>
+						<default binding="auditLogRetentionDays"/>
+					</item>
+					<item>
+						<textField binding="epochDate" enabled="false"/>
+					</item>
+				</row>
 				<row>
 					<item>
 						<spacer />
@@ -285,25 +239,7 @@
 						<button action="TruncateAuditLog" pixelWidth="150" />
 					</item>
 				</row>
-				<row>
-					<item>
-						<spacer />
-					</item>
-					<item>
-						<blurb>
-							<![CDATA[<em>{auditResponse}</em>]]>
-						</blurb>
-					</item>
-				</row>
 			</form>
-			<listGrid continueConversation="false" query="qAudits">
-				<filterParameter filterBinding="auditModuleName" operator="equal" valueBinding="auditModuleName"/>
-				<filterParameter filterBinding="auditDocumentName" operator="equal" valueBinding="auditDocumentName"/>
-				<filterParameter filterBinding="operation"  operator="equal" valueBinding="auditOperation"/>
-				<filterParameter filterBinding="timestamp" operator="greaterEqual" valueBinding="auditTimestampStart"/>
-				<filterParameter filterBinding="timestamp" operator="lessEqual" valueBinding="auditTimestampEnd"/>
-				<filterParameter filterBinding="userName" operator="equal" valueBinding="auditUser.userName"/>
-			</listGrid>
 		</tab>
 		<tab title="admin.dataMaintenance.edit.dataRefresh.tabTitle">
 			<dataGrid binding="refreshDocuments" inline="true" 
@@ -368,7 +304,6 @@
 			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" />
 		<action className="TruncateAuditLog" displayName="admin.dataMaintenance.actions.truncateLog.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.truncateLog.confirm" 
 			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" disabled="jobCommenced" />
-		<action className="CheckAuditMatches" displayName="admin.dataMaintenance.actions.checkAuditMatches.displayName" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fa fa-search" />
 		<action className="RefreshDocumentTuples" displayName="admin.dataMaintenance.actions.refreshDocumentTuples.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.refreshDocumentTuples.confirm"
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs" />
 
