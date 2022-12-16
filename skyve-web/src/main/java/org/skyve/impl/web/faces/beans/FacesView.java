@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.beans;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
@@ -139,7 +139,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 */
 	public String getCsrfToken() {
 		if (csrfToken == null) {
-			csrfToken = String.valueOf(new SecureRandom().nextInt());
+			csrfToken = StateUtil.createToken().toString();
 			csrfTokenChecked = false;
 		}
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("getCsrfToken() = " + csrfToken);

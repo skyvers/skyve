@@ -370,6 +370,11 @@ public class BackupJob extends CancellableJob {
 						final String uploadLogMessage = "Uploaded compressed backup";
 						log.add(uploadLogMessage);
 						Util.LOGGER.info(uploadLogMessage);
+
+						FileUtil.delete(zip);
+						final String deleteLogMessage = "Deleted local backup";
+						log.add(deleteLogMessage);
+						Util.LOGGER.info(deleteLogMessage);
 					}
 					
 					if (problem) {
