@@ -1,7 +1,5 @@
 package org.skyve.impl.web.spring;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -12,7 +10,6 @@ import java.util.List;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
-import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -20,6 +17,8 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
+import org.skyve.impl.util.TFAConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
@@ -40,10 +39,10 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 public class SkyveSpringSecurity {
+	
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
 		DelegatingPasswordEncoder result = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -88,10 +87,12 @@ public class SkyveSpringSecurity {
 	 * @param createdTimestamp
 	 * @return
 	 */
-	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customerName) {
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customerName);
+	private boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customer) throws SQLException {
 		
-		if ((config == null) || (createdTimestamp == null) || (! isTFAPush(config))) {
+		
+		TwoFactorCustomerConfiguration config = TFAConfigurationSingleton.getInstance().getConfig(customer);
+		
+		if (config == null || createdTimestamp == null || (! TFAConfigurationSingleton.isPushTfa(config) )) {
 			return false;
 		}
 		
@@ -103,37 +104,8 @@ public class SkyveSpringSecurity {
 		return currentTime < (generatedTime + expiryMillis);
 	}
 	
-	public static boolean isTFAPush(TwoFactorCustomerConfiguration config) {
-		return ((config != null) && "EMAIL".equals(config.getTfaType()));
-	}
-	
-	public static TwoFactorCustomerConfiguration getCustomerTFAConfig(String customerName) {
-		TwoFactorCustomerConfiguration config = null;
-		try {
-			try (Connection c = EXT.getDataStoreConnection()) {
-				String query = "select twoFactorType, twofactorPushCodeTimeOutSeconds, twoFactorEmailSubject, twoFactorEmailBody " + 
-									"from ADM_Configuration where bizCustomer = ?";
-				try (PreparedStatement s = c.prepareStatement(query)) {
-					s.setString(1, customerName);
-					try (ResultSet rs = s.executeQuery()) {
-						if (rs.next()) {
-							config = new TwoFactorCustomerConfiguration(rs.getString(1), 
-																			rs.getInt(2), 
-																			rs.getString(3),
-																			rs.getString(4));
-						}
-					}
-				}
-			}
-		}
-		catch (SQLException e) {
-			throw new DomainException("Cannot get TFA Config", e);
-		}
+	public UserDetailsService jdbcUserDetailsService() {
 		
-		return config;
-	}
-	
-	public UserDetailsManager jdbcUserDetailsManager() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;
 			
@@ -187,17 +159,29 @@ public class SkyveSpringSecurity {
 				return userFromUserQuery;
 			}
 			
+			private String getCustomerName(String springUsername) {
+				String customerName = null;
+				int slashIndex = springUsername.indexOf('/');
+				if (slashIndex > 0) {
+					customerName = springUsername.substring(0, slashIndex);
+				}
+				return customerName;
+			}
+			
+			private String getUsernameOnly(String springUsername) {
+				String userName = springUsername;
+				int slashIndex = userName.indexOf('/');
+				if (slashIndex > 0) {
+					userName = userName.substring(slashIndex + 1);
+				}
+				
+				return userName;
+			}
+			
 			@Override
 			protected List<UserDetails> loadUsersByUsername(String springUsername) {
-				String tempCustomerName = null;
-				String tempUserName = springUsername;
-				int slashIndex = tempUserName.indexOf('/');
-				if (slashIndex > 0) {
-					tempCustomerName = tempUserName.substring(0, slashIndex);
-					tempUserName = tempUserName.substring(slashIndex + 1);
-				}
-				final String customerName = tempCustomerName;
-				final String userName = tempUserName;
+				final String customerName = getCustomerName(springUsername);
+				final String usernameOnly = getUsernameOnly(springUsername);
 				
 				return getJdbcTemplate().query(
 						skyveUserQuery,
@@ -226,7 +210,7 @@ public class SkyveSpringSecurity {
 								
 								
 								String password = userPassword;
-								if (useTFAPushCodeAsPassword(twoFactorGenerated, customerName)) {
+								if (useTFAPushCodeAsPassword( twoFactorGenerated, customerName)) {
 									password = twoFactorCode;
 								} 
 								
@@ -245,7 +229,8 @@ public class SkyveSpringSecurity {
 											UtilImpl.LOGGER.warning("Account " + springUsername + " is locked for another " + secondsRemaining + " seconds");
 										}
 									}
-								}		
+								}
+								
 								
 								return new UserTFA(user,
 													password,
@@ -255,7 +240,7 @@ public class SkyveSpringSecurity {
 													! locked,
 													AuthorityUtils.NO_AUTHORITIES,
 													customerName,
-													userName,
+													usernameOnly,
 													twoFactorCode,
 													twoFactorToken,
 													tfaGenTime,
@@ -264,7 +249,7 @@ public class SkyveSpringSecurity {
 							}
 						},
 						// 2 params for multi-tennant
-						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, userName} : new String[] {userName});
+						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, usernameOnly} : new String[] {usernameOnly});
 			}
 			
 			@Override

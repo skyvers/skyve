@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -289,7 +290,7 @@ public class UtilImpl {
 	
 	public static boolean PRIMEFLEX = false;
 	
-	public static String TFA_CUSTOMER = null;
+	public static Set<String> TFA_CUSTOMER = null;
 	
 	// for skyve script
 	/**
