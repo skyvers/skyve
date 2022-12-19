@@ -30,7 +30,10 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
-		if (bean.getUser() != null) {
+		if (bean.getUser() != null && bean.getUser().getContact() != null) {
+			// validate the email and confirm email match
+			bean.validateConfirmEmail();
+
 			try {
 				// Update the username to be the same as the email
 				bean.getUser().setUserName(bean.getUser().getContact().getEmail1());
