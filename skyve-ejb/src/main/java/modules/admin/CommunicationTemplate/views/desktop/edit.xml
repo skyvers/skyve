@@ -15,7 +15,7 @@
         </row>
         <row>
             <item showLabel="true">
-				<html binding="template" pixelHeight="300" pixelWidth="800" />
+				<html binding="template" pixelHeight="300" pixelWidth="800" sanitise="none" />
 			</item>
 		</row>
 	</form>
