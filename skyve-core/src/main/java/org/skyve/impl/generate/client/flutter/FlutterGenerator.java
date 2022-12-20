@@ -73,6 +73,10 @@ public class FlutterGenerator {
 		new File(projectPath, "lib/widgets/").mkdir();
 		refreshFile("lib/widgets/skyve_border.dart", "lib/widgets/skyve_border.dart", substitutions);
 		refreshFile("lib/widgets/skyve_button.dart", "lib/widgets/skyve_button.dart", substitutions);
+		refreshFile("lib/widgets/skyve_checkBox.dart", "lib/widgets/skyve_checkbox.dart", substitutions);
+		refreshFile("lib/widgets/skyve_colourpicker.dart", "lib/widgets/skyve_colourpicker.dart", substitutions);
+		refreshFile("lib/widgets/skyve_combo.dart", "lib/widgets/skyve_combo.dart", substitutions);
+		refreshFile("lib/widgets/skyve_contentimage.dart", "lib/widgets/skyve_contentimage.dart", substitutions);
 		refreshFile("lib/widgets/skyve_datagrid.dart", "lib/widgets/skyve_datagrid.dart", substitutions);
 		refreshFile("lib/widgets/skyve_form.dart", "lib/widgets/skyve_form.dart", substitutions);
 		refreshFile("lib/widgets/skyve_hbox.dart", "lib/widgets/skyve_hbox.dart", substitutions);
@@ -81,9 +85,26 @@ public class FlutterGenerator {
 		refreshFile("lib/widgets/skyve_spacer.dart", "lib/widgets/skyve_spacer.dart", substitutions);
 		refreshFile("lib/widgets/skyve_tab.dart", "lib/widgets/skyve_tab.dart", substitutions);
 		refreshFile("lib/widgets/skyve_tabpane.dart", "lib/widgets/skyve_tabpane.dart", substitutions);
+		refreshFile("lib/widgets/skyve_textfield.dart", "lib/widgets/skyve_textfield.dart", substitutions);
 		refreshFile("lib/widgets/skyve_toolbar.dart", "lib/widgets/skyve_toolbar.dart", substitutions);
 		refreshFile("lib/widgets/skyve_vbox.dart", "lib/widgets/skyve_vbox.dart", substitutions);
 		refreshFile("lib/widgets/skyve_view.dart", "lib/widgets/skyve_view.dart", substitutions);
+		refreshFile("lib/widgets/skyve_contentlink.dart", "lib/widgets/skyve_contentlink.dart", substitutions);
+		refreshFile("lib/widgets/skyve_contentsignature.dart", "lib/widgets/skyve_contentsignature.dart", substitutions);
+		refreshFile("lib/widgets/skyve_html.dart", "lib/widgets/skyve_html.dart", substitutions);
+		refreshFile("lib/widgets/skyve_lookupdescription.dart", "lib/widgets/skyve_lookupdescription.dart", substitutions);
+		refreshFile("lib/widgets/skyve_password.dart", "lib/widgets/skyve_password.dart", substitutions);
+		refreshFile("lib/widgets/skyve_radio.dart", "lib/widgets/skyve_radio.dart", substitutions);
+		refreshFile("lib/widgets/skyve_richtext.dart", "lib/widgets/skyve_richtext.dart", substitutions);
+		refreshFile("lib/widgets/skyve_spinner.dart", "lib/widgets/skyve_spinner.dart", substitutions);
+		refreshFile("lib/widgets/skyve_textarea.dart", "lib/widgets/skyve_textarea.dart", substitutions);
+		refreshFile("lib/widgets/skyve_actionlink.dart", "lib/widgets/skyve_actionlink.dart", substitutions);
+		refreshFile("lib/widgets/skyve_report.dart", "lib/widgets/skyve_report.dart", substitutions);
+		refreshFile("lib/widgets/skyve_download.dart", "lib/widgets/skyve_download.dart", substitutions);
+		refreshFile("lib/widgets/skyve_upload.dart", "lib/widgets/skyve_upload.dart", substitutions);
+		refreshFile("lib/widgets/skyve_staticimage.dart", "lib/widgets/skyve_staticimage.dart", substitutions);
+		refreshFile("lib/widgets/skyve_dynamicimage.dart", "lib/widgets/skyve_dynamicimage.dart", substitutions);
+		refreshFile("lib/widgets/skyve_blurb.dart", "lib/widgets/skyve_blurb.dart", substitutions);
 
 		new FlutterRouting(this).create();
 

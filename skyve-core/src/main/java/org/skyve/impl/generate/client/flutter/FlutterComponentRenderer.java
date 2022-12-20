@@ -50,12 +50,33 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 public class FlutterComponentRenderer extends ComponentRenderer {
 	public static final String BORDER_IMPORT = "widgets/skyve_border";
 	public static final String BUTTON_IMPORT = "widgets/skyve_button";
+	public static final String CHECKBOX_IMPORT = "widgets/skyve_checkbox";
+	public static final String COLOURPICKER_IMPORT = "widgets/skyve_colourpicker";
+	public static final String COMBO_IMPORT = "widgets/skyve_combo";
+	public static final String CONTENTIMAGE_IMPORT = "widgets/skyve_contentimage";
+	private static final String CONTENTLINK_IMPORT = "widgets/skyve_contentlink";
 	public static final String DATA_GRID_IMPORT = "widgets/skyve_datagrid";
 	public static final String LABEL_IMPORT = "widgets/skyve_label";
 	public static final String SPACER_IMPORT = "widgets/skyve_spacer";
 	public static final String TAB_PANE_IMPORT = "widgets/skyve_tabpane";
 	public static final String TAB_IMPORT = "widgets/skyve_tab";
+	public static final String TEXTFIELD_IMPORT = "widgets/skyve_textfield";
 	public static final String TOOLBAR_IMPORT = "widgets/skyve_toolbar";
+	private static final String CONTENTSIGNATURE_IMPORT = "widgets/skyve_contentsignature";
+	private static final String HTML_IMPORT = "widgets/skyve_html";
+	private static final String LOOKUP_IMPORT = "widgets/skyve_lookupdescription";
+	private static final String PASSWORD_IMPORT = "widgets/skyve_password";
+	private static final String RADIO_IMPORT = "widgets/skyve_radio";
+	private static final String RICHTEXT_IMPORT = "widgets/skyve_richtext";
+	private static final String SPINNER_IMPORT = "widgets/skyve_spinner";
+	private static final String TEXTAREA_IMPORT = "widgets/skyve_textarea";
+	private static final String ACTIONLINK_IMPORT = "widgets/skyve_actionlink";
+	private static final String REPORT_IMPORT = "widgets/skyve_report";
+	private static final String DOWNLOAD_IMPORT = "widgets/skyve_download";
+	private static final String UPLOAD_IMPORT = "widgets/skyve_upload";
+	private static final String STATICIMAGE_IMPORT = "widgets/skyve_staticimage";
+	private static final String DYNAMICIMAGE_IMPORT = "widgets/skyve_dynamicimage";
+	private static final String BLURB_IMPORT = "widgets/skyve_blurb";
 	
 	private Set<String> imports;
 	private String startingIndent;
@@ -173,9 +194,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public RenderedComponent staticImage(RenderedComponent component, String fileUrl, StaticImage image) {
+		imports.add(STATICIMAGE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('StaticImage'),");
+		output.append("SkyveStaticImage(label: 'StaticImage'),");
 		return result;
 	}
 
@@ -184,9 +206,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											DynamicImage image,
 											String moduleName,
 											String documentName) {
+		imports.add(DYNAMICIMAGE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('DynamicImage'),");
+		output.append("SkyveDynamicImage(label: 'DynamicImage'),");
 		return result;
 	}
 
@@ -196,9 +219,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									String value,
 									String binding,
 									Blurb blurb) {
+		imports.add(BLURB_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('Blurb'),");
+		output.append("SkyveBlurb(label: 'Blurb'),");
 		return result;
 	}
 
@@ -343,9 +367,16 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										CheckBox checkBox,
 										String title,
 										boolean required) {
+		imports.add(CHECKBOX_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('CheckBox ${_bean[\"").append(BindUtil.sanitiseBinding(checkBox.getBinding())).append("\"]}'),");
+
+		// output.append("SkyveCheckBox(label: '").append(title).append("', isChecked: _bean[\"")
+		// .append(BindUtil.sanitiseBinding(checkBox.getBinding())).append("\"], tristate: ")
+		// .append(required + "),");
+		// TODO: handle proper input
+		output.append("const SkyveCheckBox(label: '").append(title).append("', isChecked: false, tristate: ").append(required + "),");
+
 		return result;
 	}
 
@@ -355,9 +386,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											ColourPicker colour,
 											String title,
 											boolean required) {
+		imports.add(COLOURPICKER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('ColourPicker ${_bean[\"").append(BindUtil.sanitiseBinding(colour.getBinding())).append("\"]}'),");
+		// output.append("Text('ColourPicker ${_bean[\"").append(BindUtil.sanitiseBinding(colour.getBinding())).append("\"]}'),");
+		output.append("SkyveColourPicker(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -367,9 +400,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Combo combo,
 									String title,
 									boolean required) {
+		imports.add(COMBO_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('Combo ${_bean[\"").append(BindUtil.sanitiseBinding(combo.getBinding())).append("\"]}'),");
+		// output.append("Text('Combo ${_bean[\"").append(BindUtil.sanitiseBinding(combo.getBinding())).append("\"]}'),");
+		output.append("SkyveCombo(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -379,9 +414,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											ContentImage image,
 											String title,
 											boolean required) {
+		imports.add(CONTENTIMAGE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('ContentImage ${_bean[\"").append(BindUtil.sanitiseBinding(image.getBinding())).append("\"]}'),");
+		// output.append("Text('ContentImage ${_bean[\"").append(BindUtil.sanitiseBinding(image.getBinding())).append("\"]}'),");
+		output.append("SkyveContentImage(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -391,9 +428,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											ContentLink link,
 											String title,
 											boolean required) {
+		imports.add(CONTENTLINK_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('ContentLink ${_bean[\"").append(BindUtil.sanitiseBinding(link.getBinding())).append("\"]}'),");
+		// output.append("Text('ContentLink ${_bean[\"").append(BindUtil.sanitiseBinding(link.getBinding())).append("\"]}'),");
+		output.append("SkyveContentLink(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -403,9 +442,12 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												ContentSignature signature,
 												String title,
 												boolean required) {
+		imports.add(CONTENTSIGNATURE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('ContentSignature ${_bean[\"").append(BindUtil.sanitiseBinding(signature.getBinding())).append("\"]}'),");
+		// output.append("Text('ContentSignature
+		// ${_bean[\"").append(BindUtil.sanitiseBinding(signature.getBinding())).append("\"]}'),");
+		output.append("SkyveContentSignature(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -415,9 +457,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									HTML html,
 									String title,
 									boolean required) {
+		imports.add(HTML_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('HTML ${_bean[\"").append(BindUtil.sanitiseBinding(html.getBinding())).append("\"]}'),");
+		// output.append("Text('HTML ${_bean[\"").append(BindUtil.sanitiseBinding(html.getBinding())).append("\"]}'),");
+		output.append("SkyveHTML(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -429,9 +473,12 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												boolean required,
 												String displayBinding,
 												QueryDefinition query) {
+		imports.add(LOOKUP_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('LookupDescription ${_bean[\"").append(BindUtil.sanitiseBinding(lookup.getBinding())).append("\"]}'),");
+		// output.append("Text('LookupDescription
+		// ${_bean[\"").append(BindUtil.sanitiseBinding(lookup.getBinding())).append("\"]}'),");
+		output.append("SkyveLookupDescription(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -441,9 +488,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Password password,
 										String title,
 										boolean required) {
+		imports.add(PASSWORD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('Password'),");
+		// output.append("const Text('Password'),");
+		output.append("SkyvePassword(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -453,9 +502,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Radio radio,
 									String title,
 									boolean required) {
+		imports.add(RADIO_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('Radio ${_bean[\"").append(BindUtil.sanitiseBinding(radio.getBinding())).append("\"]}'),");
+		// output.append("Text('Radio ${_bean[\"").append(BindUtil.sanitiseBinding(radio.getBinding())).append("\"]}'),");
+		output.append("SkyveRadio(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -465,9 +516,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										RichText text,
 										String title,
 										boolean required) {
+		imports.add(RICHTEXT_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('RichText ${_bean[\"").append(BindUtil.sanitiseBinding(text.getBinding())).append("\"]}'),");
+		// output.append("Text('RichText ${_bean[\"").append(BindUtil.sanitiseBinding(text.getBinding())).append("\"]}'),");
+		output.append("SkyveRichText(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -477,9 +530,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Spinner spinner,
 										String title,
 										boolean required) {
+		imports.add(SPINNER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('Spinner ${_bean[\"").append(BindUtil.sanitiseBinding(spinner.getBinding())).append("\"]}'),");
+		// output.append("Text('Spinner ${_bean[\"").append(BindUtil.sanitiseBinding(spinner.getBinding())).append("\"]}'),");
+		output.append("SkyveSpinner(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -492,10 +547,14 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
+		imports.add(TEXTFIELD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("TextFormField(decoration: const InputDecoration(border: OutlineInputBorder(), labelText: '").append(title);
-		output.append("'), initialValue: nvl(_bean['").append(BindUtil.sanitiseBinding(text.getBinding())).append("'])),");
+		// output.append("TextFormField(decoration: const InputDecoration(border: OutlineInputBorder(), labelText:
+		// '").append(title);
+
+		output.append("SkyveTextField(label: '").append(title);
+		output.append("', initialValue: nvl(_bean['").append(BindUtil.sanitiseBinding(text.getBinding())).append("'])),");
 		return result;
 	}
 
@@ -506,9 +565,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										String title,
 										boolean required,
 										Integer length) {
+		imports.add(TEXTAREA_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("Text('TextArea ${_bean[\"").append(BindUtil.sanitiseBinding(text.getBinding())).append("\"]}'),");
+		output.append("SkyveTextArea(label: '").append(title).append("'),");
 		return result;
 	}
 
@@ -518,17 +578,19 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											Link link,
 											Action action) {
+		imports.add(ACTIONLINK_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('ActionLink'),");
+		output.append("SkyveActionLink(label: 'ActionLink'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent report(RenderedComponent component, Action action) {
+		imports.add(REPORT_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('Report'),");
+		output.append("SkyveReport(label: 'Report'),");
 		return result;
 	}
 
@@ -537,17 +599,19 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Action action,
 										String moduleName,
 										String documentName) {
+		imports.add(DOWNLOAD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('Download'),");
+		output.append("SkyveDownload(label: 'Download'),");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent upload(RenderedComponent component, Action action) {
+		imports.add(UPLOAD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const Text('Upload'),");
+		output.append("SkyveUpload(label: 'Upload'),");
 		return result;
 	}
 	
