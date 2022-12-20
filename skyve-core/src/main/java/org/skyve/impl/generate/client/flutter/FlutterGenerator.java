@@ -82,6 +82,7 @@ public class FlutterGenerator {
 		refreshFile("lib/widgets/skyve_hbox.dart", "lib/widgets/skyve_hbox.dart", substitutions);
 		refreshFile("lib/widgets/skyve_label.dart", "lib/widgets/skyve_label.dart", substitutions);
 		refreshFile("lib/widgets/skyve_menu.dart", "lib/widgets/skyve_menu.dart", substitutions);
+		refreshFile("lib/widgets/skyve_network_image.dart", "lib/widgets/skyve_network_image.dart", substitutions);
 		refreshFile("lib/widgets/skyve_spacer.dart", "lib/widgets/skyve_spacer.dart", substitutions);
 		refreshFile("lib/widgets/skyve_tab.dart", "lib/widgets/skyve_tab.dart", substitutions);
 		refreshFile("lib/widgets/skyve_tabpane.dart", "lib/widgets/skyve_tabpane.dart", substitutions);

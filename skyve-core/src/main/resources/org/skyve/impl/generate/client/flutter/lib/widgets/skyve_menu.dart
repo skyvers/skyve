@@ -1,4 +1,5 @@
 import 'package:##PROJECT##/main.dart';
+import 'package:##PROJECT##/widgets/skyve_network_image.dart';
 import 'package:flutter/material.dart';
 
 class SkyveMenu extends StatelessWidget {
@@ -12,13 +13,13 @@ class SkyveMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-
+    WidgetsFlutterBinding.ensureInitialized();
     final DrawerHeader header = DrawerHeader(
-        decoration: BoxDecoration(
-          color: theme.primaryColor,
-        ),
-        child:
-            Image.asset('customer_image.png', height: 100, fit: BoxFit.cover));
+      decoration: BoxDecoration(
+        color: theme.primaryColor,
+      ),
+      child: const SkvyeNetworkImage(),
+    );
     final List<Widget> list = List.filled(1, header, growable: true);
 
     for (SkyveMenuData item in menu) {
