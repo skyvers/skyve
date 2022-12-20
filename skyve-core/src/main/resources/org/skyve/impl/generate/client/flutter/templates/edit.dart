@@ -30,10 +30,10 @@ class _##CLASS##State extends State<##CLASS##> {
             visible: (_bean['bizId'] != null),
             replacement: const Center(child: CircularProgressIndicator()),
             child: SingleChildScrollView(
-                child: Column(
-                    children: [
-                        ##DART##
-                    ]))));
+              child: ##DART##
+            )
+        )
+    );
   }
 
   void _load(String? bizId) async {

@@ -70,7 +70,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		imports.add(FlutterLayoutRenderer.VBOX_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
-		output.append("Wrap(children: [");
+		output.append("Column(children: [");
 		return result;
 	}
 
@@ -113,8 +113,8 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		if (title != null) {
 			output.append("title: '").append(title).append("', ");
 		}
-		output.append("children: [");
-		result.setAfter("]),");
+		output.append("child: ");
+		result.setAfter("),");
 		return result;
 	}
 
