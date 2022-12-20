@@ -178,13 +178,14 @@ public class SpringSecurityConfig {
 	
 	@Bean
 	public UserDetailsManager userDetailsManager() {
-		return skyve.jdbcUserDetailsManager();
+		return (UserDetailsManager) skyve.jdbcUserDetailsService();
 	}
 	
  	@Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();
     }
+
 }
 /*
     <!-- WAFFLE Configuration -->

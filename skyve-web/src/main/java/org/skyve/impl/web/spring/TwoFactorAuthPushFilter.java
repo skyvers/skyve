@@ -13,8 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.EXT;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.util.TFAConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.AuthenticationException;
@@ -72,8 +75,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 		
 		String customerName = obtainCustomer(request);
-		if (customerName == null) {
-			customerName = UtilImpl.CUSTOMER;
+		
+		if (!UtilImpl.TFA_CUSTOMER.contains(customerName)) {
+			return true;
 		}
 		
 		// No customer given or set in JSON
@@ -90,14 +94,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		if (! requiresAuthentication(request, response)) {
 			return true;
 		}
-		
-		// No customer config
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customerName);
-		if (config == null) {
-			return true;
-		}
-		
-		return (! SkyveSpringSecurity.isTFAPush(config));
+				
+		return !TFAConfigurationSingleton.getInstance().isPushTfa(customerName);
 	}
 
 	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
@@ -114,7 +112,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		// if it gets to here, there is no two factor token.
 		// take the opportunity in this method to clear the old TFA details if they exist;
-		if (customerRequiresTFAPushNotification() ) {
+		if ( TFAConfigurationSingleton.getInstance().getConfig(obtainCustomer(request)).isTfaEmail()) {
 			boolean stopSecFilterChain = doPushNotificationProcess(request, response);
 			
 			if (! stopSecFilterChain) {
@@ -263,7 +261,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	@SuppressWarnings("static-method")
 	protected String obtainCustomer(HttpServletRequest request) {
-		return UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
+		String customerName = UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
+		if (customerName == null) {
+			customerName = UtilImpl.CUSTOMER;
+		}
+		
+		return customerName;
 	}
 	
 	/**
@@ -291,18 +294,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		if (userDetails instanceof UserTFA) {
 			return (UserTFA) userDetails;
 		}
-		Exception e = new Exception("Two Factor Authentication expects the user details service : skyve.jdbcUserDetailsService()");
-		e.printStackTrace();
-		return null;
+		throw new DomainException("Two Factor Authentication expects the user details service : skyve.jdbcUserDetailsService()");
 	}
 	
 	protected void updateUserTFADetails(UserTFA user) {
 		userDetailsManager.updateUser(user);
-	}
-	
-	@SuppressWarnings("static-method")
-	protected boolean customerRequiresTFAPushNotification() {
-		return true;
 	}
 	
 	@SuppressWarnings("static-method")
@@ -355,8 +351,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return currentTime > (generatedTime + expiryMillis);
 	}
 	
-	private static long getTwoFactorTimeoutMillis(String customer) {
-		TwoFactorCustomerConfiguration config = SkyveSpringSecurity.getCustomerTFAConfig(customer);
+	private long getTwoFactorTimeoutMillis(String customer) {
+		TwoFactorCustomerConfiguration config = TFAConfigurationSingleton.getInstance().getConfig(customer);
 		int timeoutSeconds = config.getTfaTimeOutSeconds();
 		return timeoutSeconds * 1000;
 	}

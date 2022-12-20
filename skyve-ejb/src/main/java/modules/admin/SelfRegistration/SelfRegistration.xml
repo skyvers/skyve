@@ -11,6 +11,11 @@
             <displayName>admin.selfRegistration.activateUrl.displayName</displayName>
             <length>2083</length>
         </text>
+        <text name="confirmEmail">
+			<displayName>admin.selfRegistration.confirmEmail.displayName</displayName>
+			<length>500</length>
+			<validator type="email" />
+		</text>
         <text name="confirmPassword" persistent="false" audited="false" trackChanges="true">
             <documentation>Confirm password checked during user registration to bypass change password
                 validation in the UserBizlet.</documentation>
@@ -37,6 +42,14 @@
         </association>
     </attributes>
     <conditions>
+    	<condition name="confirmEmailInvalid" usage="view">
+    		<description>True if the entered confirm email address is invalid (does not conform to the regular expression).</description>
+    		<expression>((SelfRegistrationExtension)this).confirmEmailInvalid()</expression>
+    	</condition>
+    	<condition name="emailInvalid" usage="view">
+    		<description>True if the entered email address is invalid (does not conform to the regular expression).</description>
+    		<expression>((SelfRegistrationExtension)this).emailInvalid()</expression>
+    	</condition>	
         <condition name="registrationComplete">
             <description>Whether or not the registration process has finished.</description>
             <expression><![CDATA[getUser() != null && getUser().isPersisted()]]></expression>
