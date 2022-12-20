@@ -89,7 +89,7 @@
 				</row>
 				<row>
 					<item showLabel="true" colspan="4">
-						<html binding="body" pixelHeight="300" pixelWidth="800" />
+						<html binding="body" pixelHeight="300" pixelWidth="800" sanitise="none" />
 					</item>
 				</row>
 				<row>
