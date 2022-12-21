@@ -73,6 +73,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												FormItem currentFormItem,
 												FormColumn currentFormColumn,
 												String widgetLabel,
+												int widgetColspan,
 												boolean widgetRequired,
 												String widgetInvisible,
 												String widgetHelpText);

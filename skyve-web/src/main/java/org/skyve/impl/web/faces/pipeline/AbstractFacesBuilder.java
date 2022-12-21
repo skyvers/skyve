@@ -304,16 +304,16 @@ public abstract class AbstractFacesBuilder {
 								Integer pixelWidth, 
 								Integer responsiveWidth,
 								Integer percentageWidth,
-								Integer colspan, 
-								Integer rowspan) {
+								int colspan, 
+								int rowspan) {
 		Column result = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		setInvisible(result, invisible, null);
 		setId(result, null);
-		if (colspan != null) {
-			result.setColspan(colspan.intValue());
+		if (colspan > 1) {
+			result.setColspan(colspan);
 		}
-		if (rowspan != null) {
-			result.setRowspan(rowspan.intValue());
+		if (rowspan > 1) {
+			result.setRowspan(rowspan);
 		}
 
 		String existingStyle = noWrap ? 

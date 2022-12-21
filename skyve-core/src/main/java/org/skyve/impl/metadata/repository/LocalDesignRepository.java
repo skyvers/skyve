@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.repository;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.skyve.impl.bind.BindUtil;
@@ -156,9 +157,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 			throw new MetaDataException("Home Module reference does not reference a module in customer " + customer.getName(), e);
 		}
 
-		for (String moduleName : ((CustomerImpl) customer).getModuleNames()) {
+		// NB Module entry names (keys) are in defined order
+		for (Entry<String, ViewLayout> moduleEntry : ((CustomerImpl) customer).getModuleEntries().entrySet()) {
+			String moduleName = moduleEntry.getKey();
+			ViewLayout layout = moduleEntry.getValue();
+
+			Module module = null;
 			try {
-				if (getModule(customer, moduleName) == null) {
+				module = getModule(customer, moduleName);
+				if (module == null) {
 					throw new MetaDataException("Repository returned null for " + moduleName + 
 													" for customer " + customer.getName());
 				}
@@ -166,6 +173,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 			catch (MetaDataException e) {
 				throw new MetaDataException("Module reference " + moduleName + 
 												" does not reference a module in customer " + customer.getName(), e);
+			}
+
+			// Catch where we can't convert from top defined to side rendered
+			// NB null = side (the default)
+			if ((layout != ViewLayout.top) && (module.getViewLayout() == ViewLayout.top)) {
+				throw new MetaDataException("Module reference " + moduleName + " for customer " + customer.getName() +
+												" has a layout of side but the module is defined with a layout of top and cannot be converted");
 			}
 		}
 		

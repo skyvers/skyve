@@ -156,6 +156,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										int formWidgetLabel,
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {

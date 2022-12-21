@@ -238,6 +238,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {
@@ -248,6 +249,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 											currentFormItem,
 											currentFormColumn,
 											widgetLabel,
+											widgetColspan,
 											widgetRequired,
 											widgetInvisible,
 											widgetHelpText);

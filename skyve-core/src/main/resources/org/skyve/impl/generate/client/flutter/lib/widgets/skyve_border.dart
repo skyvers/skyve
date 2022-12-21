@@ -6,6 +6,6 @@ class SkyveBorder extends Card {
             key: key,
             child: (title == null)
                 ? child
-                : Column(children: [ListTile(title: Text(title!)), child!]),
+                : Column(children: [ListTile(title: Text(title)), child!]),
             margin: const EdgeInsets.all(8.0));
 }

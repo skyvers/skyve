@@ -161,6 +161,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										int formColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {

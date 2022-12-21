@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.metadata.MetaDataException;
@@ -48,6 +49,8 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	private String title;
 	
 	private boolean prototype;
+	
+	private ViewLayout viewLayout;
 	
 	private Map<String, DocumentRef> documentRefs = new TreeMap<>();
 
@@ -120,6 +123,15 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	public void setPrototype(boolean prototype) {
 		this.prototype = prototype;
+	}
+
+	@Override
+	public ViewLayout getViewLayout() {
+		return viewLayout;
+	}
+
+	public void setViewLayout(ViewLayout viewLayout) {
+		this.viewLayout = viewLayout;
 	}
 
 	@Override

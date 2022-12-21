@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/module" xmlns:tns="http://www.skyve.org/xml/module" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/common" xmlns:ns1="http://www.skyve.org/xml/view">
-
-  <xs:import namespace="http://www.skyve.org/xml/view" schemaLocation="view.xsd"/>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/module" xmlns:tns="http://www.skyve.org/xml/module" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
+
+  <xs:import namespace="http://www.skyve.org/xml/view" schemaLocation="view.xsd"/>
 
   <xs:element name="bizQL" type="tns:bizQL"/>
 
@@ -45,10 +45,10 @@
 
   <xs:complexType name="module">
     <xs:complexContent>
-      <xs:extension base="ns2:namedMetaData">
+      <xs:extension base="ns1:namedMetaData">
         <xs:sequence>
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="homeRef" type="ns1:viewType" form="qualified" minOccurs="0"/>
+          <xs:element name="homeRef" type="ns2:viewType" form="qualified" minOccurs="0"/>
           <xs:element name="homeDocument" type="xs:string" form="qualified"/>
           <xs:element name="jobs" form="qualified" minOccurs="0">
             <xs:complexType>
@@ -86,13 +86,14 @@
         </xs:sequence>
         <xs:attribute name="title" type="xs:string" use="required"/>
         <xs:attribute name="prototype" type="xs:boolean"/>
+        <xs:attribute name="viewLayout" type="ns1:viewLayout"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="job">
     <xs:complexContent>
-      <xs:extension base="ns2:namedMetaData">
+      <xs:extension base="ns1:namedMetaData">
         <xs:sequence/>
         <xs:attribute name="displayName" type="xs:string" use="required"/>
         <xs:attribute name="className" type="xs:string" use="required"/>
@@ -110,7 +111,7 @@
 
   <xs:complexType name="role">
     <xs:complexContent>
-      <xs:extension base="ns2:namedMetaData">
+      <xs:extension base="ns1:namedMetaData">
         <xs:sequence>
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="description" type="xs:string" form="qualified"/>
@@ -193,7 +194,7 @@
 
   <xs:complexType name="moduleRoleUserAccessUxUiMetadata">
     <xs:complexContent>
-      <xs:extension base="ns2:namedMetaData">
+      <xs:extension base="ns1:namedMetaData">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
@@ -253,7 +254,7 @@
 
   <xs:complexType name="actionMetaData">
     <xs:complexContent>
-      <xs:extension base="ns2:namedMetaData">
+      <xs:extension base="ns1:namedMetaData">
         <xs:sequence>
           <xs:element name="uxui" type="tns:applicableTo" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
@@ -384,7 +385,7 @@
 
   <xs:complexType name="abstractQuery" abstract="true">
     <xs:complexContent>
-      <xs:extension base="ns2:namedMetaData">
+      <xs:extension base="ns1:namedMetaData">
         <xs:sequence>
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="description" type="xs:string" form="qualified"/>
@@ -405,7 +406,7 @@
         <xs:attribute name="filterable" type="xs:boolean"/>
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="escape" type="xs:boolean"/>
-        <xs:attribute name="sanitise" type="ns1:sanitisation"/>
+        <xs:attribute name="sanitise" type="ns2:sanitisation"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -413,15 +414,15 @@
   <xs:complexType name="metaDataQueryColumnMetaData" abstract="true">
     <xs:sequence>
       <xs:element name="name" type="xs:string" form="qualified" minOccurs="0"/>
-      <xs:element name="filterOperator" type="ns2:filterOperator" form="qualified" minOccurs="0"/>
+      <xs:element name="filterOperator" type="ns1:filterOperator" form="qualified" minOccurs="0"/>
       <xs:element name="filterExpression" type="xs:string" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="binding" type="xs:string"/>
     <xs:attribute name="displayName" type="xs:string"/>
-    <xs:attribute name="sortOrder" type="ns2:sortDirection"/>
+    <xs:attribute name="sortOrder" type="ns1:sortDirection"/>
     <xs:attribute name="hidden" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
-    <xs:attribute name="alignment" type="ns1:horizontalAlignment"/>
+    <xs:attribute name="alignment" type="ns2:horizontalAlignment"/>
   </xs:complexType>
 
   <xs:complexType name="metaDataQueryContentColumnMetaData">

@@ -31,6 +31,7 @@ import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -52,6 +53,7 @@ import org.skyve.metadata.view.View.ViewType;
 			name = "module",
 			propOrder = {"title",
 							"prototype",
+							"viewLayout",
 							"documentation", 
 							"homeRef",
 							"homeDocument",
@@ -65,6 +67,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 
 	private String title;
 	private Boolean prototype;
+	private ViewLayout viewLayout;
 	private ViewType homeRef;
 	private String homeDocument;
 	private List<JobMetaDataImpl> jobs = new ArrayList<>();
@@ -95,6 +98,15 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 
 	public String getHomeDocument() {
 		return homeDocument;
+	}
+
+	@XmlAttribute
+	public void setViewLayout(ViewLayout viewLayout) {
+		this.viewLayout = viewLayout;
+	}
+
+	public ViewLayout getViewLayout() {
+		return viewLayout;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
@@ -184,6 +196,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 		result.setTitle(value);
 
 		result.setPrototype(Boolean.TRUE.equals(prototype));
+		
+		result.setViewLayout(getViewLayout());
 		
 		result.setDocumentation(documentation);
 		

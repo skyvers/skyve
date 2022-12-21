@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Download;
@@ -104,7 +105,7 @@ public class CustomerImpl implements Customer {
 	private Converter<TimeOnly> defaultTimeConverter;
 	private Converter<DateTime> defaultDateTimeConverter;
 	private Converter<Timestamp> defaultTimestampConverter;
-	private List<String> moduleNames = new ArrayList<>();
+	private LinkedHashMap<String, ViewLayout> moduleEntries = new LinkedHashMap<>();
 	private String homeModuleName;
 	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
 	private boolean allowModuleRoles = true;
@@ -237,8 +238,8 @@ public class CustomerImpl implements Customer {
 		return defaultActions;
 	}
 
-	public List<String> getModuleNames() {
-		return moduleNames;
+	public Map<String, ViewLayout> getModuleEntries() {
+		return moduleEntries;
 	}
 
 	@Override
@@ -253,9 +254,10 @@ public class CustomerImpl implements Customer {
 
 	@Override
 	public List<Module> getModules() {
-		List<Module> result = new ArrayList<>(moduleNames.size());
+		List<Module> result = new ArrayList<>(moduleEntries.size());
 
-		for (String moduleName : moduleNames) {
+		// NB Keys are in insertion order
+		for (String moduleName : moduleEntries.keySet()) {
 			result.add(getModule(moduleName));
 		}
 

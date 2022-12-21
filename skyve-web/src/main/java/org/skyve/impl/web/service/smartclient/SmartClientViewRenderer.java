@@ -138,7 +138,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 										View view,
 										String uxui,
 										boolean noCreateView) {
-		super(user, module, document, view, uxui);
+		super(user, module, document, view, uxui, false);
 		this.noCreateView = noCreateView;
 	}
 
@@ -403,6 +403,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		formVariable = "v" + variableCounter++;
 		code.append("var ").append(formVariable);
 		code.append("=isc.DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
+		// Render form with top labels if required (increase cell padding somewhat to accommodate
+		if (isRenderTopLabels()) {
+			code.append("titleOrientation:'top',cellPadding:5,");
+		}
 		// SC docs says that autoFocus will focus in first focusable item
 		// in the form when it is drawn.
 		// Don't use autoFocus as we have multiple dynamic forms that can be declared
@@ -485,16 +489,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 								boolean required,
 								String help,
 								boolean showLabel,
+								int colspan,
 								FormItem item) {
 		code.append("{showTitle:").append(showLabel).append(',');
 		// label handled in preProcessFormItem()
-		Integer span = item.getColspan();
-		if (span != null) {
-			code.append("colSpan:").append(span).append(',');
+		if (colspan >= 1) {
+			code.append("colSpan:").append(colspan).append(',');
 		}
-		span = item.getRowspan();
-		if (span != null) {
-			code.append("rowSpan:").append(span).append(',');
+		Integer rowspan = item.getRowspan();
+		if (rowspan != null) {
+			code.append("rowSpan:").append(rowspan).append(',');
 		}
 		HorizontalAlignment horizontalAlignment = item.getHorizontalAlignment();
 		if (horizontalAlignment != null) {
@@ -514,6 +518,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									boolean required,
 									String help,
 									boolean showLabel,
+									int colspan,
 									FormItem item) {
 		if (startedNewFormRow) {
 			code.append("startRow:true},");
@@ -524,17 +529,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		
 		// Move along the requisite amount of form columns
-		if (showLabel) {
+		if (showLabel && (! isRenderTopLabels())) {
 			incrementFormColumn();
 		}
-		Integer colspan = item.getColspan();
-		if (colspan == null) { // defaults to 1
+		for (int i = 0, l = colspan; i < l; i++) {
 			incrementFormColumn();
-		}
-		else {
-			for (int i = 0, l = colspan.intValue(); i < l; i++) {
-				incrementFormColumn();
-			}
 		}
 	}
 

@@ -114,6 +114,7 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {

@@ -160,6 +160,7 @@ public class ReactNativeLayoutRenderer extends LayoutRenderer {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										int formWidgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {

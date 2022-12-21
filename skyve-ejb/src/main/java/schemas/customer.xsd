@@ -68,6 +68,7 @@
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence/>
+        <xs:attribute name="viewLayout" type="ns1:viewLayout"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

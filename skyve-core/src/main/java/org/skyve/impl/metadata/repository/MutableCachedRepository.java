@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
@@ -56,7 +57,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		}
 		else {
 			// Clear any customer overrides and any modules the customer has access to.
-			List<String> moduleNames = ((CustomerImpl) customer).getModuleNames();
+			// NB moduleNames set is in insertion order
+			Set<String> moduleNames = ((CustomerImpl) customer).getModuleEntries().keySet();
 			List<String> modulePrefixes = new ArrayList<>(moduleNames.size());
 			for (String moduleName : moduleNames) {
 				modulePrefixes.add(MODULES_NAMESPACE + moduleName);
@@ -159,7 +161,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	public Module getModule(Customer customer, String moduleName) {
 		Module result = null;
 		if (customer != null) {
-			if (! ((CustomerImpl) customer).getModuleNames().contains(moduleName)) {
+			if (! ((CustomerImpl) customer).getModuleEntries().containsKey(moduleName)) {
 				throw new MetaDataException("Module " + moduleName + " does not exist for customer " + customer.getName());
 			}
 			// get customer overridden

@@ -193,7 +193,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								String widgetId,
 								ComponentBuilder cb,
 								LayoutBuilder lb) {
-		super(user, module, document, view, uxui);
+		super(user, module, document, view, uxui, true);
 		String viewName = view.getName();
 		createView = ViewType.create.toString().equals(viewName);
 		this.widgetId = widgetId;
@@ -530,6 +530,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								boolean required,
 								String help,
 								boolean showLabel,
+								int colspan,
 								FormItem item) {
 		// nothing to do here
 	}
@@ -539,6 +540,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									boolean required,
 									String help,
 									boolean showLabel,
+									int colspan,
 									FormItem item) {
 		// nothing to do here
 	}
@@ -552,6 +554,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private void addComponent(String widgetLabel,
+								int formColspan,
 								boolean widgetRequired,
 								String widgetInvisible,
 								String helpText,
@@ -620,17 +623,12 @@ public class FacesViewRenderer extends ViewRenderer {
 											formItem, 
 											formColumn,
 											widgetLabel,
+											formColspan,
 											widgetRequired,
 											widgetInvisible,
 											helpText);
-				Integer colspan = formItem.getColspan();
-				if (colspan == null) {
+				for (int i = 0, l = formColspan; i< l; i++) {
 					incrementFormColumn();
-				}
-				else {
-					for (int i = 0, l = colspan.intValue(); i< l; i++) {
-						incrementFormColumn();
-					}
 				}
 			}
 		}
@@ -648,6 +646,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		Form currentForm = getCurrentForm();
 		renderButton(action,
 						label,
+						getCurrentWidgetColspan(),
 						iconStyleClass,
 						toolTip,
 						confirmationText,
@@ -664,11 +663,12 @@ public class FacesViewRenderer extends ViewRenderer {
 								String confirmationText,
 								char type,
 								Button button) {
-		renderButton(action, label, iconStyleClass, toolTip, confirmationText, button, null);
+		renderButton(action, label, 0, iconStyleClass, toolTip, confirmationText, button, null);
 	}
 	
 	private void renderButton(Action action,
 								String label,
+								int formColspan,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
@@ -720,7 +720,8 @@ public class FacesViewRenderer extends ViewRenderer {
 									formDisabledConditionName,
 									action);
 		}
-	    addComponent(null, 
+	    addComponent(null,
+	    				formColspan,
 	    				false, 
 	    				action.getInvisibleConditionName(), 
 	    				null,
@@ -742,7 +743,12 @@ public class FacesViewRenderer extends ViewRenderer {
 									ZoomIn zoomIn) {
 		Form currentForm = getCurrentForm();
 		String formDisabledConditionName = (currentForm == null) ? null : currentForm.getDisabledConditionName();
-		renderZoomIn(label, iconStyleClass, toolTip, zoomIn, formDisabledConditionName);
+		renderZoomIn(label,
+						getCurrentWidgetColspan(),
+						iconStyleClass,
+						toolTip,
+						zoomIn,
+						formDisabledConditionName);
 	}
 
 	@Override
@@ -751,10 +757,11 @@ public class FacesViewRenderer extends ViewRenderer {
 								String iconStyleClass,
 								String toolTip,
 								ZoomIn zoomIn) {
-		renderZoomIn(label, iconStyleClass, toolTip, zoomIn, null);
+		renderZoomIn(label, 0, iconStyleClass, toolTip, zoomIn, null);
 	}
 	
 	protected void renderZoomIn(String label,
+									int formColspan,
 									String iconStyleClass,
 									String toolTip,
 									ZoomIn zoomIn,
@@ -766,6 +773,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									zoomIn,
 									formDisabledConditionName);
 		addComponent(null, 
+						formColspan,
 						false, 
 						zoomIn.getInvisibleConditionName(), 
 						null,
@@ -784,6 +792,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderMap(MapDisplay map) {
 	    UIComponent l = cb.map(null, map, map.getModelName());
 	    addComponent(null, 
+	    				0,
 	    				false, 
 	    				map.getInvisibleConditionName(), 
 	    				null,
@@ -801,6 +810,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderChart(Chart chart) {
 	    UIComponent l = cb.chart(null, chart);
 	    addComponent(null, 
+	    				0,
 	    				false, 
 	    				chart.getInvisibleConditionName(), 
 	    				null,
@@ -816,11 +826,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnGeometry(Geometry geometry) {
-		renderFormGeometry(geometry);
+		renderGeometry(0, geometry);
 	}
 
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
+		renderGeometry(getCurrentWidgetColspan(), geometry);
+	}
+	
+	private void renderGeometry(int formColspan, Geometry geometry) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -832,6 +846,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												required);
 		eventSource = c.getEventSource();
         addComponent(title, 
+        				formColspan,
         				false, 
         				geometry.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -867,6 +882,7 @@ public class FacesViewRenderer extends ViewRenderer {
 													required);
 		eventSource = c.getEventSource();
 		addComponent(title, 
+						getCurrentWidgetColspan(),
         				false, 
         				geometry.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -887,13 +903,18 @@ public class FacesViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderFormDialogButton(String label, DialogButton button) {
-		renderDialogButton(label, button);
+		renderDialogButton(label, getCurrentWidgetColspan(), button);
 	}
 
 	@Override
 	public void renderDialogButton(String label, DialogButton button) {
-	    UIComponent bn = cb.label(null, "dialogButton"); // TODO dialog button
+		renderDialogButton(label, 0, button);
+	}
+
+	private void renderDialogButton(String label, int formColspan, DialogButton button) {
+		UIComponent bn = cb.label(null, "dialogButton"); // TODO dialog button
 	    addComponent(null, 
+	    				formColspan,
 	    				false, 
 	    				button.getInvisibleConditionName(), 
 	    				null,
@@ -909,14 +930,19 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormSpacer(Spacer spacer) {
-		renderSpacer(spacer);
+		renderSpacer(getCurrentWidgetColspan(), spacer);
 	}
 
 	@Override
 	public void renderSpacer(Spacer spacer) {
+		renderSpacer(0, spacer);
+	}
+	
+	private void renderSpacer(int formColspan, Spacer spacer) {
 		UIComponent component = cb.spacer(null, spacer);
 		if (component != null) {
 			addComponent(null, 
+							formColspan,
 							false, 
 							spacer.getInvisibleConditionName(), 
 							null,
@@ -933,13 +959,18 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormStaticImage(String fileUrl, StaticImage image) {
-		renderStaticImage(fileUrl, image);
+		renderStaticImage(fileUrl, getCurrentWidgetColspan(), image);
 	}
 
 	@Override
 	public void renderStaticImage(String fileUrl, StaticImage image) {
+		renderStaticImage(fileUrl, 0, image);
+	}
+	
+	private void renderStaticImage(String fileUrl, int formColspan, StaticImage image) {
 		UIComponent i = cb.staticImage(null, fileUrl, image);
 		addComponent(null, 
+						formColspan,
 						false, 
 						image.getInvisibleConditionName(), 
 						null,
@@ -966,7 +997,8 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderDynamicImage(DynamicImage image) {
 		UIComponent i = cb.dynamicImage(null, image, module.getName(), document.getName());
-		addComponent(null, 
+		addComponent(null,
+						0,
 						false, 
 						image.getInvisibleConditionName(), 
 						null,
@@ -982,16 +1014,20 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormLink(String value, Link link) {
-		renderLink(value, link);
+		renderLink(value, getCurrentWidgetColspan(), link);
 	}
 
 	@Override
 	public void renderContainerColumnLink(String value, Link link) {
-		renderLink(value, link);
+		renderLink(value, 0, link);
 	}
 
 	@Override
 	public void renderLink(String value, Link link) {
+		renderLink(value, 0, link);
+	}
+	
+	private void renderLink(String value, int formColspan, Link link) {
 		org.skyve.impl.metadata.view.reference.Reference outerReference = link.getReference();
 		final ReferenceTarget target = link.getTarget();
 		final AtomicReference<UIComponent> c = new AtomicReference<>();
@@ -1058,6 +1094,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		UIComponent component = c.get();
 		if (component != null) {
 			addComponent(null, 
+							formColspan,
 							false, 
 							link.getInvisibleConditionName(), 
 							null,
@@ -1074,16 +1111,20 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormBlurb(String markup, Blurb blurb) {
-		renderBlurb(markup, blurb);
+		renderBlurb(markup, getCurrentWidgetColspan(), blurb);
 	}
 
 	@Override
 	public void renderContainerColumnBlurb(String markup, Blurb blurb) {
-		renderBlurb(markup, blurb);
+		renderBlurb(markup, 0, blurb);
 	}
 
 	@Override
 	public void renderBlurb(String markup, Blurb blurb) {
+		renderBlurb(markup, 0, blurb);
+	}
+	
+	private void renderBlurb(String markup, int formColspan, Blurb blurb) {
 		String value = null;
 		String binding = null;
 		if (markup.indexOf('{') > -1) {
@@ -1093,7 +1134,8 @@ public class FacesViewRenderer extends ViewRenderer {
 			value = markup;
 		}
 		UIComponent c = cb.blurb(null, dataWidgetVar, value, binding, blurb);
-		addComponent(null, 
+		addComponent(null,
+						formColspan,
 						false, 
 						blurb.getInvisibleConditionName(), 
 						null,
@@ -1109,16 +1151,20 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormLabel(String value, Label label) {
-		renderLabel(value, label);
+		renderLabel(value, getCurrentWidgetColspan(), label);
 	}
 
 	@Override
 	public void renderContainerColumnLabel(String value, Label label) {
-		renderLabel(value, label);
+		renderLabel(value, 0, label);
 	}
 
 	@Override
 	public void renderLabel(String value, Label label) {
+		renderLabel(value, 0, label);
+	}
+	
+	private void renderLabel(String value, int formColspan, Label label) {
 		String ultimateValue = label.getLocalisedValue();
 		String binding = label.getBinding();
 		if ((ultimateValue == null) && (binding == null)) { // using the Label.for attribute
@@ -1140,6 +1186,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 	    UIComponent c = cb.label(null, dataWidgetVar, ultimateValue, binding, label);
 	    addComponent(null, 
+	    				formColspan,
 	    				false, 
 	    				label.getInvisibleConditionName(), 
 	    				null,
@@ -1157,6 +1204,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderFormProgressBar(ProgressBar progressBar) {
 	    UIComponent p = cb.label(null, "progressBar"); // TODO progress bar
 	    addComponent(null, 
+	    				getCurrentWidgetColspan(),
 	    				false, 
 	    				progressBar.getInvisibleConditionName(), 
 	    				null,
@@ -1466,11 +1514,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnCheckBox(CheckBox checkBox) {
-		renderFormCheckBox(checkBox);
+		renderCheckBox(0, checkBox);
 	}
 
 	@Override
 	public void renderFormCheckBox(CheckBox checkBox) {
+		renderCheckBox(getCurrentWidgetColspan(), checkBox);
+	}
+	
+	private void renderCheckBox(int formColspan, CheckBox checkBox) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1482,6 +1534,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												required);
 		eventSource = c.getEventSource();
 		addComponent(title,
+						formColspan,
 						required,
 						checkBox.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
@@ -1520,11 +1573,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnColourPicker(ColourPicker colour) {
-		renderFormColourPicker(colour);
+		renderColourPicker(0, colour);
 	}
 
 	@Override
 	public void renderFormColourPicker(ColourPicker colour) {
+		renderColourPicker(getCurrentWidgetColspan(), colour);
+	}
+	
+	private void renderColourPicker(int formColspan, ColourPicker colour) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1536,6 +1593,7 @@ public class FacesViewRenderer extends ViewRenderer {
 													required);
 		eventSource = c.getEventSource();
 		addComponent(title, 
+						formColspan,
 						required, 
 						colour.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
@@ -1561,11 +1619,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnCombo(Combo combo) {
-		renderFormCombo(combo);
+		renderCombo(0, combo);
 	}
 
 	@Override
 	public void renderFormCombo(Combo combo) {
+		renderCombo(getCurrentWidgetColspan(), combo);
+	}
+	
+	private void renderCombo(int formColspan, Combo combo) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1577,6 +1639,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											required);
 		eventSource = c.getEventSource();
 		addComponent(title, 
+						formColspan,
 						required, 
 						combo.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
@@ -1602,16 +1665,20 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnContentImage(ContentImage image) {
-		renderFormContentImage(image);
+		renderContentImage(0, image);
 	}
 
 	@Override
 	public void renderContainerColumnContentImage(ContentImage image) {
-		renderFormContentImage(image);
+		renderContentImage(0, image);
 	}
 
 	@Override
 	public void renderFormContentImage(ContentImage image) {
+		renderContentImage(getCurrentWidgetColspan(), image);
+	}
+	
+	private void renderContentImage(int formColspan, ContentImage image) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1622,6 +1689,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											title,
 											required);
         addComponent(title, 
+        				formColspan,
         				false, 
         				image.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -1637,11 +1705,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnContentLink(String value, ContentLink link) {
-		renderFormContentLink(value, link);
+		renderContentLink(value, 0, link);
 	}
 
 	@Override
 	public void renderFormContentLink(String value, ContentLink link) {
+		renderContentLink(value, getCurrentWidgetColspan(), link);
+	}
+	
+	private void renderContentLink(String value, int formColspan, ContentLink link) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1652,6 +1724,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										title,
 										required);
 		addComponent(title, 
+						formColspan,
 						required, 
 						link.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
@@ -1672,7 +1745,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		Form currentForm = getCurrentForm();
 		UIComponent c = lb.contentSignatureLayout(null, signature);
         addComponent(title, 
-        				false, 
+        			getCurrentWidgetColspan(),
+       				false, 
         				signature.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
         				c, 
@@ -1693,11 +1767,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnHTML(HTML html) {
-		renderFormHTML(html);
+		renderHTML(0, html);
 	}
 
 	@Override
 	public void renderFormHTML(HTML html) {
+		renderHTML(getCurrentWidgetColspan(), html);
+	}
+
+	private void renderHTML(int formColspan, HTML html) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1708,6 +1786,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									title,
 									required);
         addComponent(title, 
+        				formColspan,
         				required, 
         				html.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -1764,7 +1843,7 @@ public class FacesViewRenderer extends ViewRenderer {
 													boolean canUpdate,
 													String descriptionBinding,
 													LookupDescription lookup) {
-		renderFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
+		renderLookupDescription(query, 0, canCreate, canUpdate, descriptionBinding, lookup);
 	}
 
 	@Override
@@ -1773,6 +1852,20 @@ public class FacesViewRenderer extends ViewRenderer {
 												boolean canUpdate,
 												String descriptionBinding,
 												LookupDescription lookup) {
+		renderLookupDescription(query,
+									getCurrentWidgetColspan(),
+									canCreate,
+									canUpdate,
+									descriptionBinding,
+									lookup);
+	}
+	
+	public void renderLookupDescription(MetaDataQueryDefinition query,
+											int formColspan,
+											boolean canCreate,
+											boolean canUpdate,
+											String descriptionBinding,
+											LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1786,6 +1879,7 @@ public class FacesViewRenderer extends ViewRenderer {
 														query);
         eventSource = c.getEventSource();
         addComponent(title, 
+        				formColspan,
         				required, 
         				lookup.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -1819,11 +1913,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnPassword(Password password) {
-		renderFormPassword(password);
+		renderPassword(0, password);
 	}
 
 	@Override
 	public void renderFormPassword(Password password) {
+		renderPassword(getCurrentWidgetColspan(), password);
+	}
+
+	private void renderPassword(int formColspan, Password password) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1835,6 +1933,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												required);
         eventSource = c.getEventSource();
         addComponent(title, 
+        				formColspan,
         				required, 
         				password.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -1860,11 +1959,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnRadio(Radio radio) {
-		renderFormRadio(radio);
+		renderRadio(0, radio);
 	}
 
 	@Override
 	public void renderFormRadio(Radio radio) {
+		renderRadio(getCurrentWidgetColspan(), radio);
+	}
+	
+	private void renderRadio(int formColspan, Radio radio) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1876,6 +1979,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											required);
 		eventSource = c.getEventSource();
 		addComponent(title, 
+						formColspan,
 						required, 
 						radio.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),
@@ -1901,11 +2005,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnRichText(RichText text) {
-		renderFormRichText(text);
+		renderRichText(0, text);
 	}
 
 	@Override
 	public void renderFormRichText(RichText text) {
+		renderRichText(getCurrentWidgetColspan(), text);
+	}
+	
+	private void renderRichText(int formColspan, RichText text) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
@@ -1917,6 +2025,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												required);
         eventSource = c.getEventSource();
         addComponent(title, 
+        				formColspan,
         				required, 
         				text.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -1942,16 +2051,21 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnSlider(Slider slider) {
-		renderFormSlider(slider);		
+		renderSlider(0, slider);		
 	}
 
 	@Override
 	public void renderFormSlider(Slider slider) {
+		renderSlider(getCurrentWidgetColspan(), slider);		
+	}
+
+	private void renderSlider(int formColspan, Slider slider) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		UIComponentBase c = (UIComponentBase) cb.label(null, "slider"); // TODO slider
         eventSource = c;
         addComponent(title, 
+        				formColspan,
         				required, 
         				slider.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -1977,11 +2091,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnSpinner(Spinner spinner) {
-		renderFormSpinner(spinner);
+		renderSpinner(0, spinner);
 	}
 
 	@Override
 	public void renderFormSpinner(Spinner spinner) {
+		renderSpinner(getCurrentWidgetColspan(), spinner);
+	}
+	
+	private void renderSpinner(int formColspan, Spinner spinner) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
@@ -2002,6 +2120,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												convertConverter(converter, type));
         eventSource = c.getEventSource();
         addComponent(title, 
+        				formColspan,
         				required, 
         				spinner.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -2027,11 +2146,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnTextArea(TextArea text) {
-		renderFormTextArea(text);
+		renderTextArea(0, text);
 	}
 
 	@Override
 	public void renderFormTextArea(TextArea text) {
+		renderTextArea(getCurrentWidgetColspan(), text);
+	}
+	
+	private void renderTextArea(int formColspan, TextArea text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		Integer length = null;
@@ -2051,6 +2174,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												length);
         eventSource = c.getEventSource();
         addComponent(title, 
+        				formColspan,
         				required, 
         				text.getInvisibleConditionName(), 
         				getCurrentWidgetHelp(),
@@ -2076,11 +2200,15 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnTextField(TextField text) {
-		renderFormTextField(text);
+		renderTextField(0, text);
 	}
 
 	@Override
 	public void renderFormTextField(TextField text) {
+		renderTextField(getCurrentWidgetColspan(), text);
+	}
+	
+	private void renderTextField(int formColspan, TextField text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
@@ -2130,6 +2258,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											convertConverter(converter, type));
         eventSource = c.getEventSource();
 		addComponent(title, 
+						formColspan,
 						required, 
 						text.getInvisibleConditionName(), 
 						getCurrentWidgetHelp(),

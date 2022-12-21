@@ -10,6 +10,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -89,6 +90,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;
 
+	// Whether to never pick top label layout
+	private boolean stopTop = false;
+	
 	// Stack of containers sent in to render methods
 	private Stack<Container> currentContainers = new Stack<>();
 	public Stack<Container> getCurrentContainers() {
@@ -98,9 +102,21 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// Attributes pushed and popped during internal processing
 	private Stack<String> renderAttributes = new Stack<>();
 	
-	protected ViewRenderer(User user, Module module, Document document, View view, String uxui) {
+	protected ViewRenderer(User user, Module module, Document document, View view, String uxui, boolean stopTop) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);
 		this.user = user;
+		this.stopTop = stopTop;
+	}
+
+	// Should this view be rendered with top labels or side labels
+	private boolean renderTopLabels = false;
+	public boolean isRenderTopLabels() {
+		return renderTopLabels;
+	}
+	// Is this view defined with top labels or side labels
+	private boolean authoredTopLabels = false;
+	public boolean isAuthoredTopLabels() {
+		return authoredTopLabels;
 	}
 
 	private String viewIcon16x16Url;
@@ -108,6 +124,22 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitView() {
+		authoredTopLabels = (module.getViewLayout() == ViewLayout.top);
+		if (stopTop) {
+			renderTopLabels = false;
+		}
+		else {
+			ViewLayout layout = view.getLayout();
+			renderTopLabels = (layout == ViewLayout.top);
+			if (! renderTopLabels) {
+				renderTopLabels = authoredTopLabels;
+			}
+			if (! renderTopLabels) {
+				layout = customer.getModuleEntries().get(module.getName());
+				renderTopLabels = (layout == ViewLayout.top);
+			}
+		}
+		
 		viewIcon16x16Url = iconToUrl(document.getIcon16x16RelativeFileName());
 		String viewIcon32x32 = view.getIcon32x32RelativeFileName();
 		viewIcon32x32Url = iconToUrl((viewIcon32x32 == null) ? document.getIcon32x32RelativeFileName() : viewIcon32x32);
@@ -287,6 +319,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public String getCurrentWidgetHelp() {
 		return currentWidgetHelp;
 	}
+	private int currentWidgetColspan = 1;
+	public int getCurrentWidgetColspan() {
+		return currentWidgetColspan;
+	}
 	private TargetMetaData currentTarget;
 	public TargetMetaData getCurrentTarget() {
 		return currentTarget;
@@ -301,6 +337,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 											boolean required,
 											String help,
 											boolean showsLabel,
+											int colspan,
 											FormItem item);
 	
 	private void preProcessWidget(String binding, boolean showsLabelByDefault) {
@@ -308,6 +345,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentWidgetShowLabel = false;
 		currentWidgetRequired = null;
 		currentWidgetHelp = null;
+		currentWidgetColspan = 1;
 		currentTarget = null;
 		
 		String ultimateBinding = binding;
@@ -357,6 +395,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentWidgetLabel = null;
 			currentWidgetHelp = null;
 			currentWidgetRequired = null;
+			currentWidgetColspan = 1;
 		}
 		if (currentFormItem != null) {
 			String label = currentFormItem.getLocalisedLabel();
@@ -371,14 +410,24 @@ public abstract class ViewRenderer extends ViewVisitor {
 			if (required != null) {
 				currentWidgetRequired = required;
 			}
-		}
-		if (currentFormItem != null) {
+			Integer colspan = currentFormItem.getColspan();
+			if (colspan != null) {
+				currentWidgetColspan = colspan.intValue();
+			}
+
 			Boolean showLabel = currentFormItem.getShowLabel();
 			currentWidgetShowLabel = (showLabel == null) ? showsLabelByDefault : showLabel.booleanValue();
+
+			// If showing label and we're rendering top for a side authored form,
+			// increment the colspan so we assume the size of the side label column too.
+			if (currentWidgetShowLabel && renderTopLabels && (! authoredTopLabels)) {
+				currentWidgetColspan++;
+			}
 			renderFormItem(currentWidgetLabel,
 							Boolean.TRUE.equals(currentWidgetRequired),
 							currentWidgetHelp,
 							currentWidgetShowLabel,
+							currentWidgetColspan,
 							currentFormItem);
 		}
 	}
@@ -389,12 +438,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 							Boolean.TRUE.equals(currentWidgetRequired),
 							currentWidgetHelp,
 							currentWidgetShowLabel,
+							currentWidgetColspan,
 							item);
 		currentFormItem = null;
 		currentWidgetRequired = null;
 		currentWidgetLabel = null;
 		currentWidgetShowLabel = false;
 		currentWidgetHelp = null;
+		currentWidgetColspan = 1;
 		currentTarget = null;
 	}
 
@@ -402,6 +453,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 											boolean required,
 											String help,
 											boolean showLabel,
+											int colspan,
 											FormItem item);
 	
 	@Override

@@ -80,6 +80,13 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="viewLayout">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="side"/>
+      <xs:enumeration value="top"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="sortDirection">
     <xs:restriction base="xs:string">
       <xs:enumeration value="ascending"/>
