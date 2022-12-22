@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import './pages/contact_list.dart';
+import './pages/contact_list_2.dart';
 import './widget/drawer.dart';
 
 void main() {
@@ -28,8 +29,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       routes: <String, WidgetBuilder>{
-        '/': (context) =>  const MyHomePage(title: 'Flutter Demo Home Page'),
-        ContactListPage.route: (context) => const ContactListPage()
+        '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
+        ContactListPage.route: (context) => const ContactListPage(),
+        ContactListPage2.route: (context) => const ContactListPage2(),
       },
     );
   }

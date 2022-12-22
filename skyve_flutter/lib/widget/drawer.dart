@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../pages/contact_list.dart';
+import '../pages/contact_list_2.dart';
 
 Widget _buildMenuItem(
     BuildContext context, Widget title, String routeName, String currentRoute) {
@@ -33,6 +34,12 @@ Drawer buildDrawer(BuildContext context, String currentRoute) {
           context,
           const Text('Contact List'),
           ContactListPage.route,
+          currentRoute,
+        ),
+        _buildMenuItem(
+          context,
+          const Text('Contact List 2'),
+          ContactListPage2.route,
           currentRoute,
         ),
       ],

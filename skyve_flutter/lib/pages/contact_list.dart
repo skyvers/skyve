@@ -26,7 +26,30 @@ class _ContactListState extends State<ContactListPage> {
     readSampleContactJson().then((value) {
       print('In promise post readSampleContactJson');
       print(value);
-      _gridStateManager.appendNewRows(count: 3);
+
+      double width = MediaQuery.of(context).size.width;
+      print("width is " + width.toString());
+      PlutoColumn firstColumn = _gridStateManager.refColumns.originalList.first;
+
+      firstColumn.width = width;
+      //print(_gridStateManager.columnsWidthAtColumnIdx(1).toString());
+      //_gridStateManager.resizeColumn(firstColumn, 0);
+      //print(_gridStateManager.columnsWidthAtColumnIdx(1).toString());
+
+      List<PlutoRow> rows = [];
+
+      for (var readRow in value) {
+        rows.add(PlutoRow(cells: {
+          'name': PlutoCell(value: readRow["name"]),
+          'contactType': PlutoCell(value: readRow["contactType"]),
+          'email1': PlutoCell(value: readRow["email1"]),
+          'mobile': PlutoCell(value: readRow["mobile"]),
+          'bizKey': PlutoCell(value: readRow["bizKey"])
+        }));
+        //print(readRow);
+      }
+
+      _gridStateManager.appendRows(rows);
     });
 
     final grid = _buildGrid();
@@ -39,9 +62,7 @@ class _ContactListState extends State<ContactListPage> {
         ));
   }
 
-  void addRow(Map<String, dynamic> rowData) {
-
-  }
+  void addRow(Map<String, dynamic> rowData) {}
 
   PlutoGrid _buildGrid() {
     List<PlutoColumn> columns = <PlutoColumn>[
@@ -54,6 +75,8 @@ class _ContactListState extends State<ContactListPage> {
           title: 'Email', field: 'email1', type: PlutoColumnType.text()),
       PlutoColumn(
           title: 'Mobile', field: 'mobile', type: PlutoColumnType.text()),
+      PlutoColumn(
+          title: 'bizKey', field: 'bizKey', type: PlutoColumnType.text()),
     ];
 
     final List<PlutoRow> rows = <PlutoRow>[
@@ -61,8 +84,9 @@ class _ContactListState extends State<ContactListPage> {
         'name': PlutoCell(value: 'Dave Pipes'),
         'contactType': PlutoCell(value: 'Person'),
         'email1': PlutoCell(value: 'test@example.com'),
-        'mobile': PlutoCell(value: null)
-      })
+        'mobile': PlutoCell(value: null),
+        'bizKey': PlutoCell(value: "extra-data")
+      }),
     ];
 
     return PlutoGrid(
