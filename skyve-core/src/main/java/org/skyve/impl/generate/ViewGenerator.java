@@ -7,21 +7,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.view.Actions;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.WidgetReference;
+import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
+import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
@@ -64,9 +67,12 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class ViewGenerator {
-	private static final Integer THIRTY = Integer.valueOf(30);
-	private static final Integer SIXTY = Integer.valueOf(60);
+	private static final Integer ZERO = Integer.valueOf(0);
+	private static final Integer TWO = Integer.valueOf(2);
+	private static final Integer THREE = Integer.valueOf(3);
 	private static final Integer FOUR = Integer.valueOf(4);
+	private static final Integer SIX = Integer.valueOf(6);
+	private static final Integer EIGHT = Integer.valueOf(8);
 	private static final Integer TWELVE = Integer.valueOf(12);
 	
 	private ProvidedRepository repository;
@@ -85,7 +91,8 @@ public class ViewGenerator {
 			result = generateListView(customer, document, defaultQuery, null);
 		}
 		else if (ViewType.edit.toString().equals(viewName)) {
-			result = generateEditView(customer, module, document);
+			// NB Default to side layout
+			result = generateEditView(customer, module, document, module.getViewLayout() != ViewLayout.top);
 		}
 		else {
 			throw new IllegalArgumentException("ViewGenerator : Cannot generate a view of type " + viewName);
@@ -123,7 +130,7 @@ public class ViewGenerator {
 		MetaData widget;
 	}
 	
-	private ViewImpl generateEditView(Customer customer, Module module, Document document) {
+	private ViewImpl generateEditView(Customer customer, Module module, Document document, boolean sideLayout) {
 		ViewImpl result = new ViewImpl();
 		result.setName(ViewType.edit.toString());
 
@@ -172,20 +179,33 @@ public class ViewGenerator {
 			result.putAction(action);
 		}
 
+		// <hbox shrinkWrap="height">
+		HBox hbox = new HBox();
+		hbox.setShrinkWrap(ShrinkWrap.height);
+		List<MetaData> hboxGuts = hbox.getContained();
+		hboxGuts.add(responsiveGutter());
+		
+		// <form border="true" responsiveWidth="8" sm="12" lg="6" xl="4">
 		Form form = new Form();
 		form.setBorder(Boolean.TRUE);
-		form.setPercentageWidth(SIXTY);
-		form.setResponsiveWidth(TWELVE);
-		FormColumn column = new FormColumn();
-		column.setPercentageWidth(THIRTY);
-		column.setResponsiveWidth(FOUR);
-		form.getColumns().add(column);
+		form.setResponsiveWidth(EIGHT);
+		form.setSm(TWELVE);
+		form.setLg(SIX);
+		form.setXl(FOUR);
+		if (sideLayout) {
+			FormColumn column = new FormColumn();
+			column.setResponsiveWidth(FOUR);
+			form.getColumns().add(column);
+		}
 		form.getColumns().add(new FormColumn());
 		
 		List<Detail> details = new ArrayList<>();
 
 		processAttributes(customer, module, document, form, details, null);
-		
+
+		hboxGuts.add(form);
+		hboxGuts.add(responsiveGutter());
+
 		// make a tabbed view if more than 1 detail widget or there is 1 detail widget and more than 5 form fields
 		int numberOfDetailWidgets = details.size();
 		if ((numberOfDetailWidgets > 1) || 
@@ -195,7 +215,7 @@ public class ViewGenerator {
 			if (! form.getRows().isEmpty()) {
 				tab = new Tab();
 				tab.setTitle("General");
-				tab.getContained().add(form);
+				tab.getContained().add(hbox);
 				tabPane.getTabs().add(tab);
 			}
 			
@@ -214,7 +234,7 @@ public class ViewGenerator {
 		}
 		else {
 			if (! form.getRows().isEmpty()) {
-				result.getContained().add(form);
+				result.getContained().add(hbox);
 			}
 
 			for (Detail detail : details) {
@@ -225,6 +245,17 @@ public class ViewGenerator {
 		return result;
 	}
 
+	// <vbox responsiveWidth="2" sm="12" lg="3" xl="4" pixelHeight="0" />
+	private static VBox responsiveGutter() {
+		VBox result = new VBox();
+		result.setResponsiveWidth(TWO);
+		result.setSm(TWELVE);
+		result.setLg(THREE);
+		result.setXl(FOUR);
+		result.setPixelHeight(ZERO);
+		return result;
+	}
+	
 	private void processAttributes(Customer customer, 
 									Module module, 
 									Document document,
@@ -578,8 +609,8 @@ public class ViewGenerator {
 		if (args.length >= 5) {
 			srcPath = args[0];
 			customerName = args[1];
-			moduleName = args[2];
-			documentName = args[3];
+			moduleName = UtilImpl.processStringValue(args[2]);
+			documentName = UtilImpl.processStringValue(args[3]);
 			customerOverridden = Boolean.parseBoolean(args[4]);
 			if (args.length == 6) {
 				uxui = args[5];
@@ -601,7 +632,7 @@ public class ViewGenerator {
 		Customer customer = repository.getCustomer(customerName);
 
 		// If the module and/or document was not specified, we will just generate all edit views.
-		if (StringUtils.isBlank(moduleName) || StringUtils.isBlank(documentName)) {
+		if ((moduleName == null) || (documentName == null)) {
 			for (Module module : customer.getModules()) {
 				for (Map.Entry<String, Module.DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 					Module.DocumentRef documentRef = entry.getValue();
