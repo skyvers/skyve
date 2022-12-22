@@ -1,3 +1,6 @@
 org.eclipse.core.resources.prefs
 org.eclipse.jdt.core.prefs
 .idea
+*.classpath
+*.project
+*/.settings/*
