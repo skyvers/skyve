@@ -9,6 +9,6 @@ class SkyveTextArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement widget
-    return SkyveTextField(label: label);
+    return SkyveTextField(label: label, maxlines: null);
   }
 }

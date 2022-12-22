@@ -18,6 +18,9 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 	public static final String VBOX_IMPORT = "widgets/skyve_vbox";
 	public static final String HBOX_IMPORT = "widgets/skyve_hbox";
 	public static final String FORM_IMPORT = "widgets/skyve_form";
+	public static final String FORMROW_IMPORT = "widgets/skyve_formrow";
+	public static final String FORMCOLUMN_IMPORT = "widgets/skyve_formcolumn";
+	public static final String FORMITEM_IMPORT = "widgets/skyve_formitem";
 
 	private Set<String> imports;
 
@@ -111,17 +114,21 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 	@Override
 	public RenderedComponent formLayout(RenderedComponent component, Form form) {
 		imports.add(FORM_IMPORT);
+		imports.add(FORMCOLUMN_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
-		output.append("SkyveForm(children: [");
+		output.append(
+				"SkyveForm(formCols: [], formRows: [");
 		return result;
 	}
 
 	@Override
 	public RenderedComponent formRowLayout(RenderedComponent component, FormRow row) {
+		imports.add(FORMROW_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
-		output.append("BootstrapRow(decoration: BoxDecoration(border: Border.all(color: Colors.transparent, width: 10.0)), children: [");
+		output.append(
+				"SkyveFormRow(formItems: [");
 		return result;
 	}
 
@@ -150,25 +157,20 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 										String widgetHelpText) {
 		imports.add(FlutterComponentRenderer.LABEL_IMPORT);
 		RenderedComponent cell = new RenderedComponent(FlutterGenerator.INDENT);
-		cell.getOutput().append("BootstrapCol(sizes: 'col-12 col-md-4', invisibleForSizes: 'xs sm', child: const SkyveLabel('").append(widgetLabel).append("')),");
+		cell.getOutput().append("SkyveFormItem(const SkyveLabel('").append(widgetLabel).append("')),");
 		formOrRowLayout.addChild(cell);
 	}
 
 	@Override
-	public void layoutFormItemWidget(RenderedComponent formOrRowLayout,
-										RenderedComponent formItemComponent,
-										Form currentForm,
-										FormItem currentFormItem,
-										FormColumn currentFormColumn,
-										String widgetLabel,
-										int formColspan,
-										boolean widgetRequired,
-										String widgetInvisible,
-										String widgetHelpText) {
-		RenderedComponent col = new RenderedComponent(FlutterGenerator.INDENT).setAfter("),").setIndent("");
-		col.getOutput().append("BootstrapCol(sizes: 'col-12 col-md-8', child: ");
+	public void layoutFormItemWidget(RenderedComponent formOrRowLayout, RenderedComponent formItemComponent, Form currentForm,
+			FormItem currentFormItem, FormColumn currentFormColumn, String widgetLabel, int formWidgetColspan,
+			boolean widgetRequired, String widgetInvisible, String widgetHelpText) {
+		imports.add(FORMITEM_IMPORT);
+RenderedComponent col = new RenderedComponent(FlutterGenerator.INDENT).setAfter("),").setIndent("");
+		col.getOutput().append("SkyveFormItem(");
 		formOrRowLayout.addChild(col);
 		col.addChild(formItemComponent);
+
 	}
 
 	@Override
@@ -206,4 +208,5 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 //		return container.getParent().getParent();
 		return container.getParent();
 	}
+
 }

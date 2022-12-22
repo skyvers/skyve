@@ -106,6 +106,9 @@ public class FlutterGenerator {
 		refreshFile("lib/widgets/skyve_staticimage.dart", "lib/widgets/skyve_staticimage.dart", substitutions);
 		refreshFile("lib/widgets/skyve_dynamicimage.dart", "lib/widgets/skyve_dynamicimage.dart", substitutions);
 		refreshFile("lib/widgets/skyve_blurb.dart", "lib/widgets/skyve_blurb.dart", substitutions);
+		refreshFile("lib/widgets/skyve_formitem.dart", "lib/widgets/skyve_formitem.dart", substitutions);
+		refreshFile("lib/widgets/skyve_formrow.dart", "lib/widgets/skyve_formrow.dart", substitutions);
+		refreshFile("lib/widgets/skyve_formcolumn.dart", "lib/widgets/skyve_formcolumn.dart", substitutions);
 
 		new FlutterRouting(this).create();
 
