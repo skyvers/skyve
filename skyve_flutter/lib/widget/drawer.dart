@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../pages/contact_list.dart';
 import '../pages/contact_list_2.dart';
 
-Widget _buildMenuItem(
-    BuildContext context, Widget title, String routeName, String currentRoute) {
+Widget _buildMenuItem(BuildContext context, Widget title, String routeName, String currentRoute) {
   var isSelected = routeName == currentRoute;
 
   return ListTile(
@@ -38,7 +37,7 @@ Drawer buildDrawer(BuildContext context, String currentRoute) {
         ),
         _buildMenuItem(
           context,
-          const Text('Contact List 2'),
+          const Text('Pluto Grid Transition'),
           ContactListPage2.route,
           currentRoute,
         ),

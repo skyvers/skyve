@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../widget/drawer.dart';
-import '../pages/contact_list.dart';
 
 class ContactListPage2 extends StatefulWidget {
   static const String route = 'ContactList2';
@@ -36,7 +35,7 @@ class _ContactListState2 extends State<ContactListPage2> {
     loadJson();
   }
 
-  Center getCenter(String value) {
+  Center getRandomWidget(String value) {
     return Center(
       child: Card(
         child: Column(
@@ -111,6 +110,8 @@ class _ContactListState2 extends State<ContactListPage2> {
           'bizKey': PlutoCell(value: readRow["bizKey"])
         }));
 
+        // load data into this so infinity scroll will have data
+        // to populate
         fakeFetchedRows.add(PlutoRow(cells: {
           'column1': PlutoCell(value: readRow),
           'name': PlutoCell(value: readRow["name"]),
@@ -125,8 +126,7 @@ class _ContactListState2 extends State<ContactListPage2> {
         _gridStateManagerAlternate.appendRows(rowsMobile);
       }
 
-      print(
-          "==== data loaded into rowsMobile: " + rowsMobile.length.toString());
+      print("==== data loaded into rowsMobile: " + rowsMobile.length.toString());
     });
   }
 
@@ -142,21 +142,23 @@ class _ContactListState2 extends State<ContactListPage2> {
 
       Widget body;
 
+      // trying to switch the pluto column from single row to multirow
+      // however, the grid seems to only redraw properly if I put something in between.
       if (constraints.maxWidth < 1000 && constraints.maxWidth > 800) {
-        body = getCenter("Some string 1");
+        body = getRandomWidget("Some string 1");
       } else {
         PlutoGrid grid = buildAlternateGrid(mobileView);
         print(" ====== number of columns is " + grid.columns.length.toString());
         body = Center(child: grid);
       }
 
+      // test to see if the widget will change if not a plutogrid
+      // this works
       // if (mobileView) {
-      //   body = getCenter("Is mobile view");
+      //   body = getRandomWidget("Is mobile view");
       // } else {
-      //   body = getCenter("Is not mobile view");
+      //   body = getRandomWidget("Is not mobile view");
       // }
-
-      print("==== body change");
 
       return Scaffold(
           appBar: AppBar(title: const Text('Contact List')),
@@ -192,18 +194,13 @@ class _ContactListState2 extends State<ContactListPage2> {
       columns.addAll([
         PlutoColumn(title: 'Name', field: 'name', type: PlutoColumnType.text()),
         PlutoColumn(
-            title: 'Contact Type',
-            field: 'contactType',
-            type: PlutoColumnType.select(['Person', 'Organisation'])),
-        PlutoColumn(
-            title: 'Email', field: 'email1', type: PlutoColumnType.text()),
-        PlutoColumn(
-            title: 'Mobile', field: 'mobile', type: PlutoColumnType.text()),
-        PlutoColumn(
-            title: 'bizKey', field: 'bizKey', type: PlutoColumnType.text()),
+            title: 'Contact Type', field: 'contactType', type: PlutoColumnType.select(['Person', 'Organisation'])),
+        PlutoColumn(title: 'Email', field: 'email1', type: PlutoColumnType.text()),
+        PlutoColumn(title: 'Mobile', field: 'mobile', type: PlutoColumnType.text()),
+        PlutoColumn(title: 'bizKey', field: 'bizKey', type: PlutoColumnType.text()),
       ]);
     }
-    print("======columns size " + columns.length.toString());
+
     return PlutoGrid(
       columns: columns,
       rows: rows,
@@ -214,6 +211,8 @@ class _ContactListState2 extends State<ContactListPage2> {
         event.stateManager.appendRows(rowsMobile);
       },
       configuration: PlutoGridConfiguration(
+          //Column Filtering example
+          //https://weblaze.dev/pluto_grid/build/web/#feature/column-filtering
           columnFilter: PlutoGridColumnFilterConfig(
               filters: const [
                 ...FilterHelper.defaultFilters,
@@ -221,17 +220,13 @@ class _ContactListState2 extends State<ContactListPage2> {
                 ClassYouImplemented(),
               ],
               resolveDefaultColumnFilter: (column, resolver) {
-                print("resolver filter is " + column.field);
-                print("resolver filter is " + resolver.toString());
-
                 // if (column.field == 'column1') {
                 //   return resolver<ClassYouImplemented>() as PlutoFilterType;
                 // } else
                 if (column.field == 'text') {
                   return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
                 } else if (column.field == 'number') {
-                  return resolver<PlutoFilterTypeGreaterThan>()
-                      as PlutoFilterType;
+                  return resolver<PlutoFilterTypeGreaterThan>() as PlutoFilterType;
                 } else if (column.field == 'date') {
                   return resolver<PlutoFilterTypeLessThan>() as PlutoFilterType;
                 } else if (column.field == 'select') {
@@ -239,8 +234,12 @@ class _ContactListState2 extends State<ContactListPage2> {
                 }
                 return resolver<PlutoFilterTypeContains>() as PlutoFilterType;
               }),
-          style: PlutoGridStyleConfig(
-              rowHeight: mobileView ? rowHeightMobile : rowHeightDesktop)),
+          // Setting the height of the columns. Request to add Dynamic row Height
+          //https://github.com/bosskmk/pluto_grid/issues/671
+          style: PlutoGridStyleConfig(rowHeight: mobileView ? rowHeightMobile : rowHeightDesktop)),
+
+      // Infinity Scrolling
+      // https://weblaze.dev/pluto_grid/build/web/#feature/row-infinity-scroll
       createFooter: (s) => PlutoInfinityScrollRows(
         // First call the fetch function to determine whether to load the page.
         // Default is true.
@@ -262,27 +261,21 @@ class _ContactListState2 extends State<ContactListPage2> {
   }
 
   Future<List<Map<String, dynamic>>> readSampleContactJson() async {
-    final String response =
-        await DefaultAssetBundle.of(context).loadString('./contact_data.json');
+    final String response = await DefaultAssetBundle.of(context).loadString('./contact_data.json');
     Map<String, dynamic> jsonContent = await json.decode(response);
     List<dynamic> data = jsonContent['response']['data'];
 
-    List<Map<String, dynamic>> md =
-        data.map((e) => (e as Map<String, dynamic>)).toList();
+    List<Map<String, dynamic>> md = data.map((e) => (e as Map<String, dynamic>)).toList();
 
     print('==== Returning ${md.length} contact entries');
 
     return md;
   }
 
-  Future<PlutoInfinityScrollRowsResponse> fetch(
-    PlutoInfinityScrollRowsRequest request,
-  ) async {
+  // Infinity Scrolling
+  // https://weblaze.dev/pluto_grid/build/web/#feature/row-infinity-scroll
+  Future<PlutoInfinityScrollRowsResponse> fetch(PlutoInfinityScrollRowsRequest request) async {
     List<PlutoRow> tempList = rowsMobile;
-    // examples for pre sort / filtering / etc
-    // figuring out is last etc
-    // https://github.com/bosskmk/pluto_grid/blob/master/demo/lib/screen/feature/row_infinity_scroll_screen.dart
-
     Iterable<PlutoRow> fetchedRows = tempList;
     if (request.lastRow == null) {
       fetchedRows = fetchedRows.take(30);
@@ -301,6 +294,8 @@ class _ContactListState2 extends State<ContactListPage2> {
   }
 }
 
+// Custom Filter : Column Filtering example
+//https://weblaze.dev/pluto_grid/build/web/#feature/column-filtering
 class ClassYouImplemented implements PlutoFilterType {
   @override
   String get title => 'Custom contains';
