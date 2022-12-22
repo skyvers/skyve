@@ -7,11 +7,17 @@ import 'package:flutter_bootstrap/flutter_bootstrap.dart';
 class ##CLASS## extends StatefulWidget {
   static const routeName = '/##MODULE##/##DOCUMENT##';
 
-  const ##CLASS##({Key? key}) : super(key: key);
+  final Map<String,String> queryParams;
+
+  const ##CLASS##({Key? key, this.queryParams = const {}}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     return _##CLASS##State();
+  }
+  
+  String? get _bizId {
+    return queryParams['bizId'];
   }
 }
 
@@ -20,7 +26,7 @@ class _##CLASS##State extends State<##CLASS##> {
 
   @override
   Widget build(BuildContext context) {
-    final bizId = ModalRoute.of(context)!.settings.arguments as String?;
+    final bizId = widget._bizId;
     _load(bizId);
     return SkyveView.responsiveView(
         context,

@@ -2,11 +2,14 @@ import 'package:##PROJECT##/util/skyve_rest_client.dart';
 import 'package:##PROJECT##/views/##MODULE##/##EDIT_DART##.dart';
 import 'package:##PROJECT##/widgets/skyve_view.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ##CLASS## extends StatefulWidget {
   static const routeName = '/##MODULE##/##VIEW##';
 
-  const ##CLASS##({Key? key}) : super(key: key);
+  final Map<String,String> queryParams;
+
+  const ##CLASS##({Key? key, this.queryParams = const {}}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -64,9 +67,12 @@ class _##CLASS##State extends State<##CLASS##> {
                                 subtitle: Text(nvl(_rows[index]['##COLUMN2##'])),
                                 trailing: const Icon(Icons.chevron_right),
                                 onTap: () {
-                                  Navigator.pushNamed(context,
-                                      ##EDIT_CLASS##.routeName,
-                                      arguments: _rows[index]['bizId']);
+                                  var uri = Uri(
+                                      path: ##EDIT_CLASS##.routeName,
+                                      queryParameters: {
+                                        'bizId': _rows[index]['bizId']
+                                      });
+                                  GoRouter.of(context).go(uri.toString());
                                 })));
                   }),
               Positioned(

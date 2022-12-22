@@ -53,9 +53,9 @@ public class FlutterRouting {
 
 		
 		sb.setLength(0);
-		sb.append("final routes = <String, WidgetBuilder>{\n");
+		sb.append("final List<GoRoute> _goRoutes = [\n");
 		routes.forEach(r -> sb.append(INDENT).append(INDENT).append(r).append('\n'));
-		sb.append(INDENT).append("};\n");
+		sb.append(INDENT).append("];\n");
 		substitutions.put("##ROUTES##", sb.toString());
 
 		generator.refreshFile("lib/main.dart", "lib/main.dart", substitutions);
@@ -205,9 +205,10 @@ public class FlutterRouting {
 					.append(".routeName").append(", icon: null),\n");
 		}
 
-		sb.setLength(0);
-		sb.append(className).append(".routeName: (context) => const ").append(className).append("(),");
-		routes.add(sb.toString());
+		// Create the GoRoute declaration
+		String pattern = "GoRoute(path: %s.routeName, builder: (context, state) => %s(queryParams: state.queryParams)),";
+		String goRoute = String.format(pattern, className, className);
+		routes.add(goRoute);
 		
 		generator.views.add(view);
 	}
