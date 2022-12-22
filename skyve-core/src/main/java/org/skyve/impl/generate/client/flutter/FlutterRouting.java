@@ -18,6 +18,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.menu.MenuRenderer;
 
@@ -26,6 +27,7 @@ public class FlutterRouting {
 	private Set<String> imports = new TreeSet<>();
 	private Set<String> routes = new TreeSet<>();
 	private StringBuilder menu = new StringBuilder(1024);
+	private int indentationLevel = 0;
 	
 	public FlutterRouting(FlutterGenerator generator) {
 		this.generator = generator;
@@ -93,6 +95,26 @@ public class FlutterRouting {
 				processItem(new FlutterCalendarView(generator, moduleName, viewName), item);
 			}
 			
+			@Override
+			public void renderMenuGroup(MenuGroup menuGroup, Module menuModule) {
+				openMenuGroup(menuGroup.getLocalisedName());
+			}
+
+			@Override
+			public void renderedMenuGroup(MenuGroup menuGroup, Module menuModule) {
+				closeMenuGroup();
+			}
+
+			@Override
+			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu skyveMenu, Module menuModule, boolean open) {
+				openMenuModule(menuModule.getLocalisedTitle());
+			}
+
+			@Override
+			public void renderedModuleMenu(org.skyve.metadata.module.menu.Menu skyveMenu, Module menuModule, boolean open) {
+				closeMenuModule();
+			}
+
 			@Override
 			public void renderEditItem(EditItem item,
 										Module menuModule,
@@ -176,14 +198,49 @@ public class FlutterRouting {
 		sb.append("import 'package:").append(generator.projectName).append("/views/").append(view.moduleName).append('/').append(view.fileName).append("';");
 		imports.add(sb.toString());
 
+		indent();
+		// TODO implement FA icon
 		if (item != null) {
-			menu.append(INDENT).append("SkyveMenuData(label: '").append(item.getLocalisedName()).append("', routeName: ").append(className).append(".routeName),\n");
+			menu.append("SkyveMenuData(label: '").append(item.getLocalisedName()).append("', routeName: ").append(className)
+					.append(".routeName").append(", icon: null),\n");
 		}
-		
+
 		sb.setLength(0);
 		sb.append(className).append(".routeName: (context) => const ").append(className).append("(),");
 		routes.add(sb.toString());
 		
 		generator.views.add(view);
+	}
+
+	private void openMenuModule(String moduleName) {
+		indent();
+		menu.append("SkyveMenuModule(label: '").append(moduleName).append("', items: [\n");
+		indentationLevel++;
+	}
+
+	private void closeMenuModule() {
+		closeCollapsibleMenu();
+	}
+
+	private void openMenuGroup(String menuGroupName) {
+		indent();
+		menu.append("SkyveMenuGroup(label: '").append(menuGroupName).append("', children: [\n");
+		indentationLevel++;
+	}
+
+	private void closeMenuGroup() {
+		closeCollapsibleMenu();
+	}
+
+	private void closeCollapsibleMenu() {
+		indentationLevel--;
+		indent();
+		menu.append("]),\n");
+	}
+
+	private void indent() {
+		for (int indentCount = 0; indentCount <= indentationLevel; indentCount++) {
+			menu.append(INDENT);
+		}
 	}
 }
