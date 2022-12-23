@@ -1,7 +1,7 @@
 package modules.admin.DataMaintenance;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -10,7 +10,7 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
 import org.skyve.job.Job;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
@@ -126,10 +126,8 @@ public class TruncateAuditLogJob extends Job {
 			log.add("Truncated batch " + batchNo++ + ".");
 		}
 
-		// TODO check this
-		// try set timezone GMT
-		dm.setEpochDate(new DateOnly(LocalDateTime.now(ZoneId.systemDefault())));
-//		dm.setEpochDate(new DateOnly(LocalDate.now().minusDays(auditLogRetentionDays.intValue()).atStartOfDay()));
+		dm.setEpochDate(new DateTime(ZonedDateTime.now(ZoneOffset.UTC).withHour(0).withMinute(0).withSecond(0)
+				.minusDays(auditLogRetentionDays.intValue()).toLocalDateTime()));
 		dm = pers.save(dm);
 
 		try {
