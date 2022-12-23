@@ -236,7 +236,8 @@ class _ContactListState2 extends State<ContactListPage2> {
               }),
           // Setting the height of the columns. Request to add Dynamic row Height
           //https://github.com/bosskmk/pluto_grid/issues/671
-          style: PlutoGridStyleConfig(rowHeight: mobileView ? rowHeightMobile : rowHeightDesktop)),
+          style: PlutoGridStyleConfig(rowHeight: mobileView ? rowHeightMobile : rowHeightDesktop),
+          columnSize: PlutoGridColumnSizeConfig(autoSizeMode: PlutoAutoSizeMode.scale)),
 
       // Infinity Scrolling
       // https://weblaze.dev/pluto_grid/build/web/#feature/row-infinity-scroll

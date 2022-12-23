@@ -24,18 +24,6 @@ class _ContactListState extends State<ContactListPage> {
   @override
   Widget build(BuildContext context) {
     readSampleContactJson().then((value) {
-      print('In promise post readSampleContactJson');
-      print(value);
-
-      double width = MediaQuery.of(context).size.width;
-      print("width is " + width.toString());
-      PlutoColumn firstColumn = _gridStateManager.refColumns.originalList.first;
-
-      firstColumn.width = width;
-      //print(_gridStateManager.columnsWidthAtColumnIdx(1).toString());
-      //_gridStateManager.resizeColumn(firstColumn, 0);
-      //print(_gridStateManager.columnsWidthAtColumnIdx(1).toString());
-
       List<PlutoRow> rows = [];
 
       for (var readRow in value) {
@@ -52,31 +40,26 @@ class _ContactListState extends State<ContactListPage> {
       _gridStateManager.appendRows(rows);
     });
 
-    final grid = _buildGrid();
+    return LayoutBuilder(builder: (context, constraints) {
+      PlutoGrid grid = _buildGrid(constraints.maxWidth);
 
-    return Scaffold(
-        appBar: AppBar(title: const Text('Contact List')),
-        drawer: buildDrawer(context, ContactListPage.route),
-        body: Container(
-          child: grid,
-        ));
+      return Scaffold(
+          appBar: AppBar(title: const Text('Contact List')),
+          drawer: buildDrawer(context, ContactListPage.route),
+          body: grid);
+    });
   }
 
   void addRow(Map<String, dynamic> rowData) {}
 
-  PlutoGrid _buildGrid() {
+  PlutoGrid _buildGrid(double width) {
     List<PlutoColumn> columns = <PlutoColumn>[
       PlutoColumn(title: 'Name', field: 'name', type: PlutoColumnType.text()),
       PlutoColumn(
-          title: 'Contact Type',
-          field: 'contactType',
-          type: PlutoColumnType.select(['Person', 'Organisation'])),
-      PlutoColumn(
-          title: 'Email', field: 'email1', type: PlutoColumnType.text()),
-      PlutoColumn(
-          title: 'Mobile', field: 'mobile', type: PlutoColumnType.text()),
-      PlutoColumn(
-          title: 'bizKey', field: 'bizKey', type: PlutoColumnType.text()),
+          title: 'Contact Type', field: 'contactType', type: PlutoColumnType.select(['Person', 'Organisation'])),
+      PlutoColumn(title: 'Email', field: 'email1', type: PlutoColumnType.text()),
+      PlutoColumn(title: 'Mobile', field: 'mobile', type: PlutoColumnType.text()),
+      PlutoColumn(title: 'bizKey', field: 'bizKey', type: PlutoColumnType.text()),
     ];
 
     final List<PlutoRow> rows = <PlutoRow>[
@@ -90,22 +73,22 @@ class _ContactListState extends State<ContactListPage> {
     ];
 
     return PlutoGrid(
-      columns: columns,
-      rows: rows,
-      onLoaded: (PlutoGridOnLoadedEvent event) {
-        _gridStateManager = event.stateManager;
-      },
-    );
+        columns: columns,
+        rows: rows,
+        onLoaded: (PlutoGridOnLoadedEvent event) {
+          _gridStateManager = event.stateManager;
+        },
+        configuration: PlutoGridConfiguration(
+            //style: PlutoGridStyleConfig(),
+            columnSize: PlutoGridColumnSizeConfig(autoSizeMode: PlutoAutoSizeMode.scale)));
   }
 
   Future<List<Map<String, dynamic>>> readSampleContactJson() async {
-    final String response =
-        await DefaultAssetBundle.of(context).loadString('./contact_data.json');
+    final String response = await DefaultAssetBundle.of(context).loadString('./contact_data.json');
     Map<String, dynamic> jsonContent = await json.decode(response);
     List<dynamic> data = jsonContent['response']['data'];
 
-    List<Map<String, dynamic>> md =
-        data.map((e) => (e as Map<String, dynamic>)).toList();
+    List<Map<String, dynamic>> md = data.map((e) => (e as Map<String, dynamic>)).toList();
 
     print('Returning ${md.length} contact entries');
 
