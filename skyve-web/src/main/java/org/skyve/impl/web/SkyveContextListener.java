@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -607,10 +608,9 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		
 		UtilImpl.TFA_CUSTOMER = new HashSet<>();
-		String tfaCustomer = getString("account", "tfaCustomer", account, false);
+		List<String> tfaCustomer = getList("account", "tfaCustomer", account, false);
 		if (tfaCustomer != null) {
-			String [] customers = tfaCustomer.split(";");
-			for (String customerName : customers) {
+			for (String customerName : tfaCustomer) {
 				String name = UtilImpl.processStringValue(customerName);
 				if (name != null) {
 					UtilImpl.TFA_CUSTOMER.add(name);
@@ -700,7 +700,11 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 	
 	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
+		
+		
+		
 		Object result = properties.get(key);
+		
 		if (required && (result == null)) {
 			if (prefix != null) {
 				throw new IllegalStateException(String.format("Property %s.%s does not exist in the JSON configuration.", prefix, key));
@@ -730,6 +734,11 @@ public class SkyveContextListener implements ServletContextListener {
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> getObject(String prefix, String key, Map<String, Object> properties, boolean required) {
 		return (Map<String, Object>) get(prefix, key, properties, required);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static List<String> getList(String prefix, String key, Map<String, Object> properties, boolean required) {
+		return (List<String>) get(prefix, key, properties, required);
 	}
 	
 	@Override
