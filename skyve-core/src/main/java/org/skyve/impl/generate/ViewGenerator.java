@@ -67,7 +67,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class ViewGenerator {
-	private static final Integer ZERO = Integer.valueOf(0);
+	private static final Integer ONE = Integer.valueOf(1);
 	private static final Integer TWO = Integer.valueOf(2);
 	private static final Integer THREE = Integer.valueOf(3);
 	private static final Integer FOUR = Integer.valueOf(4);
@@ -252,7 +252,7 @@ public class ViewGenerator {
 		result.setSm(TWELVE);
 		result.setLg(THREE);
 		result.setXl(FOUR);
-		result.setPixelHeight(ZERO);
+		result.setPixelHeight(ONE);
 		return result;
 	}
 	
