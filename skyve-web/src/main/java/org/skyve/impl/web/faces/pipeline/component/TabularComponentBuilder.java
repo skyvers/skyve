@@ -712,7 +712,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												String dataWidgetVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
-												boolean inline) {
+												boolean inline,
+												boolean canCreate,
+												boolean canDelete) {
 		if (component != null) {
 			return component;
 		}
@@ -738,7 +740,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
 			col.getFacets().put("header", columnHeader);
 
-			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
+			if (canCreate && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
 				CommandButton button = createDataGridAddButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledConditionName);
 				columnHeader.getChildren().add(button);
 			}
@@ -748,7 +750,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				children.add(button);
 			}
 
-			if (! Boolean.FALSE.equals(grid.getShowRemove())) {
+			if (canDelete && (! Boolean.FALSE.equals(grid.getShowRemove()))) {
 				// Conditionally add some whitespace between buttons
 				if (! col.getChildren().isEmpty()) {
 					children.add(label(null, " "));

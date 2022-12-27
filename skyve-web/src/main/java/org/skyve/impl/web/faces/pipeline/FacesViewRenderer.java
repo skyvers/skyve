@@ -1351,11 +1351,16 @@ public class FacesViewRenderer extends ViewRenderer {
 	private void renderedDataWidget(AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
+		boolean canCreate = false;
+		boolean canDelete = false;
 		TargetMetaData target = getCurrentTarget();
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation != null) {
-				alias = module.getDocument(customer, targetRelation.getDocumentName()).getLocalisedSingularAlias();
+				final Document targetDocument = module.getDocument(customer, targetRelation.getDocumentName());
+				alias = targetDocument.getLocalisedSingularAlias();
+				canCreate = user.canCreateDocument(targetDocument);
+				canDelete = user.canDeleteDocument(targetDocument);
 			}
 		}
 
@@ -1367,7 +1372,9 @@ public class FacesViewRenderer extends ViewRenderer {
 													dataWidgetVar,
 													gridColumnExpression.toString(), 
 													alias, 
-													Boolean.TRUE.equals(grid.getInline()));
+													Boolean.TRUE.equals(grid.getInline()),
+													canCreate,
+													canDelete);
 		}
 	    dataWidgetBinding = null;
 	    dataWidgetVar = null;

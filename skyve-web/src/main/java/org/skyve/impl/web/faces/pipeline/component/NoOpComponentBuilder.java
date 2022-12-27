@@ -223,7 +223,9 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 													String dataWidgetVar,
 													String gridColumnExpression,
 													String singluarDocumentAlias,
-													boolean inline) {
+													boolean inline,
+													boolean canCreate,
+													boolean canDelete) {
 		return component;
 	}
 

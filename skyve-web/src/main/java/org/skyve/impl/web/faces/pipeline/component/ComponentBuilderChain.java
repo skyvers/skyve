@@ -417,7 +417,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												String dataWidgetVar,
 												String gridColumnExpression,
 												String singluarDocumentAlias,
-												boolean inline) {
+												boolean inline,
+												boolean canCreate,
+												boolean canDelete) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridActionColumn(result,
@@ -426,7 +428,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 														dataWidgetVar,
 														gridColumnExpression,
 														singluarDocumentAlias,
-														inline);
+														inline,
+														canCreate,
+														canDelete);
 		}
 		return result;
 	}

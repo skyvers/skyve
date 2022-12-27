@@ -244,7 +244,9 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 												String dataWidgetVar,
 												String gridColumnExpression,
 												String singluarDocumentAlias,
-												boolean inline) {
+												boolean inline,
+												boolean canCreate,
+												boolean canDelete) {
 		// component = current as it was set in the previous builder in the chain
 		if (component != null) {
 			String dataGridIdentifier = grid.getBinding();
