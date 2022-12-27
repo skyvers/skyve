@@ -2,6 +2,9 @@ package org.skyve.metadata.module.fluent;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
@@ -18,6 +21,7 @@ import org.skyve.impl.metadata.user.DocumentPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.metadata.user.Role;
+import org.skyve.metadata.user.UserAccess;
 
 public class FluentModuleRole {
 	private ModuleRoleMetaData role = null;
@@ -35,6 +39,7 @@ public class FluentModuleRole {
 		description(role.getDescription());
 		documentation(role.getDocumentation());
 		
+		// Process privileges
 		RoleImpl impl = (RoleImpl) role;
 		List<Privilege> privileges = impl.getPrivileges();
 		LinkedHashMap<String, FluentDocumentPrivilege> map = new LinkedHashMap<>();
@@ -59,6 +64,32 @@ public class FluentModuleRole {
 		}
 		
 		map.values().forEach(p -> addPrivilege(p));
+		
+		// Process accesses
+		Map<UserAccess, Set<String>> accesses = impl.getAccesses();
+		if (accesses != null) {
+			for (Entry<UserAccess, Set<String>> access : accesses.entrySet()) {
+				UserAccess key = access.getKey();
+				if (key.isSingular()) {
+					addSingularAccess(new FluentModuleRoleSingularAccess().from(key.getDocumentName(), access.getValue()));
+				}
+				else if (key.isQueryAggregate()) {
+					addQueryAggregateAccess(new FluentModuleRoleQueryAggregateAccess().from(key.getComponent(), access.getValue()));
+				}
+				else if (key.isDocumentAggregate()) {
+					addDocumentAggregateAccess(new FluentModuleRoleDocumentAggregateAccess().from(key.getComponent(), access.getValue()));
+				}
+				else if (key.isModelAggregate()) {
+					addModelAggregateAccess(new FluentModuleRoleModelAggregateAccess().from(key.getDocumentName(), key.getComponent(), access.getValue()));
+				}
+				else if (key.isPreviousComplete()) {
+					addPreviousCompleteAccess(new FluentModuleRolePreviousCompleteAccess().from(key.getDocumentName(), key.getComponent(), access.getValue()));
+				}
+				else {
+					throw new IllegalStateException(key + " is not catered for");
+				}
+			}
+		}
 		
 		return this;
 	}
@@ -119,10 +150,11 @@ public class FluentModuleRole {
 	/**
 	 * Finds the model aggregate access with the specified document name in this module role's list of accesses.
 	 */
-	public FluentModuleRoleModelAggregateAccess findModelAggregateAccess(String modelName) {
+	public FluentModuleRoleModelAggregateAccess findModelAggregateAccess(final String documentName, final String modelName) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> a instanceof ModuleRoleModelAggregateUserAccessMetaData
-						&& ((ModuleRoleModelAggregateUserAccessMetaData) a).getModelName().equals(modelName))
+				.filter(a -> (a instanceof ModuleRoleModelAggregateUserAccessMetaData) &&
+								((ModuleRoleModelAggregateUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+								((ModuleRoleModelAggregateUserAccessMetaData) a).getModelName().equals(modelName))
 				.findFirst()
 				.orElse(null);
 
@@ -134,9 +166,10 @@ public class FluentModuleRole {
 	 * Removes the {@link ModuleRoleModelAggregateUserAccessMetaData} with the specified
 	 * model name if one is defined for this module role.
 	 */
-	public FluentModuleRole removeModelAggregateAccess(String modelName) {
-		role.getAccesses().removeIf(a -> a instanceof ModuleRoleModelAggregateUserAccessMetaData
-				&& ((ModuleRoleModelAggregateUserAccessMetaData) a).getModelName().equals(modelName));
+	public FluentModuleRole removeModelAggregateAccess(final String documentName, final String modelName) {
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleModelAggregateUserAccessMetaData) &&
+											((ModuleRoleModelAggregateUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+											((ModuleRoleModelAggregateUserAccessMetaData) a).getModelName().equals(modelName));
 		return this;
 	}
 
@@ -148,26 +181,29 @@ public class FluentModuleRole {
 	}
 
 	/**
-	 * Finds the previous complete access with the specified document name in this module role's list of accesses.
+	 * Finds the previous complete access with the specified document name and binding in this module role's list of accesses.
 	 */
-	public FluentModuleRolePreviousCompleteAccess findPreviousCompleteAccess(final String documentName) {
+	public FluentModuleRolePreviousCompleteAccess findPreviousCompleteAccess(final String documentName, final String binding) {
 		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
-				.filter(a -> a instanceof ModuleRolePreviousCompleteUserAccessMetaData
-						&& ((ModuleRolePreviousCompleteUserAccessMetaData) a).getDocumentName().equals(documentName))
+				.filter(a -> (a instanceof ModuleRolePreviousCompleteUserAccessMetaData) &&
+								((ModuleRolePreviousCompleteUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+								((ModuleRolePreviousCompleteUserAccessMetaData) a).getBinding().equals(binding))
 				.findFirst()
 				.orElse(null);
 
-		return result != null ? new FluentModuleRolePreviousCompleteAccess((ModuleRolePreviousCompleteUserAccessMetaData) result)
-				: null;
+		return (result != null) ? 
+					new FluentModuleRolePreviousCompleteAccess((ModuleRolePreviousCompleteUserAccessMetaData) result) :
+					null;
 	}
 
 	/**
 	 * Removes the {@link ModuleRolePreviousCompleteUserAccessMetaData} with the specified
-	 * document name if one is defined for this module role.
+	 * document name and binding if one is defined for this module role.
 	 */
-	public FluentModuleRole removePreviousCompleteAccess(String documentName) {
-		role.getAccesses().removeIf(a -> a instanceof ModuleRolePreviousCompleteUserAccessMetaData
-				&& ((ModuleRolePreviousCompleteUserAccessMetaData) a).getDocumentName().equals(documentName));
+	public FluentModuleRole removePreviousCompleteAccess(final String documentName, final String binding) {
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRolePreviousCompleteUserAccessMetaData) &&
+											((ModuleRolePreviousCompleteUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+											((ModuleRolePreviousCompleteUserAccessMetaData) a).getBinding().equals(binding));
 		return this;
 	}
 

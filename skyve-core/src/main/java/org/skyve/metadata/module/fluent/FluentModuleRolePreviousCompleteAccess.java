@@ -1,5 +1,7 @@
 package org.skyve.metadata.module.fluent;
 
+import java.util.Set;
+
 import org.skyve.impl.metadata.repository.module.ModuleRolePreviousCompleteUserAccessMetaData;
 
 /**
@@ -7,9 +9,8 @@ import org.skyve.impl.metadata.repository.module.ModuleRolePreviousCompleteUserA
  * 
  * @author benpetito
  */
-public class FluentModuleRolePreviousCompleteAccess
-		extends FluentModuleRoleAccess<FluentModuleRolePreviousCompleteAccess, ModuleRolePreviousCompleteUserAccessMetaData> {
-
+public class FluentModuleRolePreviousCompleteAccess extends
+				FluentModuleRoleAccess<FluentModuleRolePreviousCompleteAccess, ModuleRolePreviousCompleteUserAccessMetaData> {
 	/**
 	 * Creates a new FluentModuleRolePreviousCompleteAccess.
 	 */
@@ -25,10 +26,14 @@ public class FluentModuleRolePreviousCompleteAccess
 	}
 
 	/**
-	 * Specifies the binding for this FluentModuleRolePreviousCompleteAccess.
+	 * Returns a FluentModuleRolePreviousCompleteAccess from a runtime metadata.
 	 */
-	public FluentModuleRolePreviousCompleteAccess binding(final String binding) {
-		access.setBinding(binding);
+	protected FluentModuleRolePreviousCompleteAccess from(String documentName,
+															String binding,
+															Set<String> uxuis) {
+		documentName(documentName);
+		binding(binding);
+		uxuis.forEach(u -> addUxUi(u));
 		return this;
 	}
 
@@ -41,13 +46,10 @@ public class FluentModuleRolePreviousCompleteAccess
 	}
 
 	/**
-	 * Returns a FluentModuleRolePreviousCompleteAccess from a ModuleRolePreviousCompleteUserAccessMetaData.
+	 * Specifies the binding for this FluentModuleRolePreviousCompleteAccess.
 	 */
-	@Override
-	protected FluentModuleRolePreviousCompleteAccess from(
-			@SuppressWarnings("hiding") ModuleRolePreviousCompleteUserAccessMetaData access) {
-		super.from(access);
-		documentName(access.getDocumentName());
+	public FluentModuleRolePreviousCompleteAccess binding(final String binding) {
+		access.setBinding(binding);
 		return this;
 	}
 

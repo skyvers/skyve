@@ -155,10 +155,10 @@ public class FluentModuleRoleTest {
 	public void testFindModelAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleModelAggregateAccess access1 = new FluentModuleRoleModelAggregateAccess();
-		access1.modelName("TestModel1");
+		access1.documentName("TestDocument").modelName("TestModel1");
 
 		FluentModuleRoleModelAggregateAccess access2 = new FluentModuleRoleModelAggregateAccess();
-		access2.modelName("TestModel2");
+		access2.documentName("TestDocument").modelName("TestModel2");
 
 		fluent.addModelAggregateAccess(access1);
 		fluent.addModelAggregateAccess(access2);
@@ -167,10 +167,11 @@ public class FluentModuleRoleTest {
 		assertThat(fluent.get().getAccesses().size(), is(2));
 
 		// call the method under test
-		FluentModuleRoleModelAggregateAccess result = fluent.findModelAggregateAccess("TestModel1");
+		FluentModuleRoleModelAggregateAccess result = fluent.findModelAggregateAccess("TestDocument", "TestModel1");
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
+		assertThat(result.get().getDocumentName(), is("TestDocument"));
 		assertThat(result.get().getModelName(), is("TestModel1"));
 	}
 
@@ -179,10 +180,10 @@ public class FluentModuleRoleTest {
 	public void testFindPreviousCompleteAccess() {
 		// setup the test data
 		FluentModuleRolePreviousCompleteAccess access1 = new FluentModuleRolePreviousCompleteAccess();
-		access1.documentName("TestDocument1");
+		access1.documentName("TestDocument").binding("binding1");
 
 		FluentModuleRolePreviousCompleteAccess access2 = new FluentModuleRolePreviousCompleteAccess();
-		access2.documentName("TestDocument2");
+		access2.documentName("TestDocument").binding("binding2");
 
 		fluent.addPreviousCompleteAccess(access1);
 		fluent.addPreviousCompleteAccess(access2);
@@ -191,11 +192,12 @@ public class FluentModuleRoleTest {
 		assertThat(fluent.get().getAccesses().size(), is(2));
 
 		// call the method under test
-		FluentModuleRolePreviousCompleteAccess result = fluent.findPreviousCompleteAccess("TestDocument1");
+		FluentModuleRolePreviousCompleteAccess result = fluent.findPreviousCompleteAccess("TestDocument", "binding1");
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
-		assertThat(result.get().getDocumentName(), is("TestDocument1"));
+		assertThat(result.get().getDocumentName(), is("TestDocument"));
+		assertThat(result.get().getBinding(), is("binding1"));
 	}
 
 	@Test
@@ -276,10 +278,10 @@ public class FluentModuleRoleTest {
 	public void testRemoveModelAggregateAccess() {
 		// setup the test data
 		FluentModuleRoleModelAggregateAccess access1 = new FluentModuleRoleModelAggregateAccess();
-		access1.modelName("TestModel1");
+		access1.documentName("TestDocument").modelName("TestModel1");
 
 		FluentModuleRoleModelAggregateAccess access2 = new FluentModuleRoleModelAggregateAccess();
-		access2.modelName("TestModel2");
+		access2.documentName("TestDocument").modelName("TestModel2");
 
 		fluent.addModelAggregateAccess(access1);
 		fluent.addModelAggregateAccess(access2);
@@ -288,7 +290,7 @@ public class FluentModuleRoleTest {
 		assertThat(fluent.get().getAccesses().size(), is(2));
 
 		// call the method under test
-		fluent.removeModelAggregateAccess("TestModel1");
+		fluent.removeModelAggregateAccess("TestDocument", "TestModel1");
 
 		// verify the result
 		assertThat(fluent.get().getAccesses().size(), is(1));

@@ -1,5 +1,7 @@
 package org.skyve.metadata.module.fluent;
 
+import java.util.Set;
+
 import org.skyve.impl.metadata.repository.module.ModuleRoleModelAggregateUserAccessMetaData;
 
 /**
@@ -7,9 +9,8 @@ import org.skyve.impl.metadata.repository.module.ModuleRoleModelAggregateUserAcc
  * 
  * @author benpetito
  */
-public class FluentModuleRoleModelAggregateAccess
-		extends FluentModuleRoleAccess<FluentModuleRoleModelAggregateAccess, ModuleRoleModelAggregateUserAccessMetaData> {
-
+public class FluentModuleRoleModelAggregateAccess extends
+				FluentModuleRoleAccess<FluentModuleRoleModelAggregateAccess, ModuleRoleModelAggregateUserAccessMetaData> {
 	/**
 	 * Creates a new FluentModuleRoleModelAggregateAccess.
 	 */
@@ -25,6 +26,16 @@ public class FluentModuleRoleModelAggregateAccess
 	}
 
 	/**
+	 * Returns a FluentModuleRoleModelAggregateAccess from runtime metadata.
+	 */
+	protected FluentModuleRoleModelAggregateAccess from(String documentName, String modelName, Set<String> uxuis) {
+		documentName(documentName);
+		modelName(modelName);
+		uxuis.forEach(u -> addUxUi(u));
+		return this;
+	}
+
+	/**
 	 * Specifies the document name for this FluentModuleRoleModelAggregateAccess.
 	 */
 	public FluentModuleRoleModelAggregateAccess documentName(final String documentName) {
@@ -33,14 +44,10 @@ public class FluentModuleRoleModelAggregateAccess
 	}
 
 	/**
-	 * Returns a FluentModuleRoleModelAggregateAccess from a ModuleRoleModelAggregateUserAccessMetaData.
+	 * Specifies the model name for this FluentModuleRoleModelAggregateAccess.
 	 */
-	@Override
-	protected FluentModuleRoleModelAggregateAccess from(
-			@SuppressWarnings("hiding") ModuleRoleModelAggregateUserAccessMetaData access) {
-		super.from(access);
-		documentName(access.getDocumentName());
-		modelName(access.getModelName());
+	public FluentModuleRoleModelAggregateAccess modelName(final String modelName) {
+		access.setModelName(modelName);
 		return this;
 	}
 
@@ -50,13 +57,5 @@ public class FluentModuleRoleModelAggregateAccess
 	@Override
 	public ModuleRoleModelAggregateUserAccessMetaData get() {
 		return access;
-	}
-
-	/**
-	 * Specifies the model name for this FluentModuleRoleModelAggregateAccess.
-	 */
-	public FluentModuleRoleModelAggregateAccess modelName(final String modelName) {
-		access.setModelName(modelName);
-		return this;
 	}
 }

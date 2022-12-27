@@ -1,5 +1,7 @@
 package org.skyve.metadata.module.fluent;
 
+import java.util.Set;
+
 import org.skyve.impl.metadata.repository.module.ModuleRoleSingularUserAccessMetaData;
 
 /**
@@ -7,9 +9,8 @@ import org.skyve.impl.metadata.repository.module.ModuleRoleSingularUserAccessMet
  * 
  * @author benpetito
  */
-public class FluentModuleRoleSingularAccess
-		extends FluentModuleRoleAccess<FluentModuleRoleSingularAccess, ModuleRoleSingularUserAccessMetaData> {
-
+public class FluentModuleRoleSingularAccess extends
+				FluentModuleRoleAccess<FluentModuleRoleSingularAccess, ModuleRoleSingularUserAccessMetaData> {
 	/**
 	 * Creates a new FluentModuleRoleSingularAccess.
 	 */
@@ -25,21 +26,19 @@ public class FluentModuleRoleSingularAccess
 	}
 
 	/**
-	 * Specifies the document name for this FluentModuleRoleSingularAccess.
+	 * Returns a FluentModuleRoleSingularAccess from a runtime metadata.
 	 */
-	public FluentModuleRoleSingularAccess documentName(final String documentName) {
-		access.setDocumentName(documentName);
+	protected FluentModuleRoleSingularAccess from(String documentName, Set<String> uxuis) {
+		documentName(documentName);
+		uxuis.forEach(u -> addUxUi(u));
 		return this;
 	}
 
 	/**
-	 * Returns a FluentModuleRoleSingularAccess from a ModuleRoleDocumentAggregateUserAccessMetaData.
+	 * Specifies the document name for this FluentModuleRoleSingularAccess.
 	 */
-	@Override
-	protected FluentModuleRoleSingularAccess from(@SuppressWarnings("hiding") ModuleRoleSingularUserAccessMetaData access) {
-		super.from(access);
-		documentName(access.getDocumentName());
-
+	public FluentModuleRoleSingularAccess documentName(final String documentName) {
+		access.setDocumentName(documentName);
 		return this;
 	}
 
