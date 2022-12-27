@@ -17,8 +17,8 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.security.SkyveRememberMeTokenRepository;
-import org.skyve.impl.util.TFAConfigurationSingleton;
-import org.skyve.impl.util.TwoFactorCustomerConfiguration;
+import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 public class SkyveSpringSecurity {
@@ -87,25 +88,20 @@ public class SkyveSpringSecurity {
 	 * @param createdTimestamp
 	 * @return
 	 */
-	private boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customer) throws SQLException {
-		
-		
-		TwoFactorCustomerConfiguration config = TFAConfigurationSingleton.getInstance().getConfig(customer);
-		
-		if (config == null || createdTimestamp == null || (! TFAConfigurationSingleton.isPushTfa(config) )) {
+	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customerName) {
+		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(customerName);
+		if ((config == null) || (createdTimestamp == null) || (! TwoFactorAuthConfigurationSingleton.isPushTfa(config))) {
 			return false;
 		}
 		
 		long expiryMillis = config.getTfaTimeOutSeconds() * 1000;
-		
 		long generatedTime = createdTimestamp.getTime();
 		long currentTime = new DateTime().getTime();
 		
 		return currentTime < (generatedTime + expiryMillis);
 	}
 	
-	public UserDetailsService jdbcUserDetailsService() {
-		
+	public UserDetailsManager jdbcUserDetailsManager() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;
 			
@@ -159,29 +155,17 @@ public class SkyveSpringSecurity {
 				return userFromUserQuery;
 			}
 			
-			private String getCustomerName(String springUsername) {
-				String customerName = null;
-				int slashIndex = springUsername.indexOf('/');
-				if (slashIndex > 0) {
-					customerName = springUsername.substring(0, slashIndex);
-				}
-				return customerName;
-			}
-			
-			private String getUsernameOnly(String springUsername) {
-				String userName = springUsername;
-				int slashIndex = userName.indexOf('/');
-				if (slashIndex > 0) {
-					userName = userName.substring(slashIndex + 1);
-				}
-				
-				return userName;
-			}
-			
 			@Override
 			protected List<UserDetails> loadUsersByUsername(String springUsername) {
-				final String customerName = getCustomerName(springUsername);
-				final String usernameOnly = getUsernameOnly(springUsername);
+				String tempCustomerName = null;
+				String tempUserName = springUsername;
+				int slashIndex = tempUserName.indexOf('/');
+				if (slashIndex > 0) {
+					tempCustomerName = tempUserName.substring(0, slashIndex);
+					tempUserName = tempUserName.substring(slashIndex + 1);
+				}
+				final String customerName = tempCustomerName;
+				final String userName = tempUserName;
 				
 				return getJdbcTemplate().query(
 						skyveUserQuery,
@@ -232,7 +216,7 @@ public class SkyveSpringSecurity {
 								}
 								
 								
-								return new UserTFA(user,
+								return new TwoFactorAuthUser(user,
 													password,
 													enabled,
 													true,
@@ -240,7 +224,7 @@ public class SkyveSpringSecurity {
 													! locked,
 													AuthorityUtils.NO_AUTHORITIES,
 													customerName,
-													usernameOnly,
+													userName,
 													twoFactorCode,
 													twoFactorToken,
 													tfaGenTime,
@@ -249,7 +233,7 @@ public class SkyveSpringSecurity {
 							}
 						},
 						// 2 params for multi-tennant
-						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, usernameOnly} : new String[] {usernameOnly});
+						(UtilImpl.CUSTOMER == null) ? new String[] {customerName, userName} : new String[] {userName});
 			}
 			
 			@Override
@@ -264,7 +248,7 @@ public class SkyveSpringSecurity {
 
 			@Override
 			public void updateUser(UserDetails user) {
-				UserTFA tfa = (UserTFA) user;
+				TwoFactorAuthUser tfa = (TwoFactorAuthUser) user;
 				
 				Timestamp codeGenTS = tfa.getTfaCodeGeneratedTimestamp() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedTimestamp().getTime());
 				

@@ -290,7 +290,7 @@ public class UtilImpl {
 	
 	public static boolean PRIMEFLEX = false;
 	
-	public static Set<String> TFA_CUSTOMER = null;
+	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;
 	
 	// for skyve script
 	/**

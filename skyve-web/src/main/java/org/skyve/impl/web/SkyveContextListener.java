@@ -42,7 +42,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
-import org.skyve.impl.util.TFAConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
@@ -97,6 +97,8 @@ public class SkyveContextListener implements ServletContextListener {
 
 			EXT.getJobScheduler().startup();
 
+			TwoFactorAuthConfigurationSingleton.getInstance().startup();
+
 			// Set up the session cookie
 			SessionCookieConfig scc = ctx.getSessionCookieConfig();
 			scc.setHttpOnly(true);
@@ -120,8 +122,6 @@ public class SkyveContextListener implements ServletContextListener {
 				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
 				internalCustomer.notifyStartup();
 			}
-			
-			TFAConfigurationSingleton.getInstance().startup(EXT.getDataStoreConnection());
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
@@ -607,13 +607,13 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS = number.intValue();
 		}
 		
-		UtilImpl.TFA_CUSTOMER = new HashSet<>();
-		List<String> tfaCustomer = getList("account", "tfaCustomer", account, false);
+		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = new HashSet<>();
+		List<String> tfaCustomer = getList("account", "tfaCustomers", account, false);
 		if (tfaCustomer != null) {
 			for (String customerName : tfaCustomer) {
 				String name = UtilImpl.processStringValue(customerName);
 				if (name != null) {
-					UtilImpl.TFA_CUSTOMER.add(name);
+					UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.add(name);
 				}
 			}
 		}
@@ -700,11 +700,7 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 	
 	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
-		
-		
-		
 		Object result = properties.get(key);
-		
 		if (required && (result == null)) {
 			if (prefix != null) {
 				throw new IllegalStateException(String.format("Property %s.%s does not exist in the JSON configuration.", prefix, key));
@@ -748,10 +744,16 @@ public class SkyveContextListener implements ServletContextListener {
 				try {
 					try {
 						try {
-							ProvidedRepository repository = ProvidedRepositoryFactory.get();
-							for (String customerName : repository.getAllCustomerNames()) {
-								CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
-								internalCustomer.notifyShutdown();
+							try {
+								ProvidedRepository repository = ProvidedRepositoryFactory.get();
+								for (String customerName : repository.getAllCustomerNames()) {
+									CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+									internalCustomer.notifyShutdown();
+								}
+							}
+							finally {
+								// Ensure Two Factor Auth Configuration is finalized
+								TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
 							}
 						}
 						finally {

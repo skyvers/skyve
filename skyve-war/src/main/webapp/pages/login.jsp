@@ -7,7 +7,7 @@
 <%@ page import="org.skyve.web.WebContext"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
-<%@ page import="org.skyve.impl.web.spring.TwoFactorAuthenticationForwardHandler"%>
+<%@ page import="org.skyve.impl.web.spring.TwoFactorAuthForwardHandler"%>
 <%@ page import="org.skyve.impl.web.spring.TwoFactorAuthPushFilter"%>
 <%
 	String tfaToken = UtilImpl.processStringValue((String) request.getAttribute(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE));
@@ -26,7 +26,7 @@
 	
 	if (show2FA) {	
 		customer = (String) request.getAttribute(TwoFactorAuthPushFilter.CUSTOMER_ATTRIBUTE);
-		error2FA = "1".equals(request.getAttribute(TwoFactorAuthenticationForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE));
+		error2FA = "1".equals(request.getAttribute(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE));
 		user = (String) request.getAttribute(TwoFactorAuthPushFilter.USER_ATTRIBUTE);
 		rmChecked = Boolean.TRUE.equals((Boolean) request.getAttribute(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE));
 	}
@@ -49,16 +49,16 @@
 	Locale locale = request.getLocale();
 	if (customer != null) {
 		try {
-			Customer c = CORE.getRepository().getCustomer(customer);
-			if (c != null) {
-				String languageTag = c.getLanguageTag();
-				if (languageTag != null) {
-					locale = Locale.forLanguageTag(languageTag);
-				}
-			}
+	Customer c = CORE.getRepository().getCustomer(customer);
+	if (c != null) {
+		String languageTag = c.getLanguageTag();
+		if (languageTag != null) {
+			locale = Locale.forLanguageTag(languageTag);
+		}
+	}
 		}
 		catch (Exception e) {
-			// cannot get locale - do nothing
+	// cannot get locale - do nothing
 		}
 	}
 	
@@ -71,12 +71,12 @@
 	boolean allowRegistration = (UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (! show2FA));
 	
 	String passwordEmptyError = show2FA ? 
-									Util.i18n("page.login.password.error.2FACode.required", locale) : 
-									Util.i18n("page.login.password.error.required", locale);
+							Util.i18n("page.login.password.error.2FACode.required", locale) : 
+							Util.i18n("page.login.password.error.required", locale);
 	
 	String loginBanner = show2FA ? 
-							Util.i18n("page.login.2FACode.banner", locale) :
-							Util.i18n("page.login.banner", locale);
+					Util.i18n("page.login.2FACode.banner", locale) :
+					Util.i18n("page.login.banner", locale);
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">

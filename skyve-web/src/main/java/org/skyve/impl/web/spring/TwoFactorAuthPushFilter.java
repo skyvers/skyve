@@ -13,12 +13,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.EXT;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
-import org.skyve.impl.util.TFAConfigurationSingleton;
-import org.skyve.impl.util.TwoFactorCustomerConfiguration;
+import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.util.OWASP;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -65,7 +66,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	protected boolean skipPushFilter(HttpServletRequest request, HttpServletResponse response) {
 		// No two factor customers defined
-		if (UtilImpl.TFA_CUSTOMER == null) {
+		if (UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS == null) {
 			return true;
 		}
 		
@@ -76,7 +77,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		String customerName = obtainCustomer(request);
 		
-		if (!UtilImpl.TFA_CUSTOMER.contains(customerName)) {
+		// TFA customer not in json
+		if (! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains(customerName)) {
 			return true;
 		}
 		
@@ -85,17 +87,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return true;
 		}
 
-		// TFA customer not in json
-		if (! UtilImpl.TFA_CUSTOMER.contains(customerName)) {
-			return true;
-		}
-
 		// No authentication required
 		if (! requiresAuthentication(request, response)) {
 			return true;
 		}
 				
-		return !TFAConfigurationSingleton.getInstance().isPushTfa(customerName);
+		return (! TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName));
 	}
 
 	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
@@ -112,7 +109,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		// if it gets to here, there is no two factor token.
 		// take the opportunity in this method to clear the old TFA details if they exist;
-		if ( TFAConfigurationSingleton.getInstance().getConfig(obtainCustomer(request)).isTfaEmail()) {
+		if (TwoFactorAuthConfigurationSingleton.getInstance().getConfig(obtainCustomer(request)).isTfaEmail()) {
 			boolean stopSecFilterChain = doPushNotificationProcess(request, response);
 			
 			if (! stopSecFilterChain) {
@@ -139,11 +136,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 */
 	private boolean doPushNotificationProcess(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException, ServletException {
-		String username = obtainUsername(request);
-		String customer = obtainCustomer(request);
+		String userName = obtainUsername(request);
+		String customerName = obtainCustomer(request);
 		
-		UserTFA user = getUserDB(username);
-		
+		TwoFactorAuthUser user = getUserDB(userName);
 		if (user == null) {
 			return false;
 		}
@@ -170,10 +166,10 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			pushNotification(user, twoFactorCodeClearText);
 
 			// redirect to 2FA code entry page
-			TwoFactorAuthenticationForwardHandler handler = new TwoFactorAuthenticationForwardHandler("/login");
+			TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
 
-			request.setAttribute(CUSTOMER_ATTRIBUTE, customer);
-			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
+			request.setAttribute(CUSTOMER_ATTRIBUTE, OWASP.sanitise(Sanitisation.text, customerName));
+			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  OWASP.sanitise(Sanitisation.text, user.getTfaToken()));
 			request.setAttribute(USER_ATTRIBUTE, user.getUser());
 			request.setAttribute(REMEMBER_ATTRIBUTE, Boolean.valueOf(rememberMe));
 			handler.onAuthenticationFailure(request, response, new TwoFactorAuthRequiredException("OTP sent", false));
@@ -197,8 +193,12 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	throws IOException, ServletException {
 		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
 		String username = obtainUsername(request);
-		UserTFA user = getUserDB(username);
+		TwoFactorAuthUser user = getUserDB(username);
 		
+		if (user == null) {
+			return false;
+		}
+
 		if ((! tfaCodesPopulated(user)) || (! twoFactorToken.equals(user.getTfaToken())) ) {
 			UtilImpl.LOGGER.info("Inconsistent TFA details. TFA Codes populated : " + 
 									String.valueOf(tfaCodesPopulated(user)) +
@@ -220,7 +220,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		catch (@SuppressWarnings("unused") AuthenticationException e) {
 			// throws error if authentication failed, catch so we want to handle it
 			UtilImpl.LOGGER.info("Provided TFA code does not match."); 
-			TwoFactorAuthenticationForwardHandler handler = new TwoFactorAuthenticationForwardHandler("/login");
+			TwoFactorAuthForwardHandler handler = new TwoFactorAuthForwardHandler("/login");
 			request.setAttribute(CUSTOMER_ATTRIBUTE, user.getCustomer());
 			request.setAttribute(TWO_FACTOR_TOKEN_ATTRIBUTE,  user.getTfaToken());
 			request.setAttribute(USER_ATTRIBUTE, user.getUser());
@@ -231,7 +231,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return false;
 	}
 	
-	private void clearTFADetails(UserTFA user) {
+	private void clearTFADetails(TwoFactorAuthUser user) {
 		boolean edited = false;
 		
 		if (user.getTfaCodeGeneratedTimestamp() != null) {
@@ -272,7 +272,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	/**
 	 * send the push notification
 	 */
-	protected abstract void pushNotification(UserTFA user, String code);
+	protected abstract void pushNotification(TwoFactorAuthUser user, String code);
 	
 	/**
 	 * Get the user details required for this filter
@@ -281,7 +281,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return
 	 * @throws Exception 
 	 */
-	protected UserTFA getUserDB(String username) {
+	protected TwoFactorAuthUser getUserDB(String username) {
 		UserDetails userDetails;
 		try {
 			userDetails = userDetailsManager.loadUserByUsername(username);
@@ -291,13 +291,13 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return null;
 		}
 		
-		if (userDetails instanceof UserTFA) {
-			return (UserTFA) userDetails;
+		if (userDetails instanceof TwoFactorAuthUser) {
+			return (TwoFactorAuthUser) userDetails;
 		}
-		throw new DomainException("Two Factor Authentication expects the user details service : skyve.jdbcUserDetailsService()");
+		return null;
 	}
 	
-	protected void updateUserTFADetails(UserTFA user) {
+	protected void updateUserTFADetails(TwoFactorAuthUser user) {
 		userDetailsManager.updateUser(user);
 	}
 	
@@ -323,7 +323,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param request
 	 * @return
 	 */
-	protected boolean canAuthenticateWithPassword(HttpServletRequest request, UserTFA user) {
+	protected boolean canAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
 		String password = obtainPassword(request);
 		password = (password != null) ? password : "";
 		
@@ -332,7 +332,6 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	
 	@SuppressWarnings("static-method")
 	protected boolean tfaCodeExpired(String customer, String twoFactorCode) {
-		
 		long generatedTime;
 		try {
 			String [] splitParts = twoFactorCode.split("-");
@@ -351,8 +350,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return currentTime > (generatedTime + expiryMillis);
 	}
 	
-	private long getTwoFactorTimeoutMillis(String customer) {
-		TwoFactorCustomerConfiguration config = TFAConfigurationSingleton.getInstance().getConfig(customer);
+	private static long getTwoFactorTimeoutMillis(String customer) {
+		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(customer);
 		int timeoutSeconds = config.getTfaTimeOutSeconds();
 		return timeoutSeconds * 1000;
 	}
@@ -364,10 +363,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return
 	 */
 	@SuppressWarnings("static-method")
-	protected boolean tfaCodesPopulated(UserTFA user) {
+	protected boolean tfaCodesPopulated(TwoFactorAuthUser user) {
 		return ((user.getTfaCode() != null) &&
 				(user.getTfaToken() != null) &&
 				(user.getTfaCodeGeneratedTimestamp() != null));
 	}
-	
 }
