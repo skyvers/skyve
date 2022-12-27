@@ -1856,7 +1856,8 @@ public class ClientViewRenderer extends ViewRenderer {
 									String toolTip,
 									String confirmationText,
 									char type, 
-									ActionImpl action) {
+									ActionImpl action,
+									boolean canDelete) {
 		processImplicitAction(action, ImplicitActionName.Remove);
 	}
 

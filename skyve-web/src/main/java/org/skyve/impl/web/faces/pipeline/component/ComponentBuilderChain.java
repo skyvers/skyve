@@ -847,6 +847,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent remove(UIComponent component, 
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action,
+								boolean canDelete) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.remove(result, label, iconStyleClass, toolTip, confirmationText, action, canDelete);
+		}
+		return result;
+	}
+
+	@Override
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,

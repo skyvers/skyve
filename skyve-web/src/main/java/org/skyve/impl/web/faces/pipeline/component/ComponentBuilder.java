@@ -520,6 +520,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										String confirmationText,
 										Action action);
 
+	public abstract UIComponent remove(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										Action action,
+										boolean canDelete);
+
 	public abstract UIComponent action(UIComponent component, 
 										String dataWidgetBinding, 
 										String dataWidgetVar,

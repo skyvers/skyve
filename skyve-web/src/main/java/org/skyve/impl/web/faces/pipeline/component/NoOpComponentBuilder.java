@@ -494,6 +494,17 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent remove(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action,
+								boolean canDelete) {
+		return component;
+	}
+
+	@Override
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
