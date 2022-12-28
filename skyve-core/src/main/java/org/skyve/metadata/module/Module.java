@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.skyve.impl.metadata.repository.ViewLayout;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.SerializableMetaData;
@@ -123,7 +123,7 @@ public interface Module extends NamedMetaData, PersistentMetaData {
 	 */
 	public boolean isPrototype();
 
-	public ViewLayout getViewLayout();
+	public FormLabelLayout getFormLabelLayout();
 	
 	/**
 	 * 

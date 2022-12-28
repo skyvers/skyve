@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -158,9 +159,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 
 		// NB Module entry names (keys) are in defined order
-		for (Entry<String, ViewLayout> moduleEntry : ((CustomerImpl) customer).getModuleEntries().entrySet()) {
+		for (Entry<String, FormLabelLayout> moduleEntry : ((CustomerImpl) customer).getModuleEntries().entrySet()) {
 			String moduleName = moduleEntry.getKey();
-			ViewLayout layout = moduleEntry.getValue();
+			FormLabelLayout formLabelLayout = moduleEntry.getValue();
 
 			Module module = null;
 			try {
@@ -177,7 +178,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 			// Catch where we can't convert from top defined to side rendered
 			// NB null = side (the default)
-			if ((layout != ViewLayout.top) && (module.getViewLayout() == ViewLayout.top)) {
+			if ((formLabelLayout != FormLabelLayout.top) && (module.getFormLabelLayout() == FormLabelLayout.top)) {
 				throw new MetaDataException("Module reference " + moduleName + " for customer " + customer.getName() +
 												" has a layout of side but the module is defined with a layout of top and cannot be converted");
 			}

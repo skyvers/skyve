@@ -31,10 +31,10 @@ import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
@@ -53,7 +53,7 @@ import org.skyve.metadata.view.View.ViewType;
 			name = "module",
 			propOrder = {"title",
 							"prototype",
-							"viewLayout",
+							"formLabelLayout",
 							"documentation", 
 							"homeRef",
 							"homeDocument",
@@ -67,7 +67,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 
 	private String title;
 	private Boolean prototype;
-	private ViewLayout viewLayout;
+	private FormLabelLayout formLabelLayout;
 	private ViewType homeRef;
 	private String homeDocument;
 	private List<JobMetaDataImpl> jobs = new ArrayList<>();
@@ -101,12 +101,12 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 	}
 
 	@XmlAttribute
-	public void setViewLayout(ViewLayout viewLayout) {
-		this.viewLayout = viewLayout;
+	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+		this.formLabelLayout = formLabelLayout;
 	}
 
-	public ViewLayout getViewLayout() {
-		return viewLayout;
+	public FormLabelLayout getFormLabelLayout() {
+		return formLabelLayout;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
@@ -197,7 +197,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 
 		result.setPrototype(Boolean.TRUE.equals(prototype));
 		
-		result.setViewLayout(getViewLayout());
+		result.setFormLabelLayout(getFormLabelLayout());
 		
 		result.setDocumentation(documentation);
 		

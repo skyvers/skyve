@@ -17,7 +17,6 @@ import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
-import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
@@ -41,7 +40,6 @@ import org.skyve.metadata.view.View.ViewParameter;
 							"icon32x32RelativeFileName",
 							"helpRelativeFileName",
 							"helpURL",
-							"layout",
 							"refreshTimeInSeconds",
 							"refreshConditionName", 
 							"refreshActionName",
@@ -57,7 +55,6 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 	private String icon32x32RelativeFileName;
 	private String helpRelativeFileName;
 	private String helpURL;
-	private ViewLayout layout;
 	private Actions actions = null;
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
@@ -124,15 +121,6 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 	@XmlAttribute(name = "helpURL")
 	public void setHelpURL(String helpURL) {
 		this.helpURL = UtilImpl.processStringValue(helpURL);
-	}
-
-	public ViewLayout getLayout() {
-		return layout;
-	}
-
-	@XmlAttribute(name = "layout")
-	public void setLayout(ViewLayout layout) {
-		this.layout = layout;
 	}
 
 	public Actions getActions() {
@@ -229,8 +217,6 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 		result.setHelpRelativeFileName(getHelpRelativeFileName());
 		result.setHelpURL(getHelpURL());
 		
-		result.setLayout(getLayout());
-
 		String theName = getName();
 		if (theName == null) {
 			throw new MetaDataException(metaDataName + " : The view [name] is required for view " + metaDataName);

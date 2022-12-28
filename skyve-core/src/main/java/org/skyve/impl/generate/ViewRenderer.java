@@ -10,7 +10,6 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -24,6 +23,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
@@ -108,11 +108,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 		this.stopTop = stopTop;
 	}
 
-	// Should this view be rendered with top labels or side labels
-	private boolean renderTopLabels = false;
-	public boolean isRenderTopLabels() {
-		return renderTopLabels;
-	}
 	// Is this view defined with top labels or side labels
 	private boolean authoredTopLabels = false;
 	public boolean isAuthoredTopLabels() {
@@ -124,22 +119,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	@Override
 	public final void visitView() {
-		authoredTopLabels = (module.getViewLayout() == ViewLayout.top);
-		if (stopTop) {
-			renderTopLabels = false;
-		}
-		else {
-			ViewLayout layout = view.getLayout();
-			renderTopLabels = (layout == ViewLayout.top);
-			if (! renderTopLabels) {
-				renderTopLabels = authoredTopLabels;
-			}
-			if (! renderTopLabels) {
-				layout = customer.getModuleEntries().get(module.getName());
-				renderTopLabels = (layout == ViewLayout.top);
-			}
-		}
-		
+		authoredTopLabels = (module.getFormLabelLayout() == FormLabelLayout.top);
 		viewIcon16x16Url = iconToUrl(document.getIcon16x16RelativeFileName());
 		String viewIcon32x32 = view.getIcon32x32RelativeFileName();
 		viewIcon32x32Url = iconToUrl((viewIcon32x32 == null) ? document.getIcon32x32RelativeFileName() : viewIcon32x32);
@@ -242,8 +222,31 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 	private String currentFormBorderTitle;
 	
+	// Should the view forms be rendered with top labels or side labels
+	private boolean renderTopFormLabels = false;
+	public boolean isRenderTopFormLabels() {
+		return renderTopFormLabels;
+	}
+
 	@Override
 	public final void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
+		if (stopTop) {
+			renderTopFormLabels = false;
+		}
+		else {
+			FormLabelLayout layout = form.getLabelLayout();
+			if (layout != null) {
+				renderTopFormLabels = (layout == FormLabelLayout.top);
+			}
+			else {
+				renderTopFormLabels = authoredTopLabels;
+				if (! renderTopFormLabels) {
+					layout = customer.getModuleEntries().get(module.getName());
+					renderTopFormLabels = (layout == FormLabelLayout.top);
+				}
+			}
+		}
+		
 		currentForm = form;
 		currentFormBorderTitle = form.getLocalisedBorderTitle();
 		currentFormColumnIndex = 0;
@@ -258,6 +261,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 		currentForm = null;
 		currentFormBorderTitle = null;
+		renderTopFormLabels = false;
 	}
 
 	public abstract void renderedForm(String borderTitle, Form form);
@@ -420,7 +424,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 			// If showing label and we're rendering top for a side authored form,
 			// increment the colspan so we assume the size of the side label column too.
-			if (currentWidgetShowLabel && renderTopLabels && (! authoredTopLabels)) {
+			if (currentWidgetShowLabel && renderTopFormLabels && (! authoredTopLabels)) {
 				currentWidgetColspan++;
 			}
 			renderFormItem(currentWidgetLabel,

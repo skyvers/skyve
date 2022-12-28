@@ -17,9 +17,9 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryContentColumnImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -50,7 +50,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	
 	private boolean prototype;
 	
-	private ViewLayout viewLayout;
+	private FormLabelLayout formLabelLayout;
 	
 	private Map<String, DocumentRef> documentRefs = new TreeMap<>();
 
@@ -126,12 +126,12 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
-	public ViewLayout getViewLayout() {
-		return viewLayout;
+	public FormLabelLayout getFormLabelLayout() {
+		return formLabelLayout;
 	}
 
-	public void setViewLayout(ViewLayout viewLayout) {
-		this.viewLayout = viewLayout;
+	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+		this.formLabelLayout = formLabelLayout;
 	}
 
 	@Override

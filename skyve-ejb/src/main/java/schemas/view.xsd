@@ -684,7 +684,6 @@
         <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
         <xs:attribute name="helpRelativeFileName" type="xs:string"/>
         <xs:attribute name="helpURL" type="xs:string"/>
-        <xs:attribute name="layout" type="ns1:viewLayout"/>
         <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
         <xs:attribute name="refreshIf" type="xs:string"/>
         <xs:attribute name="refreshAction" type="xs:string"/>
@@ -1125,6 +1124,7 @@
     <xs:attribute name="border" type="xs:boolean"/>
     <xs:attribute name="borderTitle" type="xs:string"/>
     <xs:attribute name="defaultLabelAlign" type="tns:horizontalAlignment"/>
+    <xs:attribute name="labelLayout" type="ns1:formLabelLayout"/>
     <xs:attribute name="disabled" type="xs:string"/>
     <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>

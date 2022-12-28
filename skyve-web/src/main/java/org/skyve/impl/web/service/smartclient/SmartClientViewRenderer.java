@@ -404,7 +404,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("var ").append(formVariable);
 		code.append("=isc.DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
 		// Render form with top labels if required (increase cell padding somewhat to accommodate
-		if (isRenderTopLabels()) {
+		if (isRenderTopFormLabels()) {
 			code.append("titleOrientation:'top',cellPadding:5,");
 		}
 		// SC docs says that autoFocus will focus in first focusable item
@@ -529,7 +529,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		
 		// Move along the requisite amount of form columns
-		if (showLabel && (! isRenderTopLabels())) {
+		if (showLabel && (! isRenderTopFormLabels())) {
 			incrementFormColumn();
 		}
 		for (int i = 0, l = colspan; i < l; i++) {

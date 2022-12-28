@@ -13,7 +13,6 @@ import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
-import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.view.Actions;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -29,6 +28,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -92,7 +92,7 @@ public class ViewGenerator {
 		}
 		else if (ViewType.edit.toString().equals(viewName)) {
 			// NB Default to side layout
-			result = generateEditView(customer, module, document, module.getViewLayout() != ViewLayout.top);
+			result = generateEditView(customer, module, document, module.getFormLabelLayout() != FormLabelLayout.top);
 		}
 		else {
 			throw new IllegalArgumentException("ViewGenerator : Cannot generate a view of type " + viewName);
@@ -130,7 +130,7 @@ public class ViewGenerator {
 		MetaData widget;
 	}
 	
-	private ViewImpl generateEditView(Customer customer, Module module, Document document, boolean sideLayout) {
+	private ViewImpl generateEditView(Customer customer, Module module, Document document, boolean formLabelSideLayout) {
 		ViewImpl result = new ViewImpl();
 		result.setName(ViewType.edit.toString());
 
@@ -192,7 +192,7 @@ public class ViewGenerator {
 		form.setSm(TWELVE);
 		form.setLg(SIX);
 		form.setXl(FOUR);
-		if (sideLayout) {
+		if (formLabelSideLayout) {
 			FormColumn column = new FormColumn();
 			column.setResponsiveWidth(FOUR);
 			form.getColumns().add(column);
