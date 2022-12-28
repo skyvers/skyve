@@ -108,18 +108,11 @@ public abstract class ViewRenderer extends ViewVisitor {
 		this.stopTop = stopTop;
 	}
 
-	// Is this view defined with top labels or side labels
-	private boolean authoredTopLabels = false;
-	public boolean isAuthoredTopLabels() {
-		return authoredTopLabels;
-	}
-
 	private String viewIcon16x16Url;
 	private String viewIcon32x32Url;
 	
 	@Override
 	public final void visitView() {
-		authoredTopLabels = (module.getFormLabelLayout() == FormLabelLayout.top);
 		viewIcon16x16Url = iconToUrl(document.getIcon16x16RelativeFileName());
 		String viewIcon32x32 = view.getIcon32x32RelativeFileName();
 		viewIcon32x32Url = iconToUrl((viewIcon32x32 == null) ? document.getIcon32x32RelativeFileName() : viewIcon32x32);
@@ -222,27 +215,41 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 	private String currentFormBorderTitle;
 	
-	// Should the view forms be rendered with top labels or side labels
-	private boolean renderTopFormLabels = false;
-	public boolean isRenderTopFormLabels() {
-		return renderTopFormLabels;
+	// Is this form defined with top labels or side labels (by module default or form setting)
+	private boolean currentFormAuthoredTopLabels = false;
+	public boolean isCurrentFormAuthoredTopLabels() {
+		return currentFormAuthoredTopLabels;
+	}
+
+	// Should this form be rendered with top labels or side labels
+	private boolean currentFormRenderTopLabels = false;
+	public boolean isCurrentFormRenderTopLabels() {
+		return currentFormRenderTopLabels;
 	}
 
 	@Override
 	public final void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
+		// Disallow top rendering (for PF currently)
 		if (stopTop) {
-			renderTopFormLabels = false;
+			currentFormAuthoredTopLabels = false;
+			currentFormRenderTopLabels = false;
 		}
 		else {
+			// If explicitly defined on the form, use that
 			FormLabelLayout layout = form.getLabelLayout();
 			if (layout != null) {
-				renderTopFormLabels = (layout == FormLabelLayout.top);
+				currentFormAuthoredTopLabels = (layout == FormLabelLayout.top);
+				currentFormRenderTopLabels = currentFormAuthoredTopLabels;
 			}
 			else {
-				renderTopFormLabels = authoredTopLabels;
-				if (! renderTopFormLabels) {
+				// Use the module definition (defaults to side)
+				currentFormAuthoredTopLabels = (module.getFormLabelLayout() == FormLabelLayout.top);
+				currentFormRenderTopLabels = currentFormAuthoredTopLabels;
+
+				// Use the customer override to render if defined
+				if (! currentFormRenderTopLabels) {
 					layout = customer.getModuleEntries().get(module.getName());
-					renderTopFormLabels = (layout == FormLabelLayout.top);
+					currentFormRenderTopLabels = (layout == FormLabelLayout.top);
 				}
 			}
 		}
@@ -261,7 +268,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 		currentForm = null;
 		currentFormBorderTitle = null;
-		renderTopFormLabels = false;
+		currentFormAuthoredTopLabels = false;
+		currentFormRenderTopLabels = false;
 	}
 
 	public abstract void renderedForm(String borderTitle, Form form);
@@ -424,7 +432,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 			// If showing label and we're rendering top for a side authored form,
 			// increment the colspan so we assume the size of the side label column too.
-			if (currentWidgetShowLabel && renderTopFormLabels && (! authoredTopLabels)) {
+			if (currentWidgetShowLabel && currentFormRenderTopLabels && (! currentFormAuthoredTopLabels)) {
 				currentWidgetColspan++;
 			}
 			renderFormItem(currentWidgetLabel,

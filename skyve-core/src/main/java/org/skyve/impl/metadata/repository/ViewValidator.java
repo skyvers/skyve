@@ -137,7 +137,6 @@ class ViewValidator extends ViewVisitor {
 		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view, uxui);
 		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
-		visit();
 	}
 
 	private void validateBinding(String bindingPrefix,
