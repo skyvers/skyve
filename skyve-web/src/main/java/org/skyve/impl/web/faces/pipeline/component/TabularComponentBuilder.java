@@ -178,7 +178,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return panelGroup(true, false, false, invisibleConditionName, null);
+		HtmlPanelGroup result = panelGroup(true, false, false, null, null);
+
+		// Don't render the view if there is not bean selected as 
+		// it'll cause a cascade of stack traces as the EL is evaluated
+		StringBuilder rendered = new StringBuilder(64);
+		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
+		rendered.append(managedBeanName).append(".currentBean.getBean() ne null) and (not ");
+		rendered.append(managedBeanName).append(".currentBean['").append(invisibleConditionName).append("'])");
+		result.setValueExpression("rendered",
+									createValueExpressionFromFragment(null,
+																		false,
+																		rendered.toString(),
+																		false,
+																		null,
+																		Boolean.class,
+																		false,
+																		Sanitisation.none));
+		return result;
 	}
 
 	@Override
