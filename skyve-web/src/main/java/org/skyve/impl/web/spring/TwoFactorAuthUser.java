@@ -7,7 +7,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-public class UserTFA extends User {
+public class TwoFactorAuthUser extends User {
 	private static final long serialVersionUID = 2127717918658548938L;
 	
 	private String tfaCode;
@@ -18,7 +18,7 @@ public class UserTFA extends User {
 	private String email;
 	private String userPassword;
 
-	public UserTFA(String username,
+	public TwoFactorAuthUser(String username,
 					String password,
 					boolean enabled,
 					boolean accountNonExpired,

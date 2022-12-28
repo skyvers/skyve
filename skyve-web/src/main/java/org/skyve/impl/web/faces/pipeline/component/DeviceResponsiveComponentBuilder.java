@@ -42,7 +42,8 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 											String formDisabled,
 											String invisible,
 											String processOverride,
-											String updateOverride) {
+											String updateOverride,
+											boolean canDelete) {
 		if (UserAgentType.phone.equals(userAgentType)) {
 			return super.actionButton(title, 
 										iconStyleClass,
@@ -60,7 +61,8 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 										formDisabled,
 										invisible,
 										processOverride,
-										updateOverride);
+										updateOverride,
+										canDelete);
 		}
 
 		return super.actionButton(title, 
@@ -79,6 +81,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 									formDisabled,
 									invisible,
 									processOverride,
-									updateOverride);
+									updateOverride,
+									canDelete);
 	}
 }

@@ -417,7 +417,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												String dataWidgetVar,
 												String gridColumnExpression,
 												String singluarDocumentAlias,
-												boolean inline) {
+												boolean inline,
+												boolean canCreate,
+												boolean canDelete) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridActionColumn(result,
@@ -426,7 +428,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 														dataWidgetVar,
 														gridColumnExpression,
 														singluarDocumentAlias,
-														inline);
+														inline,
+														canCreate,
+														canDelete);
 		}
 		return result;
 	}
@@ -838,6 +842,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.upload(result, label, iconStyleClass, toolTip, confirmationText, action);
+		}
+		return result;
+	}
+
+	@Override
+	public UIComponent remove(UIComponent component, 
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action,
+								boolean canDelete) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.remove(result, label, iconStyleClass, toolTip, confirmationText, action, canDelete);
 		}
 		return result;
 	}

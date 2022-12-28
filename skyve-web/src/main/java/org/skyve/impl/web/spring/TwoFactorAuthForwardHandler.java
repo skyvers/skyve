@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.ForwardAuthenticationFailureHandler;
 
-public class TwoFactorAuthenticationForwardHandler extends ForwardAuthenticationFailureHandler {
+public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHandler {
 	public static String TWO_FACTOR_AUTH_ERROR_ATTRIBUTE = "tfaerror";
 	
-	public TwoFactorAuthenticationForwardHandler(String forwardUrl) {
+	public TwoFactorAuthForwardHandler(String forwardUrl) {
 		super(forwardUrl);
 	}
 

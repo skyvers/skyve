@@ -19,6 +19,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -407,7 +408,8 @@ public class WebUtil {
 											String bizId, 
 											Persistence persistence,
 											Bean conversationBean,
-											WebContext webContext) {
+											WebContext webContext)
+	throws NoResultsException, SecurityException {
 		Bean result = null;
 		
 		User user = persistence.getUser();
@@ -433,12 +435,11 @@ public class WebUtil {
 				
 			}
 		}
-		if (result == null) {
+		if ((result == null) && referenceDocument.isPersistable()) {
 			result = persistence.retrieve(referenceDocument, bizId);
 		}
 		if (result == null) {
-			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
-																		referenceDocument.getLocalisedSingularAlias())));
+			throw new NoResultsException();
 		}
 		if (! user.canReadBean(bizId, 
 								result.getBizModule(), 
