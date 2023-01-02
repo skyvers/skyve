@@ -972,10 +972,12 @@ isc.EditView.addMethods({
 										(tool.type == 'S') || // Save
 										(tool.type == 'C') || // Cancel
 										(tool.type == 'D') || // Delete
-										// only allow the remove button if we came from a list
+										// Conditionally show the remove button
 										((tool.type == 'R') && // Remove
-											((this._openedFromDataGrid === undefined) ||
-												(! this._openedFromDataGrid))));
+											// only allow the remove button if we came from a list
+											((this._openedFromDataGrid === undefined) || (! this._openedFromDataGrid) || 
+												// if no delete privilege, show remove button if its a non-persisted record
+												((! tool._canDelete) && values.persisted))));
 				}
 				else { // top view
 					this._showHide(tool, 

@@ -1351,11 +1351,16 @@ public class FacesViewRenderer extends ViewRenderer {
 	private void renderedDataWidget(AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
+		boolean canCreate = false;
+		boolean canDelete = false;
 		TargetMetaData target = getCurrentTarget();
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation != null) {
-				alias = module.getDocument(customer, targetRelation.getDocumentName()).getLocalisedSingularAlias();
+				final Document targetDocument = module.getDocument(customer, targetRelation.getDocumentName());
+				alias = targetDocument.getLocalisedSingularAlias();
+				canCreate = user.canCreateDocument(targetDocument);
+				canDelete = user.canDeleteDocument(targetDocument);
 			}
 		}
 
@@ -1367,7 +1372,9 @@ public class FacesViewRenderer extends ViewRenderer {
 													dataWidgetVar,
 													gridColumnExpression.toString(), 
 													alias, 
-													Boolean.TRUE.equals(grid.getInline()));
+													Boolean.TRUE.equals(grid.getInline()),
+													canCreate,
+													canDelete);
 		}
 	    dataWidgetBinding = null;
 	    dataWidgetVar = null;
@@ -2475,8 +2482,9 @@ public class FacesViewRenderer extends ViewRenderer {
 									String toolTip,
 									String confirmationText,
 									char type, 
-									ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Remove);
+									ActionImpl action,
+									boolean canDelete) {
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Remove, canDelete);
 	}
 
 	@Override
@@ -2487,7 +2495,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.ZoomOut);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.ZoomOut, false);
 	}
 
 	@Override
@@ -2498,7 +2506,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-//		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Navigate);
+//		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Navigate, false);
 	}
 
 	@Override
@@ -2509,7 +2517,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								String confirmationText,
 								char type,
 								ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.OK);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.OK, false);
 	}
 
 	@Override
@@ -2520,7 +2528,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Save);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Save, false);
 	}
 
 	@Override
@@ -2531,7 +2539,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Cancel);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Cancel, false);
 	}
 
 	@Override
@@ -2542,7 +2550,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Delete);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Delete, false);
 	}
 
 	/**
@@ -2559,7 +2567,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Report);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Report, false);
 	}
 
 	@Override
@@ -2570,7 +2578,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizExport);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizExport, false);
 	}
 
 	@Override
@@ -2581,7 +2589,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizImport);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizImport, false);
 	}
 
 	@Override
@@ -2592,7 +2600,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										String confirmationText,
 										char type,
 										ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Download);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Download, false);
 	}
 
 	@Override
@@ -2603,7 +2611,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Upload);
+		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Upload, false);
 	}
 
 	@Override
@@ -2614,7 +2622,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									String confirmationText,
 									char type,
 									ActionImpl action) {
-//		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.New);
+//		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.New, false);
 	}
 
 	@Override
@@ -2644,7 +2652,8 @@ public class FacesViewRenderer extends ViewRenderer {
 										String toolTip,
 										String confirmationText,
 										Action action,
-										ImplicitActionName name) {
+										ImplicitActionName name,
+										boolean canDelete) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
@@ -2664,11 +2673,16 @@ public class FacesViewRenderer extends ViewRenderer {
 					else if (ImplicitActionName.Upload.equals(name)) {
 						toolbarLayout.getChildren().add(cb.upload(null, label, iconStyleClass, toolTip, confirmationText, action));
 					}
+					else if (ImplicitActionName.Remove.equals(name)) {
+						toolbarLayout.getChildren().add(cb.remove(null,
+																	label,
+																	iconStyleClass,
+																	toolTip,
+																	confirmationText,
+																	action,
+																	canDelete));
+					}
 					else {
-						String displayName = action.getLocalisedDisplayName();
-						if (displayName == null) {
-							displayName = name.getLocalisedDisplayName();
-						}
 						toolbarLayout.getChildren().add(cb.action(null,
 																	dataWidgetBinding,
 																	dataWidgetVar,

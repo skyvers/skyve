@@ -166,7 +166,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
 public class TabularComponentBuilder extends ComponentBuilder {
-
 	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
 	public static final String SINGLE_ACTION_COLUMN_WIDTH = "60";
@@ -179,7 +178,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return panelGroup(true, false, false, invisibleConditionName, null);
+		HtmlPanelGroup result = panelGroup(true, false, false, null, null);
+
+		// Don't render the view if there is not bean selected as 
+		// it'll cause a cascade of stack traces as the EL is evaluated
+		StringBuilder rendered = new StringBuilder(64);
+		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
+		rendered.append(managedBeanName).append(".currentBean.getBean() ne null) and (not ");
+		rendered.append(managedBeanName).append(".currentBean['").append(invisibleConditionName).append("'])");
+		result.setValueExpression("rendered",
+									createValueExpressionFromFragment(null,
+																		false,
+																		rendered.toString(),
+																		false,
+																		null,
+																		Boolean.class,
+																		false,
+																		Sanitisation.none));
+		return result;
 	}
 
 	@Override
@@ -341,7 +357,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                formDisabledConditionName,
 				                action.getInvisibleConditionName(),
 				                properties.get(PROCESS_KEY),
-				                properties.get(UPDATE_KEY));
+				                properties.get(UPDATE_KEY),
+				                false);
 	}
 
 	@Override
@@ -712,7 +729,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												String dataWidgetVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
-												boolean inline) {
+												boolean inline,
+												boolean canCreate,
+												boolean canDelete) {
 		if (component != null) {
 			return component;
 		}
@@ -738,7 +757,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
 			col.getFacets().put("header", columnHeader);
 
-			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
+			if (canCreate && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
 				CommandButton button = createDataGridAddButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledConditionName);
 				columnHeader.getChildren().add(button);
 			}
@@ -748,7 +767,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				children.add(button);
 			}
 
-			if (! Boolean.FALSE.equals(grid.getShowRemove())) {
+			if (canDelete && (! Boolean.FALSE.equals(grid.getShowRemove()))) {
 				// Conditionally add some whitespace between buttons
 				if (! col.getChildren().isEmpty()) {
 					children.add(label(null, " "));
@@ -2787,6 +2806,39 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent remove(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								Action action,
+								boolean canDelete) {
+		if (component != null) {
+			return component;
+		}
+
+		Map<String, String> properties = action.getProperties();
+		return actionButton(label,
+								iconStyleClass,
+								toolTip,
+								ImplicitActionName.Remove,
+								action.getName(),
+								false,
+								null,
+								null,
+								null,
+								null,
+								action.getClientValidation(),
+								confirmationText,
+								action.getDisabledConditionName(),
+								null,
+								action.getInvisibleConditionName(),
+								properties.get(PROCESS_KEY),
+								properties.get(UPDATE_KEY),
+								canDelete);
+	}
+	
+	@Override
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
@@ -2817,7 +2869,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								action.getInvisibleConditionName(),
 								properties.get(PROCESS_KEY),
-								properties.get(UPDATE_KEY));
+								properties.get(UPDATE_KEY),
+								false);
 	}
 
 	protected Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
@@ -3189,7 +3242,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String formDisabled,
 											String invisible,
 											String processOverride,
-											String updateOverride) {
+											String updateOverride,
+											boolean canDelete) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
 		result.setValue(title);
@@ -3291,6 +3345,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (! inline) { // inline grids don't need invisible expression on remove button or link
 				StringBuilder expression = new StringBuilder(128);
 				expression.append("not empty ").append(managedBeanName).append(".viewBinding");
+				if (ImplicitActionName.Remove.equals(implicitActionName) && (! canDelete)) {
+					expression.insert(0, '(');
+					expression.append(" and ").append(managedBeanName).append(".currentBean['").append(Bean.NOT_PERSISTED_KEY).append("'])");
+				}
 				if (invisible == null) {
 					result.setValueExpression("rendered",
 												createValueExpressionFromFragment(null,

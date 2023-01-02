@@ -565,7 +565,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
-											button);
+											button,
+											null);
 		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
 		code.append(buttonCode).append("]}),");
 		disabled(action.getDisabledConditionName(), code);
@@ -593,7 +594,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
-											button);
+											button,
+											null);
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1864,7 +1866,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1887,7 +1890,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1897,7 +1901,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									String toolTip,
 									String confirmationText,
 									char type,
-									ActionImpl action) {
+									ActionImpl action,
+									boolean canDelete) {
 		addAction(null,
 					ImplicitActionName.Remove,
 					label,
@@ -1910,7 +1915,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					Boolean.valueOf(canDelete));
 	}
 
 	@Override
@@ -1933,7 +1939,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1956,7 +1963,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1979,7 +1987,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2002,7 +2011,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2025,7 +2035,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2048,7 +2059,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2071,7 +2083,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2094,7 +2107,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2117,7 +2131,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2140,7 +2155,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2163,7 +2179,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2186,7 +2203,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2209,7 +2227,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2232,7 +2251,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 	
 	private void writeOutServerSideCallbackMethodIfNecessary() {
@@ -2690,7 +2710,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 							char type,
 							List<Parameter> parameters,
 							String disabledConditionName,
-							String invisibleConditionName) {
+							String invisibleConditionName,
+							Boolean canDelete) { // null unless its a remove button
 		if (! Boolean.FALSE.equals(inActionPanel) && 
 				(! ImplicitActionName.Add.equals(implicitName)) &&
 				(! ImplicitActionName.Edit.equals(implicitName))) {
@@ -2706,7 +2727,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												parameters,
 												disabledConditionName,
 												invisibleConditionName,
-												null);
+												null,
+												canDelete);
 			// use double quote string delimiter to allow &quot; HTML character entity
 			code.append("view.add");
 			if (! noCreateView) {
@@ -2761,7 +2783,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									List<Parameter> parameters,
 									String disabledConditionName,
 									String invisibleConditionName,
-									Button button) { // null if called from an action defn
+									Button button, // null if called from an action defn
+									Boolean canDelete) { // null for anything but remove button
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizButton.create({validate:");
 		result.append(! Boolean.FALSE.equals(clientValidation));
@@ -2808,6 +2831,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			result.append("confirm:'").append(OWASP.escapeJsString(confirmationText)).append("',");
 		}
 		appendParameters(parameters, result);
+		if (canDelete != null) {
+			result.append("_canDelete:").append(canDelete).append(',');
+		}
 		result.append("_view:view})");
 		
 		return result.toString();

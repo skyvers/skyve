@@ -6,7 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.skyve.impl.util.TFAConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
@@ -77,10 +77,10 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			redirectUrl = Util.getHomeUrl();
 		}
 		
-		UserTFA principal = (UserTFA) authentication.getPrincipal();
+		TwoFactorAuthUser principal = (TwoFactorAuthUser) authentication.getPrincipal();
 		String customerName = principal.getCustomer();
 		if ((userDetailsManager != null) && (customerName != null)) {
-			if(  TFAConfigurationSingleton.getInstance().isPushTfa(customerName) ) {
+			if (TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName)) {
 				cleanupTFACodes(principal);
 			}
 		}
@@ -91,7 +91,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 	}
 	
-	private void cleanupTFACodes(UserTFA principal) {
+	private void cleanupTFACodes(TwoFactorAuthUser principal) {
 		principal.setTfaCodeGeneratedTimestamp(null);
 		principal.setTfaCode(null);
 		principal.setTfaToken(null);

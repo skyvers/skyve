@@ -223,7 +223,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															String dataWidgetVar,
 															String gridColumnExpression,
 															String singluarDocumentAlias,
-															boolean inline);
+															boolean inline,
+															boolean canCreate,
+															boolean canDelete);
 	
 	public abstract UIComponent listGrid(UIComponent component,
 											String moduleName,
@@ -517,6 +519,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										String toolTip,
 										String confirmationText,
 										Action action);
+
+	public abstract UIComponent remove(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										Action action,
+										boolean canDelete);
 
 	public abstract UIComponent action(UIComponent component, 
 										String dataWidgetBinding, 

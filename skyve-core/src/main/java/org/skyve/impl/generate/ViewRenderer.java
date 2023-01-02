@@ -424,6 +424,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @return	false if the user does not have privileges to execute the action, otherwise true.
 	 */
 	private boolean preProcessAction(ImplicitActionName implicitName, Action action, ActionShow showOverride) {
+		boolean result = true;
+		
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
 		// Note that the " " result is for SC
@@ -437,7 +439,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 		if (implicitName == null) {
 			if (! user.canExecuteAction(document, resourceName)) {
-				return false;
+				result = false;
 			}
 			actionType = ' ';
 		}
@@ -445,7 +447,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			switch (implicitName) {
 				case Add:
 					if (! user.canCreateDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Add.gif";
@@ -457,7 +459,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case BizExport:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/BizExport.png";
@@ -469,7 +471,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case BizImport:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/BizImport.png";
@@ -481,7 +483,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Download:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Download.png";
@@ -493,7 +495,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Upload:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Upload.png";
@@ -514,7 +516,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Delete:
 					if (! user.canDeleteDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Delete.gif";
@@ -530,7 +532,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Edit:
 					if (! user.canReadDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Edit.gif";
@@ -542,7 +544,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case New:
 					if (! user.canCreateDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/New.gif";
@@ -555,7 +557,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				case OK:
 					if ((! user.canUpdateDocument(document)) && 
 							(! user.canCreateDocument(document))) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/OK.gif";
@@ -567,7 +569,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Remove:
 					if (! user.canDeleteDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Remove.gif";
@@ -592,7 +594,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				case Save:
 					if ((! user.canUpdateDocument(document)) && 
 							(! user.canCreateDocument(document))) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Save.gif";
@@ -644,7 +646,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			actionConfirmationText = Util.i18n(actionConfirmationText);
 		}
 		
-		return true;
+		return result;
 	}
 		
 	@Override
@@ -1726,15 +1728,15 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitRemoveAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Remove, action, null)) {
-			renderRemoveAction(actionLabel,
-								actionIconUrl,
-								actionIconStyleClass,
-								actionToolTip,
-								actionConfirmationText,
-								actionType,
-								action);
-		}
+		boolean canDelete = preProcessAction(ImplicitActionName.Remove, action, null);
+		renderRemoveAction(actionLabel,
+							actionIconUrl,
+							actionIconStyleClass,
+							actionToolTip,
+							actionConfirmationText,
+							actionType,
+							action,
+							canDelete);
 	}
 
 	public abstract void renderRemoveAction(String label,
@@ -1743,7 +1745,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 												String toolTip,
 												String confirmationText,
 												char type,
-												ActionImpl action);
+												ActionImpl action,
+												boolean canDelete);
 
 	@Override
 	public final void visitZoomOutAction(ActionImpl action) {

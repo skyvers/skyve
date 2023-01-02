@@ -22,7 +22,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	}
 	
 	@Override
-	protected void pushNotification(UserTFA user, String code) {
+	protected void pushNotification(TwoFactorAuthUser user, String code) {
 		String emailAddress = user.getEmail();
 		if (emailAddress == null) {
 			UtilImpl.LOGGER.warning("No email found for user : " + user.getUsername()); 

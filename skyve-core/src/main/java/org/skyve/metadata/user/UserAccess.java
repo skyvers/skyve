@@ -32,15 +32,15 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	}
 	
 	public static UserAccess documentAggregate(String moduleName, String documentName) {
-		return new UserAccess('A', moduleName, null, documentName);
+		return new UserAccess('D', moduleName, null, documentName);
 	}
 
 	public static UserAccess queryAggregate(String moduleName, String queryName) {
-		return new UserAccess('A', moduleName, null, queryName);
+		return new UserAccess('Q', moduleName, null, queryName);
 	}
 
 	public static UserAccess modelAggregate(String moduleName, String documentName, String modelName) {
-		return new UserAccess('A', moduleName, documentName, modelName);
+		return new UserAccess('M', moduleName, documentName, modelName);
 	}
 
 	public static UserAccess previousComplete(String moduleName, String documentName, String binding) {
@@ -51,8 +51,16 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 		return (type == 'S');
 	}
 
+	public boolean isDocumentAggregate() {
+		return (type == 'D');
+	}
+
+	public boolean isQueryAggregate() {
+		return (type == 'Q');
+	}
+
 	public boolean isModelAggregate() {
-		return ((type == 'A') && (moduleName != null) && (documentName != null) && (component != null));
+		return (type == 'M');
 	}
 
 	public boolean isPreviousComplete() {

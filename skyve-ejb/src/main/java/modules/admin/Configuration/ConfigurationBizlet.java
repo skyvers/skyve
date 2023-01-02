@@ -1,9 +1,11 @@
 package modules.admin.Configuration;
 
+import java.util.Map;
+
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.util.TFAConfigurationSingleton;
-import org.skyve.impl.util.TwoFactorCustomerConfiguration;
+import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
+import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
@@ -127,35 +129,26 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 	
 	@Override
 	public void postSave(ConfigurationExtension bean) throws Exception {
-		
-		if (bean.originalValues().containsKey(Configuration.twoFactorTypePropertyName) || 
-				bean.originalValues().containsKey(Configuration.twofactorPushCodeTimeOutSecondsPropertyName) || 
-				bean.originalValues().containsKey(Configuration.twoFactorEmailSubjectPropertyName) ||
-				bean.originalValues().containsKey(Configuration.twoFactorEmailBodyPropertyName) ) {
-			TwoFactorCustomerConfiguration tfaConfig = new TwoFactorCustomerConfiguration(
-					bean.getTwoFactorType().toCode(), 
-					bean.getTwofactorPushCodeTimeOutSeconds(), 
-					bean.getTwoFactorEmailSubject(), 
-					bean.getTwoFactorEmailBody());
-			
-			TFAConfigurationSingleton.getInstance().add(tfaConfig);
+		TwoFactorType type = bean.getTwoFactorType();
+		Integer timeout = bean.getTwofactorPushCodeTimeOutSeconds();
+		String subject = bean.getTwoFactorEmailSubject();
+		String body = bean.getTwoFactorEmailBody();
+		if ((type != null) && (timeout != null) && (subject != null) && (body != null)) {
+			// if the bean is new (just new)
+			if (bean.getBizVersion().equals(Integer.valueOf(0))) {
+				TwoFactorAuthCustomerConfiguration tfaConfig = new TwoFactorAuthCustomerConfiguration(type.toCode(), timeout.intValue(), subject, body);
+				TwoFactorAuthConfigurationSingleton.getInstance().add(tfaConfig);
+			}
+			else {
+				Map<String, Object> originalValues = bean.originalValues();
+				if (originalValues.containsKey(Configuration.twoFactorTypePropertyName) || 
+						originalValues.containsKey(Configuration.twofactorPushCodeTimeOutSecondsPropertyName) || 
+						originalValues.containsKey(Configuration.twoFactorEmailSubjectPropertyName) ||
+						originalValues.containsKey(Configuration.twoFactorEmailBodyPropertyName) ) {
+					TwoFactorAuthCustomerConfiguration tfaConfig = new TwoFactorAuthCustomerConfiguration(type.toCode(), timeout.intValue(), subject, body);
+					TwoFactorAuthConfigurationSingleton.getInstance().add(tfaConfig);
+				}
+			}
 		}
-		
-		// if the bean is new ( just new)
-		if (bean.getBizVersion().equals(Integer.valueOf(0)) && bean.getTwoFactorType() != null) {
-			TwoFactorCustomerConfiguration tfaConfig = new TwoFactorCustomerConfiguration(
-					bean.getTwoFactorType().toCode(), 
-					bean.getTwofactorPushCodeTimeOutSeconds(), 
-					bean.getTwoFactorEmailSubject(), 
-					bean.getTwoFactorEmailBody());
-			
-			TFAConfigurationSingleton.getInstance().add(tfaConfig);
-		}
-		
-		super.postSave(bean);
 	}
-	
-	
-	
-
 }
