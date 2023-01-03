@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.FacesWebContext;
@@ -103,7 +104,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				
 				// No bizId or not a persistent document
 				String bizId = facesView.getBizIdParameter();
-				if ((bizId == null) || (! document.isPersistable())) {
+				if (bizId == null) {
 					// No security check is required as we are at the top of the conversation
 					// If the user doesn't have create privilege, it will be stopped in SaveAction.
 					bean = document.newInstance(user);
@@ -145,33 +146,24 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				}
 				else {
 					AbstractPersistence persistence = AbstractPersistence.get();
-					bean = persistence.retrieve(document, bizId);
-
-					webContext = new FacesWebContext();
-					webContext.setConversation(persistence);
-					webContext.setCurrentBean(bean);
-		
-					// NB bean can be null if it wasn't found in the retrieve above
-					String bindingParameter = facesView.getBindingParameter();
-					if (bean != null) {
-						if (! user.canReadBean(bean.getBizId(), 
-								bean.getBizModule(), 
-								bean.getBizDocument(), 
-								bean.getBizCustomer(), 
-								bean.getBizDataGroupId(), 
-								bean.getBizUserId())) {
-							throw new SecurityException("this data", user.getName());
-						}
-
-						if (bindingParameter != null) {
-							setupViewForZoomIn(bean, bindingParameter);
-						}
+					try {
+						// NB can throw NoResultsException or SecurityException
+						bean = (T) WebUtil.findReferencedBean(document, bizId, persistence, null, webContext);
+					}
+					finally {
+						webContext = new FacesWebContext();
+						webContext.setConversation(persistence);
+						webContext.setCurrentBean(bean);
 					}
 					
+					// NB bean can be null if it wasn't found in the retrieve above
+					String bindingParameter = facesView.getBindingParameter();
+					if (bindingParameter != null) {
+						setupViewForZoomIn(bean, bindingParameter);
+					}
 					// We can't check for update privilege here as we don't know if the zoom in is read-only or not.
 					// Its up to the app coder to disable the UI if appropriate.
-		
-					if (bindingParameter == null) {
+					else {
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, bean, null, webContext);
 						if (! vetoed) {

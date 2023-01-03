@@ -178,7 +178,7 @@ public class SpringSecurityConfig {
 	
 	@Bean
 	public UserDetailsManager userDetailsManager() {
-		return (UserDetailsManager) skyve.jdbcUserDetailsService();
+		return skyve.jdbcUserDetailsManager();
 	}
 	
  	@Bean

@@ -4,21 +4,21 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.metadata.repository.ViewLayout;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "module")
 public class CustomerModuleMetaData extends NamedMetaData {
 	private static final long serialVersionUID = -4251806306391755042L;
 
-	private ViewLayout viewLayout;
+	private FormLabelLayout formLabelLayout;
 
-	public ViewLayout getViewLayout() {
-		return viewLayout;
+	public FormLabelLayout getFormLabelLayout() {
+		return formLabelLayout;
 	}
 
 	@XmlAttribute
-	public void setViewLayout(ViewLayout viewLayout) {
-		this.viewLayout = viewLayout;
+	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+		this.formLabelLayout = formLabelLayout;
 	}
 }

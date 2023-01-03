@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.event.Addable;
 import org.skyve.impl.metadata.view.event.Changeable;
@@ -200,6 +201,18 @@ public class ComponentViewVisitor extends ViewVisitor {
 	public void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
 		disable(form);
 		invisible(form);
+
+		// If we have a top-defined module and this form is defaulting, 
+		// explicitly set it to top for the component in case the component
+		// belongs to a view in a side-defined module.
+		// Note that top defined forms cannot be converted to side defined,
+		// but side defined forms can be converted to top defined.
+		// Thus any top-defined forms need to be made explicit when used in a component.
+		if (form.getLabelLayout() == null) {
+			if (module.getFormLabelLayout() == FormLabelLayout.top) {
+				form.setLabelLayout(FormLabelLayout.top);
+			}
+		}
 
 		// capture the targeted widget, if applicable
 		if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {

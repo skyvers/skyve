@@ -23,8 +23,8 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -105,7 +105,7 @@ public class CustomerImpl implements Customer {
 	private Converter<TimeOnly> defaultTimeConverter;
 	private Converter<DateTime> defaultDateTimeConverter;
 	private Converter<Timestamp> defaultTimestampConverter;
-	private LinkedHashMap<String, ViewLayout> moduleEntries = new LinkedHashMap<>();
+	private LinkedHashMap<String, FormLabelLayout> moduleEntries = new LinkedHashMap<>();
 	private String homeModuleName;
 	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
 	private boolean allowModuleRoles = true;
@@ -238,7 +238,7 @@ public class CustomerImpl implements Customer {
 		return defaultActions;
 	}
 
-	public Map<String, ViewLayout> getModuleEntries() {
+	public Map<String, FormLabelLayout> getModuleEntries() {
 		return moduleEntries;
 	}
 

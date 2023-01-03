@@ -80,7 +80,7 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="viewLayout">
+  <xs:simpleType name="formLabelLayout">
     <xs:restriction base="xs:string">
       <xs:enumeration value="side"/>
       <xs:enumeration value="top"/>

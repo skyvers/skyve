@@ -223,7 +223,9 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 													String dataWidgetVar,
 													String gridColumnExpression,
 													String singluarDocumentAlias,
-													boolean inline) {
+													boolean inline,
+													boolean canCreate,
+													boolean canDelete) {
 		return component;
 	}
 
@@ -488,6 +490,17 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 								String toolTip,
 								String confirmationText, 
 								Action action) {
+		return component;
+	}
+
+	@Override
+	public UIComponent remove(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action,
+								boolean canDelete) {
 		return component;
 	}
 

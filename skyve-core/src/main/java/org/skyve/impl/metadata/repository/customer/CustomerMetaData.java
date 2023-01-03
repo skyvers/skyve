@@ -21,7 +21,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.metadata.repository.ViewLayout;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
@@ -257,13 +257,13 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		result.setDefaultTimestampConverter(timestampConverter);
 
 		// NB Entries are in insertion order
-		Map<String, ViewLayout> moduleEntries = result.getModuleEntries();
+		Map<String, FormLabelLayout> moduleEntries = result.getModuleEntries();
 		if (modules != null) {
 			for (CustomerModuleMetaData module : modules.getModules()) {
 				if (module == null) {
 					throw new MetaDataException(metaDataName + " : One of the module references is not defined.");
 				}
-				moduleEntries.put(module.getName(), module.getViewLayout());
+				moduleEntries.put(module.getName(), module.getFormLabelLayout());
 			}
 	
 			value = modules.getHomeModule();

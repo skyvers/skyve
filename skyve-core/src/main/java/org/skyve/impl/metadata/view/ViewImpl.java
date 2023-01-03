@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.ViewLayout;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
@@ -58,7 +57,6 @@ public class ViewImpl extends Container implements View {
 	private String iconStyleClass;
 	private String helpRelativeFileName;
 	private String helpURL;
-	private ViewLayout layout;
 	private String title;
 	private String actionsWidgetId;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
@@ -154,15 +152,6 @@ public class ViewImpl extends Container implements View {
 		this.helpURL = helpURL;
 	}
 	
-	@Override
-	public ViewLayout getLayout() {
-		return layout;
-	}
-
-	public void setLayout(ViewLayout layout) {
-		this.layout = layout;
-	}
-
 	@Override
 	public String getTitle() {
 		return title;
