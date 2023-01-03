@@ -1,8 +1,8 @@
-import 'package:flutest/widgets/skyve_formcolumn.dart';
-import 'package:flutest/widgets/skyve_formitem.dart';
-import 'package:flutest/widgets/skyve_formrow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bootstrap/flutter_bootstrap.dart';
+import 'skyve_formcolumn.dart';
+import 'skyve_formitem.dart';
+import 'skyve_formrow.dart';
 
 class SkyveForm extends StatelessWidget {
   final List<SkyveFormColumn> formCols;

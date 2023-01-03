@@ -1,5 +1,5 @@
-import 'package:##PROJECT##/widgets/skyve_textField.dart';
 import 'package:flutter/material.dart';
+import 'skyve_textField.dart';
 
 class SkyveRadio extends StatelessWidget {
   final String label;

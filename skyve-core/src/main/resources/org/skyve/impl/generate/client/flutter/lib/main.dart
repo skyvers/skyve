@@ -1,9 +1,9 @@
 ##IMPORTS##
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'views/auto_log_in.dart';
+import 'auto_log_in.dart';
 import 'dart:async';
-import 'package:skyve_week_mat/util/skyve_rest_client.dart';
+import 'util/skyve_rest_client.dart';
 
 void main() {
   runApp(App());

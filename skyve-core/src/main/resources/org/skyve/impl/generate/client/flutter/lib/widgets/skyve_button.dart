@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SkyveButton extends StatelessWidget {
   final String name;
@@ -13,8 +14,9 @@ class SkyveButton extends StatelessWidget {
       return ElevatedButton(
           child: Text(label),
           onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
+            final GoRouter router = GoRouter.of(context);
+            if (router.canPop()) {
+              router.pop();
             }
           });
     } else {

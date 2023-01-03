@@ -67,12 +67,11 @@ class _##CLASS##State extends State<##CLASS##> {
                                 subtitle: Text(nvl(_rows[index]['##COLUMN2##'])),
                                 trailing: const Icon(Icons.chevron_right),
                                 onTap: () {
-                                  var uri = Uri(
-                                      path: ##EDIT_CLASS##.routeName,
-                                      queryParameters: {
-                                        'bizId': _rows[index]['bizId']
-                                      });
-                                  GoRouter.of(context).go(uri.toString());
+                                  context.push(Uri(
+                                    path: ##EDIT_CLASS##.routeName,
+                                    queryParameters: {
+                                      'bizId': _rows[index]['bizId']
+                                    }).toString());
                                 })));
                   }),
               Positioned(
@@ -81,7 +80,7 @@ class _##CLASS##State extends State<##CLASS##> {
                 child: FloatingActionButton(
                     child: const Icon(Icons.add),
                     onPressed: () {
-                      Navigator.pushNamed(context, ##EDIT_CLASS##.routeName);
+                      context.push(##EDIT_CLASS##.routeName);
                     }),
               )
             ])));

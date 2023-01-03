@@ -68,6 +68,8 @@ public class FlutterGenerator {
 		Map<String, String> substitutions = Collections.singletonMap("##PROJECT##", projectName);
 		refreshFile("pubspec.yaml", "pubspec.yaml", substitutions);
 
+		refreshFile("lib/auto_log_in.dart", "lib/auto_log_in.dart", substitutions);
+
 		new File(projectPath, "lib/util/").mkdir();
 		refreshFile("lib/util/skyve_rest_client.dart", "lib/util/skyve_rest_client.dart", substitutions);
 		new File(projectPath, "lib/widgets/").mkdir();

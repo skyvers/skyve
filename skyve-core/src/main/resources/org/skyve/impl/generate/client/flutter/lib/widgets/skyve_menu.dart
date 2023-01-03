@@ -1,7 +1,7 @@
-import 'package:##PROJECT##/main.dart';
-import 'package:##PROJECT##/widgets/skyve_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../main.dart';
+import 'skyve_network_image.dart';
 
 class SkyveMenu extends StatelessWidget {
   const SkyveMenu(
@@ -113,13 +113,12 @@ class SkyveMenu extends StatelessWidget {
       leading: icon,
       selected: selected,
       onTap: () {
-
         if (!selected) {
           // Go to the clicked menu item
-          GoRouter.of(context).go(routeName);
+          context.go(routeName);
         } else {
           // Close the side menu
-          GoRouter.of(context).pop();
+          context.pop();
         }
       },
     );

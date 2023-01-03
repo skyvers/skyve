@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:skyve_week_mat/util/skyve_rest_client.dart';
+import 'util/skyve_rest_client.dart';
 
 class AutoLogIn extends StatefulWidget {
   static const routeName = '/auto-log-in';
 
-  late String? destination;
+  final String? destination;
 
-  AutoLogIn({super.key, this.destination});
+  const AutoLogIn({super.key, this.destination});
 
   @override
   State<AutoLogIn> createState() => _AutoLogInState();
@@ -32,7 +32,7 @@ class _AutoLogInState extends State<AutoLogIn> {
       if (!mounted) return;
 
       String dest = widget.destination!;
-      GoRouter.of(context).go(dest);
+      context.go(dest);
     } else {
       debugPrint('Login failed');
     }

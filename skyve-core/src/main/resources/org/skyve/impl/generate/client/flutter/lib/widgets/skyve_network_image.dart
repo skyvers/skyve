@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
 import '../util/skyve_rest_client.dart';
 
 class SkvyeNetworkImage extends StatelessWidget {
