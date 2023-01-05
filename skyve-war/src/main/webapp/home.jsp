@@ -62,6 +62,9 @@
 
 	// Get (and set) the user agent type (if required - could have been set by device.jsp)
 	UserAgentType userAgentType = UserAgent.getType(request);
+	// Determine the UX/UI
+	UxUi uxui = UserAgent.getUxUi(request);
+
 	Router router = repository.getRouter();
 
 	RouteCriteria criteria = new RouteCriteria();
@@ -87,7 +90,8 @@
 		catch (Exception e) {
 			throw new IllegalStateException("Malformed URL cannot be canonicalised", e);
 		}
-		if (router.isUnsecured(criteria)) {
+		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
+		if (router.isUnsecured(outcomeUrl)) {
 			if (customerName == null) {
 				throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter");
 			}
@@ -158,10 +162,7 @@
 			return;
 		}
 		
-		// Determine the UX/UI
-		UxUi uxui = UserAgent.getUxUi(request);
-
-		// Set the extra criterium if  user is defined
+		// Set the extra criterium if user is defined
 		if (user != null) {
 			criteria.setCustomerName(user.getCustomerName());
 			criteria.setDataGroupId(user.getDataGroupId());
