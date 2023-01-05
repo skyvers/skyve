@@ -78,6 +78,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
 
 	/** @hidden */
+	public static final String jobLogRetentionDaysPropertyName = "jobLogRetentionDays";
+
+	/** @hidden */
 	@Deprecated
 	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
 
@@ -376,6 +379,13 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * Clear this setting to have codes that never expire.
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
+
+	/**
+	 * Job log Retention Days
+	 * <br/>
+	 * Number of days of jobs to keep in the job list. Will not prune old job logs if null.
+	 **/
+	private Integer jobLogRetentionDays;
 
 	/**
 	 * This option is now a startup property found in the project JSON file.
@@ -749,6 +759,24 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
 		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
 		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #jobLogRetentionDays} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getJobLogRetentionDays() {
+		return jobLogRetentionDays;
+	}
+
+	/**
+	 * {@link #jobLogRetentionDays} mutator.
+	 * @param jobLogRetentionDays	The new value.
+	 **/
+	@XmlElement
+	public void setJobLogRetentionDays(Integer jobLogRetentionDays) {
+		preset(jobLogRetentionDaysPropertyName, jobLogRetentionDays);
+		this.jobLogRetentionDays = jobLogRetentionDays;
 	}
 
 	/**

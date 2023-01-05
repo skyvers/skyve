@@ -64,6 +64,11 @@
 			<displayName>admin.configuration.selfRegistrationActivationExpiryHours.displayName</displayName>
 			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
 		</integer>
+		<integer name="jobLogRetentionDays">
+			<displayName>admin.configuration.jobLogRetentionDays.displayName</displayName>
+			<description>admin.configuration.jobLogRetentionDays.description</description>
+			<validator min="0"/>
+		</integer>
 		
 		<boolean name="allowUserSelfRegistration" required="false" deprecated="true">
 			<displayName>This option is now a startup property found in the project JSON file.</displayName>
