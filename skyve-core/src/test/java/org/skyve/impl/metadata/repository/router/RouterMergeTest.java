@@ -4,22 +4,11 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.util.Arrays;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.web.WebAction;
 
-public class RouterMergerTest {
-
-	private RouterMerger routerMerger;
-
-	@Before
-	public void setup() {
-		routerMerger = new RouterMerger();
-	}
-
+public class RouterMergeTest {
 	@Test
 	public void testMerge() {
 		final Router router = XMLMetaData.unmarshalRouterFile(this.getClass().getResource("router.xml").getPath());
@@ -40,21 +29,21 @@ public class RouterMergerTest {
 		existingDesktopUxUi.getRoutes().add(newDesktopRoute);
 		routerToMerge.getUxUis().add(existingDesktopUxUi);
 
-		final Router mergedRouter = routerMerger.mergeRouters(Arrays.asList(router, routerToMerge));
-		assertThat(mergedRouter.getUxuiSelectorClassName(), is("router.DefaultUxUiSelector"));
-		assertThat(getUxUiFromRouter(mergedRouter, newUxUi.getName()), is(newUxUi));
-		assertThat(getUxUiFromRouter(mergedRouter, existingDesktopUxUi.getName()).getRoutes(), hasItem(newDesktopRoute));
-		assertThat(getRouteFromUxUi(getUxUiFromRouter(mergedRouter, existingDesktopUxUi.getName()), newDesktopRoute.getOutcomeUrl()).getCriteria(), hasItem(newRouteCriteria));
-		assertThat(getRouteFromUxUi(getUxUiFromRouter(mergedRouter, existingDesktopUxUi.getName()), newDesktopRoute.getOutcomeUrl()).getProperties().get("newPropertyKey"), is("newPropertyValue"));
+		router.merge(routerToMerge);
+		assertThat(router.getUxuiSelectorClassName(), is("router.DefaultUxUiSelector"));
+		assertThat(getUxUiFromRouter(router, newUxUi.getName()), is(newUxUi));
+		assertThat(getUxUiFromRouter(router, existingDesktopUxUi.getName()).getRoutes(), hasItem(newDesktopRoute));
+		assertThat(getRouteFromUxUi(getUxUiFromRouter(router, existingDesktopUxUi.getName()), newDesktopRoute.getOutcomeUrl()).getCriteria(), hasItem(newRouteCriteria));
+		assertThat(getRouteFromUxUi(getUxUiFromRouter(router, existingDesktopUxUi.getName()), newDesktopRoute.getOutcomeUrl()).getProperties().get("newPropertyKey"), is("newPropertyValue"));
 	}
 
-	private UxUiMetadata getUxUiFromRouter(Router router, String uxUiName) {
+	private static UxUiMetadata getUxUiFromRouter(Router router, String uxUiName) {
 		return router.getUxUis().stream()
 				.filter(uxui -> uxUiName.equals(uxui.getName()))
 				.findFirst().orElse(null);
 	}
 
-	private Route getRouteFromUxUi(UxUiMetadata uxUi, String routeOutcome) {
+	private static Route getRouteFromUxUi(UxUiMetadata uxUi, String routeOutcome) {
 		return uxUi.getRoutes().stream()
 				.filter(route -> routeOutcome.equals(route.getOutcomeUrl()))
 				.findFirst().orElse(null);

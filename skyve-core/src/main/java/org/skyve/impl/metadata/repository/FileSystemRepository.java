@@ -18,7 +18,6 @@ import org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
-import org.skyve.impl.metadata.repository.router.RouterMerger;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -304,14 +303,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			if (routersFileInfo.isEmpty()) {
 				throw new MetaDataException("No routers found.");
 			}
-			final List<Router> routers = new ArrayList<>(routersFileInfo.size());
 			for (String path : routersFileInfo.keySet()) {
 				Router router = XMLMetaData.unmarshalRouterFile(path);
 				router = router.convert(ROUTER_NAME, getDelegator());
-				routers.add(router);
+				if (result == null) {
+					result = router;
+				}
+				else {
+					result.merge(router);
+				}
 			}
-
-			result = new RouterMerger().mergeRouters(routers);
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);
