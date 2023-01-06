@@ -381,9 +381,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	private Integer selfRegistrationActivationExpiryHours;
 
 	/**
-	 * Job log Retention Days
+	 * Job Log Retention Days
 	 * <br/>
-	 * Number of days of jobs to keep in the job list. Will not prune old job logs if null.
+	 * Number of days of jobs to keep in the job list. Will not trim old job logs if null.
 	 **/
 	private Integer jobLogRetentionDays;
 
