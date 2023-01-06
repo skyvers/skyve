@@ -141,4 +141,15 @@
 			</item>
 		</row>
 	</form>
+	<form border="true" borderTitle="admin.configuration.edit.general.jobLogRetention.borderTitle">
+		<column responsiveWidth="3"/>
+		<column />
+		<column responsiveWidth="3"/>
+		<column />
+		<row>
+			<item>
+				<default binding="jobLogRetentionDays" />
+			</item>
+		</row>
+	</form>
 </view>

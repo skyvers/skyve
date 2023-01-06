@@ -18,6 +18,7 @@
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
 		<job name="jAvailableDiskSpaceAlarm" displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob"/>
+		<job name="jTrimJobLog" displayName="Trim Job Log" className="modules.admin.Configuration.TrimJobLogJob"/>
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
