@@ -28,15 +28,16 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
-import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
@@ -433,6 +434,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 	
+	@SuppressWarnings("null")
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
@@ -483,6 +485,14 @@ public class LocalDesignRepository extends FileSystemRepository {
 											document.getParentDocumentName() + " that does not exist in this module.");
 		}
 		
+		// Check Persistent name and Strategy="mapped" do not coexist in a Document as they conflict
+		if (document.getPersistent() != null
+				&& Persistent.ExtensionStrategy.mapped.equals(document.getPersistent().getStrategy())
+				&& document.getPersistent().getName() != null) {
+			throw new MetaDataException(
+					documentIdentifier + " can not have Persistent name set and strategy set to mapped.");
+		}
+
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
 		// Check attributes
