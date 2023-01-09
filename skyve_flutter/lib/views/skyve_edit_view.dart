@@ -74,7 +74,7 @@ class _SkyveEditViewState extends State<SkyveEditView> {
                 ]),
                 SkyveBorder(
                   child: SkyveHBox(children: [
-                    SkyveForm(formCols: [], formRows: [
+                    SkyveForm(formCols: const [], formRows: [
                       SkyveFormRow(formItems: [
                         const SkyveFormItem(SkyveLabel('Name')),
                         SkyveFormItem(

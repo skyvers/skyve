@@ -3,8 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'util/skyve_rest_client.dart';
 import 'views/auto_log_in.dart';
-import 'views/skyve_edit_view.dart';
-import 'views/skyve_list_view.dart';
+import 'views/skyve_container.dart';
 import 'widgets/skyve_menu.dart';
 
 void main() {
@@ -20,22 +19,11 @@ const menu = [
 ];
 
 class App extends StatelessWidget {
-  final List<GoRoute> _goRoutes = [
-    GoRoute(
-        path: '/admin/Contact',
-        builder: (context, state) =>
-            SkyveEditView(queryParams: state.queryParams)),
-    GoRoute(
-        path: '/admin/qContacts',
-        builder: (context, state) =>
-            SkyveListView(queryParams: state.queryParams)),
-  ];
-
   late GoRouter _router;
 
   App({Key? key}) : super(key: key) {
-    // Non generated routes here
-    var comboRoutes = [
+    // Create our router
+    _router = GoRouter(initialLocation: '/', redirect: redirect, routes: [
       GoRoute(
         name: 'Login',
         path: AutoLogIn.routeName,
@@ -46,20 +34,9 @@ class App extends StatelessWidget {
       ),
       GoRoute(
         path: '/',
-        builder: (context, state) =>
-            SkyveListView(queryParams: state.queryParams),
-      ),
-    ];
-
-    // Appending the generated ones
-    comboRoutes.addAll(_goRoutes);
-
-    // Create our router
-    _router = GoRouter(
-      initialLocation: '/',
-      redirect: redirect,
-      routes: comboRoutes,
-    );
+        builder: (context, state) => const SkyveContainer(),
+      )
+    ]);
   }
 
   static FutureOr<String?> redirect(BuildContext context, GoRouterState state) {

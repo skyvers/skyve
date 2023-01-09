@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.Principal;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -94,9 +95,8 @@ public class DynamicImageServlet extends HttpServlet {
 	    		persistence.setForThread();
 	        	
 	        	Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
-				User user = WebUtil.processUserPrincipalForRequest(request,
-																	request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null,
-																	true);
+		    	Principal userPrincipal = request.getUserPrincipal();
+		    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 				if (user == null) {
 					throw new SessionEndedException(request.getLocale());
 				}

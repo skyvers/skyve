@@ -91,6 +91,14 @@ public class OWASP {
 		return result;
 	}
 	
+	public static String escapeJsonString(String value) {
+		if (value == null) {
+			return null;
+		}
+
+		return value.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+	}
+
 	public static String escapeJsString(String value) {
 		return escapeJsString(value, true, true);
 	}

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.security.Principal;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -43,7 +44,8 @@ public class BizportExportServlet extends HttpServlet {
 				try {
 					try {
 						persistence.begin();
-						User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
+				    	Principal userPrincipal = request.getUserPrincipal();
+				    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 						if (user == null) {
 							throw new SessionEndedException(request.getLocale());
 						}

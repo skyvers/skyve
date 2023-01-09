@@ -128,6 +128,14 @@ class SkyveRestClient {
     });
   }
 
+  Future<List<dynamic>> metadata() async {
+    debugPrint('Fetch metadata');
+
+    return await _fetch('meta').then((jsonString) {
+      return jsonDecode(jsonString);
+    });
+  }
+
   Future<Map<String, dynamic>> edit(
       String moduleName, String documentName, String? bizId) async {
     debugPrint('Edit bean $moduleName.$documentName#$bizId');

@@ -3,6 +3,7 @@ package org.skyve.impl.web.service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +93,8 @@ public class ChartServlet extends HttpServlet {
 			try {
 				try {
 					persistence.begin();
-					User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
+			    	Principal userPrincipal = request.getUserPrincipal();
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}

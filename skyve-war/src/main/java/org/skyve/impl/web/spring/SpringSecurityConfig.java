@@ -68,12 +68,12 @@ public class SpringSecurityConfig {
 				.antMatchers("/image").authenticated()
 				// Secure customer resource servlet
 				.antMatchers("/resource", "/content").authenticated()
+				// Secure meta data servlet
+				.antMatchers("/meta").authenticated()
 				// Secure SC edit view servlet
-// TODO hack!
-				.antMatchers("/smartedit").permitAll()
+				.antMatchers("/smartedit").authenticated()
 				// Secure SC list view servlet
-// TODO hack!
-				.antMatchers("/smartlist").permitAll()
+				.antMatchers("/smartlist").authenticated()
 				// Secure SC view generation servlet
 				.antMatchers("/smartgen").authenticated()
 				// Secure SC snap servlet
