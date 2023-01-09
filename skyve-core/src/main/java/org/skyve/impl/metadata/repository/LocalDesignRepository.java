@@ -488,7 +488,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		Persistent persistent = document.getPersistent();
 		if ((persistent != null) &&
 				Persistent.ExtensionStrategy.mapped.equals(persistent.getStrategy()) &&
-				(document.getName() != null)) {
+				(persistent.getName() != null)) {
 			throw new MetaDataException(documentIdentifier + " can not have a persistent name and a mapped strategy"
 					+ " - all inherited attributes will be persisted as columns in tables for each subtype document.");
 		}
