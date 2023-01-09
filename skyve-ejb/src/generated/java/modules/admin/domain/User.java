@@ -95,6 +95,12 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String lastAuthenticationFailurePropertyName = "lastAuthenticationFailure";
 
 	/** @hidden */
+	public static final String emailSentPropertyName = "emailSent";
+
+	/** @hidden */
+	public static final String hasSignedInPropertyName = "hasSignedIn";
+
+	/** @hidden */
 	public static final String contactPropertyName = "contact";
 
 	/** @hidden */
@@ -421,6 +427,20 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Time that last authentication failure occurred
 	 **/
 	private Timestamp lastAuthenticationFailure;
+
+	/**
+	 * Email sent
+	 * <br/>
+	 * True when an activation email has been sent to this user.
+	 **/
+	private Boolean emailSent = Boolean.valueOf(false);
+
+	/**
+	 * Has signed in
+	 * <br/>
+	 * True if the user has signed in previously
+	 **/
+	private Boolean hasSignedIn = Boolean.valueOf(false);
 
 	/**
 	 * Contact
@@ -862,6 +882,42 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setLastAuthenticationFailure(Timestamp lastAuthenticationFailure) {
 		preset(lastAuthenticationFailurePropertyName, lastAuthenticationFailure);
 		this.lastAuthenticationFailure = lastAuthenticationFailure;
+	}
+
+	/**
+	 * {@link #emailSent} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getEmailSent() {
+		return emailSent;
+	}
+
+	/**
+	 * {@link #emailSent} mutator.
+	 * @param emailSent	The new value.
+	 **/
+	@XmlElement
+	public void setEmailSent(Boolean emailSent) {
+		preset(emailSentPropertyName, emailSent);
+		this.emailSent = emailSent;
+	}
+
+	/**
+	 * {@link #hasSignedIn} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getHasSignedIn() {
+		return hasSignedIn;
+	}
+
+	/**
+	 * {@link #hasSignedIn} mutator.
+	 * @param hasSignedIn	The new value.
+	 **/
+	@XmlElement
+	public void setHasSignedIn(Boolean hasSignedIn) {
+		preset(hasSignedInPropertyName, hasSignedIn);
+		this.hasSignedIn = hasSignedIn;
 	}
 
 	/**
@@ -1474,6 +1530,44 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 */
 	public boolean isNotCanActivateUser() {
 		return (! isCanActivateUser());
+	}
+
+	/**
+	 * Controls visibility of Send/Resend button so that Send is only visible when activation email has not been sent.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCanSendFirstActivationEmail() {
+		return (!Boolean.TRUE.equals(getEmailSent()));
+	}
+
+	/**
+	 * {@link #isCanSendFirstActivationEmail} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCanSendFirstActivationEmail() {
+		return (! isCanSendFirstActivationEmail());
+	}
+
+	/**
+	 * Allows administrators to send and resend user's activation emails.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCanSendInvitation() {
+		return (isSecurityAdministrator() && !Boolean.TRUE.equals(getHasSignedIn()));
+	}
+
+	/**
+	 * {@link #isCanSendInvitation} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCanSendInvitation() {
+		return (! isCanSendInvitation());
 	}
 
 	/**

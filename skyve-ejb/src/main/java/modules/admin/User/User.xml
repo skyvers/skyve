@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <document name="User"
 			xmlns="http://www.skyve.org/xml/document"
+			xmlns:v="http://www.skyve.org/xml/view"
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<persistent name="ADM_SecurityUser" />
@@ -91,6 +92,18 @@
 			<displayName>admin.user.lastAuthenticationFailure.displayName</displayName>
 			<description>admin.user.lastAuthenticationFailure.description</description>
 		</timestamp>
+		<boolean name="emailSent">
+			<displayName>Email sent</displayName>
+			<description>True when an activation email has been sent to this user.</description>
+			<defaultWidget><v:checkBox triState="false"/></defaultWidget>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="hasSignedIn" audited="false" persistent="false">
+			<displayName>Has signed in</displayName>
+			<description>True if the user has signed in previously</description>
+			<defaultWidget><v:checkBox triState="false"/></defaultWidget>
+			<defaultValue>false</defaultValue>
+		</boolean>
 		<!-- If you change this association to be composed, change it in admin.UserProxy document also -->
 		<association name="contact" type="aggregation" required="true">
 			<displayName>admin.user.association.contact.displayName</displayName>
@@ -340,6 +353,18 @@
 			<description>Allows administrators to manually activate users when User Self-Registration is enabled.</description>
 			<expression>
 				<![CDATA[isSecurityAdministrator() && isSelfRegistrationEnabled()]]>
+			</expression>
+		</condition>
+		<condition name="canSendInvitation" usage="view">
+			<description>Allows administrators to send and resend user's activation emails.</description>
+			<expression>
+				<![CDATA[isSecurityAdministrator() && !Boolean.TRUE.equals(getHasSignedIn())]]>
+			</expression>
+		</condition>
+		<condition name="canSendFirstActivationEmail" usage="view">
+			<description>Controls visibility of Send/Resend button so that Send is only visible when activation email has not been sent.</description>
+			<expression>
+				<![CDATA[!Boolean.TRUE.equals(getEmailSent())]]>
 			</expression>
 		</condition>
 	</conditions>

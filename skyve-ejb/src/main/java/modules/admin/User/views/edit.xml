@@ -50,6 +50,14 @@
 					<item>
 						<spacer visible="selfRegistrationEnabledAndUserNotActivated"/>
 					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="emailSent" disabled="true"/>
+					</item>
+					<item>
+						<button action="SendActivation" pixelWidth="170"/>
+					</item>
 					<item>
 						<button action="ResendActivation" pixelWidth="170"/>
 					</item>
@@ -110,7 +118,9 @@
 		relativeIconFileName="shared/icons/Job.gif"/>
 		<action className="GeneratePassword" displayName="admin.user.actions.generatePassword.actionName" visible="securityAdministrator" 
 		relativeIconFileName="shared/icons/Job.gif"/>
-		<action className="ResendActivation" inActionPanel="false" visible="selfRegistrationEnabledAndUserNotActivated" displayName="Resend Activation" iconStyleClass="fa fa-envelope-o"
+		<action name="ResendActivation" className="ResendActivation" inActionPanel="false" visible="notCanSendFirstActivationEmail" displayName="admin.user.actions.resendActivation.actionName" iconStyleClass="fa fa-envelope-o"
 			confirm="Are you sure you wish to resend the activation email to this user? Their previous activation link will no longer work." />
+		<action name="SendActivation" className="ResendActivation" inActionPanel="false" visible="canSendFirstActivationEmail" displayName="admin.user.actions.sendActivation.actionName" iconStyleClass="fa fa-envelope-o"
+			confirm="Are you sure you wish to send the activation email to this user?" />
 	</actions>
 </view>

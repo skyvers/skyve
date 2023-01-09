@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import modules.admin.Group.GroupExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
+import modules.admin.User.UserExtension;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.User;
@@ -30,28 +31,29 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
-		if (bean.getUser() != null && bean.getUser().getContact() != null) {
+		UserExtension result = bean.getUser();
+		if (result != null && result.getContact() != null) {
 			// validate the email and confirm email match
 			bean.validateConfirmEmail();
 
 			try {
 				// Update the username to be the same as the email
-				bean.getUser().setUserName(bean.getUser().getContact().getEmail1());
+				result.setUserName(result.getContact().getEmail1());
 
 				// Should be a person registering for an account
-				bean.getUser().getContact().setContactType(Contact.ContactType.person);
+				result.getContact().setContactType(Contact.ContactType.person);
 
-				String unencodedPassword = bean.getUser().getPassword();
+				String unencodedPassword = result.getPassword();
 				try {
 					// validate the password and confirm password match
 					bean.validateConfirmPassword();
 
 					// Encode password
-					encodePassword(bean.getUser());
+					encodePassword(result);
 
 					final GroupExtension selfRegistrationGroup = Configuration.newInstance().getUserSelfRegistrationGroup();
 					if (selfRegistrationGroup != null) {
-						bean.getUser().getGroups().add(selfRegistrationGroup);
+						result.getGroups().add(selfRegistrationGroup);
 					} else {
 						LOGGER.error(
 								"Self registration failed because no self-registration group has been set in the configuration.");
@@ -63,27 +65,31 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					// perform UserRegistration specific validations first
 					BeanValidator.validateBeanAgainstBizlet(bean);
 
-					BeanValidator.validateBeanAgainstDocument(bean.getUser().getContact());
-					BeanValidator.validateBeanAgainstDocument(bean.getUser());
-					BeanValidator.validateBeanAgainstBizlet(bean.getUser());
+					BeanValidator.validateBeanAgainstDocument(result.getContact());
+					BeanValidator.validateBeanAgainstDocument(result);
+					BeanValidator.validateBeanAgainstBizlet(result);
 				} catch (ValidationException e) {
 					// Reset roles
-					bean.getUser().getGroups().clear();
+					result.getGroups().clear();
 					// Decode password
-					bean.getUser().setPassword(unencodedPassword);
+					result.setPassword(unencodedPassword);
 					// Rethrow validation exceptions
 					throw e;
 				}
 
 				// generate the activation code and save the new user
-				bean.getUser().generateActivationDetailsAndSave(persistence);
+				result.generateActivationDetailsAndSave(persistence);
 
 				// Send registration email to the new user
 				sendRegistrationEmail(bean);
 				
+				// Update and save bean for view and action control
+				result.setEmailSent(Boolean.TRUE);
+				result = CORE.getPersistence().save(result);
+
 				webContext.growl(MessageSeverity.info, String.format(
 						"An activation email has been sent to %s. Please use the link in the email to activate your account prior to signing in.",
-						bean.getUser().getContact().getEmail1()));
+						result.getContact().getEmail1()));
 				
 			} catch (Exception e) {
 				throw e;

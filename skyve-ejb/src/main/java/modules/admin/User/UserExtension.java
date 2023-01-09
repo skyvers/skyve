@@ -16,7 +16,9 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.Role;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
@@ -28,6 +30,7 @@ import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Contact;
 import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
+import modules.admin.domain.UserLoginRecord;
 import modules.admin.domain.UserProxy;
 import modules.admin.domain.UserRole;
 
@@ -122,7 +125,30 @@ public class UserExtension extends User {
 		this.setBizUserId(getBizId());
 
 		// Save and set the user
-		this.upsertUser(persistence, this);
+		UserExtension user = this;
+		user = persistence.save(user);
+	}
+
+	/**
+	 * Check user login record to see whether this user has ever signed in
+	 */
+	@Override
+	public Boolean getHasSignedIn() {
+		Boolean result = super.getHasSignedIn();
+		// only do the query if the result is unknown
+		if (result == null) {
+			try {
+				Persistence persistence = CORE.getPersistence();
+				persistence.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+				DocumentQuery q = persistence.newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
+				q.getFilter().addEquals(UserLoginRecord.userNamePropertyName, this.getUserName());
+				result = Boolean.valueOf(q.beanResult() != null);
+			}
+			finally {
+				CORE.getPersistence().resetDocumentPermissionScopes();
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -155,37 +181,6 @@ public class UserExtension extends User {
 															ResponseMode.EXPLICIT,
 															null,
 															this);
-	}
-
-	/**
-	 * Upsert the user into the database.
-	 * <br />
-	 * NOTE: We upsert the user rather than regularly calling {@link Persistence#save(org.skyve.domain.PersistentBean)} because
-	 * calling save will automatically set the bizUserId to be the current logged in user.
-	 * <br />
-	 * When registering, we want the User we are just about to create to own the documents.
-	 *
-	 * @param persistence skyve persistence to save the bean
-	 * @param bean the user bean to register
-	 * @return the saved user bean
-	 */
-	private UserExtension upsertUser(Persistence persistence, UserExtension bean) {
-		persistence.begin();
-
-		// update bizuser id on User and related objects
-		org.skyve.metadata.user.User u = persistence.getUser();
-		Customer c = u.getCustomer();
-		Module am = c.getModule(bean.getBizModule());
-		Document ad = am.getDocument(c, bean.getBizDocument());
-		new UpdateBizUserVisitor(bean.getBizId()).visit(ad, bean, c);
-
-		// upsert Contact, User and Roles
-		persistence.upsertBeanTuple(bean.getContact());
-		persistence.upsertBeanTuple(bean);
-		persistence.upsertCollectionTuples(bean, User.groupsPropertyName);
-
-		persistence.commit(false);
-		return bean;
 	}
 
 	/**

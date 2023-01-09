@@ -20,20 +20,22 @@ public class ResendActivation implements ServerSideAction<SelfRegistrationExtens
 			throws Exception {
 
 		if (bean != null) {
-			if (bean.getUser().getContact() == null || bean.getUser().getContact().getName() == null) {
+			UserExtension user = bean.getUser();
+			if (user.getContact() == null || user.getContact().getName() == null) {
 				// this came from a public page, retrieve the user
-				UserExtension user = CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME,
-						bean.getUser().getBizId());
+				user = CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME,
+						user.getBizId());
 
 				if (user != null) {
+					user.setEmailSent(Boolean.TRUE);
+					// Set activation details
+					user.generateActivationDetailsAndSave(CORE.getPersistence());
+					user.sendUserRegistrationEmail();
+					user = CORE.getPersistence().save(user);
+					// Update and save bean for view and action control
 					bean.setUser(user);
 				}
 			}
-
-			// Set activation details
-			bean.getUser().generateActivationDetailsAndSave(CORE.getPersistence());
-
-			bean.getUser().sendUserRegistrationEmail();
 		}
 
 		return new ServerSideActionResult<>(bean);
