@@ -62,6 +62,10 @@ public class BulkUserCreationJob extends Job {
 								CommunicationUtil.ResponseMode.EXPLICIT, null, newUser);
 
 						log.add("New user '" + newUser.getUserName() + "' created and emailed ok");
+
+						// Update and save bean for view and action control
+						newUser.setEmailSent(Boolean.TRUE);
+						newUser = CORE.getPersistence().save(newUser);
 					} catch (@SuppressWarnings("unused") Exception e) {
 						log.add("New user '" + newUser.getUserName() + "' created ok but emailed FAILED");
 					}

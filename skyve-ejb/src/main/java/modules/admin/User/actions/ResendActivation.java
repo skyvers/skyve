@@ -2,7 +2,6 @@ package modules.admin.User.actions;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
@@ -17,21 +16,21 @@ public class ResendActivation implements ServerSideAction<UserExtension> {
 
 	@Override
 	public ServerSideActionResult<UserExtension> execute(UserExtension bean, WebContext webContext) throws Exception {
-
-		if (bean != null && bean.getContact() != null) {
-			if (bean.getContact().getEmail1() == null) {
+		UserExtension result = bean;
+		if (result != null && result.getContact() != null) {
+			if (result.getContact().getEmail1() == null) {
 				throw new DomainException("This user's contact does not have an email address.");
 			}
 
 			// Set activation details
-			bean.generateActivationDetailsAndSave(CORE.getPersistence());
-			bean.sendUserRegistrationEmail();
+			result.generateActivationDetailsAndSave(CORE.getPersistence());
+			result.sendUserRegistrationEmail();
 
-			if (webContext != null) {
-				webContext.growl(MessageSeverity.info, "Activation email sent to " + bean.getContact().getEmail1() + ".");
-			}
+			// Update and save bean for view and action control
+			result.setEmailSent(Boolean.TRUE);
+			result = CORE.getPersistence().save(result);
 		}
 
-		return new ServerSideActionResult<>(bean);
+		return new ServerSideActionResult<>(result);
 	}
 }
