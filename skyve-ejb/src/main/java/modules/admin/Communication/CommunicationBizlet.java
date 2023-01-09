@@ -162,8 +162,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	 * @param communicationId
 	 * @return
 	 */
-	@SuppressWarnings("unused")
-	private static boolean anonymouslyCommunicationExists(Persistence p, String bizCustomer, String communicationId) {
+	public static boolean anonymouslyCommunicationExists(Persistence p, String bizCustomer, String communicationId) {
 		boolean result = false;
 		try {
 			p.setDocumentPermissionScopes(DocumentPermissionScope.global);
