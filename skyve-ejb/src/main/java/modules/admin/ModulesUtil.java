@@ -603,7 +603,7 @@ public class ModulesUtil {
 		q.getFilter().addEquals(modules.admin.domain.User.userNamePropertyName, contact.getEmail1());
 		q.setMaxResults(1);
 
-		User found = q.beanResult();
+		UserExtension found = q.beanResult();
 		if (found != null) {
 			throw new DomainException("admin.modulesUtils.createAdminUserFromContactWithGroup.exception.duplicateUser");
 		}
