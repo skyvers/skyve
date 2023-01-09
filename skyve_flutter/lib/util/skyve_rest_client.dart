@@ -128,7 +128,7 @@ class SkyveRestClient {
     });
   }
 
-  Future<List<dynamic>> metadata() async {
+  Future<Map<String, dynamic>> metadata() async {
     debugPrint('Fetch metadata');
 
     return await _fetch('meta').then((jsonString) {
