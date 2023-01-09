@@ -155,6 +155,8 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	/**
 	 * anonymously check whether a communication exists for a customer
 	 * 
+	 * Used in UnsubscribeView
+	 * 
 	 * @param p
 	 * @param bizCustomer
 	 * @param communicationId
