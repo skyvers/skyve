@@ -55,6 +55,8 @@
 					<item>
 						<checkBox binding="emailSent" disabled="true"/>
 					</item>
+				</row>
+				<row>
 					<item>
 						<button action="SendActivation" pixelWidth="170"/>
 					</item>
