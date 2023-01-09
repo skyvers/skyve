@@ -15,7 +15,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -150,28 +149,6 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		}
 
 		super.preRerender(source, bean, webContext);
-	}
-
-	/**
-	 * anonymously check whether a communication exists for a customer
-	 * 
-	 * @param p
-	 * @param bizCustomer
-	 * @param communicationId
-	 * @return
-	 */
-	public static boolean anonymouslyCommunicationExists(Persistence p, String bizCustomer, String communicationId) {
-		boolean result = false;
-		try {
-			p.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			DocumentQuery q = p.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-			q.getFilter().addEquals(Bean.CUSTOMER_NAME, bizCustomer);
-			q.getFilter().addEquals(Bean.DOCUMENT_ID, communicationId);
-			result = q.beanResult() != null;
-		} finally {
-			p.resetDocumentPermissionScopes();
-		}
-		return result;
 	}
 
 	public static Communication setLinks(Communication communication) {
