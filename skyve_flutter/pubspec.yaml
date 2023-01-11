@@ -42,7 +42,8 @@ dependencies:
   dio_cookie_manager: ^2.0.0
   cookie_jar: ^3.0.1
   pretty_dio_logger: ^1.2.0-beta-1
-  go_router: ^6.0.0
+  go_router: ^6.0.1
+  flutter_riverpod: ^2.1.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -4,9 +4,10 @@ import '../util/skyve_rest_client.dart';
 import '../widgets/skyve_view.dart';
 
 class SkyveListView extends StatefulWidget {
-  final Map<String, String> queryParams;
+  final String m;
+  final String q;
 
-  const SkyveListView({Key? key, this.queryParams = const {}})
+  const SkyveListView({Key? key, required this.m, required this.q})
       : super(key: key);
 
   @override
@@ -22,7 +23,7 @@ class _SkyveListViewState extends State<SkyveListView> {
   @override
   void initState() {
     super.initState();
-    _load();
+    _load(widget.m, widget.q);
   }
 
   @override
@@ -85,8 +86,8 @@ class _SkyveListViewState extends State<SkyveListView> {
             ])));
   }
 
-  void _load() async {
-    final rows = await SkyveRestClient().query('admin', 'qContacts', 0, 75);
+  void _load(String m, String q) async {
+    final rows = await SkyveRestClient().query(m, q, 0, 75);
     setState(() {
       _rows = rows;
       _loaded = true;

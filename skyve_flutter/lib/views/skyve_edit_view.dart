@@ -14,26 +14,16 @@ import '../widgets/skyve_textfield.dart';
 import '../widgets/skyve_toolbar.dart';
 
 class SkyveEditView extends StatefulWidget {
-  final Map<String, String> queryParams;
+  final String m;
+  final String d;
+  final String? i;
 
-  const SkyveEditView({Key? key, this.queryParams = const {}})
+  const SkyveEditView({Key? key, required this.m, required this.d, this.i})
       : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     return _SkyveEditViewState();
-  }
-
-  String? get _bizId {
-    return queryParams['bizId'];
-  }
-
-  String? get _bizModule {
-    return queryParams['bizModule'];
-  }
-
-  String? get _bizDocument {
-    return queryParams['bizDocument'];
   }
 }
 
@@ -43,7 +33,7 @@ class _SkyveEditViewState extends State<SkyveEditView> {
   @override
   void initState() {
     super.initState();
-    _load(widget._bizId);
+    _load(widget.m, widget.d, widget.i);
   }
 
   @override
@@ -119,9 +109,9 @@ class _SkyveEditViewState extends State<SkyveEditView> {
             )));
   }
 
-  void _load(String? bizId) async {
+  void _load(String m, String d, String? i) async {
     if (_bean['bizId'] == null) {
-      final bean = await SkyveRestClient().edit('admin', 'Contact', bizId);
+      final bean = await SkyveRestClient().edit(m, d, i);
       setState(() {
         _bean = bean;
       });
