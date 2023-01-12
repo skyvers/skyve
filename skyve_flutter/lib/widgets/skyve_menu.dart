@@ -5,12 +5,9 @@ import 'package:skyve_flutter/util/skyve_providers.dart';
 import 'skyve_network_image.dart';
 
 class SkyveMenu extends ConsumerWidget {
-  const SkyveMenu(
-      {Key? key, required this.currentRoute, required this.inDrawer})
-      : super(key: key);
-
-  final String currentRoute;
   final bool inDrawer;
+
+  const SkyveMenu({Key? key, required this.inDrawer}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,7 +42,6 @@ class SkyveMenu extends ConsumerWidget {
                     title: row.label,
                     routeName: row.routeName,
                     params: row.params,
-                    currentRoute: currentRoute,
                     icon: row.icon));
               }
             }
@@ -53,8 +49,7 @@ class SkyveMenu extends ConsumerWidget {
                 context: context,
                 title: module.label,
                 open: module.open,
-                moduleMenuItems: list,
-                currentRoute: currentRoute));
+                moduleMenuItems: list));
             list.clear();
           }
 
@@ -75,8 +70,7 @@ class SkyveMenu extends ConsumerWidget {
       {required BuildContext context,
       required String title,
       required bool open,
-      required moduleMenuItems,
-      required String currentRoute}) {
+      required moduleMenuItems}) {
     return ExpansionTile(
       maintainState: true,
       title: Text(title),
@@ -102,7 +96,6 @@ class SkyveMenu extends ConsumerWidget {
             title: child.label,
             routeName: child.routeName,
             params: child.params,
-            currentRoute: currentRoute,
             icon: child.icon));
       }
     }
@@ -120,9 +113,11 @@ class SkyveMenu extends ConsumerWidget {
       required String title,
       required String routeName,
       required Map<String, dynamic>? params,
-      required String currentRoute,
       Icon? icon}) {
-    var selected = (routeName == currentRoute);
+    final String currentLocation = GoRouter.of(context).location;
+    final String newLocation =
+        Uri(path: routeName, queryParameters: params).toString();
+    var selected = (currentLocation == newLocation);
 
     return ListTile(
       title: Text(title),

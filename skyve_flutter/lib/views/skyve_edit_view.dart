@@ -40,7 +40,6 @@ class _SkyveEditViewState extends State<SkyveEditView> {
   Widget build(BuildContext context) {
     return SkyveView.responsiveView(
         context,
-        '/admin/Contact',
         _bean['_title'],
         Visibility(
             visible: (_bean['bizId'] != null),

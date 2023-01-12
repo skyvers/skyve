@@ -36,7 +36,6 @@ class _SkyveListViewState extends State<SkyveListView> {
 
     return SkyveView.responsiveView(
         context,
-        '/admin/qContacts',
         'All Contact Details',
         Visibility(
             visible: _loaded,
