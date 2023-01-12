@@ -8,7 +8,7 @@ class SkyveContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final metadata = ref.watch(containerMenuProvider);
+    final metadata = ref.watch(containerDataSourceProvider);
     return metadata.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),

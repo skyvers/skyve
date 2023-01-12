@@ -77,7 +77,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 					StringBuilder menus = new StringBuilder(2048);
 					StringBuilder dataSources = new StringBuilder(2048);
-					processModules(uxui.getName(), user,  chosenModuleName, menus, dataSources);
+					processModules(uxui.getName(), user, chosenModuleName, menus, dataSources);
 					pw.append("{\"menus\":").append(menus).append(",\n");
 					pw.append("\"dataSources\":").append(dataSources).append('}');
 				}
@@ -106,7 +106,7 @@ public class MetaDataServlet extends HttpServlet {
 		final Customer customer = user.getCustomer();
 		
 		menuJson.append("[");
-		dataSourceJson.append("[");
+		dataSourceJson.append("{");
 		
 		new MenuRenderer(uxui, chosenModuleName) {
 			@Override
@@ -316,8 +316,8 @@ public class MetaDataServlet extends HttpServlet {
 					return;
 				}
 
-				dataSourceJson.append("{\"name\":\"").append(dataSourceName);
-				dataSourceJson.append("\",\"module\":\"").append(drivingDocumentModuleName);
+				dataSourceJson.append('"').append(dataSourceName);
+				dataSourceJson.append("\":{\"module\":\"").append(drivingDocumentModuleName);
 				dataSourceJson.append("\",\"document\":\"").append(drivingDocumentName);
 
 				String icon = drivingDocument.getIconStyleClass();
@@ -551,7 +551,7 @@ public class MetaDataServlet extends HttpServlet {
         menuJson.setLength(menuJson.length() - 1);
         menuJson.append("]");
         dataSourceJson.setLength(dataSourceJson.length() - 2); // ,\n
-        dataSourceJson.append("]");
+        dataSourceJson.append("}");
 	}
 	
 	private static String emptyResponse() {

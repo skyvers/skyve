@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:skyve_flutter/main.dart';
-import 'package:skyve_flutter/util/skyve_rest_client.dart';
-import 'package:skyve_flutter/views/auto_log_in.dart';
-import 'package:skyve_flutter/views/skyve_container.dart';
-import 'package:skyve_flutter/views/skyve_edit_view.dart';
-import 'package:skyve_flutter/views/skyve_list_view.dart';
-import 'package:skyve_flutter/widgets/skyve_menu.dart';
+import '../main.dart';
+import '../models/skyve_datasource_models.dart';
+import '../models/skyve_menu_models.dart';
+import '../util/skyve_rest_client.dart';
+import '../views/auto_log_in.dart';
+import '../views/skyve_container.dart';
+import '../views/skyve_edit_view.dart';
+import '../views/skyve_list_view.dart';
 
 final containerMetaDataProvider =
     FutureProvider<Map<String, dynamic>>((ref) async {
@@ -28,47 +29,36 @@ final containerMetaDataProvider =
 });
 
 final containerMenuProvider = FutureProvider((ref) async {
-  void addItems(String moduleName, List<dynamic> jsonMenuOrGroup,
-      List<SkyveMenuItem> items) {
-    for (Map<String, dynamic> jsonItem in jsonMenuOrGroup) {
-      if (jsonItem.containsKey('edit')) {
-        items.add(SkyveMenuData(
-            label: jsonItem['edit'],
-            icon: null, //jsonItem['fontIcon'],
-            routeName: '/e',
-            params: {'m': moduleName, 'd': jsonItem['document']}));
-      } else if (jsonItem.containsKey('list')) {
-        items.add(SkyveMenuData(
-            label: jsonItem['list'],
-            icon: null, // jsonItem['fontIcon'],
-            routeName: '/l',
-            params: {'m': moduleName, 'q': jsonItem['query']}));
-      } else if (jsonItem.containsKey('group')) {
-        final List<SkyveMenuItem> groupItems = [];
-        items.add(
-            SkyveMenuGroup(label: jsonItem['group'], children: groupItems));
-        addItems(moduleName, jsonItem['items'], groupItems);
-      }
-    }
+  // Prefer global menu variable (if defined)
+  if (menu != null) {
+    return menu!;
   }
 
-  return Future<List<SkyveMenuModule>>(() async {
-    // Prefer global menu variable (if defined)
-    if (menu != null) {
-      return menu!;
-    }
-
+  return Future<List<SkyveModuleMenu>>(() async {
     // Use metadata if there is no local menu
     final metadata = await ref.watch(containerMetaDataProvider.future);
-    final List<SkyveMenuModule> result = [];
-    final List<dynamic> jsonMenus = metadata['menus'];
-    for (Map<String, dynamic> jsonModule in jsonMenus) {
-      final List<SkyveMenuItem> items = [];
-      var module = SkyveMenuModule(
-          label: jsonModule['title'], open: jsonModule['open'], items: items);
-      final List<dynamic> jsonMenu = jsonModule['menu'];
-      addItems(jsonModule['module'], jsonMenu, items);
-      result.add(module);
+    final List<dynamic> json = metadata['menus'];
+    return List.generate(
+        json.length, (index) => SkyveModuleMenu.fromJson(json[index]),
+        growable: false);
+  });
+});
+
+final containerDataSourceProvider =
+    FutureProvider<Map<String, SkyveDataSource>>((ref) async {
+  // Prefer global dataSource variable (if defined)
+  if (dataSources != null) {
+    return dataSources!;
+  }
+
+  // Use metadata if there is no local menu
+  return Future<Map<String, SkyveDataSource>>(() async {
+    final Map<String, dynamic> metadata =
+        await ref.watch(containerMetaDataProvider.future);
+    Map<String, dynamic> json = metadata['dataSources'];
+    Map<String, SkyveDataSource> result = {};
+    for (MapEntry<String, dynamic> entry in json.entries) {
+      result[entry.key] = SkyveDataSource.fromJson(entry.value);
     }
     return result;
   });
@@ -112,8 +102,9 @@ final containerRouterProvider = Provider((ref) {
         path: '/l',
         builder: (context, state) {
           final String m = state.queryParams['m']!;
+          final String? d = state.queryParams['d'];
           final String q = state.queryParams['q']!;
-          return SkyveListView(m: m, q: q);
+          return SkyveListView(m: m, d: d, q: q);
         }),
     GoRoute(
         name: 'Edit',

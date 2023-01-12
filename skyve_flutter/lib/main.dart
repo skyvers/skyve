@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'models/skyve_datasource_models.dart';
+import 'models/skyve_menu_models.dart';
 import 'util/skyve_providers.dart';
-import 'widgets/skyve_menu.dart';
 
 void main() {
   runApp(const ProviderScope(child: App()));
 }
 
 // Allow metadata to drive the menu structure
-const List<SkyveMenuModule>? menu = null;
+const List<SkyveModuleMenu>? menu = null;
+
+// Allow metadata to drive the datasource definitions
+const Map<String, SkyveDataSource>? dataSources = null;
 
 class App extends ConsumerWidget {
   const App({Key? key}) : super(key: key);

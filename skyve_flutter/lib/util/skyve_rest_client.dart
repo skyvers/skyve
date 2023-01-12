@@ -116,12 +116,21 @@ class SkyveRestClient {
     }
   }
 
-  Future<List<dynamic>> query(
-      String moduleName, String queryName, int startRow, endRow) async {
-    debugPrint('Fetch list $moduleName.$queryName');
+  String dataSource(String m, String? d, String q) {
+    return (d == null) ? '${m}_$q' : '${m}_${d}__$q';
+  }
+
+  Future<List<dynamic>> fetchQuery(
+      String m, String? d, String q, int startRow, int endRow) async {
+    return fetchDataSource(dataSource(m, d, q), startRow, endRow);
+  }
+
+  Future<List<dynamic>> fetchDataSource(
+      String ds, int startRow, int endRow) async {
+    debugPrint('Fetch list $ds');
 
     return await _fetch(
-            'smartlist?_operationType=fetch&_dataSource=${moduleName}_$queryName&_startRow=$startRow&_endRow=$endRow')
+            'smartlist?_operationType=fetch&_dataSource=$ds&_startRow=$startRow&_endRow=$endRow')
         .then((jsonString) {
       var decoded = jsonDecode(jsonString);
       return decoded['response']['data'];
