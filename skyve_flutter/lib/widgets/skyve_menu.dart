@@ -131,7 +131,8 @@ class SkyveMenu extends ConsumerWidget {
       onTap: () {
         if (!selected) {
           // Go to the clicked menu item
-          context.go(Uri(path: routeName, queryParameters: params).toString());
+          context.pushReplacement(
+              Uri(path: routeName, queryParameters: params).toString());
         } else {
           // Close the side menu
           context.pop();
