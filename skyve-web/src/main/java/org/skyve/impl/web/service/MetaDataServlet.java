@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.impl.generate.ViewRenderer;
+import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
@@ -22,7 +28,70 @@ import org.skyve.impl.metadata.module.menu.LinkItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.Inject;
+import org.skyve.impl.metadata.view.WidgetReference;
+import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Tab;
+import org.skyve.impl.metadata.view.container.TabPane;
+import org.skyve.impl.metadata.view.container.VBox;
+import org.skyve.impl.metadata.view.container.form.Form;
+import org.skyve.impl.metadata.view.container.form.FormColumn;
+import org.skyve.impl.metadata.view.container.form.FormItem;
+import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.event.Addable;
+import org.skyve.impl.metadata.view.event.Changeable;
+import org.skyve.impl.metadata.view.event.Editable;
+import org.skyve.impl.metadata.view.event.EventSource;
+import org.skyve.impl.metadata.view.event.Focusable;
+import org.skyve.impl.metadata.view.event.Removable;
+import org.skyve.impl.metadata.view.event.RerenderEventAction;
+import org.skyve.impl.metadata.view.event.Selectable;
+import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
+import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
+import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
+import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
+import org.skyve.impl.metadata.view.widget.Blurb;
+import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DialogButton;
+import org.skyve.impl.metadata.view.widget.DynamicImage;
+import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
+import org.skyve.impl.metadata.view.widget.Spacer;
+import org.skyve.impl.metadata.view.widget.StaticImage;
+import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
+import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
+import org.skyve.impl.metadata.view.widget.bound.input.HTML;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.Password;
+import org.skyve.impl.metadata.view.widget.bound.input.Radio;
+import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
+import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
+import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
+import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
@@ -37,21 +106,23 @@ import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuRenderer;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
-import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewParameter;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 public class MetaDataServlet extends HttpServlet {
 	private static final long serialVersionUID = -2160904569807647301L;
-
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		doGet(req, resp);
-	}
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -72,14 +143,15 @@ public class MetaDataServlet extends HttpServlet {
 					}
 					persistence.setUser(user);
 
-					UxUi uxui = UserAgent.getUxUi(request);
-					String chosenModuleName = Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME));
-			
-					StringBuilder menus = new StringBuilder(2048);
-					StringBuilder dataSources = new StringBuilder(2048);
-					processModules(uxui.getName(), user, chosenModuleName, menus, dataSources);
-					pw.append("{\"menus\":").append(menus).append(",\n");
-					pw.append("\"dataSources\":").append(dataSources).append('}');
+					String uxui = UserAgent.getUxUi(request).getName();
+					String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
+					String documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
+					if (documentName != null) {
+						pw.append(view(user, uxui, moduleName, documentName));
+					}
+					else {
+						metadata(user, uxui, moduleName, pw);
+					}
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();
@@ -96,6 +168,19 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 		}
+	}
+	
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		doGet(req, resp);
+	}
+
+	private static void metadata(User user, String uxui, String chosenModuleName, PrintWriter pw) {
+		StringBuilder menus = new StringBuilder(2048);
+		StringBuilder dataSources = new StringBuilder(2048);
+		processModules(uxui, user, chosenModuleName, menus, dataSources);
+		pw.append("{\"menus\":").append(menus).append(",\n");
+		pw.append("\"dataSources\":").append(dataSources).append('}');
 	}
 	
 	private static void processModules(final String uxui, 
@@ -552,6 +637,1213 @@ public class MetaDataServlet extends HttpServlet {
         menuJson.append("]");
         dataSourceJson.setLength(dataSourceJson.length() - 2); // ,\n
         dataSourceJson.append("}");
+	}
+	
+	private static StringBuilder view(User user,
+										String uxui,
+										String moduleName,
+										String documentName) {
+		final StringBuilder result = new StringBuilder(5120);
+		Customer c = user.getCustomer();
+		Module module = c.getModule(moduleName);
+		Document document = module.getDocument(c, documentName);
+		View editView = document.getView(uxui, c, ViewType.edit.toString());
+		
+		new ViewRenderer(user, module, document, editView, uxui, false) {
+			@Override
+			public void renderView(String icon16x16Url, String icon32x32Url) {
+				result.append("{\"type\":\"view\",\"name\":\"");
+				result.append(view.getName()).append("\",\"title\":\"").append(view.getTitle()).append('"');
+				String value = view.getIconStyleClass();
+				if (value != null) {
+					result.append(",\"iconStyleClass\":\"").append(value).append('"');
+				}
+				if (icon32x32Url != null) {
+					result.append(",\"icon32x32Url\":\"").append(icon32x32Url).append('"');
+				}
+				value = view.getHelpRelativeFileName();
+				if (value != null) {
+					result.append(",\"helpRelativeFileName\":\"").append(value).append('"');
+				}
+				value = view.getHelpURL();
+				if (value != null) {
+					result.append(",\"helpURL\":\"").append(value).append('"');
+				}
+				Integer integer = view.getRefreshTimeInSeconds();
+				if (integer != null) {
+					result.append(",\"helpURL\":").append(integer);
+				}
+				value = view.getRefreshConditionName();
+				if (value != null) {
+					result.append(",\"refreshConditionName\":\"").append(value).append('"');
+				}
+				value = view.getRefreshActionName();
+				if (value != null) {
+					result.append(",\"refreshActionName\":\"").append(value).append('"');
+				}
+				
+				List<ViewParameter> parameters = view.getParameters();
+				if ((parameters != null) && (! parameters.isEmpty())) {
+					result.append(",\"parameters\":[");
+					for (ViewParameter parameter : parameters) {
+						result.append("{\"fromBinding\":\"").append(parameter.getFromBinding());
+						result.append("\",\"boundTo\":\"").append(parameter.getBoundTo()).append("\"},");
+					}
+					result.setLength(result.length() - 1); // remove last comma
+					result.append(']');
+				}
+
+				processProperties(view.getProperties());
+
+				Collection<Action> actions = view.getActions();
+				if ((actions != null) && (! actions.isEmpty())) {
+					result.append(",\"actions\":[");
+					for (Action action : actions) {
+// TODO what do I do here
+					}
+					result.append(']');
+				}
+				
+				processContainer(view);
+			}
+
+			@Override
+			public void renderedView(String icon16x16Url, String icon32x32Url) {
+				processedContainer(view);
+				result.setLength(result.length() - 1); // remove last comma
+				result.append('}');
+			}
+			
+			@Override
+			public void renderVBox(String borderTitle, VBox vbox) {
+				result.append("{\"type\":\"vbox\"");
+				processContainer(vbox);
+			}
+			
+			@Override
+			public void renderedVBox(String borderTitle, VBox vbox) {
+				processedContainer(vbox);
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("},");
+			}
+			
+			@Override
+			public void renderHBox(String borderTitle, HBox hbox) {
+				result.append("{\"type\":\"hbox\"");
+				processContainer(hbox);
+			}
+			
+			@Override
+			public void renderedHBox(String title, HBox hbox) {
+				processedContainer(hbox);
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("},");
+			}
+			
+			@Override
+			public void renderTabPane(TabPane tabPane) {
+				result.append("{\"type\":\"tabPane\",\"tabs\"[");
+			}
+			
+			@Override
+			public void renderedTabPane(TabPane tabPane) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("],");
+			}
+			
+			@Override
+			public void renderTab(String title, String icon16x16Url, Tab tab) {
+				result.append("{\"type\":\"tab\"");
+				processContainer(tab);
+			}
+			
+			@Override
+			public void renderedTab(String title, String icon16x16Url, Tab tab) {
+				processedContainer(tab);
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("},");
+			}
+			
+			@Override
+			public void renderForm(String borderTitle, Form form) {
+				result.append("{\"type\":\"form\",\"columns\":[");
+				for (FormColumn column : form.getColumns()) {
+					result.append("{\"type\":\"column\"");
+					processWidths(column.getPixelWidth(),
+									column.getResponsiveWidth(),
+									column.getPercentageWidth(),
+									column.getSm(),
+									column.getMd(),
+									column.getLg(),
+									column.getXl());
+					result.append("},");
+				}
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("],\"rows\":[");
+			}
+			
+			@Override
+			public void renderedForm(String borderTitle, Form form) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderFormColumn(FormColumn column) {
+				// handled in renderForm()
+			}
+			
+			@Override
+			public void renderFormRow(FormRow row) {
+				result.append("{\"type\":\"row\",\"items\":[");
+			}
+			
+			@Override
+			public void renderedFormRow(FormRow row) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderFormItem(String label,
+										boolean required,
+										String help,
+										boolean showsLabel,
+										int colspan,
+										FormItem item) {
+				result.append("{\"type\":\"item\",\"widget\":");
+			}
+			
+			@Override
+			public void renderedFormItem(String label,
+											boolean required,
+											String help,
+											boolean showLabel,
+											int colspan,
+											FormItem item) {
+				result.append("},");
+			}
+			
+			@Override
+			public void renderFormTextField(TextField text) {
+				result.append("{\"type\":\"textField\"}");
+			}
+			
+			@Override
+			public void renderedFormTextField(TextField text) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormTextArea(TextArea text) {
+				result.append("{\"type\":\"textArea\"}");
+			}
+			
+			@Override
+			public void renderedFormTextArea(TextArea text) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormZoomIn(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											ZoomIn zoomIn) {
+				result.append("{\"type\":\"zoomIn\"}");
+			}
+			
+			@Override
+			public void renderFormStaticImage(String fileUrl, StaticImage image) {
+				result.append("{\"type\":\"staticImage\"}");
+			}
+			
+			@Override
+			public void renderFormSpinner(Spinner spinner) {
+				result.append("{\"type\":\"spinner\"}");
+			}
+			
+			@Override
+			public void renderedFormSpinner(Spinner spinner) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormSpacer(Spacer spacer) {
+				result.append("{\"type\":\"spacer\"}");
+			}
+			
+			@Override
+			public void renderFormSlider(Slider slider) {
+				result.append("{\"type\":\"slider\"}");
+			}
+			
+			@Override
+			public void renderedFormSlider(Slider slider) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormRichText(RichText text) {
+				result.append("{\"type\":\"richText\"}");
+			}
+			
+			@Override
+			public void renderedFormRichText(RichText text) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormRadio(Radio radio) {
+				result.append("{\"type\":\"richText\"}");
+			}
+			
+			@Override
+			public void renderedFormRadio(Radio radio) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormProgressBar(ProgressBar progressBar) {
+				result.append("{\"type\":\"progressBar\"}");
+			}
+			
+			@Override
+			public void renderFormPassword(Password password) {
+				result.append("{\"type\":\"password\"}");
+			}
+			
+			@Override
+			public void renderedFormPassword(Password password) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormLookupDescription(MetaDataQueryDefinition query,
+														boolean canCreate,
+														boolean canUpdate,
+														String descriptionBinding,
+														LookupDescription lookup) {
+				result.append("{\"type\":\"lookupDescription\"}");
+			}
+			
+			@Override
+			public void renderedFormLookupDescription(MetaDataQueryDefinition query,
+														boolean canCreate,
+														boolean canUpdate,
+														String descriptionBinding,
+														LookupDescription lookup) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormLink(String value, Link link) {
+				result.append("{\"type\":\"link\"}");
+			}
+			
+			@Override
+			public void renderFormLabel(String value, Label label) {
+				result.append("{\"type\":\"label\"}");
+			}
+			
+			@Override
+			public void renderFormInject(Inject inject) {
+				result.append("{\"type\":\"inject\"}");
+			}
+			
+			@Override
+			public void renderFormHTML(HTML html) {
+				result.append("{\"type\":\"html\"}");
+			}
+			
+			@Override
+			public void renderFormGeometryMap(GeometryMap geometry) {
+				result.append("{\"type\":\"geometryMap\"}");
+			}
+			
+			@Override
+			public void renderedFormGeometryMap(GeometryMap geometry) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormGeometry(Geometry geometry) {
+				result.append("{\"type\":\"geometry\"}");
+			}
+			
+			@Override
+			public void renderedFormGeometry(Geometry geometry) {
+				// nothing to see here
+			}
+
+			@Override
+			public void renderFormDialogButton(String label, DialogButton button) {
+				result.append("{\"type\":\"dialogButton\"}");
+			}
+			
+			@Override
+			public void renderFormContentSignature(ContentSignature signature) {
+				result.append("{\"type\":\"contentSignature\"}");
+			}
+			
+			@Override
+			public void renderFormContentLink(String value, ContentLink link) {
+				result.append("{\"type\":\"contentLink\"}");
+			}
+			
+			@Override
+			public void renderFormContentImage(ContentImage image) {
+				result.append("{\"type\":\"contentImage\"}");
+			}
+			
+			@Override
+			public void renderFormCombo(Combo combo) {
+				result.append("{\"type\":\"combo\"}");
+			}
+			
+			@Override
+			public void renderedFormCombo(Combo combo) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormColourPicker(ColourPicker colour) {
+				result.append("{\"type\":\"colour\"}");
+			}
+			
+			@Override
+			public void renderedFormColourPicker(ColourPicker colour) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormCheckBox(CheckBox checkBox) {
+				result.append("{\"type\":\"checkBox\"}");
+			}
+			
+			@Override
+			public void renderedFormCheckBox(CheckBox checkBox) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderFormButton(Action action,
+											String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											Button button) {
+				result.append("{\"type\":\"button\"}");
+			}
+			
+			@Override
+			public void renderFormBlurb(String markup, Blurb blurb) {
+				result.append("{\"type\":\"blurb\"}");
+			}
+			
+			@Override
+			public void renderDataGrid(String title, DataGrid grid) {
+				result.append("{\"type\":\"dataGrid\",\"columns\":[");
+			}
+
+			@Override
+			public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
+				result.append("{\"type\":\"containerColumn\",\"widgets\":[");
+			}
+			
+			@Override
+			public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
+				result.append("{\"type\":\"staticImge\"},");
+			}
+			
+			@Override
+			public void renderContainerColumnLink(String value, Link link) {
+				result.append("{\"type\":\"link\"},");
+			}
+			
+			@Override
+			public void renderContainerColumnLabel(String value, Label label) {
+				result.append("{\"type\":\"label\"},");
+			}
+			
+			@Override
+			public void renderContainerColumnDynamicImage(DynamicImage image) {
+				result.append("{\"type\":\"dynamicImge\"},");
+			}
+			
+			@Override
+			public void renderContainerColumnContentImage(ContentImage image) {
+				result.append("{\"type\":\"contentImge\"},");
+			}
+			
+			@Override
+			public void renderContainerColumnBlurb(String markup, Blurb blurb) {
+				result.append("{\"type\":\"blurb\"},");
+			}
+			
+			@Override
+			public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
+				result.append("{\"type\":\"boundColumn\"");
+				WidgetReference input = column.getInputWidget();
+				if (input != null) {
+					result.append(",\"input\":");
+				}
+				result.append("},");
+			}
+			
+			@Override
+			public void renderBoundColumnTextField(TextField text) {
+				result.append("{\"type\":\"textField\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnTextField(TextField text) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnTextArea(TextArea text) {
+				result.append("{\"type\":\"textArea\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnTextArea(TextArea text) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnSpinner(Spinner spinner) {
+				result.append("{\"type\":\"spinner\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnSpinner(Spinner spinner) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnSlider(Slider slider) {
+				result.append("{\"type\":\"slider\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnSlider(Slider slider) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnRichText(RichText text) {
+				result.append("{\"type\":\"richText\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnRichText(RichText text) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnRadio(Radio radio) {
+				result.append("{\"type\":\"radio\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnRadio(Radio radio) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnPassword(Password password) {
+				result.append("{\"type\":\"password\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnPassword(Password password) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
+															boolean canCreate,
+															boolean canUpdate,
+															String descriptionBinding,
+															LookupDescription lookup) {
+				result.append("{\"type\":\"lookupDescription\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
+																	boolean canCreate,
+																	boolean canUpdate,
+																	String descriptionBinding,
+																	LookupDescription lookup) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnHTML(HTML html) {
+				result.append("{\"type\":\"html\"}");
+			}
+			
+			@Override
+			public void renderBoundColumnGeometry(Geometry geometry) {
+				result.append("{\"type\":\"geometry\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnGeometry(Geometry geometry) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnContentLink(String value, ContentLink link) {
+				result.append("{\"type\":\"contentLink\"}");
+			}
+			
+			@Override
+			public void renderBoundColumnContentImage(ContentImage image) {
+				result.append("{\"type\":\"contentImage\"}");
+			}
+			
+			@Override
+			public void renderBoundColumnCombo(Combo combo) {
+				result.append("{\"type\":\"combo\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnCombo(Combo combo) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnColourPicker(ColourPicker colour) {
+				result.append("{\"type\":\"colourPicker\"}");
+			}
+			
+			@Override
+			public void renderedBoundColumnColourPicker(ColourPicker colour) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderBoundColumnCheckBox(CheckBox checkBox) {
+				result.append("{\"type\":\"checkBox\"}");
+			}
+
+			@Override
+			public void renderedBoundColumnCheckBox(CheckBox checkBox) {
+				// nothing to see here
+			}
+
+			@Override
+			public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderedDataGrid(String title, DataGrid grid) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderDataRepeater(String title, DataRepeater repeater) {
+				result.append("{\"type\":\"dataRepeater\",\"columns\":[");
+			}
+			
+			@Override
+			public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+				result.append("{\"type\":\"containerColumn\"},");
+			}
+			
+			@Override
+			public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+				// nothing to see here
+			}
+
+			@Override
+			public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+				result.append("{\"type\":\"boundColumn\"},");
+			}
+			
+			@Override
+			public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderedDataRepeater(String title, DataRepeater repeater) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+				result.append("{\"type\":\"listGrid\",\"columns\":[");
+			}
+			
+			@Override
+			public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+				result.append("{\"type\":\"column\"},");
+			}
+			
+			@Override
+			public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
+				result.append("{\"type\":\"contentColumn\"},");
+			}
+			
+			@Override
+			public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderListRepeater(String title, ListRepeater repeater) {
+				result.append("{\"type\":\"listRepeater\",\"columns\":[");
+			}
+			
+			@Override
+			public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
+				result.append("{\"type\":\"column\"},");
+			}
+			
+			@Override
+			public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
+				result.append("{\"type\":\"contentColumn\"},");
+			}
+			
+			@Override
+			public void renderedListRepeater(String title, ListRepeater repeater) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderTreeGrid(String title, TreeGrid grid) {
+				result.append("{\"type\":\"treeGrid\",\"columns\":[");
+			}
+			
+			@Override
+			public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+				result.append("{\"type\":\"column\"},");
+			}
+			
+			@Override
+			public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
+				result.append("{\"type\":\"contentColumn\"},");
+			}
+			
+			@Override
+			public void renderedTreeGrid(String title, TreeGrid grid) {
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("]},");
+			}
+			
+			@Override
+			public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+				result.append("{\"type\":\"listMembership\"},");
+			}
+			
+			@Override
+			public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderCheckMembership(CheckMembership membership) {
+				result.append("{\"type\":\"checkMembership\"},");
+			}
+			
+			@Override
+			public void renderedCheckMembership(CheckMembership membership) {
+				// nothing to see here
+			}
+			
+			@Override
+			public void renderStaticImage(String fileUrl, StaticImage image) {
+				result.append("{\"type\":\"staticImage\"},");
+			}
+			
+			@Override
+			public void renderSpacer(Spacer spacer) {
+				result.append("{\"type\":\"spacer\"},");
+			}
+			
+			@Override
+			public void renderZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
+				result.append("{\"type\":\"zoomIn\"},");
+			}
+						
+			@Override
+			public void renderMap(MapDisplay map) {
+				result.append("{\"type\":\"map\"},");
+			}
+			
+			@Override
+			public void renderLink(String value, Link link) {
+				result.append("{\"type\":\"link\"},");
+			}
+			
+			@Override
+			public void renderLabel(String value, Label label) {
+				result.append("{\"type\":\"label\"},");
+			}
+			
+			@Override
+			public void renderInject(Inject inject) {
+				result.append("{\"type\":\"inject\"},");
+			}
+
+			@Override
+			public void renderDynamicImage(DynamicImage image) {
+				result.append("{\"type\":\"dynamicImage\"},");
+			}
+			
+			@Override
+			public void renderDialogButton(String label, DialogButton button) {
+				result.append("{\"type\":\"dialogButton\"},");
+			}
+			
+			@Override
+			public void renderComparison(Comparison comparison) {
+				result.append("{\"type\":\"comparison\"},");
+			}
+			
+			@Override
+			public void renderChart(Chart chart) {
+				result.append("{\"type\":\"chart\"},");
+			}
+			
+			@Override
+			public void renderButton(Action action,
+										String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										Button button) {
+				result.append("{\"type\":\"button\"},");
+			}
+			
+			@Override
+			public void renderBlurb(String markup, Blurb blurb) {
+				result.append("{\"type\":\"blurb\"},");
+			}
+			
+			@Override
+			public void renderZoomOutAction(String label,
+												String iconUrl,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText,
+												char type,
+												ActionImpl action) {
+//TODO				result.append("{\"type\":\"zoomOutAction\"},");
+			}
+			
+			@Override
+			public void renderUploadAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"uploadAction\"},");
+			}
+			
+			@Override
+			public void renderSaveAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"saveAction\"},");
+			}
+			
+			@Override
+			public void renderReportAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"reportAction\"},");
+			}
+			
+			@Override
+			public void renderRemoveAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action,
+											boolean canDelete) {
+//TODO				result.append("{\"type\":\"removeAction\"},");
+			}
+			
+			@Override
+			public void renderPrintAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"printAction\"},");
+			}
+			
+			@Override
+			public void renderOKAction(String label,
+										String iconUrl,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										char type,
+										ActionImpl action) {
+//TODO				result.append("{\"type\":\"okAction\"},");
+			}
+			
+			@Override
+			public void renderNewAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"newAction\"},");
+			}
+			
+			@Override
+			public void renderNavigateAction(String label,
+												String iconUrl,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText,
+												char type,
+												ActionImpl action) {
+//TODO				result.append("{\"type\":\"navigateAction\"},");
+			}
+			
+			@Override
+			public void renderEditAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"editAction\"},");
+			}
+			
+			@Override
+			public void renderDownloadAction(String label,
+												String iconUrl,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText,
+												char type,
+												ActionImpl action) {
+//TODO				result.append("{\"type\":\"downloadAction\"},");
+			}
+			
+			@Override
+			public void renderDeleteAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"deleteAction\"},");
+			}
+			
+			@Override
+			public void renderCustomAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"serverAction\"},");
+			}
+			
+			@Override
+			public void renderCancelAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"cancelAction\"},");
+			}
+			
+			@Override
+			public void renderBizImportAction(String label,
+												String iconUrl,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText,
+												char type,
+												ActionImpl action) {
+//TODO				result.append("{\"type\":\"importAction\"},");
+			}
+			
+			@Override
+			public void renderBizExportAction(String label,
+												String iconUrl,
+												String iconStyleClass,
+												String toolTip,
+												String confirmationText,
+												char type,
+												ActionImpl action) {
+//TODO				result.append("{\"type\":\"exportAction\"},");
+			}
+			
+			@Override
+			public void renderAddAction(String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											char type,
+											ActionImpl action) {
+//TODO				result.append("{\"type\":\"addAction\"},");
+			}
+			
+			@Override
+			public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility, boolean parentVisible,
+					boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled, boolean parentVisible,
+					boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible, boolean parentVisible,
+					boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled, boolean parentVisible,
+					boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitRerenderEventAction(RerenderEventAction rerender, EventSource source, boolean parentVisible,
+					boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			private void processContainer(Container container) {
+				if (! container.getContained().isEmpty()) {
+					result.append(",\"contained\":[");
+				}
+			}
+
+			private void processedContainer(Container container) {
+				if (! container.getContained().isEmpty()) {
+					result.setLength(result.length() - 1); // remove last comma
+					result.append("],");
+				}
+			}
+			
+			private void processProperties(Map<String, String> properties) {
+				if ((properties != null) && (! properties.isEmpty())) {
+					result.append(",\"properties\":{");
+					for (Entry<String, String> entry : properties.entrySet()) {
+						result.append('"').append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\",");
+					}
+					result.setLength(result.length() - 1); // remove comma
+					result.append('}');
+				}
+			}
+			
+			private void processWidths(Integer pixelWidth,
+										Integer responsiveWidth,
+										Integer percentageWidth,
+										Integer sm,
+										Integer md,
+										Integer lg,
+										Integer xl) {
+				if (pixelWidth != null) {
+					result.append(",\"pixelWidth\":").append(pixelWidth);
+				}
+				if (responsiveWidth != null) {
+					result.append(",\"responsiveWidth\":").append(responsiveWidth);
+				}
+				if (percentageWidth != null) {
+					result.append(",\"percentageWidth\":").append(percentageWidth);
+				}
+				if (sm != null) {
+					result.append(",\"sm\":").append(sm);
+				}
+				if (md != null) {
+					result.append(",\"md\":").append(md);
+				}
+				if (lg != null) {
+					result.append(",\"lg\":").append(lg);
+				}
+				if (xl != null) {
+					result.append(",\"xl\":").append(xl);
+				}
+			}
+		}.visit();
+		
+		return result;
 	}
 	
 	private static String emptyResponse() {
