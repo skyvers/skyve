@@ -12,11 +12,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.DataMaintenance.DataMaintenanceExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
-import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
+import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
@@ -625,7 +625,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * Epoch Date
 	 **/
-	private DateOnly epochDate;
+	private DateTime epochDate;
 
 	/**
 	 * Audit Log Retention Days
@@ -1098,7 +1098,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * {@link #epochDate} accessor.
 	 * @return	The value.
 	 **/
-	public DateOnly getEpochDate() {
+	public DateTime getEpochDate() {
 		return epochDate;
 	}
 
@@ -1107,9 +1107,9 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * @param epochDate	The new value.
 	 **/
 	@XmlElement
-	@XmlSchemaType(name = "date")
-	@XmlJavaTypeAdapter(DateOnlyMapper.class)
-	public void setEpochDate(DateOnly epochDate) {
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setEpochDate(DateTime epochDate) {
 		preset(epochDatePropertyName, epochDate);
 		this.epochDate = epochDate;
 	}

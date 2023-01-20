@@ -219,7 +219,7 @@
 				<param name="enumClass">modules.admin.domain.DataMaintenance$RestoreIndexingOption</param>
 			</type>
 		</property>
-		<property name="epochDate" type="DateOnly" />
+		<property name="epochDate" type="DateTime" />
 		<property name="auditLogRetentionDays" />
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
