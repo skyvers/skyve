@@ -166,7 +166,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 
 	/**
 	 * This method recursively walks the graph of this bean's relations determining if any have changed using isChanged().
-	 * Note that this property does is not a java bean accessor as it is expected that this call is expensive.
+	 * Note that this method is not a java bean accessor as it is expected that this call is expensive.
 	 * @return	<code>true</code> if the bean or any of its relations have been changed, otherwise <code>false</code>.
 	 */
 	public boolean hasChanged();

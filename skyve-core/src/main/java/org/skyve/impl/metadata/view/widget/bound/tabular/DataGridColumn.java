@@ -9,13 +9,14 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
+import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"title", "alignment", "pixelWidth", "properties"})
-public abstract class DataGridColumn implements TabularColumn, DecoratedMetaData {
+public abstract class DataGridColumn implements TabularColumn, AbsoluteWidth, DecoratedMetaData {
 	private static final long serialVersionUID = -5532364729219436008L;
 
 	private String title;
@@ -48,10 +49,12 @@ public abstract class DataGridColumn implements TabularColumn, DecoratedMetaData
 		this.alignment = alignment;
 	}
 
+	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
+	@Override
 	@XmlAttribute
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
