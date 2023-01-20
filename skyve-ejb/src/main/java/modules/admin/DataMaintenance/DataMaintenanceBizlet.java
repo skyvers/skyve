@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -49,7 +49,7 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		// epoch date defaults to beginning of earliest Skyve applications so it can be used with all Skyve applications
 		if (result.getEpochDate() == null) {
 			LocalDate epochDate = LocalDate.of(2010, Month.JANUARY, 1);
-			result.setEpochDate(new DateOnly(epochDate));
+			result.setEpochDate(new DateTime(epochDate));
 			result = CORE.getPersistence().save(result);
 		}
 
