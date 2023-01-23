@@ -32,6 +32,7 @@
 				<value code="I" description="Insert" />
 				<value code="U" description="Update" />
 				<value code="D" description="Delete" />
+				<value code="R" description="Reconstruction" />
 			</values>
 		</enum>
 		<timestamp name="timestamp" required="true">

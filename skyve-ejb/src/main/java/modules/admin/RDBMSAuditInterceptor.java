@@ -115,10 +115,10 @@ public class RDBMSAuditInterceptor extends Interceptor {
 					// oldBean can be null when the bean was inserted and updated within this transaction but not yet committed
 					// ie tempP can't see the bean yet on another DB connection
 					if (oldBean == null) {
-						audit(bean, Operation.insert, true);
+						audit(bean, Operation.reconstruction, true);
 					}
 					else {
-						audit(oldBean, Operation.insert, true);
+						audit(oldBean, Operation.reconstruction, true);
 					}
 				}
 				finally {

@@ -85,7 +85,8 @@ public class Audit extends AbstractPersistentBean {
 	public static enum Operation implements Enumeration {
 		insert("I", "Insert"),
 		update("U", "Update"),
-		delete("D", "Delete");
+		delete("D", "Delete"),
+		reconstruction("R", "Reconstruction");
 
 		private String code;
 		private String description;

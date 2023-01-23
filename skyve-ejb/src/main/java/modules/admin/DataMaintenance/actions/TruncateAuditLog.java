@@ -1,7 +1,6 @@
 package modules.admin.DataMaintenance.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.skyve.CORE;
@@ -75,7 +74,6 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 	 * @throws Exception
 	 */
 	public static List<String> retrieveAuditsToTruncate(Persistence pers, Bean audit) throws Exception {
-		Customer customer = pers.getUser().getCustomer();
 		List<String> auditBizIdsToTruncate = new ArrayList<>();
 
 		// Checking all Audits with same auditBizId of the Audit passed in
@@ -91,7 +89,6 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 			q.addBoundProjection(Audit.operationPropertyName);
 
 			try (AutoClosingIterable<Audit> audits = q.beanIterable()) {
-				Iterator<Audit> iterator = audits.iterator();
 				for (Bean processedAudit : audits) {
 					auditBizIdsToTruncate.add(processedAudit.getBizId());
 				}
@@ -99,8 +96,15 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 			return auditBizIdsToTruncate;
 		}
 
+		// Reconstruction records should all be deleted, regardless of whether they are the penultimate record
+		if (Operation.reconstruction.equals(operation)) {
+			auditBizIdsToTruncate.add(audit.getBizId());
+			return auditBizIdsToTruncate;
+		}
+
 		// Insert and Update Audit records need to be checked that they aren't the penultimate record
 		// and that they are the Audit passed in or were earlier
+		// Reconstruction records should all be deleted
 		q.getFilter().addEquals(Audit.auditBizIdPropertyName, Binder.get(audit, Audit.auditBizIdPropertyName));
 		q.addBoundProjection(Bean.DOCUMENT_ID);
 		q.addBoundProjection(Audit.auditBizIdPropertyName);
@@ -109,6 +113,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 		q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
 		
 		try (AutoClosingIterable<Bean> audits = q.beanIterable()) {
+			// The List is used to check the number of Audits retrieved
 			List<Audit> indexedAudits = q.beanResults();
 			Audit penultimateAudit = indexedAudits.get(1);
 
@@ -116,12 +121,13 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 			// therefore at least 3 Audits for the same auditBizid are required to truncate 1 Audit
 			if (indexedAudits.size() > 2) {
 				for (Bean auditBeingProcessed : audits) {
-					// truncate Audit record if it is the audit being processed or prior and it is before the penultimate Audit
-					// record
+					// Truncate Audit record if it is the audit being processed or an audit prior and it is before the penultimate
+					// Audit record
 					Long processedAuditMillis = (Long) Binder.get(auditBeingProcessed, Audit.millisPropertyName);
 					Long auditMillis = (Long) Binder.get(audit, Audit.millisPropertyName);
 					if (processedAuditMillis.longValue() <= auditMillis.longValue()
-							&& processedAuditMillis.longValue() < penultimateAudit.getMillis().longValue()) {
+							&& processedAuditMillis.longValue() < penultimateAudit.getMillis().longValue()
+							|| Operation.reconstruction.equals(Binder.get(audit, Audit.operationPropertyName))) {
 						auditBizIdsToTruncate.add(auditBeingProcessed.getBizId());
 					}
 				}
