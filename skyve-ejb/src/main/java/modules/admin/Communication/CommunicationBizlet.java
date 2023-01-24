@@ -17,6 +17,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
@@ -167,15 +168,16 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		try {
 			p.setDocumentPermissionScopes(DocumentPermissionScope.global);
 			DocumentQuery q = p.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-			q.addBoundProjection(Bean.CUSTOMER_NAME, bizCustomer);
-			q.addBoundProjection(Bean.DOCUMENT_ID, communicationId);
-			result = q.projectedResult() != null;
+			q.addBoundProjection(Bean.DOCUMENT_ID);
+			DocumentFilter f = q.getFilter();
+			f.addEquals(Bean.CUSTOMER_NAME, bizCustomer);
+			f.addEquals(Bean.DOCUMENT_ID, communicationId);
+			result = q.scalarResult(String.class) != null;
 		} finally {
 			p.resetDocumentPermissionScopes();
 		}
 		return result;
 	}
-
 
 	public static Communication setLinks(Communication communication) {
 		Communication bean = communication;
