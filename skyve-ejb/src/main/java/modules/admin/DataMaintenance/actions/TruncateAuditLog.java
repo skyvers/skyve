@@ -38,8 +38,6 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 
 		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 
-		bean.setAuditResponse("Truncate Audit Log Job commenced.");
-
 		return new ServerSideActionResult<>(bean);
 	}
 

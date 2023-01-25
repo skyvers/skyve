@@ -93,8 +93,26 @@ public class TruncateAuditLogJob extends Job {
 		}
 
 		Persistence pers = CORE.getPersistence();
+		dm.setAuditResponse("Truncate Audit Log Job commenced.");
+		dm = pers.save(dm);
+
+		try {
+			truncate(dm, pers);
+		} finally {
+			dm.setAuditResponse(null);
+			dm = pers.save(dm);
+		}
+
+		setPercentComplete(100);
+		log.add("Finished Truncation Job at " + new Date() + ".");
+	}
+
+	private void truncate(DataMaintenance bean, Persistence pers) throws Exception {
+		DataMaintenance dm = bean;
+		List<String> log = getLog();
 		log.add("Started Truncate Audit Log Job at " + new Date());
-		
+
+		Integer auditLogRetentionDays = dm.getAuditLogRetentionDays();
 		long dayToPrune = auditLogRetentionDays.longValue();
 		// Customer epoch time is the last time that the audits have been pruned
 		long customerEpochTime = dm.getEpochDate().toInstant().toEpochMilli();
@@ -162,35 +180,29 @@ public class TruncateAuditLogJob extends Job {
 							auditsToTruncate.clear();
 						}
 					}
+						}
+					}
+					// Update dayToPrune to the previous day
+					dayToPrune = dayToPrune + 1;
 				}
-			}
-			// Update dayToPrune to the previous day
-			dayToPrune = dayToPrune + 1;
-		}
 
-		if (!auditsToTruncate.isEmpty()) {
-			TruncateAuditLog.truncateAuditBatch(pers, auditsToTruncate);
-			log.add("Truncated batch " + batchNo++ + ".");
-		}
+				if (!auditsToTruncate.isEmpty()) {
+					TruncateAuditLog.truncateAuditBatch(pers, auditsToTruncate);
+					log.add("Truncated batch " + batchNo++ + ".");
+				}
 
-		// Update epoch time of the system to the current datetime minus the Audit log Retention Days
-		dm.setEpochDate(new DateTime(
-				ZonedDateTime.now(ZoneId.systemDefault()).minusDays(auditLogRetentionDays.intValue()).toLocalDateTime()));
-		dm = pers.save(dm);
+				// Update epoch time of the system to the current datetime minus the Audit log Retention Days
+				dm.setEpochDate(new DateTime(
+						ZonedDateTime.now(ZoneId.systemDefault()).minusDays(auditLogRetentionDays.intValue()).toLocalDateTime()));
+				dm = pers.save(dm);
 
-		try {
-			CommunicationUtil.sendFailSafeSystemCommunication(JobsBizlet.SYSTEM_JOB_NOTIFICATION,
-					JobsBizlet.SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT, "Truncate Audit Log Job", ResponseMode.SILENT, null,
-					dm);
-		} catch (@SuppressWarnings("unused") Exception e) {
-			log.add("Email notification failed.");
-		}
+				try {
+					CommunicationUtil.sendFailSafeSystemCommunication(JobsBizlet.SYSTEM_JOB_NOTIFICATION,
+							JobsBizlet.SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT, "Truncate Audit Log Job", ResponseMode.SILENT, null,
+							dm);
+				} catch (@SuppressWarnings("unused") Exception e) {
+					log.add("Email notification failed.");
+				}
 
-		// TODO ensure audit response is set null - surround all in try-catch?
-
-		dm.setAuditResponse(null);
-		dm = pers.save(dm);
-		setPercentComplete(100);
-		log.add("Finished Truncation Job at " + new Date() + ".");
 	}
 }
