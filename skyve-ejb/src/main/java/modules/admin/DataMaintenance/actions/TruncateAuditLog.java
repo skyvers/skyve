@@ -45,6 +45,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 
 	/**
 	 * Helper method for the TruncateAuditLogJob
+	 * Retrieve the query of the days worth of audits for the customer this job is being run for
 	 * 
 	 * @param pers
 	 * @param millisStart
@@ -88,7 +89,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 			q.addBoundProjection(Audit.millisPropertyName);
 			q.addBoundProjection(Audit.operationPropertyName);
 
-			try (AutoClosingIterable<Audit> audits = q.beanIterable()) {
+			try (AutoClosingIterable<Audit> audits = q.projectedIterable()) {
 				for (Bean processedAudit : audits) {
 					auditBizIdsToTruncate.add(processedAudit.getBizId());
 				}
@@ -112,24 +113,28 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 		q.addBoundProjection(Audit.operationPropertyName);
 		q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
 		
-		try (AutoClosingIterable<Bean> audits = q.beanIterable()) {
+		try (AutoClosingIterable<Bean> audits = q.projectedIterable()) {
 			// The List is used to check the number of Audits retrieved
-			List<Audit> indexedAudits = q.beanResults();
-			Audit penultimateAudit = indexedAudits.get(1);
+			List<Bean> indexedAudits = q.projectedResults();
 
 			// Insert and Update Audit records will not be truncated when they are the penultimate or ultimate record
 			// therefore at least 3 Audits for the same auditBizid are required to truncate 1 Audit
-			if (indexedAudits.size() > 2) {
-				for (Bean auditBeingProcessed : audits) {
-					// Truncate Audit record if it is the audit being processed or an audit prior and it is before the penultimate
-					// Audit record
-					Long processedAuditMillis = (Long) Binder.get(auditBeingProcessed, Audit.millisPropertyName);
-					Long auditMillis = (Long) Binder.get(audit, Audit.millisPropertyName);
-					if (processedAuditMillis.longValue() <= auditMillis.longValue()
-							&& processedAuditMillis.longValue() < penultimateAudit.getMillis().longValue()
-							|| Operation.reconstruction.equals(Binder.get(audit, Audit.operationPropertyName))) {
-						auditBizIdsToTruncate.add(auditBeingProcessed.getBizId());
-					}
+			if (indexedAudits.size() <= 2) {
+				return auditBizIdsToTruncate;
+			}
+
+			Bean penultimateAudit = indexedAudits.get(1);
+			for (Bean auditBeingProcessed : audits) {
+				// Truncate Audit record if it is the Audit being processed or an Audit prior
+				// AND it is before the penultimate Audit record
+				// OR if it is a Reconstruction Audit
+				Long processedAuditMillis = (Long) Binder.get(auditBeingProcessed, Audit.millisPropertyName);
+				Long auditMillis = (Long) Binder.get(audit, Audit.millisPropertyName);
+				if (processedAuditMillis.longValue() <= auditMillis.longValue()
+						&& processedAuditMillis.longValue() < ((Long) Binder.get(penultimateAudit, Audit.millisPropertyName))
+								.longValue()
+						|| Operation.reconstruction.equals(Binder.get(audit, Audit.operationPropertyName))) {
+					auditBizIdsToTruncate.add(auditBeingProcessed.getBizId());
 				}
 			}
 		}
@@ -145,7 +150,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 	 * @param auditsToTruncate
 	 */
 	public static void truncateAuditBatch(Persistence pers, List<String> bizIdBatch) {
-		SQL sql = pers.newSQL("delete from ADM_Audit where bizId in (:bizIdBatch)");
+		SQL sql = pers.newSQL("DELETE FROM ADM_Audit WHERE bizId IN (:bizIdBatch)");
 		sql.putParameter("bizIdBatch", bizIdBatch, AttributeType.id);
 		sql.execute();
 	}
