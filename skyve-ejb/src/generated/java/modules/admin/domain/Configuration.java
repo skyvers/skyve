@@ -1216,6 +1216,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the customer has Two Factor Auth Email enabled
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isTfaEmailEnabled() {
+		return (org.skyve.impl.util.UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains(org.skyve.CORE.getCustomer().getName()));
+	}
+
+	/**
+	 * {@link #isTfaEmailEnabled} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotTfaEmailEnabled() {
+		return (! isTfaEmailEnabled());
+	}
+
+	/**
 	 * True when the user has selected Two Factor Auth Email type
 	 *
 	 * @return The condition

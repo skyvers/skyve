@@ -76,9 +76,7 @@ class AccessProcessor {
 			if (queryName != null) {
 				addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
 			}
-			else {
-				addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
-			}
+			addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
 		}
 		else if (homeRef == ViewType.edit) {
 			addAccessForUxUis(UserAccess.singular(moduleName, homeDocumentName), Collections.emptySet());

@@ -5,7 +5,7 @@
 	xmlns:c="http://www.skyve.org/xml/common">
 	
 	<vbox border="true" borderTitle="admin.configuration.twofactor.twofactor.borderTitle" widgetId="tfaWidgetId">
-		<form >
+		<form>
 	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="1"/>
@@ -30,25 +30,27 @@
 	        <column responsiveWidth="1"/>
 	        <row>
 	        	<item>
-	        		<spacer/>
+	        		<spacer invisible="tfaEmailEnabled" />
 	        	</item>
 	        	<item>
-	        		<blurb><![CDATA[<b>Please contact Biz Hub to enable Two Factor Authentication.</b>]]></blurb>
+	        		<blurb invisible="tfaEmailEnabled">
+	        			<![CDATA[<b>Please contact Biz Hub to enable Two Factor Authentication.</b>]]>
+        			</blurb>
 	        	</item>
 	        </row>
 	        <row>
 	            <item required="true">
-	                <default binding="twoFactorEmailSubject" />
+	                <textField binding="twoFactorEmailSubject" visible="tfaEmailEnabled" />
 	            </item>
 	        </row>
 	        <row>
 	            <item required="true">
-	                <textArea binding="twoFactorEmailBody"/>
+	                <textArea binding="twoFactorEmailBody" visible="tfaEmailEnabled" />
 	            </item>
 	        </row>
 	        <row>
 	            <item required="true">
-	                <default binding="twofactorPushCodeTimeOutSeconds"/>
+	                <textField binding="twofactorPushCodeTimeOutSeconds" visible="tfaEmailEnabled" />
 	            </item>
 	        </row>
 	    </form>
