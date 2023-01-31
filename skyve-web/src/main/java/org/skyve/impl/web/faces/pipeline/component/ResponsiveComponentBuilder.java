@@ -18,8 +18,13 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
+		// A tabular span with nowrap is the result of the super call
 		HtmlPanelGroup result = (HtmlPanelGroup) super.view(component, invisibleConditionName);
+		// Change from a span with nowrap to a responsive div
+		result.setLayout("block");
+		result.setStyle(null);
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
+
 		return result;
 	}
 
