@@ -13,6 +13,7 @@ import org.skyve.job.Job;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
+import org.skyve.util.Binder;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
 import org.skyve.util.Util;
@@ -165,7 +166,10 @@ public class TruncateAuditLogJob extends Job {
 
 				// Check the day of audits for any audits we want to truncate
 				for (Bean audit : auditsToCheck) {
-					// Retrieve all Audits for the same bizId
+					// Retrieve all Audits for the same bizId if the auditBizId has not already been checked
+					if (!auditsToTruncate.contains(Binder.get(audit, Bean.DOCUMENT_ID))) {
+						continue;
+					}
 					List<String> auditBizIds = TruncateAuditLog.retrieveAuditsToTruncate(pers, audit);
 					for (String auditBizId : auditBizIds) {
 						auditsToTruncate.add(auditBizId);
