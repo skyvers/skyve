@@ -20,6 +20,7 @@ import org.skyve.util.Util;
 
 import modules.admin.DataMaintenance.actions.TruncateAuditLog;
 import modules.admin.Jobs.JobsBizlet;
+import modules.admin.domain.Audit;
 import modules.admin.domain.DataMaintenance;
 
 public class TruncateAuditLogJob extends Job {
@@ -167,7 +168,7 @@ public class TruncateAuditLogJob extends Job {
 				// Check the day of audits for any audits we want to truncate
 				for (Bean audit : auditsToCheck) {
 					// Retrieve all Audits for the same bizId if the auditBizId has not already been checked
-					if (!auditsToTruncate.contains(Binder.get(audit, Bean.DOCUMENT_ID))) {
+					if (!auditsToTruncate.contains(Binder.get(audit, Audit.auditBizIdPropertyName))) {
 						continue;
 					}
 					List<String> auditBizIds = TruncateAuditLog.retrieveAuditsToTruncate(pers, audit);
