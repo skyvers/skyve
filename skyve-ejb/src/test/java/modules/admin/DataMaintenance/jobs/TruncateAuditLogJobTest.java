@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.skyve.CORE;
 import org.skyve.domain.types.DateTime;
-import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.customer.InterceptorMetaDataImpl;
 import org.skyve.metadata.user.User;
@@ -34,7 +33,6 @@ public class TruncateAuditLogJobTest extends AbstractH2Test {
 	@Before
 	public void setup() throws Exception {
 		bean = DataMaintenance.newInstance();
-		System.out.println(AbstractContentManager.IMPLEMENTATION_CLASS);
 		DateTime epoch = new DateTime(LocalDateTime.of(2010, 1, 1, 0, 1));
 		bean.setEpochDate(epoch);
 		bean.setAuditLogRetentionDays(Integer.valueOf(0));
