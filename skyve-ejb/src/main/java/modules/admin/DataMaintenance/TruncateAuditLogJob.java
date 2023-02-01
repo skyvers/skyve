@@ -1,12 +1,9 @@
 package modules.admin.DataMaintenance;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Date;
+import java.math.BigInteger;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 import org.skyve.CORE;
@@ -104,13 +101,13 @@ public class TruncateAuditLogJob extends Job {
 		}
 
 		setPercentComplete(100);
-		log.add("Finished Truncation Job at " + new Date() + ".");
+		log.add("Finished Truncation Job at " + new DateTime() + ".");
 	}
 
-	private void truncate(DataMaintenance bean, Persistence pers) throws Exception {
+	public void truncate(DataMaintenance bean, Persistence pers) throws Exception {
 		DataMaintenance dm = bean;
 		List<String> log = getLog();
-		log.add("Started Truncate Audit Log Job at " + new Date());
+		log.add("Started Truncate Audit Log Job at " + new DateTime());
 
 		Integer auditLogRetentionDays = dm.getAuditLogRetentionDays();
 		long dayToPrune = auditLogRetentionDays.longValue();
@@ -134,13 +131,12 @@ public class TruncateAuditLogJob extends Job {
 		log.add("Found " + size + " Audits to process.");
 		long pruneEndTime;
 
-		List<String> auditsToTruncate = new ArrayList<>();
+		Set<String> auditsToTruncate = new TreeSet<>();
 
 		// We want to keep checking and truncating Audits while the day to prune is greater than epoch and results are being
 		// truncated, starting from the Audit Retention log Days + 1 ago
 		// Bucket Audits for truncation by day
-		while (customerEpochTime < new DateTime(LocalDateTime.now(ZoneId.systemDefault()).minusDays(dayToPrune)
-				.toEpochSecond(ZoneOffset.UTC)).toInstant().toEpochMilli()) {
+		while (customerEpochTime < (System.currentTimeMillis() - (dayToPrune * MILLIS_IN_DAY))) {
 			// percentage complete calculations
 			pruneStartTime = System.currentTimeMillis() - (dayToPrune * MILLIS_IN_DAY);
 			pruneEndTime = System.currentTimeMillis() - ((dayToPrune + 1) * MILLIS_IN_DAY);
@@ -158,7 +154,7 @@ public class TruncateAuditLogJob extends Job {
 
 			// If there are no audits to process (no audits between current pruneStartTime and epoch), exit and stop retrieving
 			// audits
-			if (auditsLeftToProcess.equals(Integer.valueOf(0))) {
+			if (auditsLeftToProcess.equals(BigInteger.valueOf(0))) {
 				break;
 			}
 
@@ -180,29 +176,27 @@ public class TruncateAuditLogJob extends Job {
 							auditsToTruncate.clear();
 						}
 					}
-						}
-					}
-					// Update dayToPrune to the previous day
-					dayToPrune = dayToPrune + 1;
 				}
+			}
+			// Update dayToPrune to the previous day
+			dayToPrune = dayToPrune + 1;
+		}
 
-				if (!auditsToTruncate.isEmpty()) {
-					TruncateAuditLog.truncateAuditBatch(pers, auditsToTruncate);
-					log.add("Truncated batch " + batchNo++ + ".");
-				}
+		if (!auditsToTruncate.isEmpty()) {
+			TruncateAuditLog.truncateAuditBatch(pers, auditsToTruncate);
+			log.add("Truncated batch " + batchNo++ + ".");
+		}
 
-				// Update epoch time of the system to the current datetime minus the Audit log Retention Days
-				dm.setEpochDate(new DateTime(
-						ZonedDateTime.now(ZoneId.systemDefault()).minusDays(auditLogRetentionDays.intValue()).toLocalDateTime()));
-				dm = pers.save(dm);
+		// Update epoch time of the system to the current datetime minus the Audit log Retention Days
+		dm.setEpochDate(new DateTime(System.currentTimeMillis() - (dayToPrune * MILLIS_IN_DAY)));
+		dm = pers.save(dm);
 
-				try {
-					CommunicationUtil.sendFailSafeSystemCommunication(JobsBizlet.SYSTEM_JOB_NOTIFICATION,
-							JobsBizlet.SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT, "Truncate Audit Log Job", ResponseMode.SILENT, null,
-							dm);
-				} catch (@SuppressWarnings("unused") Exception e) {
-					log.add("Email notification failed.");
-				}
-
+		try {
+			CommunicationUtil.sendFailSafeSystemCommunication(JobsBizlet.SYSTEM_JOB_NOTIFICATION,
+					JobsBizlet.SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT, "Truncate Audit Log Job", ResponseMode.SILENT, null,
+					dm);
+		} catch (@SuppressWarnings("unused") Exception e) {
+			log.add("Email notification failed.");
+		}
 	}
 }

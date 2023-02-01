@@ -2,6 +2,7 @@ package modules.admin.DataMaintenance.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -147,7 +148,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 	 * @param pers
 	 * @param auditsToTruncate
 	 */
-	public static void truncateAuditBatch(Persistence pers, List<String> bizIdBatch) {
+	public static void truncateAuditBatch(Persistence pers, Set<String> bizIdBatch) {
 		SQL sql = pers.newSQL("DELETE FROM ADM_Audit WHERE bizId IN (:bizIdBatch)");
 		sql.putParameter("bizIdBatch", bizIdBatch, AttributeType.id);
 		sql.execute();

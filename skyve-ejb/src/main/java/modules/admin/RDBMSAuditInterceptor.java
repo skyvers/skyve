@@ -158,7 +158,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 				a.setMillis(Long.valueOf(millis));
 				a.setTimestamp(new Timestamp(millis));
 				a.setUserName(lock.getUsername());
-				a.setOperation(Operation.insert);
+				a.setOperation(Operation.reconstruction);
 			}
 			else {
 				long millis = System.currentTimeMillis();
