@@ -53,9 +53,6 @@ public class TruncateAuditLogJobTest extends AbstractH2Test {
 		interceptor.setClassName(RDBMSAuditInterceptor.class.getName());
 		customer.putInterceptor(interceptor);
 
-		// Module module = customer.getModule(DataMaintenance.MODULE_NAME);
-		// JobMetaData job = module.getJob("jTruncateAuditLog");
-
 		// need to begin transaction to avoid H2 locking
 		pers.begin();
 
