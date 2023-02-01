@@ -60,37 +60,27 @@ public class TruncateAuditLogJobTest extends AbstractH2Test {
 		Contact testContact = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 		testContact = pers.save(testContact);
 
-		String bizId = testContact.getBizId();
-		testContact = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-		testContact.setBizId(bizId);
+		testContact.setMobile("0000000000");
 		testContact = pers.save(testContact);
 
-		bizId = testContact.getBizId();
-		testContact = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-		testContact.setBizId(bizId);
+		testContact.setMobile("1111111111");
 		testContact = pers.save(testContact);
 
-		bizId = testContact.getBizId();
-		testContact = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-		testContact.setBizId(bizId);
+		testContact.setMobile("2222222222");
 		testContact = pers.save(testContact);
 
 		// second Audit bizId - check Insert and Update Audits exist
 		Contact testContact2 = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 		testContact2 = pers.save(testContact2);
 
-		bizId = testContact2.getBizId();
-		testContact2 = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-		testContact2.setBizId(bizId);
+		testContact2.setMobile("0000000000");
 		testContact2 = pers.save(testContact2);
 
 		// third Audit bizId - check Reconstruction Audits are created, then deleted after job runs
 		Contact testContact3 = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 		testContact3 = pers.save(testContact3);
 
-		bizId = testContact3.getBizId();
-		testContact3 = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-		testContact3.setBizId(bizId);
+		testContact3.setMobile("0000000000");
 		testContact3 = pers.save(testContact3);
 
 		// commit to avoid H2 locking
@@ -112,9 +102,7 @@ public class TruncateAuditLogJobTest extends AbstractH2Test {
 		// begin transaction to avoid H2 locking
 		pers.begin();
 		// update testContact3 so that Reconstruction Audit is made
-		bizId = testContact3.getBizId();
-		testContact3 = db.fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
-		testContact3.setBizId(bizId);
+		testContact3.setMobile("1111111111");
 		testContact3 = pers.save(testContact3);
 
 		// commit to avoid H2 locking
@@ -145,14 +133,14 @@ public class TruncateAuditLogJobTest extends AbstractH2Test {
 		q1.getFilter().addEquals(Audit.operationPropertyName, Operation.update);
 		List<Audit> q1Audits = q1.beanResults();
 
-		assertEquals(q1Audits.size(), 2);
+		assertEquals(2, q1Audits.size());
 
 		// testContact2 should have 2 Audits
 		DocumentQuery q2 = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q2.getFilter().addEquals(Audit.auditBizIdPropertyName, testContact2.getBizId());
 		List<Audit> q2Audits = q2.beanResults();
 		
-		assertEquals(q2Audits.size(), 2);
+		assertEquals(2, q2Audits.size());
 
 		// testContact3 should have no reconstruction Audits
 		DocumentQuery q3 = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
@@ -160,6 +148,6 @@ public class TruncateAuditLogJobTest extends AbstractH2Test {
 		q3.getFilter().addEquals(Audit.operationPropertyName, Operation.reconstruction);
 		List<Audit> q3Audits = q3.beanResults();
 
-		assertEquals(q3Audits.size(), 0);
+		assertEquals(0, q3Audits.size());
 	}
 }
