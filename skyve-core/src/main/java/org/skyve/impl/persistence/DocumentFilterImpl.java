@@ -5,6 +5,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -20,13 +21,15 @@ public class DocumentFilterImpl implements DocumentFilter {
 
 	private AbstractDocumentQuery owningQuery;
 	private StringBuilder filterClause = new StringBuilder(128); // resulting filter expression
-
-	public DocumentFilterImpl(AbstractDocumentQuery owningQuery) {
-		this(owningQuery, null);
+	private RDBMS rdbms;
+	
+	DocumentFilterImpl(AbstractDocumentQuery owningQuery, RDBMS rdbms) {
+		this(owningQuery, rdbms, null);
 	}
 
-	DocumentFilterImpl(AbstractDocumentQuery owningQuery, String filterClause) {
+	DocumentFilterImpl(AbstractDocumentQuery owningQuery, RDBMS rdbms, String filterClause) {
 		setQuery(owningQuery);
+		this.rdbms = rdbms;
 		if (filterClause != null) {
 			// NB we include brackets here in case there are lower precedence operators in the clause
 			// like ORs etc - the brackets ensure that we respect the intention of the query
@@ -74,7 +77,31 @@ public class DocumentFilterImpl implements DocumentFilter {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
+
+		// lower function is required for postgresql database with 
+		// String operands (where the binding isn't "bizid" or ends with ".bizId")
+		boolean lower = (RDBMS.postgresql == rdbms);
+		if (lower) {
+			if (Bean.DOCUMENT_ID.equals(binding) || binding.endsWith(Bean.DOCUMENT_ID_SUFFIX)) {
+				lower = false;
+			}
+			else {
+				for (Object operand : operands) {
+					if (! (operand instanceof String)) {
+						lower = false;
+						break;
+					}
+				}
+			}
+		}
+
+		if (lower) {
+			filterClause.append("lower(");
+		}
 		filterClause.append(entityAlias).append('.').append(binding);
+		if (lower) {
+			filterClause.append(')');
+		}
 		if (not) {
 			filterClause.append(" not");
 		}
@@ -82,8 +109,15 @@ public class DocumentFilterImpl implements DocumentFilter {
 		
 		for (Object operand : operands) {
 			String parameterName = "param" + owningQuery.parameterNumber++;
+			// Its probably wisest (although untested as yet) to use the DB lower function 
+			// on parameters to use its char set and collation.
 			owningQuery.putParameter(parameterName, operand);
-			filterClause.append(':').append(parameterName).append(',');
+			if (lower) {
+				filterClause.append("lower(:").append(parameterName).append("),");
+			}
+			else {
+				filterClause.append(':').append(parameterName).append(',');
+			}
 		}
 		filterClause.setLength(filterClause.length() - 1); // remove last comma
 		filterClause.append(')');
@@ -435,6 +469,8 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public DocumentFilter addAliasedBetween(String entityAlias, String binding, Object minOperand, Object maxOperand) {
+		// Its probably wisest (although untested as yet) to use the DB lower function 
+		// on parameters to use its char set and collation.
 		String minParameterName = "param" + owningQuery.parameterNumber++;
 		String maxParameterName = "param" + owningQuery.parameterNumber++;
 		owningQuery.putParameter(minParameterName, minOperand);
@@ -443,8 +479,24 @@ public class DocumentFilterImpl implements DocumentFilter {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(entityAlias).append('.').append(binding).append(" BETWEEN ");
-		filterClause.append(':').append(minParameterName).append(" and :").append(maxParameterName);
+
+		// lower function is required for postgresql database with 
+		// String operands (where the binding isn't "bizid" or ends with ".bizId")
+		boolean lower = ((RDBMS.postgresql == rdbms) && (minOperand instanceof String) && (maxOperand instanceof String));
+		if (lower) {
+			if (Bean.DOCUMENT_ID.equals(binding) || binding.endsWith(Bean.DOCUMENT_ID_SUFFIX)) {
+				lower = false;
+			}
+		}
+		
+		if (lower) {
+			filterClause.append("lower(").append(entityAlias).append('.').append(binding).append(") BETWEEN ");
+			filterClause.append("lower(:").append(minParameterName).append(") and lower(:").append(maxParameterName).append(')');
+		}
+		else {
+			filterClause.append(entityAlias).append('.').append(binding).append(" BETWEEN ");
+			filterClause.append(':').append(minParameterName).append(" and :").append(maxParameterName);
+		}
 		return this;
 	}
 
@@ -534,13 +586,37 @@ public class DocumentFilterImpl implements DocumentFilter {
 			filterClause.append(", :").append(parameterName).append(functionSuffix);
 		}
 		else {
+			// lower function is required for postgresql database with 
+			// a String operand (where the binding isn't "bizid" or ends with ".bizId")
+			boolean lower = ((RDBMS.postgresql == rdbms) && (operand instanceof String));
+			if (lower) {
+				if (Bean.DOCUMENT_ID.equals(binding) || binding.endsWith(Bean.DOCUMENT_ID_SUFFIX)) {
+					lower = false;
+				}
+			}
+
+			if (lower) {
+				filterClause.append("lower(");
+			}
 			if (useStr) {
 				filterClause.append("str(").append(entityAlias).append('.').append(binding).append(')');
 			}
 			else {
 				filterClause.append(entityAlias).append('.').append(binding);
 			}
-			filterClause.append(operator).append(':').append(parameterName);
+			if (lower) {
+				filterClause.append(')');
+			}
+			filterClause.append(operator);
+			// Its probably wisest (although untested as yet) to use the DB lower function 
+			// on parameters to use its char set and collation.
+			if (lower) {
+				filterClause.append("lower(");
+			}
+			filterClause.append(':').append(parameterName);
+			if (lower) {
+				filterClause.append(')');
+			}
 		}
 
 		if (addNullTest) {

@@ -3,13 +3,13 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Index;
 import org.hibernate.spatial.JTSGeometryType;
-import org.hibernate.spatial.dialect.postgis.PostgisPG94Dialect;
+import org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 
-public class PostgreSQL94SpatialDialect extends PostgisPG94Dialect implements SkyveDialect {
-	private static final long serialVersionUID = 1967272819835999455L;
+public class PostgreSQL10SpatialDialect extends PostgisPG10Dialect implements SkyveDialect {
+	private static final long serialVersionUID = 2816243503536182927L;
 
 	private PostgreSQLSpatialDialectDelegate delegate = new PostgreSQLSpatialDialectDelegate(this);
 

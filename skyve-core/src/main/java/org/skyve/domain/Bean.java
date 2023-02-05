@@ -77,6 +77,11 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 */
 	public static final String NOT_CREATED_KEY = "notCreated";
 
+	/**
+	 * 
+	 */
+	public static final String DOCUMENT_ID_SUFFIX = ".bizId";
+
 	/*
 	 * 
 	 */
