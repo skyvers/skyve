@@ -241,7 +241,8 @@ public class ViewImpl extends Container implements View {
 		if (result != null) { // accesses were generated
 			for (Component component : components) {
 				ViewImpl fragment = component.getFragment(customer, uxui);
-				result.addAll(fragment.getAccesses(customer, uxui));
+				Set<UserAccess> componentAccesses = fragment.getAccesses(customer, uxui);
+				result.addAll(componentAccesses);
 			}
 		}
 
@@ -535,8 +536,8 @@ public class ViewImpl extends Container implements View {
 	private transient ComponentFragments fragments = new ComponentFragments(this);
 	
 	// All components in this view (one level deep)
-	// Not required to be Serialized as ViewImpls are cloned by serialization to populate this
-	private transient Set<Component> components = new HashSet<>();
+	// This is populated in resolve() and is used to recursively determine accesses in getAccesses().
+	private Set<Component> components = new HashSet<>();
 	
 	/**
 	 * Reinstate transients after Deserialization
@@ -544,7 +545,6 @@ public class ViewImpl extends Container implements View {
 	 */
 	private Object readResolve() {
 		fragments = new ComponentFragments(this);
-		components = new HashSet<>();
 		return this;
 	}
 	
