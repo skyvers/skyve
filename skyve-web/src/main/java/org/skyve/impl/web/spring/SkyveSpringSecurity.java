@@ -68,7 +68,7 @@ public class SkyveSpringSecurity {
 		}
 	}
 	
-	@SuppressWarnings("static-method")
+	@SuppressWarnings("static-methol113d")
 	public UserDetailsService testUserDetailsService(String customerName, String userName, String password) {
 		@SuppressWarnings("deprecation")
 		UserDetails user = User.withDefaultPasswordEncoder()
@@ -293,6 +293,9 @@ public class SkyveSpringSecurity {
 		if (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) {
 			registrations.add(githubClientRegistration());
 		}
+		if (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null) {
+			registrations.add(azureAdClientRegistration());
+		}
 
 		// Add a dummy registration otherwise spring security will moan
 		if (registrations.isEmpty()) {
@@ -361,5 +364,29 @@ public class SkyveSpringSecurity {
 									.userNameAttributeName("id")
 									.clientName("GitHub")
 									.build();
+	}
+
+	// https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
+	// Hit /oauth2/authorization/microsoft
+	@SuppressWarnings("static-method")
+	public ClientRegistration azureAdClientRegistration() {
+
+		String tenantId = UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID;
+
+		return ClientRegistration.withRegistrationId("microsoft")
+				.clientId(UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID)
+				.clientSecret(UtilImpl.AUTHENTICATION_AZUREAD_SECRET)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+				.scope("User.Read")
+				.authorizationUri(
+						"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize".replace("{tenantId}", tenantId))
+				.tokenUri("https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token".replace("{tenantId}", tenantId))
+				.userInfoUri("https://graph.microsoft.com/oidc/userinfo")
+				.jwkSetUri("https://login.microsoftonline.com/{tenantId}/discovery/v2.0/keys".replace("{tenantId}", tenantId))
+				.userNameAttributeName("email")
+				.clientName("Microsoft")
+				.build();
 	}
 }

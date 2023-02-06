@@ -274,6 +274,14 @@ public class UtilImpl {
 	public static String AUTHENTICATION_GITHUB_CLIENT_ID = null;
 	// github auth secret
 	public static String AUTHENTICATION_GITHUB_SECRET = null;
+
+	// azure AD auth client id
+	public static String AUTHENTICATION_AZUREAD_CLIENT_ID = null;
+	// azure AD auth tenant id
+	public static String AUTHENTICATION_AZUREAD_TENANT_ID = null;
+	// azure AD auth secret
+	public static String AUTHENTICATION_AZUREAD_SECRET = null;
+
 	// The Login URI to forward to
 	public static String AUTHENTICATION_LOGIN_URI = "/login";
 	// The Logged Out URI to forward to
