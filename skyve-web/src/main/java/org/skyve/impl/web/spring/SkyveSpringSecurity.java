@@ -68,7 +68,7 @@ public class SkyveSpringSecurity {
 		}
 	}
 	
-	@SuppressWarnings("static-methol113d")
+	@SuppressWarnings("static-method")
 	public UserDetailsService testUserDetailsService(String customerName, String userName, String password) {
 		@SuppressWarnings("deprecation")
 		UserDetails user = User.withDefaultPasswordEncoder()
