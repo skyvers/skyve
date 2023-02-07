@@ -409,25 +409,22 @@ public class ViewImpl extends Container implements View {
 					}
 	
 					if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
-						Document drivingDocument = null;
-						String drivingModuleName = null;
-						String drivingDocumentName = null;
-						
 						if (modelName != null) {
 							ListModel<Bean> model = document.getListModel(customer, modelName, true);
-							drivingDocument = model.getDrivingDocument();
-							drivingModuleName = drivingDocument.getOwningModuleName();
-							drivingDocumentName = drivingDocument.getName();
+							Document drivingDocument = model.getDrivingDocument();
+							if (drivingDocument != null) {
+								String drivingModuleName = drivingDocument.getOwningModuleName();
+								String drivingDocumentName = drivingDocument.getName();
+								accesses.add(UserAccess.singular(drivingModuleName, drivingDocumentName));
+							}
 						}
 						else {
 							MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
-							drivingDocumentName = query.getDocumentName();
+							String drivingDocumentName = query.getDocumentName();
 							Module drivingModule = query.getDocumentModule(customer);
-							drivingModuleName = drivingModule.getName();
-							drivingDocument = drivingModule.getDocument(customer, drivingDocumentName);
+							String drivingModuleName = drivingModule.getName();
+							accesses.add(UserAccess.singular(drivingModuleName, drivingDocumentName));
 						}
-	
-						accesses.add(UserAccess.singular(drivingModuleName, drivingDocumentName));
 					}
 				}
 			}
