@@ -177,7 +177,7 @@ class AccessProcessor {
 		final String overriddenUxUi = view.getOverriddenUxUiName();
 		final Module module = customer.getModule(document.getOwningModuleName());
 		
-		Set<UserAccess> viewAccesses = view.getAccesses(customer, uxui);
+		Set<UserAccess> viewAccesses = view.getAccesses(customer, document, uxui);
 		if (viewAccesses != null) { // can be null when access control is turned off
 			for (UserAccess viewAccess : viewAccesses) {
 				if (viewAccess.isSingular()) {

@@ -667,7 +667,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		new ViewValidator(viewImpl, this, customerImpl, (DocumentImpl) document, uxui);
 		
 		// Check modelAggregate and previousComplete UserAccesses
-		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, uxui);
+		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, document, uxui);
 		if (accesses != null) { // can be null if access control is turned off
 			for (UserAccess access : accesses) {
 				if (access.isModelAggregate()) {

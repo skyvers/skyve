@@ -235,14 +235,38 @@ public class ViewImpl extends Container implements View {
 	/**
 	 * Get accesses for this view and any component fragments recursively.
 	 */
-	public Set<UserAccess> getAccesses(CustomerImpl customer, String uxui) {
+	public Set<UserAccess> getAccesses(CustomerImpl customer, Document document, String uxui) {
 		Set<UserAccess> result = accesses;
-		
 		if (result != null) { // accesses were generated
 			for (Component component : components) {
 				ViewImpl fragment = component.getFragment(customer, uxui);
-				Set<UserAccess> componentAccesses = fragment.getAccesses(customer, uxui);
-				result.addAll(componentAccesses);
+				Set<UserAccess> componentAccesses = fragment.getAccesses(customer, document, uxui);
+				for (UserAccess componentAccess : componentAccesses) {
+					// Change the module name for query and document aggregates as the query or document 
+					// is imported into the referencing module.
+					if (componentAccess.isQueryAggregate()) {
+						if (! document.getOwningModuleName().equals(componentAccess.getModuleName())) {
+							result.add(UserAccess.queryAggregate(document.getOwningModuleName(), componentAccess.getComponent()));
+							continue;
+						}
+					}
+					else if (componentAccess.isDocumentAggregate()) {
+						if (! document.getOwningModuleName().equals(componentAccess.getModuleName())) {
+							result.add(UserAccess.documentAggregate(document.getOwningModuleName(), componentAccess.getComponent()));
+							continue;
+						}
+					}
+					// Change the module and document name for the model aggregates as these are required
+					// to be defined on each document they are referenced from.
+					else if (componentAccess.isModelAggregate()) {
+						if (! (document.getOwningModuleName().equals(componentAccess.getModuleName()) &&
+								document.getName().equals(componentAccess.getDocumentName()))) {
+							result.add(UserAccess.modelAggregate(document.getOwningModuleName(), document.getName(), componentAccess.getComponent()));
+							continue;
+						}
+					}
+					result.add(componentAccess);
+				}
 			}
 		}
 
