@@ -289,6 +289,8 @@ public class BindTests extends AbstractSkyveTest {
 		// Test functions and imports
 		Assert.assertEquals(currentDate, Binder.formatMessage("{el:newDateOnly()}", bean));
 		Assert.assertEquals(tomorrowsDate, Binder.formatMessage("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", bean));
+		Assert.assertEquals(String.valueOf(new DateOnly().toLocalDate().getYear()),
+				Binder.formatMessage("{el:newDateOnly().toLocalDate().getYear()}", bean));
 		Assert.assertEquals(currentTime, Binder.formatMessage("{el:newTimeOnly()}", bean));
 		Assert.assertEquals(currentDateTime, Binder.formatMessage("{el:newDateTime()}", bean));
 		Assert.assertEquals(currentTimestamp, Binder.formatMessage("{el:newTimestamp()}", bean));
