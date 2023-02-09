@@ -50,7 +50,6 @@ public class DataMaintenanceBizlet extends SingletonCachedBizlet<DataMaintenance
 		if (result.getEpochDate() == null) {
 			LocalDate epochDate = LocalDate.of(2010, Month.JANUARY, 1);
 			result.setEpochDate(new DateTime(epochDate));
-			result = CORE.getPersistence().save(result);
 		}
 
 		return result;

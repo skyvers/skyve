@@ -1,6 +1,7 @@
 package modules.admin.DataMaintenance;
 
-import java.math.BigInteger;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -12,7 +13,6 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.job.Job;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.Persistence;
-import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
@@ -60,11 +60,10 @@ public class TruncateAuditLogJob extends Job {
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();
-		String trace;
 
 		DataMaintenance dm = (DataMaintenance) getBean();
 		if (dm == null) {
-			trace = "DataMaintenance bean cannot be retrieved. Exiting Truncate Audit Log Job.";
+			String trace = "DataMaintenance bean cannot be retrieved. Exiting Truncate Audit Log Job.";
 			Util.LOGGER.log(Level.WARNING, trace);
 			log.add(trace);
 			return;
@@ -73,7 +72,7 @@ public class TruncateAuditLogJob extends Job {
 		// check a truncate audit log job or audit log refresh are not already running
 		String auditResponse = dm.getAuditResponse();
 		if (auditResponse != null) {
-			trace = "Audit Log is currently being used. Please check the job log for "
+			String trace = "Audit Log is currently being used. Please check the job log for "
 					+ "a currently running Truncate Audit Log Job or Refresh Document Tuple Job.";
 			Util.LOGGER.log(Level.INFO, trace);
 			log.add(trace);
@@ -84,7 +83,7 @@ public class TruncateAuditLogJob extends Job {
 		// if Audit log Retention Days is null all Audits are to be kept and this job will not delete anything
 		Integer auditLogRetentionDays = dm.getAuditLogRetentionDays();
 		if (auditLogRetentionDays == null) {
-			trace = "Audit Log Retention is not set. No Audits are to be deleted.";
+			String trace = "Audit Log Retention is not set. No Audits are to be deleted.";
 			Util.LOGGER.log(Level.INFO, trace);
 			log.add(trace);
 			setPercentComplete(100);
@@ -93,13 +92,11 @@ public class TruncateAuditLogJob extends Job {
 
 		Persistence pers = CORE.getPersistence();
 		dm.setAuditResponse("Truncate Audit Log Job commenced.");
-		dm = pers.save(dm);
 
 		try {
 			truncate(dm, pers);
 		} finally {
 			dm.setAuditResponse(null);
-			dm = pers.save(dm);
 		}
 
 		setPercentComplete(100);
@@ -111,10 +108,9 @@ public class TruncateAuditLogJob extends Job {
 		List<String> log = getLog();
 		log.add("Started Truncate Audit Log Job at " + new DateTime());
 
+		// Audit log retention days is non-null at this point
 		Integer auditLogRetentionDays = dm.getAuditLogRetentionDays();
 		long dayToPrune = auditLogRetentionDays.longValue();
-		// Customer epoch time is the last time that the audits have been pruned
-		long customerEpochTime = dm.getEpochDate().toInstant().toEpochMilli();
 
 		// Used for logging
 		int dayInt = 1;
@@ -122,43 +118,25 @@ public class TruncateAuditLogJob extends Job {
 
 		// Start time to prune
 		long pruneStartTime = System.currentTimeMillis() - (dayToPrune * MILLIS_IN_DAY);
+		long pruneEndTime = pruneStartTime - MILLIS_IN_DAY;
 
 		// Find size for Percentage complete calculations
-		SQL sql = pers.newSQL(
-				"SELECT COUNT(*) AS count FROM ADM_Audit WHERE millis BETWEEN :epoch AND :pruneStartTime AND bizCustomer = :customer");
-		sql.putParameter("pruneStartTime", Long.valueOf(pruneStartTime));
-		sql.putParameter("epoch", Long.valueOf(dm.getEpochDate().toInstant().toEpochMilli()));
-		sql.putParameter("customer", pers.getUser().getCustomerName(), false);
-		Number size = sql.retrieveScalar(Number.class);
-		log.add("Found " + size + " Audits to process.");
-		long pruneEndTime;
+		LocalDateTime date1 = dm.getEpochDate().toLocalDateTime();
+		LocalDateTime date2 = LocalDateTime.now().minusDays(dayToPrune);
+		Long daysSize = Long.valueOf(Duration.between(date1, date2).toDays());
+		log.add("Found " + daysSize + " Days to process.");
 
 		Set<String> auditsToTruncate = new TreeSet<>();
 
 		// We want to keep checking and truncating Audits while the day to prune is greater than epoch and results are being
 		// truncated, starting from the Audit Retention log Days + 1 ago
 		// Bucket Audits for truncation by day
-		while (customerEpochTime < (System.currentTimeMillis() - (dayToPrune * MILLIS_IN_DAY))) {
-			// percentage complete calculations
+		while (dayToPrune < daysSize.longValue()) {
+			// Used in finding audits for the day
 			pruneStartTime = System.currentTimeMillis() - (dayToPrune * MILLIS_IN_DAY);
-			pruneEndTime = System.currentTimeMillis() - ((dayToPrune + 1) * MILLIS_IN_DAY);
+			pruneEndTime = pruneStartTime - MILLIS_IN_DAY;
 
-			// Find number of audits left to process for Percentage complete calculations
-			sql = pers.newSQL(
-					"SELECT COUNT(*) FROM ADM_Audit WHERE millis BETWEEN :epoch AND :pruneStartTime AND bizCustomer = :customer");
-			sql.putParameter("pruneStartTime", Long.valueOf(pruneStartTime));
-			sql.putParameter("epoch", Long.valueOf(dm.getEpochDate().toInstant().toEpochMilli()));
-			sql.putParameter("customer", pers.getUser().getCustomerName(), false);
-			Number auditsLeftToProcess = sql.retrieveScalar(Number.class);
-			log.add(auditsLeftToProcess + " Audits remaining to process.");
-
-			setPercentComplete((int) (1 - (auditsLeftToProcess.floatValue() / (size.floatValue()))));
-
-			// If there are no audits to process (no audits between current pruneStartTime and epoch), exit and stop retrieving
-			// audits
-			if (auditsLeftToProcess.equals(BigInteger.valueOf(0))) {
-				break;
-			}
+			setPercentComplete(Long.valueOf(dayToPrune).intValue(), daysSize.intValue());
 
 			try (AutoClosingIterable<Bean> auditsToCheck = TruncateAuditLog.retrieveDaysAudits(pers, pruneStartTime,
 					pruneEndTime)
@@ -168,7 +146,7 @@ public class TruncateAuditLogJob extends Job {
 				// Check the day of audits for any audits we want to truncate
 				for (Bean audit : auditsToCheck) {
 					// Retrieve all Audits for the same bizId if the auditBizId has not already been checked
-					if (!auditsToTruncate.contains(Binder.get(audit, Audit.auditBizIdPropertyName))) {
+					if (auditsToTruncate.contains(Binder.get(audit, Audit.auditBizIdPropertyName))) {
 						continue;
 					}
 					List<String> auditBizIds = TruncateAuditLog.retrieveAuditsToTruncate(pers, audit);
@@ -187,6 +165,7 @@ public class TruncateAuditLogJob extends Job {
 			dayToPrune = dayToPrune + 1;
 		}
 
+		// Truncate any left over audits that didn't get batched into a 100
 		if (!auditsToTruncate.isEmpty()) {
 			TruncateAuditLog.truncateAuditBatch(pers, auditsToTruncate);
 			log.add("Truncated batch " + batchNo++ + ".");
