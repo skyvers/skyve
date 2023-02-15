@@ -38,11 +38,17 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		projections.add(PersistentBean.FLAG_COMMENT_NAME);
 		projections.add(Bean.BIZ_KEY);
 		projections.add(DownloadFolder.namePropertyName);
+		projections.add(DownloadFolder.sizePropertyName);
 
 		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(DownloadFolder.namePropertyName);
 		column.setSortable(false);
 		columns.add(column);
+
+		MetaDataQueryProjectedColumnImpl sizeColumn = new MetaDataQueryProjectedColumnImpl();
+		sizeColumn.setBinding(DownloadFolder.sizePropertyName);
+		sizeColumn.setSortable(false);
+		columns.add(sizeColumn);
 	}
 	
 	@Override

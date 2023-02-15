@@ -31,10 +31,18 @@ public class DownloadFolder extends AbstractTransientBean {
 	/** @hidden */
 	public static final String namePropertyName = "name";
 
+	/** @hidden */
+	public static final String sizePropertyName = "size";
+
 	/**
 	 * Name
 	 **/
 	private String name;
+
+	/**
+	 * Size (MB)
+	 **/
+	private Long size;
 
 	@Override
 	@XmlTransient
@@ -89,5 +97,23 @@ public class DownloadFolder extends AbstractTransientBean {
 	public void setName(String name) {
 		preset(namePropertyName, name);
 		this.name = name;
+	}
+
+	/**
+	 * {@link #size} accessor.
+	 * @return	The value.
+	 **/
+	public Long getSize() {
+		return size;
+	}
+
+	/**
+	 * {@link #size} mutator.
+	 * @param size	The new value.
+	 **/
+	@XmlElement
+	public void setSize(Long size) {
+		preset(sizePropertyName, size);
+		this.size = size;
 	}
 }

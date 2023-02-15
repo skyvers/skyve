@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 
 import org.skyve.CORE;
 
+import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 
@@ -77,6 +79,16 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	public void moveBackup(String srcBackupName, String destBackupName) {
 		copyBackup(srcBackupName, destBackupName);
 		deleteBackup(srcBackupName);
+	}
+
+	@Override
+	public long getFileSize(String fileName) {
+		final BlobContainerClient blobContainerClient = getBlobContainerClient();
+		final BlobClient blobClient = blobContainerClient.getBlobClient(getDirectoryName() + fileName);
+		final BlobProperties blobProperties = blobClient.getProperties();
+		long result = blobProperties.getBlobSize();
+
+		return result != 0 ? result : 0;
 	}
 
 	private static String getConnectionString() {
