@@ -655,7 +655,7 @@ public class TestUtil {
 
 				// keep adding sentences until we hit the length
 				StringBuilder b = new StringBuilder();
-				while ((b.length() < r) && (sentences.length > i)) {
+				while ((b.length() < r) && (sentences.length >= i)) {
 					b.append(sentences[i]).append(".");
 					i++;
 					if (b.length() > r) {
