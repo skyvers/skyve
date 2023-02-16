@@ -424,6 +424,13 @@ public class RestoreJob extends CancellableJob {
 
 								statement.executeUpdate();
 								rowCount++;
+
+								if ((rowCount % 1000L) == 0L) {
+									connection.commit();
+									if ((rowCount % 10000L) == 0L) {
+										Util.LOGGER.info("      processed " + rowCount + " rows");
+									}
+								}
 							} // while (each CSV line)
 
 							connection.commit();
@@ -541,6 +548,13 @@ public class RestoreJob extends CancellableJob {
 								statement.setString(i, values.get(Bean.DOCUMENT_ID));
 								statement.executeUpdate();
 								rowCount++;
+								
+								if ((rowCount % 1000L) == 0L) {
+									connection.commit();
+									if ((rowCount % 10000L) == 0L) {
+										Util.LOGGER.info("      processed " + rowCount + " rows");
+									}
+								}
 							} // while (each CSV line)
 
 							connection.commit();
