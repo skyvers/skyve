@@ -706,6 +706,8 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * New Backup Name
+	 * <br/>
+	 * The new backup name without .zip appended.
 	 **/
 	private String newBackupName;
 
