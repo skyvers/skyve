@@ -40,6 +40,21 @@
 						<server action="BackupSelected" />
 					</onSelectedHandlers>
 				</listGrid>
+				<form visible="backupSelected" border="true">
+					<column responsiveWidth="3"/>
+					<column responsiveWidth="3"/>
+					<column responsiveWidth="2"/>
+					<column responsiveWidth="2"/>
+					<column/>
+					<row>
+						<item>
+							<textField binding="newBackupName"/>
+						</item>
+						<item>
+							<button action="RenameBackup"/>
+						</item>
+					</row>
+				</form>
 				<form>
 					<column />
 					<column />
@@ -194,6 +209,7 @@
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
 		<action className="ReindexContent" displayName="admin.dataMaintenance.actions.reindexContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.reindexContent.confirm"
 			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
+		<action className="RenameBackup" displayName="admin.dataMaintenance.actions.renameBackup.displayName" inActionPanel="false" iconStyleClass="fa fa-arrow-right"/>
 		<action className="Restore" displayName="admin.dataMaintenance.actions.restore.displayName" inActionPanel="false" disabled="notBackupSelected" confirm="admin.dataMaintenance.actions.restore.confirm" 
 			relativeIconFileName="shared/icons/Exclamation.gif"	iconStyleClass="fa fa-toggle-left" />
 		<action className="Truncate" displayName="admin.dataMaintenance.actions.truncate.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.trucate.confirm"
