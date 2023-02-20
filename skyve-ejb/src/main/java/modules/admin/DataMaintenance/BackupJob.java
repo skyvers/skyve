@@ -3,8 +3,10 @@ package modules.admin.DataMaintenance;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +22,14 @@ import org.skyve.util.Util;
 import modules.admin.domain.DataMaintenance;
 
 public class BackupJob extends Job {
+
+	private final String WEEKLY_BACKUP_PREFIX = "WEEKLY";
+	private final String MONTHLY_BACKUP_PREFIX = "MONTHLY";
+	private final String YEARLY_BACKUP_PREFIX = "YEARLY";
+	private final long MILLIS_IN_WEEK = 604800000L;
+	private final long MILLIS_IN_MONTH = 2629800000L;
+	private final long MILLIS_IN_YEAR = 31556952000L;
+
 	@Override
 	public String cancel() {
 		return null;
@@ -91,20 +101,49 @@ public class BackupJob extends Job {
 
 			// copy daily to weekly
 			if (weekly > 0) {
-				File copy = new File(backupDir,
-										String.format("WEEKLY_%s.zip",
-														CORE.getDateFormat("yyyyMMWW").format(now)));
-				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
-				log.add(trace);
-				Util.LOGGER.info(trace);
-				FileUtil.copy(dailyZip, copy);
-				if (ExternalBackup.areExternalBackupsEnabled()) {
-					try {
-						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (@SuppressWarnings("unused") Exception e) {
-						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
-						log.add(trace);
-						Util.LOGGER.warning(trace);
+				// Check existing weekly backup exists
+				boolean doWeeklyBackup = false;
+				// Retrieve file from the backup directory where it is the last WEEKLY backup file
+				List<File> files = Files.walk(backupDir.toPath())
+						.filter(Files::isRegularFile)
+						.map(Path::toFile)
+						.filter(f -> f.getName().startsWith(WEEKLY_BACKUP_PREFIX))
+						.sorted(Comparator.comparing(File::lastModified).reversed())
+						.limit(1)
+						.collect(Collectors.toList());
+				
+				// check previous weekly backup exists and is at least a week old
+				if (files.size() > 0) {
+					File file = files.get(0);
+					long timeDifference = System.currentTimeMillis() - file.lastModified();
+					if (timeDifference >= MILLIS_IN_WEEK) {
+						doWeeklyBackup = true;
+					}
+				}
+				else {
+					// First weekly backup
+					doWeeklyBackup = true;
+				}
+
+				// Weekly backup should be made if it is the first weekly backup or if the most recent weekly backup is over a week
+				// old
+				if (doWeeklyBackup) {
+					File copy = new File(backupDir,
+							String.format("WEEKLY_%s.zip",
+									CORE.getDateFormat("yyyyMMWW").format(now)));
+					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					FileUtil.copy(dailyZip, copy);
+					if (ExternalBackup.areExternalBackupsEnabled()) {
+						try {
+							ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+						} catch (@SuppressWarnings("unused") Exception e) {
+							trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(),
+									copy.getName());
+							log.add(trace);
+							Util.LOGGER.warning(trace);
+						}
 					}
 				}
 			}
@@ -115,20 +154,49 @@ public class BackupJob extends Job {
 			}
 			// copy daily to monthly
 			if (monthly > 0) {
-				File copy = new File(backupDir,
-										String.format("MONTHLY_%s.zip",
-														CORE.getDateFormat("yyyyMM").format(now)));
-				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
-				log.add(trace);
-				Util.LOGGER.info(trace);
-				FileUtil.copy(dailyZip, copy);
-				if (ExternalBackup.areExternalBackupsEnabled()) {
-					try {
-						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (@SuppressWarnings("unused") Exception e) {
-						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
-						log.add(trace);
-						Util.LOGGER.warning(trace);
+				// Check existing monthly backup is one month old
+				boolean doMonthlyBackup = false;
+				// Retrieve file from the backup directory where it is the last MONTHLY backup file
+				List<File> files = Files.walk(backupDir.toPath())
+						.filter(Files::isRegularFile)
+						.map(Path::toFile)
+						.filter(f -> f.getName().startsWith(MONTHLY_BACKUP_PREFIX))
+						.sorted(Comparator.comparing(File::lastModified).reversed())
+						.limit(1)
+						.collect(Collectors.toList());
+				
+				// check previous Monthly backup exists and is at least a week old
+				if (files.size() > 0) {
+					File file = files.get(0);
+					long timeDifference = System.currentTimeMillis() - file.lastModified();
+					if (timeDifference >= MILLIS_IN_MONTH) {
+						doMonthlyBackup = true;
+					}
+				}
+				else {
+					// First monthly backup
+					doMonthlyBackup = true;
+				}
+
+				// Monthly backup should be made if it is the first monthly backup or if the most recent monthly backup is over a
+				// month old
+				if (doMonthlyBackup) {
+					File copy = new File(backupDir,
+							String.format("MONTHLY_%s.zip",
+									CORE.getDateFormat("yyyyMM").format(now)));
+					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					FileUtil.copy(dailyZip, copy);
+					if (ExternalBackup.areExternalBackupsEnabled()) {
+						try {
+							ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+						} catch (@SuppressWarnings("unused") Exception e) {
+							trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(),
+									copy.getName());
+							log.add(trace);
+							Util.LOGGER.warning(trace);
+						}
 					}
 				}
 			}
@@ -139,20 +207,48 @@ public class BackupJob extends Job {
 			}
 			// copy daily to yearly
 			if (yearly > 0) {
-				File copy = new File(backupDir,
-										String.format("YEARLY_%s.zip",
-														CORE.getDateFormat("yyyy").format(now)));
-				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
-				log.add(trace);
-				Util.LOGGER.info(trace);
-				FileUtil.copy(dailyZip, copy);
-				if (ExternalBackup.areExternalBackupsEnabled()) {
-					try {
-						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (@SuppressWarnings("unused") Exception e) {
-						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
-						log.add(trace);
-						Util.LOGGER.warning(trace);
+				// Check existing yearly backup is one month old
+				boolean doYearlyBackup = false;
+				// Retrieve file from the backup directory where it is the last YEARLY backup file
+				List<File> files = Files.walk(backupDir.toPath())
+						.filter(Files::isRegularFile)
+						.map(Path::toFile)
+						.filter(f -> f.getName().startsWith(YEARLY_BACKUP_PREFIX))
+						.sorted(Comparator.comparing(File::lastModified).reversed())
+						.limit(1)
+						.collect(Collectors.toList());
+
+				// check previous Monthly backup exists and is at least a week old
+				if (files.size() > 0) {
+					File file = files.get(0);
+					long timeDifference = System.currentTimeMillis() - file.lastModified();
+					if (timeDifference >= MILLIS_IN_YEAR) {
+						doYearlyBackup = true;
+					}
+				} else {
+					// First yearly backup
+					doYearlyBackup = true;
+				}
+
+				// Yearly backup should be made if it is the first yearly backup or if the most recent yearly backup is over a year
+				// old
+				if (doYearlyBackup) {
+					File copy = new File(backupDir,
+							String.format("YEARLY_%s.zip",
+									CORE.getDateFormat("yyyy").format(now)));
+					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					FileUtil.copy(dailyZip, copy);
+					if (ExternalBackup.areExternalBackupsEnabled()) {
+						try {
+							ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
+						} catch (@SuppressWarnings("unused") Exception e) {
+							trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(),
+									copy.getName());
+							log.add(trace);
+							Util.LOGGER.warning(trace);
+						}
 					}
 				}
 			}
