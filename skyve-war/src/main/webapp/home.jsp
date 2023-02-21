@@ -62,8 +62,6 @@
 
 	// Get (and set) the user agent type (if required - could have been set by device.jsp)
 	UserAgentType userAgentType = UserAgent.getType(request);
-	// Determine the UX/UI
-	UxUi uxui = UserAgent.getUxUi(request);
 
 	Router router = repository.getRouter();
 
@@ -90,6 +88,10 @@
 		catch (Exception e) {
 			throw new IllegalStateException("Malformed URL cannot be canonicalised", e);
 		}
+		
+		// Determine the UX/UI without a user principal
+		UxUi uxui = UserAgent.getUxUi(request);
+		// Now determine if the outcome URL is unsecured or not.
 		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
 		if (router.isUnsecured(outcomeUrl)) {
 			if (customerName == null) {
@@ -178,6 +180,8 @@
 			}
 		}
 		
+		// Determine the UX/UI with the user principal
+		UxUi uxui = UserAgent.getUxUi(request);
 		// Determine the route
 		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
 		if (UtilImpl.COMMAND_TRACE) {

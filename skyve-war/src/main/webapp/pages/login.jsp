@@ -289,7 +289,7 @@
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
 		            </div>
 
-					<% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) { %>
+					<% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null)) { %>
 					<div class="ui segment">
 						<div class="ui grid">
 							<div class="sixteen wide column">
@@ -322,6 +322,16 @@
 										<i class="github icon"></i>
 									</div>
 									<a href="oauth2/authorization/github" class="ui basic gray left pointing label">GitHub</a>
+								</div>
+							</div>
+							<% } %>
+							<% if (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null) { %>
+							<div class="eight wide column" style="padding-top: 0;">
+								<div class="ui fluid labeled button">
+									<div class="ui gray button">
+										<i class="microsoft icon"></i>
+									</div>
+									<a href="oauth2/authorization/microsoft" class="ui basic gray left pointing label">Azure AD</a>
 								</div>
 							</div>
 							<% } %>							

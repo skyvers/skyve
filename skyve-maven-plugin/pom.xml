@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>8.2.1-SNAPSHOT</version>
+		<version>8.2.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-maven-plugin</artifactId>
 
@@ -123,7 +123,7 @@
 		<dependency>
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-create</artifactId>
-			<version>2.1.0</version>
+			<version>2.1.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.skyve</groupId>

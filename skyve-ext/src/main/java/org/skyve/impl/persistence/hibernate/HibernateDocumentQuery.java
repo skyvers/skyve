@@ -14,7 +14,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	
 	public HibernateDocumentQuery(Bean queryByExampleBean, AbstractHibernatePersistence persistence)
 	throws Exception {
-		super(queryByExampleBean);
+		super(queryByExampleBean, AbstractHibernatePersistence.getDialect().getRDBMS());
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
@@ -22,19 +22,19 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 									String fromClause,
 									String filterClause,
 									AbstractHibernatePersistence persistence) {
-		super(document, fromClause, filterClause);
+		super(document, AbstractHibernatePersistence.getDialect().getRDBMS(), fromClause, filterClause);
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
 	public HibernateDocumentQuery(Document document, AbstractHibernatePersistence persistence) {
-		super(document);
+		super(document, AbstractHibernatePersistence.getDialect().getRDBMS());
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
 	public HibernateDocumentQuery(String moduleName, 
 									String documentName,
 									AbstractHibernatePersistence persistence) {
-		super(moduleName, documentName);
+		super(moduleName, documentName, AbstractHibernatePersistence.getDialect().getRDBMS());
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 

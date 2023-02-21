@@ -217,7 +217,14 @@
 				]]>
 			</expression>
 		</condition>
-		
+		<condition name="tfaEmailEnabled" usage="view">
+			<description>True when the customer has Two Factor Auth Email enabled</description>
+			<expression>
+				<![CDATA[
+					org.skyve.impl.util.UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains(org.skyve.CORE.getCustomer().getName())
+				]]>
+			</expression>
+		</condition>
 		<condition name="tfaEmailSelected" usage="view">
 			<description>True when the user has selected Two Factor Auth Email type</description>
 			<expression>

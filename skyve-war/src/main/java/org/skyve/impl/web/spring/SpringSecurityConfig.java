@@ -136,12 +136,13 @@ public class SpringSecurityConfig {
 		TwoFactorAuthPushEmailFilter tfaEmail = new TwoFactorAuthPushEmailFilter(userDetailsManager());
 		http.addFilterBefore(tfaEmail, UsernamePasswordAuthenticationFilter.class);
 
-		if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) ||
-				(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) ||
-				(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) {
+		if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null)
+				|| (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null)
+				|| (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)
+				|| (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null)) {
 			http.oauth2Login().loginPage(Util.getLoginUrl());
 		}
-			
+
 //		http.saml2Login()
 //				.loginPage(Util.getLoginUrl())
 //				.defaultSuccessUrl(Util.getHomeUrl());
@@ -152,7 +153,7 @@ public class SpringSecurityConfig {
 		tfaEmail.setAuthenticationManager(authenticationManager);
 		return result;
 	}
-	
+
 /*
 	@Bean
 	public RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {

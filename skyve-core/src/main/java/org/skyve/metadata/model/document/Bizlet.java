@@ -244,7 +244,7 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * Provides a point to do form level operations before implicit actions get run.
 	 * @param actionName	The name of the action invoked.
 	 * @param bean	The bean that the action pertains to.
-	 * @param parentBean	The parent of the bean for an Add or Edit action.
+	 * @param parentBean	The bean of the parent view (the view navigating from) for an Add or Edit action.
 	 * @param webContext	The web context.
 	 * @throws Exception
 	 */

@@ -76,9 +76,7 @@ class AccessProcessor {
 			if (queryName != null) {
 				addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
 			}
-			else {
-				addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
-			}
+			addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
 		}
 		else if (homeRef == ViewType.edit) {
 			addAccessForUxUis(UserAccess.singular(moduleName, homeDocumentName), Collections.emptySet());
@@ -179,7 +177,7 @@ class AccessProcessor {
 		final String overriddenUxUi = view.getOverriddenUxUiName();
 		final Module module = customer.getModule(document.getOwningModuleName());
 		
-		Set<UserAccess> viewAccesses = view.getAccesses(customer, uxui);
+		Set<UserAccess> viewAccesses = view.getAccesses(customer, document, uxui);
 		if (viewAccesses != null) { // can be null when access control is turned off
 			for (UserAccess viewAccess : viewAccesses) {
 				if (viewAccess.isSingular()) {

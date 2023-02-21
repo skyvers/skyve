@@ -17,10 +17,10 @@ import org.skyve.web.WebContext;
 import modules.admin.Startup.StartupBizlet;
 import modules.admin.Startup.StartupExtension;
 import modules.admin.domain.Configuration;
+import modules.admin.domain.Configuration.TwoFactorType;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Startup;
 import modules.admin.domain.User;
-import modules.admin.domain.Configuration.TwoFactorType;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
 	@Override
@@ -36,7 +36,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			p.resetDocumentPermissionScopes();
 		}
 
-		// Set the user name and email to the logged in user (if logged in)
+		// Set the startup and set the emailFrom to the startup mailsender
 		if (result.getStartup() == null) {
 			result.setStartup(Startup.newInstance());
 			result.setEmailFrom(result.getStartup().getMailSender());

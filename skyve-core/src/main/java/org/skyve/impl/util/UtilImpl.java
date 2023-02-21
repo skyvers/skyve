@@ -62,8 +62,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "47";
-	public static final String SKYVE_VERSION = "8.2.1-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "48";
+	public static final String SKYVE_VERSION = "8.2.3-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
@@ -274,6 +274,14 @@ public class UtilImpl {
 	public static String AUTHENTICATION_GITHUB_CLIENT_ID = null;
 	// github auth secret
 	public static String AUTHENTICATION_GITHUB_SECRET = null;
+
+	// azure AD auth client id
+	public static String AUTHENTICATION_AZUREAD_CLIENT_ID = null;
+	// azure AD auth tenant id
+	public static String AUTHENTICATION_AZUREAD_TENANT_ID = null;
+	// azure AD auth secret
+	public static String AUTHENTICATION_AZUREAD_SECRET = null;
+
 	// The Login URI to forward to
 	public static String AUTHENTICATION_LOGIN_URI = "/login";
 	// The Logged Out URI to forward to

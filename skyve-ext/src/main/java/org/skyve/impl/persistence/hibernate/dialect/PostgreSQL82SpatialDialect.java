@@ -1,15 +1,17 @@
 package org.skyve.impl.persistence.hibernate.dialect;
 
 import org.hibernate.mapping.Column;
+import org.hibernate.mapping.Index;
 import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.spatial.dialect.postgis.PostgisPG82Dialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
+import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 
 public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements SkyveDialect {
 	private static final long serialVersionUID = 2172740003262109261L;
 
-	private PostgreSQLSpatialDialectDelegate delegate = new PostgreSQLSpatialDialectDelegate();
+	private PostgreSQLSpatialDialectDelegate delegate = new PostgreSQLSpatialDialectDelegate(this);
 
 	@Override
 	public int getGeometrySqlType() {
@@ -44,5 +46,10 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	@Override
 	public RDBMS getRDBMS() {
 		return delegate.getRDBMS();
+	}
+	
+	@Override
+	public Exporter<Index> getIndexExporter() {
+		return delegate.getIndexExporter();
 	}
 }

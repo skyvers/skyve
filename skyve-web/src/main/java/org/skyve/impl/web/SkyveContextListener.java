@@ -601,6 +601,9 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getString("account", "facebookAuthSecret", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getString("account", "githubAuthClientId", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getString("account", "githubAuthSecret", account, false);
+		UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID = getString("account", "azureAdAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID = getString("account", "azureAdAuthTenantId", account, false);
+		UtilImpl.AUTHENTICATION_AZUREAD_SECRET = getString("account", "azureAdAuthSecret", account, false);
 
 		number = getNumber("account", "rememberMeTokenTimeoutHours", account, false);
 		if (number != null) {

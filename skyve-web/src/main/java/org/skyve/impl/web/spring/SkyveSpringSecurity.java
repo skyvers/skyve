@@ -115,9 +115,13 @@ public class SkyveSpringSecurity {
 					whereClause = "where u.bizCustomer = ? and u.userName = ?";
 				}
 				
-				// this should be the same for all dialects
-				skyveUserTFAUpdate = "update ADM_SecurityUser as u set u.twoFactorCode = ? , u.twoFactorToken = ?, u.twoFactorCodeGeneratedTimestamp = ? " + whereClause;
-					
+				// Don't include bizCustomer in the where clause if single customer to allow for better data store index usage.
+				String whereClauseForUpdate = "where userName = ?";
+				if (UtilImpl.CUSTOMER == null) { // multi-tennant
+					whereClauseForUpdate = "where bizCustomer = ? and userName = ?";
+				}
+				skyveUserTFAUpdate = "update ADM_SecurityUser set twoFactorCode = ? , twoFactorToken = ?, twoFactorCodeGeneratedTimestamp = ? " + whereClauseForUpdate;
+				
 				SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 				RDBMS rdbms = dialect.getRDBMS();
 				
@@ -126,6 +130,7 @@ public class SkyveSpringSecurity {
 							+ "u.twoFactorCode, u.twoFactorToken, u.twoFactorCodeGeneratedTimestamp, c.email1 from ADM_SecurityUser as u "
 							+ " inner join ADM_Contact as c on u.contact_id = c.bizId " 
 							+ whereClause;
+					
 				}
 				else if (RDBMS.mysql.equals(rdbms)) {
 					skyveUserQuery = "select concat(u.bizCustomer, '/', u.userName), u.password, not ifNull(u.inactive, false) and ifNull(u.activated, true),  u.authenticationFailures, u.lastAuthenticationFailure, "
@@ -256,8 +261,13 @@ public class SkyveSpringSecurity {
 					ps.setString(1, tfa.getTfaCode());
 					ps.setString(2, tfa.getTfaToken());
 					ps.setTimestamp(3, codeGenTS);
-					ps.setString(4, tfa.getCustomer());
-					ps.setString(5, tfa.getUser());
+					// specify two parameters for customer/user for multi-tennant
+					if (UtilImpl.CUSTOMER == null) {
+						ps.setString(4, tfa.getCustomer());
+						ps.setString(5, tfa.getUser());
+					} else {
+						ps.setString(4, tfa.getUser());
+					}
 				});
 			}
 		};
@@ -282,6 +292,9 @@ public class SkyveSpringSecurity {
 		}
 		if (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) {
 			registrations.add(githubClientRegistration());
+		}
+		if (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null) {
+			registrations.add(azureAdClientRegistration());
 		}
 
 		// Add a dummy registration otherwise spring security will moan
@@ -351,5 +364,29 @@ public class SkyveSpringSecurity {
 									.userNameAttributeName("id")
 									.clientName("GitHub")
 									.build();
+	}
+
+	// https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
+	// Hit /oauth2/authorization/microsoft
+	@SuppressWarnings("static-method")
+	public ClientRegistration azureAdClientRegistration() {
+
+		String tenantId = UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID;
+
+		return ClientRegistration.withRegistrationId("microsoft")
+				.clientId(UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID)
+				.clientSecret(UtilImpl.AUTHENTICATION_AZUREAD_SECRET)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+				.scope("User.Read")
+				.authorizationUri(
+						"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize".replace("{tenantId}", tenantId))
+				.tokenUri("https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token".replace("{tenantId}", tenantId))
+				.userInfoUri("https://graph.microsoft.com/oidc/userinfo")
+				.jwkSetUri("https://login.microsoftonline.com/{tenantId}/discovery/v2.0/keys".replace("{tenantId}", tenantId))
+				.userNameAttributeName("email")
+				.clientName("Microsoft")
+				.build();
 	}
 }
