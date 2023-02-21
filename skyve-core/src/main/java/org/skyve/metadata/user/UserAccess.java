@@ -87,8 +87,9 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 		if (e == null) {
 			return null;
 		}
-		d = m.getDocument(c, e.getDocumentName());
-		return UserAccess.singular(d.getOwningModuleName(), documentName);
+		String baseDocumentName = e.getDocumentName();
+		d = m.getDocument(c, baseDocumentName);
+		return UserAccess.singular(d.getOwningModuleName(), baseDocumentName);
 	}
 	
 	@Override
