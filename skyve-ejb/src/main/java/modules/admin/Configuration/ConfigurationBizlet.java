@@ -118,9 +118,18 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		if (Configuration.twoFactorTypePropertyName.equals(source) && bean.getTwoFactorType() == TwoFactorType.email) {
 			if (bean.getTwoFactorEmailBody() == null) {
 				bean.setTwoFactorEmailBody("Hi,<br /><br />Your verification code is: {tfaCode}<br />");
+				StringBuilder sb = new StringBuilder(128);
+				sb.append("Hi, <br />");
+				sb.append("Your verification code is: {tfaCode}<br />");
+				sb.append("Enter the code above where prompted<br />.");
+				sb.append("<br />");
+				sb.append("Having issues with your 2FA? Reach out to your system administrator.");
+
+				bean.setTwoFactorEmailBody(sb.toString());
 			}
 			if (bean.getTwoFactorEmailSubject() == null) {
 				bean.setTwoFactorEmailSubject("Please verify your email security code");
+				bean.setTwoFactorEmailSubject("Email verification security code");
 			}
 		}
 
