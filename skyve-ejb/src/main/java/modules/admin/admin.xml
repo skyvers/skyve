@@ -256,6 +256,7 @@
 					<action name="Restore" />
 					<action name="Truncate" />
 					<action name="DownloadBackup" />
+					<action name="DownloadProblems" />
 					<action name="RefreshDocumentTuples" />
 					<action name="Create" />
 					<action name="Drop" />

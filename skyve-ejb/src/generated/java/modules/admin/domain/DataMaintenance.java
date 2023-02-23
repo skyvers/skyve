@@ -1393,6 +1393,26 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
+	 * A backup from the backup list has been selected and isn't an External Backup.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isBackupSelectedAndNotExternal() {
+		return (!org.skyve.impl.backup.ExternalBackup.areExternalBackupsEnabled()
+						&& selectedBackupName != null);
+	}
+
+	/**
+	 * {@link #isBackupSelectedAndNotExternal} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotBackupSelectedAndNotExternal() {
+		return (! isBackupSelectedAndNotExternal());
+	}
+
+	/**
 	 * Refresh Backups
 	 *
 	 * @return The condition
@@ -1447,6 +1467,25 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 */
 	public boolean isNotContentSelected() {
 		return (! isContentSelected());
+	}
+
+	/**
+	 * External Backup has been selected.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isExternalBackup() {
+		return (org.skyve.impl.backup.ExternalBackup.areExternalBackupsEnabled());
+	}
+
+	/**
+	 * {@link #isExternalBackup} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotExternalBackup() {
+		return (! isExternalBackup());
 	}
 
 	/**
