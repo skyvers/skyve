@@ -20,6 +20,7 @@ import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.Util;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.GrantedAuthority;
@@ -315,7 +316,7 @@ public class SkyveSpringSecurity {
 									.clientSecret(UtilImpl.AUTHENTICATION_GOOGLE_SECRET)
 									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-									.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+									.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
 									.scope("openid", "profile", "email", "address", "phone")
 									.authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
 									.tokenUri("https://www.googleapis.com/oauth2/v4/token")
@@ -336,7 +337,7 @@ public class SkyveSpringSecurity {
 									.clientSecret(UtilImpl.AUTHENTICATION_FACEBOOK_SECRET)
 									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-									.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+									.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
 									.scope("public_profile", "email")
 									.authorizationUri("https://www.facebook.com/v2.8/dialog/oauth")
 									.tokenUri("https://graph.facebook.com/v2.8/oauth/access_token")
@@ -356,7 +357,7 @@ public class SkyveSpringSecurity {
 									.clientSecret(UtilImpl.AUTHENTICATION_GITHUB_SECRET)
 									.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 									.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-									.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+									.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
 									.scope("read:user")
 									.authorizationUri("https://github.com/login/oauth/authorize")
 									.tokenUri("https://github.com/login/oauth/access_token")
@@ -378,7 +379,7 @@ public class SkyveSpringSecurity {
 				.clientSecret(UtilImpl.AUTHENTICATION_AZUREAD_SECRET)
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+				.redirectUri(Util.getSkyveContextUrl() + "/login/oauth2/code/{registrationId}")
 				.scope("User.Read")
 				.authorizationUri(
 						"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/authorize".replace("{tenantId}", tenantId))

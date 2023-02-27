@@ -49,7 +49,7 @@ public class SecurityListener {
 			username = (String) principal;
 		}
 		else {
-			UtilImpl.LOGGER.warning("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in you project and handle the principal yourself.");
+			UtilImpl.LOGGER.warning("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in your project and handle the principal yourself.");
 		}
 		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + username);
 		if (username != null) {
