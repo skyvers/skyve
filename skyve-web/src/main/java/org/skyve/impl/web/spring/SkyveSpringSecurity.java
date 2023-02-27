@@ -23,6 +23,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
+import org.springframework.security.core.AuthenticatedPrincipal;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -389,5 +390,32 @@ public class SkyveSpringSecurity {
 				.userNameAttributeName("email")
 				.clientName("Microsoft")
 				.build();
+	}
+	
+	/**
+	 * Determine the user name from the Spring Security principal object.
+	 * <br/>
+	 *  The user name is hard to get in spring security.
+	 *   The principal is an object and getUserName() is not on an interface.
+	 *   Some security plugin implementations (the waffle one) have a getUserName() but the principal does not extend User.
+	 *   The OAuth plugin uses AuthenticatedPrincipal which is also not part of User.
+	 *   NB It would be possible to use reflection to obtain the user name from different implementations
+	 *   but I think the best thing we can do is warn about it and let a Skyve project mask this class if required.
+	 *   
+	 * @param principal	The principal (anything could come through here)
+	 * @return	The user name of the principal.
+	 */
+	public static String userNameFromPrincipal(Object principal) {
+		String result = null;
+		if (principal instanceof UserDetails) {
+			result = ((UserDetails) principal).getUsername();
+		}
+		else if (principal instanceof AuthenticatedPrincipal) {
+			result = ((AuthenticatedPrincipal) principal).getName();
+		}
+		else if (principal instanceof String) {
+			result = (String) principal;
+		}
+		return result;
 	}
 }

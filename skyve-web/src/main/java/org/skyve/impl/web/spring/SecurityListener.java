@@ -17,8 +17,6 @@ import org.skyve.metadata.MetaDataException;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
-import org.springframework.security.core.AuthenticatedPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,39 +24,23 @@ public class SecurityListener {
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationFailure(AuthenticationFailureBadCredentialsEvent evt) {
-		String username = (String) evt.getAuthentication().getPrincipal();
-		UtilImpl.LOGGER.warning("Login Attempt failed for user " + username);
-		recordLoginFailure(username);
+		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
+		UtilImpl.LOGGER.warning("Login Attempt failed for user " + userName);
+		if (userName != null) {
+			recordLoginFailure(userName);
+		}
 	}
 	
 	@EventListener
 	@SuppressWarnings("static-method")
 	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
-		Object principal = evt.getAuthentication().getPrincipal();
-
-		// The username is hard to get in spring security.
-		// The principal is an object and getUserName() is not on an interface.
-		// Some security plugin implementations (the waffle one) have a getUserName() but the principal 
-		// does not extend User.
-		// The OAuth plugin uses AuthenticatedPrincipal which is also not part of User.
-		// NB It would be possible to use reflection to obtain the username from different implementations
-		// but I think the best thing we can do is warn about it and let a skyve project mask this class if required.
-		String username = null;
-		if (principal instanceof UserDetails) {
-			username = ((UserDetails) principal).getUsername();
-		}
-		else if (principal instanceof AuthenticatedPrincipal) {
-			username = ((AuthenticatedPrincipal) principal).getName();
-		}
-		else if (principal instanceof String) {
-			username = (String) principal;
-		}
-		else {
+		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
+		if (userName == null) {
 			UtilImpl.LOGGER.warning("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in your project and handle the principal yourself.");
 		}
-		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + username);
-		if (username != null) {
-			resetLoginFailure(username);
+		UtilImpl.LOGGER.info("Login Attempt succeeded for user " + userName);
+		if (userName != null) {
+			resetLoginFailure(userName);
 		}
 	}
 	
@@ -190,11 +172,13 @@ public class SecurityListener {
 				if (rs.next()) {
 					// NB only return the bizId for resetLoginFailure if authenticationFailures is not 0 or lastAuthenticationFailure is not null
 					if (forReset) {
+						// authenticationFailures is not 0 
 						int authenticationFailures = rs.getInt(2);
 						if (rs.wasNull() || (authenticationFailures != 0)) {
 							result = rs.getString(1);
 						}
 						else {
+							// lastAuthenticationFailure is not null
 							rs.getObject(3);
 							if (! rs.wasNull()) {
 								result = rs.getString(1);

@@ -77,11 +77,16 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			redirectUrl = Util.getHomeUrl();
 		}
 		
-		TwoFactorAuthUser principal = (TwoFactorAuthUser) authentication.getPrincipal();
-		String customerName = principal.getCustomer();
-		if ((userDetailsManager != null) && (customerName != null)) {
-			if (TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName)) {
-				cleanupTFACodes(principal);
+		if (userDetailsManager != null) {
+			Object principal = authentication.getPrincipal();
+			if (principal instanceof TwoFactorAuthUser) {
+				TwoFactorAuthUser tfaUser = (TwoFactorAuthUser) principal;
+				String customerName = tfaUser.getCustomer();
+				if (customerName != null) {
+					if (TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName)) {
+						cleanupTFACodes(tfaUser);
+					}
+				}
 			}
 		}
 		
