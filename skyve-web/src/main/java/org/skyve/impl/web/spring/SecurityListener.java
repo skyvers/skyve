@@ -17,7 +17,8 @@ import org.skyve.metadata.MetaDataException;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.AuthenticatedPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,11 +40,15 @@ public class SecurityListener {
 		// The principal is an object and getUserName() is not on an interface.
 		// Some security plugin implementations (the waffle one) have a getUserName() but the principal 
 		// does not extend User.
+		// The OAuth plugin uses AuthenticatedPrincipal which is also not part of User.
 		// NB It would be possible to use reflection to obtain the username from different implementations
 		// but I think the best thing we can do is warn about it and let a skyve project mask this class if required.
 		String username = null;
-		if (principal instanceof User) {
-			username = ((User) principal).getUsername();
+		if (principal instanceof UserDetails) {
+			username = ((UserDetails) principal).getUsername();
+		}
+		else if (principal instanceof AuthenticatedPrincipal) {
+			username = ((AuthenticatedPrincipal) principal).getName();
 		}
 		else if (principal instanceof String) {
 			username = (String) principal;
