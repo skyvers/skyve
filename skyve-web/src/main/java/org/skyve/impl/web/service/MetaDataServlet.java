@@ -236,8 +236,7 @@ public class MetaDataServlet extends HttpServlet {
 		StringBuilder menus = new StringBuilder(2048);
 		StringBuilder dataSources = new StringBuilder(2048);
 		processModules(uxui, user, chosenModuleName, menus, dataSources);
-		pw.append("{\"menus\":").append(menus).append(",\n");
-		pw.append("\"dataSources\":").append(dataSources).append('}');
+		pw.append("{\"menus\":").append(menus).append(",\"dataSources\":").append(dataSources).append('}');
 	}
 	
 	private static void processModules(final String uxui, 
@@ -555,7 +554,7 @@ public class MetaDataServlet extends HttpServlet {
 					dataSourceJson.append(",\"rowHeight\":").append(cellHeight);
 				}
 				
-				dataSourceJson.append("},\n");
+				dataSourceJson.append("},");
 				visitedDataSourceNames.add(dataSourceName);
 			}
 
@@ -685,14 +684,14 @@ public class MetaDataServlet extends HttpServlet {
 					dataSourceJson.append(",rowHeight:").append(cellHeight);
 				}
 				
-				dataSourceJson.append("},\n");
+				dataSourceJson.append("},");
 			}
 */
 		}.render(user);
 
-        menuJson.setLength(menuJson.length() - 1);
+        menuJson.setLength(menuJson.length() - 1); // ,
         menuJson.append("]");
-        dataSourceJson.setLength(dataSourceJson.length() - 2); // ,\n
+        dataSourceJson.setLength(dataSourceJson.length() - 1); // ,
         dataSourceJson.append("}");
 	}
 	
@@ -755,7 +754,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 
 				processDecorated(view);
-				processContainer(view);
+				processContainer();
 			}
 
 			@Override
@@ -788,7 +787,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				processInvisible(vbox);
 				processDecorated(vbox);
-				processContainer(vbox);
+				processContainer();
 			}
 			
 			@Override
@@ -815,7 +814,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				processInvisible(hbox);
 				processDecorated(hbox);
-				processContainer(hbox);
+				processContainer();
 			}
 			
 			@Override
@@ -837,13 +836,13 @@ public class MetaDataServlet extends HttpServlet {
 				processDisableable(tabPane);
 				processInvisible(tabPane);
 				processDecorated(tabPane);
-				result.append(",\"tabs\"[");
+				result.append(",\"tabs\":[");
 			}
 			
 			@Override
 			public void renderedTabPane(TabPane tabPane) {
 				result.setLength(result.length() - 1); // remove last comma
-				result.append("],");
+				result.append("]},");
 			}
 			
 			@Override
@@ -860,7 +859,7 @@ public class MetaDataServlet extends HttpServlet {
 				processDisableable(tab);
 				processInvisible(tab);
 				processDecorated(tab);
-				processContainer(tab);
+				processContainer();
 			}
 			
 			@Override
@@ -1027,7 +1026,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			@Override
 			public void renderFormTextArea(TextArea text) {
-				result.append("{\"type\":\"textArea\"}");
+				result.append("{\"type\":\"textArea\"");
 				processInputWidget(text);
 				processEditable(text);
 				KeyboardType keyboardType = text.getKeyboardType();
@@ -1226,7 +1225,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"lookupDescription\"");
 				processInputWidget(lookup);
 				result.append(",\"descriptionBinding\":\"").append(descriptionBinding).append('"');
-				result.append("\"dataSource\":\"").append(query.getOwningModule().getName()).append('_');
+				result.append(",\"dataSource\":\"").append(query.getOwningModule().getName()).append('_');
 				result.append(query.getDocumentName()).append('"');
 				result.append(",\"canCreate\":").append(canCreate);
 				result.append(",\"canUpdate\":").append(canUpdate);
@@ -1369,6 +1368,7 @@ public class MetaDataServlet extends HttpServlet {
 							result.append(reference.getActionName()).append('"');
 						}
 					}.process(linkReference);
+					result.append('}');
 				}
 				ReferenceTarget target = link.getTarget();
 				if (target != null) {
@@ -1577,7 +1577,7 @@ public class MetaDataServlet extends HttpServlet {
 											String confirmationText,
 											char type,
 											Button button) {
-				result.append("{\"type\":\"button\",\"actionType\":\"").append(type);
+				result.append("{\"type\":\"button\",\"actionType\":\"").append(type).append('"');
 				if (action != null) {
 					result.append(",\"actionName\":\"").append(action.getName()).append('"');
 				}
@@ -1626,7 +1626,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderDataGrid(String title, DataGrid grid) {
 				result.append("{\"type\":\"dataGrid\"");
 				if (title != null) {
-					result.append("\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
 				}
 				processBound(grid);
 				processIdentifiable(grid);
@@ -1671,11 +1671,11 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 				result.append("{\"type\":\"containerColumn\"");
 				if (title != null) {
-					result.append("\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
 				}
 				HorizontalAlignment alignment = column.getAlignment();
 				if (alignment != null) {
-					result.append("\"alignment\":\"").append(alignment).append('"');
+					result.append(",\"alignment\":\"").append(alignment).append('"');
 				}
 				processSize(column);
 				processDecorated(column);
@@ -1719,19 +1719,21 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("]},");
 			}
 			
+			WidgetReference input = null;
+
 			@Override
 			public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 				result.append("{\"type\":\"boundColumn\"");
 				if (title != null) {
-					result.append("\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
 				}
 				HorizontalAlignment alignment = column.getAlignment();
 				if (alignment != null) {
-					result.append("\"alignment\":\"").append(alignment).append('"');
+					result.append(",\"alignment\":\"").append(alignment).append('"');
 				}
 				processSize(column);
 				processDecorated(column);
-				WidgetReference input = column.getInputWidget();
+				input = column.getInputWidget();
 				if (input != null) {
 					result.append(",\"input\":");
 				}
@@ -1739,72 +1741,100 @@ public class MetaDataServlet extends HttpServlet {
 			
 			@Override
 			public void renderBoundColumnTextField(TextField text) {
-				renderFormTextField(text);
+				if (input != null) {
+					renderFormTextField(text);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnTextField(TextField text) {
-				renderedFormTextField(text);
+				if (input != null) {
+					renderedFormTextField(text);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnTextArea(TextArea text) {
-				renderFormTextArea(text);
+				if (input != null) {
+					renderFormTextArea(text);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnTextArea(TextArea text) {
-				renderedFormTextArea(text);
+				if (input != null) {
+					renderedFormTextArea(text);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnSpinner(Spinner spinner) {
-				renderFormSpinner(spinner);
+				if (input != null) {
+					renderFormSpinner(spinner);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnSpinner(Spinner spinner) {
-				renderedFormSpinner(spinner);
+				if (input != null) {
+					renderedFormSpinner(spinner);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnSlider(Slider slider) {
-				renderFormSlider(slider);
+				if (input != null) {
+					renderFormSlider(slider);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnSlider(Slider slider) {
-				renderedFormSlider(slider);
+				if (input != null) {
+					renderedFormSlider(slider);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnRichText(RichText text) {
-				renderFormRichText(text);
+				if (input != null) {
+					renderFormRichText(text);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnRichText(RichText text) {
-				renderedFormRichText(text);
+				if (input != null) {
+					renderedFormRichText(text);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnRadio(Radio radio) {
-				renderFormRadio(radio);
+				if (input != null) {
+					renderFormRadio(radio);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnRadio(Radio radio) {
-				renderedFormRadio(radio);
+				if (input != null) {
+					renderedFormRadio(radio);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnPassword(Password password) {
-				renderFormPassword(password);
+				if (input != null) {
+					renderFormPassword(password);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnPassword(Password password) {
-				renderedFormPassword(password);
+				if (input != null) {
+					renderedFormPassword(password);
+				}
 			}
 			
 			@Override
@@ -1813,7 +1843,9 @@ public class MetaDataServlet extends HttpServlet {
 															boolean canUpdate,
 															String descriptionBinding,
 															LookupDescription lookup) {
-				renderFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
+				if (input != null) {
+					renderFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
+				}
 			}
 			
 			@Override
@@ -1822,67 +1854,92 @@ public class MetaDataServlet extends HttpServlet {
 																boolean canUpdate,
 																String descriptionBinding,
 																LookupDescription lookup) {
-				renderedFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
+				if (input != null) {
+					renderedFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnHTML(HTML html) {
-				renderFormHTML(html);
+				if (input != null) {
+					renderFormHTML(html);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnGeometry(Geometry geometry) {
-				renderFormGeometry(geometry);
+				if (input != null) {
+					renderFormGeometry(geometry);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnGeometry(Geometry geometry) {
-				renderedFormGeometry(geometry);
+				if (input != null) {
+					renderedFormGeometry(geometry);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnContentLink(String value, ContentLink link) {
-				renderFormContentLink(value, link);
+				if (input != null) {
+					renderFormContentLink(value, link);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnContentImage(ContentImage image) {
-				renderFormContentImage(image);
+				if (input != null) {
+					renderFormContentImage(image);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnCombo(Combo combo) {
-				renderFormCombo(combo);
+				if (input != null) {
+					renderFormCombo(combo);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnCombo(Combo combo) {
-				renderedFormCombo(combo);
+				if (input != null) {
+					renderedFormCombo(combo);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnColourPicker(ColourPicker colour) {
-				renderFormColourPicker(colour);
+				if (input != null) {
+					renderFormColourPicker(colour);
+				}
 			}
 			
 			@Override
 			public void renderedBoundColumnColourPicker(ColourPicker colour) {
-				renderedFormColourPicker(colour);
+				if (input != null) {
+					renderedFormColourPicker(colour);
+				}
 			}
 			
 			@Override
 			public void renderBoundColumnCheckBox(CheckBox checkBox) {
-				renderFormCheckBox(checkBox);
+				if (input != null) {
+					renderFormCheckBox(checkBox);
+				}
 			}
 
 			@Override
 			public void renderedBoundColumnCheckBox(CheckBox checkBox) {
-				renderedFormCheckBox(checkBox);
+				if (input != null) {
+					renderedFormCheckBox(checkBox);
+				}
 			}
 
 			@Override
 			public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
 				result.append("},");
+				input = null;
 			}
 			
 			@Override
@@ -1895,7 +1952,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderDataRepeater(String title, DataRepeater repeater) {
 				result.append("{\"type\":\"dataRepeater\"");
 				if (title != null) {
-					result.append("\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
+					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
 				}
 				processBound(repeater);
 				processIdentifiable(repeater);
@@ -2605,8 +2662,16 @@ public class MetaDataServlet extends HttpServlet {
 				// handled in processFilterable()
 			}
 			
+			private void postProcessListColumns() {
+				if (getCurrentListWidgetModel() != null) {
+					result.setLength(result.length() - 1); // ,
+					result.append(']');
+				}
+			}
+			
 			@Override
 			public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+				postProcessListColumns();
 				String selectedIdBinding = selectable.getSelectedIdBinding();
 				if (selectedIdBinding != null) {
 					result.append(",\"selectedIdBinding\":\"").append(selectedIdBinding).append('"');
@@ -2628,6 +2693,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			@Override
 			public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+				postProcessListColumns();
 				List<EventAction> actions = removable.getRemovedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"removedActions\":[");
@@ -2679,6 +2745,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			@Override
 			public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+				postProcessListColumns();
 				List<EventAction> actions = editable.getEditedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"editedActions\":[");
@@ -2766,28 +2833,28 @@ public class MetaDataServlet extends HttpServlet {
 			public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 															boolean parentVisible,
 															boolean parentEnabled) {
-				result.append("{\"type\":\"toggleVisibility\"}");
+				result.append("{\"type\":\"toggleVisibility\"},");
 			}
 			
 			@Override
 			public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 														boolean parentVisible,
 														boolean parentEnabled) {
-				result.append("{\"type\":\"toggleDisabled\"}");
+				result.append("{\"type\":\"toggleDisabled\"},");
 			}
 			
 			@Override
 			public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 														boolean parentVisible,
 														boolean parentEnabled) {
-				result.append("{\"type\":\"setInvisible\"}");
+				result.append("{\"type\":\"setInvisible\"},");
 			}
 			
 			@Override
 			public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 														boolean parentVisible,
 														boolean parentEnabled) {
-				result.append("{\"type\":\"setDisabled\"}");
+				result.append("{\"type\":\"setDisabled\"},");
 			}
 			
 			@Override
@@ -2795,26 +2862,24 @@ public class MetaDataServlet extends HttpServlet {
 													EventSource source,
 													boolean parentVisible,
 													boolean parentEnabled) {
-				result.append("{\"type\":\"rerender\"}");
+				result.append("{\"type\":\"rerender\"},");
 			}
 			
 			
 			@Override
 			public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
-				result.append("{\"type\":\"server\"}");
+				result.append("{\"type\":\"server\"},");
 			}
 			
-			private void processContainer(Container container) {
-				if (! container.getContained().isEmpty()) {
-					result.append(",\"contained\":[");
-				}
+			private void processContainer() {
+				result.append(",\"contained\":[");
 			}
 
 			private void processedContainer(Container container) {
 				if (! container.getContained().isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
-					result.append("],");
 				}
+				result.append("],");
 			}
 			
 			private void processSize(AbsoluteWidth size) {
@@ -2937,7 +3002,7 @@ public class MetaDataServlet extends HttpServlet {
 			}
 
 			private void processBound(Bound bound) {
-				result.append(",\"bound\":\"").append(bound.getBinding()).append('"');
+				result.append(",\"binding\":\"").append(bound.getBinding()).append('"');
 			}
 
 			private void processEditable(org.skyve.metadata.view.Editable editable) {
@@ -2954,7 +3019,7 @@ public class MetaDataServlet extends HttpServlet {
 					result.append(",\"filterParameters\":[");
 					for (FilterParameter filter : filters) {
 						result.append("{\"filterBinding\":\"").append(filter.getFilterBinding());
-						result.append(",\"operator\":\"").append(filter.getOperator()).append('"');
+						result.append("\",\"operator\":\"").append(filter.getOperator()).append('"');
 						String string = filter.getValue();
 						if (string != null) {
 							result.append(",\"value\":\"").append(OWASP.escapeJsonString(string)).append('"');
@@ -3095,9 +3160,10 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append(",\"clientValidation\":").append(! Boolean.FALSE.equals(action.getClientValidation()));
 				actionsJSON.append(",\"inActionPanel\":").append(! Boolean.FALSE.equals(action.getInActionPanel()));
 				ActionShow show = action.getShow();
-				if (show != null) {
-					actionsJSON.append(",\"show\":\"").append(show).append('"');
+				if (show == null) {
+					show = ActionShow.both;
 				}
+				actionsJSON.append(",\"show\":\"").append(show).append('"');
 				if (confirmationText != null) {
 					actionsJSON.append(",\"confirm\":\"").append(OWASP.escapeJsonString(confirmationText)).append('"');
 				}

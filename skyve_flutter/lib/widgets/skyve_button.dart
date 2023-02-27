@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class SkyveButton extends StatelessWidget {
+  final String type;
   final String name;
   final String label;
 
-  const SkyveButton({Key? key, required this.name, required this.label})
+  const SkyveButton(
+      {Key? key, required this.type, required this.name, required this.label})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (name == 'Cancel') {
+    if (type == 'C') {
       return ElevatedButton(
           child: Text(label),
           onPressed: () {

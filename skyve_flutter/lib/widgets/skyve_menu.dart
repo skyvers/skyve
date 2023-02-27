@@ -28,14 +28,14 @@ class SkyveMenu extends ConsumerWidget {
           final List<Widget> list = List.empty(growable: true);
           final List<Widget> moduleList = List.empty(growable: true);
 
-          for (SkyveModuleMenu module in model) {
+          for (SkyveModuleMenuModel module in model) {
             List<Widget> groupItems = [];
-            for (SkyveMenuItem item in module.items) {
-              if (item is SkyveMenuGroup) {
+            for (SkyveMenuItemModel item in module.items) {
+              if (item is SkyveMenuGroupModel) {
                 list.add(_buildMenuGroup(
                     context: context, title: item.title, items: item.items));
                 groupItems.clear();
-              } else if (item is SkyveNavigationMenuItem) {
+              } else if (item is SkyveNavigationMenuItemModel) {
                 list.add(_buildMenuItem(
                     context: context,
                     title: item.title,
@@ -83,11 +83,11 @@ class SkyveMenu extends ConsumerWidget {
   Widget _buildMenuGroup(
       {required BuildContext context, required String title, required items}) {
     List<Widget> groupItems = [];
-    for (SkyveMenuItem item in items) {
-      if (item is SkyveMenuGroup) {
+    for (SkyveMenuItemModel item in items) {
+      if (item is SkyveMenuGroupModel) {
         groupItems.add(_buildMenuGroup(
             context: context, title: item.title, items: item.items));
-      } else if (item is SkyveNavigationMenuItem) {
+      } else if (item is SkyveNavigationMenuItemModel) {
         groupItems.add(_buildMenuItem(
             context: context,
             title: item.title,

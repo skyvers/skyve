@@ -54,7 +54,7 @@ class SkyveRestClient {
       throw Exception('Response data was null');
     }
 
-    return response.data!;
+    return response.data!.replaceAll('\\n', '\\\\n').replaceAll('\t', '\\t');
   }
 
   /// Attempt to login using the provided creds
@@ -141,6 +141,15 @@ class SkyveRestClient {
     debugPrint('Fetch metadata');
 
     return await _fetch('meta').then((jsonString) {
+      return jsonDecode(jsonString);
+    });
+  }
+
+  Future<Map<String, dynamic>> view(String m, String d) async {
+    debugPrint('Fetch view');
+
+    return await _fetch('meta?_mod=$m&_doc=$d').then((jsonString) {
+      debugPrint(jsonString);
       return jsonDecode(jsonString);
     });
   }

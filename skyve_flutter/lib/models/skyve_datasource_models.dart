@@ -1,26 +1,26 @@
-class SkyveDataSource {
+class SkyveDataSourceModel {
   final String module;
   final String document;
-  final List<SkyveDataSourceField> fields;
-  const SkyveDataSource(
+  final List<SkyveDataSourceFieldModel> fields;
+  const SkyveDataSourceModel(
       {required this.module, required this.document, required this.fields});
 
-  SkyveDataSource.fromJson(Map<String, dynamic> json)
+  SkyveDataSourceModel.fromJson(Map<String, dynamic> json)
       : module = json['module'],
         document = json['document'],
-        fields = SkyveDataSourceField.fromJsonList(json['fields']);
+        fields = SkyveDataSourceFieldModel.fromJsonList(json['fields']);
 }
 
-class SkyveDataSourceField {
+class SkyveDataSourceFieldModel {
   final String name;
-  const SkyveDataSourceField({required this.name});
+  const SkyveDataSourceFieldModel({required this.name});
 
-  SkyveDataSourceField.fromJson(Map<String, dynamic> json)
+  SkyveDataSourceFieldModel.fromJson(Map<String, dynamic> json)
       : name = json['name'];
 
-  static List<SkyveDataSourceField> fromJsonList(List<dynamic> json) {
+  static List<SkyveDataSourceFieldModel> fromJsonList(List<dynamic> json) {
     return List.generate(
-        json.length, (index) => SkyveDataSourceField.fromJson(json[index]),
+        json.length, (index) => SkyveDataSourceFieldModel.fromJson(json[index]),
         growable: false);
   }
 }

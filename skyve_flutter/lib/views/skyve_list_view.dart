@@ -23,7 +23,7 @@ class SkyveListView extends ConsumerStatefulWidget {
 class _SkyveListViewState extends ConsumerState<SkyveListView> {
   final SkyveRestClient _rest = SkyveRestClient();
   late String _dataSourceName;
-  late SkyveDataSource _dataSource;
+  late SkyveDataSourceModel _dataSource;
   bool _loaded = false;
   List<dynamic> _rows = [];
 

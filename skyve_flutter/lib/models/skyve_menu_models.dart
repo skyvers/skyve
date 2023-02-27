@@ -1,39 +1,40 @@
-class SkyveModuleMenu {
+class SkyveModuleMenuModel {
   final String module;
   final String title;
   final bool open;
-  final List<SkyveMenuItem> items;
+  final List<SkyveMenuItemModel> items;
 
-  const SkyveModuleMenu(
+  const SkyveModuleMenuModel(
       {required this.module,
       required this.title,
       required this.open,
       required this.items});
 
-  SkyveModuleMenu.fromJson(Map<String, dynamic> json)
+  SkyveModuleMenuModel.fromJson(Map<String, dynamic> json)
       : module = json['module'],
         title = json['title'],
         open = json['open'],
-        items = SkyveMenuItem.fromJsonList(json['module'], json['menu']);
+        items = SkyveMenuItemModel.fromJsonList(json['module'], json['menu']);
 }
 
-abstract class SkyveMenuItem {
-  const SkyveMenuItem({required this.title});
+abstract class SkyveMenuItemModel {
+  const SkyveMenuItemModel({required this.title});
 
   final String title;
 
-  static List<SkyveMenuItem> fromJsonList(String module, List<dynamic> json) {
+  static List<SkyveMenuItemModel> fromJsonList(
+      String module, List<dynamic> json) {
     return List.generate(json.length, (index) {
       Map<String, dynamic> jsonItem = json[index];
       if (jsonItem.containsKey('edit')) {
-        return SkyveNavigationMenuItem(
+        return SkyveNavigationMenuItemModel(
             title: jsonItem['edit'],
             icon: jsonItem['fontIcon'],
             path: '/e',
             params: {'m': module, 'd': jsonItem['document']});
       } else if (jsonItem.containsKey('list')) {
         if (jsonItem.containsKey('model')) {
-          return SkyveNavigationMenuItem(
+          return SkyveNavigationMenuItemModel(
               title: jsonItem['list'],
               icon: jsonItem['fontIcon'],
               path: '/l',
@@ -43,32 +44,32 @@ abstract class SkyveMenuItem {
                 'q': jsonItem['model']
               });
         }
-        return SkyveNavigationMenuItem(
+        return SkyveNavigationMenuItemModel(
             title: jsonItem['list'],
             icon: jsonItem['fontIcon'],
             path: '/l',
             params: {'m': module, 'q': jsonItem['query']});
       } else if (jsonItem.containsKey('group')) {
-        return SkyveMenuGroup(
+        return SkyveMenuGroupModel(
             title: jsonItem['group'],
-            items: SkyveMenuItem.fromJsonList(module, jsonItem['items']));
+            items: SkyveMenuItemModel.fromJsonList(module, jsonItem['items']));
       }
-      return const SkyveNavigationMenuItem(title: 'Unknown', path: '/');
+      return const SkyveNavigationMenuItemModel(title: 'Unknown', path: '/');
     }, growable: false);
   }
 }
 
-class SkyveMenuGroup extends SkyveMenuItem {
-  final List<SkyveMenuItem> items;
+class SkyveMenuGroupModel extends SkyveMenuItemModel {
+  final List<SkyveMenuItemModel> items;
 
-  const SkyveMenuGroup({required super.title, required this.items});
+  const SkyveMenuGroupModel({required super.title, required this.items});
 }
 
-class SkyveNavigationMenuItem extends SkyveMenuItem {
+class SkyveNavigationMenuItemModel extends SkyveMenuItemModel {
   final String path;
   final String? icon;
   final Map<String, dynamic>? params;
 
-  const SkyveNavigationMenuItem(
+  const SkyveNavigationMenuItemModel(
       {required super.title, this.icon, required this.path, this.params});
 }
