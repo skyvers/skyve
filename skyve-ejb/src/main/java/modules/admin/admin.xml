@@ -23,6 +23,7 @@
 		<document ref="Audit" defaultQueryName="qAudits" />
 		<document ref="ChangePassword" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
+		<document ref="CommunicationManager"/>
 		<document ref="CommunicationTemplate" defaultQueryName="qCommunicationTemplate"/>
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
@@ -196,6 +197,10 @@
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />
 				</document>
+				<document name="CommunicationManager" permission="_____">
+					<action name="ExportCommunicationSpecifications"/>
+					<action name="ImportCommunicationSpecifications"/>
+				</document>
 				<document name="CommunicationTemplate" permission="CRUDC"/>
 				<document name="Contact" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
@@ -351,6 +356,10 @@
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />
 				</document>
+				<document name="CommunicationManager" permission="_____">
+					<action name="ExportCommunicationSpecifications"/>
+					<action name="ImportCommunicationSpecifications"/>
+				</document>
 				<document name="CommunicationTemplate" permission="CRUDC" />
 				<document name="Configuration" permission="CRUDC">
 					<action name="SendMail" />
@@ -454,6 +463,11 @@
 				<role name="ContactManager" />
 				<role name="SecurityAdministrator" />
 			</list>
+			<edit name="Communication Manager" document="CommunicationManager">
+				<uxui name="desktop"/>
+				<role name="ContactManager" />
+				<role name="SecurityAdministrator" />
+			</edit>
 			<list document="CommunicationTemplate" name="admin.adminMenu.communicationTemplate.list.displayName">
 				<role name="ContactManager" />
 				<role name="SecurityAdministrator" />
