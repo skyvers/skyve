@@ -265,7 +265,7 @@
 		                	<% if (show2FA) { %>
 								<div class="ui left icon input">
 			                        <i class="lock icon"></i>
-			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.2FACode.label", locale)%>"/>
+			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" inputmode="numeric" placeholder="<%=Util.i18n("page.login.2FACode.label", locale)%>"/>
 			                    </div>
 			                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
 							<% } else { %>
