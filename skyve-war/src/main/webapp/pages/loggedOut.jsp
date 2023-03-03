@@ -4,6 +4,7 @@
 <%@page import="org.skyve.domain.messages.SkyveException"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.impl.util.UtilImpl"%>						
 <%@page import="org.skyve.impl.web.UserAgent"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
 <%
@@ -63,7 +64,11 @@
 		            		<%=Util.i18n("page.logout.banner", locale)%>
 		            	</div>
 						<% if ((referer == null) || referer.contains("/login")) { // no referer or came from the login page %>
-							<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+							<% if (UtilImpl.CUSTOMER == null) { %>
+								<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : ("?customer=" + user.getCustomerName())%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+							<% } else { %>
+								<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+							<% } %>
 						<% } else { %>
 							<a href="<%=referer%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.banner", locale)%></a>
 						<% } %>

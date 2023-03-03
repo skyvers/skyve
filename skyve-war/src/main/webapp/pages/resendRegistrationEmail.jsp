@@ -88,7 +88,11 @@
 		            		</div>
 		            	</div>
 		            	<% } %>
-		            	<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+	                	<% if (UtilImpl.CUSTOMER == null) { %>
+		            		<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : ("?customer=" + user.getCustomerName())%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+		                <% } else { %>
+		            		<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+		                <% } %>
 		            </div>
 		        </div>
 		    </div>
