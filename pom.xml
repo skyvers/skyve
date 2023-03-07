@@ -29,8 +29,8 @@
 		<commonmark.version>0.10.0</commonmark.version>
 		<commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-codec.version>1.15</commons-codec.version>
-		<commons-fileupload.version>1.4</commons-fileupload.version>
-		<commons-io.version>2.8.0</commons-io.version>
+		<commons-fileupload.version>1.5</commons-fileupload.version>
+		<commons-io.version>2.11.0</commons-io.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
 		<commons-validator.version>1.7</commons-validator.version>
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
