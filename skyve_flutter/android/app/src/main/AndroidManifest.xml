@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.skyve.skyve_flutter">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
    <application
         android:label="skyve_flutter"
         android:name="${applicationName}"

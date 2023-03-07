@@ -98,3 +98,17 @@ Hit the F5 key - if certain files have focus hitting F5 won't work so make sure 
 
 Hit CTRL+SHFT+P and type flutter to see what is available in VS Code.
 
+### Flutter on Android
+
+To rebuild the flutter android project:-
+ * delete the android folder 
+ * use VSCode to add enable android for this project from the run targets list in RHS of bottom status bar.
+    - This will rebuild the android project in the android folder.
+ * Check the docs/customisations.txt to reconfigure the android app with various configurations required.
+ * Run "flutter pub run flutter_launcher_icons:main" in the VSCode terminal to reinstate the app icons in the android folder.
+
+Bear in mind that flutter_html package used in bindah depends on webview_flutter package which uses android's web view which requires android sdk version of 32 and min sdk version of 21.
+
+You can open the android folder in Android studio and set up an emulator in the "Device Manager" view.
+
+Run the app through flutter using "flutter run --dart-define='SERVER_URL=https://app.bindah.au/" when the emulator is running.
