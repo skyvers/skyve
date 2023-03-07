@@ -140,12 +140,18 @@ public class SpringSecurityConfig {
 				|| (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null)
 				|| (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)
 				|| (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null)) {
-			http.oauth2Login().loginPage(Util.getLoginUrl());
+			http.oauth2Login()
+					.defaultSuccessUrl(Util.getHomeUrl())
+					.loginPage(Util.getLoginUrl())
+					.failureUrl(Util.getLoginUrl() + "?error")
+					.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()));
 		}
 
 //		http.saml2Login()
+//				.defaultSuccessUrl(Util.getHomeUrl())
 //				.loginPage(Util.getLoginUrl())
-//				.defaultSuccessUrl(Util.getHomeUrl());
+//				.failureUrl(Util.getLoginUrl() + "?error")
+//				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()));
 
 		DefaultSecurityFilterChain result = http.build();
 		// Note AuthenticationManager is not available as a shared object until after build()

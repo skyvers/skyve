@@ -77,16 +77,11 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		
 		String customerName = obtainCustomer(request);
 		
-		// TFA customer not in json
-		if (! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains(customerName)) {
+		// No customer given or set in JSON or TFA customer not in json
+		if ((customerName == null) || (! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains(customerName))) {
 			return true;
 		}
 		
-		// No customer given or set in JSON
-		if (customerName == null) {
-			return true;
-		}
-
 		// No authentication required
 		if (! requiresAuthentication(request, response)) {
 			return true;

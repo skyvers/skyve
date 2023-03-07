@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-                                                                                                                                                                                                    
     
     
     
@@ -47,8 +46,7 @@
     
     
     
-    <wb-module deploy-name="skyve-ear-8.2.3-SNAPSHOT">
-                                                                                                                                                                                                                                                                                                                                                                                                        
+    <wb-module deploy-name="skyve-ear-8.3.0-SNAPSHOT">
         
         
         
@@ -97,7 +95,6 @@
         
         
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
-                                                                                                                                                                                                                                                                                                                                                                                                        
         
         
         
@@ -158,15 +155,11 @@
             <dependency-type>uses</dependency-type>
                     
         </dependent-module>
-                
-        <dependent-module archiveName="skyve-ext-8.2.3-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
-                        
+        <dependent-module archiveName="skyve-ext-8.3.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-ext/skyve-ext">
             <dependency-type>uses</dependency-type>
                     
         </dependent-module>
-                
-        <dependent-module archiveName="skyve-core-8.2.3-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
-                        
+        <dependent-module archiveName="skyve-core-8.3.0-SNAPSHOT.jar" deploy-path="/lib/" handle="module:/resource/skyve-core/skyve-core">
             <dependency-type>uses</dependency-type>
                     
         </dependent-module>
@@ -890,7 +883,6 @@
             <dependency-type>uses</dependency-type>
                     
         </dependent-module>
-                                                                                                                                                                                                                                                                                                                                                                                                    
     
     
     
@@ -939,7 +931,6 @@
     
     
     </wb-module>
-                                                                                                                                                                                                
 
 
 

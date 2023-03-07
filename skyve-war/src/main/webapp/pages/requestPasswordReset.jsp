@@ -186,7 +186,11 @@
 			                <% } %>
 			                
 			                <div style="margin-top: 5px;">
-			                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+			                	<% if (UtilImpl.CUSTOMER == null) { %>
+				                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%><%=(user == null) ? "" : ("?customer=" + user.getCustomerName())%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+				                <% } else { %>
+				                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+				                <% } %>
 			                </div>
 		                </div>
 		                
