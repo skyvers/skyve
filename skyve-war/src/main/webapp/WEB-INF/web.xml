@@ -222,6 +222,10 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
+		<servlet-name>HealthServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>TrackmateServlet</servlet-name>
 	</filter-mapping>
 
@@ -564,6 +568,14 @@
 	<servlet-mapping>
 		<servlet-name>MapServlet</servlet-name>
 		<url-pattern>/map</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>HealthServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.HealthServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>HealthServlet</servlet-name>
+		<url-pattern>/health</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackmateServlet</servlet-name>

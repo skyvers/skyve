@@ -290,6 +290,11 @@ public class UtilImpl {
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
 	
+	// Enable/Disable "/health" endpoint to show health status JSON
+	public static boolean HEALTH_CHECK = true;
+	// Number of seconds to cache the health results to alleviate denial of service
+	public static int HEALTH_CACHE_TIME_IN_SECONDS = 300; // 5 mins
+	
 	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
 	public static String BOOTSTRAP_CUSTOMER = null;
 	public static String BOOTSTRAP_USER = null;

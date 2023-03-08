@@ -648,6 +648,12 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SUPPORT_EMAIL_ADDRESS = getString("environment", "supportEmailAddress", environment, false);
 		UtilImpl.SHOW_SETUP = getBoolean("environment", "showSetup", environment);
 
+		Map<String, Object> health = getObject(null, "health", properties, false);
+		if (health != null) {
+			UtilImpl.HEALTH_CHECK = getBoolean("health", "check", health);
+			UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = getInt("health", "cacheTimeInSeconds", health);
+		}
+
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString("api", "googleRecaptchaSiteKey", api, false);
