@@ -38,7 +38,6 @@ import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
@@ -572,37 +571,37 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 	private void populateReferences(PersistentBean bean, Set<String> dynamicReferenceNames) throws Exception {
 		String select = "select relatedModuleName, relatedDocumentName, relatedId, attributeName from ADM_DynamicRelation where parent_id = :bizId order by attributeName, ordinal";
-		try (AutoClosingIterable<Object[]> i = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).tupleIterable()) {
-			for (Object[] tuple : i) {
-				String relatedModuleName = (String) tuple[0];
-				String relatedDocumentName = (String) tuple[1];
-				String relatedId = (String) tuple[2];
-				String attributeName = (String) tuple[3];
+		// Note - this following SQL gets a list instead of iterating as this method is recursive (through the populate() call for relatedBean).
+		// Hibernate can't manage multiple nested ScrollableResults for certain databases (MySQL) and closes the encapsulated ResultSet of the outer ScrollableResults prematurely.
+		for (Object[] tuple : persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).tupleResults()) {
+			String relatedModuleName = (String) tuple[0];
+			String relatedDocumentName = (String) tuple[1];
+			String relatedId = (String) tuple[2];
+			String attributeName = (String) tuple[3];
 
-				if (dynamicReferenceNames.contains(attributeName)) {
-					// Find the related bean
-					PersistentBean relatedBean = null;
-					if (relatedId != null) {
-						// static document has related module and document name
-						if ((relatedModuleName != null) && (relatedDocumentName != null)) {
-							relatedBean = persistence.retrieve(relatedModuleName, relatedDocumentName, relatedId);
-						}
-						// otherwise dynamic document
-						else {
-							relatedBean = populate(relatedId);
-						}
+			if (dynamicReferenceNames.contains(attributeName)) {
+				// Find the related bean
+				PersistentBean relatedBean = null;
+				if (relatedId != null) {
+					// static document has related module and document name
+					if ((relatedModuleName != null) && (relatedDocumentName != null)) {
+						relatedBean = persistence.retrieve(relatedModuleName, relatedDocumentName, relatedId);
 					}
-					
-					// Set the related bean
-					Object value = bean.getDynamic(attributeName);
-					if (value instanceof List<?>) {
-						if (relatedBean != null) {
-							BindUtil.addElementToCollection(bean, attributeName, relatedBean);
-						}
-					}
+					// otherwise dynamic document
 					else {
-						BindUtil.setAssociation(bean, attributeName, relatedBean);
+						relatedBean = populate(relatedId);
 					}
+				}
+				
+				// Set the related bean
+				Object value = bean.getDynamic(attributeName);
+				if (value instanceof List<?>) {
+					if (relatedBean != null) {
+						BindUtil.addElementToCollection(bean, attributeName, relatedBean);
+					}
+				}
+				else {
+					BindUtil.setAssociation(bean, attributeName, relatedBean);
 				}
 			}
 		}
