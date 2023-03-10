@@ -52,7 +52,7 @@ public class Truncate {
 
 					BackupUtil.secureSQL(sql, table, customerName);
 					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("unlink table " + table.name);
-					persistence.newSQL(sql.toString()).execute();
+					persistence.newSQL(sql.toString()).noTimeout().execute();
 					persistence.commit(false);
 					persistence.begin();
 				}
@@ -65,7 +65,7 @@ public class Truncate {
 					sql.append("delete from ").append(table.name);
 					BackupUtil.secureSQL(sql, table, customerName);
 					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete joining table " + table.name);
-					persistence.newSQL(sql.toString()).execute();
+					persistence.newSQL(sql.toString()).noTimeout().execute();
 					persistence.commit(false);
 					persistence.begin();
 				}
@@ -83,7 +83,7 @@ public class Truncate {
 				sql.append("delete from ").append(table.name);
 				BackupUtil.secureSQL(sql, table, customerName);
 				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete extension table " + table.name);
-				persistence.newSQL(sql.toString()).execute();
+				persistence.newSQL(sql.toString()).noTimeout().execute();
 				persistence.commit(false);
 				persistence.begin();
 			}
@@ -100,7 +100,7 @@ public class Truncate {
 				sql.append("delete from ").append(table.name);
 				BackupUtil.secureSQL(sql, table, customerName);
 				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete table " + table.name);
-				persistence.newSQL(sql.toString()).execute();
+				persistence.newSQL(sql.toString()).noTimeout().execute();
 				persistence.commit(false);
 				persistence.begin();
 			}
