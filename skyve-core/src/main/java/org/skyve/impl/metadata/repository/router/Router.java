@@ -79,14 +79,16 @@ public class Router implements ConvertableMetaData<Router> {
 	
 	public Route selectRoute(String uxui, RouteCriteria criteria) {
 		UxUiMetadata selectedUxUi = uxuiMap.get(uxui);
-		for (Route route : selectedUxUi.getRoutes()) {
-			List<RouteCriteria> routeCriteria = route.getCriteria();
-			if (routeCriteria.isEmpty()) { // if no criteria defined then its a match
-				return route;
-			}
-			for (RouteCriteria routeCriterium : routeCriteria) {
-				if (routeCriterium.matches(criteria)) {
+		if (selectedUxUi != null) {
+			for (Route route : selectedUxUi.getRoutes()) {
+				List<RouteCriteria> routeCriteria = route.getCriteria();
+				if (routeCriteria.isEmpty()) { // if no criteria defined then its a match
 					return route;
+				}
+				for (RouteCriteria routeCriterium : routeCriteria) {
+					if (routeCriterium.matches(criteria)) {
+						return route;
+					}
 				}
 			}
 		}
