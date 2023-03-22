@@ -153,7 +153,7 @@ class ValidationELResolver extends ELResolver {
 	 */
 	private Object getClassOrDocument(Object base, Object property) {
 		Object object = base;
-		final String propertyName = (String) property;
+		final String propertyName = property.toString();
 
 		// Possible Collection or InverseMany
 		// If so, return the single element in the list which is the related document

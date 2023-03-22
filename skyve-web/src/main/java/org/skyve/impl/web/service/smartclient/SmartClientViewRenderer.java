@@ -1491,6 +1491,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormHTML(HTML html) {
 		preProcessFormItem(html, "bizHTML");
 		size(html, null, code);
+		String mentionMarkers = html.getMentionMarkers();
+		if (mentionMarkers != null) {
+			code.append("mentionMarkers:'").append(OWASP.escapeJsString(mentionMarkers)).append("',");
+		}
 		disabled(html.getDisabledConditionName(), code);
 		invisible(html.getInvisibleConditionName(), code);
 	}

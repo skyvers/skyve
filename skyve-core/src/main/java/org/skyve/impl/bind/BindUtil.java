@@ -112,30 +112,30 @@ public final class BindUtil {
 // Maybe MapBean (now DynamicBean) never used to set the document name.
 //					String documentName = bean.getBizDocument();
 //					if (documentName != null) {
-						try {
-							// Try to get the value from this bean
-							// Do not use BindUtil.getMetaDataForBinding as it may not be a document
-							// property, it could be a condition or an implicit property.
-							String displayValue = ExpressionEvaluator.format(expression, bean);
-							// if there is a postEvaluateDisplayValue function, apply it
-							if (postEvaluateDisplayValue != null) {
-								displayValue = postEvaluateDisplayValue.apply(displayValue);
-							}
-							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
-							// move the openCurlyBraceIndex along by the display value length so that
-							// any '{' occurrences replaced in as literals above are skipped.
-							openCurlyBraceIndex += displayValue.length();
-							// find the next occurrence
-							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex);
-							success = true;
-							
-							break;
+					try {
+						// Try to get the value from this bean
+						// Do not use BindUtil.getMetaDataForBinding as it may not be a document
+						// property, it could be a condition or an implicit property.
+						String displayValue = ExpressionEvaluator.format(expression, bean);
+						// if there is a postEvaluateDisplayValue function, apply it
+						if (postEvaluateDisplayValue != null) {
+							displayValue = postEvaluateDisplayValue.apply(displayValue);
 						}
-						catch (Exception e) {
-							cause = e;
-						}
+						result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
+						// move the openCurlyBraceIndex along by the display value length so that
+						// any '{' occurrences replaced in as literals above are skipped.
+						openCurlyBraceIndex += displayValue.length();
+						// find the next occurrence
+						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex);
+						success = true;
+						
+						break;
 					}
-//				}
+					catch (Exception e) {
+						cause = e;
+					}
+//					}
+				}
 				
 				if (! success) {
 					StringBuilder exMessage = new StringBuilder();

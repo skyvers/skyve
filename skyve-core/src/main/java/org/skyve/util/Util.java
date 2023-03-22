@@ -9,6 +9,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -196,6 +198,18 @@ public class Util {
 		}
 
 		return count;
+	}
+
+	public static int lastIndexOfRegEx(String string, String regex) {
+		int result = -1;
+
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(string);
+		while (m.find()) {
+			result = m.start();
+		}
+
+		return result;
 	}
 
 	/**

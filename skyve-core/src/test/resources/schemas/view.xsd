@@ -465,6 +465,7 @@
         <xs:attribute name="pixelWidth" type="xs:int" use="required"/>
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="sanitise" type="tns:sanitisation"/>
+        <xs:attribute name="mentionMarkers" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
