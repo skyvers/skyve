@@ -23,6 +23,7 @@ import modules.admin.domain.Startup;
 import modules.admin.domain.User;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
+
 	@Override
 	public ConfigurationExtension newInstance(ConfigurationExtension bean) throws Exception {
 		// temporarily elevate access to find existing configuration regardless of user
@@ -91,6 +92,10 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			bean.setPasswordAccountLockoutThreshold(
 					UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0 ? String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD) : "");
 
+			// default the two-factor type
+			if (bean.getTwoFactorType() == null) {
+				bean.setTwoFactorType(TwoFactorType.off);
+			}
 		} else if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			bean.getStartup().saveConfiguration();
 		}
@@ -128,6 +133,10 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			}
 			if (bean.getTwoFactorEmailSubject() == null) {
 				bean.setTwoFactorEmailSubject("Email verification security code");
+			}
+			if (bean.getTwofactorPushCodeTimeOutSeconds() == null) {
+				// default to 5 minutes
+				bean.setTwofactorPushCodeTimeOutSeconds(Integer.valueOf(5 * 60));
 			}
 		}
 
