@@ -14,8 +14,11 @@ import org.springframework.security.provisioning.UserDetailsManager;
 public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	private static final String TFA_CODE_KEY = "{tfaCode}"; 
 	
-	public static final String SYSTEM_TWO_FACTOR_CODE_SUBJECT = "Please verify your email security code";
-	public static final String SYSTEM_TWO_FACTOR_CODE_BODY = "Hi,<br /><br />Your verification code is: {tfaCode}<br />"; 
+	public static final String SYSTEM_TWO_FACTOR_CODE_SUBJECT = "Email verification security code";
+	public static final String SYSTEM_TWO_FACTOR_CODE_BODY = "Hi,<br />"
+			+ "Your verification code is: {tfaCode}<br />"
+			+ "Enter the code above where prompted<br />.<br />"
+			+ "Having issues with your 2FA? Reach out to your system administrator.";
 	
 	public TwoFactorAuthPushEmailFilter(UserDetailsManager userDetailsManager) {
 		super(userDetailsManager);
