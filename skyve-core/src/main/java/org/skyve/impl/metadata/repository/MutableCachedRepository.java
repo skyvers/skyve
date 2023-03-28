@@ -44,6 +44,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	 *    modules/admin
 	 *    modules/admin/Contact
 	 * Thread-safe and performant for mostly-read operations.
+	 * NB The population of the cache cannot use computeIfPresent() and computeIfAbsent() because the processing could
+	 * 		end up trying to compute the same key within the labda functions arguments to these methods which will throw
+	 * 		java.lang.IllegalStateException: Recursive update as per the API contract.
 	 */
 	private ConcurrentHashMap<String, Optional<MetaData>> cache = new ConcurrentHashMap<>();
 	
@@ -84,34 +87,30 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	
 	@Override
 	public Router getRouter() {
-		Router result = null;
-		
-		Optional<MetaData> o = cache.computeIfPresent(ROUTER_KEY, (k, v) -> {
+		Optional<MetaData> result = cache.get(ROUTER_KEY);
+		if (result != null) { // key is present
 			// Load if empty
-			if (v.isEmpty()) {
+			if (result.isEmpty()) {
 				Router router = loadRouter();
 				router = router.convert(ROUTER_NAME, getDelegator());
-				return Optional.of(router);
+				result = Optional.of(router);
+				cache.put(ROUTER_KEY, result);
 			}
-
-			// Load if dev mode and new repository version
-			if (UtilImpl.DEV_MODE) {
-				Router r = (Router) v.get();
-				if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
-					Router router = loadRouter();
-					router = router.convert(ROUTER_NAME, getDelegator());
-					return Optional.of(router);
+			else {
+				// Load if dev mode and new repository version
+				if (UtilImpl.DEV_MODE) {
+					Router r = (Router) result.get();
+					if (r.getLastModifiedMillis() < routerLastModifiedMillis()) {
+						Router router = loadRouter();
+						router = router.convert(ROUTER_NAME, getDelegator());
+						result = Optional.of(router);
+						cache.put(ROUTER_KEY, result);
+					}
 				}
 			}
-			
-			// Return the cached value
-			return v;
-		});
-		if ((o != null) && o.isPresent()) {
-			result = (Router) o.get();
 		}
-		
-		return result;
+
+		return ((result == null) || result.isEmpty()) ? null : (Router) result.get();
 	}
 	
 	@Override
@@ -125,28 +124,30 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	@Override
 	public Customer getCustomer(String customerName) {
 		String customerKey = CUSTOMERS_NAMESPACE + customerName;
-		Optional<MetaData> o = cache.computeIfPresent(customerKey, (k, v) -> {
+		Optional<MetaData> result = cache.get(customerKey);
+		if (result != null) { // key is present
 			// Load if empty
-			if (v.isEmpty()) {
+			if (result.isEmpty()) {
 				CustomerMetaData customerMetaData = loadCustomer(customerName);
 				Customer customer = customerMetaData.convert(customerName, getDelegator());
-				return Optional.of(customer);
+				result = Optional.of(customer);
+				cache.put(customerKey, result);
 			}
-			
-			// Load if dev mode and new repository version
-			if (UtilImpl.DEV_MODE) {
-				Customer c = (Customer) v.get();
-				if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
-					CustomerMetaData customerMetaData = loadCustomer(customerName);
-					Customer customer = customerMetaData.convert(customerName, getDelegator());
-					return Optional.of(customer);
+			else {
+				// Load if dev mode and new repository version
+				if (UtilImpl.DEV_MODE) {
+					Customer c = (Customer) result.get();
+					if (c.getLastModifiedMillis() < customerLastModifiedMillis(customerName)) {
+						CustomerMetaData customerMetaData = loadCustomer(customerName);
+						Customer customer = customerMetaData.convert(customerName, getDelegator());
+						result = Optional.of(customer);
+						cache.put(customerKey, result);
+					}
 				}
 			}
-			
-			// Return the cached value
-			return v;
-		});
-		return ((o == null) || o.isEmpty()) ? null : (Customer) o.get();
+		}
+		
+		return ((result == null) || result.isEmpty()) ? null : (Customer) result.get();
 	}
 
 	@Override
@@ -176,37 +177,36 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	
 	private @Nullable Module getModuleInternal(@Nullable Customer customer, @Nonnull String moduleName) {
 		final String customerName = (customer == null) ? null : customer.getName();
-		StringBuilder moduleKey = new StringBuilder(64);
+		StringBuilder moduleKeySB = new StringBuilder(64);
 		if (customerName != null) {
-			moduleKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+			moduleKeySB.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 		}
-		moduleKey.append(MODULES_NAMESPACE).append(moduleName);
-		
-		Optional<MetaData> result = cache.computeIfPresent(moduleKey.toString(), (k, v) -> {
+		moduleKeySB.append(MODULES_NAMESPACE).append(moduleName);
+		String moduleKey = moduleKeySB.toString();
+		Optional<MetaData> result = cache.get(moduleKey);
+		if (result != null) { // key is present
 			// Load if empty
-			if (v.isEmpty()) {
+			if (result.isEmpty()) {
 				ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
 				Module module = this.convertModule(customerName, moduleName, moduleMetaData);
-				return Optional.of(module);
+				result = Optional.of(module);
+				cache.put(moduleKey, result);
 			}
-
-			// Load if dev mode and new repository version
-			if (UtilImpl.DEV_MODE) {
-				Module m = (Module) v.get();
-				if (m.getLastModifiedMillis() < moduleLastModifiedMillis(customerName, moduleName)) {
-					ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
-					Module module = this.convertModule(customerName, moduleName, moduleMetaData);
-					return Optional.of(module);
+			else {
+				// Load if dev mode and new repository version
+				if (UtilImpl.DEV_MODE) {
+					Module m = (Module) result.get();
+					if (m.getLastModifiedMillis() < moduleLastModifiedMillis(customerName, moduleName)) {
+						ModuleMetaData moduleMetaData = loadModule(customerName, moduleName);
+						Module module = this.convertModule(customerName, moduleName, moduleMetaData);
+						result = Optional.of(module);
+						cache.put(moduleKey, result);
+					}
 				}
 			}
-			
-			// Return the cached value
-			return v;
-		});
-		if ((result != null) && result.isPresent()) {
-			return (Module) result.get();
 		}
-		return null;
+		
+		return ((result == null) || result.isEmpty()) ? null : (Module) result.get();
 	}
 
 	private @Nonnull Module convertModule(@Nullable String customerName, @Nonnull String moduleName, @Nonnull ModuleMetaData module) {
@@ -265,39 +265,38 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		String documentModuleName = ((ref.getReferencedModuleName() == null) ? module.getName() : ref.getReferencedModuleName());
 
 		final String customerName = (customer == null) ? null : customer.getName();
-		StringBuilder documentKey = new StringBuilder(64);
+		StringBuilder documentKeySB = new StringBuilder(64);
 		if (customerOverride) {
-			documentKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+			documentKeySB.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
 		}
-		documentKey.append(MODULES_NAMESPACE).append(documentModuleName).append('/').append(documentName);
-		
-		Optional<MetaData> result = cache.computeIfPresent(documentKey.toString(), (k, v) -> {
+		documentKeySB.append(MODULES_NAMESPACE).append(documentModuleName).append('/').append(documentName);
+		String documentKey = documentKeySB.toString();
+		Optional<MetaData> result = cache.get(documentKey);
+		if (result != null) { // key is present
 			// Load if empty
-			if (v.isEmpty()) {
+			if (result.isEmpty()) {
 				DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
 				Module documentModule = getModule(customer, documentModuleName);
 				Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
-				return Optional.of(document);
+				result = Optional.of(document);
+				cache.put(documentKey, result);
 			}
-
-			// Load if dev mode and new repository version
-			if (UtilImpl.DEV_MODE) {
-				Document d = (Document) v.get();
-				if (d.getLastModifiedMillis() < documentLastModifiedMillis(customerOverride ? customerName : null, documentModuleName, documentName)) {
-					DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
-					Module documentModule = getModule(customer, documentModuleName);
-					Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
-					return Optional.of(document);
+			else {
+				// Load if dev mode and new repository version
+				if (UtilImpl.DEV_MODE) {
+					Document d = (Document) result.get();
+					if (d.getLastModifiedMillis() < documentLastModifiedMillis(customerOverride ? customerName : null, documentModuleName, documentName)) {
+						DocumentMetaData documentMetaData = loadDocument(customerOverride ? customerName : null, documentModuleName, documentName);
+						Module documentModule = getModule(customer, documentModuleName);
+						Document document = convertDocument(customerName, documentModuleName, documentModule, documentName, documentMetaData);
+						result = Optional.of(document);
+						cache.put(documentKey, result);
+					}
 				}
 			}
-			
-			// Return the cached value
-			return v;
-		});
-		if ((result != null) && result.isPresent()) {
-			return (Document) result.get();
 		}
-		return null;
+		
+		return ((result == null) || result.isEmpty()) ? null : (Document) result.get();
 	}
 
 	private Document convertDocument(String customerName,
@@ -416,12 +415,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				String documentName = document.getName();
 				key.append(MODULES_NAMESPACE).append(documentModuleName).append('/');
 				key.append(documentName).append('/').append(VIEWS_NAMESPACE).append(name);
-				Optional<MetaData> o = cache.computeIfAbsent(key.toString(), k -> {
-					View view = scaffoldView(customer, document, name, uxui);
-					return (view == null) ? null : Optional.of(view);
-				});
-				if ((o != null) && o.isPresent()) {
-					result = (View) o.get();
+				String viewKey = key.toString();
+				Optional<MetaData> o = cache.get(viewKey);
+				if (o == null) { // key absent
+					result = scaffoldView(customer, document, name, uxui);
+					if (result != null) {
+						cache.put(viewKey, Optional.of(result));
+					}
 				}
 			}
 		}
@@ -434,58 +434,58 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 									Document document,
 									String uxui, // the current uxui
 									String viewName) {
-		StringBuilder viewKey = new StringBuilder(128);
+		StringBuilder viewKeySB = new StringBuilder(128);
 		if (searchCustomerName != null) {
-			viewKey.append(CUSTOMERS_NAMESPACE).append(searchCustomerName).append('/');
+			viewKeySB.append(CUSTOMERS_NAMESPACE).append(searchCustomerName).append('/');
 		}
-		viewKey.append(MODULES_NAMESPACE);
+		viewKeySB.append(MODULES_NAMESPACE);
 		String documentModuleName = document.getOwningModuleName();
 		String documentName = document.getName();
-		viewKey.append(documentModuleName).append('/').append(documentName).append('/').append(VIEWS_NAMESPACE);
+		viewKeySB.append(documentModuleName).append('/').append(documentName).append('/').append(VIEWS_NAMESPACE);
 		if (seachUxUi != null) {
-			viewKey.append(seachUxUi).append('/');
+			viewKeySB.append(seachUxUi).append('/');
 		}
-		viewKey.append(viewName);
-		
-		Optional<MetaData> o = cache.computeIfPresent(viewKey.toString(), (k, v) -> {
+		viewKeySB.append(viewName);
+		String viewKey = viewKeySB.toString();
+		Optional<MetaData> result = cache.get(viewKey);
+		if (result != null) { // key is present
 			// Load if empty
-			if (v.isEmpty()) {
+			if (result.isEmpty()) {
 				// Load the view using the searchUxUi
 				ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
 				View view = null;
 				if (viewMetaData != null) {
 					// Convert the view ensuring view components within vanilla views are resolved with the current uxui
 					view = convertView(searchCustomerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
-				}
-				return Optional.ofNullable(view);
-			}
-
-			// Load if dev mode and new repository version
-			if (UtilImpl.DEV_MODE) {
-				ViewImpl view = (ViewImpl) v.get();
-				// check last modified for the view
-				if (view.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName)) {
-					// Load the view using the searchUxUi
-					ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
-					View newView = null;
-					if (viewMetaData != null) {
-						// Convert the view ensuring view components within vanilla views are resolved with the current uxui
-						newView = convertView(searchCustomerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
+					if (view != null) {
+						result = Optional.of(view);
+						cache.put(viewKey, result);
 					}
-					return Optional.ofNullable(newView);
 				}
 			}
-			
-			// Return the cached value
-			return v;
-		});
-
-		ViewImpl result = null;
-		if ((o != null) && o.isPresent()) {
-			result = (ViewImpl) o.get();
+			else {
+				// Load if dev mode and new repository version
+				if (UtilImpl.DEV_MODE) {
+					ViewImpl view = (ViewImpl) result.get();
+					// check last modified for the view
+					if (view.getLastModifiedMillis() < viewLastModifiedMillis(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName)) {
+						// Load the view using the searchUxUi
+						ViewMetaData viewMetaData = loadView(searchCustomerName, documentModuleName, documentName, seachUxUi, viewName);
+						View newView = null;
+						if (viewMetaData != null) {
+							// Convert the view ensuring view components within vanilla views are resolved with the current uxui
+							newView = convertView(searchCustomerName, seachUxUi, customer, documentModuleName, documentName, document, uxui, viewMetaData);
+							if (newView != null) {
+								result = Optional.of(newView);
+								cache.put(viewKey, result);
+							}
+						}
+					}
+				}
+			}
 		}
 		
-		return result;
+		return ((result == null) || result.isEmpty()) ? null : (View) result.get();
 	}
 
 	private ViewImpl convertView(String searchCustomerName,
