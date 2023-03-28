@@ -23,12 +23,11 @@
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
 
-	
 	if (show2FA) {	
 		customer = (String) request.getAttribute(TwoFactorAuthPushFilter.CUSTOMER_ATTRIBUTE);
 		error2FA = "1".equals(request.getAttribute(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE));
 		user = (String) request.getAttribute(TwoFactorAuthPushFilter.USER_ATTRIBUTE);
-		rmChecked = Boolean.TRUE.equals((Boolean) request.getAttribute(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE));
+		rmChecked = Boolean.TRUE.equals(request.getAttribute(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE));
 	}
 	
 	String rememberMeChecked = rmChecked ? "checked" : "";
@@ -287,6 +286,12 @@
 		    					</div>
     					</div>
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
+						
+						<% if (show2FA) { %>
+							<div style="margin-top: 5px;">
+			                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.2FACode.return.label", locale)%></a>
+			                </div>
+		                <% } %>
 		            </div>
 
 					<% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null)) { %>
