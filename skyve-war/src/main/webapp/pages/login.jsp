@@ -243,8 +243,8 @@
 						<% } %>
 		                <div class="field">
 		                <% if (show2FA) { %>
-		                	<input type="password" id="user" name="user" hidden="true" value="<%=user%>"/>
-		                	<input type="password" id="customer" name="customer" hidden="true" value="<%=customer%>"/>
+		                	<input type="hidden" id="user" name="user" value="<%=user%>"/>
+		                	<input type="hidden" id="customer" name="customer" value="<%=customer%>"/>
 		                <% } else { %>
 		                    <div class="ui left icon input">
 	                    	<% if(allowRegistration) { %>
