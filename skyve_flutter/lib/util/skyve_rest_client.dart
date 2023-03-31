@@ -23,7 +23,7 @@ class SkyveRestClient {
   }
 
   SkyveRestClient._internal() {
-    _dio.options.connectTimeout = 10000;
+    _dio.options.connectTimeout = const Duration(seconds: 10);
 
     // Manage cookies
     final cookieJar = CookieJar();
