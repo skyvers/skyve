@@ -4113,7 +4113,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			expression.append(ImplicitActionName.Navigate.name().toLowerCase()).append('}');
 			MethodExpression me = ef.createMethodExpression(elc, expression.toString(), null, new Class[0]);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
-
+			ajax.setProcess(process);
+			
 			ValueExpression disabled = createOredValueExpressionFromConditions(clickToZoomDisabledConditionNames);
 			if (disabled != null) {
 				ajax.setValueExpression("disabled", disabled);
