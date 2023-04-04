@@ -1,17 +1,26 @@
 package modules.admin.Configuration;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.ExpressionEvaluator;
 import org.skyve.web.WebContext;
 
 import modules.admin.Startup.StartupBizlet;
@@ -71,6 +80,67 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		return result;
 	}
 
+	private static final String TFA_CODE_EXPRESSION = "{tfaCode}";
+	private static final String RESET_PASSWORD_URL_EXPRESSION = "{#resetPasswordUrl}";
+	
+	@Override
+	public List<String> complete(String attributeName, String value, ConfigurationExtension bean) throws Exception {
+		if (Configuration.twoFactorEmailBodyPropertyName.equals(attributeName)) {
+			if ((value == null) || (TFA_CODE_EXPRESSION.startsWith(value))) {
+				return Collections.singletonList(TFA_CODE_EXPRESSION);
+			}
+		}
+		else if (Configuration.passwordResetEmailSubjectPropertyName.equals(attributeName)) {
+			Customer c = CORE.getCustomer();
+			Module m = c.getModule(User.MODULE_NAME);
+			Document d = m.getDocument(c, User.DOCUMENT_NAME);
+			return ExpressionEvaluator.completeExpression(value, c, m, d);
+		}
+		else if (Configuration.passwordResetEmailBodyPropertyName.equals(attributeName)) {
+			Customer c = CORE.getCustomer();
+			Module m = c.getModule(User.MODULE_NAME);
+			Document d = m.getDocument(c, User.DOCUMENT_NAME);
+			List<String> result = ExpressionEvaluator.completeExpression(value, c, m, d);
+			if ((value == null) || (RESET_PASSWORD_URL_EXPRESSION.startsWith(RESET_PASSWORD_URL_EXPRESSION))) {
+				if (result.isEmpty()) {
+					result = Collections.singletonList(RESET_PASSWORD_URL_EXPRESSION);
+				}
+				else {
+					result.add(0, RESET_PASSWORD_URL_EXPRESSION);
+				}
+			}
+			return result;
+		}
+		
+		return Collections.emptyList();
+	}
+	
+	@Override
+	public void validate(ConfigurationExtension bean, ValidationException e) throws Exception {
+		String expression = bean.getPasswordResetEmailSubject();
+		if (expression != null) {
+			String error = Binder.validateMessage(expression, User.MODULE_NAME, User.DOCUMENT_NAME);
+			if (error != null) {
+				e.getMessages().add(new Message(Configuration.passwordResetEmailSubjectPropertyName, error));
+			}
+		}
+		
+		expression = bean.getPasswordResetEmailBody();
+		if (expression != null) {
+			String error = Binder.validateMessage(expression.replace(RESET_PASSWORD_URL_EXPRESSION, ""), User.MODULE_NAME, User.DOCUMENT_NAME);
+			if (error != null) {
+				e.getMessages().add(new Message(Configuration.passwordResetEmailBodyPropertyName, error));
+			}
+		}
+		
+		expression = bean.getTwoFactorEmailBody();
+		if (expression != null) {
+			if (BindUtil.containsSkyveExpressions(expression.replace(TFA_CODE_EXPRESSION, ""))) {
+				e.getMessages().add(new Message(Configuration.twoFactorEmailBodyPropertyName, "The only expression allowed here is " + TFA_CODE_EXPRESSION));
+			}
+		}
+	}
+	
 	@Override
 	public ConfigurationExtension preExecute(ImplicitActionName actionName, ConfigurationExtension bean, Bean parentBean,
 			WebContext webContext) throws Exception {

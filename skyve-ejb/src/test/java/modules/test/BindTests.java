@@ -353,69 +353,69 @@ public class BindTests extends AbstractSkyveTest {
 
 	@Test
 	public void testExpressionValidation() throws Exception {
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{USER}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{USERID}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{USERNAME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{DATAGROUPID}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{CONTACTID}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{CUSTOMER}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{DATE}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{TIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{DATETIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{TIMESTAMP}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{URL}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{USER}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{USERID}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{USERNAME}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{DATAGROUPID}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{CONTACTID}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{CUSTOMER}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{DATE}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{TIME}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{DATETIME}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{TIMESTAMP}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{URL}", c, aapd));
 		
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{ text }"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{bean:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{bean: text }"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{bean : text }"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{disp:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{desc:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:bean.doesNotExist}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.doesNotExist}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:bean..doesNotExist}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean..doesNotExist}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:stash['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:user.attributes['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:user.attributes['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:stash['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:user.attributes['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:user.attributes['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{i18n:some.non-existent.key}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{role:admin.BasicUser}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{stash:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{stash:nothing}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{user:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{user:nothing}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{ text }", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{bean:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{bean: text }", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{bean : text }", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{disp:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{desc:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:bean.doesNotExist}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:bean.doesNotExist}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:bean..doesNotExist}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:bean..doesNotExist}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:stash['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:user.attributes['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:user.attributes['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:stash['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:user.attributes['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:user.attributes['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{i18n:some.non-existent.key}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{role:admin.BasicUser}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{stash:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{stash:nothing}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{user:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{user:nothing}", c, aapd));
 		
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{text\\}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "\\{text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "\\{{text}"));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{text\\}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("\\{text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("\\{{text}", c, aapd));
 		
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.normalInteger + bean.normalInteger}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.longInteger + bean.longInteger}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.decimal2.bigDecimalValue() + bean.decimal2.bigDecimalValue()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.decimal5.add(bean.decimal5)}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.date == bean.date}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:empty bean.date}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:not empty bean.date and bean.booleanFlag}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:empty bean.date ? DATE : bean.date}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.text.concat(bean.text)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.normalInteger + bean.normalInteger}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.longInteger + bean.longInteger}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.decimal2.bigDecimalValue() + bean.decimal2.bigDecimalValue()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.decimal5.add(bean.decimal5)}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.date == bean.date}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:empty bean.date}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:not empty bean.date and bean.booleanFlag}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:empty bean.date ? DATE : bean.date}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.text.concat(bean.text)}", c, aapd));
 
 		// Stash operation puts that expression evaluation into typeless mode
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['key'].concat(bean.text)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['key'].concat(bean.text)}", c, aapd));
 		// Stashy is still a problem though
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stashy['key'].concat(bean.text)}"));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:stashy['key'].concat(bean.text)}", c, aapd));
 		// And the other expression for the concat parameter is still validated
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['key'].concat(bean.texty)}"));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:stash['key'].concat(bean.texty)}", c, aapd));
 		// But concaty method name is not chacked coz we lost the type information retrieving from the stash
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['key'].concaty(bean.text)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['key'].concaty(bean.text)}", c, aapd));
 
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedAssociation}", Bean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:empty bean.aggregatedAssociation}", Boolean.class, c, m, aapd));
@@ -441,19 +441,19 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation.condition}", Boolean.class, c, m, aapd));
 
 		// Test functions
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newTimeOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newTimeOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateTime()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateTime()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newTimestamp()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newTimestamp()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newDateOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDateOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newTimeOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newTimeOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newDateTime()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDateTime()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newTimestamp()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newTimestamp()}", c, aapd));
 		
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:Decimal2.ZERO}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDecimal2(100)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:Decimal2.ZERO}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDecimal2(100)}", c, aapd));
 	}
 	
 	@Test

@@ -189,7 +189,7 @@ public final class BindUtil {
 					(expression.charAt(length - 1) == '}'));
 	}
 	
-	public static String validateMessageExpressions(Customer customer, Module module, Document document, String message) {
+	public static String validateMessageExpressions(String message, Customer customer, Document... documents) {
 		String error = null;
 		
 		StringBuilder result = new StringBuilder(message);
@@ -209,7 +209,20 @@ public final class BindUtil {
 						error = "Expression is empty";
 					}
 					else {
-						error = ExpressionEvaluator.validate(expression, null, customer, module, document);
+						boolean success = false;
+						StringBuilder errors = new StringBuilder(128);
+						for (Document document : documents) {
+							Module module = customer.getModule(document.getOwningModuleName());
+							error = ExpressionEvaluator.validate(expression, null, customer, module, document);
+							if (error == null) {
+								success = true;
+								break;
+							}
+							errors.append((errors.length() == 0) ? error : ". " + error);
+						}
+						if (! success) {
+							error = errors.toString();
+						}
 						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 					}
 				}

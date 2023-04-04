@@ -41,7 +41,7 @@
 	        </row>
 	        <row>
 	            <item required="true">
-	                <html binding="twoFactorEmailBody" pixelWidth="600" pixelHeight="200" sanitise="none" visible="tfaEmailEnabled" />
+	                <html binding="twoFactorEmailBody" pixelWidth="600" pixelHeight="200" sanitise="none" mentionMarkers="{}" visible="tfaEmailEnabled" />
 	            </item>
 	        </row>
 	        <row>

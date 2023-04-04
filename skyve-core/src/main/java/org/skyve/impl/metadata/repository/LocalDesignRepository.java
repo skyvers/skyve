@@ -483,7 +483,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// Check the bizKey expression, if defined
 		String bizKeyExpression = document.getBizKeyExpression();
 		if (bizKeyExpression != null) {
-			String error = BindUtil.validateMessageExpressions(customer, module, document, bizKeyExpression);
+			String error = BindUtil.validateMessageExpressions(bizKeyExpression, customer, document);
 			if (error != null) {
 				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier + ": " + error);
 			}
@@ -523,7 +523,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 					Class<?> implementingType = attribute.getAttributeType().getImplementingType();
 					if (String.class.equals(implementingType)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
-							String error = BindUtil.validateMessageExpressions(customer, module, document, defaultValue);
+							String error = BindUtil.validateMessageExpressions(defaultValue, customer, document);
 							if (error != null) {
 								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
 																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
@@ -661,10 +661,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// Check the message binding expressions, if present
 		List<UniqueConstraint> constraints = document.getUniqueConstraints();
 		if (constraints != null) {
-			Module owningModule = getModule(customer, document.getOwningModuleName());
 			for (UniqueConstraint constraint : constraints) {
 				String message = constraint.getMessage();
-				String error = BindUtil.validateMessageExpressions(customer, owningModule, document, message);
+				String error = BindUtil.validateMessageExpressions(message, customer, document);
 				if (error != null) {
 					throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
 													constraint.getName() + " in document " + documentIdentifier + ": " + error);

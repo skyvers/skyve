@@ -100,6 +100,21 @@ public abstract class ExpressionEvaluator {
 	/**
 	 * Validate an expression.
 	 * @param expression
+	 * @param customer
+	 * @param module
+	 * @param document
+	 * @return	null if valid or the error message if not.
+	 */
+	public static @Nullable String validate(@Nonnull String expression,
+												@Nullable Customer customer,
+												@Nullable Module module,
+												@Nullable Document document) {
+		return validate(expression, null, customer, module, document);
+	}
+	
+	/**
+	 * Validate an expression.
+	 * @param expression
 	 * @param returnType A return type to assert.
 	 * @param customer
 	 * @param module

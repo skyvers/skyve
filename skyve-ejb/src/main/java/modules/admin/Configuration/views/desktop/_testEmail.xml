@@ -24,7 +24,7 @@
 			</item>
 		</row>
 		<row>
-			<item showLabel="true">
+			<item showLabel="true" colspan="4">
 				<richText binding="emailContent" minPixelHeight="100" pixelWidth="400" pixelHeight="100" maxPixelHeight="100" />
 			</item>
 		</row>

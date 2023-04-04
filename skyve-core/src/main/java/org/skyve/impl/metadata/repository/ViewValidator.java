@@ -368,7 +368,6 @@ class ViewValidator extends ViewVisitor {
 												String widgetIdentifier,
 												String description) {
 		if (message != null) {
-			Module testModule = module;
 			Document testDocument = document;
 			if (dataWidgetBinding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
@@ -377,10 +376,9 @@ class ViewValidator extends ViewVisitor {
 				if (targetAttribute instanceof Relation) {
 					Relation relation = (Relation) targetAttribute;
 					testDocument = module.getDocument(customer, relation.getDocumentName());
-					testModule = customer.getModule(testDocument.getOwningModuleName());
 				}
 			}
-			String error = BindUtil.validateMessageExpressions(customer, testModule, testDocument, message);
+			String error = BindUtil.validateMessageExpressions(message, customer, testDocument);
 			if (error != null) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 												" has " + description + " containing malformed binding expressions: " + error);

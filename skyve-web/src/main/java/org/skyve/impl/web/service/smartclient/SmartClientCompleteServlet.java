@@ -146,6 +146,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 							attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
 						}
 					}
+			        catch (ConversationEndedException | SessionEndedException e) {
+			        	throw e;
+			        }
 					catch (Exception e) {
 						throw new ServletException("Mal-formed URL", e);
 					}
