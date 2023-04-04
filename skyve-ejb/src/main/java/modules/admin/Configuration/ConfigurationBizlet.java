@@ -118,9 +118,22 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 				default:
 					break;
 			}
-		}
-		
-		if (Configuration.twoFactorTypePropertyName.equals(source) && bean.getTwoFactorType() == TwoFactorType.email) {
+		} else if (Binder.createCompoundBinding(Configuration.startupPropertyName, Startup.backupTypePropertyName).equals(source)) {
+			// clear the azure backup config if switching to none/internal
+			switch (bean.getStartup().getBackupType()) {
+				case azure:
+					if (bean.getStartup().getBackupDirectoryName() == null) {
+						bean.getStartup().setBackupDirectoryName(UtilImpl.ARCHIVE_NAME);
+					}
+					break;
+				case none:
+					bean.getStartup().setBackupConnectionString(null);
+					bean.getStartup().setBackupDirectoryName(null);
+					break;
+				default:
+					break;
+			}
+		} else if (Configuration.twoFactorTypePropertyName.equals(source) && bean.getTwoFactorType() == TwoFactorType.email) {
 			if (bean.getTwoFactorEmailBody() == null) {
 				StringBuilder sb = new StringBuilder(128);
 				sb.append("Hi, <br />");

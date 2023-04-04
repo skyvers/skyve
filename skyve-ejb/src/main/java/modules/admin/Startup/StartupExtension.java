@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -36,6 +37,11 @@ public class StartupExtension extends Startup {
 	static final String API_STANZA_KEY = "api";
 	static final String API_GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
 	static final String API_GOOGLE_RECAPTCHA_KEY = "googleRecaptchaSiteKey";
+
+	static final String BACKUP_STANZA_KEY = "backup";
+	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
+	static final String BACKUP_CONNECTION_STRING_KEY = "connectionString";
+	static final String BACKUP_CONTAINER_NAME_KEY = "containerName";
 
 	static final String ENVIRONMENT_STANZA_KEY = "environment";
 	static final String ENVIRONMENT_IDENTIFIER_KEY = "identifier";
@@ -91,6 +97,19 @@ public class StartupExtension extends Startup {
 		setMapZoom(Integer.valueOf(UtilImpl.MAP_ZOOM));
 
 		setAccountAllowUserSelfRegistration(Boolean.valueOf(UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION));
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> backup = (Map<String, Object>) UtilImpl.CONFIGURATION.get(BACKUP_STANZA_KEY);
+		if (backup != null) {
+			String backupType = (String) backup.get(BACKUP_EXTERNAL_BACKUP_CLASS_KEY);
+			if (backupType != null) {
+				setBackupType(BackupType.fromCode(backupType));
+			} else {
+				setBackupType(BackupType.none);
+			}
+			setBackupConnectionString((String) backup.get(BACKUP_CONNECTION_STRING_KEY));
+			setBackupDirectoryName((String) backup.get(BACKUP_CONTAINER_NAME_KEY));
+		}
 	}
 
 	/**
@@ -111,6 +130,7 @@ public class StartupExtension extends Startup {
 		putMail(properties);
 		putMap(properties);
 		putAccount(properties);
+		putBackup(properties);
 
 		// write the json out to the content directory
 		String json = marshall(properties);
@@ -206,6 +226,55 @@ public class StartupExtension extends Startup {
 		}
 
 		return api;
+	}
+
+	/**
+	 * Compares the current value of the backup configuration against the
+	 * new value from the startup page and if they value has changed, adds it to the
+	 * map to be persisted and updates the running configuration with the new value.
+	 * 
+	 * @param properties The current override configuration property map
+	 * @return The map of backup properties which have been modified
+	 */
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> putBackup(final Map<String, Object> properties) {
+
+		// initialise or get the existing property map
+		Map<String, Object> backup = (Map<String, Object>) properties.get(BACKUP_STANZA_KEY);
+		if (backup == null) {
+			backup = new HashMap<>();
+			properties.put(BACKUP_STANZA_KEY, backup);
+		}
+
+		// get the current root json backup map (or use a blank one for comparisons if there is not one)
+		Map<String, Object> rootBackupMap = UtilImpl.CONFIGURATION.containsKey(BACKUP_STANZA_KEY)
+				? (Map<String, Object>) UtilImpl.CONFIGURATION.get(BACKUP_STANZA_KEY)
+				: new HashMap<>();
+
+		// add any values to the override configuration if they have changed
+		if (getBackupType() == null
+				|| !Objects.equals(getBackupType().toCode(), rootBackupMap.get(BACKUP_EXTERNAL_BACKUP_CLASS_KEY))) {
+			if (getBackupType() == null || getBackupType() == BackupType.none) {
+				backup.put(BACKUP_EXTERNAL_BACKUP_CLASS_KEY, null);
+			} else {
+				backup.put(BACKUP_EXTERNAL_BACKUP_CLASS_KEY, getBackupType().toCode());
+			}
+			UtilImpl.CONFIGURATION.put(BACKUP_STANZA_KEY, backup);
+		}
+
+		if (getBackupConnectionString() == null
+				|| !Objects.equals(getBackupConnectionString(), rootBackupMap.get(BACKUP_CONNECTION_STRING_KEY))) {
+			backup.put(BACKUP_CONNECTION_STRING_KEY, getBackupConnectionString());
+			UtilImpl.CONFIGURATION.put(BACKUP_STANZA_KEY, backup);
+		}
+
+		if (getBackupDirectoryName() == null
+				|| !Objects.equals(getBackupDirectoryName(), rootBackupMap.get(BACKUP_CONTAINER_NAME_KEY))) {
+			backup.put(BACKUP_CONTAINER_NAME_KEY, getBackupDirectoryName());
+			UtilImpl.CONFIGURATION.put(BACKUP_STANZA_KEY, backup);
+		}
+
+		return backup;
 	}
 
 	/**

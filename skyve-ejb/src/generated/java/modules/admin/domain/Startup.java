@@ -25,6 +25,7 @@ import org.skyve.util.Util;
 		and is shown to the administrator by default on first login.
  * 
  * @depend - - - MapType
+ * @depend - - - BackupType
  * @stereotype "transient"
  */
 @XmlType
@@ -102,6 +103,15 @@ public abstract class Startup extends AbstractTransientBean {
 	/** @hidden */
 	public static final String apiTwilioDefaultSendNumberPropertyName = "apiTwilioDefaultSendNumber";
 
+	/** @hidden */
+	public static final String backupTypePropertyName = "backupType";
+
+	/** @hidden */
+	public static final String backupConnectionStringPropertyName = "backupConnectionString";
+
+	/** @hidden */
+	public static final String backupDirectoryNamePropertyName = "backupDirectoryName";
+
 	/**
 	 * Type
 	 * <br/>
@@ -173,6 +183,85 @@ public abstract class Startup extends AbstractTransientBean {
 				MapType[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (MapType value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Type
+	 * <br/>
+	 * Which external backup provider should be used this Skyve application? Note: additional charges may apply.
+	 **/
+	@XmlEnum
+	public static enum BackupType implements Enumeration {
+		none("none", "None (Internal Backups)"),
+		azure("org.skyve.impl.backup.AzureBlobStorageBackup", "Azure Blob Storage");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private BackupType(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static BackupType fromCode(String code) {
+			BackupType result = null;
+
+			for (BackupType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static BackupType fromLocalisedDescription(String description) {
+			BackupType result = null;
+
+			for (BackupType value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				BackupType[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (BackupType value : values) {
 					domainValues.add(value.domainValue);
 				}
 			}
@@ -318,6 +407,29 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Default Send Number
 	 **/
 	private String apiTwilioDefaultSendNumber;
+
+	/**
+	 * Type
+	 * <br/>
+	 * Which external backup provider should be used this Skyve application? Note: additional charges may apply.
+	 **/
+	private BackupType backupType = BackupType.none;
+
+	/**
+	 * Connection String
+	 * <br/>
+	 * The connection string to the external backup location, e.g. 
+					<code style='white-space: pre-wrap;'>DefaultEndpointsProtocol=https;AccountName=ACCOUNT_NAME;AccountKey=ACCOUNT_KEY;EndpointSuffix=core.windows.net</code>.
+	 **/
+	private String backupConnectionString;
+
+	/**
+	 * Directory Name
+	 * <br/>
+	 * The name of the top-level backup directory, e.g. <code>applicationName</code>, this will be 
+					created if it does not exist.
+	 **/
+	private String backupDirectoryName;
 
 	@Override
 	@XmlTransient
@@ -715,6 +827,79 @@ public abstract class Startup extends AbstractTransientBean {
 	public void setApiTwilioDefaultSendNumber(String apiTwilioDefaultSendNumber) {
 		preset(apiTwilioDefaultSendNumberPropertyName, apiTwilioDefaultSendNumber);
 		this.apiTwilioDefaultSendNumber = apiTwilioDefaultSendNumber;
+	}
+
+	/**
+	 * {@link #backupType} accessor.
+	 * @return	The value.
+	 **/
+	public BackupType getBackupType() {
+		return backupType;
+	}
+
+	/**
+	 * {@link #backupType} mutator.
+	 * @param backupType	The new value.
+	 **/
+	@XmlElement
+	public void setBackupType(BackupType backupType) {
+		preset(backupTypePropertyName, backupType);
+		this.backupType = backupType;
+	}
+
+	/**
+	 * {@link #backupConnectionString} accessor.
+	 * @return	The value.
+	 **/
+	public String getBackupConnectionString() {
+		return backupConnectionString;
+	}
+
+	/**
+	 * {@link #backupConnectionString} mutator.
+	 * @param backupConnectionString	The new value.
+	 **/
+	@XmlElement
+	public void setBackupConnectionString(String backupConnectionString) {
+		preset(backupConnectionStringPropertyName, backupConnectionString);
+		this.backupConnectionString = backupConnectionString;
+	}
+
+	/**
+	 * {@link #backupDirectoryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getBackupDirectoryName() {
+		return backupDirectoryName;
+	}
+
+	/**
+	 * {@link #backupDirectoryName} mutator.
+	 * @param backupDirectoryName	The new value.
+	 **/
+	@XmlElement
+	public void setBackupDirectoryName(String backupDirectoryName) {
+		preset(backupDirectoryNamePropertyName, backupDirectoryName);
+		this.backupDirectoryName = backupDirectoryName;
+	}
+
+	/**
+	 * True when the selected backup type is Azure Blob Storage
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isBackupTypeAzure() {
+		return (BackupType.azure == getBackupType());
+	}
+
+	/**
+	 * {@link #isBackupTypeAzure} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotBackupTypeAzure() {
+		return (! isBackupTypeAzure());
 	}
 
 	/**

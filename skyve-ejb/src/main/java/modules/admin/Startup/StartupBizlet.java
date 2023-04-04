@@ -1,5 +1,6 @@
 package modules.admin.Startup;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
 
@@ -29,6 +30,21 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 					break;
 				case leaflet:
 					bean.setMapLayer(MAP_LAYER_OPEN_STREET_MAP);
+					break;
+				default:
+					break;
+			}
+		} else if (Startup.backupTypePropertyName.equals(source)) {
+			// clear the azure backup config if switching to none/internal
+			switch (bean.getBackupType()) {
+				case azure:
+					if (bean.getBackupDirectoryName() == null) {
+						bean.setBackupDirectoryName(UtilImpl.ARCHIVE_NAME);
+					}
+					break;
+				case none:
+					bean.setBackupConnectionString(null);
+					bean.setBackupDirectoryName(null);
 					break;
 				default:
 					break;

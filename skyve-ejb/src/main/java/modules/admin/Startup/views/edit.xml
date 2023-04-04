@@ -207,6 +207,52 @@
 	        </row>
 	    </form>
     </vbox>
+    
+    <vbox border="true" borderTitle="Cloud Backup Settings">
+	    <form responsiveWidth="12" widgetId="formBackup">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <!-- <textField binding="backupBackupClass"/> -->
+	                <combo binding="backupType">
+	                	<onChangedHandlers>
+	                		<rerender clientValidation="false">
+	                			<properties>
+						            <c:property key="update">formBackup</c:property>
+	                			</properties>
+	                		</rerender>
+	                	</onChangedHandlers>
+	                </combo>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <password binding="backupConnectionString" visible="backupTypeAzure"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="backupDirectoryName" visible="backupTypeAzure"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer />
+	        	</item>
+	        	<item colspan="2">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888;">
+	        					See cloud backup instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/backup-restore/#cloud-backups' target='_blank'>Skyve Dev Guide</a>
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	    </form>
+    </vbox>
 
     <actions widgetId="actionPanel">
         <!-- <defaults/> -->
