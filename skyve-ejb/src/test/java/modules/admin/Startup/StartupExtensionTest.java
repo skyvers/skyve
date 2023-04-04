@@ -1,7 +1,7 @@
 package modules.admin.Startup;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 
@@ -21,6 +21,7 @@ import org.mockito.Spy;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 
+import modules.admin.domain.Startup.BackupType;
 import modules.admin.domain.Startup.MapType;
 
 public class StartupExtensionTest {
@@ -37,6 +38,9 @@ public class StartupExtensionTest {
 	@Before
 	public void before() throws Exception {
 		MockitoAnnotations.initMocks(this);
+
+		Map<String, Object> properties = new HashMap<>();
+		UtilImpl.CONFIGURATION = properties;
 
 		overrideProperties = new HashMap<>();
 		UtilImpl.OVERRIDE_CONFIGURATION = overrideProperties;
@@ -83,6 +87,25 @@ public class StartupExtensionTest {
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_MAPS_V3_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_KEY));
+	}
+
+	@Test
+	public void testSaveConfigurationUpdatesBackupProperties() throws Exception {
+		// setup mocks
+		Mockito.when(bean.getBackupType()).thenReturn(BackupType.none);
+
+		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+
+		// call the method under test
+		bean.saveConfiguration();
+
+		// verify the results
+		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_STANZA_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_CONNECTION_STRING_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_CONTAINER_NAME_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_EXTERNAL_BACKUP_CLASS_KEY));
 	}
 
 	@Test

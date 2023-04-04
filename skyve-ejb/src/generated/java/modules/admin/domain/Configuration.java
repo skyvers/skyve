@@ -1119,6 +1119,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the selected backup type is Azure Blob Storage
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isBackupTypeAzure() {
+		return (getStartup() != null && getStartup().isBackupTypeAzure());
+	}
+
+	/**
+	 * {@link #isBackupTypeAzure} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotBackupTypeAzure() {
+		return (! isBackupTypeAzure());
+	}
+
+	/**
 	 * backupsConfigured
 	 *
 	 * @return The condition
