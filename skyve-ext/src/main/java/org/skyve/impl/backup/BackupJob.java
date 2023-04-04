@@ -403,7 +403,10 @@ public class BackupJob extends CancellableJob {
 					log.add(trace);
 					Util.LOGGER.info(trace);
 					setPercentComplete(100);
-					EXT.push(new PushMessage().user().growl(MessageSeverity.info, "Backup Completed" + (problem ? " with problems" : "")));
+					trace = "Backup Completed" + (problem ? " with problems" : "");
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					EXT.push(new PushMessage().user().growl(MessageSeverity.info, trace));
 				}
 			}
 		}
