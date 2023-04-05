@@ -69,8 +69,8 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		final BlobContainerSasPermission permission = new BlobContainerSasPermission();
 		permission.setReadPermission(true);
 		final String sas = getBlobContainerClient().generateSas(new BlobServiceSasSignatureValues(OffsetDateTime.now().plusMinutes(10), permission));
-		final String srcBlobUrl = getBlobContainerClient().getBlobClient(srcBackupName).getBlobUrl();
-		getBlobContainerClient().getBlobClient(destBackupName).copyFromUrl(srcBlobUrl + "?" + sas);
+		final String srcBlobUrl = getBlobContainerClient().getBlobClient(getDirectoryName() + srcBackupName).getBlobUrl();
+		getBlobContainerClient().getBlobClient(getDirectoryName() + destBackupName).copyFromUrl(srcBlobUrl + "?" + sas);
 	}
 
 	@Override
