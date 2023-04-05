@@ -58,8 +58,7 @@ public class BackupJob extends Job {
 			org.skyve.impl.backup.BackupJob backupJob = new org.skyve.impl.backup.BackupJob();
 			execute(backupJob);
 			backupZip = backupJob.getBackupZip();
-		}
-		else {
+		} else {
 			trace = "No daily backup taken by the BackupJob as dailyBackupRetention in DataMaintenance is null or zero";
 			log.add(trace);
 			Util.LOGGER.warning(trace);
@@ -73,12 +72,6 @@ public class BackupJob extends Job {
 			// move the zip archive
 			File backupDir = backupZip.getParentFile();
 			File dailyZip = new File(backupDir, "DAILY_" + backupZip.getName());
-			if (Files.move(backupZip.toPath(), dailyZip.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
-				throw new IOException("Could not rename " + backupZip.getPath() + " to " + dailyZip.getPath());
-			}
-			trace = String.format("Backup moved from %s to %s", backupZip.getAbsolutePath(), dailyZip.getAbsolutePath());
-			log.add(trace);
-			Util.LOGGER.info(trace);
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				try {
 					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
@@ -87,17 +80,21 @@ public class BackupJob extends Job {
 					log.add(trace);
 					Util.LOGGER.warning(trace);
 				}
+			} else {
+				if (Files.move(backupZip.toPath(), dailyZip.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
+					throw new IOException("Could not rename " + backupZip.getPath() + " to " + dailyZip.getPath());
+				}
+				trace = String.format("Backup moved from %s to %s", backupZip.getAbsolutePath(), dailyZip.getAbsolutePath());
+				log.add(trace);
+				Util.LOGGER.info(trace);
+
 			}
 
 			// copy daily to weekly
 			if (weekly > 0) {
 				File copy = new File(backupDir,
-										String.format("WEEKLY_%s.zip",
-														CORE.getDateFormat("yyyyMMWW").format(now)));
-				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
-				log.add(trace);
-				Util.LOGGER.info(trace);
-				FileUtil.copy(dailyZip, copy);
+						String.format("WEEKLY_%s.zip",
+								CORE.getDateFormat("yyyyMMWW").format(now)));
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
@@ -106,9 +103,13 @@ public class BackupJob extends Job {
 						log.add(trace);
 						Util.LOGGER.warning(trace);
 					}
+				} else {
+					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					FileUtil.copy(dailyZip, copy);
 				}
-			}
-			else {
+			} else {
 				trace = "No weekly backup taken by the BackupJob as weeklyBackupRetention in DataMaintenance is null or zero";
 				log.add(trace);
 				Util.LOGGER.warning(trace);
@@ -116,12 +117,8 @@ public class BackupJob extends Job {
 			// copy daily to monthly
 			if (monthly > 0) {
 				File copy = new File(backupDir,
-										String.format("MONTHLY_%s.zip",
-														CORE.getDateFormat("yyyyMM").format(now)));
-				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
-				log.add(trace);
-				Util.LOGGER.info(trace);
-				FileUtil.copy(dailyZip, copy);
+						String.format("MONTHLY_%s.zip",
+								CORE.getDateFormat("yyyyMM").format(now)));
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
@@ -130,6 +127,11 @@ public class BackupJob extends Job {
 						log.add(trace);
 						Util.LOGGER.warning(trace);
 					}
+				} else {
+					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					FileUtil.copy(dailyZip, copy);
 				}
 			}
 			else {
@@ -140,12 +142,8 @@ public class BackupJob extends Job {
 			// copy daily to yearly
 			if (yearly > 0) {
 				File copy = new File(backupDir,
-										String.format("YEARLY_%s.zip",
-														CORE.getDateFormat("yyyy").format(now)));
-				trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
-				log.add(trace);
-				Util.LOGGER.info(trace);
-				FileUtil.copy(dailyZip, copy);
+						String.format("YEARLY_%s.zip",
+								CORE.getDateFormat("yyyy").format(now)));
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
@@ -154,20 +152,25 @@ public class BackupJob extends Job {
 						log.add(trace);
 						Util.LOGGER.warning(trace);
 					}
+				} else {
+					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
+					log.add(trace);
+					Util.LOGGER.info(trace);
+					FileUtil.copy(dailyZip, copy);
 				}
 			}
 
 			// cull daily
 			cull(backupDir, "DAILY_", daily);
-			cull(backupDir, "DAILY_", "_PROBLEMS", daily*2);
+			cull(backupDir, "DAILY_", "_PROBLEMS", daily * 2);
 			// cull weekly
 			cull(backupDir, "WEEKLY_", weekly);
-			cull(backupDir, "WEEKLY_", "_PROBLEMS", weekly*2);
+			cull(backupDir, "WEEKLY_", "_PROBLEMS", weekly * 2);
 			// cull monthly
 			cull(backupDir, "MONTHLY_", monthly);
-			cull(backupDir, "MONTHLY_", "_PROBLEMS", monthly*2);
+			cull(backupDir, "MONTHLY_", "_PROBLEMS", monthly * 2);
 			// cull yearly
-			cull(backupDir, "YEARLY_", "_PROBLEMS", yearly*2);
+			cull(backupDir, "YEARLY_", "_PROBLEMS", yearly * 2);
 		}
 
 		// TODO instance of communication instance in code - default settings
@@ -184,15 +187,15 @@ public class BackupJob extends Job {
 	}
 
 	private void cull(File backupDir, String prefix, String suffix, int retain)
-	throws IOException {
+			throws IOException {
 		Collection<String> log = getLog();
 		final String regex = prefix + "\\d*" + ((suffix == null) ? "" : suffix) + "\\.zip";
 		File[] files = FileUtil.listFiles(backupDir, regex, SortDirection.descending);
 
 		for (int i = retain, l = files.length; i < l; i++) {
 			String trace = String.format("Cull backup %s - retention is set to %d",
-											files[i].getAbsolutePath(),
-											Integer.valueOf(retain));
+					files[i].getAbsolutePath(),
+					Integer.valueOf(retain));
 			log.add(trace);
 			Util.LOGGER.info(trace);
 			FileUtil.delete(files[i]);
@@ -201,7 +204,8 @@ public class BackupJob extends Job {
 			try {
 				final ExternalBackup externalBackup = ExternalBackup.getInstance();
 				final List<String> backups = externalBackup.listBackups();
-				final List<String> matchingBackups = backups.stream().filter(backup -> backup.matches(regex)).collect(Collectors.toList());
+				final List<String> matchingBackups = backups.stream().filter(backup -> backup.matches(regex))
+						.collect(Collectors.toList());
 				for (int i = retain, l = matchingBackups.size(); i < l; i++) {
 					String trace = String.format("Cull backup %s - retention is set to %d",
 							matchingBackups.get(i),
