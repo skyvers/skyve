@@ -244,8 +244,7 @@ isc.BizListGrid.addMethods({
 					padding: 0,
 					margin: 5,
 					useAllDataSourceFields: false,
-					numCols: 3,
-					colWidths: ['*', 100, 100],
+					numCols: 2,
 					items: [] // this form is built in ListGrid.setDataSource()
 				})
 	        ]
@@ -1730,13 +1729,13 @@ isc.BizListGrid.addMethods({
 		me._flagForm.setFields([
 			{name:'bizFlagComment', 
 				type:'richText',
-				colSpan: 3,
+				colSpan: 2,
 				height:175,
 				validators: [{type: 'lengthRange', min: 0, max: 1024, clientOnly: true}]},
-			{type: 'spacer', startRow: true, endRow: false},
 			{type: 'button',
 				title: 'Clear',
 				width: 100,
+				align: 'right',
 				startRow: false,
 				endRow: false,
 				click: function() {
@@ -1761,6 +1760,7 @@ isc.BizListGrid.addMethods({
 			{type: 'button',
 				title: 'Flag',
 				width: 100,
+				align: 'left',
 				startRow: false,
 				endRow: true,
 				click: function() {
