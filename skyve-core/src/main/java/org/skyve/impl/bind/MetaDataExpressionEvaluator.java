@@ -249,7 +249,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 										targetDocument = null; // '.' & ']' are errors
 									}
 								}
-								else if (simpleBindingFragment == null) {
+								else {
 									bindingPrefix += '.';
 								}
 							}

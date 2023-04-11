@@ -101,7 +101,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			Module m = c.getModule(User.MODULE_NAME);
 			Document d = m.getDocument(c, User.DOCUMENT_NAME);
 			List<String> result = ExpressionEvaluator.completeExpression(value, c, m, d);
-			if ((value == null) || (RESET_PASSWORD_URL_EXPRESSION.startsWith(RESET_PASSWORD_URL_EXPRESSION))) {
+			if ((value == null) || (RESET_PASSWORD_URL_EXPRESSION.startsWith(value))) {
 				if (result.isEmpty()) {
 					result = Collections.singletonList(RESET_PASSWORD_URL_EXPRESSION);
 				}
