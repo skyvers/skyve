@@ -320,7 +320,7 @@
 		// Enable/Disable "/health" endpoint to show health status JSON
 		"check": true,
 		// Number of seconds to cache the health results to alleviate denial of service
-		"cacheTimeInSeconds": 300
+		"cacheTimeInSeconds": 60
 	},
 	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
 	// NOTE: the user will NOT be created for production environments (where the environment identifier above is null)
