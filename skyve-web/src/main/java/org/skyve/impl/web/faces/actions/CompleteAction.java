@@ -75,13 +75,17 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 				attributeName = binding.substring(lastDotIndex + 1);
 				Module module = customer.getModule(bean.getBizModule());
 				document = module.getDocument(customer, bean.getBizDocument());
-				attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, attributeName);
+				document = target.getDocument();
+				attribute = target.getAttribute(); // could be null for an implicit attribute
 			}
 		}
 		else {
 			Module module = customer.getModule(bean.getBizModule());
 			document = module.getDocument(customer, bean.getBizDocument());
-			attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, attributeName);
+			document = target.getDocument();
+			attribute = target.getAttribute(); // could be null for an implicit attribute
 		}
 
 		if ((attribute == null) && (! BindUtil.isImplicit(attributeName))) {
