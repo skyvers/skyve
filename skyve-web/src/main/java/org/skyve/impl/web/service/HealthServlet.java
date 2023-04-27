@@ -92,21 +92,17 @@ public class HealthServlet extends HttpServlet {
 				
 				// Primary Data Store
 				result.append("\",\"database\":\"");
-				try {
-					p.begin();
-					p.newSQL("select 1 from ADM_Configuration where 1 = 0").scalarResults(Number.class);
-					p.rollback();
-					result.append("ok");
-				}
-				catch (@SuppressWarnings("unused") Throwable t) {
-					result.append("error");
-				}
+				p.begin();
+				p.newSQL("select 1 from ADM_Configuration where 1 = 0").scalarResults(Number.class);
+				p.rollback();
+				result.append("ok");
 			}
 			finally {
 				p.commit(true);
 			}
 		}
-		catch (@SuppressWarnings("unused") Throwable t) {
+		catch (Throwable t) {
+			t.printStackTrace();
 			result.append("error");
 		}
 		
@@ -122,7 +118,8 @@ public class HealthServlet extends HttpServlet {
 			}
 			result.append("ok");
 		}
-		catch (@SuppressWarnings("unused") Throwable t) {
+		catch (Throwable t) {
+			t.printStackTrace();
 			result.append("error");
 		}
 		
@@ -137,7 +134,8 @@ public class HealthServlet extends HttpServlet {
 				result.append("ok");
 			}
 		}
-		catch (@SuppressWarnings("unused") Throwable t) {
+		catch (Throwable t) {
+			t.printStackTrace();
 			result.append("error");
 		}
 
@@ -148,7 +146,8 @@ public class HealthServlet extends HttpServlet {
 			EXT.getAddInManager();
 			result.append("ok");
 		}
-		catch (@SuppressWarnings("unused") Throwable t) {
+		catch (Throwable t) {
+			t.printStackTrace();
 			result.append("error");
 		}
 
@@ -160,7 +159,8 @@ public class HealthServlet extends HttpServlet {
 				result.append("ok");
 			}
 		}
-		catch (@SuppressWarnings("unused") Throwable t) {
+		catch (Throwable t) {
+			t.printStackTrace();
 			result.append("error");
 		}
 
@@ -172,7 +172,8 @@ public class HealthServlet extends HttpServlet {
 				EXT.getJobScheduler();
 				result.append("ok");
 			}
-			catch (@SuppressWarnings("unused") Throwable t) {
+			catch (Throwable t) {
+				t.printStackTrace();
 				result.append("error");
 			}
 		}
@@ -187,7 +188,8 @@ public class HealthServlet extends HttpServlet {
 			StateUtil.checkToken("", null);
 			result.append("ok");
 		}
-		catch (@SuppressWarnings("unused") Throwable t) {
+		catch (Throwable t) {
+			t.printStackTrace();
 			result.append("error");
 		}
 
