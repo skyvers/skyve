@@ -47,6 +47,14 @@ public class Binder {
 		return BindUtil.validateMessageExpressions(message, CORE.getCustomer(), documents);
 	}
 
+	public static boolean isSkyveExpression(String expression) {
+		return BindUtil.isSkyveExpression(expression);
+	}
+	
+	public static boolean containsSkyveExpression(String message) {
+		return BindUtil.containsSkyveExpressions(message);
+	}
+	
 	public static String validateMessage(String message, String moduleName, String... documentNames) {
 		Customer c  = CORE.getCustomer();
 		Module m = c.getModule(moduleName);
