@@ -51,7 +51,7 @@ public class Binder {
 		return BindUtil.isSkyveExpression(expression);
 	}
 	
-	public static boolean containsSkyveExpression(String message) {
+	public static boolean containsSkyveExpressions(String message) {
 		return BindUtil.containsSkyveExpressions(message);
 	}
 	
