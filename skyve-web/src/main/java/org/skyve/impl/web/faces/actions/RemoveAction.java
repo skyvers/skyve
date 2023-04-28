@@ -92,9 +92,14 @@ public class RemoveAction extends FacesAction<Void> {
 					beanToRemove = bizlet.preExecute(ImplicitActionName.Remove, beanToRemove, null, webContext);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + beanToRemove);
 				}
-				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, beanToRemove, null, webContext);
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Remove, beanToRemove, null, webContext);
 
-				BindUtil.removeElementFromCollection(bean, viewBinding.substring(0, lastCollectionindex), beanToRemove);
+				if (lastCollectionindex > -1) { // remove from a collection or inverseMany
+					BindUtil.removeElementFromCollection(bean, viewBinding.substring(0, lastCollectionindex), beanToRemove);
+				}
+				else { // remove from an association or inverseOne
+					BindUtil.set(bean, viewBinding, null);
+				}
 				ZoomOutAction.zoomOut(facesView, internalCustomer);
 			}
 		}
