@@ -527,13 +527,13 @@ public class CustomerImpl implements Customer {
 	
 	public void notifyStartup() {
 		for (ObserverMetaData observer : observers.values()) {
-			observer.getObserver().startup();
+			observer.getObserver().startup(this);
 		}
 	}
 
 	public void notifyShutdown() {
 		for (ObserverMetaData observer : reversedObservers) {
-			observer.getObserver().shutdown();
+			observer.getObserver().shutdown(this);
 		}
 	}
 

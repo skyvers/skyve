@@ -9,9 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.metadata.controller.Observer;
 
-public class TwoFactorAuthConfigurationSingleton implements Observer {
+public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	private static TwoFactorAuthConfigurationSingleton instance;
 
 	private final ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configuration = new ConcurrentHashMap<>();

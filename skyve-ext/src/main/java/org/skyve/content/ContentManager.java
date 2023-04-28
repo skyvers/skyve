@@ -1,9 +1,9 @@
 package org.skyve.content;
 
 import org.pf4j.ExtensionPoint;
-import org.skyve.metadata.controller.Observer;
+import org.skyve.impl.util.SystemObserver;
 
-public interface ContentManager extends AutoCloseable, ExtensionPoint, Observer {
+public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObserver {
 	public static final String FILE_STORE_NAME = "SKYVE_STORE";
 
 	/**
