@@ -302,7 +302,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setIcon(iconStyleClass);
 		result.setTitle(toolTip);
 
-		setSize(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelWidth(), null, null);
+		setSize(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelHeight(), null, null);
 		setInvisible(result, zoomIn.getInvisibleConditionName(), null);
 		setDisabled(result, zoomIn.getDisabledConditionName(), formDisabledConditionName);
 		setId(result, null);
