@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -68,7 +69,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(LoadAction::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private LoadAction(String code, String description) {
 			this.code = code;
@@ -118,14 +119,6 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				LoadAction[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (LoadAction value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

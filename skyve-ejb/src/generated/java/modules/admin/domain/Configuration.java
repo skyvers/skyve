@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -158,7 +159,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(PasswordComplexityModel::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private PasswordComplexityModel(String code, String description) {
 			this.code = code;
@@ -208,14 +209,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				PasswordComplexityModel[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (PasswordComplexityModel value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -237,7 +230,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(TwoFactorType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private TwoFactorType(String code, String description) {
 			this.code = code;
@@ -287,14 +280,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				TwoFactorType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (TwoFactorType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

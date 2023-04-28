@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -389,7 +390,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(ReportType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private ReportType(String code, String description) {
 			this.code = code;
@@ -439,14 +440,6 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				ReportType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (ReportType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -468,7 +461,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(OutputFormat::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private OutputFormat(String code, String description) {
 			this.code = code;
@@ -518,14 +511,6 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				OutputFormat[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (OutputFormat value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -547,7 +532,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Mode::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Mode(String code, String description) {
 			this.code = code;
@@ -597,14 +582,6 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Mode[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Mode value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -630,7 +607,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(WizardState::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private WizardState(String code, String description) {
 			this.code = code;
@@ -680,14 +657,6 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				WizardState[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (WizardState value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -710,7 +679,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(GenerateExisting::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private GenerateExisting(String code, String description) {
 			this.code = code;
@@ -760,14 +729,6 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				GenerateExisting[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (GenerateExisting value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -164,7 +165,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(RestorePreProcess::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private RestorePreProcess(String code, String description) {
 			this.code = code;
@@ -214,14 +215,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				RestorePreProcess[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (RestorePreProcess value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -242,7 +235,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(ContentRestoreOption::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private ContentRestoreOption(String code, String description) {
 			this.code = code;
@@ -292,14 +285,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				ContentRestoreOption[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (ContentRestoreOption value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -321,7 +306,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(RestoreIndexingOption::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private RestoreIndexingOption(String code, String description) {
 			this.code = code;
@@ -371,14 +356,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				RestoreIndexingOption[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (RestoreIndexingOption value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -398,7 +375,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(RefreshOption::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private RefreshOption(String code, String description) {
 			this.code = code;
@@ -448,14 +425,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				RefreshOption[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (RefreshOption value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -479,7 +448,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(EvictOption::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private EvictOption(String code, String description) {
 			this.code = code;
@@ -529,14 +498,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				EvictOption[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (EvictOption value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

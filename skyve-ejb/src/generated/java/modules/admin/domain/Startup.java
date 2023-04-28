@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -129,7 +130,7 @@ public abstract class Startup extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(MapType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private MapType(String code, String description) {
 			this.code = code;
@@ -179,14 +180,6 @@ public abstract class Startup extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				MapType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (MapType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -208,7 +201,7 @@ public abstract class Startup extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(BackupType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private BackupType(String code, String description) {
 			this.code = code;
@@ -258,14 +251,6 @@ public abstract class Startup extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				BackupType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (BackupType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

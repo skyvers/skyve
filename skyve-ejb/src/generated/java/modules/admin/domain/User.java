@@ -2,6 +2,8 @@ package modules.admin.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -181,7 +183,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(WizardState::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private WizardState(String code, String description) {
 			this.code = code;
@@ -231,14 +233,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				WizardState[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (WizardState value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -258,7 +252,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(GroupSelection::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private GroupSelection(String code, String description) {
 			this.code = code;
@@ -308,14 +302,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				GroupSelection[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (GroupSelection value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

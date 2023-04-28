@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -170,7 +171,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(SailUserAgentType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private SailUserAgentType(String code, String description) {
 			this.code = code;
@@ -220,14 +221,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				SailUserAgentType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (SailUserAgentType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -250,7 +243,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(SailTestStrategy::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private SailTestStrategy(String code, String description) {
 			this.code = code;
@@ -300,14 +293,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				SailTestStrategy[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (SailTestStrategy value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -327,7 +312,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(SailExecutor::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private SailExecutor(String code, String description) {
 			this.code = code;
@@ -377,14 +362,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				SailExecutor[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (SailExecutor value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

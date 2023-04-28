@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -230,7 +231,7 @@ public class ReportDesign extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Mode::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Mode(String code, String description) {
 			this.code = code;
@@ -280,14 +281,6 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Mode[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Mode value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -309,7 +302,7 @@ public class ReportDesign extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(DefinitionSource::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private DefinitionSource(String code, String description) {
 			this.code = code;
@@ -359,14 +352,6 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				DefinitionSource[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (DefinitionSource value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -386,7 +371,7 @@ public class ReportDesign extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(ReportType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private ReportType(String code, String description) {
 			this.code = code;
@@ -436,14 +421,6 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				ReportType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (ReportType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -463,7 +440,7 @@ public class ReportDesign extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Orientation::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Orientation(String code, String description) {
 			this.code = code;
@@ -513,14 +490,6 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Orientation[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Orientation value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -541,7 +510,7 @@ public class ReportDesign extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(CollectionType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private CollectionType(String code, String description) {
 			this.code = code;
@@ -591,14 +560,6 @@ public class ReportDesign extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				CollectionType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (CollectionType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

@@ -1,7 +1,8 @@
 package modules.kitchensink.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -85,7 +86,7 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(ConstantEnum::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private ConstantEnum(String code, String description) {
 			this.code = code;
@@ -135,14 +136,6 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				ConstantEnum[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (ConstantEnum value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

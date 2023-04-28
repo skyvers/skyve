@@ -1,7 +1,8 @@
 package modules.whosin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -111,7 +112,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Status::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Status(String code, String description) {
 			this.code = code;
@@ -161,14 +162,6 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Status[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Status value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

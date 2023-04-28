@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -79,7 +80,7 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Result::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Result(String code, String description) {
 			this.code = code;
@@ -129,14 +130,6 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Result[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Result value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
