@@ -791,7 +791,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	public void setDocumentation(String documentation) {
-		this.documentation = documentation;
+		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
 	private static Text bizKeyField;

@@ -41,6 +41,8 @@ import org.dom4j.QName;
 import org.dom4j.Visitor;
 import org.dom4j.VisitorSupport;
 import org.dom4j.io.SAXReader;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
@@ -79,6 +81,7 @@ public class XMLMetaData {
 	public static final String MODULE_NAMESPACE = "http://www.skyve.org/xml/module";
 	public static final String DOCUMENT_NAMESPACE = "http://www.skyve.org/xml/document";
 	public static final String VIEW_NAMESPACE = "http://www.skyve.org/xml/view";
+	public static final String BEHAVIOUR_NAMESPACE = "http://www.skyve.org/xml/behaviour";
 	public static final String SAIL_NAMESPACE = "http://www.skyve.org/xml/sail";
 	public static final String CDATA_START_TAG = "<![CDATA[";
 	public static final String CDATA_END_TAG = "]]>";
@@ -99,6 +102,10 @@ public class XMLMetaData {
 	private static final JAXBContext VIEW_CONTEXT;
 	private static final Schema VIEW_SCHEMA;
 
+	private static final JAXBContext ACTION_CONTEXT;
+	private static final JAXBContext BIZLET_CONTEXT;
+	private static final Schema BEHAVIOUR_SCHEMA;
+
 	private static final JAXBContext SAIL_CONTEXT;
 	private static final Schema SAIL_SCHEMA;
 
@@ -118,6 +125,10 @@ public class XMLMetaData {
 
 			VIEW_CONTEXT = JAXBContext.newInstance(ViewMetaData.class);
 			VIEW_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/view.xsd");
+
+			ACTION_CONTEXT = JAXBContext.newInstance(ActionMetaData.class);
+			BIZLET_CONTEXT = JAXBContext.newInstance(BizletMetaData.class);
+			BEHAVIOUR_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/behaviour.xsd");
 
 			SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
 			SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
@@ -475,6 +486,204 @@ public class XMLMetaData {
 		}
 	}
 
+	public static String marshalBizlet(BizletMetaData bizlet, boolean customerOverridden) {
+		try {
+			Marshaller marshaller = BIZLET_CONTEXT.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			StringBuilder location = new StringBuilder(64);
+			location.append(BEHAVIOUR_NAMESPACE).append(' ');
+			if (customerOverridden) {
+				location.append("../../");
+			}
+			location.append("../../../../schemas/behaviour.xsd");
+			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, location.toString());
+			StringWriter sos = new StringWriter(1024);
+			marshaller.marshal(bizlet, sos);
+
+			Document document = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new JAXBFixingVisitor(BEHAVIOUR_NAMESPACE);
+			document.accept(visitor);
+			return document.asXML();
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal bizlet", e);
+		}
+	}
+
+	/**
+	 * Writes the BizletMetaData to a new bizlet.xml in the location of the
+	 * specified file. This will overwrite any existing bizlet file in that location.
+	 * 
+	 * The bizlet will create it's own package directory if it doesn't already exist.
+	 * 
+	 * @param bizlet The bizlet to output to a file
+	 * @param customerOverridden Should be true if this bizlet is a customer override, false otherwise
+	 * @param bizletDocumentDirectory The path to the document this bizlet belongs to
+	 */
+	public static void marshalBizlet(BizletMetaData bizlet, boolean customerOverridden, String bizletDocumentDirectory) {
+		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		StringBuilder filePath = new StringBuilder(64);
+		filePath.append(bizletDocumentDirectory);
+		if ((! bizletDocumentDirectory.endsWith("/")) && (! bizletDocumentDirectory.endsWith("\\"))) {
+			filePath.append('/');
+		}
+		File file = new File(filePath.toString());
+		file.mkdirs();
+		filePath.append(file.getName()).append("Bizlet.xml");
+		file = new File(filePath.toString());
+		Util.LOGGER.info(String.format("Attempting to write bizlet.xml to %s", file.getPath()));
+
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+				try (OutputStreamWriter osw = new OutputStreamWriter(bos, Util.UTF8)) {
+					try (BufferedWriter bw = new BufferedWriter(osw)) {
+						String contents = marshalBizlet(bizlet, customerOverridden);
+						bw.write(contents);
+						bw.flush();
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal bizlet at " + file.getPath(), e);
+		}
+	}
+	
+	public static BizletMetaData unmarshalBizletFile(String file) {
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		File f = new File(file);
+		try (FileInputStream fis = new FileInputStream(f)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = BIZLET_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
+						BizletMetaData result = (BizletMetaData) unmarshaller.unmarshal(br);
+						result.setLastModifiedMillis(f.lastModified());
+						return result;
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal bizlet at " + file, e);
+		}
+	}
+
+	public static BizletMetaData unmarshalBizletString(String xml) {
+		try (StringReader sr = new StringReader(xml)) {
+			Unmarshaller unmarshaller = BIZLET_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
+			return (BizletMetaData) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal bizlet xml " + xml, e);
+		}
+	}
+
+	public static String marshalAction(ActionMetaData action, boolean customerOverridden) {
+		try {
+			Marshaller marshaller = ACTION_CONTEXT.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			StringBuilder location = new StringBuilder(64);
+			location.append(BEHAVIOUR_NAMESPACE).append(' ');
+			if (customerOverridden) {
+				location.append("../../");
+			}
+			location.append("../../../../schemas/behaviour.xsd");
+			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, location.toString());
+			StringWriter sos = new StringWriter(1024);
+			marshaller.marshal(action, sos);
+
+			Document document = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new JAXBFixingVisitor(BEHAVIOUR_NAMESPACE);
+			document.accept(visitor);
+			return document.asXML();
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal " + action.getName() + " action", e);
+		}
+	}
+
+	/**
+	 * Writes the ActionMetaData to a new action.xml in the location of the
+	 * specified file. This will overwrite any existing file in that location with
+	 * the same name as specified in the metadata.
+	 * 
+	 * The action will create it's own package directory if it doesn't already exist,
+	 * and create an action.xml according to the <code>name</code> specified in the
+	 * ActionMetaData.
+	 * 
+	 * @param action The action to output to a file
+	 * @param customerOverridden Should be true if this action is a customer override, false otherwise
+	 * @param actionDocumentDirectory The path to the document this action belongs to
+	 */
+	public static void marshalAction(ActionMetaData action, boolean customerOverridden, String actionDocumentDirectory) {
+		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		StringBuilder filePath = new StringBuilder(64);
+		filePath.append(actionDocumentDirectory);
+		if ((! actionDocumentDirectory.endsWith("/")) && (! actionDocumentDirectory.endsWith("\\"))) {
+			filePath.append('/');
+		}
+		filePath.append("actions/");
+		File file = new File(filePath.toString());
+		file.mkdirs();
+		filePath.append(action.getName()).append(".xml");
+		file = new File(filePath.toString());
+		Util.LOGGER.info(String.format("Attempting to write action.xml to %s", file.getPath()));
+
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			try (BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+				try (OutputStreamWriter osw = new OutputStreamWriter(bos, Util.UTF8)) {
+					try (BufferedWriter bw = new BufferedWriter(osw)) {
+						String contents = marshalAction(action, customerOverridden);
+						bw.write(contents);
+						bw.flush();
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal action at " + file.getPath(), e);
+		}
+	}
+	
+	public static ActionMetaData unmarshalActionFile(String file) {
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		File f = new File(file);
+		try (FileInputStream fis = new FileInputStream(f)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = ACTION_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
+						ActionMetaData result = (ActionMetaData) unmarshaller.unmarshal(br);
+						result.setLastModifiedMillis(f.lastModified());
+						return result;
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal action at " + file, e);
+		}
+	}
+
+	public static ActionMetaData unmarshalActionString(String xml) {
+		try (StringReader sr = new StringReader(xml)) {
+			Unmarshaller unmarshaller = ACTION_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
+			return (ActionMetaData) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal action xml " + xml, e);
+		}
+	}
+
 	public static String marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) {
 		try {
 			Marshaller marshaller = VIEW_CONTEXT.createMarshaller();
@@ -543,7 +752,7 @@ public class XMLMetaData {
 			}
 		}
 		catch (Exception e) {
-			throw new MetaDataException("Could not marshal document at " + file.getPath(), e);
+			throw new MetaDataException("Could not marshal view at " + file.getPath(), e);
 		}
 	}
 	
@@ -815,6 +1024,8 @@ public class XMLMetaData {
 		JAXBContext jaxbContext = JAXBContext.newInstance(CustomerMetaData.class, 
 															ModuleMetaData.class,
 															DocumentMetaData.class,
+															ActionMetaData.class,
+															BizletMetaData.class,
 															ViewMetaData.class,
 															Router.class,
 															Automation.class);
@@ -833,6 +1044,9 @@ public class XMLMetaData {
 				}
 				else if (namespaceUri.endsWith("/document")) {
 					file = new File("document.xsd");
+				}
+				else if (namespaceUri.endsWith("/behaviour")) {
+					file = new File("behaviour.xsd");
 				}
 				else if (namespaceUri.endsWith("/view")) {
 					file = new File("view.xsd");
