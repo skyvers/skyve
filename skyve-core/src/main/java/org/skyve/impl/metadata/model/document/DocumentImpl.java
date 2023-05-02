@@ -30,7 +30,6 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.flow.Flow;
 import org.skyve.impl.metadata.model.ModelImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
@@ -78,8 +77,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
-
-	private Flow flow;
 
 	/**
 	 * This is a map of fieldName -> document's child or detail document names. This can be empty if no detail document exists.
@@ -448,14 +445,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		}
 		
 		return Collections.unmodifiableList(result);
-	}
-
-	public Flow getFlow() {
-		return flow;
-	}
-
-	public void setFlow(Flow flow) {
-		this.flow = flow;
 	}
 
 	@Override
