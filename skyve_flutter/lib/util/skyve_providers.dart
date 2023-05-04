@@ -53,7 +53,7 @@ final containerDataSourceProvider =
     return dataSources!;
   }
 
-  // Use metadata if there is no local menu
+  // Use metadata if there is no local data sources
   return Future<Map<String, SkyveDataSourceModel>>(() async {
     final Map<String, dynamic> metadata =
         await ref.watch(containerMetaDataProvider.future);
