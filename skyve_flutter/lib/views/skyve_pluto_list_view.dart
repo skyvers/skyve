@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import '../util/skyve_rest_client.dart';
 
 class ContactListPage2 extends StatefulWidget {
   static const String route = 'ContactList2';
@@ -17,6 +18,9 @@ class ContactListPage2 extends StatefulWidget {
 }
 
 class _ContactListState2 extends State<ContactListPage2> {
+  final SkyveRestClient _rest = SkyveRestClient();
+  late String _dataSourceName;
+
   double rowHeightMobile = 100;
   double rowHeightDesktop = 45;
   double columnWidthP = 550;
@@ -33,6 +37,8 @@ class _ContactListState2 extends State<ContactListPage2> {
   void initState() {
     super.initState();
     debugPrint("==== init state called");
+
+    _dataSourceName = _rest.dataSource('admin', null, 'qContacts');
 
     columns = [
       PlutoColumn(
@@ -113,8 +119,7 @@ class _ContactListState2 extends State<ContactListPage2> {
       // trying to switch the pluto column from single row to multirow
       // however, the grid seems to only redraw properly if I put something in between.
       PlutoGrid grid = _buildGrid(mobileView);
-      body = Padding(
-          padding: const EdgeInsets.all(80.0), child: Center(child: grid));
+      body = Center(child: grid);
 
       return Scaffold(
           appBar: AppBar(title: const Text('Contact List')),
@@ -124,12 +129,7 @@ class _ContactListState2 extends State<ContactListPage2> {
     });
   }
 
-  bool _sizeChanged(SizeChangedLayoutNotification notification) {
-    final RenderBox? renderBox =
-        _widgetKey.currentContext?.findRenderObject() as RenderBox?;
-    final Size? size = renderBox?.size; // or _widgetKey.currentContext?.size
-    debugPrint('Changed Size: ${size?.width}, ${size?.height}');
-
+  bool _sizeChanged(SizeChangedLayoutNotification? notification) {
     bool mobile = MediaQuery.of(context).size.width < 800.0;
     debugPrint('size changed $mobile');
     _gridStateManager.hideColumn(columns[0], !mobile, notify: false);
@@ -244,10 +244,7 @@ class _ContactListState2 extends State<ContactListPage2> {
   }
 
   Future<List<Map<String, dynamic>>> readSampleContactJson() async {
-    final String response =
-        await DefaultAssetBundle.of(context).loadString('./contact_data.json');
-    Map<String, dynamic> jsonContent = await json.decode(response);
-    List<dynamic> data = jsonContent['response']['data'];
+    List<dynamic> data = await _rest.fetchDataSource(_dataSourceName, 0, 75);
 
     List<Map<String, dynamic>> md =
         data.map((e) => (e as Map<String, dynamic>)).toList();
