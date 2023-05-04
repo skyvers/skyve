@@ -7,27 +7,33 @@ import 'package:flutter/foundation.dart';
 //import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class SkyveRestClient {
-  /// Set this value using --dart-define=SERVER_URL=http://xyz/etc/ when launching
-  static const _baseUri = 'http://localhost:8080/skyve/';
+  // if served from the web, use host/ or host/context/
+  // NB change this to use chrome (web) for running or debugging
+  static final String _baseUri = (kIsWeb
+      ? (Uri.base.origin +
+          (Uri.base.pathSegments.isEmpty
+              ? '/'
+              : '/${Uri.base.pathSegments[0]}/'))
+      : 'http://localhost:8080/skyve/');
   // static const _baseUri = 'http://10.0.2.2:8080/skyve/';
 
   static final instance = SkyveRestClient._internal();
   bool _loggedIn = false;
 
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: _baseUri,
-  ));
+  final Dio _dio =
+      Dio(BaseOptions(connectTimeout: const Duration(seconds: 60)));
 
   factory SkyveRestClient() {
     return instance;
   }
 
   SkyveRestClient._internal() {
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-
+    debugPrint('BaseURI is $_baseUri');
     // Manage cookies
-    final cookieJar = CookieJar();
-    _dio.interceptors.add(CookieManager(cookieJar));
+    if (!kIsWeb) {
+      final cookieJar = CookieJar();
+      _dio.interceptors.add(CookieManager(cookieJar));
+    }
 
     // Log requests
     // _dio.interceptors.add(PrettyDioLogger(
@@ -49,7 +55,7 @@ class SkyveRestClient {
   }
 
   Future<String> _fetch(String url) async {
-    final Response<String> response = await _dio.get(url);
+    final Response<String> response = await _dio.get(_baseUri + url);
     if (response.data == null) {
       throw Exception('Response data was null');
     }
@@ -82,7 +88,7 @@ class SkyveRestClient {
     /// any chance of us touching it. On mobile the redirect
     /// will not be followed because we're doing a POST.
     try {
-      Response<String> response = await _dio.post('loginAttempt',
+      Response<String> response = await _dio.post('${_baseUri}loginAttempt',
           queryParameters: params,
           options: Options(validateStatus: validateStatus));
       // This'll throw an error when running anywhere except the browser

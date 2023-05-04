@@ -1,10 +1,6 @@
 # skyve_flutter
 
-A project to test out some of the featurs of flutter including:
-
-* JSON handling
-* REST request creation and response handling
-* Creating a custom DataTable via composition that has filtering (the standard Flutter widget does not have filtering)
+A flutter web and phone app container and generator.
 
 ## Getting Started
 
@@ -72,6 +68,18 @@ dart pub global activate flutter_cors
 fluttercors --disable
 fluttercors --enable
 ```
+
+### To add the web container to a project
+
+```bash
+flutter build web
+```
+
+creates a build in <project>/build/web/
+
+- Take the contents of this folder and copy to <project>/src/main/webapp/app/
+- Search/replace index.html with index.jsp in src/main/webapp/app/
+- Compare index.html and index.jsp and keep the pertinent changes to set the appropriate base HREF.
 
 ## Flutter in VS Code
 
