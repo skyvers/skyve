@@ -13,6 +13,7 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -88,7 +89,7 @@ public class UserExtension extends User {
 	}
 
 	/**
-	 * Return the metadata user that is this user
+	 * Return the metadata user for this {@link User}.
 	 *
 	 * @return the metadata user that is this user
 	 */
@@ -156,6 +157,50 @@ public class UserExtension extends User {
 															null,
 															this);
 	}
+	
+	/**
+	 * Whether the currently logged in {@link org.skyve.metadata.user.User} is this {@link User}.
+	 * 
+	 * @return true if the logged in user is this {@link User}
+	 */
+	public boolean owningUser() {
+		return CORE.getPersistence().getUser().getId().equals(getBizId());
+	}
+
+	/**
+	 * Return a {@link UserProxy} from this {@link User}, without retrieving it from the database again.
+	 * 
+	 * @return A user proxy representing this user
+	 */
+	public UserProxyExtension toUserProxy() {
+		UserProxyExtension proxy = UserProxy.newInstance();
+
+		// set core Skyve attributes
+		proxy.setBizId(this.getBizId());
+		proxy.setBizCustomer(this.getBizCustomer());
+		proxy.setBizDataGroupId(this.getBizDataGroupId());
+		proxy.setBizLock(this.getBizLock());
+		proxy.setBizUserId(this.getBizUserId());
+		proxy.setBizVersion(this.getBizVersion());
+		proxy.setBizKey(this.getBizKey());
+
+		// set any attributes of the proxy that are on the User
+		Module m = CORE.getCustomer().getModule(User.MODULE_NAME);
+		Document proxyDoc = m.getDocument(CORE.getCustomer(), UserProxy.DOCUMENT_NAME);
+		Document userDoc = m.getDocument(CORE.getCustomer(), User.DOCUMENT_NAME);
+
+		List<? extends Attribute> allProxyAttributes = proxyDoc.getAllAttributes(CORE.getCustomer()),
+				allUserAttributes = userDoc.getAllAttributes(CORE.getCustomer());
+
+		for (Attribute a : allProxyAttributes) {
+			// if the attribute is found on the User and UserProxy, copy it across
+			if (allUserAttributes.stream().anyMatch(att -> att.getName().equals(a.getName()))) {
+				Binder.set(proxy, a.getName(), Binder.get(this, a.getName()));
+			}
+		}
+
+		return proxy;
+	}
 
 	/**
 	 * Upsert the user into the database.
@@ -205,29 +250,5 @@ public class UserExtension extends User {
 			bean.setBizUserId(bizUserId);
 			return true;
 		}
-	}
-	
-	/**
-	 * Return a user proxy from the user
-	 * 
-	 * @param user
-	 * @return
-	 */
-	public UserProxyExtension toUserProxy() {
-		UserProxyExtension result = UserProxy.newInstance();
-		result.setUserName(getUserName());
-		result.setCreatedDateTime(new DateTime());
-		result.setContact(getContact());
-		result.setInactive(getInactive());
-
-		return result;
-	}
-
-	/**
-	 * Whether the currently logged in user is this user
-	 * @return
-	 */
-	public boolean owningUser() {
-		return CORE.getPersistence().getUser().getId().equals(getBizId());
 	}
 }
