@@ -201,6 +201,21 @@ public abstract class ExpressionEvaluator {
 		return result.toString();
 	}
 
+	public static @Nullable String validateBinding(@Nonnull String binding,
+													@Nullable Customer customer,
+													@Nullable Module module,
+													@Nullable Document document) {
+		return validateBinding(binding, null, customer, module, document);
+	}
+
+	public static @Nullable String validateBinding(@Nonnull String binding,
+													@Nullable Class<?> returnType,
+													@Nullable Customer customer,
+													@Nullable Module module,
+													@Nullable Document document) {
+		return DEFAULT_EVALUATOR.validateWithoutPrefix(binding, returnType, customer, module, document);
+	}
+	
 	public static @Nonnull List<String> completeBinding(@Nullable String fragment,
 															@Nonnull Customer customer,
 															@Nonnull Module module,
