@@ -53,6 +53,8 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
 
+	public static final String DYNAMIC_ENTITY_TABLE_NAME = "ADM_DynamicEntity";
+	
 	protected Persistence persistence;
 	
 	// Cache that points to each DynamicBean ever populated.
