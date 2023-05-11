@@ -2,6 +2,13 @@ package org.skyve.job;
 
 import org.skyve.impl.job.AbstractSkyveJob;
 
+/**
+ * Extension point for Jobs.
+ * The job will not be able to be cancelled by default.
+ * Extend CancellableJob to get cancelling behaviour.
+ * 
+ * @author mike
+ */
 public abstract class Job extends AbstractSkyveJob {
 	/**
 	 * Implement the job here.
