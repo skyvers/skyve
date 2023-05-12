@@ -17,18 +17,15 @@ import org.skyve.impl.metadata.repository.view.Actions;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
-import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.WidgetReference;
-import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
-import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
-import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -67,13 +64,15 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class ViewGenerator {
-	private static final Integer ONE = Integer.valueOf(1);
-	private static final Integer TWO = Integer.valueOf(2);
-	private static final Integer THREE = Integer.valueOf(3);
+// Revert the responsive gutter centred layout
+//	private static final Integer ONE = Integer.valueOf(1);
+//	private static final Integer TWO = Integer.valueOf(2);
+//	private static final Integer THREE = Integer.valueOf(3);
 	private static final Integer FOUR = Integer.valueOf(4);
-	private static final Integer SIX = Integer.valueOf(6);
-	private static final Integer EIGHT = Integer.valueOf(8);
+//	private static final Integer SIX = Integer.valueOf(6);
+//	private static final Integer EIGHT = Integer.valueOf(8);
 	private static final Integer TWELVE = Integer.valueOf(12);
+	private static final Integer SIXTY = Integer.valueOf(60);
 	
 	private ProvidedRepository repository;
 	
@@ -180,18 +179,23 @@ public class ViewGenerator {
 		}
 
 		// <hbox shrinkWrap="height">
-		HBox hbox = new HBox();
-		hbox.setShrinkWrap(ShrinkWrap.height);
-		List<MetaData> hboxGuts = hbox.getContained();
-		hboxGuts.add(responsiveGutter());
+// Revert the responsive gutter centred layout
+//		HBox hbox = new HBox();
+//		hbox.setShrinkWrap(ShrinkWrap.height);
+//		List<MetaData> hboxGuts = hbox.getContained();
+//		hboxGuts.add(responsiveGutter());
 		
 		// <form border="true" responsiveWidth="8" sm="12" lg="6" xl="4">
+System.out.println(customer.getName() + " : " + module.getName() + '.' + document.getName());
 		Form form = new Form();
 		form.setBorder(Boolean.TRUE);
-		form.setResponsiveWidth(EIGHT);
-		form.setSm(TWELVE);
-		form.setLg(SIX);
-		form.setXl(FOUR);
+// Revert the responsive gutter centred layout
+		form.setPercentageWidth(SIXTY);
+		form.setResponsiveWidth(TWELVE);
+//		form.setResponsiveWidth(EIGHT);
+//		form.setSm(TWELVE);
+//		form.setLg(SIX);
+//		form.setXl(FOUR);
 		if (formLabelSideLayout) {
 			FormColumn column = new FormColumn();
 			column.setResponsiveWidth(FOUR);
@@ -203,19 +207,23 @@ public class ViewGenerator {
 
 		processAttributes(customer, module, document, form, details, null);
 
-		hboxGuts.add(form);
-		hboxGuts.add(responsiveGutter());
+// Revert the responsive gutter centred layout
+//		hboxGuts.add(form);
+//		hboxGuts.add(responsiveGutter());
 
 		// make a tabbed view if more than 1 detail widget or there is 1 detail widget and more than 5 form fields
 		int numberOfDetailWidgets = details.size();
 		if ((numberOfDetailWidgets > 1) || 
 				((numberOfDetailWidgets == 1) && (form.getRows().size() > 5))) {
+System.out.println("CREATE TABBED");
 			TabPane tabPane = new TabPane();
 			Tab tab = null;
 			if (! form.getRows().isEmpty()) {
 				tab = new Tab();
 				tab.setTitle("General");
-				tab.getContained().add(hbox);
+// Revert the responsive gutter centred layout
+				tab.getContained().add(form);
+//				tab.getContained().add(hbox);
 				tabPane.getTabs().add(tab);
 			}
 			
@@ -233,8 +241,11 @@ public class ViewGenerator {
 			result.getContained().add(tabPane);
 		}
 		else {
+System.out.println("CREATE UNTABBED");
 			if (! form.getRows().isEmpty()) {
-				result.getContained().add(hbox);
+// Revert the responsive gutter centred layout
+				result.getContained().add(form);
+//				result.getContained().add(hbox);
 			}
 
 			for (Detail detail : details) {
@@ -245,7 +256,8 @@ public class ViewGenerator {
 		return result;
 	}
 
-	// <vbox responsiveWidth="2" sm="12" lg="3" xl="4" pixelHeight="0" />
+/* Revert the responsive gutter centred layout
+	// <vbox responsiveWidth="2" sm="12" lg="3" xl="4" pixelHeight="1" />
 	private static VBox responsiveGutter() {
 		VBox result = new VBox();
 		result.setResponsiveWidth(TWO);
@@ -255,7 +267,7 @@ public class ViewGenerator {
 		result.setPixelHeight(ONE);
 		return result;
 	}
-	
+*/
 	private void processAttributes(Customer customer, 
 									Module module, 
 									Document document,
