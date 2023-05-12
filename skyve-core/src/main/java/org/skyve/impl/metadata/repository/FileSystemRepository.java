@@ -849,7 +849,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				String className = k.replace('/', '.');
 				if (this.loadClasses) {
 					try {
-						return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+						return Thread.currentThread().getContextClassLoader().loadClass(className);
 					}
 					catch (Exception e) {
 						throw new MetaDataException("A problem was encountered loading class " + className, e);

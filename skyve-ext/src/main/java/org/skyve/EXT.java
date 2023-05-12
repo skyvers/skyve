@@ -281,7 +281,9 @@ public class EXT {
 		try {
 			String jndiDataSourceName = dataStore.getJndiDataSourceName();
 			if (jndiDataSourceName == null) {
-				Class.forName(dataStore.getJdbcDriverClassName());
+				// Required for any JDBC drivers < JDBC 4.0.
+				// It required class loading AND initialisation, not just loading - ie Thread.currentThread().getContextClassLoader().loadClass(...)
+				Class.forName(dataStore.getJdbcDriverClassName(), true, Thread.currentThread().getContextClassLoader());
 				Properties connectionProps = new Properties();
 				String value = dataStore.getUserName();
 				if (value != null) {

@@ -69,7 +69,7 @@ public class ListGrid extends HtmlPanelGroup {
 	    			tempComponentBuilder = new SkyveComponentBuilderChain();
 	    		}
 	    		else {
-	    			Class<?> type = Class.forName(classString);
+	    			Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(classString);
 	    			tempComponentBuilder = (ComponentBuilder) type.getDeclaredConstructor().newInstance();
 	    		}
 	    	}

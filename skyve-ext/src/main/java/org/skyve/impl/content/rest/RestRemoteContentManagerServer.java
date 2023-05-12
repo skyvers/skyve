@@ -53,7 +53,7 @@ import org.skyve.util.Util;
  *		    </filter>
  *			<filter-mapping>
  *		        <filter-name>APIFilter</filter-name>
- *				<url-pattern>/rest/api/*</url-pattern>
+ *				<url-pattern>/rest/content/*</url-pattern>
  *		    </filter-mapping>
  *		    <filter>
  *		        <display-name>ContentFilter</display-name>

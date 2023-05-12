@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.skyve.impl.backup.AzureBlobStorageBackup;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 
@@ -103,8 +104,8 @@ public class StartupExtensionTest {
 		// verify the results
 		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_STANZA_KEY));
-		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_CONNECTION_STRING_KEY));
-		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_CONTAINER_NAME_KEY));
+		assertThat(valueCapture.getValue(), containsString(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY));
+		assertThat(valueCapture.getValue(), containsString(AzureBlobStorageBackup.AZURE_CONTAINER_NAME_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_EXTERNAL_BACKUP_CLASS_KEY));
 	}
 

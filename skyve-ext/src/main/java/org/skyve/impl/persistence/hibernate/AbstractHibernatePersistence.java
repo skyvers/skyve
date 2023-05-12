@@ -175,7 +175,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 		else {
 			try {
-				AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.SKYVE_PERSISTENCE_CLASS);
+				AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalStateException("Could not find SKYVE_PERSISTENCE_CLASS " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
@@ -187,7 +187,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 		else {
 			try {
-				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Class.forName(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalStateException("Could not find SKYVE_DYNAMIC_PERSISTENCE_CLASS " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS, e);
@@ -384,7 +384,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				dialect = DIALECTS.get(dialectClassName);
 				if (dialect == null) {
 					try {
-						Class<?> dialectClass = Class.forName(dialectClassName);
+						Class<?> dialectClass = Thread.currentThread().getContextClassLoader().loadClass(dialectClassName);
 						dialect = (SkyveDialect) dialectClass.getDeclaredConstructor().newInstance();
 						DIALECTS.put(dialectClassName, dialect);
 					}

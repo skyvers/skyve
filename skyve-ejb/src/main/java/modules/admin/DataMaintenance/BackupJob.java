@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ public class BackupJob extends Job {
 		DateOnly now = new DateOnly();
 		DataMaintenance dm = DataMaintenance.newInstance();
 		File backupZip = null;
-		Collection<String> log = getLog();
+		List<String> log = getLog();
 		String trace;
 
 		Integer yearlyBackupRetention = dm.getYearlyBackupRetention();
@@ -79,6 +78,7 @@ public class BackupJob extends Job {
 					trace = String.format("Failed to move external backup from %s to %s", backupZip.getName(), dailyZip.getName());
 					log.add(trace);
 					Util.LOGGER.warning(trace);
+					org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 				}
 			} else {
 				if (Files.move(backupZip.toPath(), dailyZip.toPath(), StandardCopyOption.REPLACE_EXISTING) == null) {
@@ -87,7 +87,6 @@ public class BackupJob extends Job {
 				trace = String.format("Backup moved from %s to %s", backupZip.getAbsolutePath(), dailyZip.getAbsolutePath());
 				log.add(trace);
 				Util.LOGGER.info(trace);
-
 			}
 
 			// copy daily to weekly
@@ -102,6 +101,7 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
+						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
 					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
@@ -126,6 +126,7 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
+						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
 					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
@@ -151,6 +152,7 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
+						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
 					trace = String.format("Copy Backup %s to %s", backupZip.getAbsolutePath(), copy.getAbsolutePath());
@@ -173,8 +175,6 @@ public class BackupJob extends Job {
 			cull(backupDir, "YEARLY_", "_PROBLEMS", yearly * 2);
 		}
 
-		// TODO instance of communication instance in code - default settings
-
 		setPercentComplete(100);
 		trace = String.format("Finished Backup of customer %s at %s", CORE.getUser().getCustomerName(), new Date());
 		log.add(trace);
@@ -188,7 +188,7 @@ public class BackupJob extends Job {
 
 	private void cull(File backupDir, String prefix, String suffix, int retain)
 			throws IOException {
-		Collection<String> log = getLog();
+		List<String> log = getLog();
 		final String regex = prefix + "\\d*" + ((suffix == null) ? "" : suffix) + "\\.zip";
 		File[] files = FileUtil.listFiles(backupDir, regex, SortDirection.descending);
 
@@ -218,6 +218,7 @@ public class BackupJob extends Job {
 						trace = String.format("Failed to cull external backup %s", matchingBackups.get(i));
 						log.add(trace);
 						Util.LOGGER.warning(trace);
+						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				}
 			} catch (Exception e) {

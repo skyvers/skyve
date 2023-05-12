@@ -219,6 +219,13 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.CONTENT_REST_SERVER_URL = getString("content", "serverUrl", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
+		// Backup settings
+		Map<String, Object> backup = getObject(null, "backup", properties, false);
+		if (backup != null) {
+			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = getString("backup", "externalBackupClass", backup, false);
+			UtilImpl.BACKUP_PROPERTIES = getObject("backup", "properties", backup, false);
+		}
+		
 		// Uploads settings
 		Map<String, Object> uploads = getObject(null, "uploads", properties, false);
 		if (uploads != null) {
@@ -490,7 +497,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				try {
-					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.SKYVE_PERSISTENCE_CLASS);
+					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				}
 				catch (ClassNotFoundException e) {
 					throw new IllegalStateException("Could not find factories.persistenceClass " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
@@ -507,7 +514,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				try {
-					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Class.forName(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				}
 				catch (ClassNotFoundException e) {
 					throw new IllegalStateException("Could not find factories.dynamicPersistenceClass " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS, e);

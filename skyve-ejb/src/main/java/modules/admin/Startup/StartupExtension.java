@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -17,6 +17,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
+import org.skyve.impl.backup.AzureBlobStorageBackup;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.util.JSON;
@@ -40,8 +41,7 @@ public class StartupExtension extends Startup {
 
 	static final String BACKUP_STANZA_KEY = "backup";
 	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
-	static final String BACKUP_CONNECTION_STRING_KEY = "connectionString";
-	static final String BACKUP_CONTAINER_NAME_KEY = "containerName";
+	static final String BACKUP_PROPERTIES_KEY = "properties";
 
 	static final String ENVIRONMENT_STANZA_KEY = "environment";
 	static final String ENVIRONMENT_IDENTIFIER_KEY = "identifier";
@@ -98,17 +98,21 @@ public class StartupExtension extends Startup {
 
 		setAccountAllowUserSelfRegistration(Boolean.valueOf(UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION));
 
-		@SuppressWarnings("unchecked")
-		Map<String, Object> backup = (Map<String, Object>) UtilImpl.CONFIGURATION.get(BACKUP_STANZA_KEY);
-		if (backup != null) {
-			String backupType = (String) backup.get(BACKUP_EXTERNAL_BACKUP_CLASS_KEY);
-			if (backupType != null) {
-				setBackupType(BackupType.fromCode(backupType));
-			} else {
-				setBackupType(BackupType.none);
+		if (UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS != null) {
+			setBackupType(BackupType.fromCode(UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS));
+		}
+		else {
+			setBackupType(BackupType.none);
+		}
+		if (UtilImpl.BACKUP_PROPERTIES != null) {
+			Object property = UtilImpl.BACKUP_PROPERTIES.get(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY);
+			if (property != null) {
+				setBackupConnectionString(property.toString());
 			}
-			setBackupConnectionString((String) backup.get(BACKUP_CONNECTION_STRING_KEY));
-			setBackupDirectoryName((String) backup.get(BACKUP_CONTAINER_NAME_KEY));
+			property = UtilImpl.BACKUP_PROPERTIES.get(AzureBlobStorageBackup.AZURE_CONTAINER_NAME_KEY);
+			if (property != null) {
+				setBackupDirectoryName(property.toString());
+			}
 		}
 	}
 
@@ -238,41 +242,36 @@ public class StartupExtension extends Startup {
 	 */
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> putBackup(final Map<String, Object> properties) {
-
 		// initialise or get the existing property map
 		Map<String, Object> backup = (Map<String, Object>) properties.get(BACKUP_STANZA_KEY);
+		Map<String, Object> backupProperties = null;
 		if (backup == null) {
 			backup = new HashMap<>();
 			properties.put(BACKUP_STANZA_KEY, backup);
 		}
 
-		// get the current root json backup map (or use a blank one for comparisons if there is not one)
-		Map<String, Object> rootBackupMap = UtilImpl.CONFIGURATION.containsKey(BACKUP_STANZA_KEY)
-				? (Map<String, Object>) UtilImpl.CONFIGURATION.get(BACKUP_STANZA_KEY)
-				: new HashMap<>();
-
 		// add any values to the override configuration if they have changed
-		if (getBackupType() == null
-				|| !Objects.equals(getBackupType().toCode(), rootBackupMap.get(BACKUP_EXTERNAL_BACKUP_CLASS_KEY))) {
-			if (getBackupType() == null || getBackupType() == BackupType.none) {
-				backup.put(BACKUP_EXTERNAL_BACKUP_CLASS_KEY, null);
-			} else {
-				backup.put(BACKUP_EXTERNAL_BACKUP_CLASS_KEY, getBackupType().toCode());
+		BackupType backupType = getBackupType();
+		if ((backupType == null) || (backupType == BackupType.none)) {
+			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = null;
+		} else {
+			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = backupType.toCode();
+			backupProperties = new TreeMap<>();
+			backup.put(BACKUP_PROPERTIES_KEY, backupProperties);
+		}
+		backup.put(BACKUP_EXTERNAL_BACKUP_CLASS_KEY, UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS);
+
+		if (backupProperties != null) {
+			String property = getBackupConnectionString();
+			if (property != null) {
+				backupProperties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY, property);
 			}
-			UtilImpl.CONFIGURATION.put(BACKUP_STANZA_KEY, backup);
+			property = getBackupDirectoryName();
+			if (property != null) {
+				backupProperties.put(AzureBlobStorageBackup.AZURE_CONTAINER_NAME_KEY, property);
+			}
 		}
-
-		if (getBackupConnectionString() == null
-				|| !Objects.equals(getBackupConnectionString(), rootBackupMap.get(BACKUP_CONNECTION_STRING_KEY))) {
-			backup.put(BACKUP_CONNECTION_STRING_KEY, getBackupConnectionString());
-			UtilImpl.CONFIGURATION.put(BACKUP_STANZA_KEY, backup);
-		}
-
-		if (getBackupDirectoryName() == null
-				|| !Objects.equals(getBackupDirectoryName(), rootBackupMap.get(BACKUP_CONTAINER_NAME_KEY))) {
-			backup.put(BACKUP_CONTAINER_NAME_KEY, getBackupDirectoryName());
-			UtilImpl.CONFIGURATION.put(BACKUP_STANZA_KEY, backup);
-		}
+		UtilImpl.BACKUP_PROPERTIES = backupProperties;
 
 		return backup;
 	}

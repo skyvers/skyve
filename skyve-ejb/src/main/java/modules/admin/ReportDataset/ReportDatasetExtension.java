@@ -126,7 +126,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	public List<DynaBean> executeClass() {
 		try {
 			@SuppressWarnings("unchecked")
-			Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Class.forName(getQuery());
+			Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Thread.currentThread().getContextClassLoader().loadClass(getQuery());
 			if (reportClass != null) {
 				BeanReportDataset dataset = CDI.current().select(reportClass).get();
 				return dataset.getResults(getParent().getParameters());

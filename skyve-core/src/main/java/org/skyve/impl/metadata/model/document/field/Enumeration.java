@@ -234,7 +234,7 @@ public class Enumeration extends ConstrainableField {
 		
 		try {
 			@SuppressWarnings("unchecked")
-			Class<org.skyve.domain.types.Enumeration> result = (Class<org.skyve.domain.types.Enumeration>) Class.forName(fullyQualifiedEnumName, true, Thread.currentThread().getContextClassLoader());
+			Class<org.skyve.domain.types.Enumeration> result = (Class<org.skyve.domain.types.Enumeration>) Thread.currentThread().getContextClassLoader().loadClass(fullyQualifiedEnumName);
 			return result;
 		}
 		catch (Exception e) {

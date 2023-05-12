@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.skyve.CORE;
+import org.skyve.impl.util.UtilImpl;
 
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -18,6 +19,8 @@ import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 
 public class AzureBlobStorageBackup implements ExternalBackup {
+	public static final String AZURE_CONNECTION_STRING_KEY = "connectionString";
+	public static final String AZURE_CONTAINER_NAME_KEY = "containerName";
 
 	@Override
 	public List<String> listBackups() {
@@ -80,7 +83,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	}
 
 	private static String getConnectionString() {
-		final String connectionString = (String) ExternalBackup.getProperties().get("connectionString");
+		final String connectionString = (String) UtilImpl.BACKUP_PROPERTIES.get(AZURE_CONNECTION_STRING_KEY);
 		if (connectionString == null) {
 			throw new IllegalStateException("Missing JSON property connectionString under backup.");
 		}
@@ -88,7 +91,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	}
 
 	private static String getContainerName() {
-		final String containerName = (String) ExternalBackup.getProperties().get("containerName");
+		final String containerName = (String) UtilImpl.BACKUP_PROPERTIES.get(AZURE_CONTAINER_NAME_KEY);
 		if (containerName == null) {
 			throw new IllegalStateException("Missing JSON property containerName under backup.");
 		}
