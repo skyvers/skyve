@@ -186,7 +186,6 @@ public class ViewGenerator {
 //		hboxGuts.add(responsiveGutter());
 		
 		// <form border="true" responsiveWidth="8" sm="12" lg="6" xl="4">
-System.out.println(customer.getName() + " : " + module.getName() + '.' + document.getName());
 		Form form = new Form();
 		form.setBorder(Boolean.TRUE);
 // Revert the responsive gutter centred layout
@@ -215,7 +214,6 @@ System.out.println(customer.getName() + " : " + module.getName() + '.' + documen
 		int numberOfDetailWidgets = details.size();
 		if ((numberOfDetailWidgets > 1) || 
 				((numberOfDetailWidgets == 1) && (form.getRows().size() > 5))) {
-System.out.println("CREATE TABBED");
 			TabPane tabPane = new TabPane();
 			Tab tab = null;
 			if (! form.getRows().isEmpty()) {
@@ -241,7 +239,6 @@ System.out.println("CREATE TABBED");
 			result.getContained().add(tabPane);
 		}
 		else {
-System.out.println("CREATE UNTABBED");
 			if (! form.getRows().isEmpty()) {
 // Revert the responsive gutter centred layout
 				result.getContained().add(form);
