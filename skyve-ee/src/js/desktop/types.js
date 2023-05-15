@@ -1613,7 +1613,7 @@ isc.BizContentImageItem.addMethods({
 			imageType: 'stretch',
 			overflow: 'hidden',
 			isGroup: true,
-			styleName: 'bizhubRoundedBorder',
+			styleName: 'bizhubRoundedBorder bizhubContentImgFit',
 			groupBorderCSS: '1px solid #bfbfbf',
 			margin: 1,
 			groupLabelBackgroundColor:'transparent',
