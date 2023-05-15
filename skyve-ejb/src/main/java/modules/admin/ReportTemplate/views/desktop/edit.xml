@@ -69,6 +69,11 @@
 					<radio binding="outputFormat" vertical="false" />
 				</item>
 			</row>
+			<row>
+				<item>
+					<default binding="restrictToRole" />
+				</item>
+			</row>
 		</form>
 		<form responsiveWidth="6" border="true" borderTitle="Report Template" minPixelHeight="300" visible="typeFreemarker">
 			<column />

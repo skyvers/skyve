@@ -101,6 +101,13 @@
 				<value code="bean" description="Bean"/>
 			</values>
 		</enum>
+		<text name="restrictToRole">
+			<displayName>Restrict to Role</displayName>
+			<description>If this report should only be available to a subset of users with a specific role</description>
+			<domain>variant</domain>
+			<length>60</length>
+		</text>
+		
 		<collection name="datasets" type="child">
 			<displayName>Datasets</displayName>
 			<documentName>ReportDataset</documentName>

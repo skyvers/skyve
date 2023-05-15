@@ -95,6 +95,9 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	public static final String modePropertyName = "mode";
 
 	/** @hidden */
+	public static final String restrictToRolePropertyName = "restrictToRole";
+
+	/** @hidden */
 	public static final String datasetsPropertyName = "datasets";
 
 	/** @hidden */
@@ -819,6 +822,13 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * The query mode of the Jasper report
 	 **/
 	private Mode mode;
+
+	/**
+	 * Restrict to Role
+	 * <br/>
+	 * If this report should only be available to a subset of users with a specific role
+	 **/
+	private String restrictToRole;
 
 	/**
 	 * Datasets
@@ -1560,6 +1570,24 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	public void setMode(Mode mode) {
 		preset(modePropertyName, mode);
 		this.mode = mode;
+	}
+
+	/**
+	 * {@link #restrictToRole} accessor.
+	 * @return	The value.
+	 **/
+	public String getRestrictToRole() {
+		return restrictToRole;
+	}
+
+	/**
+	 * {@link #restrictToRole} mutator.
+	 * @param restrictToRole	The new value.
+	 **/
+	@XmlElement
+	public void setRestrictToRole(String restrictToRole) {
+		preset(restrictToRolePropertyName, restrictToRole);
+		this.restrictToRole = restrictToRole;
 	}
 
 	/**
