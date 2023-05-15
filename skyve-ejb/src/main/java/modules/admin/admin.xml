@@ -110,6 +110,9 @@
 				</document>
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
+			<accesses>
+				<singular document="ReportTemplate"/>
+			</accesses>
 		</role>
 		<role name="AuditManager">
 			<description>admin.adminRoles.auditManager.description</description>
