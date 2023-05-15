@@ -825,8 +825,28 @@
             </columns>
         </query>
         <query documentName="ReportTemplate" name="qEnabledReports">
+        	<documentation>Shows all enabled reports which are not fragments, and makes sure 
+        		the logged in user has the role if the report is restricted to a specific role.</documentation>
 			<description><![CDATA[All Reports]]></description>
-			<filter>bean.includeFragment = false and bean.enabled = true</filter>
+			<filter>
+				bean.includeFragment = false AND bean.enabled = true
+				AND (
+					bean.restrictToRole IS NULL OR (
+						EXISTS (
+							SELECT 1
+							FROM {admin.UserRole} as ur
+							WHERE ur.roleName = bean.restrictToRole AND ur.parent.bizId = {USERID}
+						)
+						OR EXISTS (
+							SELECT 1
+							FROM {admin.User} as u
+	                		INNER JOIN u.groups as g
+	                		INNER JOIN g.roles as gr
+	                		WHERE gr.roleName = bean.restrictToRole AND u.bizId = {USERID}
+						) 
+					)
+				)
+			</filter>
 			<columns>
 				<column binding="name" sortOrder="ascending" />
 				<column binding="description" />
@@ -852,6 +872,7 @@
 				<column binding="outputFormat" displayName="Format" pixelWidth="80" />
 				<column binding="reportType" hidden="true" />
 				<column binding="templateName" />
+				<column binding="restrictToRole" hidden="true" />
 				<column binding="template" hidden="true" />
 			</columns>
 		</query>

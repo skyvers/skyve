@@ -537,6 +537,7 @@
 				<param name="enumClass">modules.admin.domain.ReportTemplate$Mode</param>
 			</type>
 		</property>
+		<property name="restrictToRole" length="60" />
 		<bag name="datasets" order-by="datasetName asc" cascade="all-delete-orphan">
 			<key column="parent_id" />
 			<one-to-many entity-name="adminReportDataset" />

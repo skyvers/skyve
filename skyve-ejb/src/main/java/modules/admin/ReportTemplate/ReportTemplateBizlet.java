@@ -28,6 +28,7 @@ import org.skyve.web.WebContext;
 import modules.admin.JobSchedule.JobScheduleBizlet;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
+import modules.admin.User.UserBizlet;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.ReportType;
 
@@ -90,6 +91,15 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		}
 
 		return super.getDynamicDomainValues(attributeName, bean);
+	}
+
+	@Override
+	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+		if (ReportTemplate.restrictToRolePropertyName.equals(attributeName)) {
+			return UserBizlet.getCustomerRoleValues(CORE.getUser());
+		}
+
+		return super.getVariantDomainValues(attributeName);
 	}
 
 	@Override
