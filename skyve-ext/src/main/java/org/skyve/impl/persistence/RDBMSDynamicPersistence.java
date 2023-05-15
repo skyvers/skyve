@@ -452,22 +452,26 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}
 	}
 
+	/**
+	 * Called by Skyve Persistence for a static bean with some dynamic properties
+	 */
 	@Override
 	public void populate(PersistentBean bean) {
 		try {
 //System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
 			// Note that caching of these mixed beans is handled by hibernate so if AbstractHibernatePersistence.postLoad() calls this method, we don't ask questions.
 
-			// select the json by bizId
+			// select the json by bizId (no assertion that the row exists since this is a hybrid static/dynamic bean and is driven by the static select)
 			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields from ADM_DynamicEntity where bizid = :bizId";
-			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).retrieveTuple();
-	
-			User u = persistence.getUser();
-			Customer c = u.getCustomer();
-			Module m = c.getModule(bean.getBizModule());
-			Document d = m.getDocument(c, bean.getBizDocument());
-			
-			populate(u, c, m, d, bean, tuple);
+			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).tupleResult();
+			if (tuple != null) { // dynamic properties exist
+				User u = persistence.getUser();
+				Customer c = u.getCustomer();
+				Module m = c.getModule(bean.getBizModule());
+				Document d = m.getDocument(c, bean.getBizDocument());
+				
+				populate(u, c, m, d, bean, tuple);
+			}
 		}
 		catch (SkyveException e) {
 			throw e;
@@ -477,6 +481,9 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}
 	}
 
+	/**
+	 * Called by Skyve Persistence for a totally dynamic bean.
+	 */
 	@Override
 	public DynamicPersistentBean populate(String bizId) {
 		try {
@@ -485,7 +492,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				return dynamicFirstLevelCache.get(bizId);
 			}
 
-			// select the json by bizId
+			// select the json by bizId (assert that the row exists since this is a totally dynamic bean)
 			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields, moduleName, documentName from ADM_DynamicEntity where bizid = :bizId";
 			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bizId, false).retrieveTuple();
 			
