@@ -109,10 +109,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent tabPane(UIComponent component,
 											TabPane tabPane,
 											String moduleName,
-											String documentName,
-											StringBuilder stickyTabScript);
+											String documentName);
 	
 	public abstract UIComponent tab(UIComponent component, String title, Tab tab);
+	
+	public abstract UIComponent tabPaneScript(UIComponent component,
+												TabPane tabPane,
+												String moduleName,
+												String documentName,
+												String tabPaneComponentId);
 	
 	public abstract UIComponent border(UIComponent component,
 										String title,

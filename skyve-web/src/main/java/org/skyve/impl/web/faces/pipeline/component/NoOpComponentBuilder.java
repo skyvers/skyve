@@ -66,8 +66,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent tabPane(UIComponent component,
 								TabPane tabPane,
 								String moduleName,
-								String documentName,
-								StringBuilder stickyTabScript) {
+								String documentName) {
 		return component;
 	}
 
@@ -76,6 +75,15 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 		return component;
 	}
 
+	@Override
+	public UIComponent tabPaneScript(UIComponent component,
+										TabPane tabPane,
+										String moduleName,
+										String documentName,
+										String tabPaneComponentId) {
+		return component;
+	}
+	
 	@Override
 	public UIComponent border(UIComponent component, String title, String invisibileConditionName, Integer pixelWidth) {
 		return component;

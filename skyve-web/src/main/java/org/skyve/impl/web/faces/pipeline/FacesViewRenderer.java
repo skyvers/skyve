@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
-import javax.faces.component.UIOutput;
 
 import org.primefaces.component.calendar.Calendar;
 import org.skyve.domain.Bean;
@@ -251,11 +250,9 @@ public class FacesViewRenderer extends ViewRenderer {
     	}
 	}
 
-	private StringBuilder stickyTabScript = new StringBuilder(128);
-	
 	@Override
 	public void renderTabPane(TabPane tabPane) {
-		UIComponent component = cb.tabPane(null, tabPane, module.getName(), document.getName(), stickyTabScript);
+		UIComponent component = cb.tabPane(null, tabPane, module.getName(), document.getName());
         addToContainer(component, 
         				tabPane.getPixelWidth(), 
         				tabPane.getResponsiveWidth(), 
@@ -274,31 +271,21 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedTabPane(TabPane tabPane) {
+		UIComponent script = cb.tabPaneScript(null, tabPane, module.getName(), document.getName(), current.getId());
+		
 		addedToContainer();
 
-        // remember tab unless the tab selection is being controlled by the view.
-		UIOutput script = null;
-		if ((stickyTabScript.length() > 0) && (tabPane.getSelectedTabIndexBinding() == null)) {
-			script = new UIOutput();
-			script.setValue(String.format("<script type=\"text/javascript\">%s</script>", stickyTabScript));
-        }
-		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
 			current.getChildren().remove(fragment);
 			fragment.setParent(null);
 			facesView.getChildren().add(fragment);
 			fragment = null;
-			if (script != null) {
-				facesView.getChildren().add(script);
-			}
+			facesView.getChildren().add(script);
 		}
 		else {
-			if (script != null) {
-				current.getChildren().add(script);
-			}
+			current.getChildren().add(script);
 		}
-		stickyTabScript.setLength(0);
 	}
 
 	@Override

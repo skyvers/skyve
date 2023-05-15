@@ -217,12 +217,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent tabPane(UIComponent component,
 								TabPane tabPane,
 								String moduleName,
-								String documentName,
-								StringBuilder stickyTabScript) {
+								String documentName) {
 		if (component != null) {
 			return component;
 		}
 
+		StringBuilder expr = new StringBuilder(96);
 		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
 		// NB We can't turn prependId off as PF doesn't work.
 		// result.setPrependId(false);
@@ -232,21 +232,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
 		if (selectedTabIndexBinding != null) {
 			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class, false, Sanitisation.none));
-			result.setOnTabChange("SKYVE.PF.tabChange()");
+			
+			// Set display on based on whether there is a tab index defined
+			expr.append("#{empty ").append(managedBeanName).append(".currentBean['").append(selectedTabIndexBinding).append("'] ? 'display:none' : ''}");
+			result.setValueExpression("style", ef.createValueExpression(elc, expr.toString(), String.class));
 		}
 		else {
 			result.setStyle("display:none");
-			result.setWidgetVar(id);
-			result.setOnTabChange(String.format("SKYVE.PF.tabChange();sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));
-
-			stickyTabScript.append(String.format("var t=PF('%s');if(t){t.jq.show();t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);}else{$(document).ready(function(){var t=PF('%s');t.jq.show();t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);});}",
-													id,
-													moduleName, documentName, id,
-													moduleName, documentName, id,
-													id,
-													moduleName, documentName, id,
-													moduleName, documentName, id));
 		}
+		
+		result.setWidgetVar(id); // for subsequent tab script to work
+
+		expr.setLength(0);
+		expr.append("SKYVE.PF.tabChange('").append(moduleName).append("','").append(documentName).append("','").append(id).append("',index)");
+		result.setOnTabChange(expr.toString());
+
 		return result;
 	}
 
@@ -264,6 +264,35 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@Override
+	public UIComponent tabPaneScript(UIComponent component, TabPane tabPane, String moduleName, String documentName, String tabPaneComponentId) {
+		UIOutput result = new UIOutput();
+
+		StringBuilder expr = new StringBuilder(128);
+		expr.append("<script type=\"text/javascript\">var t=PF('");
+		expr.append(tabPaneComponentId).append("');if(t){t.jq.show();t.select(sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append("?sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append(":0);}else{$(document).ready(function(){var t=PF('");
+		expr.append(tabPaneComponentId).append("');t.jq.show();t.select(sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append("?sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append(":0);});}</script>");
+		result.setValue(expr.toString());
+		
+		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
+		if (selectedTabIndexBinding != null) {
+			// Set script conditional rendering based on whether there is a tab index defined
+			expr.setLength(0);
+			expr.append("#{empty ").append(managedBeanName).append(".currentBean['").append(selectedTabIndexBinding).append("']}");
+			result.setValueExpression("rendered", ef.createValueExpression(elc, expr.toString(), Boolean.class));
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public UIComponent border(UIComponent component, String borderTitle, String invisibleConditionName, Integer pixelWidth) {
 		if (component != null) {
