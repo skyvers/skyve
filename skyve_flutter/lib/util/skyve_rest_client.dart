@@ -176,11 +176,3 @@ class SkyveRestClient {
     });
   }
 }
-
-class Result {
-  late bool hasError;
-  late String errorMessage;
-  late int statusCode;
-
-  Result(this.hasError, this.errorMessage, {this.statusCode = 0});
-}
