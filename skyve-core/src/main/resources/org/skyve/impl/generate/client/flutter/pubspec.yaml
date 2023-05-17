@@ -1,4 +1,4 @@
-name: ##PROJECT##
+name: '##PROJECT##'
 description: A Skyve Flutter project.
 
 # The following line prevents the package from being accidentally published to

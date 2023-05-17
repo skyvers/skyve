@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.skyve.CORE;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -16,56 +16,60 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
 public class FlutterEditView extends FlutterView {
-	private Module module;
-	private Document document;
-	private View createView;
-	private View editView;
-	
-	public FlutterEditView(FlutterGenerator generator, String moduleName, String viewName) {
-		super(generator, moduleName, viewName);
-	}
+    private Module module;
+    private Document document;
+    private View createView;
+    private View editView;
 
-	public void setViews(Module module, Document document) {
-		this.module = module;
-		this.document = document;
-		Customer c = CORE.getCustomer();
+    private final User user;
+
+    public FlutterEditView(FlutterGenerator generator, String moduleName, String viewName) {
+        super(generator, moduleName, viewName);
+
+        user = new SuperUser();
+        user.setCustomerName(generator.customer.getName());
+    }
+
+    public void setViews(Module module, Document document) {
+        this.module = module;
+        this.document = document;
+        Customer c = generator.customer;
         editView = document.getView(generator.uxui, c, ViewType.edit.toString());
         createView = document.getView(generator.uxui, c, ViewType.create.toString());
- 	}
+     }
 
-	@Override
-	protected void create(FileWriter fw) throws IOException {
-		Set<String> imports = new TreeSet<>();
-		String editDart = null;
-		String createDart = null;
+    @Override
+    protected void create(FileWriter fw) throws IOException {
+        Set<String> imports = new TreeSet<>();
+        String editDart = null;
+        String createDart = null;
 
-		// Wrap edit and create views in a Fragment if necessary
-		boolean bothViews = (editView != null) && (createView != null);
+        // Wrap edit and create views in a Fragment if necessary
+        boolean bothViews = (editView != null) && (createView != null);
 
-		User u = CORE.getUser();
-		if (editView != null) {
-			FlutterViewRenderer v = new FlutterViewRenderer(u, module, document, editView, generator.uxui, imports);
-			v.visit();
-			editDart = v.getResult().toString();
-		}
-		if (createView != null) {
-			FlutterViewRenderer v = new FlutterViewRenderer(u, module, document, createView, generator.uxui, imports);
-			v.visit();
-			createDart = v.getResult().toString();
-		}
+        if (editView != null) {
+            FlutterViewRenderer v = new FlutterViewRenderer(user, module, document, editView, generator.uxui, imports);
+            v.visit();
+            editDart = v.getResult().toString();
+        }
+        if (createView != null) {
+            FlutterViewRenderer v = new FlutterViewRenderer(user, module, document, createView, generator.uxui, imports);
+            v.visit();
+            createDart = v.getResult().toString();
+        }
 
-		Map<String, String> subs = new TreeMap<>();
-		subs.put("##PROJECT##", generator.projectName);
-		subs.put("##MODULE##", moduleName);
-		subs.put("##DOCUMENT##", document.getName());
-		subs.put("##CLASS##", className);
-		
-		StringBuilder sb = new StringBuilder(256);
-		for (String key : imports) {
-			sb.append("import 'package:").append(generator.projectName).append("/").append(key).append(".dart';\n");
-		}
-		subs.put("##IMPORTS##", sb.toString());
-		
+        Map<String, String> subs = new TreeMap<>();
+        subs.put("##PROJECT##", generator.projectName);
+        subs.put("##MODULE##", moduleName);
+        subs.put("##DOCUMENT##", document.getName());
+        subs.put("##CLASS##", className);
+        
+        StringBuilder sb = new StringBuilder(256);
+        for (String key : imports) {
+            sb.append("import 'package:").append(generator.projectName).append("/").append(key).append(".dart';\n");
+        }
+        subs.put("##IMPORTS##", sb.toString());
+        
 //		if (bothViews) {
 //		fw.write("\t\tif (this.state.created) {\n");
 //		fw.write("\t\t\treturn (\n");
@@ -79,8 +83,8 @@ public class FlutterEditView extends FlutterView {
 //		fw.write("\t\t}\n");
 //	}
 //	else {
-		subs.put("##DART##", editDart);
-		//		fw.write("\t\treturn (\n");
+        subs.put("##DART##", editDart);
+        //		fw.write("\t\treturn (\n");
 //		if (editView != null) {
 //			fw.write((editJsx == null) ? "" : editJsx.toString());
 //		}
@@ -90,7 +94,7 @@ public class FlutterEditView extends FlutterView {
 //		fw.write("\t\t);\n");
 //	}
 
-		fw.write(substitute("templates/edit.dart", subs));
+        fw.write(substitute("templates/edit.dart", subs));
 
 //		fw.write("import React from 'react';\n");
 //		fw.write("import {View} from '../../View';\n");
@@ -150,5 +154,5 @@ public class FlutterEditView extends FlutterView {
 //
 //		fw.write("\t}\n");
 //		fw.write("}\n");
-	}
+    }
 }

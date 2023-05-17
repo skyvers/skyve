@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-abstract class AbstractSkyveMojo extends AbstractMojo {
+public abstract class AbstractSkyveMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 

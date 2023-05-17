@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
@@ -28,9 +27,11 @@ public class FlutterRouting {
 	private Set<String> routes = new TreeSet<>();
 	private StringBuilder menu = new StringBuilder(1024);
 	private int indentationLevel = 0;
+	private Customer customer; 
 	
 	public FlutterRouting(FlutterGenerator generator) {
 		this.generator = generator;
+		this.customer = generator.customer;
 		menu.append("const menu = [\n");
 	}
 	
@@ -62,14 +63,13 @@ public class FlutterRouting {
 	}
 	
 	private void viewImportsAndRoutes() {
-		Customer c = CORE.getCustomer();
-		for (Module m : c.getModules()) {
+		for (Module m : customer.getModules()) {
 			String moduleName = m.getName();
 			Map<String, DocumentRef> refs = m.getDocumentRefs();
 			for (String documentName : refs.keySet()) {
 				DocumentRef ref = refs.get(documentName);
 				if (ref.getOwningModuleName().equals(moduleName)) {
-					Document d = m.getDocument(c, documentName);
+					Document d = m.getDocument(customer, documentName);
 					FlutterEditView view = new FlutterEditView(generator, moduleName, documentName);
 					view.setViews(m, d);
 					processItem(view, null);
@@ -79,7 +79,6 @@ public class FlutterRouting {
 	}
 	
 	private void menuImportsAndRoutes() {
-		Customer c = CORE.getCustomer();
 		new MenuRenderer(generator.uxui, null) {
 			@Override
 			public void renderCalendarItem(CalendarItem item,
@@ -145,7 +144,7 @@ public class FlutterRouting {
 					component.setModel(itemModule,
 										itemDocument,
 										modelName,
-										itemDocument.getListModel(c, modelName, false));
+										itemDocument.getListModel(customer, modelName, false));
 				}
 				else if (item.getQueryName() != null) { // query driven
 					component.setQuery(menuModule,
@@ -155,7 +154,7 @@ public class FlutterRouting {
 				else { // document driven
 					component.setQuery(menuModule,
 										itemDocument,
-										menuModule.getDocumentDefaultQuery(c, itemDocument.getName()));
+										menuModule.getDocumentDefaultQuery(customer, itemDocument.getName()));
 				}
 				processItem(component, item);
 			}
@@ -187,7 +186,7 @@ public class FlutterRouting {
 				String viewName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
 				processItem(new FlutterTreeView(generator, moduleName, viewName), item);
 			}
-		}.render(c);
+		}.render(customer);
 	}
 	
 	private void processItem(FlutterView view, MenuItem item) {
