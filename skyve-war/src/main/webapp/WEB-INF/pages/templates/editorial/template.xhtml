@@ -24,6 +24,8 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
 <!--
 			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
 -->
@@ -40,28 +42,14 @@
 				SKYVE.PF.establishHistory();
 			</script>
 			<style>
-				.content-header {
-					display: none;
-				}
-				.ui-panelmenu .ui-menuitem-link {
-					border-radius: 0px; !important;
-				}
-				.ui-panelmenu .ui-panelmenu-header {
-					border: none !important;
-					border-radius: 0px; !important;
-				}
-				.ui-panelmenu .ui-panelmenu-content {
-					background-color: transparent !important;
-					border: none !important;
-				}
-				.ui-datatable th {
-					font-size: larger !important;
-				}
 				.ui-datatable-data > tr {
 					text-align: center !important;
 				}
-				.ui-panel-content {
-					border-top: 1px solid #c8c8c8 !important;
+				.ui-datatable-data > tr > td {
+					padding: 4px !important;
+				}
+				.ui-datatable thead th {
+					padding: 4px !important;
 				}
 			</style>
 			<ui:insert name="templateHead" />

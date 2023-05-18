@@ -22,7 +22,7 @@
 		</repository>
 		<repository>
 			<id>skyve</id>
-			<url>http://repo.skyve.org/repository/skyve/</url>
+			<url>https://repo.skyve.org/repository/skyve/</url>
 		</repository>
 		<repository>
 			<id>oss.sonatype.org</id>
@@ -30,11 +30,11 @@
 		</repository>
 		<repository>
 			<id>Prime Faces</id>
-			<url>http://repository.primefaces.org/</url>
+			<url>https://repository.primefaces.org/</url>
 		</repository>
 		<repository>
 			<id>osgeo</id>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
+			<url>https://download.osgeo.org/webdav/geotools/</url>
 		</repository>
 		<repository>
 			<id>boundlessgeo</id>
@@ -45,11 +45,11 @@
 	<distributionManagement>
 		<repository>
 			<id>skyve</id>
-			<url>http://repo.skyve.org/repository/maven-releases/</url>
+			<url>https://repo.skyve.org/repository/maven-releases/</url>
 		</repository>
 		<snapshotRepository>
 			<id>skyve</id>
-			<url>http://repo.skyve.org/repository/maven-snapshots/</url>
+			<url>https://repo.skyve.org/repository/maven-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 

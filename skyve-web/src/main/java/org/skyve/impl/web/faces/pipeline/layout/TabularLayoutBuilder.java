@@ -12,6 +12,7 @@ import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.row.Row;
+import org.primefaces.component.toolbar.ToolbarGroup;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -40,9 +41,11 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 			return components;
 		}
 
-		UIComponent layout = panelGroup(false, false, false, null, null);
+		ToolbarGroup toolbarGroup = (ToolbarGroup) a.createComponent(ToolbarGroup.COMPONENT_TYPE);
+		setId(toolbarGroup, null);
+
 		List<UIComponent> result = new ArrayList<>(1);
-		result.add(layout);
+		result.add(toolbarGroup);
 		return result;
 	}
 	

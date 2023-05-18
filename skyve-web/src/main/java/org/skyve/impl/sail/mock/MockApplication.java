@@ -50,7 +50,7 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.defaultcommand.DefaultCommand;
 import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.donutchart.DonutChart;
-import org.primefaces.component.editor.Editor;
+import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.fieldset.Fieldset;
 import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.component.graphicimage.GraphicImage;
@@ -158,8 +158,8 @@ public class MockApplication extends Application {
 		else if (DonutChart.COMPONENT_TYPE.equals(componentType)) {
 			return new DonutChart();
 		}
-		else if (Editor.COMPONENT_TYPE.equals(componentType)) {
-			return new Editor();
+		else if (TextEditor.COMPONENT_TYPE.equals(componentType)) {
+			return new TextEditor();
 		}
 		else if (Fieldset.COMPONENT_TYPE.equals(componentType)) {
 			return new Fieldset();

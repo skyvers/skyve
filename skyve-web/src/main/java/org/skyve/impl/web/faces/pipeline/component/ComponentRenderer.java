@@ -39,7 +39,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
-import org.primefaces.component.editor.Editor;
+import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.fieldset.Fieldset;
 import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.component.graphicimage.GraphicImage;
@@ -156,7 +156,7 @@ public class ComponentRenderer {
 			putValueExpression(attributes, "sortBy", component);
 			putValue(attributes, "style", column.getStyle());
 			putValue(attributes, "styleClass", column.getStyleClass());
-			int priority = column.getPriority();
+			int priority = column.getResponsivePriority();
 			if ((priority > 0) && (priority <= 6)) {
 				putValue(attributes, "priority", Integer.toString(priority));
 			}
@@ -231,10 +231,10 @@ public class ComponentRenderer {
 			putValue(attributes, "style", table.getStyle());
 			putValue(attributes, "styleClass", table.getStyleClass());
 		}
-		else if (component instanceof Editor) {
+		else if (component instanceof TextEditor) {
 			tagName = "p:editor";
 			
-			Editor editor = (Editor) component;
+			TextEditor editor = (TextEditor) component;
 			putValue(attributes, "style", editor.getStyle());
 			putValue(attributes, "styleClass", editor.getStyleClass());
 		}
@@ -385,7 +385,6 @@ public class ComponentRenderer {
 			OverlayPanel overlay = (OverlayPanel) component;
 			putValue(attributes, "widgetVar", overlay.getWidgetVar());
 			putValue(attributes, "for", overlay.getFor());
-			putValue(attributes, "hideEffect", overlay.getHideEffect());
 			putValue(attributes, "dynamic", String.valueOf(overlay.isDynamic()));
 			putValue(attributes, "showCloseIcon", String.valueOf(overlay.isShowCloseIcon()));
 			putValue(attributes, "modal", String.valueOf(overlay.isModal()));

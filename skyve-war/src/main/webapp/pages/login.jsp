@@ -100,7 +100,6 @@
 
 		<%@include file="fragments/favicon.html" %>
 	    <link rel="stylesheet" href="semantic24/semantic.min.css">
-		<link type="text/css" rel="stylesheet" href="javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces" />
 	    
 	    <%@include file="fragments/styles.html" %>
 	    <%@include file="fragments/backgroundImage.html" %>

@@ -2,7 +2,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import javax.faces.component.UIComponent;
 
-import org.primefaces.component.api.UIData;
+import org.primefaces.component.api.UIPageableData;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.model.document.Document;
@@ -20,7 +20,7 @@ public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 									ListGrid listGrid,
 									boolean aggregateQuery) {
 		if (component != null) {
-			UIData dt = (UIData) component;
+			UIPageableData dt = (UIPageableData) component;
 			dt.setPaginator(true);
 	    	dt.setRowsPerPageTemplate("25,50,75,100");
 	    	dt.setPaginatorAlwaysVisible(false);

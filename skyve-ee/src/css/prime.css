@@ -3,9 +3,9 @@ body,html {
 	padding: 0;
 	height: 100%;
 }
-/* Ensure that there is a little margin on stacked buttons in wrapped toolbars */
-.ui-toolbar * {
-	margin-bottom: 1px !important;
+/* Ensure that there is gaps vertically and horizontally between toolbar buttons */
+.ui-toolbar-group-left, .ui-toolbar-group-right {
+	gap: 5px !important;
 }
 /* Ensure that the list grid filter components fit the column widths nicely */
 .ui-column-customfilter {
@@ -14,6 +14,12 @@ body,html {
 }
 .ui-column-filter {
 	width: 95% !important;
+}
+
+/* Make font-awesome icons centered when buttons collapse their labels at mobile breakpoints */
+.ui-button {
+	min-width: 33px !important;
+	min-height: 30px !important;
 }
 
 /* skyve alignment styles */

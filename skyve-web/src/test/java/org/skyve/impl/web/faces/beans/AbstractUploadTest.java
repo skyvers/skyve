@@ -47,6 +47,11 @@ public class AbstractUploadTest {
 			// nothing to see here
 		}
 		
+		@Override
+		public void delete() throws IOException {
+			// nothing to see here
+		}
+
 		public TestUploadedFile test(@SuppressWarnings("hiding") String fileName,
 										@SuppressWarnings("hiding") long size) {
 			this.fileName = fileName;

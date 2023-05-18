@@ -646,7 +646,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								alignment,
 	                            false,
 	                            column.getPixelWidth());
-		result.setPriority(columnPriority);
+		result.setResponsivePriority(columnPriority);
 		if (columnPriority < 6) {
 			columnPriority++;
 		}
@@ -734,7 +734,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								alignment,
 				                false,
 				                column.getPixelWidth());
-		col.setPriority(columnPriority);
+		col.setResponsivePriority(columnPriority);
 		if (columnPriority < 6) {
 			columnPriority++;
 		}
@@ -775,7 +775,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									HorizontalAlignment.centre,
 					                true,
 					                SINGLE_ACTION_COLUMN_WIDTH_INTEGER);
-			col.setPriority(1);
+			col.setResponsivePriority(1);
 			List<UIComponent> children = col.getChildren();
 
 			String disabledConditionName = grid.getDisabledConditionName();
@@ -783,7 +783,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 			final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 			columnHeader.setLayout("block");
-			columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
+			columnHeader.setStyle("display:flex;flex-direction:column;height:40px;justify-content:space-evenly;align-items:center");
 			col.getFacets().put("header", columnHeader);
 
 			if (canCreate && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
@@ -1076,7 +1076,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 		setId(overlay, null);
 		overlay.setFor(mapButtonId);
-		overlay.setHideEffect("fade");
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
@@ -1330,12 +1329,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	    																					createOredValueExpressionFragmentFromConditions(new String[] {grid.getDisableZoomConditionName()})),
 	    																					String.class));
     		}
-	        result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
 
 	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 	        StringBuilder start = new StringBuilder(64);
-	        start.append("var s=PF('").append(result.getId()).append("').selection[0];SKYVE.PF.pushHistory('");
-			start.append("?a=").append(WebAction.e.toString()).append("'+s);return false;");
+	        start.append("var s=PF('").append(result.getId()).append("').selection[0];console.log(s);SKYVE.PF.pushHistory('");
+			start.append("?a=").append(WebAction.e.toString()).append("&m='+s.substring(s.indexOf('.') + 1)+");
+			start.append("'&d='+s.substring(s.indexOf('#') + 1, s.indexOf('.'))+");
+			start.append("'&i='+s.substring(0, s.indexOf('#')));return false;");
 			ajax.setOnstart(start.toString());
 	        result.addClientBehavior("rowSelect", ajax);
     	}
@@ -1586,7 +1586,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 			setId(column, null);
 			column.setHeaderText(displayName);
-			column.setPriority(columnPriority);
+			column.setResponsivePriority(columnPriority);
 			column.setStyleClass("hiddenFilter");
 			if (columnPriority < 6) {
 				columnPriority++;
@@ -1773,14 +1773,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   String parentId,
 													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
-		column.setPriority(1);
+		column.setResponsivePriority(1);
 		column.setWidth(SINGLE_ACTION_COLUMN_WIDTH);
 		column.setStyle("text-align:center !important");
 
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		columnHeader.setLayout("block");
-		columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
+		columnHeader.setStyle("display:flex;flex-direction:column;height:80px;justify-content:space-evenly;align-items:center");
 		column.getFacets().put("header", columnHeader);
 		List<UIComponent> columnHeaderChildren = columnHeader.getChildren();
 
@@ -2399,7 +2399,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			setId(overlay, null);
 			overlay.setWidgetVar(sanitisedBinding + "Overlay");
 			overlay.setFor(uploadButtonId);
-			overlay.setHideEffect("fade");
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
@@ -3566,7 +3565,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String overlayId = overlay.getId();
 		overlay.setWidgetVar(overlayId + "Overlay");
 		overlay.setFor(uploadButtonId);
-		overlay.setHideEffect("fade");
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
@@ -4162,7 +4160,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
             final Column dragHandleColumn = (Column) a.createComponent(Column.COMPONENT_TYPE);
             setId(dragHandleColumn, null);
             dragHandleColumn.setWidth("10");
-            dragHandleColumn.setPriority(1);
+            dragHandleColumn.setResponsivePriority(1);
 
             final HtmlPanelGroup dragHandle = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 			dragHandle.setStyleClass("fa fa-sort");

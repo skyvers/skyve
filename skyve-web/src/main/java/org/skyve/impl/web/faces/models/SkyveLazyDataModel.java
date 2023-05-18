@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.models;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +77,17 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		this.escape = escape;
 	}
 	
+	/**
+	 * Can't implement this as the rows and the count come back together in the load method.
+	 */
+	@Override
+	public int count(Map<String, FilterMeta> filterBy) {
+		return 0;
+	}
+	
+	/**
+	 * Return a page of filtered and sorted data (and set the rowCount)
+	 */
 	@Override
 	public List<BeanMapAdapter<Bean>> load(int first,
 											int pageSize,
@@ -202,25 +212,13 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		return result;
 	}
 
-	@Override
-	public List<BeanMapAdapter<Bean>> load(int first,
-											int pageSize,
-											String sortField,
-											SortOrder sortOrder,
-											Map<String, FilterMeta> filters) {
-		Map<String, SortMeta> sorts = null;
-		if (sortField != null) {
-			sorts = Collections.singletonMap(sortField, new SortMeta(null, sortField, sortOrder, null));
-		}
-		return load(first, pageSize, sorts, filters);
-	}
-
 	/**
 	 * Called when encoding the rows of a data table or data list.
 	 */
 	@Override
-	public Object getRowKey(BeanMapAdapter<Bean> bean) {
-		return bean.getBean().getBizId();
+	public String getRowKey(BeanMapAdapter<Bean> bean) {
+		Bean row = bean.getBean();
+		return new StringBuilder(128).append(row.getBizId()).append('#').append(row.getBizDocument()).append('.').append(row.getBizModule()).toString();
 	}
 	
 	/**
@@ -239,10 +237,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		SortParameter[] sortParameters = new SortParameter[l];
 		int i = 0;
 		for (SortMeta sm : multiSortMeta.values()) {
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    SORT by %s %s", sm.getSortField(), sm.getSortOrder()));
+			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    SORT by %s %s", sm.getField(), sm.getOrder()));
 			SortParameter sp = new SortParameterImpl();
-			sp.setBy(sm.getSortField());
-			sp.setDirection((SortOrder.DESCENDING.equals(sm.getSortOrder())) ? SortDirection.descending : null);
+			sp.setBy(sm.getField());
+			sp.setDirection((SortOrder.DESCENDING.equals(sm.getOrder())) ? SortDirection.descending : null);
 			sortParameters[i++] = sp;
 		}
 

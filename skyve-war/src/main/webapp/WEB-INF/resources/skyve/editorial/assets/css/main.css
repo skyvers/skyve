@@ -11,10 +11,6 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;}
 
-body {
-	line-height: 1;
-}
-
 ol, ul {
 	list-style: none;
 }
@@ -83,59 +79,6 @@ mark {
 			transition: none !important;
 		}
 
-/* Type */
-
-	body {
-/*		color: #7f888f; */
-		font-family: "Open Sans", sans-serif;
-		font-size: 13pt;
-		font-weight: 400;
-		line-height: 1.65;
-	}
-
-		@media screen and (max-width: 1680px) {
-
-			body {
-				font-size: 11pt;
-			}
-
-		}
-
-		@media screen and (max-width: 1280px) {
-
-			body {
-				font-size: 10pt;
-			}
-
-		}
-
-		@media screen and (max-width: 360px) {
-
-			body {
-				font-size: 9pt;
-			}
-
-		}
-
-	a {
-		-moz-transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		-webkit-transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		-ms-transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		border-bottom: dotted 1px;
-/*		color: #f56a6a; */
-		text-decoration: none;
-	}
-
-		a:hover {
-/*			border-bottom-color: #f56a6a; */
-/*			color: #f56a6a !important; */
-		}
-
-			a:hover strong {
-				color: inherit;
-			}
-
 	strong, b {
 /*		color: #3d4449; */
 		font-weight: 600;
@@ -152,7 +95,6 @@ mark {
 	h1, h2, h3, h4, h5, h6 {
 		/* color: #3d4449; */
 		/* font-family: "Roboto Slab", serif; */
-		font-family: "Open Sans","Helvetica Neue",sans-serif;
 		font-weight: 700;
 		line-height: 1.5;
 		margin: 0 0 1em 0;
@@ -1759,8 +1701,6 @@ mark {
 	}
 
 	header p {
-		/* font-family: "Roboto Slab", serif; */
-		font-family: "Open Sans","Helvetica Neue",sans-serif;
 		font-size: 1em;
 		font-weight: 400;
 		letter-spacing: 0.075em;
@@ -2703,7 +2643,7 @@ mark {
 			text-indent: 7.5em;
 			top: 0;
 			width: 6em;
-			z-index: 10000;
+			z-index: 999;
 		}
 
 			#sidebar .toggle:before {
@@ -2798,7 +2738,7 @@ mark {
 				left: 0;
 				position: fixed;
 				top: 0;
-				z-index: 10000;
+				z-index: 999;
 				width: 24em;
 			}
 
@@ -2898,8 +2838,6 @@ mark {
 		#header .logo {
 			border-bottom: 0;
 			color: inherit;
-			/* font-family: "Roboto Slab", serif; */
-			font-family: "Open Sans","Helvetica Neue",sans-serif;
 			font-size: 2em;
 		}
 
@@ -3037,8 +2975,6 @@ mark {
 		-ms-user-select: none;
 		user-select: none;
 		color: #3d4449;
-		font-family: "Roboto Slab", serif;
-		font-family: 400;
 		letter-spacing: 0.075em;
 		list-style: none;
 		margin-bottom: 0;
