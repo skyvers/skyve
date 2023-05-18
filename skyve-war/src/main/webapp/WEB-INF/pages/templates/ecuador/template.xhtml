@@ -33,8 +33,8 @@
 			<h:outputStylesheet name="css/ecuador.css" library="skyve" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />
 			
-			<h:outputScript name="js/nanoscroller.js" library="ecuador-layout" />
 			<h:outputScript name="js/layout.js" library="ecuador-layout" />
+			<h:outputScript name="js/prism.js" library="ecuador-layout"/>
 	
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
@@ -143,7 +143,6 @@
 				</f:facet>
 			</p:ajaxStatus>
 	
-			<h:outputStylesheet name="css/nanoscroller.css" library="ecuador-layout" />
 			<h:outputStylesheet name="#{'css/layout-'.concat(skyve.getThemeColour('indigo')).concat('.css')}" library="ecuador-layout" />
 		</h:body>
 	</f:view>

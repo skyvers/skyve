@@ -73,7 +73,9 @@ public class Menu extends Harness {
 			}
 		}.execute();
 	}
-	
+
+	private static int menuItemId = 1; 
+
 	private MenuModel createMenuModel(String bizModule, String uxui) {
 		MenuModel result = new DefaultMenuModel();
 
@@ -85,7 +87,7 @@ public class Menu extends Harness {
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,
 											Module menuModule,
 											boolean open) {
-				DefaultSubMenu moduleSub = DefaultSubMenu.builder().label(menuModule.getLocalisedTitle()).build();
+				DefaultSubMenu moduleSub = DefaultSubMenu.builder().id(String.valueOf(menuItemId++)).label(menuModule.getLocalisedTitle()).build();
 				result.getElements().add(moduleSub);
 				moduleSub.setExpanded(open);
 				subs.push(moduleSub);
@@ -93,7 +95,7 @@ public class Menu extends Harness {
 
 			@Override
 			public void renderMenuGroup(MenuGroup group, Module menuModule) {
-				DefaultSubMenu sub = DefaultSubMenu.builder().label(group.getLocalisedName()).build();
+				DefaultSubMenu sub = DefaultSubMenu.builder().id(String.valueOf(menuItemId++)).label(group.getLocalisedName()).build();
 				sub.setExpanded(true);
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
@@ -181,7 +183,7 @@ public class Menu extends Harness {
 																		Module itemModule,
 																		String itemQueryName,
 																		String itemAbsoluteHref) {
-		DefaultMenuItem result = DefaultMenuItem.builder().value(item.getLocalisedName()).icon(iconStyleClass).build();
+		DefaultMenuItem result = DefaultMenuItem.builder().id(String.valueOf(menuItemId++)).value(item.getLocalisedName()).icon(iconStyleClass).build();
 		result.setAjax(false);
 		result.setHref("#");
 		result.setOnclick(createMenuItemOnClick(menuModule, itemModule, item, itemQueryName, itemAbsoluteHref));
