@@ -443,7 +443,14 @@ public class FacesView<T extends Bean> extends Harness {
 				if (adapter != null) {
 					Bean bean = adapter.getBean();
 					if (bean != null) {
+						// bizId could be in data table rowid format <bizId>#<bizDocument>.<bizModule>
 						String bizId = bean.getBizId();
+						if (bizId != null) {
+							int hashIndex = bizId.indexOf('#');
+							if (hashIndex > -1) {
+								bizId = bizId.substring(0, hashIndex);
+							}
+						}
 						if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - SET "+ selectedIdBinding + " to " + bizId);
 						BindUtil.set(getCurrentBean().getBean(), selectedIdBinding, bizId);
 					}
@@ -461,6 +468,17 @@ public class FacesView<T extends Bean> extends Harness {
 				action(actionName, null, null);
 			}
 		}
+	}
+	
+	/**
+	 * Used to ensure the DataTable renderer highlights the row correctly
+	 */
+	private BeanMapAdapter<Bean> selectedRow;
+	public BeanMapAdapter<Bean> getSelectedRow() {
+		return selectedRow;
+	}
+	public void setSelectedRow(BeanMapAdapter<Bean> selectedRow) {
+		this.selectedRow = selectedRow;
 	}
 	
 	/**

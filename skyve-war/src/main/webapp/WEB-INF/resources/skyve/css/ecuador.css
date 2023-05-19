@@ -25,13 +25,6 @@
 	vertical-align: middle;
 }
 
-/* keep the border on panel content for vboxes and hboxes etc */
-.ui-panel-content {
-	border-top: 1px solid #dedede !important;
-}
-
-
-
 /* data tables */
 .ui-datatable tbody td {
 	text-align: center;

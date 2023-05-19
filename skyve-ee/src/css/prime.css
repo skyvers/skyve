@@ -21,6 +21,16 @@ body,html {
 	min-width: 33px !important;
 	min-height: 30px !important;
 }
+/* Except for spinner buttons */
+.ui-spinner-button.ui-button {
+	min-width: 0px !important;
+	min-height: 0px !important;
+}
+/* And autocomplete dropdown buttons */
+.ui-autocomplete-dropdown.ui-button {
+	min-width: 0px !important;
+	min-height: 0px !important;
+}
 
 /* skyve alignment styles */
 .left {
@@ -177,6 +187,10 @@ table.inputComponent {
 	width: 100%;
 	border-collapse: collapse
 }
+table.inputComponent td {
+	white-space: nowrap !important;
+}
+
 /* Shrink style for error message so it only takes up as much space as necessary */
 table td.shrink {
 	width: 1px;

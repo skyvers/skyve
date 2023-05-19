@@ -1317,7 +1317,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
     	result.setWidgetVar(result.getId());
 
     	if (grid.getSelectedIdBinding() != null) {
-    		addDataTableSelection(result, grid.getSelectedIdBinding(), grid.getSelectedActions(), modelName);
+    		addDataTableSelection(result, grid.getSelectedIdBinding(), grid.getSelectedActions(), modelName, true);
     	}
     	else if (zoomRendered) {
     		if (grid.getDisableZoomConditionName() == null) {
@@ -1477,13 +1477,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	protected void addDataTableSelection(DataTable table,
 										String selectedIdBinding,
 										List<EventAction> selectedActions,
-										String source) {
+										String source,
+										boolean rowKeyFromModel) {
 		table.setSelectionMode("single");
-		table.setValueExpression("rowKey", ef.createValueExpression(elc, String.format("#{%s['bizId']}", table.getVar()), String.class));
+		if (! rowKeyFromModel) {
+			table.setValueExpression("rowKey", ef.createValueExpression(elc, String.format("#{%s['bizId']}", table.getVar()), String.class));
+		}
 		Map<String, Object> attributes = table.getAttributes();
 		attributes.put("selectedIdBinding", selectedIdBinding);
+		table.setValueExpression("selection", ef.createValueExpression(elc, String.format("#{%s.selectedRow}", managedBeanName), BeanMapAdapter.class));
 
-        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+		AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 		if (selectedActions != null) {
 			ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
 			if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
@@ -4118,7 +4122,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class, false, Sanitisation.none));
 
 		if (selectedIdBinding != null) {
-			addDataTableSelection(result, selectedIdBinding, selectedActions, binding);
+			addDataTableSelection(result, selectedIdBinding, selectedActions, binding, false);
 		}
 		else if (clickToZoom) {
 			String id = result.getId();
@@ -4133,7 +4137,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 																			String.class,
 																			false,
 																			Sanitisation.text));
-
 			AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 			StringBuilder expression = new StringBuilder(64);
 			expression.append("#{").append(managedBeanName).append('.');

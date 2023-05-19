@@ -227,8 +227,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	@Override
 	public BeanMapAdapter<Bean> getRowData(String rowKey) {
 		Map<String, Object> properties = new TreeMap<>();
-		properties.put(Bean.DOCUMENT_ID, rowKey);
-		DynamicBean bean = new DynamicBean(moduleName, documentName, properties);
+		int hashIndex = rowKey.lastIndexOf('#');
+		int dotIndex = rowKey.lastIndexOf('.');
+		properties.put(Bean.DOCUMENT_ID, rowKey.substring(0, hashIndex));
+		String bizDocument = rowKey.substring(hashIndex + 1, dotIndex);
+		String bizModule = rowKey.substring(dotIndex + 1);
+		DynamicBean bean = new DynamicBean(bizModule, bizDocument, properties);
 		return new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext());
 	}
 	
