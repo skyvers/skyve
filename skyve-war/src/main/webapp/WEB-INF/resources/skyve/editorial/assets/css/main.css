@@ -2794,14 +2794,14 @@ mark {
 		@media screen and (max-width: 736px) {
 
 			#sidebar .toggle {
-				text-indent: 7.25em;
-				width: 7.25em;
+				text-indent: 6.125em;
+				width: 6.125em;
 			}
 
 				#sidebar .toggle:before {
 					color: #7f888f;
 					margin-left: -0.0625em;
-					margin-top: -0.25em;
+					margin-top: -0.5em;
 					font-size: 1.1rem;
 					z-index: 1;
 				}
@@ -2810,11 +2810,11 @@ mark {
 					background: rgba(222, 225, 226, 0.75);
 					border-radius: 0.375em;
 					content: '';
-					height: 3.5em;
+					height: 3em;
 					left: 1em;
 					position: absolute;
 					top: 1em;
-					width: 5em;
+					width: 4em;
 				}
 
 		}
@@ -2827,7 +2827,7 @@ mark {
 		display: -ms-flex;
 		display: flex;
 		border-bottom: solid 5px #7f888f;
-		padding: 1em 0 2.05em 0;
+		padding: 1em 0 0 0;
 		position: relative;
 	}
 

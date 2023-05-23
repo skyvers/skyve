@@ -187,9 +187,6 @@ table.inputComponent {
 	width: 100%;
 	border-collapse: collapse
 }
-table.inputComponent td {
-	white-space: nowrap !important;
-}
 
 /* Shrink style for error message so it only takes up as much space as necessary */
 table td.shrink {

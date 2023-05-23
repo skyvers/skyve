@@ -152,7 +152,7 @@ public class ListGrid extends HtmlPanelGroup {
 											name,
 											model,
 											null,
-											model.getLocalisedDescription(),
+											null,
 											listGrid,
 											aggregateQuery);
 	}
