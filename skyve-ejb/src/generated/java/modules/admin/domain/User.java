@@ -1160,7 +1160,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	@XmlElement
 	public void setContactSelected(Boolean contactSelected) {
-		preset(contactSelectedPropertyName, contactSelected);
 		this.contactSelected = contactSelected;
 	}
 
