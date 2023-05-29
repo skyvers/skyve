@@ -29,7 +29,7 @@
 			<!--  The password is checked and populated in the Bizlet -->
 			<length>100</length>
 		</text>
-		<text name="generatedPassword" audited="false"  persistent="false" trackChanges="false">
+		<text name="generatedPassword" audited="false" persistent="false" trackChanges="false" usage="view">
 			<displayName>admin.user.generatedPassword.displayName</displayName>
 			<description>admin.user.generatedPassword.description</description>
 			<length>255</length>
@@ -44,12 +44,12 @@
 			<domain>variant</domain>
 			<length>30</length>
 		</text>
-		<text name="newPassword" persistent="false" audited="false">
+		<text name="newPassword" audited="false" persistent="false" usage="both">
 			<displayName>admin.user.newPassword.displayName</displayName>
 			<description>admin.user.newPassword.description</description>
 			<length>255</length>
 		</text>
-		<text name="confirmPassword" persistent="false" audited="false">
+		<text name="confirmPassword" audited="false" persistent="false" usage="both">
 			<displayName>admin.user.confirmPassword.displayName</displayName>
 			<description>admin.user.confirmPassword.description</description>
 			<length>255</length>
@@ -137,7 +137,7 @@
 		</collection>
 		
 		<!-- New user wizard state properties -->
-		<enum name="wizardState" persistent="false">
+		<enum name="wizardState" audited="false" persistent="false" usage="view">
 			<displayName>Wizard State</displayName>
 			<description>
 			The create user wizard is staged into the following states which roughly follow in order.
@@ -154,23 +154,23 @@
 				<value code="confirmGroupMemberships"/>
 			</values>
 		</enum>
-		<text name="searchContactName" persistent="false">
+		<text name="searchContactName" audited="false" persistent="false" usage="view">
 			<displayName>admin.user.searchContactName.displayName</displayName>
 			<description>admin.user.searchContactName.description</description>
 			<length>1024</length>
 		</text>
-		<text name="searchEmail" persistent="false">
+		<text name="searchEmail" audited="false" persistent="false" usage="view">
 			<displayName>admin.user.searchEmail.displayName</displayName>
 			<description>admin.user.searchEmail.description</description>
 			<length>512</length>
 		</text>
-		<collection name="candidateContacts" type="child" persistent="false">
+		<collection name="candidateContacts" type="child" audited="false" persistent="false" usage="view">
 			<displayName>admin.user.collection.candidateContacts.displayName</displayName>
 			<description>admin.user.collection.candidateContacts.description</description>
 			<documentName>UserCandidateContact</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
-		<boolean name="contactSelected" persistent="false">
+		<boolean name="contactSelected" audited="false" persistent="false" trackChanges="false" usage="view">
 			<displayName>admin.user.contactSelected.displayName</displayName>
 			<defaultValue>false</defaultValue>
 		</boolean>
@@ -178,14 +178,14 @@
 			<displayName>admin.user.inactive.displayName</displayName>
 			<description>admin.user.inactive.description</description>
 		</boolean>
-		<enum name="groupSelection" persistent="false" audited="false" trackChanges="false">
+		<enum name="groupSelection" audited="false" persistent="false" trackChanges="false" usage="view">
 			<displayName>admin.user.groupSelection.displayName</displayName>
 			<values>
 				<value code="existingGroups" description="Existing groups"/>
 				<value code="newGroup" description="New group"/>
 			</values>
 		</enum>
-		<boolean name="groupsExist" persistent="false" audited="false" trackChanges="false">
+		<boolean name="groupsExist" audited="false" persistent="false"  trackChanges="false" usage="view">
 			<displayName>admin.user.groupsExist.displayName</displayName>
 		</boolean>
 		<association type="aggregation" name="newGroup"  persistent="false" audited="false" trackChanges="false">
@@ -219,7 +219,7 @@
 			<displayName>admin.user.activationCodeCreationDateTime.displayName</displayName>
 			<description>admin.user.activationCodeCreationDateTime.description</description>
 		</dateTime>
-		<text name="activateUrl" persistent="false" audited="false" trackChanges="false">
+		<text name="activateUrl" audited="false" persistent="false" trackChanges="false" usage="both">
 			<displayName>Activation Url</displayName>
 			<length>2083</length>
 		</text>	
