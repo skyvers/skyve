@@ -5,7 +5,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.converters.Format;
 
 public class HH24_MI_SS extends AbstractTimeConverter {
-	private static final String PATTERN = "HH:mm:ss";
+	public static final String PATTERN = "HH:mm:ss";
 
 	@Override
 	public Format<TimeOnly> getFormat() {

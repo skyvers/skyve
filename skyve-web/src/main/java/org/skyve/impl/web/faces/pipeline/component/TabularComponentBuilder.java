@@ -30,13 +30,13 @@ import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.button.Button;
-import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.donutchart.DonutChart;
 import org.primefaces.component.graphicimage.GraphicImage;
@@ -80,6 +80,10 @@ import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
+import org.skyve.domain.types.converters.time.HH24_MI;
+import org.skyve.domain.types.converters.time.HH24_MI_SS;
+import org.skyve.domain.types.converters.time.HH_MI;
+import org.skyve.domain.types.converters.time.HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
@@ -1312,6 +1316,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.getFacets().put("emptyMessage", emptyMessage);
 
 		result.setSortMode("multiple");
+//		result.setReflow(true);
 
         setId(result, null);
     	result.setWidgetVar(result.getId());
@@ -1779,8 +1784,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setResponsivePriority(1);
 		column.setWidth(SINGLE_ACTION_COLUMN_WIDTH);
-		column.setStyle("text-align:center !important");
-
+//		column.setStyleClass("listGridActionColumnHeader");
+		
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		columnHeader.setLayout("block");
@@ -2636,15 +2641,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		boolean useCalendar = false;
+		boolean useDatePicker = false;
 		Format<?> mutableFormat = format;
 		if (converter != null) {
 			AttributeType converterAttributeType = converter.getAttributeType();
 			// Date type and editable field - use readonly mask if not editable.
-			useCalendar = (! Boolean.FALSE.equals(text.getEditable())) &&
-	        				(AttributeType.date.equals(converterAttributeType) ||
-        						AttributeType.dateTime.equals(converterAttributeType) ||
-        						AttributeType.timestamp.equals(converterAttributeType));
+			useDatePicker = (! Boolean.FALSE.equals(text.getEditable())) &&
+		        				(AttributeType.date.equals(converterAttributeType) ||
+				        			AttributeType.time.equals(converterAttributeType) ||
+	        						AttributeType.dateTime.equals(converterAttributeType) ||
+	        						AttributeType.timestamp.equals(converterAttributeType));
 	        if (mutableFormat == null) {
 		        mutableFormat = converter.getFormat();
 	        }
@@ -2652,15 +2658,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		CompleteType complete = text.getComplete();
         UIComponentBase result = null;
-        if (useCalendar) {
-            result = calendar(dataWidgetVar,
-	            				text.getBinding(),
-	                            title,
-	                            required,
-	                            false,
-	                            text.getDisabledConditionName(),
-	                            formDisabledConditionName,
-	                            facesConverter);
+        if (useDatePicker) {
+            result = datePicker(dataWidgetVar,
+		            				text.getBinding(),
+		                            title,
+		                            required,
+		                            false,
+		                            text.getDisabledConditionName(),
+		                            formDisabledConditionName,
+		                            facesConverter);
         }
         else if ((mutableFormat != null) && (mutableFormat.getMask() != null)) {
             result = maskField(dataWidgetVar,
@@ -3104,129 +3110,243 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private Calendar calendar(String dataWidgetVar,
-								String binding,
-								String title,
-								boolean required,
-								boolean mobile,
-								String disabled,
-								String formDisabled,
-								Converter converter) {
-		Calendar result = (Calendar) input(Calendar.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
+	private DatePicker datePicker(String dataWidgetVar,
+									String binding,
+									String title,
+									boolean required,
+									boolean mobile,
+									String disabled,
+									String formDisabled,
+									Converter converter) {
+		DatePicker result = (DatePicker) input(DatePicker.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		if (! mobile) {
-			result.setMode("popup");
-			result.setShowOn("button");
-			result.setNavigator(true);
-			result.setShowButtonPanel(true);
+			result.setShowIcon(true);
+			result.setShowOnFocus(false);
 		}
-		result.setYearRange("c-100:c+10");
+		result.setShowButtonBar(true);
 
 		String converterName = converter.getClass().getSimpleName();
 		if ("DD_MM_YYYY".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("99/99/9999");
 		}
 		else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy hh:mm a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("99/99/9999 99:99 aa");
 		}
 		else if ("DD_MM_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy HH:mm");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("99/99/9999 99:99");
 		}
 		else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy hh:mm:ss a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99 aa");
 		}
 		else if ("DD_MM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy HH:mm:ss");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99");
 		}
 		else if ("DD_MMM_YYYY".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("99-aaa-9999");
 		}
 		else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy hh:mm a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("99-aaa-9999 99:99 aa");
 		}
 		else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("99-aaa-9999 99:99");
 		}
 		else if ("DD_MMM_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy hh:mm:ss a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("99-aaa-9999 99:99:99 aa");
 		}
 		else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm:ss");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("99-aaa-9999 99:99:99");
 		}
 		else if ("MM_DD_YYYY".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("99/99/9999");
 		}
 		else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("99/99/9999 99:99 aa");
 		}
 		else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("99/99/9999 99:99");
 		}
 		else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99 aa");
 		}
 		else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99");
 		}
 		else if ("MMM_DD_YYYY".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("aaa-99-9999");
 		}
 		else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("aaa-99-9999 99:99 aa");
 		}
 		else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("aaa-99-9999 99:99");
 		}
 		else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("aaa-99-9999 99:99:99 aa");
 		}
 		else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("aaa-99-9999 99:99:99");
 		}
 		else if ("YYYY_MM_DD".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("9999/99/99");
 		}
 		else if ("YYYY_MM_DD_HH_MI".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("9999/99/99 99:99 aa");
 		}
 		else if ("YYYY_MM_DD_HH24_MI".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH24_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("9999/99/99 99:99");
 		}
 		else if ("YYYY_MM_DD_HH_MI_SS".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("9999/99/99 99:99:99 aa");
 		}
 		else if ("YYYY_MM_DD_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH24_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("9999/99/99 99:99:99");
+		}
+		else if ("HH_MI".equals(converterName)) {
+			result.setPattern(HH_MI.PATTERN);
+			result.setTimeOnly(true);
+			result.setHourFormat("12");
+			result.setMask("99:99 aa");
+		}
+		else if ("HH24_MI".equals(converterName)) {
+			result.setPattern(HH24_MI.PATTERN);
+			result.setTimeOnly(true);
+			result.setMask("99:99");
+		}
+		else if ("HH_MI_SS".equals(converterName)) {
+			result.setPattern(HH_MI_SS.PATTERN);
+			result.setTimeOnly(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
+			result.setMask("99:99:99 aa");
+		}
+		else if ("HH24_MI_SS".equals(converterName)) {
+			result.setPattern(HH24_MI_SS.PATTERN);
+			result.setShowButtonBar(true);
+			result.setTimeOnly(true);
+			result.setShowSeconds(true);
+			result.setMask("99:99:99");
 		}
 		else {
 			throw new IllegalStateException(converterName + " is not supported");
 		}
 
 		result.setConverter(converter);
+		
 		return result;
 	}
 
