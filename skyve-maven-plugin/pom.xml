@@ -111,25 +111,15 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>org.skyve</groupId>
-			<artifactId>skyve-core</artifactId>
-			<version>${skyve.version}</version>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
+			<version>3.0.2</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-tools</artifactId>
 			<version>${skyve.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.skyve</groupId>
-			<artifactId>skyve-create</artifactId>
-			<version>2.1.2</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.skyve</groupId>
-					<artifactId>skyve-core</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>

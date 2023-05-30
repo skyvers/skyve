@@ -1316,7 +1316,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.getFacets().put("emptyMessage", emptyMessage);
 
 		result.setSortMode("multiple");
-//		result.setReflow(true);
 
         setId(result, null);
     	result.setWidgetVar(result.getId());
@@ -1784,7 +1783,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setResponsivePriority(1);
 		column.setWidth(SINGLE_ACTION_COLUMN_WIDTH);
-//		column.setStyleClass("listGridActionColumnHeader");
+		column.setStyle("text-align:center !important");
 		
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);

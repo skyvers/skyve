@@ -4,8 +4,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.skyve.create.SkyveProject;
-import org.skyve.create.SkyveProject.SkyveProjectCreator;
+import org.skyve.impl.create.MavenSkyveProject;
+import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -42,10 +42,10 @@ public class ScriptMojo extends AbstractSkyveMojo {
 				scriptPath = project.getBasedir().toPath().resolve(scriptPath).toString();
 			}
 
-			final SkyveProject me = new SkyveProjectCreator().projectName(project.getName())
-																.projectDirectory(project.getBasedir().getAbsolutePath()).customerName(customer)
-																.skyveDirectory(skyveDir)
-																.initialise();
+			final MavenSkyveProject me = new MavenSkyveProjectCreator().projectName(project.getName())
+																		.projectDirectory(project.getBasedir().getAbsolutePath()).customerName(customer)
+																		.skyveDirectory(skyveDir)
+																		.initialise();
 
 			final String script = new String(Files.readAllBytes(Paths.get(scriptPath)));
 			me.applyScript(script, false);

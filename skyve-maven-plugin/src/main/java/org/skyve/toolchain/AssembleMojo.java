@@ -8,8 +8,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.skyve.create.SkyveProject;
-import org.skyve.create.SkyveProject.SkyveProjectCreator;
+import org.skyve.impl.create.MavenSkyveProject;
+import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
 @Mojo(name = "assemble")
 public class AssembleMojo extends AbstractMojo {
@@ -56,7 +56,7 @@ public class AssembleMojo extends AbstractMojo {
 				}
 			}
 
-			final SkyveProjectCreator creator = new SkyveProjectCreator()
+			final MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator()
 														.projectName(project.getName())
 														.projectDirectory(project.getBasedir().getAbsolutePath())
 														.customerName(customer)
@@ -69,7 +69,7 @@ public class AssembleMojo extends AbstractMojo {
 				}
 			}
 
-			final SkyveProject me = creator.initialise();
+			final MavenSkyveProject me = creator.initialise();
 			me.clearBeforeAssemble();
 			me.assemble();
 		}

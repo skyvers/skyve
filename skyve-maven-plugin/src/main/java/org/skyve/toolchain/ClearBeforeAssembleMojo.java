@@ -5,8 +5,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.skyve.create.SkyveProject;
-import org.skyve.create.SkyveProject.SkyveProjectCreator;
+import org.skyve.impl.create.MavenSkyveProject;
+import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
 @Mojo(name = "clearBeforeAssemble")
 public class ClearBeforeAssembleMojo extends AbstractMojo {
@@ -22,7 +22,7 @@ public class ClearBeforeAssembleMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
-			final SkyveProject me = new SkyveProjectCreator()
+			final MavenSkyveProject me = new MavenSkyveProjectCreator()
 											.projectName(project.getName())
 											.projectDirectory(project.getBasedir().getAbsolutePath())
 											.customerName(customer)
