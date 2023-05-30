@@ -22,6 +22,8 @@ public class UserExtensionH2Test extends AbstractH2TestForJUnit5 {
 	public void setup() throws Exception {
 		DataBuilder db = new DataBuilder().fixture(FixtureType.crud);
 		bean = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		// create the test data
+		bean = CORE.getPersistence().save(bean);
 	}
 
 	@Test
@@ -46,9 +48,6 @@ public class UserExtensionH2Test extends AbstractH2TestForJUnit5 {
 	@Test
 	@SuppressWarnings("boxing")
 	public void testToProxyDoesNotCreateDuplicates() throws Exception {
-		// create the test data
-		bean = CORE.getPersistence().save(bean);
-
 		// validate the test data
 		assertThat(CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME).beanResults()
 				.size(), is(2));

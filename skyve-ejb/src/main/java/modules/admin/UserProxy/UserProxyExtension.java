@@ -8,7 +8,6 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.persistence.DocumentQuery;
 
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
@@ -39,13 +38,11 @@ public class UserProxyExtension extends UserProxy {
 	}
 
 	/**
-	 * Return the user from this user proxy.
+	 * Return the user from this user proxy, if persisted, or null if not persisted.
 	 * 
 	 * @return	The User.
 	 */
 	public UserExtension toUser() throws Exception {
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
-		q.getFilter().addEquals(contactPropertyName, this.getContact());
-		return q.retrieveBean();
+		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, getBizId());
 	}
 }

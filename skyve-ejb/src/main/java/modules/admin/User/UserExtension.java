@@ -13,7 +13,6 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -168,38 +167,12 @@ public class UserExtension extends User {
 	}
 
 	/**
-	 * Return a {@link UserProxy} from this {@link User}, without retrieving it from the database again.
+	 * Return a {@link UserProxy} from this {@link User}, if persisted, or null if not persisted.
 	 * 
 	 * @return A user proxy representing this user
 	 */
 	public UserProxyExtension toUserProxy() {
-		UserProxyExtension proxy = UserProxy.newInstance();
-
-		// set core Skyve attributes
-		proxy.setBizId(this.getBizId());
-		proxy.setBizCustomer(this.getBizCustomer());
-		proxy.setBizDataGroupId(this.getBizDataGroupId());
-		proxy.setBizLock(this.getBizLock());
-		proxy.setBizUserId(this.getBizUserId());
-		proxy.setBizVersion(this.getBizVersion());
-		proxy.setBizKey(this.getBizKey());
-
-		// set any attributes of the proxy that are on the User
-		Module m = CORE.getCustomer().getModule(User.MODULE_NAME);
-		Document proxyDoc = m.getDocument(CORE.getCustomer(), UserProxy.DOCUMENT_NAME);
-		Document userDoc = m.getDocument(CORE.getCustomer(), User.DOCUMENT_NAME);
-
-		List<? extends Attribute> allProxyAttributes = proxyDoc.getAllAttributes(CORE.getCustomer()),
-				allUserAttributes = userDoc.getAllAttributes(CORE.getCustomer());
-
-		for (Attribute a : allProxyAttributes) {
-			// if the attribute is found on the User and UserProxy, copy it across
-			if (allUserAttributes.stream().anyMatch(att -> att.getName().equals(a.getName()))) {
-				Binder.set(proxy, a.getName(), Binder.get(this, a.getName()));
-			}
-		}
-
-		return proxy;
+		return CORE.getPersistence().retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, getBizId());
 	}
 
 	/**
