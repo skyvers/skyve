@@ -173,7 +173,7 @@
 				]]>
 			</description>
 			<length>63</length>
-			<validator regularExpression="^(?!-)[a-z0-9]+(-[a-z0-9]+)*$" 
+			<validator regularExpression="^[a-z0-9]+(-[a-z0-9]+)*$" 
 				validationMessage="This must be a valid DNS name, starting with a letter or number, containing only letters, numbers and the dash character. Every dash must be immediately preceeded and followed by a ltter or number."/>
 		</text>
 	</attributes>
