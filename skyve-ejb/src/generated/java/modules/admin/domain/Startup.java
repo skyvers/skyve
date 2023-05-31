@@ -411,8 +411,11 @@ public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * Directory Name
 	 * <br/>
-	 * The name of the top-level backup directory, e.g. <code>applicationName</code>, this will be 
-					created if it does not exist.
+	 * The name of the top-level backup directory, e.g. <code>application-name</code>, this will be 
+					created if it does not exist.<br/>
+					This must be a valid DNS name, starting with a letter or number, containing only letters, numbers
+					and the dash character. Every dash must be immediately preceeded and followed by a ltter or number.<br/>
+					Must be from 3 to 63 characters long.
 	 **/
 	private String backupDirectoryName;
 
