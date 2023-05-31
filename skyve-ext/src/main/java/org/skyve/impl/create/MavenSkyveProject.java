@@ -21,14 +21,14 @@ import org.skyve.impl.script.SkyveScriptInterpreter;
 import org.skyve.impl.util.UtilImpl;
 
 public class MavenSkyveProject {
-	static final Path SKYVE_EJB_PATH = Paths.get("skyve-ejb");
-	static final Path SKYVE_SRC_PATH = SKYVE_EJB_PATH.resolve("src").resolve("main").resolve("java");
-	static final Path SKYVE_SRC_RESOURCES_PATH = SKYVE_EJB_PATH.resolve("src").resolve("main").resolve("resources");
-	static final Path SKYVE_WEB_PATH = Paths.get("skyve-war").resolve("src").resolve("main").resolve("java");
-	static final Path SKYVE_GENERATED_PATH = SKYVE_EJB_PATH.resolve("src").resolve("generated").resolve("java");
-	static final Path SKYVE_TEST_PATH = SKYVE_EJB_PATH.resolve("src").resolve("test").resolve("java");
-	static final Path SKYVE_GENERATED_TEST_PATH = SKYVE_EJB_PATH.resolve("src").resolve("generatedTest").resolve("java");
-	static final Path SKYVE_WAR_PATH = Paths.get("skyve-war").resolve("src").resolve("main").resolve("webapp");
+	public static final Path SKYVE_EJB_PATH = Paths.get("skyve-ejb");
+	public static final Path SKYVE_SRC_PATH = SKYVE_EJB_PATH.resolve("src").resolve("main").resolve("java");
+	public static final Path SKYVE_SRC_RESOURCES_PATH = SKYVE_EJB_PATH.resolve("src").resolve("main").resolve("resources");
+	public static final Path SKYVE_WEB_PATH = Paths.get("skyve-war").resolve("src").resolve("main").resolve("java");
+	public static final Path SKYVE_GENERATED_PATH = SKYVE_EJB_PATH.resolve("src").resolve("generated").resolve("java");
+	public static final Path SKYVE_TEST_PATH = SKYVE_EJB_PATH.resolve("src").resolve("test").resolve("java");
+	public static final Path SKYVE_GENERATED_TEST_PATH = SKYVE_EJB_PATH.resolve("src").resolve("generatedTest").resolve("java");
+	public static final Path SKYVE_WAR_PATH = Paths.get("skyve-war").resolve("src").resolve("main").resolve("webapp");
 
 	private final String projectName;
 	private final String projectDescription;
@@ -42,10 +42,10 @@ public class MavenSkyveProject {
 	private final Path testDirectory;
 	private final Path generatedTestDirectory;
 	private final String skyveScript;
-	private final Map<String, Pair<ModuleMetaData, List<DocumentMetaData>>> metaData;
+	private final Map<String, Pair<ModuleMetaData, List<DocumentMetaData>>> metaData = new HashMap<>();
 	private boolean copyFromProject;
 
-	private MavenSkyveProject(MavenSkyveProjectCreator builder) {
+	protected MavenSkyveProject(MavenSkyveProjectCreator builder) {
 		this.projectName = builder.projectName;
 		this.projectDescription = (builder.projectDescription != null) ? builder.projectDescription : builder.projectName;
 		this.projectDirectory = Paths.get(builder.projectDirectory);
@@ -58,7 +58,6 @@ public class MavenSkyveProject {
 		this.testDirectory = Paths.get(builder.testDirectory);
 		this.generatedTestDirectory = Paths.get(builder.generatedTestDirectory);
 		this.skyveScript = builder.skyveScript;
-		this.metaData = builder.metaData;
 		this.copyFromProject = builder.copyFromProject;
 	}
 
@@ -162,7 +161,15 @@ public class MavenSkyveProject {
 		return projectDirectory.resolve("scripts").resolve("skyve.md");
 	}
 
-	public static void copyFiles(File projectDirectory, Path skyveBasePath, List<File> files) throws IOException {
+	protected Map<String, Pair<ModuleMetaData, List<DocumentMetaData>>> getMetaData() {
+		return metaData;
+	}
+	
+	public boolean isCopyFromProject() {
+		return copyFromProject;
+	}
+
+	private static void copyFiles(File projectDirectory, Path skyveBasePath, List<File> files) throws IOException {
 		for (File file : files) {
 			final File target = new File(projectDirectory, skyveBasePath.relativize(file.toPath()).toString());
 			if (! target.getParentFile().exists()) {
@@ -463,7 +470,6 @@ public class MavenSkyveProject {
 		private String testDirectory = DEFAULT_TEST_DIRECTORY;
 		private String generatedTestDirectory = DEFAULT_GENERATED_TEST_DIRECTORY;
 		private String skyveScript;
-		private final Map<String, Pair<ModuleMetaData, List<DocumentMetaData>>> metaData = new HashMap<>();
 		private boolean copyFromProject = false;
 
 		public MavenSkyveProjectCreator() {
@@ -477,84 +483,78 @@ public class MavenSkyveProject {
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator projectName(final String projectName) {
 			this.projectName = projectName;
+			return this;
+		}
 
+		@SuppressWarnings("hiding")
+		public MavenSkyveProjectCreator projectDescription(final String projectDescription) {
+			this.projectDescription = projectDescription;
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator projectDirectory(final String projectDirectory) {
 			this.projectDirectory = projectDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator customerName(final String customerName) {
 			this.customerName = customerName;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator skyveDirectory(final String skyveDirectory) {
 			this.skyveDirectory = skyveDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator srcDirectory(final String srcDirectory) {
 			this.srcDirectory = srcDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator generatedDirectory(final String generatedDirectory) {
 			this.generatedDirectory = generatedDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator resourceDirectory(final String resourceDirectory) {
 			this.resourceDirectory = resourceDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator webDirectory(final String webDirectory) {
 			this.webDirectory = webDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator testDirectory(final String testDirectory) {
 			this.testDirectory = testDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator generatedTestDirectory(final String generatedTestDirectory) {
 			this.generatedTestDirectory = generatedTestDirectory;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator skyveScript(final String skyveScript) {
 			this.skyveScript = skyveScript;
-
 			return this;
 		}
 
 		@SuppressWarnings("hiding")
 		public MavenSkyveProjectCreator copyFromProject(final boolean copyFromProject) {
 			this.copyFromProject = copyFromProject;
-
 			return this;
 		}
 
