@@ -1,4 +1,4 @@
-To install the ultima theme (>= 2.0.0) on skyve.
+To install the ultima theme (>= 6.1.0) on skyve.
 
 1) Drop ultima-theme-*.jar into WEB-INF/lib/
 2) Drop ultima-layout/ folder into WEB-INF/resources/
@@ -7,7 +7,7 @@ To install the ultima theme (>= 2.0.0) on skyve.
 5) Change router.UxUis to use "ultima" for the template name, "ultima" for the theme name 
 	and a theme colour matching the theme colour if there is one eg "indigo"
 
- To install the ecuador theme (>= 3.0.0) on skyve.
+ To install the ecuador theme (>= 6.1.0) on skyve.
  
 1) Drop ecuador-theme-*.jar into WEB-INF/lib/
 2) Drop ecuador-layout/ folder into WEB-INF/resources/

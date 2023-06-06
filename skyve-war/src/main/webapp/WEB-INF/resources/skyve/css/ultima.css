@@ -12,17 +12,12 @@ h2 {
 
 @media (min-width: 641px) {
 	.topbar-title {
-		font-size: 16px;
-		font-weight: bold;
-		vertical-align: middle;
+		font-size: 24px !important;
 		color: white;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		position: absolute;
-		top: 30px;
-		left: 290px;
-		width: 50%;
+		width: 100%;
 	}
 
 }
