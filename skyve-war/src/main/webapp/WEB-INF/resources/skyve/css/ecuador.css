@@ -29,6 +29,9 @@
 .ui-datatable tbody td {
 	text-align: center;
 }
+.ui-datatable thead th {
+	padding: 0px 1rem !important
+}
 
 @media (max-width: 1024px) {
 	#topbar-appname .app-name {

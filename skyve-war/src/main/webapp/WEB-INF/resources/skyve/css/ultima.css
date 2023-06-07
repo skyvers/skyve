@@ -9,6 +9,9 @@ h2 {
 .ui-datatable tbody td {
 	text-align: center;
 }
+.ui-datatable thead th {
+	padding: 0px 1rem !important
+}
 
 @media (min-width: 641px) {
 	.topbar-title {
