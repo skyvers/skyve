@@ -3102,6 +3102,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			if (visitedQueryNames.contains(dataSourceId)) {
 				return dataSourceId;
 			}
+			// NB Add the visited query name here before processing the query columns in case 1 of the query columns is a reference using the same query/datasource
+			visitedQueryNames.add(dataSourceId);
 			toAppendTo.append('{');
 		}
 		toAppendTo.append("ID:'").append(dataSourceId);
@@ -3250,7 +3252,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else {
 			toAppendTo.append("},\n");
-			visitedQueryNames.add(dataSourceId);
 		}
 		
 		// Add any child datasources found
