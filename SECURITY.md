@@ -12,6 +12,8 @@ The following Skyve versions are currently being supported with security updates
 | 5.0.x   | :x:                |
 | < 5.0   | :x:                |
 
+_Note: only customers covered by a support agreement will receive patches for major versions less than the current major version (8.x.x)._
+
 ## Reporting a Vulnerability
 
 If a vulnerability is found in Skyve, please use the [Contact Us](https://skyve.org/contact) 
