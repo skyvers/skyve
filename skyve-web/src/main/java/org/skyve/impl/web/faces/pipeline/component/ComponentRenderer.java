@@ -31,7 +31,6 @@ import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.button.Button;
-import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
@@ -39,6 +38,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.fieldset.Fieldset;
 import org.primefaces.component.fileupload.FileUpload;
@@ -53,6 +53,7 @@ import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.password.Password;
+import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.progressbar.ProgressBar;
 import org.primefaces.component.row.Row;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
@@ -127,18 +128,22 @@ public class ComponentRenderer {
 			putValue(attributes, "style", button.getStyle());
 			putValue(attributes, "styleClass", button.getStyleClass());
 		}
-		else if (component instanceof Calendar) {
-			tagName = "p:calendar";
+		else if (component instanceof DatePicker) {
+			tagName = "p:datePicker";
 			
-			Calendar calendar = (Calendar) component;
-			putValue(attributes, "mode", calendar.getMode());
-			putValue(attributes, "showOn", calendar.getShowOn());
-			putValue(attributes, "navigator", Boolean.valueOf(calendar.isNavigator()));
-			putValue(attributes, "showButtonPanel", Boolean.valueOf(calendar.isShowButtonPanel()));
-			putValue(attributes, "pattern", calendar.getPattern());
-			putValue(attributes, "mask", calendar.getMask());
-			putValue(attributes, "style", calendar.getStyle());
-			putValue(attributes, "styleClass", calendar.getStyleClass());
+			DatePicker picker = (DatePicker) component;
+			putValue(attributes, "showIcon", Boolean.valueOf(picker.isShowIcon()));
+			putValue(attributes, "showOnFocus", Boolean.valueOf(picker.isShowOnFocus()));
+			putValue(attributes, "showButtonBar", Boolean.valueOf(picker.isShowButtonBar()));
+			putValue(attributes, "pattern", picker.getPattern());
+			putValue(attributes, "monthNavigator", Boolean.valueOf(picker.isMonthNavigator()));
+			putValue(attributes, "yearNavigator", Boolean.valueOf(picker.isYearNavigator()));
+			putValue(attributes, "mask", picker.getMask());
+			putValue(attributes, "showTime", Boolean.valueOf(picker.isShowTime()));
+			putValue(attributes, "hourFormat", picker.getHourFormat());
+			putValue(attributes, "showSeconds", Boolean.valueOf(picker.isShowSeconds()));
+			putValue(attributes, "style", picker.getStyle());
+			putValue(attributes, "styleClass", picker.getStyleClass());
 		}
 		else if (component instanceof CellEditor) {
 			tagName = "p:cellEditor";
@@ -398,6 +403,22 @@ public class ComponentRenderer {
 			Password password = (Password) component;
 			putValue(attributes, "style", password.getStyle());
 			putValue(attributes, "styleClass", password.getStyleClass());
+		}
+		else if (component instanceof PickList) {
+			tagName = "p:pickList";
+			
+			PickList pickList = (PickList) component;
+			
+			putValue(attributes, "var", pickList.getVar());
+			putValue(attributes, "showSourceControls", Boolean.valueOf(pickList.isShowSourceControls()));
+			putValue(attributes, "showTargetControls", Boolean.valueOf(pickList.isShowTargetControls()));
+			putValue(attributes, "showSourceFilter", Boolean.valueOf(pickList.isShowSourceFilter()));
+			putValue(attributes, "showTargetFilter", Boolean.valueOf(pickList.isShowTargetFilter()));
+			putValue(attributes, "responsive", Boolean.valueOf(pickList.isResponsive()));
+			putValueExpression(attributes, "itemValue", component);
+			putValueExpression(attributes, "itemLabel", component);
+			putValue(attributes, "style", pickList.getStyle());
+			putValue(attributes, "styleClass", pickList.getStyleClass());
 		}
 		else if (component instanceof ProgressBar) {
 			tagName = "p:progressBar";
@@ -692,11 +713,7 @@ public class ComponentRenderer {
 	}
 	
 	private void renderAjaxBehaviour(String eventName, AjaxBehavior behaviour) {
-		out.append(indentation).append("<p:ajax event=\"").append(eventName).append('"');
-		MethodExpression listener = behaviour.getListener();
-		if (listener != null) {
-			out.append(" listener=\"").append(listener.getExpressionString()).append('"');
-		}
+		out.append(indentation).append("<p:ajax event=\"").append(eventName).append("\" listener=\"<cant obtain AjaxBehaviourListener(s) from primefaces>\"");
 
 		String value = behaviour.getProcess();
 		if (value != null) {

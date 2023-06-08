@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 
-import org.primefaces.component.calendar.Calendar;
+import org.primefaces.component.datepicker.DatePicker;
+import org.primefaces.component.picklist.PickList;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -2818,10 +2819,16 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		String binding = changeable.getBinding();
 		List<EventAction> changedActions = changeable.getChangedActions();
-		cb.addAjaxBehavior(eventSource, "change", dataWidgetBinding, dataWidgetVar, binding, changedActions);
-		// Add this special event for date selection on calendar as "changed" doesn't fire on select
-		if (eventSource instanceof Calendar) {
-			cb.addAjaxBehavior(eventSource, "dateSelect", dataWidgetBinding, dataWidgetVar, binding, changedActions);
+		
+		if (eventSource instanceof PickList) {
+			cb.addAjaxBehavior(eventSource, "transfer", dataWidgetBinding, dataWidgetVar, binding, changedActions);
+		}
+		else {
+			cb.addAjaxBehavior(eventSource, "change", dataWidgetBinding, dataWidgetVar, binding, changedActions);
+			// Add this special event for date selection on calendar as "changed" doesn't fire on select
+			if (eventSource instanceof DatePicker) {
+				cb.addAjaxBehavior(eventSource, "dateSelect", dataWidgetBinding, dataWidgetVar, binding, changedActions);
+			}
 		}
 	}
 

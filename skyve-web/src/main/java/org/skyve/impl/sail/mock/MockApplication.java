@@ -40,13 +40,13 @@ import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.breadcrumb.BreadCrumb;
 import org.primefaces.component.button.Button;
-import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.defaultcommand.DefaultCommand;
 import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.donutchart.DonutChart;
@@ -84,7 +84,6 @@ import org.primefaces.component.steps.Steps;
 import org.primefaces.component.sticky.Sticky;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
-import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.impl.web.faces.components.Conversation;
@@ -119,9 +118,6 @@ public class MockApplication extends Application {
 		else if (Button.COMPONENT_TYPE.equals(componentType)) {
 			return new Button();
 		}
-		else if (Calendar.COMPONENT_TYPE.equals(componentType)) {
-			return new Calendar();
-		}
 		else if (ColorPicker.COMPONENT_TYPE.equals(componentType)) {
 			return new ColorPicker();
 		}
@@ -148,6 +144,9 @@ public class MockApplication extends Application {
 					return new MockFacesContext();
 				}
 			};
+		}
+		else if (DatePicker.COMPONENT_TYPE.equals(componentType)) {
+			return new DatePicker();
 		}
 		else if (DefaultCommand.COMPONENT_TYPE.equals(componentType)) {
 			return new DefaultCommand();

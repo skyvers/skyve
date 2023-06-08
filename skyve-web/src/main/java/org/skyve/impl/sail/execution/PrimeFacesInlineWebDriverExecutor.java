@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.faces.component.UIComponent;
 
-import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.colorpicker.ColorPicker;
+import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
@@ -262,7 +262,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			boolean selectOne = (component instanceof SelectOneMenu);
 			boolean radio = (component instanceof SelectOneRadio);
 			boolean checkbox = (component instanceof SelectBooleanCheckbox) || (component instanceof TriStateCheckbox);
-			boolean _input = (component instanceof Spinner) || (component instanceof Calendar);
+			boolean _input = (component instanceof Spinner) || (component instanceof DatePicker);
 			
 			// TODO implement colour picker testing
 			if (component instanceof ColorPicker) {

@@ -1992,7 +1992,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		PickList result = (PickList) a.createComponent(PickList.COMPONENT_TYPE);
-		result.setVar("item");
+		setId(result, null);
 		result.setShowSourceControls(false);
 		result.setShowTargetControls(false);
 		result.setShowSourceFilter(false);
