@@ -28,6 +28,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 
@@ -48,6 +49,9 @@ public class View extends HtmlPanelGroup {
 			final String documentName = (String) attributes.get("document");
 	    	final String managedBeanName = (String) attributes.get("managedBean");
 	    	final String widgetId = (String) attributes.get("widgetId");
+	    	// NB style and styleClass attributes are automatically applied
+	    	final String childStyle = (String) attributes.get("childStyle");
+	    	final String childStyleClass = (String) attributes.get("childStyleClass");
 	    	final String process = (String) attributes.get("process");
 	    	final String update = (String) attributes.get("update");
 	    	String classString = (String) attributes.get("componentBuilderClass");
@@ -126,6 +130,25 @@ public class View extends HtmlPanelGroup {
 																update,
 																componentBuilder,
 																layoutBuilder);
+					// Add childStyle and childStyleClass attributes if available
+					for (UIComponent view : views) {
+						if (childStyle != null) {
+							try {
+								Binder.set(view, "style", childStyle);
+							}
+							catch (@SuppressWarnings("unused") Exception e) {
+								UtilImpl.LOGGER.warning("Can't set the style attribute on this UIComponent - " + view);
+							}
+						}
+						if (childStyleClass != null) {
+							try {
+								Binder.set(view, "styleClass", childStyleClass);
+							}
+							catch (@SuppressWarnings("unused") Exception e) {
+								UtilImpl.LOGGER.warning("Can't set the styleClass attribute on this UIComponent - " + view);
+							}
+						}
+					}
 					View.this.getChildren().addAll(views);
 					
 	                return null;
