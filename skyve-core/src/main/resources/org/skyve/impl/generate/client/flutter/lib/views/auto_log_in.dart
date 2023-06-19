@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'util/skyve_rest_client.dart';
+import '../util/skyve_rest_client.dart';
 
 class AutoLogIn extends StatefulWidget {
   static const routeName = '/auto-log-in';

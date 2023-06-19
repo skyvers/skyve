@@ -7,27 +7,33 @@ import 'package:flutter/foundation.dart';
 //import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class SkyveRestClient {
-  /// Set this value using --dart-define=SERVER_URL=http://xyz/etc/ when launching
-  static const _baseUri = 'http://localhost:8080/skyve/';
+  // if served from the web, use host/ or host/context/
+  // NB change this to use chrome (web) for running or debugging
+  static final String _baseUri = (kIsWeb
+      ? (Uri.base.origin +
+          (Uri.base.pathSegments.isEmpty
+              ? '/'
+              : '/${Uri.base.pathSegments[0]}/'))
+      : 'http://localhost:8080/skyve/');
   // static const _baseUri = 'http://10.0.2.2:8080/skyve/';
 
   static final instance = SkyveRestClient._internal();
   bool _loggedIn = false;
 
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: _baseUri,
-  ));
+  final Dio _dio =
+      Dio(BaseOptions(connectTimeout: const Duration(seconds: 60)));
 
   factory SkyveRestClient() {
     return instance;
   }
 
   SkyveRestClient._internal() {
-    _dio.options.connectTimeout = const Duration(seconds: 10);
-
+    debugPrint('BaseURI is $_baseUri');
     // Manage cookies
-    final cookieJar = CookieJar();
-    _dio.interceptors.add(CookieManager(cookieJar));
+    if (!kIsWeb) {
+      final cookieJar = CookieJar();
+      _dio.interceptors.add(CookieManager(cookieJar));
+    }
 
     // Log requests
     // _dio.interceptors.add(PrettyDioLogger(
@@ -49,12 +55,12 @@ class SkyveRestClient {
   }
 
   Future<String> _fetch(String url) async {
-    final Response<String> response = await _dio.get(url);
+    final Response<String> response = await _dio.get(_baseUri + url);
     if (response.data == null) {
       throw Exception('Response data was null');
     }
 
-    return response.data!;
+    return response.data!.replaceAll('\\n', '\\\\n').replaceAll('\t', '\\t');
   }
 
   /// Attempt to login using the provided creds
@@ -82,7 +88,7 @@ class SkyveRestClient {
     /// any chance of us touching it. On mobile the redirect
     /// will not be followed because we're doing a POST.
     try {
-      Response<String> response = await _dio.post('loginAttempt',
+      Response<String> response = await _dio.post('${_baseUri}loginAttempt',
           queryParameters: params,
           options: Options(validateStatus: validateStatus));
       // This'll throw an error when running anywhere except the browser
@@ -116,15 +122,41 @@ class SkyveRestClient {
     }
   }
 
-  Future<List<dynamic>> query(
-      String moduleName, String queryName, int startRow, endRow) async {
-    debugPrint('Fetch list $moduleName.$queryName');
+  String dataSource(String m, String? d, String q) {
+    return (d == null) ? '${m}_$q' : '${m}_${d}__$q';
+  }
+
+  Future<List<dynamic>> fetchQuery(
+      String m, String? d, String q, int startRow, int endRow) async {
+    return fetchDataSource(dataSource(m, d, q), startRow, endRow);
+  }
+
+  Future<List<dynamic>> fetchDataSource(
+      String ds, int startRow, int endRow) async {
+    debugPrint('Fetch list $ds');
 
     return await _fetch(
-            'smartlist?_operationType=fetch&_dataSource=${moduleName}_$queryName&_startRow=$startRow&_endRow=$endRow')
+            'smartlist?_operationType=fetch&_dataSource=$ds&_startRow=$startRow&_endRow=$endRow')
         .then((jsonString) {
       var decoded = jsonDecode(jsonString);
       return decoded['response']['data'];
+    });
+  }
+
+  Future<Map<String, dynamic>> metadata() async {
+    debugPrint('Fetch metadata');
+
+    return await _fetch('meta').then((jsonString) {
+      return jsonDecode(jsonString);
+    });
+  }
+
+  Future<Map<String, dynamic>> view(String m, String d) async {
+    debugPrint('Fetch view');
+
+    return await _fetch('meta?_mod=$m&_doc=$d').then((jsonString) {
+      debugPrint(jsonString);
+      return jsonDecode(jsonString);
     });
   }
 
@@ -143,12 +175,4 @@ class SkyveRestClient {
       return jsonDecode(jsonString)['response']['data'][0];
     });
   }
-}
-
-class Result {
-  late bool hasError;
-  late String errorMessage;
-  late int statusCode;
-
-  Result(this.hasError, this.errorMessage, {this.statusCode = 0});
 }

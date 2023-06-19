@@ -5,7 +5,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -44,10 +46,6 @@ public class FlutterGenerator {
         this.customer = ProvidedRepositoryFactory.get().getCustomer(customerName);
     }
 
-    void refreshFile(String resourcePath, String flutterPath) throws IOException {
-        refreshFile(resourcePath, flutterPath, null);
-    }
-
     void refreshFile(String resourcePath, String flutterPath, Map<String, String> substitutions) throws IOException {
         File file = new File(projectPath, flutterPath);
         if (file.exists()) {
@@ -64,14 +62,35 @@ public class FlutterGenerator {
             flutterContent = new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
 
-        if (substitutions != null) {
-            for (Entry<String, String> substitution : substitutions.entrySet()) {
-                flutterContent = flutterContent.replace(substitution.getKey(), substitution.getValue());
-            }
+        for (Entry<String, String> substitution : substitutions.entrySet()) {
+            flutterContent = flutterContent.replace(substitution.getKey(), substitution.getValue());
         }
 
         try (FileWriter fw = new FileWriter(file)) {
             fw.write(flutterContent);
+        }
+    }
+
+    /**
+     * Refresh all the given files in the provided directory. Creating the
+     * containing output directory if necessary.
+     * 
+     * @param relativeFolderPath
+     * @param substitutions
+     * @throws IOException
+     */
+    private void refreshAll(String relativeFolderPath, Collection<String> fileNames, Map<String, String> substitutions)
+            throws IOException {
+
+        File dir = new File(projectPath, relativeFolderPath);
+        dir.mkdir();
+        if (!dir.exists()) {
+            throw new FlutterGeneratorException("Unable to creat output folder: " + dir.getAbsolutePath());
+        }
+
+        for (String fileName : fileNames) {
+            String relativeFileName = relativeFolderPath + "/" + fileName;
+            refreshFile(relativeFileName, relativeFileName, substitutions);
         }
     }
 
@@ -81,10 +100,20 @@ public class FlutterGenerator {
         Map<String, String> substitutions = Collections.singletonMap("##PROJECT##", projectName);
         refreshFile("pubspec.yaml", "pubspec.yaml", substitutions);
 
-        refreshFile("lib/auto_log_in.dart", "lib/auto_log_in.dart", substitutions);
+        // lib views folder
+        List<String> viewFiles = List.of("auto_log_in.dart", "skyve_container.dart", "skyve_edit_view.dart",
+                "skyve_list_view.dart", "skyve_pluto_list_view.dart");
+        refreshAll("lib/views", viewFiles, substitutions);
 
-        new File(projectPath, "lib/util/").mkdir();
-        refreshFile("lib/util/skyve_rest_client.dart", "lib/util/skyve_rest_client.dart", substitutions);
+        // lib util folder
+        refreshAll("lib/util", List.of("skyve_rest_client.dart", "skyve_providers.dart"), substitutions);
+
+        // lib models folder
+        refreshAll("lib/models",
+                List.of("skyve_datasource_models.dart", "skyve_menu_models.dart", "skyve_view_models.dart"),
+                substitutions);
+
+        // lib widgets folder
         new File(projectPath, "lib/widgets/").mkdir();
         refreshFile("lib/widgets/skyve_border.dart", "lib/widgets/skyve_border.dart", substitutions);
         refreshFile("lib/widgets/skyve_button.dart", "lib/widgets/skyve_button.dart", substitutions);

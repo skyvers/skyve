@@ -37,7 +37,6 @@ class _##CLASS##State extends State<##CLASS##> {
 
     return SkyveView.responsiveView(
         context,
-        ##CLASS##.routeName,
         '##DESCRIPTION##',
         Visibility(
             visible: _loaded,
@@ -87,7 +86,7 @@ class _##CLASS##State extends State<##CLASS##> {
   }
 
   void _load() async {
-    final rows = await SkyveRestClient().query('##MODULE##', '##QUERY##', 0, 75);
+    final rows = await SkyveRestClient().fetchQuery('##MODULE##', '##DOCUMENT##', '##QUERY##', 0, 75);
     setState(() {
       _rows = rows;
       _loaded = true;

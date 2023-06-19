@@ -1,72 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../main.dart';
+import '../models/skyve_menu_models.dart';
+import '../util/skyve_providers.dart';
 import 'skyve_network_image.dart';
 
-class SkyveMenu extends StatelessWidget {
-  const SkyveMenu(
-      {Key? key, required this.currentRoute, required this.inDrawer})
-      : super(key: key);
-
-  final String currentRoute;
+class SkyveMenu extends ConsumerWidget {
   final bool inDrawer;
 
+  const SkyveMenu({Key? key, required this.inDrawer}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    WidgetsFlutterBinding.ensureInitialized();
-    final DrawerHeader header = DrawerHeader(
-      decoration: BoxDecoration(
-        color: theme.primaryColor,
-      ),
-      child: const SkvyeNetworkImage(),
-    );
-    final List<Widget> list = List.empty(growable: true);
-    final List<Widget> moduleList = List.empty(growable: true);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final model = ref.watch(containerMenuProvider);
+    return model.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (model) {
+          ThemeData theme = Theme.of(context);
+          WidgetsFlutterBinding.ensureInitialized();
+          final DrawerHeader header = DrawerHeader(
+            decoration: BoxDecoration(
+              color: theme.primaryColor,
+            ),
+            child: const SkvyeNetworkImage(),
+          );
+          final List<Widget> list = List.empty(growable: true);
+          final List<Widget> moduleList = List.empty(growable: true);
 
-    for (SkyveMenuModule module in menu) {
-      List<Widget> groupItems = [];
-      for (SkyveMenuItem row in module.items) {
-        if (row is SkyveMenuGroup) {
-          list.add(_buildMenuGroup(
-              context: context, title: row.label, menuItems: row.children));
-          groupItems.clear();
-        } else if (row is SkyveMenuData) {
-          list.add(_buildMenuData(
-              context: context,
-              title: row.label,
-              routeName: row.routeName,
-              currentRoute: currentRoute,
-              icon: row.icon));
-        }
-      }
-      moduleList.add(_buildMenuModule(
-          context: context,
-          title: module.label,
-          moduleMenuItems: list,
-          currentRoute: currentRoute));
-      list.clear();
-    }
+          for (SkyveModuleMenuModel module in model) {
+            List<Widget> groupItems = [];
+            for (SkyveMenuItemModel item in module.items) {
+              if (item is SkyveMenuGroupModel) {
+                list.add(_buildMenuGroup(
+                    context: context, title: item.title, items: item.items));
+                groupItems.clear();
+              } else if (item is SkyveNavigationMenuItemModel) {
+                list.add(_buildMenuItem(
+                    context: context,
+                    title: item.title,
+                    path: item.path,
+                    params: item.params,
+                    icon: item.icon));
+              }
+            }
+            moduleList.add(_buildMenuModule(
+                context: context,
+                title: module.title,
+                open: module.open,
+                moduleMenuItems: list));
+            list.clear();
+          }
 
-    return Drawer(
-      child: Column(
-        children: [
-          SizedBox(height: 180, child: header),
-          Expanded(
-              child: ListView(padding: EdgeInsets.zero, children: moduleList))
-        ],
-      ),
-    );
+          return Drawer(
+            child: Column(
+              children: [
+                SizedBox(height: 180, child: header),
+                Expanded(
+                    child: ListView(
+                        padding: EdgeInsets.zero, children: moduleList))
+              ],
+            ),
+          );
+        });
   }
 
   Widget _buildMenuModule(
       {required BuildContext context,
       required String title,
-      required moduleMenuItems,
-      required String currentRoute}) {
+      required bool open,
+      required moduleMenuItems}) {
     return ExpansionTile(
       maintainState: true,
       title: Text(title),
+      initiallyExpanded: open,
       childrenPadding: const EdgeInsets.only(left: 10),
       children: moduleMenuItems.toList(),
     );
@@ -74,21 +81,19 @@ class SkyveMenu extends StatelessWidget {
 
   // Can call itself recursively to build nested Groups
   Widget _buildMenuGroup(
-      {required BuildContext context,
-      required String title,
-      required menuItems}) {
+      {required BuildContext context, required String title, required items}) {
     List<Widget> groupItems = [];
-    for (SkyveMenuItem child in menuItems) {
-      if (child is SkyveMenuGroup) {
+    for (SkyveMenuItemModel item in items) {
+      if (item is SkyveMenuGroupModel) {
         groupItems.add(_buildMenuGroup(
-            context: context, title: child.label, menuItems: child.children));
-      } else if (child is SkyveMenuData) {
-        groupItems.add(_buildMenuData(
+            context: context, title: item.title, items: item.items));
+      } else if (item is SkyveNavigationMenuItemModel) {
+        groupItems.add(_buildMenuItem(
             context: context,
-            title: child.label,
-            routeName: child.routeName,
-            currentRoute: currentRoute,
-            icon: child.icon));
+            title: item.title,
+            path: item.path,
+            params: item.params,
+            icon: item.icon));
       }
     }
 
@@ -100,22 +105,26 @@ class SkyveMenu extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuData(
+  Widget _buildMenuItem(
       {required BuildContext context,
       required String title,
-      required String routeName,
-      required String currentRoute,
-      Icon? icon}) {
-    var selected = (routeName == currentRoute);
+      required String path,
+      required Map<String, dynamic>? params,
+      String? icon}) {
+    final String currentLocation = GoRouter.of(context).location;
+    final String newLocation =
+        Uri(path: path, queryParameters: params).toString();
+    var selected = (currentLocation == newLocation);
 
     return ListTile(
       title: Text(title),
-      leading: icon,
+      leading: null, // icon,
       selected: selected,
       onTap: () {
         if (!selected) {
           // Go to the clicked menu item
-          context.go(routeName);
+          context.pushReplacement(
+              Uri(path: path, queryParameters: params).toString());
         } else {
           // Close the side menu
           context.pop();
@@ -123,31 +132,4 @@ class SkyveMenu extends StatelessWidget {
       },
     );
   }
-}
-
-class SkyveMenuModule {
-  const SkyveMenuModule({required this.label, required this.items});
-
-  final String label;
-  final List<SkyveMenuItem> items;
-}
-
-class SkyveMenuItem {
-  const SkyveMenuItem({required this.label});
-
-  final String label;
-}
-
-class SkyveMenuGroup extends SkyveMenuItem {
-  const SkyveMenuGroup({required super.label, required this.children});
-
-  final List<SkyveMenuItem> children;
-}
-
-class SkyveMenuData extends SkyveMenuItem {
-  const SkyveMenuData(
-      {required super.label, required this.icon, required this.routeName});
-
-  final String routeName;
-  final Icon? icon;
 }

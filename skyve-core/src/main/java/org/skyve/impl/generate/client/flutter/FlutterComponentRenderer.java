@@ -166,8 +166,25 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		imports.add(BUTTON_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const SkyveButton(name: '").append(button.getActionName()).append("', label: '").append(action.getLocalisedDisplayName()).append("'),");
+        output.append("const SkyveButton(name: '")
+              .append(button.getActionName())
+              .append("', label: '")
+              .append(action.getLocalisedDisplayName())
+              .append("', type: '")
+              .append(deriveActionType(action))
+              .append("'),");
 		return result;
+	}
+	
+	private String deriveActionType(Action action) {
+	    
+	    // FIXME
+	    // org.skyve.impl.generate.ViewRenderer has actionType char calculation
+	    // or
+	    // MetaDataServlet has json generation with, eg, 'type': 'zoomOutAction'
+	    // FIXME
+
+	    return "someAction";
 	}
 
 	@Override
@@ -175,7 +192,13 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		imports.add(BUTTON_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const SkyveButton(name: '").append(button.getActionName()).append("', label: '").append(action.getLocalisedDisplayName()).append("'),");
+        output.append("const SkyveButton(name: '")
+              .append(button.getActionName())
+              .append("', label: '")
+              .append(action.getLocalisedDisplayName())
+              .append("', type: '")
+              .append(deriveActionType(action))
+              .append("'),");
 		return result;
 	}
 
@@ -188,7 +211,13 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		imports.add(BUTTON_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const SkyveButton(name: '").append(button.getActionName()).append("', label: '").append(action.getLocalisedDisplayName()).append("'),");
+        output.append("const SkyveButton(name: '")
+              .append(button.getActionName())
+              .append("', label: '")
+              .append(action.getLocalisedDisplayName())
+              .append("', type: '")
+              .append(deriveActionType(action))
+              .append("'),");
 		return result;
 	}
 
@@ -625,7 +654,13 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		imports.add(BUTTON_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
-		output.append("const SkyveButton(name: '").append(name).append("', label: '").append(title).append("'),");
+        output.append("const SkyveButton(name: '")
+              .append(name)
+              .append("', label: '")
+              .append(title)
+              .append("', type: '")
+              .append(deriveActionType(action))
+              .append("'),");
 		return result;
 	}
 }

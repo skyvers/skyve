@@ -3,4 +3,4 @@ org.eclipse.jdt.core.prefs
 .idea
 *.classpath
 *.project
-*/.settings/*
+.settings/

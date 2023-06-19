@@ -30,7 +30,6 @@ class _##CLASS##State extends State<##CLASS##> {
     _load(bizId);
     return SkyveView.responsiveView(
         context,
-        ##CLASS##.routeName,
         _bean['_title'],
         Visibility(
             visible: (_bean['bizId'] != null),
