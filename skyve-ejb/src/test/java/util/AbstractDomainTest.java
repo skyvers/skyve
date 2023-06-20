@@ -1,6 +1,9 @@
 package util;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assume.assumeTrue;
 
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.customer.Customer;
@@ -63,7 +67,15 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		int beanCount = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults().size();
 
 		CORE.getPersistence().save(b1);
-		CORE.getPersistence().save(b2);
+
+		try {
+			CORE.getPersistence().save(b2);
+		} catch (@SuppressWarnings("unused") UniqueConstraintViolationException uce) {
+			// failed to create a unique second bean, try create b2 again
+			// if this happens consistently, you may need to use a factory to create unique instances of this document
+			b2 = getBean();
+			CORE.getPersistence().save(b2);
+		}
 
 		// perform the method under test
 		List<T> results = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults();
