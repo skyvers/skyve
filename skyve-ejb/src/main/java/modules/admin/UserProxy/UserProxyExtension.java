@@ -40,9 +40,9 @@ public class UserProxyExtension extends UserProxy {
 	/**
 	 * Return the user from this user proxy, if persisted, or null if not persisted.
 	 * 
-	 * @return	The User.
+	 * @return User
 	 */
-	public UserExtension toUser() throws Exception {
+	public UserExtension toUser() {
 		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, getBizId());
 	}
 }
