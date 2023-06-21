@@ -3,6 +3,11 @@ package org.skyve.domain;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.skyve.CORE;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+
 /**
  * 
  */
@@ -94,11 +99,28 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	public String getBizModule();
 
 	/**
+	 * Get the Module meta-data for this Bean (and the current customer).
+	 * @return	the module.
+	 */
+	public default Module getModuleMetaData() {
+		return CORE.getCustomer().getModule(getBizModule());
+	}
+	
+	/**
 	 * 
 	 * @return
 	 */
 	public String getBizDocument();
 
+	/**
+	 * Get the Document meta-data for this Bean (and the current customer).
+	 * @return	the document.
+	 */
+	public default Document getDocumentMetaData() {
+		Customer customer = CORE.getCustomer();
+		return customer.getModule(getBizModule()).getDocument(customer, getBizDocument());
+	}
+	
 	/**
 	 * 
 	 * @return
