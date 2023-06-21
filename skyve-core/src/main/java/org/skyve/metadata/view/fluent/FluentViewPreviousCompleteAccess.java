@@ -9,9 +9,7 @@ import org.skyve.impl.metadata.repository.view.access.ViewPreviousCompleteUserAc
  * 
  * @author brandon-klar
  */
-public class FluentViewPreviousCompleteAccess
-		extends FluentViewUserAccess<FluentViewPreviousCompleteAccess, ViewPreviousCompleteUserAccessMetaData> {
-
+public class FluentViewPreviousCompleteAccess extends FluentViewUserAccess<FluentViewPreviousCompleteAccess, ViewPreviousCompleteUserAccessMetaData> {
 	/**
 	 * Creates a new FluentViewPreviousCompleteAccess
 	 */
@@ -49,5 +47,4 @@ public class FluentViewPreviousCompleteAccess
 	public ViewPreviousCompleteUserAccessMetaData get() {
 		return access;
 	}
-
 }

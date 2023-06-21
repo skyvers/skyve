@@ -9,8 +9,7 @@ import org.skyve.impl.metadata.repository.view.access.ViewModelAggregateUserAcce
  * 
  * @author brandon-klar
  */
-public class FluentViewModelAggregateAccess
-		extends FluentViewUserAccess<FluentViewModelAggregateAccess, ViewModelAggregateUserAccessMetaData> {
+public class FluentViewModelAggregateAccess extends FluentViewUserAccess<FluentViewModelAggregateAccess, ViewModelAggregateUserAccessMetaData> {
 	/**
 	 * Creates a new FluentViewModelAggregateAccess
 	 */
@@ -48,5 +47,4 @@ public class FluentViewModelAggregateAccess
 	public ViewModelAggregateUserAccessMetaData get() {
 		return access;
 	}
-
 }

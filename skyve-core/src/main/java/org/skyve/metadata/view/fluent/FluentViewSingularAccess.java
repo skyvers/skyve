@@ -10,7 +10,6 @@ import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMeta
  * @author brandon-klar
  */
 public class FluentViewSingularAccess extends FluentViewUserAccess<FluentViewSingularAccess, ViewSingularUserAccessMetaData> {
-
 	/**
 	 * Creates a new FluentViewDocumentAggregateAccess
 	 */
@@ -48,5 +47,4 @@ public class FluentViewSingularAccess extends FluentViewUserAccess<FluentViewSin
 	public ViewSingularUserAccessMetaData get() {
 		return access;
 	}
-
 }

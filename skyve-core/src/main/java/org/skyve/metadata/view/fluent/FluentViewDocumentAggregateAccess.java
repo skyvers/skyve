@@ -9,9 +9,7 @@ import org.skyve.impl.metadata.repository.view.access.ViewDocumentAggregateUserA
  * 
  * @author brandon-klar
  */
-public class FluentViewDocumentAggregateAccess
-		extends FluentViewUserAccess<FluentViewDocumentAggregateAccess, ViewDocumentAggregateUserAccessMetaData> {
-
+public class FluentViewDocumentAggregateAccess extends FluentViewUserAccess<FluentViewDocumentAggregateAccess, ViewDocumentAggregateUserAccessMetaData> {
 	/**
 	 * Creates a new FluentViewDocumentAggregateAccess
 	 */

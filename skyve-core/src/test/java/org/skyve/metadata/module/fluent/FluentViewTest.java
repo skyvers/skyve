@@ -37,7 +37,7 @@ public class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
 		// call the method under test
-		fluent.addViewDocumentAggregateAccess(access);
+		fluent.addDocumentAggregateAccess(access);
 
 		// verify the result
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
@@ -54,7 +54,7 @@ public class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
 
 		// call the method under test
-		fluent.addViewQueryAggregateAccess(access);
+		fluent.addQueryAggregateAccess(access);
 
 		// verify the result
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
@@ -71,7 +71,7 @@ public class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
 
 		// call the method under test
-		fluent.addViewModelAggregateAccess(access);
+		fluent.addModelAggregateAccess(access);
 
 		// verify the result
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
@@ -88,7 +88,7 @@ public class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
 
 		// call the method under test
-		fluent.addViewSingularAccess(access);
+		fluent.addSingularAccess(access);
 
 		// verify the result
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
@@ -105,7 +105,7 @@ public class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(0));
 
 		// call the method under test
-		fluent.addViewPreviousCompleteAccess(access);
+		fluent.addPreviousCompleteAccess(access);
 
 		// verify the result
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(1));
@@ -121,8 +121,8 @@ public class FluentViewTest {
 		FluentViewModelAggregateAccess access2 = new FluentViewModelAggregateAccess();
 		access2.modelName("TestModel1");
 
-		fluent.addViewDocumentAggregateAccess(access1);
-		fluent.addViewModelAggregateAccess(access2);
+		fluent.addDocumentAggregateAccess(access1);
+		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
@@ -144,14 +144,14 @@ public class FluentViewTest {
 		FluentViewDocumentAggregateAccess access2 = new FluentViewDocumentAggregateAccess();
 		access2.documentName("TestDocument2");
 		
-		fluent.addViewDocumentAggregateAccess(access1);
-		fluent.addViewDocumentAggregateAccess(access2);
+		fluent.addDocumentAggregateAccess(access1);
+		fluent.addDocumentAggregateAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
 
 		// call the method under test
-		FluentViewDocumentAggregateAccess result = fluent.findViewDocumentAggregateAccess("TestDocument1");
+		FluentViewDocumentAggregateAccess result = fluent.findDocumentAggregateAccess("TestDocument1");
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
@@ -168,14 +168,14 @@ public class FluentViewTest {
 		FluentViewModelAggregateAccess access2 = new FluentViewModelAggregateAccess();
 		access2.modelName("TestModel2");
 
-		fluent.addViewModelAggregateAccess(access1);
-		fluent.addViewModelAggregateAccess(access2);
+		fluent.addModelAggregateAccess(access1);
+		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
 
 		// call the method under test
-		FluentViewModelAggregateAccess result = fluent.findViewModelAggregateAccess("TestModel1");
+		FluentViewModelAggregateAccess result = fluent.findModelAggregateAccess("TestModel1");
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
@@ -192,14 +192,14 @@ public class FluentViewTest {
 		FluentViewPreviousCompleteAccess access2 = new FluentViewPreviousCompleteAccess();
 		access2.binding("TestBinding2");
 
-		fluent.addViewPreviousCompleteAccess(access1);
-		fluent.addViewPreviousCompleteAccess(access2);
+		fluent.addPreviousCompleteAccess(access1);
+		fluent.addPreviousCompleteAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
 
 		// call the method under test
-		FluentViewPreviousCompleteAccess result = fluent.findViewPreviousCompleteAccess("TestBinding1");
+		FluentViewPreviousCompleteAccess result = fluent.findPreviousCompleteAccess("TestBinding1");
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
@@ -216,14 +216,14 @@ public class FluentViewTest {
 		FluentViewQueryAggregateAccess access2 = new FluentViewQueryAggregateAccess();
 		access2.queryName("TestQuery2");
 
-		fluent.addViewQueryAggregateAccess(access1);
-		fluent.addViewQueryAggregateAccess(access2);
+		fluent.addQueryAggregateAccess(access1);
+		fluent.addQueryAggregateAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
 
 		// call the method under test
-		FluentViewQueryAggregateAccess result = fluent.findViewQueryAggregateAccess("TestQuery1");
+		FluentViewQueryAggregateAccess result = fluent.findQueryAggregateAccess("TestQuery1");
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
@@ -240,14 +240,14 @@ public class FluentViewTest {
 		FluentViewSingularAccess access2 = new FluentViewSingularAccess();
 		access2.documentName("TestDocument2");
 
-		fluent.addViewSingularAccess(access1);
-		fluent.addViewSingularAccess(access2);
+		fluent.addSingularAccess(access1);
+		fluent.addSingularAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
 
 		// call the method under test
-		FluentViewSingularAccess result = fluent.findViewSingularAccess("TestDocument1");
+		FluentViewSingularAccess result = fluent.findSingularAccess("TestDocument1");
 
 		// verify the result
 		assertThat(result, is(notNullValue()));
@@ -264,8 +264,8 @@ public class FluentViewTest {
 		FluentViewDocumentAggregateAccess access2 = new FluentViewDocumentAggregateAccess();
 		access2.documentName("TestDocument2");
 
-		fluent.addViewDocumentAggregateAccess(access1);
-		fluent.addViewDocumentAggregateAccess(access2);
+		fluent.addDocumentAggregateAccess(access1);
+		fluent.addDocumentAggregateAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
@@ -289,8 +289,8 @@ public class FluentViewTest {
 		FluentViewModelAggregateAccess access2 = new FluentViewModelAggregateAccess();
 		access2.modelName("TestModel2");
 
-		fluent.addViewModelAggregateAccess(access1);
-		fluent.addViewModelAggregateAccess(access2);
+		fluent.addModelAggregateAccess(access1);
+		fluent.addModelAggregateAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
@@ -314,8 +314,8 @@ public class FluentViewTest {
 		FluentViewPreviousCompleteAccess access2 = new FluentViewPreviousCompleteAccess();
 		access2.binding("TestBinding2");
 
-		fluent.addViewPreviousCompleteAccess(access1);
-		fluent.addViewPreviousCompleteAccess(access2);
+		fluent.addPreviousCompleteAccess(access1);
+		fluent.addPreviousCompleteAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
@@ -339,8 +339,8 @@ public class FluentViewTest {
 		FluentViewQueryAggregateAccess access2 = new FluentViewQueryAggregateAccess();
 		access2.queryName("TestQuery2");
 
-		fluent.addViewQueryAggregateAccess(access1);
-		fluent.addViewQueryAggregateAccess(access2);
+		fluent.addQueryAggregateAccess(access1);
+		fluent.addQueryAggregateAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
@@ -364,8 +364,8 @@ public class FluentViewTest {
 		FluentViewSingularAccess access2 = new FluentViewSingularAccess();
 		access2.documentName("TestDocument2");
 
-		fluent.addViewSingularAccess(access1);
-		fluent.addViewSingularAccess(access2);
+		fluent.addSingularAccess(access1);
+		fluent.addSingularAccess(access2);
 
 		// validate the test data
 		assertThat(fluent.get().getAccesses().getAccesses().size(), is(2));
