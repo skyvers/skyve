@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.router;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -13,15 +14,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.metadata.repository.PersistentMetaData;
+import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
-@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
-public class Router implements PersistentMetaData<Router> {
+@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes"})
+public class Router implements ConvertableMetaData<Router> {
 	private static final long serialVersionUID = 670690452538129424L;
+
+	private long lastModifiedMillis = Long.MAX_VALUE;
+	
+	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	@XmlTransient
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
 
 	private String uxuiSelectorClassName;
 	private TaggingUxUiSelector uxuiSelector;
@@ -39,13 +52,6 @@ public class Router implements PersistentMetaData<Router> {
 		return unsecuredUrlPrefixes;
 	}
 
-	@XmlTransient
-	private List<RouteCriteria> unsecuredRoutes = new ArrayList<>();
-
-	List<RouteCriteria> getUnsecuredRoutes() {
-		return unsecuredRoutes;
-	}
-	
 	public String getUxuiSelectorClassName() {
 		return uxuiSelectorClassName;
 	}
@@ -73,14 +79,16 @@ public class Router implements PersistentMetaData<Router> {
 	
 	public Route selectRoute(String uxui, RouteCriteria criteria) {
 		UxUiMetadata selectedUxUi = uxuiMap.get(uxui);
-		for (Route route : selectedUxUi.getRoutes()) {
-			List<RouteCriteria> routeCriteria = route.getCriteria();
-			if (routeCriteria.isEmpty()) { // if no criteria defined then its a match
-				return route;
-			}
-			for (RouteCriteria routeCriterium : routeCriteria) {
-				if (routeCriterium.matches(criteria)) {
+		if (selectedUxUi != null) {
+			for (Route route : selectedUxUi.getRoutes()) {
+				List<RouteCriteria> routeCriteria = route.getCriteria();
+				if (routeCriteria.isEmpty()) { // if no criteria defined then its a match
 					return route;
+				}
+				for (RouteCriteria routeCriterium : routeCriteria) {
+					if (routeCriterium.matches(criteria)) {
+						return route;
+					}
 				}
 			}
 		}
@@ -92,17 +100,6 @@ public class Router implements PersistentMetaData<Router> {
 		if (urlPrefixToTest != null) {
 			for (String unsecuredURLPrefix : unsecuredUrlPrefixes) {
 	        	if (urlPrefixToTest.startsWith(unsecuredURLPrefix)) {
-	        		return true;
-	        	}
-	        }
-		}
-        return false;
-	}
-	
-	public boolean isUnsecured(RouteCriteria routeToTest) {
-		if (routeToTest != null) {
-			for (RouteCriteria unsecuredRoute : unsecuredRoutes) {
-	        	if (unsecuredRoute.matches(routeToTest)) {
 	        		return true;
 	        	}
 	        }
@@ -130,5 +127,48 @@ public class Router implements PersistentMetaData<Router> {
 		}
 		
 		return this;
+	}
+	
+	/**
+	 * Merges a router into this router.
+	 * If the route exists already then the route criteria are added.
+	 * If the route does not exist already, it is inserted in the order defined at the top of the list.
+	 * Thus the broadest routes should go in the global router and the module router should be mainly for public pages. 
+	 * @param routerToMerge	Router to merge into this router.
+	 */
+	public void merge(Router routerToMerge) {
+		// Set the last modified to the latest timestamp of any router to be merged
+		setLastModifiedMillis(Math.max(getLastModifiedMillis(), routerToMerge.getLastModifiedMillis()));
+
+		// Merge UX/UIs
+		final List<UxUiMetadata> uxuiMetadata = routerToMerge.getUxUis();
+		final List<UxUiMetadata> newUxUis = new ArrayList<>();
+		for (UxUiMetadata uxuiMetadatum : uxuiMetadata) {
+			final UxUiMetadata existingUxuiMetadatum = uxuis.stream()
+					.filter(uxui -> Objects.equals(uxui.getName(), uxuiMetadatum.getName()))
+					.findFirst().orElse(null);
+			if (existingUxuiMetadatum == null) {
+				newUxUis.add(uxuiMetadatum);
+			}
+			else {
+				for (int i = 0; i < uxuiMetadatum.getRoutes().size(); i++) {
+					final Route routeToMerge = uxuiMetadatum.getRoutes().get(i);
+					final Route existingRoute = existingUxuiMetadatum.getRoutes().stream()
+							.filter(route -> Objects.equals(route.getOutcomeUrl(), routeToMerge.getOutcomeUrl()))
+							.findFirst().orElse(null);
+					if (existingRoute == null) {
+						existingUxuiMetadatum.getRoutes().add(i, routeToMerge);
+					}
+					else {
+						existingRoute.getCriteria().addAll(routeToMerge.getCriteria());
+						existingRoute.getProperties().putAll(routeToMerge.getProperties());
+					}
+				}
+			}
+		}
+		uxuis.addAll(newUxUis);
+
+		// Add any extra unsecured URL prefixes
+		unsecuredUrlPrefixes.addAll(routerToMerge.getUnsecuredUrlPrefixes());
 	}
 }

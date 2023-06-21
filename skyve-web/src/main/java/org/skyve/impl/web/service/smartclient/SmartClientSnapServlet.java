@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.security.SecureRandom;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -70,11 +69,11 @@ public class SmartClientSnapServlet extends HttpServlet {
 		// If this is a mutating request, we'll definitely need a new CSRF Token
 		if ("L".equals(action)) {
 			if (newCsrfToken == null) {
-				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+				newCsrfToken = StateUtil.createToken();
 			}
 		}
 		else {
-			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			newCsrfToken = StateUtil.createToken();
 		}
     	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 

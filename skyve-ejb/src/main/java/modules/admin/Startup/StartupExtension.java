@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
+import org.skyve.impl.backup.AzureBlobStorageBackup;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.util.JSON;
@@ -36,6 +38,10 @@ public class StartupExtension extends Startup {
 	static final String API_STANZA_KEY = "api";
 	static final String API_GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
 	static final String API_GOOGLE_RECAPTCHA_KEY = "googleRecaptchaSiteKey";
+
+	static final String BACKUP_STANZA_KEY = "backup";
+	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
+	static final String BACKUP_PROPERTIES_KEY = "properties";
 
 	static final String ENVIRONMENT_STANZA_KEY = "environment";
 	static final String ENVIRONMENT_IDENTIFIER_KEY = "identifier";
@@ -91,6 +97,23 @@ public class StartupExtension extends Startup {
 		setMapZoom(Integer.valueOf(UtilImpl.MAP_ZOOM));
 
 		setAccountAllowUserSelfRegistration(Boolean.valueOf(UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION));
+
+		if (UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS != null) {
+			setBackupType(BackupType.fromCode(UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS));
+		}
+		else {
+			setBackupType(BackupType.none);
+		}
+		if (UtilImpl.BACKUP_PROPERTIES != null) {
+			Object property = UtilImpl.BACKUP_PROPERTIES.get(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY);
+			if (property != null) {
+				setBackupConnectionString(property.toString());
+			}
+			property = UtilImpl.BACKUP_PROPERTIES.get(AzureBlobStorageBackup.AZURE_CONTAINER_NAME_KEY);
+			if (property != null) {
+				setBackupDirectoryName(property.toString());
+			}
+		}
 	}
 
 	/**
@@ -111,6 +134,7 @@ public class StartupExtension extends Startup {
 		putMail(properties);
 		putMap(properties);
 		putAccount(properties);
+		putBackup(properties);
 
 		// write the json out to the content directory
 		String json = marshall(properties);
@@ -206,6 +230,50 @@ public class StartupExtension extends Startup {
 		}
 
 		return api;
+	}
+
+	/**
+	 * Compares the current value of the backup configuration against the
+	 * new value from the startup page and if they value has changed, adds it to the
+	 * map to be persisted and updates the running configuration with the new value.
+	 * 
+	 * @param properties The current override configuration property map
+	 * @return The map of backup properties which have been modified
+	 */
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> putBackup(final Map<String, Object> properties) {
+		// initialise or get the existing property map
+		Map<String, Object> backup = (Map<String, Object>) properties.get(BACKUP_STANZA_KEY);
+		Map<String, Object> backupProperties = null;
+		if (backup == null) {
+			backup = new HashMap<>();
+			properties.put(BACKUP_STANZA_KEY, backup);
+		}
+
+		// add any values to the override configuration if they have changed
+		BackupType backupType = getBackupType();
+		if ((backupType == null) || (backupType == BackupType.none)) {
+			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = null;
+		} else {
+			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = backupType.toCode();
+			backupProperties = new TreeMap<>();
+			backup.put(BACKUP_PROPERTIES_KEY, backupProperties);
+		}
+		backup.put(BACKUP_EXTERNAL_BACKUP_CLASS_KEY, UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS);
+
+		if (backupProperties != null) {
+			String property = getBackupConnectionString();
+			if (property != null) {
+				backupProperties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY, property);
+			}
+			property = getBackupDirectoryName();
+			if (property != null) {
+				backupProperties.put(AzureBlobStorageBackup.AZURE_CONTAINER_NAME_KEY, property);
+			}
+		}
+		UtilImpl.BACKUP_PROPERTIES = backupProperties;
+
+		return backup;
 	}
 
 	/**

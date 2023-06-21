@@ -291,6 +291,12 @@ public abstract class DomainGenerator {
 		System.out.println("DEBUG=" + debug);
 		System.out.println("EXCLUDED MODULES=" + ((excludedModules.length > 0) ? StringUtils.join(excludedModules, ", ") : ""));
 
+		// Set access control false so that view loading doesn't resolve all the ACLs
+		// as this requires instantiation of model classes to get the driving document.
+		// These classes may have Skyve dependencies in their constructor such as Persistence,
+		// and this will fail at generate time.
+		UtilImpl.ACCESS_CONTROL = false;
+		
 		UtilImpl.COMMAND_TRACE = false;
 		UtilImpl.CONTENT_TRACE = false;
 		UtilImpl.HTTP_TRACE = false;

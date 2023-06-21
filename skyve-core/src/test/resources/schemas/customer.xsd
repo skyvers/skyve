@@ -68,6 +68,7 @@
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence/>
+        <xs:attribute name="formLabelLayout" type="ns1:formLabelLayout"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

@@ -178,7 +178,9 @@ public abstract class Group extends AbstractPersistentBean {
 	 **/
 	public boolean addRolesElement(GroupRole element) {
 		boolean result = roles.add(element);
-		element.setParent((GroupExtension) this);
+		if (result) {
+			element.setParent((GroupExtension) this);
+		}
 		return result;
 	}
 
@@ -198,7 +200,9 @@ public abstract class Group extends AbstractPersistentBean {
 	 **/
 	public boolean removeRolesElement(GroupRole element) {
 		boolean result = roles.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -245,7 +249,9 @@ public abstract class Group extends AbstractPersistentBean {
 	 **/
 	public boolean addCandidateRolesElement(GroupRole element) {
 		boolean result = candidateRoles.add(element);
-		element.setParent((GroupExtension) this);
+		if (result) {
+			element.setParent((GroupExtension) this);
+		}
 		return result;
 	}
 
@@ -265,7 +271,9 @@ public abstract class Group extends AbstractPersistentBean {
 	 **/
 	public boolean removeCandidateRolesElement(GroupRole element) {
 		boolean result = candidateRoles.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 

@@ -16,6 +16,7 @@
 				<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 				<meta name="apple-mobile-web-app-capable" content="yes" />
+				<meta name="theme-color" content="#{bean.getThemeColour('indigo')}" />
 			</f:facet>
 	
 			<title>${project.description}</title>
@@ -24,17 +25,14 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->	
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
-<!--
-			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
--->
+			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="css/ultima.css" library="skyve" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />
 			
-			<h:outputScript name="js/nanoscroller.js" library="ultima-layout" />
+			<h:outputScript name="ripple/ripple.js" library="ultima-layout" />
 			<h:outputScript name="js/layout.js" library="ultima-layout" />
-			<h:outputScript name="js/ripple.js" library="ultima-layout" />
-			<h:outputScript name="js/swipe.js" library="ultima-layout" />
 	
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
@@ -47,11 +45,10 @@
 			<ui:insert name="templateHead" />
 		</h:head>
 	
-		<h:body id="body" styleClass="main-body layout-compact">
+		<h:body id="body" styleClass="ui-input-filled">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<div class="#{showMenu ? 'layout-wrapper menu-layout-static' : 'layout-wrapper'}">
-	
+			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light layout-topbar-'.concat(bean.getThemeColour('indigo')) : 'layout-wrapper layout-topbar-'.concat(bean.getThemeColour('indigo'))}">
 				<ui:include src="./topbar.xhtml">
 					<ui:param name="showMenu" value="#{showMenu}" />
 					<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
@@ -69,11 +66,13 @@
 				<s:resetMenuState rendered="#{resetMenu}" />
 -->
 				<h:form id="menuform" prependId="false" rendered="#{showMenu}">
-					<div class="layout-menu layout-menu-dark">
-						<div class="nano">
-							<div class="nano-content menu-scroll-content">
-								<pu:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
-							</div>
+					<p:tooltip globalSelector=".layout-menu-slim .layout-root-menuitem > a, .layout-menu-slim .layout-inline-menu-action-item > a, .layout-menu-slim .layout-inline-menu-action"
+								showEvent="mouseenter"
+								hideEvent="mouseleave"
+								styleClass="layout-menu-tooltip" />
+					<div class="layout-menu-wrapper">
+						<div class="layout-menu-container">
+							<pu:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
 						</div>
 					</div>
 				</h:form>
@@ -103,25 +102,17 @@
 											style="float:right;"
 											icon="fa fa-check" />
 					</p:confirmDialog>
-					
-					<ui:insert name="templateBody" />
-					
-					<div class="ui-g">
-						<div class="ui-g-12">
-							<div class="footer" style="padding: 0px; margin: 0px">
-								<div class="card clearfix">
-									<span class="footer-text-left">
-										<h:graphicImage name="images/skyve-thick-grey.png" style="max-height: 30px;" library="skyve" />
-									</span>
-									<span class="footer-text-right">
-										<span>Version ${project.version}</span>
-										<span class="ui-icon ui-icon-copyright"></span>
-										<span>All Rights Reserved</span>
-									</span>
-								</div>
-							</div>
-						</div>
+					<div class="layout-content">
+						<ui:insert name="templateBody" />
 					</div>
+					<div class="layout-footer flex align-items-center justify-content-between flex-wrap gap-3 p-4 shadow-2">
+						<h:graphicImage name="images/skyve-thick-grey.png" style="max-height: 30px;" library="skyve" />
+						<div class="flex gap-2">
+							<span>Version ${project.version}</span>
+							<span class="fa-solid fa-copyright"></span>
+							<span>All Rights Reserved</span>
+			            </div>
+			        </div>
 				</div>
 			</div>
 	
@@ -134,10 +125,9 @@
 				</f:facet>
 			</p:ajaxStatus>
 	
-			<h:outputStylesheet name="css/nanoscroller.css" library="ultima-layout" />
-			<h:outputStylesheet name="css/animate.css" library="ultima-layout" />
-			<h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
-			<h:outputStylesheet name="#{'css/layout-'.concat(skyve.getThemeColour('indigo')).concat('.css')}" library="ultima-layout" />
+			<h:outputStylesheet name="styles/layout-light.css" library="ultima-layout" />
+			<h:outputStylesheet name="primeflex/primeflex.min.css" library="ultima-layout"/>
+			<h:outputStylesheet name="ripple/ripple.css" library="ultima-layout" />
 		</h:body>
 	</f:view>
 </html>

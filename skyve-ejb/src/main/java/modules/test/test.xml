@@ -17,6 +17,7 @@
 		<document ref="AnyDerived2" />
 		<document ref="ArcOneToMany" />
 		<document ref="ArcOneToOne" />
+		<document ref="DeleteDuringPostDelete" />
 		<document ref="DynamicMappedExtension" />
 		<document ref="DynamicMappedSubclassed" />
 		<document ref="Hierarchical" />

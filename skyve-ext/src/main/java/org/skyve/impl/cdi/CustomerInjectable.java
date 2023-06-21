@@ -39,6 +39,11 @@ public class CustomerInjectable implements Customer {
 	}
 
 	@Override
+	public long getLastModifiedMillis() {
+		return CORE.getCustomer().getLastModifiedMillis();
+	}
+	
+	@Override
 	public String getLanguageTag() {
 		return CORE.getCustomer().getLanguageTag();
 	}

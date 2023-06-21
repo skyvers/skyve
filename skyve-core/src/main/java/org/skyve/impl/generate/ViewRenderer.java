@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
@@ -89,6 +90,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;
 
+	// Whether to never pick top label layout
+	private boolean stopTop = false;
+	
 	// Stack of containers sent in to render methods
 	private Stack<Container> currentContainers = new Stack<>();
 	public Stack<Container> getCurrentContainers() {
@@ -98,9 +102,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// Attributes pushed and popped during internal processing
 	private Stack<String> renderAttributes = new Stack<>();
 	
-	protected ViewRenderer(User user, Module module, Document document, View view) {
-		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view);
+	protected ViewRenderer(User user, Module module, Document document, View view, String uxui, boolean stopTop) {
+		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);
 		this.user = user;
+		this.stopTop = stopTop;
 	}
 
 	private String viewIcon16x16Url;
@@ -210,8 +215,45 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 	private String currentFormBorderTitle;
 	
+	// Is this form defined with top labels or side labels (by module default or form setting)
+	private boolean currentFormAuthoredTopLabels = false;
+	public boolean isCurrentFormAuthoredTopLabels() {
+		return currentFormAuthoredTopLabels;
+	}
+
+	// Should this form be rendered with top labels or side labels
+	private boolean currentFormRenderTopLabels = false;
+	public boolean isCurrentFormRenderTopLabels() {
+		return currentFormRenderTopLabels;
+	}
+
 	@Override
 	public final void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
+		// Disallow top rendering (for PF currently)
+		if (stopTop) {
+			currentFormAuthoredTopLabels = false;
+			currentFormRenderTopLabels = false;
+		}
+		else {
+			// If explicitly defined on the form, use that
+			FormLabelLayout layout = form.getLabelLayout();
+			if (layout != null) {
+				currentFormAuthoredTopLabels = (layout == FormLabelLayout.top);
+				currentFormRenderTopLabels = currentFormAuthoredTopLabels;
+			}
+			else {
+				// Use the module definition (defaults to side)
+				currentFormAuthoredTopLabels = (module.getFormLabelLayout() == FormLabelLayout.top);
+				currentFormRenderTopLabels = currentFormAuthoredTopLabels;
+
+				// Use the customer override to render if defined
+				if (! currentFormRenderTopLabels) {
+					layout = customer.getModuleEntries().get(module.getName());
+					currentFormRenderTopLabels = (layout == FormLabelLayout.top);
+				}
+			}
+		}
+		
 		currentForm = form;
 		currentFormBorderTitle = form.getLocalisedBorderTitle();
 		currentFormColumnIndex = 0;
@@ -226,6 +268,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 		currentForm = null;
 		currentFormBorderTitle = null;
+		currentFormAuthoredTopLabels = false;
+		currentFormRenderTopLabels = false;
 	}
 
 	public abstract void renderedForm(String borderTitle, Form form);
@@ -287,6 +331,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 	public String getCurrentWidgetHelp() {
 		return currentWidgetHelp;
 	}
+	private int currentWidgetColspan = 1;
+	public int getCurrentWidgetColspan() {
+		return currentWidgetColspan;
+	}
 	private TargetMetaData currentTarget;
 	public TargetMetaData getCurrentTarget() {
 		return currentTarget;
@@ -301,6 +349,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 											boolean required,
 											String help,
 											boolean showsLabel,
+											int colspan,
 											FormItem item);
 	
 	private void preProcessWidget(String binding, boolean showsLabelByDefault) {
@@ -308,6 +357,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		currentWidgetShowLabel = false;
 		currentWidgetRequired = null;
 		currentWidgetHelp = null;
+		currentWidgetColspan = 1;
 		currentTarget = null;
 		
 		String ultimateBinding = binding;
@@ -357,6 +407,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentWidgetLabel = null;
 			currentWidgetHelp = null;
 			currentWidgetRequired = null;
+			currentWidgetColspan = 1;
 		}
 		if (currentFormItem != null) {
 			String label = currentFormItem.getLocalisedLabel();
@@ -371,14 +422,24 @@ public abstract class ViewRenderer extends ViewVisitor {
 			if (required != null) {
 				currentWidgetRequired = required;
 			}
-		}
-		if (currentFormItem != null) {
+			Integer colspan = currentFormItem.getColspan();
+			if (colspan != null) {
+				currentWidgetColspan = colspan.intValue();
+			}
+
 			Boolean showLabel = currentFormItem.getShowLabel();
 			currentWidgetShowLabel = (showLabel == null) ? showsLabelByDefault : showLabel.booleanValue();
+
+			// If showing label and we're rendering top for a side authored form,
+			// increment the colspan so we assume the size of the side label column too.
+			if (currentWidgetShowLabel && currentFormRenderTopLabels && (! currentFormAuthoredTopLabels)) {
+				currentWidgetColspan++;
+			}
 			renderFormItem(currentWidgetLabel,
 							Boolean.TRUE.equals(currentWidgetRequired),
 							currentWidgetHelp,
 							currentWidgetShowLabel,
+							currentWidgetColspan,
 							currentFormItem);
 		}
 	}
@@ -389,12 +450,14 @@ public abstract class ViewRenderer extends ViewVisitor {
 							Boolean.TRUE.equals(currentWidgetRequired),
 							currentWidgetHelp,
 							currentWidgetShowLabel,
+							currentWidgetColspan,
 							item);
 		currentFormItem = null;
 		currentWidgetRequired = null;
 		currentWidgetLabel = null;
 		currentWidgetShowLabel = false;
 		currentWidgetHelp = null;
+		currentWidgetColspan = 1;
 		currentTarget = null;
 	}
 
@@ -402,6 +465,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 											boolean required,
 											String help,
 											boolean showLabel,
+											int colspan,
 											FormItem item);
 	
 	@Override
@@ -424,6 +488,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @return	false if the user does not have privileges to execute the action, otherwise true.
 	 */
 	private boolean preProcessAction(ImplicitActionName implicitName, Action action, ActionShow showOverride) {
+		boolean result = true;
+		
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
 		// Note that the " " result is for SC
@@ -437,7 +503,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		
 		if (implicitName == null) {
 			if (! user.canExecuteAction(document, resourceName)) {
-				return false;
+				result = false;
 			}
 			actionType = ' ';
 		}
@@ -445,7 +511,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			switch (implicitName) {
 				case Add:
 					if (! user.canCreateDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Add.gif";
@@ -457,7 +523,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case BizExport:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/BizExport.png";
@@ -469,7 +535,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case BizImport:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/BizImport.png";
@@ -481,7 +547,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Download:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Download.png";
@@ -493,7 +559,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Upload:
 					if (! user.canExecuteAction(document, resourceName)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Upload.png";
@@ -514,7 +580,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Delete:
 					if (! user.canDeleteDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Delete.gif";
@@ -530,7 +596,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Edit:
 					if (! user.canReadDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Edit.gif";
@@ -542,7 +608,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case New:
 					if (! user.canCreateDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/New.gif";
@@ -555,7 +621,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				case OK:
 					if ((! user.canUpdateDocument(document)) && 
 							(! user.canCreateDocument(document))) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/OK.gif";
@@ -567,7 +633,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Remove:
 					if (! user.canDeleteDocument(document)) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Remove.gif";
@@ -592,7 +658,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				case Save:
 					if ((! user.canUpdateDocument(document)) && 
 							(! user.canCreateDocument(document))) {
-						return false;
+						result = false;
 					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = "actions/Save.gif";
@@ -644,7 +710,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 			actionConfirmationText = Util.i18n(actionConfirmationText);
 		}
 		
-		return true;
+		return result;
 	}
 		
 	@Override
@@ -1726,15 +1792,15 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitRemoveAction(ActionImpl action) {
-		if (preProcessAction(ImplicitActionName.Remove, action, null)) {
-			renderRemoveAction(actionLabel,
-								actionIconUrl,
-								actionIconStyleClass,
-								actionToolTip,
-								actionConfirmationText,
-								actionType,
-								action);
-		}
+		boolean canDelete = preProcessAction(ImplicitActionName.Remove, action, null);
+		renderRemoveAction(actionLabel,
+							actionIconUrl,
+							actionIconStyleClass,
+							actionToolTip,
+							actionConfirmationText,
+							actionType,
+							action,
+							canDelete);
 	}
 
 	public abstract void renderRemoveAction(String label,
@@ -1743,7 +1809,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 												String toolTip,
 												String confirmationText,
 												char type,
-												ActionImpl action);
+												ActionImpl action,
+												boolean canDelete);
 
 	@Override
 	public final void visitZoomOutAction(ActionImpl action) {

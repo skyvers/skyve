@@ -201,7 +201,7 @@ final class BackupUtil {
 
 			for (String command : script) { 
 				try {
-					persistence.newSQL(command).execute();
+					persistence.newSQL(command).noTimeout().execute();
 				}
 				catch (Exception e) {
 					Util.LOGGER.severe("Could not execute SQL " + command);

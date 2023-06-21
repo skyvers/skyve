@@ -74,9 +74,11 @@ public class LoginServlet extends HttpServlet {
 				String url = "/pages/login.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String value = customer.getLoginResources().getLoginPageURL();
-					if (value != null) {
-						url = value;
+					if (customer != null) {
+						String value = customer.getLoginResources().getLoginPageURL();
+						if (value != null) {
+							url = value;
+						}
 					}
 				}
 
@@ -88,9 +90,11 @@ public class LoginServlet extends HttpServlet {
 				String url = "/pages/loggedOut.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String value = customer.getLoginResources().getLoggedOutPageURL();
-					if (value != null) {
-						url = value;
+					if (customer != null) {
+						String value = customer.getLoginResources().getLoggedOutPageURL();
+						if (value != null) {
+							url = value;
+						}
 					}
 				}
 
@@ -102,9 +106,11 @@ public class LoginServlet extends HttpServlet {
 				String url = "/desktop/reloginFlow.js";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String value = customer.getLoginResources().getSmartClientJavascriptURL();
-					if (value != null) {
-						url = value;
+					if (customer != null) {
+						String value = customer.getLoginResources().getSmartClientJavascriptURL();
+						if (value != null) {
+							url = value;
+						}
 					}
 				}
 

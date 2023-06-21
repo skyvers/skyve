@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.controller.BizExportAction;
@@ -52,6 +54,11 @@ public class NoOpProvidedRepository extends ProvidedRepositoryDelegate {
 
 	@Override
 	public View getView(String uxui, Customer customer, Document document, String name) {
+		return null;
+	}
+
+	@Override
+	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
 		return null;
 	}
 
@@ -147,6 +154,11 @@ public class NoOpProvidedRepository extends ProvidedRepositoryDelegate {
 
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+		return null;
+	}
+
+	@Override
+	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
 		return null;
 	}
 

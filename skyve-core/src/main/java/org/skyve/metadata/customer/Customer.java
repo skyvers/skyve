@@ -10,6 +10,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -18,7 +19,7 @@ import org.skyve.metadata.module.Module;
 /**
  * 
  */
-public interface Customer extends NamedMetaData {
+public interface Customer extends NamedMetaData, PersistentMetaData {
 	/**
 	 * The language tag for the entire customer.
 	 */

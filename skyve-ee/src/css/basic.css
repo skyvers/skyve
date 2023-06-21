@@ -36,6 +36,14 @@ html, body, input, select, textArea, button, a, fieldset, legend, pre, table {
 	width: 16px !important;
 }
 
+.bizhubContentImgFit {
+	padding: 0px !important;
+}
+
+.bizhubContentImgFit img {
+	object-fit: contain;
+}
+
 /*
 **************************************
 FORM styles

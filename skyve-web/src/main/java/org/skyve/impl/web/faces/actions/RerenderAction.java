@@ -54,6 +54,9 @@ public class RerenderAction<T extends Bean> extends FacesAction<Void> {
 		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, targetBizlet.getClass().getName(), "preRerender", "Exiting " + targetBizlet.getClass().getName() + ".preRerender: " + targetBean);
 					}
 					customer.interceptAfterPreRerender(source, targetBean, webContext);
+					
+					// We want to call post render
+					facesView.setPostRender(targetBizlet, targetBean);
 				}
 		    }
 		}

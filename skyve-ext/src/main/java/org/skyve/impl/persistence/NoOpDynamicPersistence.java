@@ -50,4 +50,24 @@ public class NoOpDynamicPersistence implements DynamicPersistence {
 		// No-op
 		return false;
 	}
+
+	@Override
+	public void begin() {
+		// No-op
+	}
+
+	@Override
+	public void rollback() {
+		// No-op
+	}
+
+	@Override
+	public void commit() {
+		// No-op
+	}
+
+	@Override
+	public void close() {
+		// No-op
+	}
 }

@@ -636,8 +636,13 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param document
 	 * @param view
 	 */
-	public ReportViewVisitor(ReportDesignGenerator reportDesignGenerator, CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
-		super(customer, module, document, view);
+	public ReportViewVisitor(ReportDesignGenerator reportDesignGenerator,
+								CustomerImpl customer,
+								ModuleImpl module,
+								DocumentImpl document,
+								ViewImpl view,
+								String uxui) {
+		super(customer, module, document, view, uxui);
 		this.reportDesignGenerator = reportDesignGenerator;
 		detailBands = new ArrayList<>();
 		viewTitle = view.getLocalisedTitle();

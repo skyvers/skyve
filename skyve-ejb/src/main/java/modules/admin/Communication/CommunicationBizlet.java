@@ -1,6 +1,5 @@
 package modules.admin.Communication;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.stream.Collectors;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.Communication.FormatType;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -17,10 +15,11 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -157,30 +156,25 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	/**
 	 * anonymously check whether a communication exists for a customer
 	 * 
+	 * Used in UnsubscribeView
+	 * 
 	 * @param p
 	 * @param bizCustomer
 	 * @param communicationId
 	 * @return
 	 */
 	public static boolean anonymouslyCommunicationExists(Persistence p, String bizCustomer, String communicationId) {
-
 		boolean result = false;
-
-		StringBuilder sqlSubString = new StringBuilder(256);
-		sqlSubString.append("select count(*) from ADM_Communication ");
-		sqlSubString.append(" where bizId = :").append(Bean.DOCUMENT_ID);
-		sqlSubString.append(" and bizCustomer = :").append(Bean.CUSTOMER_NAME);
-
-		SQL sqlSub = p.newSQL(sqlSubString.toString());
-		sqlSub.putParameter(Bean.CUSTOMER_NAME, bizCustomer, false);
-		sqlSub.putParameter(Bean.DOCUMENT_ID, communicationId, false);
-
-		// get results
 		try {
-			BigInteger exists = sqlSub.scalarResult(BigInteger.class);
-			result = exists.compareTo(new BigInteger("0")) > 0;
-		} catch (@SuppressWarnings("unused") DomainException d) {
-			// do nothing, return false
+			p.setDocumentPermissionScopes(DocumentPermissionScope.global);
+			DocumentQuery q = p.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+			q.addBoundProjection(Bean.DOCUMENT_ID);
+			DocumentFilter f = q.getFilter();
+			f.addEquals(Bean.CUSTOMER_NAME, bizCustomer);
+			f.addEquals(Bean.DOCUMENT_ID, communicationId);
+			result = q.scalarResult(String.class) != null;
+		} finally {
+			p.resetDocumentPermissionScopes();
 		}
 		return result;
 	}

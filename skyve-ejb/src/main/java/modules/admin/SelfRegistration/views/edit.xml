@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="admin.selfRegistration.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		xmlns:c="http://www.skyve.org/xml/common"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox widgetId="postRegister" border="true" visible="registrationComplete">
 		<blurb escape="false">
 			<![CDATA[
@@ -20,7 +21,7 @@
 				]]>
 			</blurb>
 		</vbox>
-		<form border="true" borderTitle="admin.selfRegistration.edit.userDetails.borderTitle" >
+		<form border="true" borderTitle="admin.selfRegistration.edit.userDetails.borderTitle" widgetId="formRegistration">
 			<column responsiveWidth="2"/>
 			<column responsiveWidth="3"/>
 			<row>
@@ -30,7 +31,52 @@
 			</row>
 			<row>
 				<item required="true" showHelp="true" help="Your contact email address. This will be used to confirm your account.">
-					<default binding="user.contact.email1"/>
+					<textField binding="user.contact.email1" keyboardType="email">
+						<onChangedHandlers>
+							<rerender clientValidation="false">
+								<properties>
+									<c:property key="update">formRegistration</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
+					</textField>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer visible="emailInvalid"/>
+				</item>
+				<item>
+					<blurb visible="emailInvalid">
+						<![CDATA[
+							<span style="font-size:90%;color:#888;">The email address does not appear to be valid.</span>
+						]]>
+					</blurb>
+				</item>
+			</row>
+			<row>
+				<item required="true">
+					<textField binding="confirmEmail" keyboardType="email">
+						<onChangedHandlers>
+							<rerender clientValidation="false">
+								<properties>
+									<c:property key="update">formRegistration</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
+					</textField>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer visible="confirmEmailInvalid"/>
+				</item>
+				<item>
+					<blurb visible="confirmEmailInvalid">
+						<![CDATA[
+							<span style="font-size:90%;color:#888;">The email address does not appear to be valid.</span>
+						]]>
+					</blurb>
 				</item>
 			</row>
 			<row>

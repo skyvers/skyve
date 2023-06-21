@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 /**
  * In SQL Server 2016, the connection must be in a specific isolation mode (TRANSACTION_SNAPSHOT)
- * work like a real database and not a toy.
+ * to work like a real database and not a toy.
  * The below sets the underlying connection in this mode.
  * @author mike
  *

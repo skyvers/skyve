@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -33,6 +32,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -59,6 +59,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
@@ -92,12 +93,13 @@ public class SmartClientEditServlet extends HttpServlet {
 														Module module, 
 														Document document, 
 														View view,
+														String uxui,
 														Bean bean,
 														int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
 														int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
 														boolean forApply) {
 		if (MANIPULATOR_CLASS == null) {
-			return new ViewJSONManipulator(user, module, document, view, bean, editIdCounter, createIdCounter, forApply);
+			return new ViewJSONManipulator(user, module, document, view, uxui, bean, editIdCounter, createIdCounter, forApply);
 		}
 
 		try {
@@ -138,11 +140,11 @@ public class SmartClientEditServlet extends HttpServlet {
 		// If this is a mutating request, we'll definitely need a new CSRF Token
 		if (Operation.fetch.toString().equals(operationType)) {
 			if (newCsrfToken == null) {
-				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+				newCsrfToken = StateUtil.createToken();
 			}
 		}
 		else {
-			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			newCsrfToken = StateUtil.createToken();
 		}
     	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 
@@ -254,9 +256,15 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			processBean = formBean;
 		    		}
 			    	
+					if (! user.canAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName())) {
+						final String userName = user.getName();
+						UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + processModule.getName() + '.' + processDocument.getName());
+						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+						throw new AccessException("this page", userName);
+					}
+
 					if (! user.canAccessDocument(processDocument)) {
-						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(),
-														user.getName());
+						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(), user.getName());
 					}
 	
 					HttpSession session = request.getSession();
@@ -499,7 +507,8 @@ public class SmartClientEditServlet extends HttpServlet {
 								String uxui,
 								PrintWriter pw)
 	throws Exception {
-    	Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
+		final CustomerImpl internalCustomer = (CustomerImpl) customer;
+		final Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
     	Bean processBean = null;
     	
     	if (formBinding == null) { // top level
@@ -518,7 +527,6 @@ public class SmartClientEditServlet extends HttpServlet {
 	    							uxui);
 	    		
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, processBean, null, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
@@ -530,7 +538,6 @@ public class SmartClientEditServlet extends HttpServlet {
 					}
 	    		}
 	    		else if (source != null) { // rerender event
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
@@ -543,32 +550,21 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		}
 	    	}
 	    	else { // persisted instance (or a zoomout)
-	    		boolean persistentDocument = processDocument.isPersistable();
-	    		// if document is persistent, try to retrieve the instance
-	    		if (persistentDocument) {
-	    			processBean = persistence.retrieve(processDocument, bizId);
+	    		// resolve the bean under edit
+	    		try {
+	    			processBean = WebUtil.findReferencedBean(processDocument, bizId, persistence, contextBean, webContext);
 	    		}
-	    		// if we have no process bean, this mean it aint persisted yet, its a zoomOut
-	    		// We're at the top level, so just let the process bean be the contextBean
-	    		if (processBean == null) { // not persisted
+	    		catch (NoResultsException e) {
+		    		// if we have no process bean, this mean it ain't persisted yet, its a zoomOut.
+		    		// We're at the top level, so just let the process bean be the contextBean
+	    			if (contextBean == null) {
+	    	    		// We got nothing! Either the bean has been deleted, or the user doesn't have read access on this
+	    				throw e;
+	    			}
 	    			processBean = contextBean;
 	    		}
-	    		// We got nothing! Either the bean has been deleted, or the user doesn't have read access on this
-	    		if (processBean == null) {
-	    			throw new NoResultsException();
-	    		}
-	    		if (persistentDocument) {
-		    		if (! user.canReadBean(processBean.getBizId(), 
-	    									processBean.getBizModule(), 
-	    									processBean.getBizDocument(), 
-	    									processBean.getBizCustomer(), 
-	    									processBean.getBizDataGroupId(), 
-	    									processBean.getBizUserId())) {
-		    			throw new SecurityException("this data", user.getName());
-		    		}
-	    		}
+
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, null, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
@@ -580,7 +576,6 @@ public class SmartClientEditServlet extends HttpServlet {
 					}
 	    		}
 	    		else if (source != null) { // rerender event
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
@@ -633,7 +628,6 @@ public class SmartClientEditServlet extends HttpServlet {
 
 	    		// call preExecute()
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
@@ -653,7 +647,6 @@ public class SmartClientEditServlet extends HttpServlet {
 					}
 	    		}
 	    		else if (source != null) { // rerender event
-		    		CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
 			    		// add the newInstance to the context bean before preRerender
@@ -694,7 +687,6 @@ public class SmartClientEditServlet extends HttpServlet {
     			}
     			
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
 					if (! vetoed) {
 						if (processBizlet != null) {
@@ -706,7 +698,6 @@ public class SmartClientEditServlet extends HttpServlet {
 					}
 	    		}
 	    		else if (source != null) { // rerender event
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
 					if (! vetoed) {
 		    			if (processBizlet != null) {
@@ -731,6 +722,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																							processBean.isCreated() ? 
 																								ViewType.edit.toString() : 
 																								ViewType.create.toString()),
+																uxui,
 																processBean,
 																editIdCounter,
 																createIdCounter,
@@ -744,9 +736,14 @@ public class SmartClientEditServlet extends HttpServlet {
 			pw.append(message);
 		}
 		finally {
-			// lastly put the conversation in the cache, after the response is sent
-			// and all lazy loading of domain objects has been realised
-			StateUtil.cacheConversation(webContext);
+			try {
+				postRender(internalCustomer, processBizlet, processBean, webContext);
+			}
+			finally {
+				// lastly put the conversation in the cache, after the response is sent
+				// and all lazy loading of domain objects has been realised
+				StateUtil.cacheConversation(webContext);
+			}
 		}
     }
     
@@ -915,6 +912,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																						formBean.isCreated() ? 
 																							ViewType.edit.toString() : 
 																							ViewType.create.toString()),
+																uxui,
 																formBean, 
 																editIdCounter,
 																createIdCounter,
@@ -926,6 +924,8 @@ public class SmartClientEditServlet extends HttpServlet {
 			mutableCustomActionName = null;
 		}
 		
+		final Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
+		final CustomerImpl internalCustomer = (CustomerImpl) customer;
 		Bean processedBean = processBean;
 		
 		// if we need to redirect once the XHR response is received by the browser, this will be not null
@@ -963,7 +963,6 @@ public class SmartClientEditServlet extends HttpServlet {
 																processBean.getBizId());
 				}
 				else if (serverSideAction != null) { // server-side action
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforeServerSideAction(processDocument,
 																						mutableCustomActionName,
 																						processedBean, 
@@ -979,10 +978,8 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 			}
 			else if (source != null) { // rerender event
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
 				boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processedBean, webContext);
 				if (! vetoed) {
-					Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
 					if (processBizlet != null) {
 						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processedBean + ", " + webContext);
 						processBizlet.preRerender(source, processedBean, webContext);
@@ -993,10 +990,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			}
 		}
 		else { // an implicit action
-			Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
 			UtilImpl.LOGGER.info("PRE-EXECUTE on " + implicitAction);
 
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			// Process pre-execute
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(implicitAction, processedBean, null, webContext);
 			if (! vetoed) {
 				if (processBizlet != null) {
@@ -1019,7 +1015,7 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 			}
 			
-			// we are saving, so run security checks and save the bean
+			// We are saving, so run security checks and save the bean
 			if ((formBinding == null) && (gridBinding == null) && // top level
 					(ImplicitActionName.OK.equals(implicitAction) || ImplicitActionName.Save.equals(implicitAction)) && // Save or OK pressed
 					(processedBean instanceof PersistentBean)) { // we have a persistent bean to apply
@@ -1069,10 +1065,13 @@ public class SmartClientEditServlet extends HttpServlet {
 													ViewType.create.toString());
 		pumpOutResponse(webContext,
 							user,
+							internalCustomer,
 							formModule,
 							formDocument,
 							renderView,
+							uxui,
 							beanToRender,
+							processBizlet,
 							editIdCounter,
 							createIdCounter,
 							redirectUrl,
@@ -1081,10 +1080,13 @@ public class SmartClientEditServlet extends HttpServlet {
 
 	private static void pumpOutResponse(AbstractWebContext webContext,
 		                                    User user,
+		                                    CustomerImpl internalCustomer,
 											Module formModule,
 											Document formDocument,
 											View formView,
+											String uxui,
 											Bean formBean,
+											Bizlet<Bean> formBizlet,
 											int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 											int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
 											String redirectUrl,
@@ -1097,6 +1099,7 @@ public class SmartClientEditServlet extends HttpServlet {
 															formModule, 
 															formDocument, 
 															formView,
+															uxui,
 															formBean,
 															editIdCounter,
 															createIdCounter,
@@ -1112,9 +1115,14 @@ public class SmartClientEditServlet extends HttpServlet {
 			pw.append(result);
 		}
 		finally {
-			// lastly put the conversation in the cache, after the response is sent
-			// and all lazy loading of domain objects has been realised
-			StateUtil.cacheConversation(webContext);
+			try {
+				postRender(internalCustomer, formBizlet, formBean, webContext);
+			}
+			finally {
+				// lastly put the conversation in the cache, after the response is sent
+				// and all lazy loading of domain objects has been realised
+				StateUtil.cacheConversation(webContext);
+			}
 		}
 	}
 	
@@ -1179,8 +1187,25 @@ public class SmartClientEditServlet extends HttpServlet {
 		
 		persistence.delete(processDocument, persistentBeanToDelete);
 
-		StateUtil.cacheConversation(webContext);
-
 		pw.append("{\"response\":{\"status\":0}}");
+
+		try {
+			postRender(internalCustomer, bizlet, persistentBeanToDelete, webContext);
+		}
+		finally {
+			StateUtil.cacheConversation(webContext);
+		}
+	}
+	
+	private static <T extends Bean> void postRender(CustomerImpl internalCustomer, Bizlet<T> bizlet, T bean, AbstractWebContext webContext) {
+		boolean vetoed = internalCustomer.interceptBeforePostRender(bean, webContext);
+		if (! vetoed) {
+			if (bizlet != null) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postRender", "Entering " + bizlet.getClass().getName() + ".postRender: " + bean + ", " + webContext);
+    			bizlet.postRender(bean, webContext);
+    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postRender", "Exiting " + bizlet.getClass().getName() + ".postRender: " + bean + ", " + webContext);
+			}
+			internalCustomer.interceptAfterPostRender(bean, webContext);
+		}
 	}
 }

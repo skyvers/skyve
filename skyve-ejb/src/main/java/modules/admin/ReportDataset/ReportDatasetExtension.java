@@ -126,7 +126,7 @@ public class ReportDatasetExtension extends ReportDataset {
 	public List<DynaBean> executeClass() {
 		try {
 			@SuppressWarnings("unchecked")
-			Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Class.forName(getQuery());
+			Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Thread.currentThread().getContextClassLoader().loadClass(getQuery());
 			if (reportClass != null) {
 				BeanReportDataset dataset = CDI.current().select(reportClass).get();
 				return dataset.getResults(getParent().getParameters());
@@ -169,7 +169,7 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						if (param.getReportInputValue() != null) {
-							bql.putParameter(param.getName(), Integer.getInteger(param.getReportInputValue()));
+							bql.putParameter(param.getName(), Integer.valueOf(param.getReportInputValue()));
 						} else {
 							bql.putParameter(param.getName(), (param.getNumericalDefaultValue() == null ? null
 									: Integer.valueOf(param.getNumericalDefaultValue().intValue())));
@@ -229,7 +229,7 @@ public class ReportDatasetExtension extends ReportDataset {
 						break;
 					case integer:
 						if (param.getReportInputValue() != null) {
-							sql.putParameter(param.getName(), Integer.getInteger(param.getReportInputValue()));
+							sql.putParameter(param.getName(), Integer.valueOf(param.getReportInputValue()));
 						} else {
 							sql.putParameter(param.getName(), (param.getNumericalDefaultValue() == null ? null
 									: Integer.valueOf(param.getNumericalDefaultValue().intValue())));

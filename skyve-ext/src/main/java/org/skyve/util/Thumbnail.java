@@ -92,7 +92,7 @@ public class Thumbnail {
 			Thread.sleep(10);
 		}
 
-		// Create a cache key based on a "SHA-1" has of the canonical file name.
+		// Create a cache key based on a "SHA-1" hash of the canonical file name.
 		// It is unlikely that there will be hash collisions (git uses this method for commit hashes).
 		// If there is a collision, the wrong thumb nail image will be served which is not the end of the world.
 		MessageDigest md = MessageDigest.getInstance("SHA1"); // SHA-1 base 32 is 32 chars

@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.models;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.util.UtilImpl;
@@ -36,6 +36,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
@@ -56,6 +57,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	private String modelName;
 	private List<FilterParameter> filterParameters;
 	private List<Parameter> parameters;
+	private boolean escape;
 	
 	public SkyveLazyDataModel(FacesView<? extends Bean> view,
 								String moduleName, 
@@ -63,7 +65,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 								String queryName,
 								String modelName,
 								List<FilterParameter> filterParameters,
-								List<Parameter> parameters) {
+								List<Parameter> parameters,
+								boolean escape) {
 		this.view = view;
 		this.moduleName = moduleName;
 		this.documentName = documentName;
@@ -71,8 +74,20 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		this.modelName = modelName;
 		this.filterParameters = filterParameters;
 		this.parameters = parameters;
+		this.escape = escape;
 	}
 	
+	/**
+	 * Can't implement this as the rows and the count come back together in the load method.
+	 */
+	@Override
+	public int count(Map<String, FilterMeta> filterBy) {
+		return 0;
+	}
+	
+	/**
+	 * Return a page of filtered and sorted data (and set the rowCount)
+	 */
 	@Override
 	public List<BeanMapAdapter<Bean>> load(int first,
 											int pageSize,
@@ -87,6 +102,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 
 		// model type of request
 		if (modelName != null) {
+			if (! u.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), view.getUxUi().getName())) {
+				final String userName = u.getName();
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("this data", userName);
+			}
 			d = m.getDocument(c, documentName);
 			model = d.getListModel(c, modelName, true);
 			if (model == null) {
@@ -99,10 +120,30 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 				query = m.getMetaDataQuery(queryName);
 				if (query == null) {
 					if (documentName == null) { // query name is the document name
+						if (! u.canAccess(UserAccess.documentAggregate(moduleName, queryName), view.getUxUi().getName())) {
+							final String userName = u.getName();
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + queryName);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("this data", userName);
+						}
 						query = m.getDocumentDefaultQuery(c, queryName);
 					}
 					else {
+						if (! u.canAccess(UserAccess.documentAggregate(moduleName, documentName), view.getUxUi().getName())) {
+							final String userName = u.getName();
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentName);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("this data", userName);
+						}
 						query = m.getDocumentDefaultQuery(c, documentName);
+					}
+				}
+				else {
+					if (! u.canAccess(UserAccess.queryAggregate(moduleName, queryName), view.getUxUi().getName())) {
+						final String userName = u.getName();
+						UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + queryName);
+						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+						throw new AccessException("this data", userName);
 					}
 				}
 				if (query == null) {
@@ -110,6 +151,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 				}
 			}
 			else {
+				if (! u.canAccess(UserAccess.documentAggregate(moduleName, documentName), view.getUxUi().getName())) {
+					final String userName = u.getName();
+					UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentName);
+					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+					throw new AccessException("this data", userName);
+				}
 				query = m.getDocumentDefaultQuery(c, documentName);
 				if (query == null) {
 					throw new MetaDataException(documentName + " is not a valid document for a default query.");
@@ -127,6 +174,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		d = model.getDrivingDocument();
 		
 		if (! u.canReadDocument(d)) {
+			UtilImpl.LOGGER.info("User " + u.getName() + " cannot read document " + d.getOwningModuleName() + '.' + d.getName());
 			throw new SecurityException(d.getName() + " in module " + d.getOwningModuleName(), u.getName());
 		}
 		
@@ -156,7 +204,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		setRowCount((int) page.getTotalRows());
 		
 		List<Bean> beans = page.getRows();
-		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), true);
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), escape);
 		List<BeanMapAdapter<Bean>> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
 			result.add(new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext()));
@@ -164,25 +212,13 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		return result;
 	}
 
-	@Override
-	public List<BeanMapAdapter<Bean>> load(int first,
-											int pageSize,
-											String sortField,
-											SortOrder sortOrder,
-											Map<String, FilterMeta> filters) {
-		Map<String, SortMeta> sorts = null;
-		if (sortField != null) {
-			sorts = Collections.singletonMap(sortField, new SortMeta(null, sortField, sortOrder, null));
-		}
-		return load(first, pageSize, sorts, filters);
-	}
-
 	/**
 	 * Called when encoding the rows of a data table or data list.
 	 */
 	@Override
-	public Object getRowKey(BeanMapAdapter<Bean> bean) {
-		return bean.getBean().getBizId();
+	public String getRowKey(BeanMapAdapter<Bean> bean) {
+		Bean row = bean.getBean();
+		return new StringBuilder(128).append(row.getBizId()).append('#').append(row.getBizDocument()).append('.').append(row.getBizModule()).toString();
 	}
 	
 	/**
@@ -191,8 +227,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	@Override
 	public BeanMapAdapter<Bean> getRowData(String rowKey) {
 		Map<String, Object> properties = new TreeMap<>();
-		properties.put(Bean.DOCUMENT_ID, rowKey);
-		DynamicBean bean = new DynamicBean(moduleName, documentName, properties);
+		int hashIndex = rowKey.lastIndexOf('#');
+		int dotIndex = rowKey.lastIndexOf('.');
+		properties.put(Bean.DOCUMENT_ID, rowKey.substring(0, hashIndex));
+		String bizDocument = rowKey.substring(hashIndex + 1, dotIndex);
+		String bizModule = rowKey.substring(dotIndex + 1);
+		DynamicBean bean = new DynamicBean(bizModule, bizDocument, properties);
 		return new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext());
 	}
 	
@@ -201,10 +241,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		SortParameter[] sortParameters = new SortParameter[l];
 		int i = 0;
 		for (SortMeta sm : multiSortMeta.values()) {
-			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    SORT by %s %s", sm.getSortField(), sm.getSortOrder()));
+			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    SORT by %s %s", sm.getField(), sm.getOrder()));
 			SortParameter sp = new SortParameterImpl();
-			sp.setBy(sm.getSortField());
-			sp.setDirection((SortOrder.DESCENDING.equals(sm.getSortOrder())) ? SortDirection.descending : null);
+			sp.setBy(sm.getField());
+			sp.setDirection((SortOrder.DESCENDING.equals(sm.getOrder())) ? SortDirection.descending : null);
 			sortParameters[i++] = sp;
 		}
 

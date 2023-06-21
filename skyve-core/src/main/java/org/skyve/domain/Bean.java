@@ -3,6 +3,11 @@ package org.skyve.domain;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.skyve.CORE;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+
 /**
  * 
  */
@@ -77,6 +82,11 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 */
 	public static final String NOT_CREATED_KEY = "notCreated";
 
+	/**
+	 * 
+	 */
+	public static final String DOCUMENT_ID_SUFFIX = ".bizId";
+
 	/*
 	 * 
 	 */
@@ -89,11 +99,28 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	public String getBizModule();
 
 	/**
+	 * Get the Module meta-data for this Bean (and the current customer).
+	 * @return	the module.
+	 */
+	public default Module getModuleMetaData() {
+		return CORE.getCustomer().getModule(getBizModule());
+	}
+	
+	/**
 	 * 
 	 * @return
 	 */
 	public String getBizDocument();
 
+	/**
+	 * Get the Document meta-data for this Bean (and the current customer).
+	 * @return	the document.
+	 */
+	public default Document getDocumentMetaData() {
+		Customer customer = CORE.getCustomer();
+		return customer.getModule(getBizModule()).getDocument(customer, getBizDocument());
+	}
+	
 	/**
 	 * 
 	 * @return
@@ -166,7 +193,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 
 	/**
 	 * This method recursively walks the graph of this bean's relations determining if any have changed using isChanged().
-	 * Note that this property does is not a java bean accessor as it is expected that this call is expensive.
+	 * Note that this method is not a java bean accessor as it is expected that this call is expensive.
 	 * @return	<code>true</code> if the bean or any of its relations have been changed, otherwise <code>false</code>.
 	 */
 	public boolean hasChanged();

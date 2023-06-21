@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -65,7 +66,7 @@ public abstract class ReportManager extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(ImportActionType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private ImportActionType(String code, String description) {
 			this.code = code;
@@ -115,14 +116,6 @@ public abstract class ReportManager extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				ImportActionType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (ImportActionType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

@@ -11,14 +11,20 @@ import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.impl.util.UtilImpl;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
+	// Overridden to set the grid styling
 	@Override
 	public UIComponent view(UIComponent component, String invisibleConditionName) {
 		if (component != null) {
 			return component;
 		}
 
-		HtmlPanelGroup result = panelGroup(false, false, true, invisibleConditionName, null);
+		// A tabular span with nowrap is the result of the super call
+		HtmlPanelGroup result = (HtmlPanelGroup) super.view(component, invisibleConditionName);
+		// Change from a span with nowrap to a responsive div
+		result.setLayout("block");
+		result.setStyle(null);
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
+
 		return result;
 	}
 

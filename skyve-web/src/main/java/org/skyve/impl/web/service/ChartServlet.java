@@ -3,6 +3,7 @@ package org.skyve.impl.web.service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +93,8 @@ public class ChartServlet extends HttpServlet {
 			try {
 				try {
 					persistence.begin();
-					User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
+			    	Principal userPrincipal = request.getUserPrincipal();
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -153,10 +155,8 @@ public class ChartServlet extends HttpServlet {
 
 		String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 		ChartData data = null;
-		// Check for builder if the modelName could be an index
-		ChartBuilderMetaData builder = modelName.matches("^[0-9]*$") ?
-										(ChartBuilderMetaData) view.getInlineModel(Integer.parseInt(modelName)) :
-										null;
+		// Check for an inline model builder
+		ChartBuilderMetaData builder = (ChartBuilderMetaData) view.getInlineModel(modelName);
 		if (builder == null) {
 			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);

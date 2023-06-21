@@ -25,8 +25,9 @@ public class UserProxyExtension extends UserProxy {
 		UserImpl metaDataUser = null;
 		if (isPersisted()) {
 			// Populate the user using the persistence connection since it might have just been inserted and not committed yet
-			metaDataUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(
-					(UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
+			metaDataUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ?
+																						getBizCustomer() + "/" + getUserName() : 
+																						getUserName());
 			metaDataUser.clearAllPermissionsAndMenus();
 			@SuppressWarnings("resource")
 			Connection connection = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
@@ -37,12 +38,11 @@ public class UserProxyExtension extends UserProxy {
 	}
 
 	/**
-	 * Return the user from the user proxy
+	 * Return the user from this user proxy, if persisted, or null if not persisted.
 	 * 
 	 * @return User
-	 * @throws Exception
 	 */
 	public UserExtension toUser() {
-		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, this.getBizId());
+		return CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME, getBizId());
 	}
 }

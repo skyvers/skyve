@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
+import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
 /**
  * Compiles a Jasper report.
@@ -37,7 +37,7 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 				throw new FileNotFoundException(String.format("Failed to find a report named %s.", reportName));
 			}
 			JasperReportsContext jasperReportsContext = DefaultJasperReportsContext.getInstance();
-			jasperReportsContext.setProperty(JRQueryExecuterFactory.QUERY_EXECUTER_FACTORY_PREFIX + "document",
+			jasperReportsContext.setProperty(QueryExecuterFactory.QUERY_EXECUTER_FACTORY_PREFIX + "document",
 												SkyveDocumentExecuterFactory.class.getCanonicalName());
 			for (File report : reportsToCompile) {
 				final String compiledReportFilename = report.getAbsolutePath().replace(JRXML_EXTENSION, JASPER_EXTENSION);

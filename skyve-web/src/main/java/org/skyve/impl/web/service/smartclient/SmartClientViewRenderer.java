@@ -132,8 +132,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private StringBuilder code = new StringBuilder(2048);
 	private Stack<String> containerVariables = new Stack<>();
 
-	protected SmartClientViewRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
-		super(user, module, document, view);
+	protected SmartClientViewRenderer(User user,
+										Module module,
+										Document document,
+										View view,
+										String uxui,
+										boolean noCreateView) {
+		super(user, module, document, view, uxui, false);
 		this.noCreateView = noCreateView;
 	}
 
@@ -398,6 +403,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		formVariable = "v" + variableCounter++;
 		code.append("var ").append(formVariable);
 		code.append("=isc.DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
+		// Render form with top labels if required (increase cell padding somewhat to accommodate
+		if (isCurrentFormRenderTopLabels()) {
+			code.append("titleOrientation:'top',cellPadding:5,");
+		}
 		// SC docs says that autoFocus will focus in first focusable item
 		// in the form when it is drawn.
 		// Don't use autoFocus as we have multiple dynamic forms that can be declared
@@ -480,16 +489,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 								boolean required,
 								String help,
 								boolean showLabel,
+								int colspan,
 								FormItem item) {
 		code.append("{showTitle:").append(showLabel).append(',');
 		// label handled in preProcessFormItem()
-		Integer span = item.getColspan();
-		if (span != null) {
-			code.append("colSpan:").append(span).append(',');
+		if (colspan >= 1) {
+			code.append("colSpan:").append(colspan).append(',');
 		}
-		span = item.getRowspan();
-		if (span != null) {
-			code.append("rowSpan:").append(span).append(',');
+		Integer rowspan = item.getRowspan();
+		if (rowspan != null) {
+			code.append("rowSpan:").append(rowspan).append(',');
 		}
 		HorizontalAlignment horizontalAlignment = item.getHorizontalAlignment();
 		if (horizontalAlignment != null) {
@@ -509,6 +518,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									boolean required,
 									String help,
 									boolean showLabel,
+									int colspan,
 									FormItem item) {
 		if (startedNewFormRow) {
 			code.append("startRow:true},");
@@ -519,17 +529,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		
 		// Move along the requisite amount of form columns
-		if (showLabel) {
+		if (showLabel && (! isCurrentFormRenderTopLabels())) {
 			incrementFormColumn();
 		}
-		Integer colspan = item.getColspan();
-		if (colspan == null) { // defaults to 1
+		for (int i = 0, l = colspan; i < l; i++) {
 			incrementFormColumn();
-		}
-		else {
-			for (int i = 0, l = colspan.intValue(); i < l; i++) {
-				incrementFormColumn();
-			}
 		}
 	}
 
@@ -560,7 +564,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
-											button);
+											button,
+											null);
 		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
 		code.append(buttonCode).append("]}),");
 		disabled(action.getDisabledConditionName(), code);
@@ -588,7 +593,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
-											button);
+											button,
+											null);
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -641,7 +647,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("chartType:'").append(chart.getType()).append("'});");
 		String dataSource = chart.getModelName();
 		if (dataSource == null) {
-			dataSource = String.valueOf(chart.getModel().getModelIndex());
+			dataSource = String.valueOf(chart.getModel().getModelName());
 		}
 		code.append(variable).append(".setDataSource('").append(dataSource).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -898,7 +904,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 
 		if (binding == null) {
-			code.append("defaultValue:'").append(OWASP.escapeJsString(value, false, false));
+			String defaultValue = (label.getFor() == null) ? value : value + " :";
+			code.append("defaultValue:'").append(OWASP.escapeJsString(defaultValue, false, false));
 		}
 		else {
 			code.append("name:'").append(BindUtil.sanitiseBinding(binding));
@@ -920,7 +927,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderLabel(String value, Label label) {
-		// does the value have binding expressions in them? - (?s) means mutliline match
+		// does the value have binding expressions in them? - (?s) means multi-line match
 		boolean boundValue = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value); 
 		if (boundValue) {
 			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
@@ -944,7 +951,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		String binding = label.getBinding();
 		if (binding == null) {
-			code.append("value:'").append(OWASP.escapeJsString(value, false, false));
+			String defaultValue = (label.getFor() == null) ? value : value + " :";
+			code.append("value:'").append(OWASP.escapeJsString(defaultValue, false, false));
 		}
 		else {
 			code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
@@ -1483,6 +1491,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormHTML(HTML html) {
 		preProcessFormItem(html, "bizHTML");
 		size(html, null, code);
+		String mentionMarkers = html.getMentionMarkers();
+		if (mentionMarkers != null) {
+			code.append("mentionMarkers:'").append(OWASP.escapeJsString(mentionMarkers)).append("',");
+		}
 		disabled(html.getDisabledConditionName(), code);
 		invisible(html.getInvisibleConditionName(), code);
 	}
@@ -1857,7 +1869,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1880,7 +1893,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1890,7 +1904,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									String toolTip,
 									String confirmationText,
 									char type,
-									ActionImpl action) {
+									ActionImpl action,
+									boolean canDelete) {
 		addAction(null,
 					ImplicitActionName.Remove,
 					label,
@@ -1903,7 +1918,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					Boolean.valueOf(canDelete));
 	}
 
 	@Override
@@ -1926,7 +1942,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1949,7 +1966,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1972,7 +1990,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -1995,7 +2014,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2018,7 +2038,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2041,7 +2062,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2064,7 +2086,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2087,7 +2110,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2110,7 +2134,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2133,7 +2158,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2156,7 +2182,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2179,7 +2206,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2202,7 +2230,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 
 	@Override
@@ -2225,7 +2254,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
-					action.getInvisibleConditionName());
+					action.getInvisibleConditionName(),
+					null);
 	}
 	
 	private void writeOutServerSideCallbackMethodIfNecessary() {
@@ -2683,7 +2713,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 							char type,
 							List<Parameter> parameters,
 							String disabledConditionName,
-							String invisibleConditionName) {
+							String invisibleConditionName,
+							Boolean canDelete) { // null unless its a remove button
 		if (! Boolean.FALSE.equals(inActionPanel) && 
 				(! ImplicitActionName.Add.equals(implicitName)) &&
 				(! ImplicitActionName.Edit.equals(implicitName))) {
@@ -2699,7 +2730,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												parameters,
 												disabledConditionName,
 												invisibleConditionName,
-												null);
+												null,
+												canDelete);
 			// use double quote string delimiter to allow &quot; HTML character entity
 			code.append("view.add");
 			if (! noCreateView) {
@@ -2754,7 +2786,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									List<Parameter> parameters,
 									String disabledConditionName,
 									String invisibleConditionName,
-									Button button) { // null if called from an action defn
+									Button button, // null if called from an action defn
+									Boolean canDelete) { // null for anything but remove button
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizButton.create({validate:");
 		result.append(! Boolean.FALSE.equals(clientValidation));
@@ -2801,6 +2834,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			result.append("confirm:'").append(OWASP.escapeJsString(confirmationText)).append("',");
 		}
 		appendParameters(parameters, result);
+		if (canDelete != null) {
+			result.append("_canDelete:").append(canDelete).append(',');
+		}
 		result.append("_view:view})");
 		
 		return result.toString();
@@ -3066,6 +3102,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			if (visitedQueryNames.contains(dataSourceId)) {
 				return dataSourceId;
 			}
+			// NB Add the visited query name here before processing the query columns in case 1 of the query columns is a reference using the same query/datasource
+			visitedQueryNames.add(dataSourceId);
 			toAppendTo.append('{');
 		}
 		toAppendTo.append("ID:'").append(dataSourceId);
@@ -3214,7 +3252,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else {
 			toAppendTo.append("},\n");
-			visitedQueryNames.add(dataSourceId);
 		}
 		
 		// Add any child datasources found

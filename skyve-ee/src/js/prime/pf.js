@@ -49,7 +49,8 @@ SKYVE.PF = function() {
 			$('[id$="_' + binding + '_link"]').attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false');
 		},
 		
-		tabChange: function() {
+		tabChange: function(moduleName, documentName, id, index) {
+			sessionStorage['tab_' + moduleName + '_' + documentName + '_' + id] = index;
 			if (SKYVE.BizMap) {
 				SKYVE.BizMap.resizeAll();
 			}

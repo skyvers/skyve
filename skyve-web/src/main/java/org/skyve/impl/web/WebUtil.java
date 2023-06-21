@@ -3,6 +3,7 @@ package org.skyve.impl.web;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -18,6 +19,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -78,6 +80,23 @@ public class WebUtil {
 				}
 				AbstractPersistence.get().setUser(user);
 				WebStatsUtil.recordLogin(user);
+			}
+			// TODO hack!
+			else { // check basic auth
+				final String authorization = request.getHeader("Authorization");
+				if ((authorization != null) && authorization.startsWith("Basic")) {
+					// Authorization: Basic base64credentials
+					final String base64Credentials = authorization.substring("Basic".length()).trim();
+					String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), Util.UTF8);
+	
+					// credentials = username:password or customer/username:password
+					final String[] values = credentials.split(":", 2);
+					final String username = UtilImpl.processStringValue(values[0]);
+					final String password = UtilImpl.processStringValue(values[1]);
+					// TODO check password...
+					user = ProvidedRepositoryFactory.get().retrieveUser(username);
+					AbstractPersistence.get().setUser(user);
+				}				
 			}
 		}
 		else {
@@ -389,7 +408,8 @@ public class WebUtil {
 											String bizId, 
 											Persistence persistence,
 											Bean conversationBean,
-											WebContext webContext) {
+											WebContext webContext)
+	throws NoResultsException, SecurityException {
 		Bean result = null;
 		
 		User user = persistence.getUser();
@@ -415,12 +435,11 @@ public class WebUtil {
 				
 			}
 		}
-		if (result == null) {
+		if ((result == null) && referenceDocument.isPersistable()) {
 			result = persistence.retrieve(referenceDocument, bizId);
 		}
 		if (result == null) {
-			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
-																		referenceDocument.getLocalisedSingularAlias())));
+			throw new NoResultsException();
 		}
 		if (! user.canReadBean(bizId, 
 								result.getBizModule(), 

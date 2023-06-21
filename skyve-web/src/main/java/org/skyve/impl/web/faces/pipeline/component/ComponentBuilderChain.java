@@ -135,11 +135,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent tabPane(UIComponent component,
 								TabPane tabPane,
 								String moduleName,
-								String documentName,
-								StringBuilder stickyTabScript) {
+								String documentName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.tabPane(result, tabPane, moduleName, documentName, stickyTabScript);
+			result = builder.tabPane(result, tabPane, moduleName, documentName);
 		}
 		return result;
 	}
@@ -153,6 +152,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		return result;
 	}
 
+	@Override
+	public UIComponent tabPaneScript(UIComponent component,
+										TabPane tabPane,
+										String moduleName,
+										String documentName,
+										String tabPaneComponentId) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.tabPaneScript(result, tabPane, moduleName, documentName, tabPaneComponentId);
+		}
+		return result;
+	}
+	
 	@Override
 	public UIComponent border(UIComponent component, String title, String invisibileConditionName, Integer pixelWidth) {
 		UIComponent result = component;
@@ -417,7 +429,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												String dataWidgetVar,
 												String gridColumnExpression,
 												String singluarDocumentAlias,
-												boolean inline) {
+												boolean inline,
+												boolean canCreate,
+												boolean canDelete) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridActionColumn(result,
@@ -426,7 +440,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 														dataWidgetVar,
 														gridColumnExpression,
 														singluarDocumentAlias,
-														inline);
+														inline,
+														canCreate,
+														canDelete);
 		}
 		return result;
 	}
@@ -838,6 +854,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.upload(result, label, iconStyleClass, toolTip, confirmationText, action);
+		}
+		return result;
+	}
+
+	@Override
+	public UIComponent remove(UIComponent component, 
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action,
+								boolean canDelete) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.remove(result, label, iconStyleClass, toolTip, confirmationText, action, canDelete);
 		}
 		return result;
 	}

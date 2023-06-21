@@ -140,8 +140,48 @@
 			<description></description>
 			<length>20</length>
 		</text>
+		
+		<!-- backup settings -->
+		<enum name="backupType" required="true">
+			<displayName>Type</displayName>
+			<description>Which external backup provider should be used this Skyve application? Note: additional charges may apply.</description>
+			<defaultValue>none</defaultValue>
+			<values>
+				<value name="none" code="none" description="None (Internal Backups)"/>
+				<value name="azure" code="org.skyve.impl.backup.AzureBlobStorageBackup" description="Azure Blob Storage"/>
+			</values>
+		</enum>
+		<text name="backupConnectionString">
+			<displayName>Connection String</displayName>
+			<description>
+				<![CDATA[
+					The connection string to the external backup location, e.g. 
+					<code style='white-space: pre-wrap;'>DefaultEndpointsProtocol=https;AccountName=ACCOUNT_NAME;AccountKey=ACCOUNT_KEY;EndpointSuffix=core.windows.net</code>.
+				]]>
+			</description>
+			<length>200</length>
+		</text>
+		<text name="backupDirectoryName">
+			<displayName>Directory Name</displayName>
+			<description>
+				<![CDATA[
+					The name of the top-level backup directory, e.g. <code>application-name</code>, this will be 
+					created if it does not exist.<br/>
+					This must be a valid DNS name, starting with a letter or number, containing only letters, numbers
+					and the dash character. Every dash must be immediately preceeded and followed by a ltter or number.<br/>
+					Must be from 3 to 63 characters long.
+				]]>
+			</description>
+			<length>63</length>
+			<validator regularExpression="^[a-z0-9]+(-[a-z0-9]+)*$" 
+				validationMessage="This must be a valid DNS name, starting with a letter or number, containing only letters, numbers and the dash character. Every dash must be immediately preceeded and followed by a ltter or number."/>
+		</text>
 	</attributes>
 	<conditions>
+		<condition name="backupTypeAzure" usage="view">
+			<description>True when the selected backup type is Azure Blob Storage</description>
+			<expression>BackupType.azure == getBackupType()</expression>
+		</condition>
 		<condition name="mapTypeGmap" usage="view">
 			<description>True when the selected map type is Google Maps</description>
 			<expression>MapType.gmap == getMapType()</expression>

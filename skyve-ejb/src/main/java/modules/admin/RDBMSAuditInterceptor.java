@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Interceptor;
@@ -106,9 +107,10 @@ public class RDBMSAuditInterceptor extends Interceptor {
 				// To do this we need to get the database state before this update operation
 				// We can do this by getting a new persistence and loading the record,
 				// getting the JSON for it and then inserting it in our current thread's persistence.
-				AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) p.getClass().getConstructor().newInstance();
+				AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) AbstractPersistence.newInstance();
 				try {
 					tempP.setUser(p.getUser());
+					tempP.begin();
 					PersistentBean oldBean = tempP.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 					// oldBean can be null when the bean was inserted and updated within this transaction but not yet committed
 					// ie tempP can't see the bean yet on another DB connection
@@ -120,8 +122,13 @@ public class RDBMSAuditInterceptor extends Interceptor {
 					}
 				}
 				finally {
-					// Can't call tempP.commit(true) here as it would remove the current thread's Persistence as well
-					tempP.getEntityManager().close();
+					try {
+						tempP.rollback();
+					}
+					finally {
+						// Can't call tempP.commit(true) here as it would remove the current thread's Persistence as well
+						tempP.close();
+					}
 				}
 			}
 		}

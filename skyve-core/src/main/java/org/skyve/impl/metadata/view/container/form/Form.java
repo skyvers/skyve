@@ -42,6 +42,7 @@ import org.skyve.metadata.view.Invisible;
 							"border",
 							"borderTitle",
 							"labelDefaultHorizontalAlignment",
+							"labelLayout",
 							"disabledConditionName",
 							"enabledConditionName",
 							"invisibleConditionName", 
@@ -74,6 +75,8 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	
 	private HorizontalAlignment labelDefaultHorizontalAlignment;
 	
+	private FormLabelLayout labelLayout;
+
 	private String disabledConditionName;
 	private String invisibleConditionName;
 	
@@ -277,6 +280,15 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	@XmlAttribute(name = "defaultLabelAlign", required = false)
 	public void setLabelDefaultHorizontalAlignment(HorizontalAlignment labelDefaultHorizontalAlignment) {
 		this.labelDefaultHorizontalAlignment = labelDefaultHorizontalAlignment;
+	}
+
+	public FormLabelLayout getLabelLayout() {
+		return labelLayout;
+	}
+
+	@XmlAttribute(name = "labelLayout", required = false)
+	public void setLabelLayout(FormLabelLayout labelLayout) {
+		this.labelLayout = labelLayout;
 	}
 
 	@Override

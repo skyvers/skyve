@@ -2,6 +2,7 @@ package util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
@@ -94,6 +95,7 @@ public abstract class AbstractH2Test {
 		UtilImpl.SQL_TRACE = false;
 		UtilImpl.QUERY_TRACE = false;
 		UtilImpl.JOB_SCHEDULER = false;
+		UtilImpl.CONFIGURATION = new TreeMap<>();
 
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());
 

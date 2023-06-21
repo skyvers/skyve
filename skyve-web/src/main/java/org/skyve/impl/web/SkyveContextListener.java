@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -40,6 +42,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
@@ -93,6 +96,8 @@ public class SkyveContextListener implements ServletContextListener {
 			EXT.getReporting().startup();
 
 			EXT.getJobScheduler().startup();
+
+			TwoFactorAuthConfigurationSingleton.getInstance().startup();
 
 			// Set up the session cookie
 			SessionCookieConfig scc = ctx.getSessionCookieConfig();
@@ -210,9 +215,17 @@ public class SkyveContextListener implements ServletContextListener {
 		if (gcEligibleAgeMinutes != null) {
 			UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES = gcEligibleAgeMinutes.intValue();
 		}
-		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
+		UtilImpl.CONTENT_JDBC_SERVER_ARGS = getString("content", "serverArgs", content, false);
+		UtilImpl.CONTENT_REST_SERVER_URL = getString("content", "serverUrl", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
+		// Backup settings
+		Map<String, Object> backup = getObject(null, "backup", properties, false);
+		if (backup != null) {
+			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = getString("backup", "externalBackupClass", backup, false);
+			UtilImpl.BACKUP_PROPERTIES = getObject("backup", "properties", backup, false);
+		}
+		
 		// Uploads settings
 		Map<String, Object> uploads = getObject(null, "uploads", properties, false);
 		if (uploads != null) {
@@ -484,7 +497,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				try {
-					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.SKYVE_PERSISTENCE_CLASS);
+					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				}
 				catch (ClassNotFoundException e) {
 					throw new IllegalStateException("Could not find factories.persistenceClass " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
@@ -501,7 +514,7 @@ public class SkyveContextListener implements ServletContextListener {
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				try {
-					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Class.forName(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+					AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 				}
 				catch (ClassNotFoundException e) {
 					throw new IllegalStateException("Could not find factories.dynamicPersistenceClass " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS, e);
@@ -595,10 +608,34 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getString("account", "facebookAuthSecret", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getString("account", "githubAuthClientId", account, false);
 		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getString("account", "githubAuthSecret", account, false);
+		UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID = getString("account", "azureAdAuthClientId", account, false);
+		UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID = getString("account", "azureAdAuthTenantId", account, false);
+		UtilImpl.AUTHENTICATION_AZUREAD_SECRET = getString("account", "azureAdAuthSecret", account, false);
+
+		number = getNumber("account", "rememberMeTokenTimeoutHours", account, false);
+		if (number != null) {
+			UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS = number.intValue();
+		}
+		
+		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = new HashSet<>();
+		List<String> tfaCustomer = getList("account", "tfaCustomers", account, false);
+		if (tfaCustomer != null) {
+			for (String customerName : tfaCustomer) {
+				String name = UtilImpl.processStringValue(customerName);
+				if (name != null) {
+					UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.add(name);
+				}
+			}
+		}
 		
 		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
+		// accessControl is optional, but defaults to true.
+		Boolean accessControl = (Boolean) get("environment", "accessControl", environment, false);
+		if (accessControl != null) {
+			UtilImpl.ACCESS_CONTROL = accessControl.booleanValue();
+		}
 		UtilImpl.CUSTOMER = getString("environment", "customer", environment, false);
 		UtilImpl.JOB_SCHEDULER = getBoolean("environment", "jobScheduler", environment);
 		UtilImpl.APPS_JAR_DIRECTORY = getString("environment", "appsJarDirectory", environment, false);
@@ -617,6 +654,12 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		UtilImpl.SUPPORT_EMAIL_ADDRESS = getString("environment", "supportEmailAddress", environment, false);
 		UtilImpl.SHOW_SETUP = getBoolean("environment", "showSetup", environment);
+
+		Map<String, Object> health = getObject(null, "health", properties, false);
+		if (health != null) {
+			UtilImpl.HEALTH_CHECK = getBoolean("health", "check", health);
+			UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = getInt("health", "cacheTimeInSeconds", health);
+		}
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
@@ -705,6 +748,11 @@ public class SkyveContextListener implements ServletContextListener {
 		return (Map<String, Object>) get(prefix, key, properties, required);
 	}
 	
+	@SuppressWarnings("unchecked")
+	private static List<String> getList(String prefix, String key, Map<String, Object> properties, boolean required) {
+		return (List<String>) get(prefix, key, properties, required);
+	}
+	
 	@Override
 	public void contextDestroyed(ServletContextEvent evt) {
 		try {
@@ -712,10 +760,16 @@ public class SkyveContextListener implements ServletContextListener {
 				try {
 					try {
 						try {
-							ProvidedRepository repository = ProvidedRepositoryFactory.get();
-							for (String customerName : repository.getAllCustomerNames()) {
-								CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
-								internalCustomer.notifyShutdown();
+							try {
+								ProvidedRepository repository = ProvidedRepositoryFactory.get();
+								for (String customerName : repository.getAllCustomerNames()) {
+									CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+									internalCustomer.notifyShutdown();
+								}
+							}
+							finally {
+								// Ensure Two Factor Auth Configuration is finalized
+								TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
 							}
 						}
 						finally {

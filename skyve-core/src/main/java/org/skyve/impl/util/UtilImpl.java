@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -61,8 +62,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "47";
-	public static final String SKYVE_VERSION = "8.1.4-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "50";
+	public static final String SKYVE_VERSION = "8.3.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic120";
 
 	public static boolean XML_TRACE = false;
@@ -99,9 +100,18 @@ public class UtilImpl {
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
 
-	// The arguments to send to the TCP server when running the content management in server mode.
-	public static String CONTENT_SERVER_ARGS = null;
+	// The arguments to send to the JDBC TCP server when running the content management in server mode.
+	public static String CONTENT_JDBC_SERVER_ARGS = null;
 
+	// The URL to connect to the REST server when running the content management in server mode.
+	public static String CONTENT_REST_SERVER_URL = null;
+
+	// A class to load to provide external cloud backups.
+	public static String BACKUP_EXTERNAL_BACKUP_CLASS = null;
+	
+	// Properties required to connect to a cloud provider for backup storage
+	public static Map<String, Object> BACKUP_PROPERTIES = null;
+	
 	// Allowed file upload file names - default is a blacklist of harmful "executable" files
 	public static String UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
 	
@@ -156,6 +166,9 @@ public class UtilImpl {
 
 	public static boolean DEV_MODE = false;
 
+	// If true, determine everything accessible to a user based on the skyve metadata and block access to anything else
+	public static boolean ACCESS_CONTROL = true;
+	
 	// If it is null, then the login infrastructure will prompt for the customer name.
 	// If it is set, the customer will be set to that value always.
 	// This property is also used for single sign on purposes.
@@ -251,6 +264,8 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_THRESHOLD = 3;
 	// Number of seconds per failed sign in attempt to lock the account for - Only relevant if account lockout is in use.
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+	// How long to remember a login on a device (if checked)
+	public static int REMEMBER_ME_TOKEN_TIMEOUT_HOURS = 336; // 336hrs = 14 days
 	// Enables new users to register for an account when true, requires email
 	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
 	// google auth client id
@@ -265,6 +280,14 @@ public class UtilImpl {
 	public static String AUTHENTICATION_GITHUB_CLIENT_ID = null;
 	// github auth secret
 	public static String AUTHENTICATION_GITHUB_SECRET = null;
+
+	// azure AD auth client id
+	public static String AUTHENTICATION_AZUREAD_CLIENT_ID = null;
+	// azure AD auth tenant id
+	public static String AUTHENTICATION_AZUREAD_TENANT_ID = null;
+	// azure AD auth secret
+	public static String AUTHENTICATION_AZUREAD_SECRET = null;
+
 	// The Login URI to forward to
 	public static String AUTHENTICATION_LOGIN_URI = "/login";
 	// The Logged Out URI to forward to
@@ -273,6 +296,11 @@ public class UtilImpl {
 	// Show setup screen on sign-in for DevOps users
 	public static boolean SHOW_SETUP = false;
 	
+	// Enable/Disable "/health" endpoint to show health status JSON
+	public static boolean HEALTH_CHECK = true;
+	// Number of seconds to cache the health results to alleviate denial of service
+	public static int HEALTH_CACHE_TIME_IN_SECONDS = 60; // 1 min
+	
 	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
 	public static String BOOTSTRAP_CUSTOMER = null;
 	public static String BOOTSTRAP_USER = null;
@@ -280,6 +308,8 @@ public class UtilImpl {
 	public static String BOOTSTRAP_PASSWORD = null;
 	
 	public static boolean PRIMEFLEX = false;
+	
+	public static Set<String> TWO_FACTOR_AUTH_CUSTOMERS = null;
 	
 	// for skyve script
 	/**

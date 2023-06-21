@@ -38,8 +38,9 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 									ModuleImpl module,
 									DocumentImpl document,
 									ViewImpl view,
+									String uxui,
 									String bindingToFind) {
-		super(customer, module, document, view);
+		super(customer, module, document, view, uxui);
 // TODO account for indexed & mapped bindings and ElementById() on the way in
 		this.bindingToFind = bindingToFind;
 	}

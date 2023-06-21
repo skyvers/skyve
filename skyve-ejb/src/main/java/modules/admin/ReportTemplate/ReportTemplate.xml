@@ -101,6 +101,13 @@
 				<value code="bean" description="Bean"/>
 			</values>
 		</enum>
+		<text name="restrictToRole">
+			<displayName>Restrict to Role</displayName>
+			<description>If this report should only be available to a subset of users with a specific role</description>
+			<domain>variant</domain>
+			<length>60</length>
+		</text>
+		
 		<collection name="datasets" type="child">
 			<displayName>Datasets</displayName>
 			<documentName>ReportDataset</documentName>
@@ -464,6 +471,16 @@
 		</condition>
 		
 		<!-- scheduling conditions -->
+		<condition name="canSchedule" usage="view">
+			<description>Shows the Scheduling tab if the user has permissions to save changes to reports.</description>
+			<expression>
+				<![CDATA[
+					isUserInOwningModuleRole("BasicUser") 
+						|| isUserInOwningModuleRole("DevOps")
+						|| isUserInOwningModuleRole("SecurityAdministrator")
+				]]>
+			 </expression>
+		</condition>
 		<condition name="schedulingEnabled" usage="view">
 			<description>True when scheduling is enabled, shows the scheduling fields in the UI.</description>
 			<expression>Boolean.TRUE.equals(getScheduled())</expression>

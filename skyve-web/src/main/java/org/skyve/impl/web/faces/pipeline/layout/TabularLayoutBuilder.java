@@ -12,6 +12,7 @@ import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.row.Row;
+import org.primefaces.component.toolbar.ToolbarGroup;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -40,9 +41,11 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 			return components;
 		}
 
-		UIComponent layout = panelGroup(false, false, false, null, null);
+		ToolbarGroup toolbarGroup = (ToolbarGroup) a.createComponent(ToolbarGroup.COMPONENT_TYPE);
+		setId(toolbarGroup, null);
+
 		List<UIComponent> result = new ArrayList<>(1);
-		result.add(layout);
+		result.add(toolbarGroup);
 		return result;
 	}
 	
@@ -215,8 +218,8 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 								currentFormColumn.getPixelWidth(), 
 								currentFormColumn.getResponsiveWidth(),
 								currentFormColumn.getPercentageWidth(),
-								null,
-								null);
+								1,
+								1);
 		formOrRowLayout.getChildren().add(column);
 		HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible, null);
 		column.getChildren().add(pg);
@@ -233,17 +236,19 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										FormItem currentFormItem,
 										FormColumn currentFormColumn,
 										String widgetLabel,
+										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {
+		Integer rowspan = currentFormItem.getRowspan();
 		Column col = column(widgetInvisible,
 								true,
 								false,
 								currentFormColumn.getPixelWidth(),
 								currentFormColumn.getResponsiveWidth(),
 								currentFormColumn.getPercentageWidth(),
-								currentFormItem.getColspan(),
-								currentFormItem.getRowspan());
+								widgetColspan,
+								(rowspan == null) ? 0 : rowspan.intValue());
 		formOrRowLayout.getChildren().add(col);
 		col.getChildren().add(formItemComponent);
 	}
@@ -292,7 +297,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 				}
 
 				// add a column
-				Column col = column(widgetInvisible, false, true, pixelWidth, responsiveWidth, percentageWidth, null, null);
+				Column col = column(widgetInvisible, false, true, pixelWidth, responsiveWidth, percentageWidth, 0, 0);
 				col.getChildren().add(componentToAdd);
 				r.getChildren().add(col);
 			}

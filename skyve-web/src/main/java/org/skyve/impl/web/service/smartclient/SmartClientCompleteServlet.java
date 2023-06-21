@@ -19,6 +19,7 @@ import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -26,13 +27,16 @@ import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
@@ -91,12 +95,15 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						throw new ServletException("Mal-formed URL");
 					}
 					attributeName = BindUtil.unsanitiseBinding(attributeName);
-
+					final String binding = attributeName;
+					
 					String webId = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME));
 			        if (webId == null) {
 			        	throw new ConversationEndedException(request.getLocale());
 			        }
 
+			        String formModuleName = null;
+			        String formDocumentName = null;
 			        try {
 						complete = CompleteType.valueOf(request.getParameter(AbstractWebContext.ACTION_NAME));
 
@@ -109,7 +116,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 				    		formBinding = BindUtil.unsanitiseBinding(formBinding);
 				    		bean = (Bean) BindUtil.get(bean, formBinding);
 				    	}
-
+				    	formModuleName = bean.getBizModule();
+				    	formDocumentName = bean.getBizDocument();
+				    	
 				    	// if attributeName is compound, get the parent bean and adjust the attributeName
 				    	// prefer the module and document name determination polymorphically from the bean, otherwise use the metadata
 				    	int lastDotIndex = attributeName.lastIndexOf('.');
@@ -128,15 +137,22 @@ public class SmartClientCompleteServlet extends HttpServlet {
 								attributeName = attributeName.substring(lastDotIndex + 1);
 								Module module = customer.getModule(bean.getBizModule());
 								document = module.getDocument(customer, bean.getBizDocument());
-								attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+								TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, attributeName);
+								document = target.getDocument();
+								attribute = target.getAttribute(); // could be null for an implicit attribute
 							}
 						}
 						else {
 							Module module = customer.getModule(bean.getBizModule());
 							document = module.getDocument(customer, bean.getBizDocument());
-							attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, attributeName);
+							document = target.getDocument();
+							attribute = target.getAttribute(); // could be null for an implicit attribute
 						}
 					}
+			        catch (ConversationEndedException | SessionEndedException e) {
+			        	throw e;
+			        }
 					catch (Exception e) {
 						throw new ServletException("Mal-formed URL", e);
 					}
@@ -152,8 +168,16 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					int endRow = (_endRow == null) ? Integer.MAX_VALUE : Integer.parseInt(_endRow);
 
 					if (complete == CompleteType.previous) {
+						final String userName = user.getName();
+						final UxUi uxui = UserAgent.getUxUi(request);
+						if (! user.canAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName())) {
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + formModuleName + '.' + formDocumentName + " for " + binding);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("the previous data", userName);
+						}
+
 						if (! user.canReadDocument(document)) {
-							throw new SecurityException("read this data", user.getName());
+							throw new SecurityException("read this data", userName);
 						}
 						
 						long totalRows = 0L;
@@ -162,8 +186,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						if (document.isPersistable()) { // persistent document
 							if ((attribute == null) || // implicit attribute or
 									attribute.isPersistent()) { // explicit and persistent attribute
-								String moduleName = document.getOwningModuleName();
-								String documentName = document.getName();
+								final String moduleName = document.getOwningModuleName();
+								final String documentName = document.getName();
 								DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 								StringBuilder sb = new StringBuilder(128);
 								q.addExpressionProjection(sb.append("count(distinct bean.").append(attributeName).append(')').toString(), "totalRows");

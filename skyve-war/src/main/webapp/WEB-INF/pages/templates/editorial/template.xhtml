@@ -24,6 +24,8 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
 <!--
 			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
 -->
@@ -39,31 +41,6 @@
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>
-			<style>
-				.content-header {
-					display: none;
-				}
-				.ui-panelmenu .ui-menuitem-link {
-					border-radius: 0px; !important;
-				}
-				.ui-panelmenu .ui-panelmenu-header {
-					border: none !important;
-					border-radius: 0px; !important;
-				}
-				.ui-panelmenu .ui-panelmenu-content {
-					background-color: transparent !important;
-					border: none !important;
-				}
-				.ui-datatable th {
-					font-size: larger !important;
-				}
-				.ui-datatable-data > tr {
-					text-align: center !important;
-				}
-				.ui-panel-content {
-					border-top: 1px solid #c8c8c8 !important;
-				}
-			</style>
 			<ui:insert name="templateHead" />
 		</h:head>
 		<h:body id="body" class="is-preload">
@@ -144,10 +121,10 @@
 						<div class="inner">
 							<!-- Menu -->
 							<nav id="menu">
-								<table style="margin: 0; padding: 0; border: 0; min-height: 109px;">
+								<table style="margin: 0; padding: 0; border: 0; width:100%; min-height: 109px;">
 									<tr>
 										<td style="vertical-align: middle; text-align: center;">
-											<img src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; display: block;" />
+											<img src="#{bean.logoRelativeFileNameUrl}" alt="logo" style="max-width: 280px; object-fit: contain" />
 										</td>
 									</tr>
 								</table>

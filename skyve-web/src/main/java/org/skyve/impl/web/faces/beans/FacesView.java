@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.beans;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
@@ -65,6 +65,7 @@ import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.widget.FilterParameter;
@@ -138,7 +139,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 */
 	public String getCsrfToken() {
 		if (csrfToken == null) {
-			csrfToken = String.valueOf(new SecureRandom().nextInt());
+			csrfToken = StateUtil.createToken().toString();
 			csrfTokenChecked = false;
 		}
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("getCsrfToken() = " + csrfToken);
@@ -442,7 +443,14 @@ public class FacesView<T extends Bean> extends Harness {
 				if (adapter != null) {
 					Bean bean = adapter.getBean();
 					if (bean != null) {
+						// bizId could be in data table rowid format <bizId>#<bizDocument>.<bizModule>
 						String bizId = bean.getBizId();
+						if (bizId != null) {
+							int hashIndex = bizId.indexOf('#');
+							if (hashIndex > -1) {
+								bizId = bizId.substring(0, hashIndex);
+							}
+						}
 						if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - SET "+ selectedIdBinding + " to " + bizId);
 						BindUtil.set(getCurrentBean().getBean(), selectedIdBinding, bizId);
 					}
@@ -460,6 +468,17 @@ public class FacesView<T extends Bean> extends Harness {
 				action(actionName, null, null);
 			}
 		}
+	}
+	
+	/**
+	 * Used to ensure the DataTable renderer highlights the row correctly
+	 */
+	private BeanMapAdapter<Bean> selectedRow;
+	public BeanMapAdapter<Bean> getSelectedRow() {
+		return selectedRow;
+	}
+	public void setSelectedRow(BeanMapAdapter<Bean> selectedRow) {
+		this.selectedRow = selectedRow;
 	}
 	
 	/**
@@ -533,53 +552,10 @@ public class FacesView<T extends Bean> extends Harness {
 												queryName,
 												modelName,
 												filterParameters,
-												parameters);
+												parameters,
+												true);
 			lazyDataModels.put(key, result);
 		}
- 		
-		return result;
-	}
-	
-	// Note - this is also called from EL in ListGrid tag
- 	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule,
- 												final String bizDocument,
-												final String queryName,
-												@SuppressWarnings("hiding") final String modelName,
-												final List<FilterParameter> filterParameters,
-												final List<Parameter> parameters) {
- 		List<BeanMapAdapter<Bean>> result = null;
- 		
- 		// these are ultimately web parameters that may not be present in the request
- 		if ((queryName == null) || queryName.isEmpty()) {
- 			result = new ArrayList<>();
- 		}
- 		else {
-	 		StringBuilder key = new StringBuilder(64).append(bizModule).append('.').append(queryName);
-	 		if (filterParameters != null) {
-	 			for (FilterParameter parameter : filterParameters) {
-	 				String valueOrBinding = parameter.getValue();
-	 				if (valueOrBinding == null) {
-	 					valueOrBinding = parameter.getValueBinding();
-	 				}
-	 				key.append('.').append(parameter.getFilterBinding()).append(parameter.getOperator()).append(valueOrBinding);
-	 			}
-	 		}
-	 		if (parameters != null) {
-	 			for (Parameter parameter : parameters) {
-	 				String valueOrBinding = parameter.getValue();
-	 				if (valueOrBinding == null) {
-	 					valueOrBinding = parameter.getValueBinding();
-	 				}
-	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
-	 			}
-	 		}
-	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
-			result = beans.get(key.toString());
-			if (result == null) {
-				result = new GetBeansAction(this, bizModule, bizDocument, queryName, modelName, filterParameters, parameters).execute();
-				beans.put(key.toString(), result);
-			}
- 		}
  		
 		return result;
 	}
@@ -722,7 +698,40 @@ public class FacesView<T extends Bean> extends Harness {
 		List<Parameter> parameters = (List<Parameter>) attributes.get("parameters");
 
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
-		return getBeans(completeModule, completeDocument, completeQuery, completeModel, filterParameters, parameters);
+
+ 		List<BeanMapAdapter<Bean>> result = null;
+ 		
+ 		// these are ultimately web parameters that may not be present in the request
+ 		if ((completeQuery == null) || completeQuery.isEmpty()) {
+ 			result = new ArrayList<>();
+ 		}
+ 		else {
+	 		StringBuilder key = new StringBuilder(64).append(completeModule).append('.').append(completeQuery);
+ 			for (FilterParameter parameter : filterParameters) {
+ 				String valueOrBinding = parameter.getValue();
+ 				if (valueOrBinding == null) {
+ 					valueOrBinding = parameter.getValueBinding();
+ 				}
+ 				key.append('.').append(parameter.getFilterBinding()).append(parameter.getOperator()).append(valueOrBinding);
+ 			}
+	 		if (parameters != null) {
+	 			for (Parameter parameter : parameters) {
+	 				String valueOrBinding = parameter.getValue();
+	 				if (valueOrBinding == null) {
+	 					valueOrBinding = parameter.getValueBinding();
+	 				}
+	 				key.append('.').append(parameter.getName()).append(valueOrBinding);
+	 			}
+	 		}
+	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
+			result = beans.get(key.toString());
+			if (result == null) {
+				result = new GetBeansAction(this, completeModule, completeDocument, completeQuery, modelName, filterParameters, parameters, false).execute();
+				beans.put(key.toString(), result);
+			}
+ 		}
+ 		
+		return result;
 	}
  	
  	/**
@@ -831,7 +840,7 @@ public class FacesView<T extends Bean> extends Harness {
 		BindUtil.set(getCurrentBean().getBean(), binding, null);
 	}
 	
-	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()
+	// Used to hydrate the state after dehydration in SkyveFacesPhaseListener.afterRestoreView()
  	// NB This is only set when the bean is dehydrated
 	private String dehydratedWebId;
 	public String getDehydratedWebId() {
@@ -859,8 +868,30 @@ public class FacesView<T extends Bean> extends Harness {
 		dualListModels.clear();
 		beans.clear();
 		currentBean = null;
+		postRenderBizlet = null;
+		postRenderBean = null;
 	}
 	
+	// This is used to ensure the same bizlet instance is used to call postRender() when required.
+	// If this is null, postRender isn't called in SkyveFacesPhaseListener.
+	// This enables state in the bizlet to be kept between preExecute(), preRerender() and postRender().
+	private transient Bizlet<? extends Bean> postRenderBizlet = null;
+	public Bizlet<? extends Bean> getPostRenderBizlet() {
+		return postRenderBizlet;
+	}
+
+	// If not null, indicates that we wanna call postRender() on the postRenderBizlet in SkyveFacesPhaseListener.
+	// The bizlet may still be null but we wanna make the interceptor calls anyway.
+	private transient Bean postRenderBean = null;
+	public Bean getPostRenderBean() {
+		return postRenderBean;
+	}
+
+	public void setPostRender(Bizlet<? extends Bean> bizlet, Bean bean) {
+		this.postRenderBizlet = bizlet;
+		this.postRenderBean = bean;
+	}
+
 	/**
 	 * This method produces a style class that implements 
 	 * the form column/row contract in the skyve view metadata.

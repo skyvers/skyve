@@ -11,13 +11,14 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
 /**
  * 
  */
-public interface View extends NamedMetaData, DecoratedMetaData {
+public interface View extends NamedMetaData, PersistentMetaData, DecoratedMetaData {
 	/**
 	 * 
 	 */
@@ -138,12 +139,12 @@ public interface View extends NamedMetaData, DecoratedMetaData {
 	public Collection<Action> getActions();
 
 	/**
-	 * Get an implicit inlined model - ie a chart model from a given modelId.
+	 * Get an implicit inlined model - ie a chart model from a given modelName.
 	 * 
-	 * @param modelIndex	The index of the model to get
+	 * @param modelName	The name of the model to get
 	 * @return	Model meta data.
 	 */
-	public ModelMetaData getInlineModel(int modelIndex);
+	public ModelMetaData getInlineModel(String modelName);
 	
 	/**
 	 * These represent parameters that are allowed to be populated when creating a new record.

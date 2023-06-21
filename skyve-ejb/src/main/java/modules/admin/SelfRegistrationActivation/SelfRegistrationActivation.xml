@@ -23,6 +23,46 @@
             <displayName>Login Url</displayName>
             <length>2083</length>
         </text>		
+        <markup name="pleaseSignIn">
+			<documentation>
+        		<![CDATA[
+        			<p>Congratulations {0}! Your account is now active.</p><p>Please <a href="{1}">Sign in</a> with the email address {2}.</p>
+        		]]>
+        	</documentation>
+			<displayName>Please sign in message</displayName>
+		</markup>
+		<markup name="signInLink">
+			<documentation>
+				<![CDATA[
+					<a href="{0}">Sign in</a>
+				]]>
+			</documentation>
+			<displayName>Sign in link</displayName>
+		</markup>
+		<markup name="alreadyActivated">
+			<documentation>
+				<![CDATA[
+					<p>Welcome {0} - you have already activated your account.</p><p>Please <a href="{1}">Sign in</a>.</p>
+				]]>
+			</documentation>
+			<displayName>Account already activated</displayName>
+		</markup>
+		<markup name="noLongerValid">
+			<documentation>
+				<![CDATA[
+					<p>Sorry, that code is no longer valid.</p><p>Please <a href="{0}">Sign in</a> or Register again to request a new activation email.</p>
+				]]>
+			</documentation>
+			<displayName>No longer valid</displayName>
+		</markup>
+		<markup name="notRecognised">
+			<documentation>
+				<![CDATA[
+			 		<p>Sorry, that link is not recognised. Please check the link and try again.</p><p>Return to <a href="{0}">Sign in</a>.</p>
+				]]>
+			</documentation>
+			<displayName>Not recognised</displayName>
+		</markup>
 	</attributes>
 	<conditions>
 		<condition name="showSuccess">

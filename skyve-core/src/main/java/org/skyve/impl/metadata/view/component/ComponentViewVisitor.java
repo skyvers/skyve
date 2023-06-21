@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.event.Addable;
 import org.skyve.impl.metadata.view.event.Changeable;
@@ -99,11 +100,12 @@ public class ComponentViewVisitor extends ViewVisitor {
 	public ComponentViewVisitor(CustomerImpl customer, 
 									ModuleImpl module, 
 									DocumentImpl document, 
-									ViewImpl view, 
+									ViewImpl view,
+									String currentUxUi,
 									String bindingPrefix,
 									List<ComponentNameMap> names,
 									String widgetId) {
-		super(customer, module, document, view);
+		super(customer, module, document, view, currentUxUi);
 		this.bindingPrefix = bindingPrefix;
 		this.names = new TreeMap<>();
 		for (ComponentNameMap name : names) {
@@ -199,6 +201,18 @@ public class ComponentViewVisitor extends ViewVisitor {
 	public void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
 		disable(form);
 		invisible(form);
+
+		// If we have a top-defined module and this form is defaulting, 
+		// explicitly set it to top for the component in case the component
+		// belongs to a view in a side-defined module.
+		// Note that top defined forms cannot be converted to side defined,
+		// but side defined forms can be converted to top defined.
+		// Thus any top-defined forms need to be made explicit when used in a component.
+		if (form.getLabelLayout() == null) {
+			if (module.getFormLabelLayout() == FormLabelLayout.top) {
+				form.setLabelLayout(FormLabelLayout.top);
+			}
+		}
 
 		// capture the targeted widget, if applicable
 		if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
@@ -883,7 +897,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 		if (bindingPrefix == null) {
 			return expression;
 		}
-		return BindUtil.prefixMessageBindings(expression, bindingPrefix);
+		return BindUtil.prefixMessageExpressions(expression, bindingPrefix);
 	}
 
 	private String translate(String name) {
@@ -918,6 +932,6 @@ public class ComponentViewVisitor extends ViewVisitor {
 		if (bindingPrefix == null) {
 			return binding;
 		}
-		return String.format("%s.%s", bindingPrefix, binding);
+		return bindingPrefix + '.' + binding;
 	}
 }

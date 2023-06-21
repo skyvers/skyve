@@ -15,6 +15,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
@@ -56,7 +57,15 @@ public class FacesContentUtil {
 		String contentAttributeName = binding;
 		int contentBindingLastDotIndex = binding.lastIndexOf('.');
 		if (contentBindingLastDotIndex >= 0) { // compound binding
-			contentOwner = (Bean) BindUtil.get(bean, binding.substring(0, contentBindingLastDotIndex));
+			String penultimateBinding = binding.substring(0, contentBindingLastDotIndex);
+			contentOwner = (Bean) BindUtil.get(bean, penultimateBinding);
+			// Instantiate any intermediate objects along the way if required
+			if (contentOwner == null) {
+				User u = CORE.getUser();
+				Module m = customer.getModule(bean.getBizModule());
+				Document d = m.getDocument(customer, bean.getBizDocument());
+				contentOwner = (Bean) BindUtil.instantiateAndGet(u, m, d, bean, penultimateBinding);
+			}
 			contentAttributeName = binding.substring(contentBindingLastDotIndex + 1);
 		}
 

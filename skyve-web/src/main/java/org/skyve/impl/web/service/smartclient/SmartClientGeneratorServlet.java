@@ -14,6 +14,7 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -24,6 +25,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -54,9 +56,9 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		}
 	}
 	
-	public static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, boolean noCreateView) {
+	public static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, String uxui, boolean noCreateView) {
 		if (RENDERER_CLASS == null) {
-			return new SmartClientViewRenderer(user, module, document, view, noCreateView);
+			return new SmartClientViewRenderer(user, module, document, view, uxui, noCreateView);
 		}
 		
 		try {
@@ -107,28 +109,36 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				}
 
 				UxUi uxui = UserAgent.getUxUi(request);
-				UtilImpl.LOGGER.info("UX/UI = " + uxui.getName());
+				String uxuiName = uxui.getName();
+				UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
+
+				if (! user.canAccess(UserAccess.singular(moduleName, documentName), uxuiName)) {
+					final String userName = user.getName();
+					UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + moduleName + '.' + documentName);
+					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+					throw new AccessException("this page", userName);
+				}
 
 				Module module = customer.getModule(moduleName);
 				Document document = module.getDocument(customer, documentName);
-				View editView = document.getView(uxui.getName(), customer, ViewType.edit.toString());
-				View createView = document.getView(uxui.getName(), customer, ViewType.create.toString());
+				View editView = document.getView(uxuiName, customer, ViewType.edit.toString());
+				View createView = document.getView(uxuiName, customer, ViewType.create.toString());
 	
 				String editString = null;
 				String createString = null;
 	
 				// create and edit view are the same - use edit view
 				if (ViewType.edit.toString().equals(createView.getName())) {
-					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, true);
+					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, uxuiName, true);
 					renderer.visit();
 					editString = renderer.getCode().toString();
 				}
 				else {
-					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, false);
+					SmartClientViewRenderer renderer = newRenderer(user, module, document, editView, uxuiName, false);
 					renderer.visit();
 					editString = renderer.getCode().toString();
 	
-					renderer = newRenderer(user, module, document, createView, false);
+					renderer = newRenderer(user, module, document, createView, uxuiName, false);
 					renderer.visit();
 					createString = renderer.getCode().toString();
 				}

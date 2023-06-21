@@ -35,6 +35,33 @@
 							<textArea binding="userInvitiationEmailList" pixelHeight="200" />
 						</item>
 					</row>
+				</form>
+				<form>
+					<column />
+					<row>
+						<item>
+							<blurb>{i18n:admin.userList.edit.blurb3}</blurb>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item colspan="2">
+							<combo binding="defaultModuleName">
+								<onChangedHandlers>
+									<rerender clientValidation="false" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column />
 					<row>
 						<item>
 							<button action="InviteUsers" pixelWidth="250" />

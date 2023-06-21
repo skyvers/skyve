@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.repository;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -21,21 +23,23 @@ import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
-import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
@@ -47,6 +51,7 @@ import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
@@ -98,7 +103,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 			removeInaccessibleItems(module.getName(), menu, user);
 			internalUser.putModuleMenu(module, menu);
 		}
-		internalUser.determineAccess();
 	}
 
 	private static void removeInaccessibleItems(String moduleName, Menu menu, User user) {
@@ -155,9 +159,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 			throw new MetaDataException("Home Module reference does not reference a module in customer " + customer.getName(), e);
 		}
 
-		for (String moduleName : ((CustomerImpl) customer).getModuleNames()) {
+		// NB Module entry names (keys) are in defined order
+		for (Entry<String, FormLabelLayout> moduleEntry : ((CustomerImpl) customer).getModuleEntries().entrySet()) {
+			String moduleName = moduleEntry.getKey();
+			FormLabelLayout formLabelLayout = moduleEntry.getValue();
+
+			Module module = null;
 			try {
-				if (getModule(customer, moduleName) == null) {
+				module = getModule(customer, moduleName);
+				if (module == null) {
 					throw new MetaDataException("Repository returned null for " + moduleName + 
 													" for customer " + customer.getName());
 				}
@@ -165,6 +175,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 			catch (MetaDataException e) {
 				throw new MetaDataException("Module reference " + moduleName + 
 												" does not reference a module in customer " + customer.getName(), e);
+			}
+
+			// Catch where we can't convert from top defined to side rendered
+			// NB null = side (the default)
+			if ((formLabelLayout != FormLabelLayout.top) && (module.getFormLabelLayout() == FormLabelLayout.top)) {
+				throw new MetaDataException("Module reference " + moduleName + " for customer " + customer.getName() +
+												" has a layout of side but the module is defined with a layout of top and cannot be converted");
 			}
 		}
 		
@@ -262,18 +279,53 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// check action privilege references an action in the given document view
 		for (Role role : module.getRoles()) {
-			for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
+			RoleImpl roleImpl = (RoleImpl) role;
+			for (Privilege privilege : roleImpl.getPrivileges()) {
 				if (privilege instanceof ActionPrivilege) {
 					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
 					String actionPrivilegeName = actionPrivilege.getName();
 					Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
-					if (getAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
-						throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
-														" for customer " + customer.getName() + 
-														" in module " + module.getName() +
-														" for document " + actionDocument.getName() + 
-														" for role " + role.getName() +
-														" does not reference a valid action");
+					if (getClassAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
+						if (getMetaDataAction(customer, actionDocument, actionPrivilegeName) == null) {
+							throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
+															" for customer " + customer.getName() + 
+															" in module " + module.getName() +
+															" for document " + actionDocument.getName() + 
+															" for role " + role.getName() +
+															" does not reference a valid action");
+						}
+					}
+				}
+			}
+			
+			// Check modelAggregate and previousComplete UserAccesses
+			for (UserAccess access : roleImpl.getAccesses().keySet()) {
+				if (access.isModelAggregate()) {
+/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
+					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					try {
+						getModel(customer, accessDocument, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" is for model " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+*/
+				}
+				else if (access.isPreviousComplete()) {
+					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					String binding = access.getComponent();
+					try {
+						BindUtil.getMetaDataForBinding(customer, module, accessDocument, binding);
+					}
+					catch (MetaDataException e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" with binding " + binding +
+														" is not a valid binding.", e);
 					}
 				}
 			}
@@ -433,7 +485,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// Check the bizKey expression, if defined
 		String bizKeyExpression = document.getBizKeyExpression();
 		if (bizKeyExpression != null) {
-			String error = BindUtil.validateMessageExpressions(customer, module, document, bizKeyExpression);
+			String error = BindUtil.validateMessageExpressions(bizKeyExpression, customer, document);
 			if (error != null) {
 				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier + ": " + error);
 			}
@@ -449,6 +501,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 											document.getParentDocumentName() + " that does not exist in this module.");
 		}
 		
+		// Check Persistent name and Strategy="mapped" do not coexist in a Document as they conflict
+		Persistent persistent = document.getPersistent();
+		if ((persistent != null) &&
+				Persistent.ExtensionStrategy.mapped.equals(persistent.getStrategy()) &&
+				(persistent.getName() != null)) {
+			throw new MetaDataException(documentIdentifier + " can not have a persistent name and a mapped strategy"
+					+ " - all inherited attributes will be persisted as columns in tables for each subtype document.");
+		}
+
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
 		// Check attributes
@@ -464,7 +525,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 					Class<?> implementingType = attribute.getAttributeType().getImplementingType();
 					if (String.class.equals(implementingType)) {
 						if (BindUtil.containsSkyveExpressions(defaultValue)) {
-							String error = BindUtil.validateMessageExpressions(customer, module, document, defaultValue);
+							String error = BindUtil.validateMessageExpressions(defaultValue, customer, document);
 							if (error != null) {
 								throw new MetaDataException("The default value " + defaultValue + " is not a valid expression for attribute " + 
 																module.getName() + '.' + document.getName() + '.' + attribute.getName() + ": " + error);
@@ -602,10 +663,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// Check the message binding expressions, if present
 		List<UniqueConstraint> constraints = document.getUniqueConstraints();
 		if (constraints != null) {
-			Module owningModule = getModule(customer, document.getOwningModuleName());
 			for (UniqueConstraint constraint : constraints) {
 				String message = constraint.getMessage();
-				String error = BindUtil.validateMessageExpressions(customer, owningModule, document, message);
+				String error = BindUtil.validateMessageExpressions(message, customer, document);
 				if (error != null) {
 					throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
 													constraint.getName() + " in document " + documentIdentifier + ": " + error);
@@ -616,12 +676,45 @@ public class LocalDesignRepository extends FileSystemRepository {
 	}
 
 	@Override
-	@SuppressWarnings("unused")
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
-		new ViewValidator((ViewImpl) view,
-							this,
-							(CustomerImpl) customer,
-							(DocumentImpl) document,
-							uxui);
+		CustomerImpl customerImpl = (CustomerImpl) customer;
+		ViewImpl viewImpl = (ViewImpl) view;
+		new ViewValidator(viewImpl, this, customerImpl, (DocumentImpl) document, uxui).visit();
+		
+		// Check modelAggregate and previousComplete UserAccesses
+		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, document, uxui);
+		if (accesses != null) { // can be null if access control is turned off
+			for (UserAccess access : accesses) {
+				if (access.isModelAggregate()) {
+/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
+					try {
+						getModel(customer, document, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException(""User Access [" + access.toString() + 
+														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" is for model " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+*/
+				}
+				else if (access.isPreviousComplete()) {
+					final Module module = customer.getModule(document.getOwningModuleName());
+					final String binding = access.getComponent();
+					try {
+						BindUtil.getMetaDataForBinding(customer, module, document, binding);
+					}
+					catch (MetaDataException e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module.document " + module.getName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" with binding " + binding +
+														" is not a valid binding.", e);
+					}
+				}
+			}
+		}
 	}
 }

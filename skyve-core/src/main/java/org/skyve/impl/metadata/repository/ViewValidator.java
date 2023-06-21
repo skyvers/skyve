@@ -11,6 +11,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -124,7 +125,6 @@ class ViewValidator extends ViewVisitor {
 	private ProvidedRepository repository;
 	
 	private String viewIdentifier;
-	private String uxui;
 	
 	// These 2 variables are used when validating the contents of a data grid / data repeater
 	private String dataWidgetIdentifier;
@@ -135,11 +135,9 @@ class ViewValidator extends ViewVisitor {
 					CustomerImpl customer, 
 					DocumentImpl document, 
 					String uxui) {
-		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view);
+		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view, uxui);
 		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
-		this.uxui = uxui;
-		visit();
 	}
 
 	private void validateBinding(String bindingPrefix,
@@ -371,7 +369,6 @@ class ViewValidator extends ViewVisitor {
 												String widgetIdentifier,
 												String description) {
 		if (message != null) {
-			Module testModule = module;
 			Document testDocument = document;
 			if (dataWidgetBinding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
@@ -380,10 +377,9 @@ class ViewValidator extends ViewVisitor {
 				if (targetAttribute instanceof Relation) {
 					Relation relation = (Relation) targetAttribute;
 					testDocument = module.getDocument(customer, relation.getDocumentName());
-					testModule = customer.getModule(testDocument.getOwningModuleName());
 				}
 			}
-			String error = BindUtil.validateMessageExpressions(customer, testModule, testDocument, message);
+			String error = BindUtil.validateMessageExpressions(message, customer, testDocument);
 			if (error != null) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 												" has " + description + " containing malformed binding expressions: " + error);
@@ -1797,7 +1793,7 @@ class ViewValidator extends ViewVisitor {
 						DocumentImpl targetDocument = (DocumentImpl) targetModule.getDocument(customer, targetReference.getDocumentName());
 						
 						// This is a container column of an existing row in a table/grid - so get the edit view
-						ViewImpl targetView = (ViewImpl) targetDocument.getView(uxui, customer, ViewType.edit.toString());
+						ViewImpl targetView = (ViewImpl) targetDocument.getView(currentUxUi, customer, ViewType.edit.toString());
 						if (targetView.getAction(actionName) == null) {
 							throw new MetaDataException(actionName + " DNE");
 						}
@@ -2035,7 +2031,11 @@ class ViewValidator extends ViewVisitor {
 	
 	@Override
 	public void visitCustomAction(ActionImpl action) {
-		validateClassAction(action.getResourceName());
+		String resourceName = action.getResourceName();
+		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, document, resourceName);
+		if (metaDataAction == null) {
+			validateClassAction(resourceName);
+		}
 		validateAction(action);
 	}
 

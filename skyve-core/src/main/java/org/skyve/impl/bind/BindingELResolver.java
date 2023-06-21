@@ -47,7 +47,7 @@ class BindingELResolver extends ELResolver {
 	public boolean isReadOnly(ELContext context, Object base, Object property) {
 		if ((base instanceof Bean) && (property instanceof String)) {
 			context.setPropertyResolved(true);
-			BindUtil.isMutable((Bean) base, (String) property);
+			return BindUtil.isMutable((Bean) base, (String) property);
 		}
 		return false;
 	}

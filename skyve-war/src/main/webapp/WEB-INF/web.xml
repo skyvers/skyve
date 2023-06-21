@@ -82,11 +82,7 @@
 	<!-- sam, redmond, smoothness, bootstrap -->
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
-		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'casablanca' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
-	</context-param>
-	<context-param>
-		<param-name>primefaces.FONT_AWESOME</param-name>
-		<param-value>true</param-value>
+		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'saga' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
 	</context-param>
 	<!--Skyve runs its own endpoint extension so it can get hold of the WebSocket sessions -->
 	<context-param>
@@ -214,7 +210,15 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
+		<servlet-name>MetaDataServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>BizportExportServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>SkyveFilter</filter-name>
+		<servlet-name>HealthServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
@@ -239,9 +243,32 @@
 			<param-value>31536000000</param-value>
 		</init-param>
 	</filter>
+	<!-- Javascript -->
 	<filter-mapping>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.js</url-pattern>
+	</filter-mapping>
+	<!-- Fonts -->
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.ttf</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.otf</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.woff</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.woff2</url-pattern>
+	</filter-mapping>
+	<!-- WASM -->
+	<filter-mapping>
+		<filter-name>NeverExpiresFilter</filter-name>
+		<url-pattern>*.wasm</url-pattern>
 	</filter-mapping>
 
 	<!-- Firefox requires public to cache resources to disk when using SSL -->
@@ -280,7 +307,7 @@
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
-			<param-value>default-src 'self'; frame-src 'self' *.google.com; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; form-action 'self'; connect-src 'self' ws: wss:</param-value>
+			<param-value>default-src 'self'; frame-src 'self' *.google.com; frame-ancestors 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google.com *.googleapis.com *.gstatic.com https://unpkg.com; style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com https://unpkg.com; font-src 'self' data: *.googleapis.com *.gstatic.com; img-src 'self' data: blob: *.openstreetmap.org *.googleapis.com *.gstatic.com; form-action 'self'; connect-src 'self' ws: wss: *.gstatic.com https://unpkg.com</param-value>
 		</init-param>
 		<init-param>
 			<param-name>X-Frame-Options</param-name>
@@ -515,6 +542,14 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>MetaDataServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.MetaDataServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MetaDataServlet</servlet-name>
+		<url-pattern>/meta</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>ChartServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.ChartServlet</servlet-class>
 	</servlet>
@@ -522,7 +557,6 @@
 		<servlet-name>ChartServlet</servlet-name>
 		<url-pattern>/chart</url-pattern>
 	</servlet-mapping>
-
 	<servlet>
 		<servlet-name>MapServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.MapServlet</servlet-class>
@@ -530,6 +564,14 @@
 	<servlet-mapping>
 		<servlet-name>MapServlet</servlet-name>
 		<url-pattern>/map</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>HealthServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.HealthServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>HealthServlet</servlet-name>
+		<url-pattern>/health</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackmateServlet</servlet-name>

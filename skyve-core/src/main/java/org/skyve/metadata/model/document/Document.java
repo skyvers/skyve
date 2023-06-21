@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
 import org.skyve.metadata.controller.DownloadAction;
@@ -25,7 +26,7 @@ import org.skyve.metadata.view.model.map.MapModel;
 /**
  * 
  */
-public interface Document extends Model {
+public interface Document extends Model, PersistentMetaData {
 	/**
 	 * 
 	 * @param user

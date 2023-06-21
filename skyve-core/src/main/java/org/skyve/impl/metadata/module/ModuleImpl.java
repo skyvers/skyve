@@ -19,6 +19,7 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -43,9 +44,13 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private String name;
 
+	private long lastModifiedMillis = Long.MAX_VALUE;
+	
 	private String title;
 	
 	private boolean prototype;
+	
+	private FormLabelLayout formLabelLayout;
 	
 	private Map<String, DocumentRef> documentRefs = new TreeMap<>();
 
@@ -94,6 +99,15 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
 	public String getTitle() {
 		return title;
 	}
@@ -109,6 +123,15 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	public void setPrototype(boolean prototype) {
 		this.prototype = prototype;
+	}
+
+	@Override
+	public FormLabelLayout getFormLabelLayout() {
+		return formLabelLayout;
+	}
+
+	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+		this.formLabelLayout = formLabelLayout;
 	}
 
 	@Override

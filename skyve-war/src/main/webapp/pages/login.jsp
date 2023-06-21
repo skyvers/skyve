@@ -7,13 +7,31 @@
 <%@ page import="org.skyve.web.WebContext"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
+<%@ page import="org.skyve.impl.web.spring.TwoFactorAuthForwardHandler"%>
+<%@ page import="org.skyve.impl.web.spring.TwoFactorAuthPushFilter"%>
 <%
+	String tfaToken = UtilImpl.processStringValue((String) request.getAttribute(TwoFactorAuthPushFilter.TWO_FACTOR_TOKEN_ATTRIBUTE));
+	boolean show2FA = (tfaToken != null);
+	boolean rmChecked = false;
+	String user = null;
+	boolean error2FA = false;
+	
+
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
-
+	
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
 
+	if (show2FA) {	
+		customer = (String) request.getAttribute(TwoFactorAuthPushFilter.CUSTOMER_ATTRIBUTE);
+		error2FA = "1".equals(request.getAttribute(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE));
+		user = (String) request.getAttribute(TwoFactorAuthPushFilter.USER_ATTRIBUTE);
+		rmChecked = Boolean.TRUE.equals(request.getAttribute(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE));
+	}
+	
+	String rememberMeChecked = rmChecked ? "checked" : "";
+	
 	// Clear the user object from the session if it exists
 	// If there is a public user set, this will ensure it doesn't get in the way.
 
@@ -30,16 +48,16 @@
 	Locale locale = request.getLocale();
 	if (customer != null) {
 		try {
-			Customer c = CORE.getRepository().getCustomer(customer);
-			if (c != null) {
-				String languageTag = c.getLanguageTag();
-				if (languageTag != null) {
-					locale = Locale.forLanguageTag(languageTag);
-				}
-			}
+	Customer c = CORE.getRepository().getCustomer(customer);
+	if (c != null) {
+		String languageTag = c.getLanguageTag();
+		if (languageTag != null) {
+			locale = Locale.forLanguageTag(languageTag);
+		}
+	}
 		}
 		catch (Exception e) {
-			// cannot get locale - do nothing
+	// cannot get locale - do nothing
 		}
 	}
 	
@@ -49,7 +67,15 @@
 	boolean mobile = UserAgent.getType(request).isMobile();
 	
 	// is self-registration enabled
-	boolean allowRegistration = UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION;
+	boolean allowRegistration = (UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION && (! show2FA));
+	
+	String passwordEmptyError = show2FA ? 
+							Util.i18n("page.login.password.error.2FACode.required", locale) : 
+							Util.i18n("page.login.password.error.required", locale);
+	
+	String loginBanner = show2FA ? 
+					Util.i18n("page.login.2FACode.banner", locale) :
+					Util.i18n("page.login.banner", locale);
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
@@ -74,7 +100,6 @@
 
 		<%@include file="fragments/favicon.html" %>
 	    <link rel="stylesheet" href="semantic24/semantic.min.css">
-		<link type="text/css" rel="stylesheet" href="javax.faces.resource/fa/font-awesome.css.xhtml?ln=primefaces" />
 	    
 	    <%@include file="fragments/styles.html" %>
 	    <%@include file="fragments/backgroundImage.html" %>
@@ -127,7 +152,7 @@
 			                rules: [
 			                    {
 			                        type   : 'empty',
-			                        prompt : '<%=Util.i18n("page.login.password.error.required", locale)%>'
+			                        prompt : '<%=passwordEmptyError%>'
 			                    }
 			                ]
 			            }
@@ -165,7 +190,6 @@
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
-
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
 		    	<div style="text-align: center; margin: 0 auto; margin-bottom: 10px;">
@@ -186,13 +210,26 @@
 			        	</p>
             		</div>
 				<% } %>
+				<% if (error2FA) { %>
+					<div class="ui error message">
+	            		<div class="header"><%=Util.i18n("page.loginError.banner", locale)%></div>
+			        	<p>
+			        		<%=Util.i18n("page.loginError.2FACode.invalid", locale)%>
+			        		<% if (UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD > 0) { %>
+			        			<div style="text-align:left;">
+				        			<%=Util.i18n("page.loginError.attempts", locale, String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD), String.valueOf(UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS))%>
+				        		</div>
+				        	<% } %>
+			        	</p>
+            		</div>
+				<% } %>
 		        <form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 		            <div class="ui segment">
 		            	<div class="ui header">
 		            		<% if (request.getUserPrincipal() != null) { %>
 								<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
 							<% } else { %>
-								<%=Util.i18n("page.login.banner", locale)%>
+								<%=loginBanner%>
 							<% } %>
 		            	</div>
 						<% if (customer == null) { %>
@@ -204,6 +241,10 @@
 							</div>
 						<% } %>
 		                <div class="field">
+		                <% if (show2FA) { %>
+		                	<input type="hidden" id="user" name="user" value="<%=user%>"/>
+		                	<input type="hidden" id="customer" name="customer" value="<%=customer%>"/>
+		                <% } else { %>
 		                    <div class="ui left icon input">
 	                    	<% if(allowRegistration) { %>
 	                    		<i class="envelope icon"></i>
@@ -216,28 +257,43 @@
 								<input type="hidden" name="customer" value="<%=customer%>" />
 							<% } %>
 		                    </div>
+		                <% } %>
 		                </div>
 		                <div class="field">
-		                    <div class="ui left icon input">
-		                        <i class="lock icon"></i>
-		                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
-		                    </div>
+		                	<% if (show2FA) { %>
+								<div class="ui left icon input">
+			                        <i class="lock icon"></i>
+			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" inputmode="numeric" placeholder="<%=Util.i18n("page.login.2FACode.label", locale)%>"/>
+			                    </div>
+			                    <input type="password" id="tfaToken" name="tfaToken" hidden="true" value="<%=tfaToken%>"/>
+							<% } else { %>
+			                    <div class="ui left icon input">
+			                        <i class="lock icon"></i>
+			                        <input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.password.label", locale)%>">
+			                    </div>
+		                    <% } %>
 		                </div>
 		                <div class="equal width fields">
 			                <div class="field" style="text-align: left">
 			                	<div class="ui checkbox">
-			                		<input type="checkbox" tabindex="0" class="hidden" id="remember" name="remember">
+			                		<input type="checkbox" tabindex="0" class="hidden" id="remember" name="remember" <%=rememberMeChecked%>>
 									<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
 								</div>
 							</div>
-							<div class="field" style="text-align: right;">
-								<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
-	    					</div>
+								<div class="field" style="text-align: right;">
+									<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.label", locale)%></a>
+		    					</div>
     					</div>
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
+						
+						<% if (show2FA) { %>
+							<div style="margin-top: 5px;">
+			                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.2FACode.return.label", locale)%></a>
+			                </div>
+		                <% } %>
 		            </div>
 
-					<% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) { %>
+					<% if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null) || (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null)) { %>
 					<div class="ui segment">
 						<div class="ui grid">
 							<div class="sixteen wide column">
@@ -270,6 +326,16 @@
 										<i class="github icon"></i>
 									</div>
 									<a href="oauth2/authorization/github" class="ui basic gray left pointing label">GitHub</a>
+								</div>
+							</div>
+							<% } %>
+							<% if (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null) { %>
+							<div class="eight wide column" style="padding-top: 0;">
+								<div class="ui fluid labeled button">
+									<div class="ui gray button">
+										<i class="microsoft icon"></i>
+									</div>
+									<a href="oauth2/authorization/microsoft" class="ui basic gray left pointing label">Azure AD</a>
 								</div>
 							</div>
 							<% } %>							

@@ -5,14 +5,15 @@ import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.PrompterException;
-import org.codehaus.plexus.util.StringUtils;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
@@ -76,10 +77,10 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 			documentMetaData.setSingularAlias(documentName);
 			documentMetaData.setPluralAlias(PluralUtil.pluralise(documentName));
 
-			Optional<String> persistentName = guessPersistentName(moduleName, documentName);
-			if (persistentName.isPresent()) {
+			String persistentName = generatePersistentName(moduleName, documentName);
+			if (persistentName != null) {
 				Persistent persistent = new Persistent();
-				persistent.setName(persistentName.get());
+				persistent.setName(persistentName);
 				documentMetaData.setPersistent(persistent);
 
 				BizKey bizKey = new BizKey();
@@ -132,18 +133,17 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 	/**
 	 * Uses the module and document name to guess the persistent name
 	 */
-	private Optional<String> guessPersistentName(String moduleName, final String documentName) {
-		if (moduleName != null && documentName != null) {
-			// remove any non-word characters from the module name
-			moduleName = moduleName.replaceAll("\\W", "");
-
-			if (StringUtils.left(moduleName, 3).length() > 0) {
-				String prefix = StringUtils.left(moduleName, 3);
+	private static @Nullable String generatePersistentName(String moduleName, final String documentName) {
+		if ((moduleName != null) && (documentName != null)) {
+			// remove any non-word characters and whitespace from the module name
+			String prefix = StringUtils.deleteWhitespace(moduleName.replaceAll("\\W", ""));
+			if (prefix.length() > 3) {
+				prefix = StringUtils.left(moduleName, 3);
 
 				// cleanse the document name of any invalid characters
-				return Optional.of(StringUtils.deleteWhitespace(String.format("%s_%s", prefix.toUpperCase(), documentName)));
+				return prefix.toUpperCase() + "_" + documentName;
 			}
 		}
-		return Optional.empty();
+		return null;
 	}
 }

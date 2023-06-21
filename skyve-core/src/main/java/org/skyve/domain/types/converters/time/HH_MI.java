@@ -3,7 +3,7 @@ package org.skyve.domain.types.converters.time;
 import org.skyve.domain.messages.ConversionException;
 
 public class HH_MI extends AbstractTimeConverter {
-	private static final String PATTERN = "hh:mm a";
+	public static final String PATTERN = "hh:mm a";
 
 	@Override
 	protected String getPattern() {

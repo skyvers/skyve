@@ -1,7 +1,8 @@
 package modules.kitchensink.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -163,7 +164,7 @@ public class KitchenSink extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Combo::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Combo(String code, String description) {
 			this.code = code;
@@ -213,14 +214,6 @@ public class KitchenSink extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Combo[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Combo value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -241,7 +234,7 @@ public class KitchenSink extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Radio::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Radio(String code, String description) {
 			this.code = code;
@@ -291,14 +284,6 @@ public class KitchenSink extends AbstractTransientBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Radio[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Radio value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -986,7 +971,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addContainerGridElement(ContainerGrid element) {
 		boolean result = containerGrid.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1006,7 +993,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeContainerGridElement(ContainerGrid element) {
 		boolean result = containerGrid.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1053,7 +1042,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addInlineGridElement(InlineGrid element) {
 		boolean result = inlineGrid.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1073,7 +1064,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeInlineGridElement(InlineGrid element) {
 		boolean result = inlineGrid.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1120,7 +1113,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addOrderedGridElement(OrderedGrid element) {
 		boolean result = orderedGrid.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1140,7 +1135,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeOrderedGridElement(OrderedGrid element) {
 		boolean result = orderedGrid.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1187,7 +1184,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean addDataRepeaterElement(DataRepeater element) {
 		boolean result = dataRepeater.add(element);
-		element.setParent(this);
+		if (result) {
+			element.setParent(this);
+		}
 		return result;
 	}
 
@@ -1207,7 +1206,9 @@ public class KitchenSink extends AbstractTransientBean {
 	 **/
 	public boolean removeDataRepeaterElement(DataRepeater element) {
 		boolean result = dataRepeater.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 

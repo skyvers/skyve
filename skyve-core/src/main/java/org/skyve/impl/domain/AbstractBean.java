@@ -45,13 +45,13 @@ public abstract class AbstractBean implements Bean {
 				Object oldValue = BindUtil.get(this, propertyName);
 				if (oldValue == null) {
 					if (propertyValue != null) {
-						originalValues.put(propertyName,  oldValue);
+						originalValues.put(propertyName, oldValue);
 						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
 					}
 				}
 				else {
 					if ((propertyValue == null) || (! oldValue.equals(propertyValue))) {
-						originalValues.put(propertyName,  oldValue);
+						originalValues.put(propertyName, oldValue);
 						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
 					}
 				}

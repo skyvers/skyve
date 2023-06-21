@@ -298,11 +298,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										Form currentForm,
 										FormItem currentFormItem, 
 										FormColumn currentFormColumn,
-										String widgetLabel, 
+										String widgetLabel,
+										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText) {
-		Integer colspan = currentFormItem.getColspan();
 		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
 		setInvisible(div, widgetInvisible, null);
 		
@@ -330,7 +330,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		
 		// Update div's style
 		// colspan should be 1.
-		if ((colspan == null) || (colspan.intValue() <= 1)) {
+		if (widgetColspan <= 1) {
 			// style="<repsonsive column calc method call>"
 			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', 1)}", 
 												managedBeanName, 
@@ -341,11 +341,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		}
 		else { // colspan > 1
 			// style="<repsonsive column calc method call>"
-			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', %d)}", 
+			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', %s)}", 
 												managedBeanName, 
 												Integer.toString(formIndex),
 												alignment(currentFormItem.getHorizontalAlignment(), false),
-												colspan);
+												Integer.toString(widgetColspan));
 			div.setValueExpression("styleClass", 
 									ef.createValueExpression(elc, expression, String.class));
 		}

@@ -124,7 +124,9 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	 **/
 	public boolean addAggCollectionElement(InverseManyToManyPersistent element) {
 		boolean result = aggCollection.add(element);
-		element.getInvAggCollection().add(this);
+		if (result) {
+			element.getInvAggCollection().add(this);
+		}
 		return result;
 	}
 
@@ -144,7 +146,9 @@ public class InverseManyToManyPersistent extends AbstractPersistentBean {
 	 **/
 	public boolean removeAggCollectionElement(InverseManyToManyPersistent element) {
 		boolean result = aggCollection.remove(element);
-		element.getInvAggCollection().remove(this);
+		if (result) {
+			element.getInvAggCollection().remove(this);
+		}
 		return result;
 	}
 

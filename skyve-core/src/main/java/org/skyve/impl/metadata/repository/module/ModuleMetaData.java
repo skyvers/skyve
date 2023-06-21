@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.repository.module;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -11,6 +12,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -27,11 +29,12 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
+import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
@@ -41,6 +44,7 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -49,6 +53,7 @@ import org.skyve.metadata.view.View.ViewType;
 			name = "module",
 			propOrder = {"title",
 							"prototype",
+							"formLabelLayout",
 							"documentation", 
 							"homeRef",
 							"homeDocument",
@@ -57,11 +62,12 @@ import org.skyve.metadata.view.View.ViewType;
 							"roles",
 							"menu",
 							"queries"})
-public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<org.skyve.metadata.module.Module> {
+public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData<Module> {
 	private static final long serialVersionUID = -6257431975403255783L;
 
 	private String title;
 	private Boolean prototype;
+	private FormLabelLayout formLabelLayout;
 	private ViewType homeRef;
 	private String homeDocument;
 	private List<JobMetaDataImpl> jobs = new ArrayList<>();
@@ -70,6 +76,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private List<ModuleRoleMetaData> roles = new ArrayList<>();
 	private MenuMetaData menu;
 	private String documentation;
+	private long lastModifiedMillis = Long.MAX_VALUE;
 
 	public String getTitle() {
 		return title;
@@ -91,6 +98,15 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 	public String getHomeDocument() {
 		return homeDocument;
+	}
+
+	@XmlAttribute
+	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+		this.formLabelLayout = formLabelLayout;
+	}
+
+	public FormLabelLayout getFormLabelLayout() {
+		return formLabelLayout;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
@@ -153,22 +169,37 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	@XmlTransient
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
 	public Module convert(String metaDataName, ProvidedRepository repository) {
 		ModuleImpl result = new ModuleImpl(repository);
+		result.setLastModifiedMillis(getLastModifiedMillis());
 
-		String value = getName();
-		if (value == null) {
+		String moduleName = getName();
+		if (moduleName == null) {
 			throw new MetaDataException(metaDataName + " : The module [name] is required");
 		}
-		result.setName(value);
+		result.setName(moduleName);
 
-		value = getTitle();
+		String value = getTitle();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The module [title] is required");
 		}
 		result.setTitle(value);
 
 		result.setPrototype(Boolean.TRUE.equals(prototype));
+		
+		result.setFormLabelLayout(getFormLabelLayout());
+		
+		result.setDocumentation(documentation);
 		
 		value = getHomeDocument();
 		if (value == null) {
@@ -217,6 +248,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		}
 
 		// Populate Jobs
+		
 		List<JobMetaDataImpl> repositoryJobs = getJobs();
 		if (repositoryJobs != null) {
 			Set<String> jobNames = new TreeSet<>();
@@ -421,25 +453,27 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		}
 
 		// Populate Roles
+		
 		Set<String> roleNames = new TreeSet<>();
 		List<ModuleRoleMetaData> repositoryRoles = getRoles();
 		if (repositoryRoles != null) {
 			for (ModuleRoleMetaData roleMetaData : repositoryRoles) {
 				RoleImpl role = new RoleImpl();
-				value = roleMetaData.getName();
-				if (value == null) {
+				String roleName = roleMetaData.getName();
+				if (roleName == null) {
 					throw new MetaDataException(metaDataName + " : The [name] for a role is required");
 				}
-				if (! roleNames.add(value)) {
-					throw new MetaDataException(metaDataName + " : Duplicate role named " + value);
+				if (! roleNames.add(roleName)) {
+					throw new MetaDataException(metaDataName + " : Duplicate role named " + roleName);
 				}
-				if (documentNames.contains(value)) {
-					throw new MetaDataException(metaDataName + " : The role named " + value + " is a module document name.");
+				if (documentNames.contains(roleName)) {
+					throw new MetaDataException(metaDataName + " : The role named " + roleName + " is a module document name.");
 				}
-				role.setName(value);
+				role.setName(roleName);
 				role.setDescription(roleMetaData.getDescription());
 				role.setDocumentation(roleMetaData.getDocumentation());
 				
+				// Populate privileges
 				Set<String> docPrivNames = new TreeSet<>();
 				List<DocumentPrivilegeMetaData> repositoryDocPrivileges = roleMetaData.getPrivileges();
 				if (repositoryDocPrivileges != null) {
@@ -447,23 +481,20 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 						org.skyve.impl.metadata.user.DocumentPrivilege documentPrivilege = new org.skyve.impl.metadata.user.DocumentPrivilege();
 						value = documentPrivilegeMetaData.getDocumentName();
 						if (value == null) {
-							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + 
-															role.getName());
+							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + roleName);
 						}
-						if (!docPrivNames.add(value)) {
-							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value +
-															" in role " + role.getName());
+						if (! docPrivNames.add(value)) {
+							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value + " in role " + roleName);
 						}
-						if (!documentNames.contains(value)) {
-							String message = String.format(
-									"%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. "
-											+ "Expected %2$s to be defined in the <documents> section of %4$s.xml",
-									metaDataName, value, role.getName(), result.getName());
+						if (! documentNames.contains(value)) {
+							String message = String.format("%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. " +
+																"Expected %2$s to be defined in the <documents> section of %4$s.xml",
+															metaDataName, value, roleName, result.getName());
 							throw new MetaDataException(message);
 						}
 						if (result.getDocumentRefs().get(value).getReferencedModuleName() != null) {
 							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
-															" in role " + role.getName() +
+															" in role " + roleName +
 															" cannot be for a document referenced from another module.  Document Privileges are to be made on the owning module only.");
 						}
 
@@ -471,7 +502,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 						DocumentPermission docPermission = documentPrivilegeMetaData.getPermission();
 						if (docPermission == null) {
 							throw new MetaDataException(metaDataName + " : Document permission is required for document " +
-															documentPrivilege.getName() + " in role " + role.getName());
+															documentPrivilege.getName() + " in role " + roleName);
 						}
 						documentPrivilege.setPermission(docPermission);
 
@@ -485,7 +516,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 								value = actionPrivilegeMetaData.getActionName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +
-																	documentPrivilege.getName() + " in role " + role.getName());
+																	documentPrivilege.getName() + " in role " + roleName);
 								}
 								actionPrivilege.setName(value);
 								actionPrivilege.setDocumentName(documentPrivilege.getName());
@@ -501,7 +532,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 								value = contentRestriction.getAttributeName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [attribute] for a content restriction is required for document " +
-																	documentPrivilege.getName() + " in role " + role.getName());
+																	documentPrivilege.getName() + " in role " + roleName);
 								}
 								contentRestriction.setDocumentName(documentPrivilege.getName());
 
@@ -516,12 +547,46 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 								value = contentPermission.getAttributeName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [attribute] for a content permission is required for document " +
-																	documentPrivilege.getName() + " in role " + role.getName());
+																	documentPrivilege.getName() + " in role " + roleName);
 								}
 								contentPermission.setDocumentName(documentPrivilege.getName());
 
 								role.getContentPermissions().add(contentPermission);
 							}
+						}
+					}
+				}
+				
+				// Populate User Accesses
+				List<ModuleRoleUserAccessMetaData> repositoryAccesses = roleMetaData.getAccesses();
+				if (repositoryAccesses != null) {
+					Map<UserAccess, Set<String>> accesses = role.getAccesses();
+					for (ModuleRoleUserAccessMetaData accessMetaData : repositoryAccesses) {
+						// Validate access metadata
+						accessMetaData.validate(metaDataName, roleName, result);
+
+						// Validate and add ux/uis
+						Set<String> uxuis = null;
+						List<ModuleRoleUserAccessUxUiMetadata> uxuisMetaData = accessMetaData.getUxuis();
+						if (uxuisMetaData.isEmpty()) {
+							uxuis = UserAccess.ALL_UX_UIS;
+						}
+						else {
+							uxuis = new TreeSet<>();
+							for (ModuleRoleUserAccessUxUiMetadata uxuiMetaData : uxuisMetaData) {
+								String uxuiName = uxuiMetaData.getName();
+								if (uxuiName == null) {
+									throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
+								}
+								if (! uxuis.add(uxuiMetaData.getName())) {
+									throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
+								}
+							}
+						}
+
+						// Put into accesses
+						if (accesses.put(accessMetaData.toUserAccess(moduleName), uxuis) != null) {
+							throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName).toString() + " in role " + roleName);
 						}
 					}
 				}
@@ -538,8 +603,6 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		populateModuleMenu(metaDataName, items, getMenu().getActions(), roleNames);
 		result.setMenu(resultMenu);
 
-		result.setDocumentation(documentation);
-		
 		return result;
 	}
 

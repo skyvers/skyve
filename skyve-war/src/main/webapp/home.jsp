@@ -62,6 +62,7 @@
 
 	// Get (and set) the user agent type (if required - could have been set by device.jsp)
 	UserAgentType userAgentType = UserAgent.getType(request);
+
 	Router router = repository.getRouter();
 
 	RouteCriteria criteria = new RouteCriteria();
@@ -87,7 +88,17 @@
 		catch (Exception e) {
 			throw new IllegalStateException("Malformed URL cannot be canonicalised", e);
 		}
-		if (router.isUnsecured(criteria)) {
+		
+		// Determine the UX/UI without a user principal
+		UxUi uxui = UserAgent.getUxUi(request);
+		String uxuiName = (uxui == null) ? "" : uxui.getName();
+		// Now determine if the outcome URL is unsecured or not.
+		String outcomeUrl = router.selectOutcomeUrl(uxuiName, criteria);
+		if (outcomeUrl == null) {
+			UtilImpl.LOGGER.severe("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
+			throw new ServletException("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
+		}
+		if (router.isUnsecured(outcomeUrl)) {
 			if (customerName == null) {
 				throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter");
 			}
@@ -158,10 +169,7 @@
 			return;
 		}
 		
-		// Determine the UX/UI
-		UxUi uxui = UserAgent.getUxUi(request);
-
-		// Set the extra criterium if  user is defined
+		// Set the extra criterium if user is defined
 		if (user != null) {
 			criteria.setCustomerName(user.getCustomerName());
 			criteria.setDataGroupId(user.getDataGroupId());
@@ -177,11 +185,14 @@
 			}
 		}
 		
+		// Determine the UX/UI with the user principal
+		UxUi uxui = UserAgent.getUxUi(request);
+		String uxuiName = (uxui == null) ? "" : uxui.getName();
 		// Determine the route
-		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
+		String outcomeUrl = router.selectOutcomeUrl(uxuiName, criteria);
 		if (UtilImpl.COMMAND_TRACE) {
 			UtilImpl.LOGGER.info(String.format("home.jsp - Route uxui=%s,c=%s,dg=%s,d=%s,m=%s,q=%s,a=%s to %s",
-													uxui.getName(),
+													uxuiName,
 													criteria.getCustomerName(),
 													criteria.getDataGroupId(),
 													criteria.getDocumentName(),
@@ -191,8 +202,8 @@
 													outcomeUrl));
 		}
 		if (outcomeUrl == null) {
-			UtilImpl.LOGGER.severe("The route criteria " + criteria + " for uxui " + uxui + " did not produce an outcome URL");
-			throw new ServletException("The route criteria " + criteria + " for uxui " + uxui + " did not produce an outcome URL");
+			UtilImpl.LOGGER.severe("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
+			throw new ServletException("The route criteria " + criteria + " for uxui " + uxuiName + " did not produce an outcome URL");
 		}
 			
 		// forward

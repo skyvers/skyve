@@ -30,13 +30,13 @@ import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.button.Button;
-import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.dialog.Dialog;
 import org.primefaces.component.donutchart.DonutChart;
 import org.primefaces.component.graphicimage.GraphicImage;
@@ -80,6 +80,10 @@ import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
+import org.skyve.domain.types.converters.time.HH24_MI;
+import org.skyve.domain.types.converters.time.HH24_MI_SS;
+import org.skyve.domain.types.converters.time.HH_MI;
+import org.skyve.domain.types.converters.time.HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
@@ -166,7 +170,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
 public class TabularComponentBuilder extends ComponentBuilder {
-
 	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
 	public static final String SINGLE_ACTION_COLUMN_WIDTH = "60";
@@ -179,7 +182,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		return panelGroup(true, false, false, invisibleConditionName, null);
+		HtmlPanelGroup result = panelGroup(true, false, false, null, null);
+
+		// Don't render the view if there is not bean selected as 
+		// it'll cause a cascade of stack traces as the EL is evaluated
+		StringBuilder rendered = new StringBuilder(64);
+		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
+		rendered.append(managedBeanName).append(".currentBean.getBean() ne null) and (not ");
+		rendered.append(managedBeanName).append(".currentBean['").append(invisibleConditionName).append("'])");
+		result.setValueExpression("rendered",
+									createValueExpressionFromFragment(null,
+																		false,
+																		rendered.toString(),
+																		false,
+																		null,
+																		Boolean.class,
+																		false,
+																		Sanitisation.none));
+		return result;
 	}
 
 	@Override
@@ -201,12 +221,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent tabPane(UIComponent component,
 								TabPane tabPane,
 								String moduleName,
-								String documentName,
-								StringBuilder stickyTabScript) {
+								String documentName) {
 		if (component != null) {
 			return component;
 		}
 
+		StringBuilder expr = new StringBuilder(96);
 		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
 		// NB We can't turn prependId off as PF doesn't work.
 		// result.setPrependId(false);
@@ -216,21 +236,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
 		if (selectedTabIndexBinding != null) {
 			result.setValueExpression("activeIndex", createValueExpressionFromFragment(selectedTabIndexBinding, true, null, Number.class, false, Sanitisation.none));
-			result.setOnTabChange("SKYVE.PF.tabChange()");
+			
+			// Set display on based on whether there is a tab index defined
+			expr.append("#{empty ").append(managedBeanName).append(".currentBean['").append(selectedTabIndexBinding).append("'] ? 'display:none' : ''}");
+			result.setValueExpression("style", ef.createValueExpression(elc, expr.toString(), String.class));
 		}
 		else {
 			result.setStyle("display:none");
-			result.setWidgetVar(id);
-			result.setOnTabChange(String.format("SKYVE.PF.tabChange();sessionStorage.tab_%s_%s_%s=index", moduleName, documentName, id));
-
-			stickyTabScript.append(String.format("var t=PF('%s');if(t){t.jq.show();t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);}else{$(document).ready(function(){var t=PF('%s');t.jq.show();t.select(sessionStorage.tab_%s_%s_%s?sessionStorage.tab_%s_%s_%s:0);});}",
-													id,
-													moduleName, documentName, id,
-													moduleName, documentName, id,
-													id,
-													moduleName, documentName, id,
-													moduleName, documentName, id));
 		}
+		
+		result.setWidgetVar(id); // for subsequent tab script to work
+
+		expr.setLength(0);
+		expr.append("SKYVE.PF.tabChange('").append(moduleName).append("','").append(documentName).append("','").append(id).append("',index)");
+		result.setOnTabChange(expr.toString());
+
 		return result;
 	}
 
@@ -248,6 +268,35 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	@Override
+	public UIComponent tabPaneScript(UIComponent component, TabPane tabPane, String moduleName, String documentName, String tabPaneComponentId) {
+		UIOutput result = new UIOutput();
+
+		StringBuilder expr = new StringBuilder(128);
+		expr.append("<script type=\"text/javascript\">var t=PF('");
+		expr.append(tabPaneComponentId).append("');if(t){t.jq.show();t.select(sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append("?sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append(":0);}else{$(document).ready(function(){var t=PF('");
+		expr.append(tabPaneComponentId).append("');t.jq.show();t.select(sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append("?sessionStorage.tab_");
+		expr.append(moduleName).append('_').append(documentName).append('_').append(tabPaneComponentId);
+		expr.append(":0);});}</script>");
+		result.setValue(expr.toString());
+		
+		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
+		if (selectedTabIndexBinding != null) {
+			// Set script conditional rendering based on whether there is a tab index defined
+			expr.setLength(0);
+			expr.append("#{empty ").append(managedBeanName).append(".currentBean['").append(selectedTabIndexBinding).append("']}");
+			result.setValueExpression("rendered", ef.createValueExpression(elc, expr.toString(), Boolean.class));
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public UIComponent border(UIComponent component, String borderTitle, String invisibleConditionName, Integer pixelWidth) {
 		if (component != null) {
@@ -286,7 +335,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setIcon(iconStyleClass);
 		result.setTitle(toolTip);
 
-		setSize(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelWidth(), null, null);
+		setSize(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelHeight(), null, null);
 		setInvisible(result, zoomIn.getInvisibleConditionName(), null);
 		setDisabled(result, zoomIn.getDisabledConditionName(), formDisabledConditionName);
 		setId(result, null);
@@ -341,7 +390,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                formDisabledConditionName,
 				                action.getInvisibleConditionName(),
 				                properties.get(PROCESS_KEY),
-				                properties.get(UPDATE_KEY));
+				                properties.get(UPDATE_KEY),
+				                false);
 	}
 
 	@Override
@@ -600,7 +650,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								alignment,
 	                            false,
 	                            column.getPixelWidth());
-		result.setPriority(columnPriority);
+		result.setResponsivePriority(columnPriority);
 		if (columnPriority < 6) {
 			columnPriority++;
 		}
@@ -688,7 +738,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								alignment,
 				                false,
 				                column.getPixelWidth());
-		col.setPriority(columnPriority);
+		col.setResponsivePriority(columnPriority);
 		if (columnPriority < 6) {
 			columnPriority++;
 		}
@@ -712,7 +762,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												String dataWidgetVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
-												boolean inline) {
+												boolean inline,
+												boolean canCreate,
+												boolean canDelete) {
 		if (component != null) {
 			return component;
 		}
@@ -727,7 +779,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									HorizontalAlignment.centre,
 					                true,
 					                SINGLE_ACTION_COLUMN_WIDTH_INTEGER);
-			col.setPriority(1);
+			col.setResponsivePriority(1);
 			List<UIComponent> children = col.getChildren();
 
 			String disabledConditionName = grid.getDisabledConditionName();
@@ -735,10 +787,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 			final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 			columnHeader.setLayout("block");
-			columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
+			columnHeader.setStyle("display:flex;flex-direction:column;height:40px;justify-content:space-evenly;align-items:center");
 			col.getFacets().put("header", columnHeader);
 
-			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
+			if (canCreate && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
 				CommandButton button = createDataGridAddButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledConditionName);
 				columnHeader.getChildren().add(button);
 			}
@@ -748,7 +800,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				children.add(button);
 			}
 
-			if (! Boolean.FALSE.equals(grid.getShowRemove())) {
+			if (canDelete && (! Boolean.FALSE.equals(grid.getShowRemove()))) {
 				// Conditionally add some whitespace between buttons
 				if (! col.getChildren().isEmpty()) {
 					children.add(label(null, " "));
@@ -1028,7 +1080,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
 		setId(overlay, null);
 		overlay.setFor(mapButtonId);
-		overlay.setHideEffect("fade");
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
@@ -1270,7 +1321,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
     	result.setWidgetVar(result.getId());
 
     	if (grid.getSelectedIdBinding() != null) {
-    		addDataTableSelection(result, grid.getSelectedIdBinding(), grid.getSelectedActions(), modelName);
+    		addDataTableSelection(result, grid.getSelectedIdBinding(), grid.getSelectedActions(), modelName, true);
     	}
     	else if (zoomRendered) {
     		if (grid.getDisableZoomConditionName() == null) {
@@ -1282,12 +1333,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	    																					createOredValueExpressionFragmentFromConditions(new String[] {grid.getDisableZoomConditionName()})),
 	    																					String.class));
     		}
-	        result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
 
 	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 	        StringBuilder start = new StringBuilder(64);
-	        start.append("var s=PF('").append(result.getId()).append("').selection[0];SKYVE.PF.pushHistory('");
-			start.append("?a=").append(WebAction.e.toString()).append("'+s);return false;");
+	        start.append("var s=PF('").append(result.getId()).append("').selection[0];console.log(s);SKYVE.PF.pushHistory('");
+			start.append("?a=").append(WebAction.e.toString()).append("&m='+s.substring(s.indexOf('.') + 1)+");
+			start.append("'&d='+s.substring(s.indexOf('#') + 1, s.indexOf('.'))+");
+			start.append("'&i='+s.substring(0, s.indexOf('#')));return false;");
 			ajax.setOnstart(start.toString());
 	        result.addClientBehavior("rowSelect", ajax);
     	}
@@ -1408,7 +1460,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		List<UIComponent> children = result.getChildren();
         addListGridDataColumns(model, children, showFilter, result.getWidgetVar());
-        if ((canCreateDocument && createRendered) || zoomRendered) {
+        if ((canCreateDocument && createRendered) || zoomRendered || showFilter) {
         	final UIComponent actionColumn = createListGridActionColumn(owningModuleName,
 									        								drivingDocumentName,
 									        								canCreateDocument,
@@ -1417,6 +1469,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									        								(createUrlParams == null) ? null : createUrlParams.toString(),
 									        								zoomRendered,
 									        								grid.getDisableZoomConditionName(),
+									        								showFilter,
 																			result.getId(),
 																			grid.getProperties());
 			children.add(actionColumn);
@@ -1428,13 +1481,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	protected void addDataTableSelection(DataTable table,
 										String selectedIdBinding,
 										List<EventAction> selectedActions,
-										String source) {
+										String source,
+										boolean rowKeyFromModel) {
 		table.setSelectionMode("single");
-		table.setValueExpression("rowKey", ef.createValueExpression(elc, String.format("#{%s['bizId']}", table.getVar()), String.class));
+		if (! rowKeyFromModel) {
+			table.setValueExpression("rowKey", ef.createValueExpression(elc, String.format("#{%s['bizId']}", table.getVar()), String.class));
+		}
 		Map<String, Object> attributes = table.getAttributes();
 		attributes.put("selectedIdBinding", selectedIdBinding);
+		table.setValueExpression("selection", ef.createValueExpression(elc, String.format("#{%s.selectedRow}", managedBeanName), BeanMapAdapter.class));
 
-        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+		AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 		if (selectedActions != null) {
 			ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
 			if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
@@ -1537,7 +1594,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 			setId(column, null);
 			column.setHeaderText(displayName);
-			column.setPriority(columnPriority);
+			column.setResponsivePriority(columnPriority);
 			column.setStyleClass("hiddenFilter");
 			if (columnPriority < 6) {
 				columnPriority++;
@@ -1720,23 +1777,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													   String createUrlParams,
 													   boolean zoomRendered,
 													   String zoomDisabledConditionName,
+													   boolean showFilter,
 													   String parentId,
 													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
-		column.setPriority(1);
+		column.setResponsivePriority(1);
 		column.setWidth(SINGLE_ACTION_COLUMN_WIDTH);
 		column.setStyle("text-align:center !important");
-
+		
 		// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 		final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		columnHeader.setLayout("block");
-		columnHeader.setStyle("display:flex;flex-direction:column;height:70px;justify-content:space-evenly;align-items:center");
+		columnHeader.setStyle("display:flex;flex-direction:column;height:80px;justify-content:space-evenly;align-items:center");
 		column.getFacets().put("header", columnHeader);
 		List<UIComponent> columnHeaderChildren = columnHeader.getChildren();
 
-		final UIComponent filterToggle = createDataTableFilterToggle(parentId);
-		columnHeaderChildren.add(filterToggle);
-
+		if (showFilter) {
+			final UIComponent filterToggle = createDataTableFilterToggle(parentId);
+			columnHeaderChildren.add(filterToggle);
+		}
+			
 		if (canCreateDocument && createRendered) {
 			CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 			setId(button, null);
@@ -1770,10 +1830,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			column.setHeaderText("");
 		}
+		
 		if (zoomRendered) {
 			final UIComponent button = createListGridZoomButton(zoomDisabledConditionName, properties);
 			column.getChildren().add(button);
 		}
+		
 		return column;
 	}
 
@@ -1930,7 +1992,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		PickList result = (PickList) a.createComponent(PickList.COMPONENT_TYPE);
-		result.setVar("item");
+		setId(result, null);
 		result.setShowSourceControls(false);
 		result.setShowTargetControls(false);
 		result.setShowSourceFilter(false);
@@ -2345,7 +2407,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			setId(overlay, null);
 			overlay.setWidgetVar(sanitisedBinding + "Overlay");
 			overlay.setFor(uploadButtonId);
-			overlay.setHideEffect("fade");
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
@@ -2579,15 +2640,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			return component;
 		}
 
-		boolean useCalendar = false;
+		boolean useDatePicker = false;
 		Format<?> mutableFormat = format;
 		if (converter != null) {
 			AttributeType converterAttributeType = converter.getAttributeType();
 			// Date type and editable field - use readonly mask if not editable.
-			useCalendar = (! Boolean.FALSE.equals(text.getEditable())) &&
-	        				(AttributeType.date.equals(converterAttributeType) ||
-        						AttributeType.dateTime.equals(converterAttributeType) ||
-        						AttributeType.timestamp.equals(converterAttributeType));
+			useDatePicker = (! Boolean.FALSE.equals(text.getEditable())) &&
+		        				(AttributeType.date.equals(converterAttributeType) ||
+				        			AttributeType.time.equals(converterAttributeType) ||
+	        						AttributeType.dateTime.equals(converterAttributeType) ||
+	        						AttributeType.timestamp.equals(converterAttributeType));
 	        if (mutableFormat == null) {
 		        mutableFormat = converter.getFormat();
 	        }
@@ -2595,15 +2657,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		CompleteType complete = text.getComplete();
         UIComponentBase result = null;
-        if (useCalendar) {
-            result = calendar(dataWidgetVar,
-	            				text.getBinding(),
-	                            title,
-	                            required,
-	                            false,
-	                            text.getDisabledConditionName(),
-	                            formDisabledConditionName,
-	                            facesConverter);
+        if (useDatePicker) {
+            result = datePicker(dataWidgetVar,
+		            				text.getBinding(),
+		                            title,
+		                            required,
+		                            false,
+		                            text.getDisabledConditionName(),
+		                            formDisabledConditionName,
+		                            facesConverter);
         }
         else if ((mutableFormat != null) && (mutableFormat.getMask() != null)) {
             result = maskField(dataWidgetVar,
@@ -2781,6 +2843,39 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent remove(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								Action action,
+								boolean canDelete) {
+		if (component != null) {
+			return component;
+		}
+
+		Map<String, String> properties = action.getProperties();
+		return actionButton(label,
+								iconStyleClass,
+								toolTip,
+								ImplicitActionName.Remove,
+								action.getName(),
+								false,
+								null,
+								null,
+								null,
+								null,
+								action.getClientValidation(),
+								confirmationText,
+								action.getDisabledConditionName(),
+								null,
+								action.getInvisibleConditionName(),
+								properties.get(PROCESS_KEY),
+								properties.get(UPDATE_KEY),
+								canDelete);
+	}
+	
+	@Override
 	public UIComponent action(UIComponent component,
 								String dataWidgetBinding,
 								String dataWidgetVar,
@@ -2811,7 +2906,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								action.getInvisibleConditionName(),
 								properties.get(PROCESS_KEY),
-								properties.get(UPDATE_KEY));
+								properties.get(UPDATE_KEY),
+								false);
 	}
 
 	protected Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
@@ -3013,129 +3109,243 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private Calendar calendar(String dataWidgetVar,
-								String binding,
-								String title,
-								boolean required,
-								boolean mobile,
-								String disabled,
-								String formDisabled,
-								Converter converter) {
-		Calendar result = (Calendar) input(Calendar.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
+	private DatePicker datePicker(String dataWidgetVar,
+									String binding,
+									String title,
+									boolean required,
+									boolean mobile,
+									String disabled,
+									String formDisabled,
+									Converter converter) {
+		DatePicker result = (DatePicker) input(DatePicker.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		if (! mobile) {
-			result.setMode("popup");
-			result.setShowOn("button");
-			result.setNavigator(true);
-			result.setShowButtonPanel(true);
+			result.setShowIcon(true);
+			result.setShowOnFocus(false);
 		}
-		result.setYearRange("c-100:c+10");
+		result.setShowButtonBar(true);
 
 		String converterName = converter.getClass().getSimpleName();
 		if ("DD_MM_YYYY".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("99/99/9999");
 		}
 		else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy hh:mm a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("99/99/9999 99:99 aa");
 		}
 		else if ("DD_MM_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy HH:mm");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("99/99/9999 99:99");
 		}
 		else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy hh:mm:ss a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99 aa");
 		}
 		else if ("DD_MM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy HH:mm:ss");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99");
 		}
 		else if ("DD_MMM_YYYY".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("99-aaa-9999");
 		}
 		else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy hh:mm a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("99-aaa-9999 99:99 aa");
 		}
 		else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("99-aaa-9999 99:99");
 		}
 		else if ("DD_MMM_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy hh:mm:ss a");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("99-aaa-9999 99:99:99 aa");
 		}
 		else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern("dd-MMM-yyyy HH:mm:ss");
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("99-aaa-9999 99:99:99");
 		}
 		else if ("MM_DD_YYYY".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("99/99/9999");
 		}
 		else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("99/99/9999 99:99 aa");
 		}
 		else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("99/99/9999 99:99");
 		}
 		else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99 aa");
 		}
 		else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99");
 		}
 		else if ("MMM_DD_YYYY".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("aaa-99-9999");
 		}
 		else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("aaa-99-9999 99:99 aa");
 		}
 		else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("aaa-99-9999 99:99");
 		}
 		else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("aaa-99-9999 99:99:99 aa");
 		}
 		else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("aaa-99-9999 99:99:99");
 		}
 		else if ("YYYY_MM_DD".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
 			result.setMask("9999/99/99");
 		}
 		else if ("YYYY_MM_DD_HH_MI".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
 			result.setMask("9999/99/99 99:99 aa");
 		}
 		else if ("YYYY_MM_DD_HH24_MI".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH24_MI.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
 			result.setMask("9999/99/99 99:99");
 		}
 		else if ("YYYY_MM_DD_HH_MI_SS".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
 			result.setMask("9999/99/99 99:99:99 aa");
 		}
 		else if ("YYYY_MM_DD_HH24_MI_SS".equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH24_MI_SS.PATTERN);
+			result.setMonthNavigator(true);
+			result.setYearNavigator(true);
+			result.setShowTime(true);
+			result.setShowSeconds(true);
 			result.setMask("9999/99/99 99:99:99");
+		}
+		else if ("HH_MI".equals(converterName)) {
+			result.setPattern(HH_MI.PATTERN);
+			result.setTimeOnly(true);
+			result.setHourFormat("12");
+			result.setMask("99:99 aa");
+		}
+		else if ("HH24_MI".equals(converterName)) {
+			result.setPattern(HH24_MI.PATTERN);
+			result.setTimeOnly(true);
+			result.setMask("99:99");
+		}
+		else if ("HH_MI_SS".equals(converterName)) {
+			result.setPattern(HH_MI_SS.PATTERN);
+			result.setTimeOnly(true);
+			result.setHourFormat("12");
+			result.setShowSeconds(true);
+			result.setMask("99:99:99 aa");
+		}
+		else if ("HH24_MI_SS".equals(converterName)) {
+			result.setPattern(HH24_MI_SS.PATTERN);
+			result.setShowButtonBar(true);
+			result.setTimeOnly(true);
+			result.setShowSeconds(true);
+			result.setMask("99:99:99");
 		}
 		else {
 			throw new IllegalStateException(converterName + " is not supported");
 		}
 
 		result.setConverter(converter);
+		
 		return result;
 	}
 
@@ -3183,7 +3393,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String formDisabled,
 											String invisible,
 											String processOverride,
-											String updateOverride) {
+											String updateOverride,
+											boolean canDelete) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
 		result.setValue(title);
@@ -3285,6 +3496,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (! inline) { // inline grids don't need invisible expression on remove button or link
 				StringBuilder expression = new StringBuilder(128);
 				expression.append("not empty ").append(managedBeanName).append(".viewBinding");
+				if (ImplicitActionName.Remove.equals(implicitActionName) && (! canDelete)) {
+					expression.insert(0, '(');
+					expression.append(" and ").append(managedBeanName).append(".currentBean['").append(Bean.NOT_PERSISTED_KEY).append("'])");
+				}
 				if (invisible == null) {
 					result.setValueExpression("rendered",
 												createValueExpressionFromFragment(null,
@@ -3473,7 +3688,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String overlayId = overlay.getId();
 		overlay.setWidgetVar(overlayId + "Overlay");
 		overlay.setFor(uploadButtonId);
-		overlay.setHideEffect("fade");
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
@@ -3862,6 +4076,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
+		// Escaped here because the column can't escaped and sanitised in SkyveLazyDataModel,
+		// otherwise it'll be copied into the autocomplete text field with escaped values.
+		// We have to leave it to PF to escape in the drop down and unescape when putting into the input element.
+		result.setEscape(true);
 		result.setForceSelection(true);
 		result.setDropdown(true);
 		String var = BindUtil.sanitiseBinding(binding) + "Row";
@@ -3919,6 +4137,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
+		// Escaped here because Skyve doesn't have an option to escape or sanitise complete values
+		// We have to leave it to PF to escape and unescape.
+		// Anyway, even if we could escape, it'll be copied into the autocomplete text field with the escaped values.
+		result.setEscape(true);
 		result.setForceSelection(complete == CompleteType.constrain);
 		result.setDropdown(true);
 		if (length != null) {
@@ -4019,7 +4241,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class, false, Sanitisation.none));
 
 		if (selectedIdBinding != null) {
-			addDataTableSelection(result, selectedIdBinding, selectedActions, binding);
+			addDataTableSelection(result, selectedIdBinding, selectedActions, binding, false);
 		}
 		else if (clickToZoom) {
 			String id = result.getId();
@@ -4034,14 +4256,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 																			String.class,
 																			false,
 																			Sanitisation.text));
-
 			AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 			StringBuilder expression = new StringBuilder(64);
 			expression.append("#{").append(managedBeanName).append('.');
 			expression.append(ImplicitActionName.Navigate.name().toLowerCase()).append('}');
 			MethodExpression me = ef.createMethodExpression(elc, expression.toString(), null, new Class[0]);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
-
+			ajax.setProcess(process);
+			
 			ValueExpression disabled = createOredValueExpressionFromConditions(clickToZoomDisabledConditionNames);
 			if (disabled != null) {
 				ajax.setValueExpression("disabled", disabled);
@@ -4060,7 +4282,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
             final Column dragHandleColumn = (Column) a.createComponent(Column.COMPONENT_TYPE);
             setId(dragHandleColumn, null);
             dragHandleColumn.setWidth("10");
-            dragHandleColumn.setPriority(1);
+            dragHandleColumn.setResponsivePriority(1);
 
             final HtmlPanelGroup dragHandle = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 			dragHandle.setStyleClass("fa fa-sort");

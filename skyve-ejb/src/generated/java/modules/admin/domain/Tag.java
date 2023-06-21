@@ -1,7 +1,8 @@
 package modules.admin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -140,7 +141,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(CombinationsOperator::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private CombinationsOperator(String code, String description) {
 			this.code = code;
@@ -190,14 +191,6 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				CombinationsOperator[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (CombinationsOperator value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -218,7 +211,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(FilterOperator::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private FilterOperator(String code, String description) {
 			this.code = code;
@@ -268,14 +261,6 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				FilterOperator[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (FilterOperator value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -295,7 +280,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(FilterAction::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private FilterAction(String code, String description) {
 			this.code = code;
@@ -345,14 +330,6 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				FilterAction[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (FilterAction value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

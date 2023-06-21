@@ -1,5 +1,8 @@
 package org.skyve.impl.metadata.view.model.chart;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
@@ -11,8 +14,11 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.view.model.chart.Bucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.JSON;
+import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -32,7 +38,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 public class ChartBuilderMetaData implements ModelMetaData {
 	private static final long serialVersionUID = -6525994383289095450L;
 
-	private int modelIndex;
+	private String modelName;
 	private String title;
 	private String label;
 	private String moduleName;
@@ -48,16 +54,22 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	private String primeFacesChartPostProcessorClassName;
 	
 	@Override
-	public int getModelIndex() {
-		return modelIndex;
+	@XmlTransient
+	public String getModelName() {
+		if (modelName == null) {
+			try {
+				final MessageDigest md = MessageDigest.getInstance("MD5");
+				String hash = JSON.marshall(this);
+				md.update(hash.getBytes(Util.UTF8));
+				modelName = "M" + new BigInteger(1, md.digest()).toString(36);
+			}
+			catch (Exception e) {
+				throw new MetaDataException("ChartBuilderMetaData cannot generate a model name", e);
+			}
+		}
+		return modelName;
 	}
 
-	@Override
-	@XmlTransient
-	public void setModelIndex(int modelIndex) {
-		this.modelIndex = modelIndex;
-	}
-	
 	public String getTitle() {
 		return title;
 	}

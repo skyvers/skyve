@@ -2,6 +2,13 @@ package org.skyve.job;
 
 import org.skyve.impl.job.AbstractSkyveJob;
 
+/**
+ * Extension point for Jobs.
+ * The job will not be able to be cancelled by default.
+ * Extend CancellableJob to get cancelling behaviour.
+ * 
+ * @author mike
+ */
 public abstract class Job extends AbstractSkyveJob {
 	/**
 	 * Implement the job here.
@@ -16,6 +23,18 @@ public abstract class Job extends AbstractSkyveJob {
 	@Override
 	public String cancel() {
 		return "Job cannot be cancelled.";
+	}
+	
+	/**
+	 * Indicates whether to rollback the associated transaction when a job is cancelled.
+	 * Job Implementations can override this to false if required.
+	 * Care should be taken if this method yields false that the data store is in a valid state at the cancellation point before commit.
+	 * ie if false, the Job needs to be idemptotent, and data store changes need to be atomic and consistent.
+	 * @return	the default, true.
+	 */
+	@Override
+	public boolean shouldRollbackOnCancel() {
+		return true;
 	}
 
 	/**

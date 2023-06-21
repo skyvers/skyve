@@ -16,7 +16,7 @@ public class TextStartsWithBucketMetaData extends TextStartsWithBucket {
 		super(0, false);
 	}
 
-	public int getLenth() {
+	public int getLength() {
 		return length;
 	}
 
@@ -25,7 +25,7 @@ public class TextStartsWithBucketMetaData extends TextStartsWithBucket {
 		this.length = length;
 	}
 	
-	public boolean getCaseSensitive() {
+	public boolean isCaseSensitive() {
 		return caseSensitive;
 	}
 	

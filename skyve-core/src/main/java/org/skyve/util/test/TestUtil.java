@@ -127,7 +127,7 @@ public class TestUtil {
 		if (attribute == null) {
 			return bean;
 		}
-		
+
 		final String name = attribute.getName();
 		final AttributeType type = attribute.getAttributeType();
 
@@ -216,11 +216,11 @@ public class TestUtil {
 
 	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
 	private static <T extends Bean> T constructRandomInstance(User user,
-																Module module,
-																Document document,
-																int currentDepth,
-																int maxDepth)
-	throws Exception {
+			Module module,
+			Document document,
+			int currentDepth,
+			int maxDepth)
+			throws Exception {
 		T result = document.newInstance(user);
 		Customer customer = user.getCustomer();
 		for (Attribute attribute : document.getAllAttributes(customer)) {
@@ -232,12 +232,14 @@ public class TestUtil {
 					if (currentDepth < maxDepth) {
 						AssociationImpl association = (AssociationImpl) attribute;
 						Module associationModule = module;
-						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
+						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName())
+								.getReferencedModuleName();
 						if (associationModuleRef != null) {
 							associationModule = customer.getModule(associationModuleRef);
 						}
 						Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
-						Bean value = TestUtil.constructRandomInstance(user, associationModule, associationDocument, currentDepth + 1, maxDepth);
+						Bean value = TestUtil.constructRandomInstance(user, associationModule, associationDocument,
+								currentDepth + 1, maxDepth);
 						BindUtil.setAssociation(result, name, value);
 					}
 					break;
@@ -256,9 +258,11 @@ public class TestUtil {
 							collectionModule = customer.getModule(collectionModuleRef);
 						}
 						Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
-						Bean element = TestUtil.constructRandomInstance(user, collectionModule, collectionDocument, currentDepth + 1, maxDepth);
+						Bean element = TestUtil.constructRandomInstance(user, collectionModule, collectionDocument,
+								currentDepth + 1, maxDepth);
 						BindUtil.addElementToCollection(result, name, element);
-						element = TestUtil.constructRandomInstance(user, collectionModule, collectionDocument, currentDepth + 1, maxDepth);
+						element = TestUtil.constructRandomInstance(user, collectionModule, collectionDocument, currentDepth + 1,
+								maxDepth);
 						BindUtil.addElementToCollection(result, name, element);
 					}
 					break;
@@ -304,11 +308,12 @@ public class TestUtil {
 
 	/**
 	 * Checks if the requested filename has a file extension.
+	 * 
 	 * @param filename The name of the file to check
 	 * @return True if the string contains a period followed by at least one character, false otherwise
 	 */
 	private static boolean hasExtension(final String filename) {
-		if(filename != null && filename.length() > 0 && filename.indexOf(".") > 0) {
+		if (filename != null && filename.length() > 0 && filename.indexOf(".") > 0) {
 			if ((filename.substring(filename.indexOf(".") + 1)).length() > 0) {
 				return true;
 			}
@@ -392,10 +397,8 @@ public class TestUtil {
 			int currentValueInt = currentValue.intValue();
 			do {
 				x = RANDOM.nextInt(constants.length);
-			}
-			while (x == currentValueInt);
-		}
-		else {
+			} while (x == currentValueInt);
+		} else {
 			x = RANDOM.nextInt(constants.length);
 		}
 
@@ -588,7 +591,7 @@ public class TestUtil {
 						}
 					} catch (@SuppressWarnings("unused") Exception e) {
 						// couldn't find the extension file on the classpath
-					}	
+					}
 				}
 
 				// check if there is a data file for this field
@@ -602,10 +605,10 @@ public class TestUtil {
 			}
 
 			// check if this string has a format mask
-			if(attribute instanceof Text) {
+			if (attribute instanceof Text) {
 				Text text = (Text) attribute;
 				length = Integer.valueOf(text.getLength());
-			
+
 				if (text.getFormat() != null) {
 					// check if it has a format mask and a regex, if so, prefer the regex
 					if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
@@ -639,7 +642,7 @@ public class TestUtil {
 					}
 				}
 			}
-			
+
 			// return random lorem ipsum text
 			if (length == null) {
 				// set an arbitrary max length for memo fields
@@ -655,10 +658,10 @@ public class TestUtil {
 
 				// keep adding sentences until we hit the length
 				StringBuilder b = new StringBuilder();
-				while ((b.length() < r) && (sentences.length > i)) {
+				while ((b.length() < r) && (i < sentences.length)) {
 					b.append(sentences[i]).append(".");
 					i++;
-					if (b.length() > r) {
+					if (b.length() > r || i == sentences.length) {
 						String out = b.toString();
 						out = out.substring(0, out.length() < r ? out.length() : r).trim();
 						if (out.indexOf(".") > 0) {
@@ -808,7 +811,7 @@ public class TestUtil {
 			arr[i] = a;
 		}
 	}
-	
+
 	/**
 	 * <p>
 	 * Returns a random bean tuple from the specified document query
@@ -821,27 +824,27 @@ public class TestUtil {
 	 * @param q - the query to find a random value from
 	 * @return - the random bean from the query result
 	 */
-    public static <T extends Bean> T findRandomDocumentQueryResult(DocumentQuery q) {
-        AbstractDocumentQuery aq = ((AbstractDocumentQuery) q);
+	public static <T extends Bean> T findRandomDocumentQueryResult(DocumentQuery q) {
+		AbstractDocumentQuery aq = ((AbstractDocumentQuery) q);
 
-        aq.clearProjections();
-        q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
-        long count = q.scalarResult(Number.class).longValue();
+		aq.clearProjections();
+		q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+		long count = q.scalarResult(Number.class).longValue();
 
-        // we just need a random number
-        if (count > Integer.MAX_VALUE) {
-            count = Integer.MAX_VALUE;
-        } else if (count == 0) {
-            return null;
-        }
+		// we just need a random number
+		if (count > Integer.MAX_VALUE) {
+			count = Integer.MAX_VALUE;
+		} else if (count == 0) {
+			return null;
+		}
 
-        int randomIndex = new Random().nextInt((int) count - 1);
+		int randomIndex = new Random().nextInt((int) count - 1);
 
-        // get the random record
-        aq.clearProjections();
-        q.setFirstResult(randomIndex);
-        q.setMaxResults(1);
+		// get the random record
+		aq.clearProjections();
+		q.setFirstResult(randomIndex);
+		q.setMaxResults(1);
 
-        return q.beanResult();
-    }	
+		return q.beanResult();
+	}
 }

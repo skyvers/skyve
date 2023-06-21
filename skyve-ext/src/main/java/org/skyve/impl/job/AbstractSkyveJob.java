@@ -103,6 +103,8 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	public abstract void execute(Job job) throws Exception;
 
 	public abstract String cancel();
+	
+	public abstract boolean shouldRollbackOnCancel();
 
 	/**
 	 * Return true to persist the job execution into admin.Job when successful, or
@@ -143,7 +145,12 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			BeanProvider.injectFields(this);
 			Util.LOGGER.info("Execute job " + displayName);
 			execute();
-			if (status == null) { // status could be cancelled here
+			if (JobStatus.cancelled == status) { // job was cancelled - log and rollback
+				if (shouldRollbackOnCancel()) {
+					persistence.rollback();
+				}
+			}
+			else if (status == null) { // job completed but it may not have set the completed status
 				status = JobStatus.complete;
 			}
 		}

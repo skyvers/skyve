@@ -2,6 +2,8 @@ package modules.admin.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -148,6 +150,15 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	/** @hidden */
 	public static final String activateUrlPropertyName = "activateUrl";
 
+	/** @hidden */
+	public static final String twoFactorCodePropertyName = "twoFactorCode";
+
+	/** @hidden */
+	public static final String twoFactorCodeGeneratedTimestampPropertyName = "twoFactorCodeGeneratedTimestamp";
+
+	/** @hidden */
+	public static final String twoFactorTokenPropertyName = "twoFactorToken";
+
 	/**
 	 * Wizard State
 	 * <br/>
@@ -172,7 +183,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(WizardState::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private WizardState(String code, String description) {
 			this.code = code;
@@ -222,14 +233,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				WizardState[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (WizardState value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -249,7 +252,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(GroupSelection::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private GroupSelection(String code, String description) {
 			this.code = code;
@@ -299,14 +302,6 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				GroupSelection[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (GroupSelection value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -541,6 +536,27 @@ which are implied from the groups to which they belong.
 	 * Activation Url
 	 **/
 	private String activateUrl;
+
+	/**
+	 * Two Factor Code
+	 * <br/>
+	 * this is hashed
+	 **/
+	private String twoFactorCode;
+
+	/**
+	 * 2FA Code DateTime
+	 * <br/>
+	 * used to invalidate the 2fa code when X amount of time has passed. Not displayed to the user
+	 **/
+	private Timestamp twoFactorCodeGeneratedTimestamp;
+
+	/**
+	 * Two Factor Token
+	 * <br/>
+	 * Used to identify the user is in the same session for 2FA code entry, this is for the system
+	 **/
+	private String twoFactorToken;
 
 	@Override
 	@XmlTransient
@@ -967,7 +983,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean addRolesElement(UserRole element) {
 		boolean result = roles.add(element);
-		element.setParent((UserExtension) this);
+		if (result) {
+			element.setParent((UserExtension) this);
+		}
 		return result;
 	}
 
@@ -987,7 +1005,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean removeRolesElement(UserRole element) {
 		boolean result = roles.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1088,7 +1108,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean addCandidateContactsElement(UserCandidateContact element) {
 		boolean result = candidateContacts.add(element);
-		element.setParent((UserExtension) this);
+		if (result) {
+			element.setParent((UserExtension) this);
+		}
 		return result;
 	}
 
@@ -1108,7 +1130,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	public boolean removeCandidateContactsElement(UserCandidateContact element) {
 		boolean result = candidateContacts.remove(element);
-		element.setParent(null);
+		if (result) {
+			element.setParent(null);
+		}
 		return result;
 	}
 
@@ -1136,7 +1160,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 **/
 	@XmlElement
 	public void setContactSelected(Boolean contactSelected) {
-		preset(contactSelectedPropertyName, contactSelected);
 		this.contactSelected = contactSelected;
 	}
 
@@ -1342,6 +1365,62 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	@XmlElement
 	public void setActivateUrl(String activateUrl) {
 		this.activateUrl = activateUrl;
+	}
+
+	/**
+	 * {@link #twoFactorCode} accessor.
+	 * @return	The value.
+	 **/
+	public String getTwoFactorCode() {
+		return twoFactorCode;
+	}
+
+	/**
+	 * {@link #twoFactorCode} mutator.
+	 * @param twoFactorCode	The new value.
+	 **/
+	@XmlElement
+	public void setTwoFactorCode(String twoFactorCode) {
+		preset(twoFactorCodePropertyName, twoFactorCode);
+		this.twoFactorCode = twoFactorCode;
+	}
+
+	/**
+	 * {@link #twoFactorCodeGeneratedTimestamp} accessor.
+	 * @return	The value.
+	 **/
+	public Timestamp getTwoFactorCodeGeneratedTimestamp() {
+		return twoFactorCodeGeneratedTimestamp;
+	}
+
+	/**
+	 * {@link #twoFactorCodeGeneratedTimestamp} mutator.
+	 * @param twoFactorCodeGeneratedTimestamp	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	public void setTwoFactorCodeGeneratedTimestamp(Timestamp twoFactorCodeGeneratedTimestamp) {
+		preset(twoFactorCodeGeneratedTimestampPropertyName, twoFactorCodeGeneratedTimestamp);
+		this.twoFactorCodeGeneratedTimestamp = twoFactorCodeGeneratedTimestamp;
+	}
+
+	/**
+	 * {@link #twoFactorToken} accessor.
+	 * @return	The value.
+	 **/
+	public String getTwoFactorToken() {
+		return twoFactorToken;
+	}
+
+	/**
+	 * {@link #twoFactorToken} mutator.
+	 * @param twoFactorToken	The new value.
+	 **/
+	@XmlElement
+	public void setTwoFactorToken(String twoFactorToken) {
+		preset(twoFactorTokenPropertyName, twoFactorToken);
+		this.twoFactorToken = twoFactorToken;
 	}
 
 	/**

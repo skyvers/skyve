@@ -3,6 +3,7 @@ package org.skyve.impl.web.service;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.security.Principal;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,14 +22,19 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.map.DocumentQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.metadata.view.model.map.MapResult;
@@ -77,7 +83,8 @@ public class MapServlet extends HttpServlet {
 			try {
 				try {
 					persistence.begin();
-					User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
+			    	Principal userPrincipal = request.getUserPrincipal();
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -125,16 +132,34 @@ public class MapServlet extends HttpServlet {
 	private static String processQuery(HttpServletRequest request)
 	throws Exception {
 		String moduleName = request.getParameter(AbstractWebContext.MODULE_NAME);
-		String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
+		String documentOrQueryName = request.getParameter(AbstractWebContext.QUERY_NAME);
 		String geometryBinding = request.getParameter(GEOMETRY_BINDING_NAME);
 		
-		AbstractPersistence persistence = AbstractPersistence.get();
-		User user = persistence.getUser();
+		// Run the query map model and convert to JSON
+		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
-		MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryName);
+		UxUi uxui = UserAgent.getUxUi(request);
 		if (query == null) {
-			query = module.getDocumentDefaultQuery(customer, queryName);
+			if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName())) {
+				final String userName = user.getName();
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("this data", userName);
+			}
+			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+		}
+		else {
+			if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName())) {
+				final String userName = user.getName();
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("this data", userName);
+			}
+		}
+		if (query == null) {
+			throw new ServletException(documentOrQueryName + " does not reference a valid query");
 		}
 		DocumentQueryMapModel<Bean> model = new DocumentQueryMapModel<>(query);
 		model.setGeometryBinding(geometryBinding);
@@ -143,11 +168,13 @@ public class MapServlet extends HttpServlet {
 	
 	private static String processCollection(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
+		// Get the bean from the conversation
 		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
     	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		
+		// Run a ReferenceMapModel on the given collection and convert to JSON
 		String collectionBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
 		String geometryBinding = request.getParameter(GEOMETRY_BINDING_NAME);
 		ReferenceMapModel<Bean> model = new ReferenceMapModel<>(collectionBinding);
@@ -158,18 +185,33 @@ public class MapServlet extends HttpServlet {
 
 	private static String processModel(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
-		Customer customer = CORE.getCustomer();
+		// Get the bean from the conversation
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
-		Module module = customer.getModule(bean.getBizModule());
-		Document document = module.getDocument(customer, bean.getBizDocument());
 
-		MapModel<Bean> model = document.getMapModel(customer, request.getParameter(AbstractWebContext.MODEL_NAME), true);
+		// Check if we have access
+		User user = CORE.getUser();
+		final String moduleName = bean.getBizModule();
+		final String documentName = bean.getBizDocument();
+		final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
+		UxUi uxui = UserAgent.getUxUi(request);
+		if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
+			final String userName = user.getName();
+			UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+			UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+			throw new AccessException("this data", userName);
+		}
+
+		// Invoke the model
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(moduleName);
+		Document document = module.getDocument(customer, documentName);
+		MapModel<Bean> model = document.getMapModel(customer, modelName, true);
 		model.setBean(bean);
-		
 		MapResult result = model.getResult(mapBounds(request));
 
+		// Convert to JSON
 		String json = JSON.marshall(customer, result);
 		
 		// Add _doc property to json response for resources such as images for map pins.

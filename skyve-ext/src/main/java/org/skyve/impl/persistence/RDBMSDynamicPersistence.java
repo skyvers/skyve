@@ -38,7 +38,6 @@ import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
@@ -54,6 +53,8 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
 
+	public static final String DYNAMIC_ENTITY_TABLE_NAME = "ADM_DynamicEntity";
+	
 	protected Persistence persistence;
 	
 	// Cache that points to each DynamicBean ever populated.
@@ -281,6 +282,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	private void delete(Customer customer, Document document, PersistentBean bean, boolean beforeSave) {
 		final Map<String, Bean> bizIdsToDelete = new TreeMap<>();
 		
+		// Call Bizlet.preDelete() on anything that will cascade delete
 		new BeanVisitor(false, false, false) {
 			@Override
 			protected boolean accept(String binding,
@@ -373,6 +375,17 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				}
 			}
 			
+			// Call Bizlet.postDelete() on all the deleted beans (except the bean being deleted)
+			for (Bean deletedBean : bizIdsToDelete.values()) {
+				if (! deletedBean.equals(bean)) {
+					final Module m = customer.getModule(deletedBean.getBizModule());
+					final Document d = m.getDocument(customer, deletedBean.getBizDocument());
+					if (d.isDynamic()) {
+						callBizletPostDelete(customer, d, (PersistentBean) deletedBean);
+					}
+				}
+			}
+			
 			// Flush above was successful, remove from the first level cache now
 			for (String bizId : bizIdsToDelete.keySet()) {
 				dynamicFirstLevelCache.remove(bizId);
@@ -411,22 +424,25 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}
 	}
 	
-	@Override
-	public void populate(PersistentBean bean) {
+	private static void callBizletPostDelete(Customer customer, Document document, PersistentBean bean) {
 		try {
-//System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
-			// Note that caching of these mixed beans is handled by hibernate so if AbstractHibernatePersistence.postLoad() calls this method, we don't ask questions.
-
-			// select the json by bizId
-			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields from ADM_DynamicEntity where bizid = :bizId";
-			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).retrieveTuple();
-	
-			User u = persistence.getUser();
-			Customer c = u.getCustomer();
-			Module m = c.getModule(bean.getBizModule());
-			Document d = m.getDocument(c, bean.getBizDocument());
-			
-			populate(u, c, m, d, bean, tuple);
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePostDelete(bean);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				if (bizlet != null) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+					bizlet.postDelete(bean);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Exiting " + bizlet.getClass().getName() + ".postDelete");
+				}
+				internalCustomer.interceptAfterPostDelete(bean);
+			}
+		}
+		catch (ValidationException e) {
+			for (Message message : e.getMessages()) {
+				ValidationUtil.processMessageBindings(customer, message, bean, bean);
+			}
+			throw e;
 		}
 		catch (SkyveException e) {
 			throw e;
@@ -436,6 +452,38 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		}
 	}
 
+	/**
+	 * Called by Skyve Persistence for a static bean with some dynamic properties
+	 */
+	@Override
+	public void populate(PersistentBean bean) {
+		try {
+//System.out.println("populate document for " + bean.getBizDocument() + " with bizId " + bean.getBizId());
+			// Note that caching of these mixed beans is handled by hibernate so if AbstractHibernatePersistence.postLoad() calls this method, we don't ask questions.
+
+			// select the json by bizId (no assertion that the row exists since this is a hybrid static/dynamic bean and is driven by the static select)
+			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields from ADM_DynamicEntity where bizid = :bizId";
+			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).tupleResult();
+			if (tuple != null) { // dynamic properties exist
+				User u = persistence.getUser();
+				Customer c = u.getCustomer();
+				Module m = c.getModule(bean.getBizModule());
+				Document d = m.getDocument(c, bean.getBizDocument());
+				
+				populate(u, c, m, d, bean, tuple);
+			}
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+	}
+
+	/**
+	 * Called by Skyve Persistence for a totally dynamic bean.
+	 */
 	@Override
 	public DynamicPersistentBean populate(String bizId) {
 		try {
@@ -444,7 +492,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				return dynamicFirstLevelCache.get(bizId);
 			}
 
-			// select the json by bizId
+			// select the json by bizId (assert that the row exists since this is a totally dynamic bean)
 			String select = "select bizVersion, bizLock, bizKey, bizCustomer, bizFlagComment, bizDataGroupId, bizUserId, fields, moduleName, documentName from ADM_DynamicEntity where bizid = :bizId";
 			Object[] tuple = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bizId, false).retrieveTuple();
 			
@@ -532,37 +580,37 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 
 	private void populateReferences(PersistentBean bean, Set<String> dynamicReferenceNames) throws Exception {
 		String select = "select relatedModuleName, relatedDocumentName, relatedId, attributeName from ADM_DynamicRelation where parent_id = :bizId order by attributeName, ordinal";
-		try (AutoClosingIterable<Object[]> i = persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).tupleIterable()) {
-			for (Object[] tuple : i) {
-				String relatedModuleName = (String) tuple[0];
-				String relatedDocumentName = (String) tuple[1];
-				String relatedId = (String) tuple[2];
-				String attributeName = (String) tuple[3];
+		// Note - this following SQL gets a list instead of iterating as this method is recursive (through the populate() call for relatedBean).
+		// Hibernate can't manage multiple nested ScrollableResults for certain databases (MySQL) and closes the encapsulated ResultSet of the outer ScrollableResults prematurely.
+		for (Object[] tuple : persistence.newSQL(select).putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).tupleResults()) {
+			String relatedModuleName = (String) tuple[0];
+			String relatedDocumentName = (String) tuple[1];
+			String relatedId = (String) tuple[2];
+			String attributeName = (String) tuple[3];
 
-				if (dynamicReferenceNames.contains(attributeName)) {
-					// Find the related bean
-					PersistentBean relatedBean = null;
-					if (relatedId != null) {
-						// static document has related module and document name
-						if ((relatedModuleName != null) && (relatedDocumentName != null)) {
-							relatedBean = persistence.retrieve(relatedModuleName, relatedDocumentName, relatedId);
-						}
-						// otherwise dynamic document
-						else {
-							relatedBean = populate(relatedId);
-						}
+			if (dynamicReferenceNames.contains(attributeName)) {
+				// Find the related bean
+				PersistentBean relatedBean = null;
+				if (relatedId != null) {
+					// static document has related module and document name
+					if ((relatedModuleName != null) && (relatedDocumentName != null)) {
+						relatedBean = persistence.retrieve(relatedModuleName, relatedDocumentName, relatedId);
 					}
-					
-					// Set the related bean
-					Object value = bean.getDynamic(attributeName);
-					if (value instanceof List<?>) {
-						if (relatedBean != null) {
-							BindUtil.addElementToCollection(bean, attributeName, relatedBean);
-						}
-					}
+					// otherwise dynamic document
 					else {
-						BindUtil.setAssociation(bean, attributeName, relatedBean);
+						relatedBean = populate(relatedId);
 					}
+				}
+				
+				// Set the related bean
+				Object value = bean.getDynamic(attributeName);
+				if (value instanceof List<?>) {
+					if (relatedBean != null) {
+						BindUtil.addElementToCollection(bean, attributeName, relatedBean);
+					}
+				}
+				else {
+					BindUtil.setAssociation(bean, attributeName, relatedBean);
 				}
 			}
 		}
@@ -581,5 +629,25 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	@Override
 	public boolean cached(Bean bean) {
 		return dynamicFirstLevelCache.containsKey(bean.getBizId());
+	}
+
+	@Override
+	public void begin() {
+		// nothing to do as we use the parent persistence's connection
+	}
+
+	@Override
+	public void rollback() {
+		// nothing to do as we use the parent persistence's connection
+	}
+
+	@Override
+	public void commit() {
+		// nothing to do as we use the parent persistence's connection
+	}
+	
+	@Override
+	public void close() {
+		// nothing to do as we use the parent persistence's connection
 	}
 }

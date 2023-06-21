@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -58,8 +59,8 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
+import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
@@ -99,7 +100,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 							"attributes", 
 							"conditions", 
 							"uniqueConstraints"})
-public class DocumentMetaData extends NamedMetaData implements PersistentMetaData<Document> {
+public class DocumentMetaData extends NamedMetaData implements ConvertableMetaData<Document> {
 	private static final long serialVersionUID = 222166383815547958L;
 
 	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
@@ -122,6 +123,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private List<ConditionMetaData> conditions = new ArrayList<>();
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 	private String documentation;
+	private long lastModifiedMillis = Long.MAX_VALUE;
 
 	public Extends getExtends() {
 		return inherits;
@@ -301,8 +303,19 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@Override
-	public org.skyve.metadata.model.document.Document convert(String metaDataName, ProvidedRepository repository) {
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	@XmlTransient
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
+	@Override
+	public Document convert(String metaDataName, ProvidedRepository repository) {
 		DocumentImpl result = new DocumentImpl(repository);
+		result.setLastModifiedMillis(getLastModifiedMillis());
 
 		// Set document metadata
 		String value = getName();

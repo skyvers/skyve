@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>8.1.4-SNAPSHOT</version>
+	<version>8.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -29,8 +29,8 @@
 		<commonmark.version>0.10.0</commonmark.version>
 		<commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-codec.version>1.15</commons-codec.version>
-		<commons-fileupload.version>1.4</commons-fileupload.version>
-		<commons-io.version>2.8.0</commons-io.version>
+		<commons-fileupload.version>1.5</commons-fileupload.version>
+		<commons-io.version>2.11.0</commons-io.version>
 		<commons-lang3.version>3.11</commons-lang3.version>
 		<commons-validator.version>1.7</commons-validator.version>
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
@@ -58,8 +58,8 @@
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.5.0</pf4j.version>
 		<poi.version>4.1.2</poi.version>
-		<primefaces.version>8.0</primefaces.version>
-		<primefaces-extensions.version>8.0.4</primefaces-extensions.version>
+		<primefaces.version>12.0.0</primefaces.version>
+		<primefaces-extensions.version>12.0.7</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
 		<quartz.version>2.3.2</quartz.version>
 		<slf4j-api.version>1.7.32</slf4j-api.version>
@@ -76,8 +76,8 @@
 		<mockito.version>2.28.2</mockito.version>
 		<hamcrest.version>1.3</hamcrest.version>
 		<weld-se.version>2.4.4.Final</weld-se.version>
-		<spring-security.version>5.6.3</spring-security.version>
-		<spring.version>5.3.19</spring.version>
+		<spring-security.version>5.7.5</spring-security.version>
+		<spring.version>5.3.23</spring.version>
 		<reactive-streams.version>1.0.2</reactive-streams.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.1.18</flying-saucer.version>
@@ -90,11 +90,11 @@
 	<distributionManagement>
 		<repository>
 			<id>skyve</id>
-			<url>http://repo.skyve.org/repository/maven-releases/</url>
+			<url>https://repo.skyve.org/repository/maven-releases/</url>
 		</repository>
 		<snapshotRepository>
 			<id>skyve</id>
-			<url>http://repo.skyve.org/repository/maven-snapshots/</url>
+			<url>https://repo.skyve.org/repository/maven-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 

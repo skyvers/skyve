@@ -1,5 +1,8 @@
 package modules.admin.Startup;
 
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
 
@@ -33,9 +36,41 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 				default:
 					break;
 			}
+		} else if (Startup.backupTypePropertyName.equals(source)) {
+			// clear the azure backup config if switching to none/internal
+			switch (bean.getBackupType()) {
+				case azure:
+					if (bean.getBackupDirectoryName() == null) {
+						bean.setBackupDirectoryName(UtilImpl.ARCHIVE_NAME);
+					}
+					break;
+				case none:
+					bean.setBackupConnectionString(null);
+					bean.setBackupDirectoryName(null);
+					break;
+				default:
+					break;
+			}
 		}
 
 		super.preRerender(source, bean, webContext);
+	}
+
+	@Override
+	public void validate(StartupExtension bean, ValidationException e) throws Exception {
+		if (bean.getBackupDirectoryName() != null) {
+			if (bean.getBackupDirectoryName().length() < 3) {
+				e.getMessages().add(new Message(Startup.backupDirectoryNamePropertyName,
+						"Backup directory name must be at least 3 characters"));
+			}
+
+			if (bean.getBackupDirectoryName().length() > 63) {
+				e.getMessages().add(new Message(Startup.backupDirectoryNamePropertyName,
+						"Backup directory name cannot be more than 63 characters"));
+			}
+		}
+
+		super.validate(bean, e);
 	}
 
 }

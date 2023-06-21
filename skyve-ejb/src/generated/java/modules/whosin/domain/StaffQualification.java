@@ -1,7 +1,8 @@
 package modules.whosin.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -82,7 +83,7 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Type::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Type(String code, String description) {
 			this.code = code;
@@ -132,14 +133,6 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Type[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Type value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

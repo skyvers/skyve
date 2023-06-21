@@ -9,13 +9,13 @@ import org.ehcache.CachePersistenceException;
 import org.ehcache.PersistentCacheManager;
 import org.ehcache.core.statistics.CacheStatistics;
 import org.ehcache.core.statistics.TierStatistics;
-import org.skyve.metadata.controller.Observer;
+import org.skyve.impl.util.SystemObserver;
 
 /**
  * Allows obtaining defined caches and management of EHCaches or JCaches.
  * @author mike
  */
-public interface Caching extends Observer {
+public interface Caching extends SystemObserver {
 	/**
 	 * Get an existing EHCache by name
 	 */

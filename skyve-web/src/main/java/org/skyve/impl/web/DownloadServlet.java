@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.security.Principal;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -50,9 +51,8 @@ public class DownloadServlet extends HttpServlet {
 				try {
 					try {
 						persistence.begin();
-						User user = WebUtil.processUserPrincipalForRequest(request,
-																			request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null,
-																			true);
+				    	Principal userPrincipal = request.getUserPrincipal();
+				    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 						if (user == null) {
 							throw new SessionEndedException(request.getLocale());
 						}

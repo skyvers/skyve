@@ -24,6 +24,7 @@ import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -91,6 +92,8 @@ public class CustomerImpl implements Customer {
 	 * Customer name.
 	 */
 	private String name;
+	
+	private long lastModifiedMillis = Long.MAX_VALUE;
 
 	private String languageTag;
 	
@@ -102,7 +105,7 @@ public class CustomerImpl implements Customer {
 	private Converter<TimeOnly> defaultTimeConverter;
 	private Converter<DateTime> defaultDateTimeConverter;
 	private Converter<Timestamp> defaultTimestampConverter;
-	private List<String> moduleNames = new ArrayList<>();
+	private LinkedHashMap<String, FormLabelLayout> moduleEntries = new LinkedHashMap<>();
 	private String homeModuleName;
 	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
 	private boolean allowModuleRoles = true;
@@ -153,6 +156,15 @@ public class CustomerImpl implements Customer {
 		this.name = name;
 	}
 	
+	@Override
+	public long getLastModifiedMillis() {
+		return lastModifiedMillis;
+	}
+
+	public void setLastModifiedMillis(long lastModifiedMillis) {
+		this.lastModifiedMillis = lastModifiedMillis;
+	}
+
 	@Override
 	public String getLanguageTag() {
 		return languageTag;
@@ -226,8 +238,8 @@ public class CustomerImpl implements Customer {
 		return defaultActions;
 	}
 
-	public List<String> getModuleNames() {
-		return moduleNames;
+	public Map<String, FormLabelLayout> getModuleEntries() {
+		return moduleEntries;
 	}
 
 	@Override
@@ -242,9 +254,10 @@ public class CustomerImpl implements Customer {
 
 	@Override
 	public List<Module> getModules() {
-		List<Module> result = new ArrayList<>(moduleNames.size());
+		List<Module> result = new ArrayList<>(moduleEntries.size());
 
-		for (String moduleName : moduleNames) {
+		// NB Keys are in insertion order
+		for (String moduleName : moduleEntries.keySet()) {
 			result.add(getModule(moduleName));
 		}
 
@@ -514,13 +527,13 @@ public class CustomerImpl implements Customer {
 	
 	public void notifyStartup() {
 		for (ObserverMetaData observer : observers.values()) {
-			observer.getObserver().startup();
+			observer.getObserver().startup(this);
 		}
 	}
 
 	public void notifyShutdown() {
 		for (ObserverMetaData observer : reversedObservers) {
-			observer.getObserver().shutdown();
+			observer.getObserver().shutdown(this);
 		}
 	}
 
@@ -688,6 +701,21 @@ public class CustomerImpl implements Customer {
 	public void interceptAfterPreDelete(PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPreDelete(bean);
+		}
+	}
+
+	public boolean interceptBeforePostDelete(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor().beforePostDelete(bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterPostDelete(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor().afterPostDelete(bean);
 		}
 	}
 
@@ -859,4 +887,20 @@ public class CustomerImpl implements Customer {
 			interceptor.getInterceptor().afterBizExportAction(document, actionName, result, webContext);
 		}
 	}
+	
+	public boolean interceptBeforePostRender(Bean bean, WebContext webContext) {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor().beforePostRender(bean, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterPostRender(Bean result, WebContext webContext) {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor().afterPostRender(result, webContext);
+		}
+	}
 }
+       

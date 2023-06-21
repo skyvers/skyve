@@ -125,7 +125,7 @@ public class TestQuery implements ServerSideAction<ReportDatasetExtension> {
 		} else if (DatasetType.classValue == bean.getDatasetType()) {
 			try {
 				@SuppressWarnings("unchecked")
-				Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Class.forName(bean.getQuery());
+				Class<BeanReportDataset> reportClass = (Class<BeanReportDataset>) Thread.currentThread().getContextClassLoader().loadClass(bean.getQuery());
 				if (reportClass != null) {
 					BeanReportDataset dataset = CDI.current().select(reportClass).get();
 					StringBuilder queryResults = new StringBuilder(5120);

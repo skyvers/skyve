@@ -3,7 +3,6 @@ package org.skyve.impl.backup;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Map;
 
 import org.skyve.impl.util.UtilImpl;
 
@@ -15,40 +14,14 @@ import org.skyve.impl.util.UtilImpl;
  * within the JSON configuration of the Skyve application.
  */
 public interface ExternalBackup {
-
-	/**
-	 * @return The backup properties defined in the JSON configuration.
-	 */
-	@SuppressWarnings("unchecked")
-	static Map<String, Object> getProperties() {
-		if (UtilImpl.CONFIGURATION != null) {
-			return (Map<String, Object>) UtilImpl.CONFIGURATION.get("backup");
-		}
-
-		return null;
-	}
-
-	/**
-	 * @return The classname of the implementation instance of this interface as defined in the JSON configuration.
-	 */
-	static String getExternalBackupClass() {
-		Map<String, Object> backupProperties = getProperties();
-		if (backupProperties != null) {
-			return (String) backupProperties.get("externalBackupClass");
-		}
-
-		return null;
-	}
-
 	/**
 	 * @return The appropriate implementation instance of this interface as defined in the JSON configuration.
 	 */
 	@SuppressWarnings("unchecked")
 	static ExternalBackup getInstance() {
-		final String externalBackupClass = getExternalBackupClass();
-		if (externalBackupClass != null) {
+		if (UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS != null) {
 			try {
-				Class<?> instanceClass = Class.forName(externalBackupClass);
+				Class<?> instanceClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS);
 				return ((Class<? extends ExternalBackup>) instanceClass).getDeclaredConstructor().newInstance();
 			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException e) {
 				throw new IllegalStateException("Failed to instantiate external backup class.", e);
@@ -62,7 +35,7 @@ public interface ExternalBackup {
 	 * @return True if there is an externalBackupClass defined in the JSON configuration, false otherwise.
 	 */
 	static boolean areExternalBackupsEnabled() {
-		return getExternalBackupClass() != null;
+		return UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS != null;
 	}
 
 	/**

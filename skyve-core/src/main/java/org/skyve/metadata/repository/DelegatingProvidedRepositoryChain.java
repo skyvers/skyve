@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.MetaDataException;
@@ -115,6 +117,17 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 	public View getView(String uxui, Customer customer, Document document, String name) {
 		for (ProvidedRepository delegate : delegates) {
 			View result = delegate.getView(uxui, customer, document, name);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+		for (ProvidedRepository delegate : delegates) {
+			ActionMetaData result = delegate.getMetaDataAction(customer, document, actionName);
 			if (result != null) {
 				return result;
 			}
@@ -314,6 +327,17 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			Bizlet<T> result = delegate.getBizlet(customer, document, runtime);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
+		for (ProvidedRepository delegate : delegates) {
+			BizletMetaData result = delegate.getMetaDataBizlet(customer, document);
 			if (result != null) {
 				return result;
 			}

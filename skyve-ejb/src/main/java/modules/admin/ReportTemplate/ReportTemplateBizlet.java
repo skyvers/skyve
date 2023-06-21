@@ -28,6 +28,7 @@ import org.skyve.web.WebContext;
 import modules.admin.JobSchedule.JobScheduleBizlet;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
+import modules.admin.User.UserBizlet;
 import modules.admin.domain.ReportTemplate;
 import modules.admin.domain.ReportTemplate.ReportType;
 
@@ -93,6 +94,15 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 	}
 
 	@Override
+	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+		if (ReportTemplate.restrictToRolePropertyName.equals(attributeName)) {
+			return UserBizlet.getCustomerRoleValues(CORE.getUser());
+		}
+
+		return super.getVariantDomainValues(attributeName);
+	}
+
+	@Override
 	public ReportTemplateExtension newInstance(ReportTemplateExtension bean) throws Exception {
 		ReportTemplateExtension template = super.newInstance(bean);
 		template.setAllHours(ALL_CODE);
@@ -133,6 +143,13 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			bean.setGenerateExisting(null);
 			bean.setGenerateModuleName(null);
 			bean.setGenerateDocumentName(null);
+		} else if (ReportTemplate.scheduledPropertyName.equals(source)) {
+			// check if this report can be scheduled
+			if (Boolean.TRUE.equals(bean.getScheduled())) {
+				if (bean.hasRequiredParameters()) {
+					throw new ValidationException(new Message("This report has required parameters and cannot be scheduled"));
+				}
+			}
 		}
 
 		super.preRerender(source, bean, webContext);

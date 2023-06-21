@@ -1,9 +1,8 @@
 package org.skyve.impl.domain.number;
 
-import javax.persistence.EntityManager;
-
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.metadata.user.User;
 
@@ -13,7 +12,7 @@ public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocume
 		AbstractHibernatePersistence pers = (AbstractHibernatePersistence) CORE.getPersistence();
 		User user = pers.getUser();
 		try {
-			pers = pers.getClass().getConstructor().newInstance();
+			pers = (AbstractHibernatePersistence) AbstractPersistence.newInstance();
 		}
 		catch (Exception e) {
 			throw new DomainException("Could not instantiate Autonomous Transaction Persistence", e);
@@ -24,12 +23,12 @@ public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocume
 			return getNextNumber(pers, prefix, moduleName, documentName, fieldName, minimumLength);
 		}
 		finally {
-			EntityManager em = pers.getEntityManager();
+			// Can't call pers.commit(true) here as it would remove the current thread's Persistence as well
 			try {
-				em.getTransaction().commit();
-			} finally {
-				// Can't call tempP.commit(true) here as it would remove the current thread's Persistence as well
-				em.close();
+				pers.commit(false);
+			}
+			finally {
+				pers.close();
 			}
 		}
 	}

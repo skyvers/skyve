@@ -14,8 +14,11 @@ import org.skyve.content.ContentManager;
 import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
 import org.skyve.impl.backup.ContentChecker;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -111,16 +114,43 @@ public class ContentGarbageCollectionJob implements Job {
 								
 								SQL query = null;
 								StringBuilder sql = new StringBuilder(128);
-								sql.append("select 1 from ").append(persistentIdentifier);
-								sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
+								// Determine if dynamic - dynamic document or dynamic attribute
+								boolean dynamic = document.isDynamic();
+								if (! dynamic) {
+									Attribute attribute = (attributeName == null) ? null : document.getPolymorphicAttribute(customer, attributeName);
+									dynamic = (attribute != null) && BindUtil.isDynamic(customer, module, document, attribute);
+								}
+
+								// If dynamic look in ADM_DynamicEntity, otherwise look in the persistent identifier
+								if (dynamic) {
+									sql.append("select 1 from ").append(RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME);
+									sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
+								}
+								else {
+									sql.append("select 1 from ").append(persistentIdentifier);
+									sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
+								}
 								
 								// check if we have a record
 								if (result.isAttachment()) { // attachment
-									sql.append(" and ").append(attributeName).append(" = :").append(attributeName);
-		
-									query = p.newSQL(sql.toString());
-									query.putParameter(Bean.DOCUMENT_ID, bizId, false);
-									query.putParameter(attributeName, contentId, false);
+									// If dynamic, look for the "attributeName":"contentId" combo in the fields JSON
+									if (dynamic) {
+										sql.append(" and fields like :").append(attributeName);
+										
+										query = p.newSQL(sql.toString());
+										query.putParameter(Bean.DOCUMENT_ID, bizId, false);
+										StringBuilder like = new StringBuilder(96);
+										like.append("%\"").append(attributeName).append("\":\"").append(contentId).append("\"%");
+										query.putParameter(attributeName, like.toString(), false);
+									}
+									else {
+										// Look in the table column for the contentId
+										sql.append(" and ").append(attributeName).append(" = :").append(attributeName);
+			
+										query = p.newSQL(sql.toString());
+										query.putParameter(Bean.DOCUMENT_ID, bizId, false);
+										query.putParameter(attributeName, contentId, false);
+									}
 								}
 								else { // bean
 									query = p.newSQL(sql.toString());
@@ -136,7 +166,7 @@ public class ContentGarbageCollectionJob implements Job {
 											UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId " + contentId + "/" + bizId);
 										}
 										else {
-											UtilImpl.LOGGER.severe("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizid/contentId " + contentId + "/" + bizId + " as it is actually referenced by Table#BizId " + bogusContentReference);
+											UtilImpl.LOGGER.severe("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizId/contentId " + contentId + "/" + bizId + " and owning document of " + moduleName + "." + documentName + " as it is actually referenced by Table#BizId " + bogusContentReference);
 										}
 									}
 									else {

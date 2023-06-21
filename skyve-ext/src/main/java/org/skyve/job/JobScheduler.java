@@ -4,13 +4,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.controller.Observer;
+import org.skyve.impl.util.SystemObserver;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
 
-public interface JobScheduler extends Observer {
+public interface JobScheduler extends SystemObserver {
 	public static final String REPORTS_GROUP = "REPORTS GROUP";
 	
 	/**

@@ -66,8 +66,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent tabPane(UIComponent component,
 								TabPane tabPane,
 								String moduleName,
-								String documentName,
-								StringBuilder stickyTabScript) {
+								String documentName) {
 		return component;
 	}
 
@@ -76,6 +75,15 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 		return component;
 	}
 
+	@Override
+	public UIComponent tabPaneScript(UIComponent component,
+										TabPane tabPane,
+										String moduleName,
+										String documentName,
+										String tabPaneComponentId) {
+		return component;
+	}
+	
 	@Override
 	public UIComponent border(UIComponent component, String title, String invisibileConditionName, Integer pixelWidth) {
 		return component;
@@ -223,7 +231,9 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 													String dataWidgetVar,
 													String gridColumnExpression,
 													String singluarDocumentAlias,
-													boolean inline) {
+													boolean inline,
+													boolean canCreate,
+													boolean canDelete) {
 		return component;
 	}
 
@@ -488,6 +498,17 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 								String toolTip,
 								String confirmationText, 
 								Action action) {
+		return component;
+	}
+
+	@Override
+	public UIComponent remove(UIComponent component,
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText, 
+								Action action,
+								boolean canDelete) {
 		return component;
 	}
 

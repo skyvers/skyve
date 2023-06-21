@@ -2,11 +2,15 @@ package org.skyve.impl.metadata.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
+import org.skyve.metadata.user.UserAccess;
 
 public class RoleImpl implements Role {
 	private static final long serialVersionUID = -2841351233211789543L;
@@ -17,6 +21,7 @@ public class RoleImpl implements Role {
 	private List<Privilege> privileges = new ArrayList<>();
 	private List<ContentRestriction> contentRestrictions = new ArrayList<>();
 	private List<ContentPermission> contentPermissions = new ArrayList<>();
+	private Map<UserAccess, Set<String>> accesses = new TreeMap<>();
 	private String documentation;
 	
 	@Override
@@ -49,6 +54,10 @@ public class RoleImpl implements Role {
 		return contentPermissions;
 	}
 
+	public Map<UserAccess, Set<String>> getAccesses() {
+		return accesses;
+	}
+	
 	@Override
 	public Module getOwningModule() {
 		return owningModule;

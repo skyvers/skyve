@@ -112,7 +112,7 @@ public interface User extends NamedMetaData {
 	
 	/**
 	 * Determine if we can read the document bean given the document scope etc. 
-	 * NB. Cannot select the bean from bizhub data store in this method, coz it may be transient.
+	 * NB. Cannot select the bean from the data store in this method, coz it may be transient.
 	 * 
 	 * @param beanBizId
 	 * @param beanBizModule

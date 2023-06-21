@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -22,6 +23,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
@@ -47,6 +49,8 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("CompleteAction - EXECUTE complete " + query + " for binding " + binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean bean = ActionUtil.getTargetBeanForView(facesView);
+		final String formModuleName = bean.getBizModule();
+		final String formDocumentName = bean.getBizDocument();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Document document = null;
@@ -71,13 +75,17 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 				attributeName = binding.substring(lastDotIndex + 1);
 				Module module = customer.getModule(bean.getBizModule());
 				document = module.getDocument(customer, bean.getBizDocument());
-				attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, attributeName);
+				document = target.getDocument();
+				attribute = target.getAttribute(); // could be null for an implicit attribute
 			}
 		}
 		else {
 			Module module = customer.getModule(bean.getBizModule());
 			document = module.getDocument(customer, bean.getBizDocument());
-			attribute = document.getAttribute(attributeName); // could be null for an implicit attribute
+			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, attributeName);
+			document = target.getDocument();
+			attribute = target.getAttribute(); // could be null for an implicit attribute
 		}
 
 		if ((attribute == null) && (! BindUtil.isImplicit(attributeName))) {
@@ -87,14 +95,23 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 		List<String> result = Collections.emptyList();
 
 		if (complete == CompleteType.previous) {
+			final String userName = user.getName();
+			if (! user.canAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName())) {
+				UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + formModuleName + '.' + formDocumentName + " for " + binding);
+				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+				throw new AccessException("the previous data", userName);
+			}
+			
 	    	if (! user.canReadDocument(document)) {
-				throw new SecurityException("read this data", user.getName());
+				throw new SecurityException("read this data", userName);
 			}
 
 			if (document.isPersistable()) { // persistent document
 				if ((attribute == null) || // implicit attribute or
 						attribute.isPersistent()) { // explicit and persistent attribute
-					DocumentQuery q = persistence.newDocumentQuery(document.getOwningModuleName(), document.getName());
+					final String moduleName = document.getOwningModuleName();
+					final String documentName = document.getName();
+					DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 					q.addBoundProjection(attributeName, attributeName);
 					q.setDistinct(true);
 					if (query != null) {

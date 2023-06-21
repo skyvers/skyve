@@ -109,10 +109,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent tabPane(UIComponent component,
 											TabPane tabPane,
 											String moduleName,
-											String documentName,
-											StringBuilder stickyTabScript);
+											String documentName);
 	
 	public abstract UIComponent tab(UIComponent component, String title, Tab tab);
+	
+	public abstract UIComponent tabPaneScript(UIComponent component,
+												TabPane tabPane,
+												String moduleName,
+												String documentName,
+												String tabPaneComponentId);
 	
 	public abstract UIComponent border(UIComponent component,
 										String title,
@@ -223,7 +228,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															String dataWidgetVar,
 															String gridColumnExpression,
 															String singluarDocumentAlias,
-															boolean inline);
+															boolean inline,
+															boolean canCreate,
+															boolean canDelete);
 	
 	public abstract UIComponent listGrid(UIComponent component,
 											String moduleName,
@@ -517,6 +524,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										String toolTip,
 										String confirmationText,
 										Action action);
+
+	public abstract UIComponent remove(UIComponent component,
+										String label,
+										String iconStyleClass,
+										String toolTip,
+										String confirmationText,
+										Action action,
+										boolean canDelete);
 
 	public abstract UIComponent action(UIComponent component, 
 										String dataWidgetBinding, 

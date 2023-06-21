@@ -78,7 +78,7 @@ public class SuperUser extends UserImpl {
 	@Override
 	public Set<String> getAccessibleModuleNames() {
 		try {
-			return new TreeSet<>(((CustomerImpl) getCustomer()).getModuleNames());//Repository.get().getAllVanillaModuleNames());
+			return new TreeSet<>(((CustomerImpl) getCustomer()).getModuleEntries().keySet());//Repository.get().getAllVanillaModuleNames());
 		}
 		catch (MetaDataException e) {
 			e.printStackTrace();

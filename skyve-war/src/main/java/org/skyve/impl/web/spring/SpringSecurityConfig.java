@@ -7,13 +7,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.DefaultSecurityFilterChain;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 //import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
@@ -26,14 +28,18 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 @Configuration
 @Import(SkyveSpringSecurityConfig.class)
 @EnableWebSecurity
-public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+public class SpringSecurityConfig {
 	@Autowired
 	private SkyveSpringSecurity skyve;
 	
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.authorizeRequests()
+				// Permit H2 servlet if enabled
+				.antMatchers("/h2/**").permitAll()
+				// Enable access to all rest endpoints as these will have Servlet Filters to secure.
+				.antMatchers("/rest/**").permitAll()
 				// Permit the login servlet resource
 				.antMatchers(HttpMethod.GET, "/login", "/loggedOut").permitAll()
 				// Permit the spring login mechanism and the SC JS login mechanism
@@ -44,6 +50,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/home.jsp").permitAll()
 				// Permit device.jsp as it forwards to home.jsp
 				.antMatchers("/device.jsp").permitAll()
+				// Permit the health servlet resource
+				.antMatchers("/health").permitAll()
 				// Secure the loggedIn.jsp so that redirect occurs after login
 				.antMatchers("/loggedIn.jsp").authenticated()
 				// Secure the system JSPs and HTMLs
@@ -62,6 +70,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/image").authenticated()
 				// Secure customer resource servlet
 				.antMatchers("/resource", "/content").authenticated()
+				// Secure meta data servlet
+				.antMatchers("/meta").authenticated()
 				// Secure SC edit view servlet
 				.antMatchers("/smartedit").authenticated()
 				// Secure SC list view servlet
@@ -98,9 +108,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionManagement()
 				.sessionFixation().changeSessionId()
 				.and()
+			
 			.rememberMe()
 				.key("remember")
-				.tokenValiditySeconds(1209600)
+				.tokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60)
 				.rememberMeParameter("remember")
 				.rememberMeCookieName("remember")
 				.tokenRepository(tokenRepository())
@@ -111,7 +122,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
-				.successHandler(new SkyveAuthenticationSuccessHandler())
+				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
 				.and()
 			.logout()
 				.logoutSuccessUrl(Util.getLoggedOutUrl())
@@ -124,21 +135,33 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.frameOptions().disable()
 				.contentTypeOptions().disable();
 
-			if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) ||
-					(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null) ||
-					(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)) {
-				http.oauth2Login().loginPage(Util.getLoginUrl());
-			}
-			
-//			http.saml2Login()
-//					.loginPage(Util.getLoginUrl())
-//					.defaultSuccessUrl(Util.getHomeUrl());
+		TwoFactorAuthPushEmailFilter tfaEmail = new TwoFactorAuthPushEmailFilter(userDetailsManager());
+		http.addFilterBefore(tfaEmail, UsernamePasswordAuthenticationFilter.class);
+
+		if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null)
+				|| (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null)
+				|| (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)
+				|| (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null)) {
+			http.oauth2Login()
+					.defaultSuccessUrl(Util.getHomeUrl())
+					.loginPage(Util.getLoginUrl())
+					.failureUrl(Util.getLoginUrl() + "?error")
+					.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()));
+		}
+
+//		http.saml2Login()
+//				.defaultSuccessUrl(Util.getHomeUrl())
+//				.loginPage(Util.getLoginUrl())
+//				.failureUrl(Util.getLoginUrl() + "?error")
+//				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()));
+
+		DefaultSecurityFilterChain result = http.build();
+		// Note AuthenticationManager is not available as a shared object until after build()
+		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+		tfaEmail.setAuthenticationManager(authenticationManager);
+		return result;
 	}
 
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/h2/**", "/rest/**");
-	}
 /*
 	@Bean
 	public RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
@@ -151,6 +174,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 		return new InMemoryRelyingPartyRegistrationRepository(relyingPartyRegistration);
 	}
 */
+    
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return skyve.passwordEncoder();
@@ -160,17 +184,17 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	public PersistentTokenRepository tokenRepository() throws Exception {
 		return skyve.tokenRepository();
 	}
-
+	
 	@Bean
-	@Override
-	public UserDetailsService userDetailsService() {
-		return skyve.jdbcUserDetailsService();
+	public UserDetailsManager userDetailsManager() {
+		return skyve.jdbcUserDetailsManager();
 	}
 	
  	@Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();
     }
+
 }
 /*
     <!-- WAFFLE Configuration -->

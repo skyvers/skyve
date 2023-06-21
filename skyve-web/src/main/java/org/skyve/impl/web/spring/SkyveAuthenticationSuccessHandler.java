@@ -6,9 +6,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -23,6 +25,12 @@ import org.springframework.security.web.savedrequest.SavedRequest;
  * @author mike
  */
 public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+	private UserDetailsManager userDetailsManager;
+	
+	public SkyveAuthenticationSuccessHandler(UserDetailsManager userDetailsManager) {
+		this.userDetailsManager = userDetailsManager;
+	}
+	
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request,
 											HttpServletResponse response,
@@ -35,7 +43,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			if (redirectUrl != null) {
 				UtilImpl.LOGGER.info("Redirect after login requested to " + redirectUrl);
 				// its http behind proxy server terminating TLS or some other edge case
-				if (Util.isSecureUrl() && redirectUrl.startsWith("http://")) { // could https:// or ws://
+				if (Util.isSecureUrl() && redirectUrl.startsWith("http://")) { // could be https:// or ws:// or wss://
 					if (savedRequest instanceof DefaultSavedRequest) {
 						// Remake the url from the skyve server URL, the request URI and any query parameters
 						DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) savedRequest;
@@ -69,9 +77,29 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			redirectUrl = Util.getHomeUrl();
 		}
 		
+		if (userDetailsManager != null) {
+			Object principal = authentication.getPrincipal();
+			if (principal instanceof TwoFactorAuthUser) {
+				TwoFactorAuthUser tfaUser = (TwoFactorAuthUser) principal;
+				String customerName = tfaUser.getCustomer();
+				if (customerName != null) {
+					if (TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa(customerName)) {
+						cleanupTFACodes(tfaUser);
+					}
+				}
+			}
+		}
+		
 		UtilImpl.LOGGER.info("Redirected to " + redirectUrl);
 		requestCache.removeRequest(request, response);
 		clearAuthenticationAttributes(request);
 		getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+	}
+	
+	private void cleanupTFACodes(TwoFactorAuthUser principal) {
+		principal.setTfaCodeGeneratedTimestamp(null);
+		principal.setTfaCode(null);
+		principal.setTfaToken(null);
+		userDetailsManager.updateUser(principal);
 	}
 }

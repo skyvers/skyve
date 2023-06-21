@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -34,31 +35,33 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> appendedOrderings = new LinkedHashMap<>();
 	private StringBuilder groupClause = new StringBuilder(32);
+	// Used to change the query built slightly for each RDBMS
+	private RDBMS rdbms;
 
-	public AbstractDocumentQuery(String moduleName, String documentName) {
+	protected AbstractDocumentQuery(String moduleName, String documentName, RDBMS rdbms) {
 		AbstractPersistence persistence = AbstractPersistence.get();
-		Customer customer = AbstractPersistence.get().getUser().getCustomer();
+		Customer customer = persistence.getUser().getCustomer();
 		Module module = customer.getModule(moduleName);
 		drivingDocument = module.getDocument(customer, documentName);
-		postConstruct(persistence, null);
+		postConstruct(persistence, rdbms, null);
 	}
 
-	public AbstractDocumentQuery(Document document) {
+	protected AbstractDocumentQuery(Document document, RDBMS rdbms) {
 		drivingDocument = document;
-		postConstruct(AbstractPersistence.get(), null);
+		postConstruct(AbstractPersistence.get(), rdbms, null);
 	}
 
-	public AbstractDocumentQuery(Document document, String fromClause, String filterClause) {
+	protected AbstractDocumentQuery(Document document, RDBMS rdbms, String fromClause, String filterClause) {
 		drivingDocument = document;
-		postConstruct(AbstractPersistence.get(), filterClause);
+		postConstruct(AbstractPersistence.get(), rdbms, filterClause);
 		if (fromClause != null) {
 			this.fromClause.setLength(0);
 			this.fromClause.append(new AbstractBizQL(fromClause).toQueryString(false));
 		}
 	}
 
-	public AbstractDocumentQuery(Bean queryByExampleBean) throws Exception {
-		this(queryByExampleBean.getBizModule(), queryByExampleBean.getBizDocument());
+	protected AbstractDocumentQuery(Bean queryByExampleBean, RDBMS rdbms) throws Exception {
+		this(queryByExampleBean.getBizModule(), queryByExampleBean.getBizDocument(), rdbms);
 
 		for (Attribute attribute : drivingDocument.getAttributes()) {
 			if (attribute.isPersistent() && (! (attribute instanceof Relation))) {
@@ -83,12 +86,13 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		}
 	}
 	
-	private void postConstruct(AbstractPersistence persistence, String filterClause) {
+	private void postConstruct(AbstractPersistence persistence, @SuppressWarnings("hiding") RDBMS rdbms, String filterClause) {
 		drivingModuleName = drivingDocument.getOwningModuleName();
 		drivingDocumentName = drivingDocument.getName();
-		filter = new org.skyve.impl.persistence.DocumentFilterImpl(this, filterClause);
+		filter = new DocumentFilterImpl(this, rdbms, filterClause);
 		fromClause.append(persistence.getDocumentEntityName(drivingModuleName, drivingDocumentName));
 		fromClause.append(" as ").append(THIS_ALIAS);
+		this.rdbms = rdbms;
 	}
 
 	@Override
@@ -108,7 +112,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	
 	@Override
 	public DocumentFilter newDocumentFilter() {
-		return new org.skyve.impl.persistence.DocumentFilterImpl(this);
+		return new DocumentFilterImpl(this, rdbms);
 	}
 
 	@Override

@@ -32,12 +32,16 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	@Override
 	public Observer getObserver() {
 		if (observer == null) {
-			try {
-				Class<?> observerClass = Thread.currentThread().getContextClassLoader().loadClass(className);
-				observer = (Observer) observerClass.getDeclaredConstructor().newInstance();
-			}
-			catch (Exception e) {
-				throw new MetaDataException("Could not instantiate observer class " + className, e);
+			synchronized (this) {
+				if (observer == null) {
+					try {
+						Class<?> observerClass = Thread.currentThread().getContextClassLoader().loadClass(className);
+						observer = (Observer) observerClass.getDeclaredConstructor().newInstance();
+					}
+					catch (Exception e) {
+						throw new MetaDataException("Could not instantiate observer class " + className, e);
+					}
+				}
 			}
 		}
 		

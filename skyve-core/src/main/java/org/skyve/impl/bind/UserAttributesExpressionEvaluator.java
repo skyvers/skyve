@@ -1,5 +1,8 @@
 package org.skyve.impl.bind;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
@@ -27,5 +30,18 @@ public class UserAttributesExpressionEvaluator extends ExpressionEvaluator {
 											Module module,
 											Document document) {
 		return null; // any key is valid
+	}
+	
+	@Override
+	public List<String> completeWithoutPrefix(String fragment,
+												Customer customer, 
+												Module module,
+												Document document) {
+		return Collections.emptyList(); // any key is valid
+	}
+	
+	@Override
+	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+		// nothing to do here as user uses keys
 	}
 }

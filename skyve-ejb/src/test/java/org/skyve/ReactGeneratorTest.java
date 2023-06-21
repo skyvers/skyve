@@ -2,7 +2,7 @@ package org.skyve;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.skyve.impl.generate.pwa.react.ReactGenerator;
+import org.skyve.impl.generate.client.react.ReactGenerator;
 
 import util.AbstractH2Test;
 

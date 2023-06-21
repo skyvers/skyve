@@ -175,7 +175,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 		else {
 			try {
-				AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.SKYVE_PERSISTENCE_CLASS);
+				AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalStateException("Could not find SKYVE_PERSISTENCE_CLASS " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
@@ -187,7 +187,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 		else {
 			try {
-				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Class.forName(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
+				AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = (Class<? extends DynamicPersistence>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS);
 			}
 			catch (ClassNotFoundException e) {
 				throw new IllegalStateException("Could not find SKYVE_DYNAMIC_PERSISTENCE_CLASS " + UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS, e);
@@ -384,7 +384,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				dialect = DIALECTS.get(dialectClassName);
 				if (dialect == null) {
 					try {
-						Class<?> dialectClass = Class.forName(dialectClassName);
+						Class<?> dialectClass = Thread.currentThread().getContextClassLoader().loadClass(dialectClassName);
 						dialect = (SkyveDialect) dialectClass.getDeclaredConstructor().newInstance();
 						DIALECTS.put(dialectClassName, dialect);
 					}
@@ -506,12 +506,19 @@ t.printStackTrace();
 
 	@Override
 	public final void begin() {
-		EntityTransaction et = em.getTransaction();
-		if (! et.isActive()) {
-			// FROM THE HIBERNATE_REFERENCE DOCS Page 190
-            // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-            // These methods are deprecated, as beginning and ending a transaction has the same effect.
-			et.begin();
+		try {
+			EntityTransaction et = em.getTransaction();
+			if (! et.isActive()) {
+				// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+	            // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+	            // These methods are deprecated, as beginning and ending a transaction has the same effect.
+				et.begin();
+			}
+		}
+		finally {
+			if (dynamicPersistence != null) {
+				dynamicPersistence.begin();
+			}
 		}
 	}
 
@@ -647,7 +654,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void setRollbackOnly() {
+	public final void setRollbackOnly() {
 		if (em != null) {
 			EntityTransaction et = em.getTransaction();
 			if ((et != null) && et.isActive()) {
@@ -660,13 +667,24 @@ t.printStackTrace();
 	// So we have to ensure its robust as all fuck
 	@Override
 	public final void rollback() {
-		if (em != null) {
-			EntityTransaction et = em.getTransaction();
-			if ((et != null) && et.isActive() && (! et.getRollbackOnly())) {
-                // FROM THE HIBERNATE_REFERENCE DOCS Page 190
-                // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-                // These methods are deprecated, as beginning and ending a transaction has the same effect.
-				et.rollback();
+		boolean rollbackOnly = false;
+		try {
+			if (em != null) {
+				EntityTransaction et = em.getTransaction();
+				if ((et != null) && et.isActive()) {
+					rollbackOnly = et.getRollbackOnly();
+					if (! rollbackOnly) {
+						// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+		                // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+		                // These methods are deprecated, as beginning and ending a transaction has the same effect.
+						et.rollback();
+					}
+				}
+			}
+		}
+		finally {
+			if ((! rollbackOnly) && (dynamicPersistence != null)) {
+				dynamicPersistence.rollback();
 			}
 		}
 	}
@@ -701,25 +719,48 @@ t.printStackTrace();
 		}
 		finally {
 			try {
-				closeContent();
-			}
-			catch (Exception e) {
-				UtilImpl.LOGGER.warning("Cannot commit content manager - " + e.getLocalizedMessage());
-				e.printStackTrace();
+				if (dynamicPersistence != null) {
+					if (rollbackOnly) {
+						dynamicPersistence.rollback();
+					}
+					else {
+						dynamicPersistence.commit();
+					}
+				}
 			}
 			finally {
-				if (close) {
-					if (em != null) { // can be null after a relogin
-						em.close();
+				try {
+					closeContent();
+				}
+				catch (Exception e) {
+					UtilImpl.LOGGER.warning("Cannot commit content manager - " + e.getLocalizedMessage());
+					e.printStackTrace();
+				}
+				finally {
+					if (close) {
+						close();
+						threadLocalPersistence.remove();
 					}
-					em = null;
-					session = null;
-					threadLocalPersistence.remove();
 				}
 			}
 		}
 	}
 
+	public void close() {
+		try {
+			if (em != null) { // can be null after a relogin
+				em.close();
+			}
+			em = null;
+			session = null;
+		}
+		finally {
+			if (dynamicPersistence != null) {
+				dynamicPersistence.close();
+			}
+		}
+	}
+	
 	@Override
 	public void evictAllCached() {
 		session.clear();
@@ -1762,6 +1803,18 @@ if (document.isDynamic()) return;
 				String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
 				session.delete(entityName, bean);
 				em.flush();
+			
+				// Call Bizlet postDelete()
+				vetoed = internalCustomer.interceptBeforePostDelete(bean);
+				if (! vetoed) {
+					Bizlet<Bean> bizlet = document.getBizlet(internalCustomer);
+					if (bizlet != null) {
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+						bizlet.postDelete(bean);
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Exiting " + bizlet.getClass().getName() + ".postDelete");
+					}
+					internalCustomer.interceptAfterPostDelete(bean);
+				}
 			}
 			finally {
 				if (beansToDelete != null) { // delete context was pushed
@@ -2361,9 +2414,47 @@ if (document.isDynamic()) return;
 	}
 
 	@Override
-	public void postRemove(PersistentBean loadedBean)
+	public void postRemove(PersistentBean bean)
 	throws Exception {
-		removeBeanContent(loadedBean);
+		// check we are not calling postRemove from delete operation
+		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
+		if (! deleteContext.isEmpty()) { // called within a Persistence.delete() operation 
+			// Don't continue if we've already called preDelete on this bean 
+			// as it was the argument in a Persistence.delete() call
+			Bean beanToDelete = beansToDelete.get("").stream().findFirst().get();
+			if (bean.equals(beanToDelete)) {
+				// remove content but don't call Bizlet.postDelete()
+				removeBeanContent(bean);
+				return;
+			}
+		}
+
+		// call Bizlet.postDelete() and then remove content
+		final Customer customer = user.getCustomer();
+		try {
+			final CustomerImpl internalCustomer = (CustomerImpl) customer;
+			Module module = internalCustomer.getModule(bean.getBizModule());
+			Document document = module.getDocument(customer, bean.getBizDocument());
+			boolean vetoed = internalCustomer.interceptBeforePreDelete(bean);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				if (bizlet != null) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Entering " + bizlet.getClass().getName() + ".postDelete: " + bean);
+					bizlet.postDelete(bean);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postDelete", "Exiting " + bizlet.getClass().getName() + ".postDelete");
+				}
+				internalCustomer.interceptAfterPreDelete(bean);
+			}
+		}
+		catch (ValidationException e) {
+			for (Message message : e.getMessages()) {
+				ValidationUtil.processMessageBindings(customer, message, bean, bean);
+			}
+			throw e;
+		}
+
+		// remove content
+		removeBeanContent(bean);
 	}
 	
 	public final Connection getConnection() {

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,8 +25,8 @@ import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
@@ -36,6 +35,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
@@ -43,6 +43,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.SortParameterImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -55,7 +56,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -111,11 +114,11 @@ public class SmartClientListServlet extends HttpServlet {
 		// If this is a mutating request, we'll definitely need a new CSRF Token
 		if (Operation.fetch.toString().equals(operationType)) {
 			if (newCsrfToken == null) {
-				newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+				newCsrfToken = StateUtil.createToken();
 			}
 		}
 		else {
-			newCsrfToken = Integer.valueOf(new SecureRandom().nextInt());
+			newCsrfToken = StateUtil.createToken();
 		}
     	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 
@@ -169,12 +172,23 @@ public class SmartClientListServlet extends HttpServlet {
 			        	// >3 - module_query_attribute (picklist), module_document_attribute (default query picklist)
 			        	// '__' - module_document__model
 			        	String[] tokens = dataSource.split("_");
-						module = customer.getModule(tokens[0]);
+						String moduleName = tokens[0];
+			        	module = customer.getModule(moduleName);
 						
 						// model type of request
+						UxUi uxui = UserAgent.getUxUi(request);
 						if (dataSource.contains("__")) {
-							drivingDocument = module.getDocument(customer, tokens[1]);
-							model = drivingDocument.getListModel(customer, tokens[3], true);
+							final String documentName = tokens[1];
+							final String modelName = tokens[3];
+							if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
+								final String userName = user.getName();
+								UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+								UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+								throw new AccessException("this data", userName);
+							}
+							
+							drivingDocument = module.getDocument(customer, documentName);
+							model = drivingDocument.getListModel(customer, modelName, true);
 							if (model == null) {
 								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
 							}
@@ -183,11 +197,25 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 						// query type of request
 						else {
-							String documentOrQueryName = tokens[1];
+							final String documentOrQueryName = tokens[1];
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
+								if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName())) {
+									final String userName = user.getName();
+									UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
+									UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+									throw new AccessException("this data", userName);
+								}
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+							}
+							else {
+								if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName())) {
+									final String userName = user.getName();
+									UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
+									UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+									throw new AccessException("this data", userName);
+								}
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);

@@ -3,18 +3,23 @@ package org.skyve.impl.metadata.repository;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SkyveException;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
-import org.skyve.impl.metadata.repository.router.RouterMerger;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -166,12 +171,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 						if (documentFileName.equals(ACTIONS_NAME) && documentFile.isDirectory()) {
 							for (File actionFile : documentFile.listFiles()) {
 								String actionFileName = actionFile.getName();
-								if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java")) {
+								if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java") || actionFileName.endsWith(".xml")) {
 									String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
 
 									sb.setLength(0);
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(ACTIONS_NAMESPACE).append(actionName);
+									if (actionFileName.endsWith(".xml")) {
+										sb.append(META_DATA_SUFFIX);
+									}
 									String actionLocation = sb.toString();
 									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
 									addKey(actionLocation);
@@ -256,9 +264,18 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 						else if (documentFileName.equals(moduleFileName + "Bizlet.class")) {
 							sb.setLength(0);
 							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append("Bizlet");
+							sb.append(moduleFileName).append(BIZLET_SUFFIX);
 							String bizletLocation = sb.toString();
 							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+							addKey(bizletLocation);
+						}
+						// found the bizlet metadata file
+						else if (documentFileName.equals(moduleFileName + "Bizlet.xml")) {
+							sb.setLength(0);
+							sb.append(key).append(moduleFileName).append('/');
+							sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+							String bizletLocation = sb.toString();
+							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
 							addKey(bizletLocation);
 						}
 						// found the extension class file
@@ -296,17 +313,20 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		Router result = null;
 
 		try {
-			final List<Router> routers = new ArrayList<>();
-			final Router globalRouter = getGlobalRouter();
-			if (globalRouter != null) {
-				routers.add(globalRouter);
+			final Map<String, Long> routersFileInfo = routersFileInfo(true, true);
+			if (routersFileInfo.isEmpty()) {
+				throw new MetaDataException("No routers found.");
 			}
-			routers.addAll(getModuleRouters());
-			if (routers.isEmpty()) {
-				throw new RuntimeException("No routers found.");
+			for (String path : routersFileInfo.keySet()) {
+				Router router = XMLMetaData.unmarshalRouterFile(path);
+				router = router.convert(ROUTER_NAME, getDelegator());
+				if (result == null) {
+					result = router;
+				}
+				else {
+					result.merge(router);
+				}
 			}
-
-			result = new RouterMerger().mergeRouters(routers);
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);
@@ -315,46 +335,89 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
-	@Override
-	public Router getGlobalRouter() {
-		StringBuilder sb = new StringBuilder(256);
-		sb.append(absolutePath);
-		sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-		final Router globalRouter = XMLMetaData.unmarshalRouterFile(sb.toString());
-		return globalRouter.convert(ROUTER_NAME, getDelegator());
-	}
-
 	/**
-	 * @return A list of self-contained module Routers.
+	 * Return the max(lastModified) from all the router files
 	 */
 	@Override
-	public List<Router> getModuleRouters() {
-		final List<Router> result = new ArrayList<>();
-
-		// Add customer overrides
-		final StringBuilder sb = new StringBuilder(256);
-		for (String customerName : getAllCustomerNames()) {
-			final Customer customer = getCustomer(customerName);
-			for (Module module : customer.getModules()) {
+	public long routerLastModifiedMillis() {
+		final Map<String, Long> routersFileInfo = routersFileInfo(true, true);
+		if (routersFileInfo.isEmpty()) {
+			return Long.MIN_VALUE;
+		}
+ 		return routersFileInfo.values().stream().max(Comparator.naturalOrder()).get().longValue();
+	}
+	
+	private Map<String, Long> routersFileInfo(boolean includeGlobal, boolean includeModule) {
+		Map<String, Long> result = new LinkedHashMap<>(); // keep the global one first
+		StringBuilder sb = new StringBuilder(256);
+		String s = null;
+		File f = null;
+		
+		if (includeGlobal) {
+			sb.append(absolutePath);
+			sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
+			s = sb.toString();
+			f = new File(s);
+			if (f.exists()) {
+				result.put(s, Long.valueOf(f.lastModified()));
+			}
+			sb.setLength(0);
+		}
+		
+		if (includeModule) {
+			// Add customer overrides
+			for (String customerName : getAllCustomerNames()) {
+				final Customer customer = getCustomer(customerName);
+				for (Module module : customer.getModules()) {
+					sb.append(absolutePath);
+					sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
+					s = sb.toString();
+					f = new File(s);
+					if (f.exists()) {
+						result.put(s, Long.valueOf(f.lastModified()));
+					}
+					sb.setLength(0);
+				}
+			}
+			
+			// Add vanilla modules
+			for (String moduleName : getAllVanillaModuleNames()) {
 				sb.append(absolutePath);
-				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
-				if (new File(sb.toString()).exists()) {
-					final Router moduleRouter = XMLMetaData.unmarshalRouterFile(sb.toString());
-					result.add(moduleRouter.convert(ROUTER_NAME, getDelegator()));
+				sb.append(MODULES_NAMESPACE).append(moduleName).append("/").append(ROUTER_NAME).append(".xml");
+				s = sb.toString();
+				f = new File(s);
+				if (f.exists()) {
+					result.put(s, Long.valueOf(f.lastModified()));
 				}
 				sb.setLength(0);
 			}
 		}
 		
-		// Add vanilla modules
-		for (String moduleName : getAllVanillaModuleNames()) {
-			sb.append(absolutePath);
-			sb.append(MODULES_NAMESPACE).append(moduleName).append("/").append(ROUTER_NAME).append(".xml");
-			if (new File(sb.toString()).exists()) {
-				final Router moduleRouter = XMLMetaData.unmarshalRouterFile(sb.toString());
-				result.add(moduleRouter.convert(ROUTER_NAME, getDelegator()));
-			}
-			sb.setLength(0);
+		return result;
+	}
+	
+	@Override
+	public Router getGlobalRouter() {
+		final Map<String, Long> routersFileInfo = routersFileInfo(true, false);
+ 		Optional<String> path = routersFileInfo.keySet().stream().findFirst();
+ 		if (path.isPresent()) {
+			Router router = XMLMetaData.unmarshalRouterFile(path.get());
+			return router.convert(ROUTER_NAME, getDelegator());
+ 		}
+ 		return null;
+	}
+	
+	/**
+	 * @return A list of self-contained module Routers.
+	 */
+	@Override
+	public List<Router> getModuleRouters() {
+		final Map<String, Long> routersFileInfo = routersFileInfo(false, true);
+		final List<Router> result = new ArrayList<>(routersFileInfo.size());
+		for (String path : routersFileInfo.keySet()) {
+			Router router = XMLMetaData.unmarshalRouterFile(path);
+			router = router.convert(ROUTER_NAME, getDelegator());
+			result.add(router);
 		}
 		
 		return result;
@@ -398,18 +461,23 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
+	private String customerPath(String customerName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		result.append(CUSTOMERS_NAMESPACE);
+		result.append(customerName).append('/').append(customerName).append(".xml");
+		return result.toString();
+	}
+	
 	@Override
 	public CustomerMetaData loadCustomer(String customerName) {
 		CustomerMetaData result = null;
 		
 		try {
-			StringBuilder sb = new StringBuilder(256);
-			sb.append(absolutePath);
-			sb.append(CUSTOMERS_NAMESPACE);
-			sb.append(customerName).append('/').append(customerName).append(".xml");
-			result = XMLMetaData.unmarshalCustomerFile(sb.toString());
+			String path = customerPath(customerName);
+			result = XMLMetaData.unmarshalCustomerFile(path);
 			if (! customerName.equals(result.getName())) {
-				throw new MetaDataException("Customer is defined with file name of " + sb.toString() + 
+				throw new MetaDataException("Customer is defined with file name of " + path + 
 												" but the name attribute is " + result.getName());
 			}
 		}
@@ -424,20 +492,35 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 	
 	@Override
+	public long customerLastModifiedMillis(String customerName) {
+		String path = customerPath(customerName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
+	}
+	
+	private String modulePath(String customerName, String moduleName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		if (customerName != null) {
+			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		result.append(MODULES_NAMESPACE);
+		result.append(moduleName).append('/').append(moduleName).append(".xml");
+		return result.toString();
+	}
+	
+	@Override
 	public ModuleMetaData loadModule(String customerName, String moduleName) {
 		ModuleMetaData result = null;
 		
 		try {
-			StringBuilder sb = new StringBuilder(256);
-			sb.append(absolutePath);
-			if (customerName != null) {
-				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
-			}
-			sb.append(MODULES_NAMESPACE);
-			sb.append(moduleName).append('/').append(moduleName).append(".xml");
-			result = XMLMetaData.unmarshalModuleFile(sb.toString());
+			String path = modulePath(customerName, moduleName);
+			result = XMLMetaData.unmarshalModuleFile(path);
 			if (! moduleName.equals(result.getName())) {
-				throw new MetaDataException("Module is defined with file name of " + sb.toString() + 
+				throw new MetaDataException("Module is defined with file name of " + path + 
 												" but the name attribute is " + result.getName());
 			}
 		}
@@ -452,22 +535,36 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	@Override
+	public long moduleLastModifiedMillis(String customerName, String moduleName) {
+		String path = modulePath(customerName, moduleName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
+	}
+	
+	private String documentPath(String customerName, String moduleName, String documentName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		if (customerName != null) {
+			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		result.append(MODULES_NAMESPACE);
+		result.append(moduleName).append('/');
+		result.append(documentName).append('/').append(documentName).append(".xml");
+		return result.toString();
+	}
+	
+	@Override
 	public DocumentMetaData loadDocument(String customerName, String moduleName, String documentName) {
 		DocumentMetaData result = null;
 		
 		try {
-			StringBuilder sb = new StringBuilder(256);
-			sb.setLength(0);
-			sb.append(absolutePath);
-			if (customerName != null) {
-				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
-			}
-			sb.append(MODULES_NAMESPACE);
-			sb.append(moduleName).append('/');
-			sb.append(documentName).append('/').append(documentName).append(".xml");
-			result = XMLMetaData.unmarshalDocumentFile(sb.toString());
+			String path = documentPath(customerName, moduleName, documentName);
+			result = XMLMetaData.unmarshalDocumentFile(path);
 			if (! documentName.equals(result.getName())) {
-				throw new MetaDataException("Document is defined with file name of " + sb.toString() + 
+				throw new MetaDataException("Document is defined with file name of " + path + 
 												" but the name attribute is " + result.getName());
 			}
 		} // try (populate Metadata)
@@ -482,26 +579,40 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	@Override
+	public long documentLastModifiedMillis(String customerName, String moduleName, String documentName) {
+		String path = documentPath(customerName, moduleName, documentName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
+	}
+
+	private String viewPath(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		if (customerName != null) {
+			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		result.append(MODULES_NAMESPACE);
+		result.append(moduleName).append('/');
+		result.append(documentName).append('/').append(VIEWS_NAMESPACE);
+		if (uxui != null) {
+			result.append(uxui).append('/');
+		}
+		result.append(viewName).append(".xml");
+		return result.toString();
+	}
+	
+	@Override
 	public ViewMetaData loadView(String customerName, String moduleName, String documentName, String uxui, String viewName) {
 		ViewMetaData result = null;
 		
 		try {
-			StringBuilder sb = new StringBuilder(256);
-			sb.setLength(0);
-			sb.append(absolutePath);
-			if (customerName != null) {
-				sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
-			}
-			sb.append(MODULES_NAMESPACE);
-			sb.append(moduleName).append('/');
-			sb.append(documentName).append('/').append(VIEWS_NAMESPACE);
-			if (uxui != null) {
-				sb.append(uxui).append('/');
-			}
-			sb.append(viewName).append(".xml");
-			result = XMLMetaData.unmarshalViewFile(sb.toString());
+			String path = viewPath(customerName, moduleName, documentName, uxui, viewName);
+			result = XMLMetaData.unmarshalViewFile(path);
 			if (! viewName.equals(result.getName())) {
-				throw new MetaDataException("View is defined with file name of " + sb.toString() + 
+				throw new MetaDataException("View is defined with file name of " + path + 
 												" but the name attribute is " + result.getName());
 			}
 		} // try (populate Metadata)
@@ -513,6 +624,61 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 		
 		return result;
+	}
+
+	@Override
+	public long viewLastModifiedMillis(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+		String path = viewPath(customerName, moduleName, documentName, uxui, viewName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
+	}
+	
+	private String actionPath(String customerName, String moduleName, String documentName, String actionName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		if (customerName != null) {
+			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		result.append(MODULES_NAMESPACE);
+		result.append(moduleName).append('/');
+		result.append(documentName).append('/').append(ACTIONS_NAMESPACE);
+		result.append(actionName).append(".xml");
+		return result.toString();
+	}
+	
+	@Override
+	public ActionMetaData loadMetaDataAction(String customerName, String moduleName, String documentName, String actionName) {
+		ActionMetaData result = null;
+		
+		try {
+			String path = actionPath(customerName, moduleName, documentName, actionName);
+			result = XMLMetaData.unmarshalActionFile(path);
+			if (! actionName.equals(result.getName())) {
+				throw new MetaDataException("Action is defined with file name of " + path + 
+												" but the name attribute is " + result.getName());
+			}
+		} // try (populate Metadata)
+		catch (MetaDataException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new MetaDataException(e);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public long metaDataActionLastModifiedMillis(String customerName, String moduleName, String documentName, String actionName) {
+		String path = actionPath(customerName, moduleName, documentName, actionName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
 	}
 
 	@Override
@@ -532,8 +698,49 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		StringBuilder key = new StringBuilder(128);
 		String documentName = document.getName();
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
-		key.append(documentName).append('/').append(documentName).append("Bizlet");
+		key.append(documentName).append('/').append(documentName).append(BIZLET_SUFFIX);
 		return getJavaMetaData(customer, key.toString(), false, runtime);
+	}
+
+	private String bizletPath(String customerName, String moduleName, String documentName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		if (customerName != null) {
+			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		result.append(MODULES_NAMESPACE);
+		result.append(moduleName).append('/');
+		result.append(documentName).append('/');
+		result.append(documentName).append(BIZLET_SUFFIX).append(".xml");
+		return result.toString();
+	}
+	
+	@Override
+	public BizletMetaData loadMetaDataBizlet(String customerName, String moduleName, String documentName) {
+		BizletMetaData result = null;
+		
+		try {
+			String path = bizletPath(customerName, moduleName, documentName);
+			result = XMLMetaData.unmarshalBizletFile(path);
+		} // try (populate Metadata)
+		catch (MetaDataException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new MetaDataException(e);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public long metaDataBizletLastModifiedMillis(String customerName, String moduleName, String documentName) {
+		String path = bizletPath(customerName, moduleName, documentName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
 	}
 
 	@Override
@@ -557,7 +764,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
-	private <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
+	protected <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
 		// If dynamic, use the models map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -603,7 +810,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getModel(customer, document, modelName, runtime);
 	}
 
-	protected <T extends MetaData> T getAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
+	protected <T extends MetaData> T getClassAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
 		// If dynamic, use the actions map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -629,7 +836,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName, boolean runtime) {
-		MetaData result = getAction(customer, document, actionName, true, runtime);
+		MetaData result = getClassAction(customer, document, actionName, true, runtime);
 		if (loadClasses) {
 			return (ServerSideAction<Bean>) result;
 		}
@@ -639,7 +846,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName, boolean runtime) {
-		MetaData result = getAction(customer, document, exportActionName, true, runtime);
+		MetaData result = getClassAction(customer, document, exportActionName, true, runtime);
 		if (loadClasses) {
 			return (BizExportAction) result;
 		}
@@ -649,7 +856,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName, boolean runtime) {
-		MetaData result = getAction(customer, document, importActionName, true, runtime);
+		MetaData result = getClassAction(customer, document, importActionName, true, runtime);
 		if (loadClasses) {
 			return (BizImportAction) result;
 		}
@@ -660,7 +867,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName, boolean runtime) {
-		MetaData result = getAction(customer, document, downloadActionName, true, runtime);
+		MetaData result = getClassAction(customer, document, downloadActionName, true, runtime);
 		if (loadClasses) {
 			return (DownloadAction<Bean>) result;
 		}
@@ -670,7 +877,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName, boolean runtime) {
-		return getAction(customer, document, uploadActionName, true, runtime);
+		return getClassAction(customer, document, uploadActionName, true, runtime);
 	}
 
 	@Override
@@ -742,10 +949,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				String className = k.replace('/', '.');
 				if (this.loadClasses) {
 					try {
-						return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+						return Thread.currentThread().getContextClassLoader().loadClass(className);
 					}
-					catch (Exception e) {
-						throw new MetaDataException("A problem was encountered loading class " + className, e);
+					catch (@SuppressWarnings("unused") Exception e) {
+						return null; // its up to the caller to assert existence if required
 					}
 				}
 

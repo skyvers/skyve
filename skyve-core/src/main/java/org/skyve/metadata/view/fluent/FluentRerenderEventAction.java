@@ -14,12 +14,12 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	}
 
 	public FluentRerenderEventAction from(@SuppressWarnings("hiding") RerenderEventAction action) {
-		clientValidation(action.getClientValidation());
+		clientValidation(! Boolean.FALSE.equals(action.getClientValidation()));
 		return this;
 	}
 
-	public FluentRerenderEventAction clientValidation(Boolean clientValidation) {
-		action.setClientValidation(clientValidation);
+	public FluentRerenderEventAction clientValidation(boolean clientValidation) {
+		action.setClientValidation(clientValidation ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

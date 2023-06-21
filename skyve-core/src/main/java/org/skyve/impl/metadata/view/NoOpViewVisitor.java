@@ -67,8 +67,12 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class NoOpViewVisitor extends ViewVisitor {
-	protected NoOpViewVisitor(CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
-		super(customer, module, document, view);
+	protected NoOpViewVisitor(CustomerImpl customer,
+								ModuleImpl module,
+								DocumentImpl document,
+								ViewImpl view,
+								String currentUxUi) {
+		super(customer, module, document, view, currentUxUi);
 	}
 
 	@Override

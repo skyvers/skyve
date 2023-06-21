@@ -17,4 +17,10 @@ public class DescriptionExpressionEvaluator extends MetaDataExpressionEvaluator 
 		Object result = evaluateWithoutPrefix(expression, bean);
 		return (result == null) ? "" : result.toString();
 	}
+	
+	@Override
+	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+		expression.insert(0, '.');
+		expression.insert(0, binding);
+	}
 }

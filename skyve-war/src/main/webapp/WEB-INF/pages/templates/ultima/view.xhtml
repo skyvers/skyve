@@ -14,14 +14,18 @@
 			<ui:param name="showSwitchMode" value="#{showSwitchMode}" />
 			<ui:param name="showLogout" value="#{showLogout}" />
 			<ui:param name="bean" value="#{bean}" />
-			<ui:define name="head">
+			<ui:define name="templateHead">
 				<h:outputScript library="primefaces" name="moment/moment.js" />
 				<h:outputScript library="primefaces" name="chartjs/chartjs.js" />
+				<h:outputStylesheet library="primefaces" name="colorpicker/colorpicker.css" />
+				<h:outputScript library="primefaces" name="colorpicker/colorpicker.js" />
+				<h:outputScript library="primefaces" name="inputmask/inputmask.js" />
+				<h:outputScript library="primefaces" name="datepicker/datepicker.js" />
 				<h:outputStylesheet library="primefaces" name="texteditor/texteditor.css" />
 				<h:outputScript library="primefaces" name="texteditor/texteditor.js" />
 				<h:outputStylesheet library="primefaces" name="signature/signature.css" />
 				<h:outputScript library="primefaces" name="signature/signature.js" />
-				<ui:insert name="templateHead" />
+				<ui:insert name="head" />
 			</ui:define>
 			<ui:define name="templateBody">
 				<ui:insert name="body" />

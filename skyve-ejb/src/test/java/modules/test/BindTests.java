@@ -289,6 +289,8 @@ public class BindTests extends AbstractSkyveTest {
 		// Test functions and imports
 		Assert.assertEquals(currentDate, Binder.formatMessage("{el:newDateOnly()}", bean));
 		Assert.assertEquals(tomorrowsDate, Binder.formatMessage("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", bean));
+		Assert.assertEquals(String.valueOf(new DateOnly().toLocalDate().getYear()),
+				Binder.formatMessage("{el:newDateOnly().toLocalDate().getYear()}", bean));
 		Assert.assertEquals(currentTime, Binder.formatMessage("{el:newTimeOnly()}", bean));
 		Assert.assertEquals(currentDateTime, Binder.formatMessage("{el:newDateTime()}", bean));
 		Assert.assertEquals(currentTimestamp, Binder.formatMessage("{el:newTimestamp()}", bean));
@@ -351,69 +353,69 @@ public class BindTests extends AbstractSkyveTest {
 
 	@Test
 	public void testExpressionValidation() throws Exception {
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{USER}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{USERID}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{USERNAME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{DATAGROUPID}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{CONTACTID}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{CUSTOMER}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{DATE}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{TIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{DATETIME}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{TIMESTAMP}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{URL}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{USER}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{USERID}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{USERNAME}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{DATAGROUPID}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{CONTACTID}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{CUSTOMER}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{DATE}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{TIME}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{DATETIME}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{TIMESTAMP}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{URL}", c, aapd));
 		
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{ text }"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{bean:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{bean: text }"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{bean : text }"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{disp:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{desc:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:bean.doesNotExist}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.doesNotExist}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:bean..doesNotExist}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean..doesNotExist}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:stash['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:user.attributes['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:user.attributes['text']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:stash['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:user.attributes['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:user.attributes['nothing']}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{i18n:some.non-existent.key}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{role:admin.BasicUser}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{stash:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{stash:nothing}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{user:text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{user:nothing}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{ text }", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{bean:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{bean: text }", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{bean : text }", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{disp:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{desc:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:bean.doesNotExist}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:bean.doesNotExist}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:bean..doesNotExist}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:bean..doesNotExist}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:stash['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:user.attributes['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:user.attributes['text']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:stash['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:user.attributes['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:user.attributes['nothing']}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{i18n:some.non-existent.key}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{role:admin.BasicUser}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{stash:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{stash:nothing}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{user:text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{user:nothing}", c, aapd));
 		
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{}"));
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{text\\}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "\\{text}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "\\{{text}"));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{text\\}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("\\{text}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("\\{{text}", c, aapd));
 		
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.normalInteger + bean.normalInteger}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.longInteger + bean.longInteger}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.decimal2.bigDecimalValue() + bean.decimal2.bigDecimalValue()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.decimal5.add(bean.decimal5)}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.date == bean.date}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:empty bean.date}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:not empty bean.date and bean.booleanFlag}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:empty bean.date ? DATE : bean.date}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:bean.text.concat(bean.text)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.normalInteger + bean.normalInteger}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.longInteger + bean.longInteger}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.decimal2.bigDecimalValue() + bean.decimal2.bigDecimalValue()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.decimal5.add(bean.decimal5)}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.date == bean.date}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:empty bean.date}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:not empty bean.date and bean.booleanFlag}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:empty bean.date ? DATE : bean.date}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.text.concat(bean.text)}", c, aapd));
 
 		// Stash operation puts that expression evaluation into typeless mode
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['key'].concat(bean.text)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['key'].concat(bean.text)}", c, aapd));
 		// Stashy is still a problem though
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stashy['key'].concat(bean.text)}"));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:stashy['key'].concat(bean.text)}", c, aapd));
 		// And the other expression for the concat parameter is still validated
-		Assert.assertNotNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['key'].concat(bean.texty)}"));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{el:stash['key'].concat(bean.texty)}", c, aapd));
 		// But concaty method name is not chacked coz we lost the type information retrieving from the stash
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:stash['key'].concaty(bean.text)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['key'].concaty(bean.text)}", c, aapd));
 
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedAssociation}", Bean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:empty bean.aggregatedAssociation}", Boolean.class, c, m, aapd));
@@ -439,21 +441,116 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation.condition}", Boolean.class, c, m, aapd));
 
 		// Test functions
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newTimeOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newTimeOnly()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newDateTime()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDateTime()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{rtel:newTimestamp()}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newTimestamp()}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newDateOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDateOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newTimeOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newTimeOnly()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newDateTime()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDateTime()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newTimestamp()}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newTimestamp()}", c, aapd));
 		
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:Decimal2.ZERO}"));
-		Assert.assertNull(BindUtil.validateMessageExpressions(c, m, aapd, "{el:newDecimal2(100)}"));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:Decimal2.ZERO}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDecimal2(100)}", c, aapd));
 	}
 	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testExpressionPrefixing() throws Exception {
+		Assert.assertEquals("{USER}", BindUtil.prefixMessageExpressions("{USER}", "binding"));
+		Assert.assertEquals("{USERID}", BindUtil.prefixMessageExpressions("{USERID}", "binding"));
+		Assert.assertEquals("{USERNAME}", BindUtil.prefixMessageExpressions("{USERNAME}", "binding"));
+		Assert.assertEquals("{DATAGROUPID}", BindUtil.prefixMessageExpressions("{DATAGROUPID}", "binding"));
+		Assert.assertEquals("{CONTACTID}", BindUtil.prefixMessageExpressions("{CONTACTID}", "binding"));
+		Assert.assertEquals("{CUSTOMER}", BindUtil.prefixMessageExpressions("{CUSTOMER}", "binding"));
+		Assert.assertEquals("{DATE}", BindUtil.prefixMessageExpressions("{DATE}", "binding"));
+		Assert.assertEquals("{TIME}", BindUtil.prefixMessageExpressions("{TIME}", "binding"));
+		Assert.assertEquals("{DATETIME}", BindUtil.prefixMessageExpressions("{DATETIME}", "binding"));
+		Assert.assertEquals("{TIMESTAMP}", BindUtil.prefixMessageExpressions("{TIMESTAMP}", "binding"));
+		Assert.assertEquals("{URL}", BindUtil.prefixMessageExpressions("{URL}", "binding"));
+
+		Assert.assertEquals("{binding.text}", BindUtil.prefixMessageExpressions("{text}", "binding"));
+		Assert.assertEquals("{binding.text}", BindUtil.prefixMessageExpressions("{ text }", "binding"));
+		Assert.assertEquals("Once {binding.text} {binding.text} Twice", BindUtil.prefixMessageExpressions("Once {text} {text} Twice", "binding"));
+		Assert.assertEquals("{bean:binding.text}", BindUtil.prefixMessageExpressions("{bean:text}", "binding"));
+		Assert.assertEquals("{bean:binding.text}", BindUtil.prefixMessageExpressions("{bean: text }", "binding"));
+		Assert.assertEquals("Once {bean:binding.text} {bean:binding.text} Twice", BindUtil.prefixMessageExpressions("Once {bean:text} {bean:text} Twice", "binding"));
+		Assert.assertEquals("Once {bean:binding.text} {binding.text} Twice", BindUtil.prefixMessageExpressions("Once {bean:text} {text} Twice", "binding"));
+		Assert.assertEquals("{bean:binding.text}", BindUtil.prefixMessageExpressions("{bean : text }", "binding"));
+		Assert.assertEquals("{disp:binding.text}", BindUtil.prefixMessageExpressions("{disp:text}", "binding"));
+		Assert.assertEquals("{desc:binding.text}", BindUtil.prefixMessageExpressions("{desc:text}", "binding"));
+		Assert.assertEquals("{rtel:bean.binding.text}", BindUtil.prefixMessageExpressions("{rtel:bean.text}", "binding"));
+		Assert.assertEquals("{el:bean.binding.text}", BindUtil.prefixMessageExpressions("{el:bean.text}", "binding"));
+		Assert.assertEquals("{rtel:stash['text']}", BindUtil.prefixMessageExpressions("{rtel:stash['text']}", "binding"));
+		Assert.assertEquals("{el:stash['text']}", BindUtil.prefixMessageExpressions("{el:stash['text']}", "binding"));
+		Assert.assertEquals("{rtel:user.attributes['text']}", BindUtil.prefixMessageExpressions("{rtel:user.attributes['text']}", "binding"));
+		Assert.assertEquals("{el:user.attributes['text']}", BindUtil.prefixMessageExpressions("{el:user.attributes['text']}", "binding"));
+		Assert.assertEquals("{rtel:stash['nothing']}", BindUtil.prefixMessageExpressions("{rtel:stash['nothing']}", "binding"));
+		Assert.assertEquals("{el:stash['nothing']}", BindUtil.prefixMessageExpressions("{el:stash['nothing']}", "binding"));
+		Assert.assertEquals("{rtel:user.attributes['nothing']}", BindUtil.prefixMessageExpressions("{rtel:user.attributes['nothing']}", "binding"));
+		Assert.assertEquals("{el:user.attributes['nothing']}", BindUtil.prefixMessageExpressions("{el:user.attributes['nothing']}", "binding"));
+		Assert.assertEquals("{i18n:some.non-existent.key}", BindUtil.prefixMessageExpressions("{i18n:some.non-existent.key}", "binding"));
+		Assert.assertEquals("{role:admin.BasicUser}", BindUtil.prefixMessageExpressions("{role:admin.BasicUser}", "binding"));
+		Assert.assertEquals("{stash:text}", BindUtil.prefixMessageExpressions("{stash:text}", "binding"));
+		Assert.assertEquals("{stash:nothing}", BindUtil.prefixMessageExpressions("{stash:nothing}", "binding"));
+		Assert.assertEquals("{user:text}", BindUtil.prefixMessageExpressions("{user:text}", "binding"));
+		Assert.assertEquals("{user:nothing}", BindUtil.prefixMessageExpressions("{user:nothing}", "binding"));
+		
+		Assert.assertEquals("}", BindUtil.prefixMessageExpressions("}", "binding"));
+		Assert.assertEquals("\\{text}", BindUtil.prefixMessageExpressions("\\{text}", "binding"));
+		Assert.assertEquals("\\{{binding.text}", BindUtil.prefixMessageExpressions("\\{{text}", "binding"));
+
+		Assert.assertEquals("{el:bean.binding.normalInteger + bean.binding.normalInteger}", BindUtil.prefixMessageExpressions("{el:bean.normalInteger + bean.normalInteger}", "binding"));
+		Assert.assertEquals("{el:bean.binding.longInteger + bean.binding.longInteger}", BindUtil.prefixMessageExpressions("{el:bean.longInteger + bean.longInteger}", "binding"));
+		Assert.assertEquals("{el:bean.binding.decimal2.bigDecimalValue() + bean.binding.decimal2.bigDecimalValue()}", BindUtil.prefixMessageExpressions("{el:bean.decimal2.bigDecimalValue() + bean.decimal2.bigDecimalValue()}", "binding"));
+		Assert.assertEquals("{el:bean.binding.decimal5.add(bean.binding.decimal5)}", BindUtil.prefixMessageExpressions("{el:bean.decimal5.add(bean.decimal5)}", "binding"));
+		Assert.assertEquals("{el:bean.binding.date == bean.binding.date}", BindUtil.prefixMessageExpressions("{el:bean.date == bean.date}", "binding"));
+		Assert.assertEquals("{el:empty bean.binding.date}", BindUtil.prefixMessageExpressions("{el:empty bean.date}", "binding"));
+		Assert.assertEquals("{el:not empty bean.binding.date and bean.binding.booleanFlag}", BindUtil.prefixMessageExpressions("{el:not empty bean.date and bean.booleanFlag}", "binding"));
+		Assert.assertEquals("{el:empty bean.binding.date ? DATE : bean.binding.date}", BindUtil.prefixMessageExpressions("{el:empty bean.date ? DATE : bean.date}", "binding"));
+		Assert.assertEquals("{el:bean.binding.text.concat(bean.binding.text)}", BindUtil.prefixMessageExpressions("{el:bean.text.concat(bean.text)}", "binding"));
+
+		Assert.assertEquals("{el:stash['key'].concat(bean.binding.text)}", BindUtil.prefixMessageExpressions("{el:stash['key'].concat(bean.text)}", "binding"));
+
+		Assert.assertEquals("{el:bean.binding.aggregatedAssociation}", ExpressionEvaluator.prefixBinding("{el:bean.aggregatedAssociation}", "binding"));
+		Assert.assertEquals("{el:empty bean.binding.aggregatedAssociation}", ExpressionEvaluator.prefixBinding("{el:empty bean.aggregatedAssociation}", "binding"));
+		Assert.assertEquals("{el:bean.binding.aggregatedCollection}", ExpressionEvaluator.prefixBinding("{el:bean.aggregatedCollection}", "binding"));
+		Assert.assertEquals("{el:bean.binding.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", ExpressionEvaluator.prefixBinding("{el:bean.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", "binding"));
+		Assert.assertEquals("{el:bean.binding.date.after(newDateOnly())}", ExpressionEvaluator.prefixBinding("{el:bean.date.after(newDateOnly())}", "binding"));
+		Assert.assertEquals("{el:bean.binding.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", ExpressionEvaluator.prefixBinding("{el:bean.aggregatedCollection.stream().anyMatch(c -> Boolean.FALSE.equals(c.booleanFlag))}", "binding"));
+		Assert.assertEquals("{el:bean.binding.date.after(newDateOnly())}", ExpressionEvaluator.prefixBinding("{el:bean.date.after(newDateOnly())}", "binding"));
+		Assert.assertEquals("{el:bean.binding.getDate().after(bean.binding.getDate())}", ExpressionEvaluator.prefixBinding("{el:bean.getDate().after(bean.getDate())}", "binding"));
+		Assert.assertEquals("{el:empty bean.binding.date or bean.binding.getDate().after(bean.binding.getDate())}", ExpressionEvaluator.prefixBinding("{el:empty bean.date or bean.getDate().after(bean.getDate())}", "binding"));
+		Assert.assertEquals("{el:bean.binding.date}", ExpressionEvaluator.prefixBinding("{el:bean.date}", "binding"));
+		Assert.assertEquals("{el:empty bean.binding.date or not empty bean.binding.date}", ExpressionEvaluator.prefixBinding("{el:empty bean.date or not empty bean.date}", "binding"));
+		Assert.assertEquals("{el:bean.binding.normalInteger + bean.binding.normalInteger}", ExpressionEvaluator.prefixBinding("{el:bean.normalInteger + bean.normalInteger}", "binding"));
+		Assert.assertEquals("{el:bean.binding}", ExpressionEvaluator.prefixBinding("{el:bean}", "binding"));
+		Assert.assertEquals("{el:bean.binding.aggregatedAssociation}", ExpressionEvaluator.prefixBinding("{el:bean.aggregatedAssociation}", "binding"));
+		Assert.assertEquals("{binding.aggregatedAssociation}", ExpressionEvaluator.prefixBinding("{aggregatedAssociation}", "binding"));
+		Assert.assertEquals("{binding.bizId}", ExpressionEvaluator.prefixBinding("{bizId}", "binding"));
+		Assert.assertEquals("{binding.aggregatedAssociation.bizId}", ExpressionEvaluator.prefixBinding("{aggregatedAssociation.bizId}", "binding"));
+		Assert.assertEquals("{binding.aggregatedCollection}", ExpressionEvaluator.prefixBinding("{aggregatedCollection}", "binding"));
+		Assert.assertEquals("{binding.date}", ExpressionEvaluator.prefixBinding("{date}", "binding"));
+		Assert.assertEquals("{binding.condition}", ExpressionEvaluator.prefixBinding("{condition}", "binding"));
+		Assert.assertEquals("{binding.aggregatedAssociation.condition}", ExpressionEvaluator.prefixBinding("{aggregatedAssociation.condition}", "binding"));
+
+		Assert.assertEquals("{rtel:newDateOnly()}", BindUtil.prefixMessageExpressions("{rtel:newDateOnly()}", "binding"));
+		Assert.assertEquals("{el:newDateOnly()}", BindUtil.prefixMessageExpressions("{el:newDateOnly()}", "binding"));
+		Assert.assertEquals("{rtel:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", BindUtil.prefixMessageExpressions("{rtel:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", "binding"));
+		Assert.assertEquals("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", BindUtil.prefixMessageExpressions("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", "binding"));
+		Assert.assertEquals("{rtel:newTimeOnly()}", BindUtil.prefixMessageExpressions("{rtel:newTimeOnly()}", "binding"));
+		Assert.assertEquals("{el:newTimeOnly()}", BindUtil.prefixMessageExpressions("{el:newTimeOnly()}", "binding"));
+		Assert.assertEquals("{rtel:newDateTime()}", BindUtil.prefixMessageExpressions("{rtel:newDateTime()}", "binding"));
+		Assert.assertEquals("{el:newDateTime()}", BindUtil.prefixMessageExpressions("{el:newDateTime()}", "binding"));
+		Assert.assertEquals("{rtel:newTimestamp()}", BindUtil.prefixMessageExpressions("{rtel:newTimestamp()}", "binding"));
+		Assert.assertEquals("{el:newTimestamp()}", BindUtil.prefixMessageExpressions("{el:newTimestamp()}", "binding"));
+		
+		Assert.assertEquals("{el:Decimal2.ZERO}", BindUtil.prefixMessageExpressions("{el:Decimal2.ZERO}", "binding"));
+		Assert.assertEquals("{el:newDecimal2(100)}", BindUtil.prefixMessageExpressions("{el:newDecimal2(100)}", "binding"));
+	}
+
 	/**
 	 * Test that a DynamicBean with a display binding with a dynamic domain defined by no THIS_ALIAS returns code.
 	 */

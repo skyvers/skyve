@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -153,11 +154,20 @@ public class StateUtil {
 		tokens.put(sessionId, values);
 	}
 	
+	public static Integer createToken() {
+	    // Get 128 random bytes - move past first seed sequence
+		SecureRandom random = new SecureRandom();
+	    byte[] randomBytes = new byte[128];
+	    random.nextBytes(randomBytes);
+	    
+		return Integer.valueOf(random.nextInt());
+	}
+	
 	public static void logStateStats() {
 		logCacheStats(UtilImpl.CONVERSATION_CACHE.getName(), "Conversation");
 		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Session");
 		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
-		UtilImpl.LOGGER.info("**************************************************************");
+		UtilImpl.LOGGER.info("********************************************************************************");
 	}
 	
 	private static void logCacheStats(String cacheName, String cacheDescription) {

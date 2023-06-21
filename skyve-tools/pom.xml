@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>8.1.4-SNAPSHOT</version>
+		<version>8.3.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>skyve-tools</artifactId>
 
@@ -33,23 +33,10 @@
 		    <version>${ireport.version}</version>
 			<scope>compile</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--		    <groupId>org.umlgraph</groupId>-->
-<!--		    <artifactId>umlgraph</artifactId>-->
-<!--		    <version>${umlgraph.version}</version>-->
-<!--			<scope>compile</scope>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.opengeo</groupId>
 			<artifactId>geodb</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>com.sun.tools</groupId>-->
-			<!--<artifactId>tools</artifactId>-->
-			<!--<version>${java.version}</version>-->
-			<!--<scope>system</scope>-->
-			<!--<systemPath>${java.home}/../lib/tools.jar</systemPath>-->
-		<!--</dependency>-->
 	</dependencies>
 </project>

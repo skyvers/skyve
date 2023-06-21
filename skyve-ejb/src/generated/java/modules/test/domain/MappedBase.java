@@ -1,7 +1,8 @@
 package modules.test.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -130,7 +131,7 @@ public class MappedBase extends AbstractPersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Enum3::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Enum3(String code, String description) {
 			this.code = code;
@@ -180,14 +181,6 @@ public class MappedBase extends AbstractPersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Enum3[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Enum3 value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

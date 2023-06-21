@@ -125,7 +125,7 @@ public class ContentUpload extends AbstractUpload {
 			return;
 		}
 
-		// NB Persistence has been set with the restore processing inside the SkyvePhaseListener
+		// NB Persistence has been set with the restore processing inside the SkyveFacesPhaseListener
 		Persistence persistence = CORE.getPersistence();
 		try {
 			Bean currentBean = webContext.getCurrentBean();
@@ -162,6 +162,6 @@ public class ContentUpload extends AbstractUpload {
 			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
 			fc.addMessage(null, msg);
 		}
-		// NB No need to disconnect Persistence as it is done in the SkyvePhaseListener after the response is rendered.
+		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
 	}
 }

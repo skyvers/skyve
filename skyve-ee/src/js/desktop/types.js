@@ -1613,7 +1613,7 @@ isc.BizContentImageItem.addMethods({
 			imageType: 'stretch',
 			overflow: 'hidden',
 			isGroup: true,
-			styleName: 'bizhubRoundedBorder',
+			styleName: 'bizhubRoundedBorder bizhubContentImgFit',
 			groupBorderCSS: '1px solid #bfbfbf',
 			margin: 1,
 			groupLabelBackgroundColor:'transparent',
@@ -2120,6 +2120,7 @@ isc.BizHTMLItem.addProperties({
 //name
 //title
 //icons
+//mentionMarkers - comma separated string of opening and optionally closing markers for mentions/suggest - ie '{},@,[]'
 isc.BizHTMLItem.addMethods({
 	init: function(config) {
 		this._pane = isc.HTMLPane.create({
@@ -2177,14 +2178,44 @@ isc.BizHTMLItem.addMethods({
 						['Format', 'Font', 'FontSize'], 
 						['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks']
 					];
-/* for now this is commented out (1 for each marker character)
-					CKEDITOR.config.mentions = [{
-						feed: 'http://fucked.com/?q={encodedQuery}?c=admin.Poo',
-						marker: '{',
-						minChars: 0,
-						template: '<li data-id="{id}">{fullName}</li>',
-					}];
-*/
+					if (config.mentionMarkers) {
+						var feed = function(options, callback) {
+							var values = me.form._view.gather(false);
+							var requestProperties = {params:{_attr: me.name, _a: 'suggest', _c: values._c}};
+							if (me.form._view._b) {
+								requestProperties.params._b = me.form._view._b;
+							}
+							
+							isc.BizUtil.COMPLETE_DATA_SOURCE.fetchData(
+								{value: options.marker + options.query}, 
+								function(response) {
+									if ((response) && (response.data)) {
+										for (var i = 0, l = response.data.length; i < l; i++) {
+											var data = response.data[i];
+											data.id = i;
+											data.name = data.value.substring(1);
+										}
+										callback(response.data);
+									}
+								},
+								requestProperties);
+						};
+						var markers = config.mentionMarkers.split(',');
+						var mentions = [];
+						for (var i = 0, l = markers.length; i < l; i++) {
+							var marker = markers[i];
+							if (marker.length > 1) {
+								var first = marker.substring(0, 1);
+								var second = marker.substring(1, 2);
+								// /\{[^\{\}]*$/
+								mentions.add({feed: feed, marker: first, minChars: 0, pattern: new RegExp('\\' + first + '[^\\' + first + '\\' + second + ']*$'), cache: false, throttle: 500});
+							}
+							else {
+								mentions.add({feed: feed, marker: marker, minChars: 0, cache: false, throttle: 500});
+							}
+						}
+						CKEDITOR.config.mentions = mentions;
+					}
 					// align with the "markup" styles supported in jasper reports
 					// and display more compatibly with varying style sheets
 					CKEDITOR.config.coreStyles_bold = {element: 'b', overrides: 'strong'};

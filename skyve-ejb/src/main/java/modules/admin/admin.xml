@@ -77,13 +77,19 @@
 				<document name="SelfRegistrationActivation" permission="_____"/>
 				<document name="Subscription" permission="_____"/>
 			</privileges>
+			<accesses>
+				<singular document="SelfRegistration" />
+				<singular document="SelfRegistrationActivation" />
+			</accesses>
 		</role>
 		<role name="AppUser">
 			<documentation>
 				The App User role is intended for retail and public users interacting through the "front office". 
 				These users are assumed to operate within their own scope and have only visibility to their own data.
 				
-				App Users can create their own contacts, and change their own passwords.			
+				App Users can create their own contacts, and change their own passwords.
+				
+				App Users can execute reports if given access via another module.			
 			</documentation>
 			<description>admin.adminRoles.appUser.description</description>
 			<privileges>
@@ -94,13 +100,19 @@
 				<document name="DynamicEntity" permission="CRUDD" />
 				<document name="DynamicRelation" permission="CRUDD" />
 				<document name="Generic" permission="CRUDG" />
-				<document name="ReportTemplate" permission="_R__C" />
+				<document name="ReportTemplate" permission="_R__C">
+					<action name="DownloadJasperReport" />
+					<action name="DownloadReport" />
+				</document>
 				<document name="User" permission="_RU_U" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
+			<accesses>
+				<singular document="ReportTemplate"/>
+			</accesses>
 		</role>
 		<role name="AuditManager">
 			<description>admin.adminRoles.auditManager.description</description>
@@ -138,6 +150,7 @@
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="_R__U" />
 				<document name="ReportTemplate" permission="_RU_C">
+					<action name="AddUserToEmail" />
 					<action name="DownloadJasperReport" />
 					<action name="DownloadReport" />
 				</document>
@@ -388,6 +401,9 @@
 				<document name="UserProxy" permission="_RU_C" />
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
+			<accesses>
+				<singular document="Startup" />
+			</accesses>
 		</role>
 		<role name="ViewUser">
 			<documentation>
@@ -809,8 +825,28 @@
             </columns>
         </query>
         <query documentName="ReportTemplate" name="qEnabledReports">
+        	<documentation>Shows all enabled reports which are not fragments, and makes sure 
+        		the logged in user has the role if the report is restricted to a specific role.</documentation>
 			<description><![CDATA[All Reports]]></description>
-			<filter>bean.includeFragment = false and bean.enabled = true</filter>
+			<filter>
+				bean.includeFragment = false AND bean.enabled = true
+				AND (
+					bean.restrictToRole IS NULL OR (
+						EXISTS (
+							SELECT 1
+							FROM {admin.UserRole} as ur
+							WHERE ur.roleName = bean.restrictToRole AND ur.parent.bizId = {USERID}
+						)
+						OR EXISTS (
+							SELECT 1
+							FROM {admin.User} as u
+	                		INNER JOIN u.groups as g
+	                		INNER JOIN g.roles as gr
+	                		WHERE gr.roleName = bean.restrictToRole AND u.bizId = {USERID}
+						) 
+					)
+				)
+			</filter>
 			<columns>
 				<column binding="name" sortOrder="ascending" />
 				<column binding="description" />
@@ -836,6 +872,7 @@
 				<column binding="outputFormat" displayName="Format" pixelWidth="80" />
 				<column binding="reportType" hidden="true" />
 				<column binding="templateName" />
+				<column binding="restrictToRole" hidden="true" />
 				<column binding="template" hidden="true" />
 			</columns>
 		</query>

@@ -109,7 +109,10 @@ public class AddAction extends FacesAction<Void> {
 				newViewBinding.append("ElementById(").append(newBean.getBizId()).append(')');
 				zoomInBinding.append("ElementById(").append(newBean.getBizId()).append(')');
 				
-		    	facesView.setViewBinding(newViewBinding.toString());
+				// If not inline, then we want to call post render on the newly added bean
+				facesView.setPostRender(bizlet, bean);
+				
+				facesView.setViewBinding(newViewBinding.toString());
 		    	facesView.getZoomInBindings().push(zoomInBinding.toString());
 				if (UtilImpl.FACES_TRACE) { 
 					Util.LOGGER.info("Push ZoomInBinding " + zoomInBinding.toString());

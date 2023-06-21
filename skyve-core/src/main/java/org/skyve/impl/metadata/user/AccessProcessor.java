@@ -1,60 +1,42 @@
 package org.skyve.impl.metadata.user;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import org.skyve.CORE;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
-import org.skyve.impl.metadata.view.NoOpViewVisitor;
 import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
-import org.skyve.impl.metadata.view.widget.Chart;
-import org.skyve.impl.metadata.view.widget.MapDisplay;
-import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
-import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
-import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
-import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
-import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
 class AccessProcessor {
-	private User user;
-	private Customer customer;
+	private CustomerImpl customer;
 	private Map<String, Menu> moduleMenuMap;
 	private Map<String, Set<String>> accesses;
 	private Router router;
 
-	private Module module;
-	private String moduleName;
-	private Menu menu;
-	
-	AccessProcessor(User user, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
-		this.user = user;
-		this.customer = user.getCustomer();
+	AccessProcessor(CustomerImpl customer, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
+		this.customer = customer;
 		this.moduleMenuMap = moduleMenuMap;
 		this.accesses = accesses;
 		router = CORE.getRepository().getRouter();
@@ -62,236 +44,202 @@ class AccessProcessor {
 	
 	/**
 	 * This method determines the accesses allowed.
-	 * It is synchronized on the current thread of execution to enable dev mode to function with multiple threads re-processing the accesses.
 	 */
 	void process() {
-		synchronized (Thread.currentThread()) {
-			for (Entry<String, Menu> entry : moduleMenuMap.entrySet()) {
-				moduleName = entry.getKey();
-				module = customer.getModule(moduleName);
-				menu = entry.getValue();
-	
-				processMenuItems(menu.getItems());
-			}
+		for (Entry<String, Menu> entry : moduleMenuMap.entrySet()) {
+			final String moduleName = entry.getKey();
+			final Module module = customer.getModule(moduleName);
+			processModuleHome(module, moduleName);
+			
+			final Menu menu = entry.getValue();
+			processMenuItems(menu.getItems(), module, moduleName);
+			
+			processRoles(module);
 		}
-System.out.println(accesses.size());
+		processedUxUiViews.clear();
+//for (String a : accesses.keySet()) {
+//	System.out.println(a);
+//	for (String u : accesses.get(a)) {
+//		System.out.println(" u=" + u);
+//	}
+//}
 	}
 
-	private void processMenuItems(List<MenuItem> items) {
+	private Set<String> processedUxUiViews = new TreeSet<>();
+
+	private void processModuleHome(final Module module, final String moduleName) {
+		String homeDocumentName = module.getHomeDocumentName();
+		ViewType homeRef = module.getHomeRef();
+		if (homeRef == ViewType.list) {
+			DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
+			String queryName = ref.getDefaultQueryName();
+			if (queryName != null) {
+				addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
+			}
+			addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
+		}
+		else if (homeRef == ViewType.edit) {
+			addAccessForUxUis(UserAccess.singular(moduleName, homeDocumentName), Collections.emptySet());
+			Document document = module.getDocument(customer, homeDocumentName);
+			processViews(document);
+		}
+	}
+	
+	private void processMenuItems(final List<MenuItem> items, final Module module, final String moduleName) {
 		for (MenuItem item : items) {
 			// NB Disregard LinkItem as it is outside of accesses
 			if (item instanceof MenuGroup) {
-				processMenuItems(((MenuGroup) item).getItems());
+				processMenuItems(((MenuGroup) item).getItems(), module, moduleName);
 			}
 			else if (item instanceof EditItem) {
 				EditItem edit = (EditItem) item;
 				String documentName = edit.getDocumentName();
-				addMenuAccess(UserAccess.singular(moduleName, documentName), edit.getUxUis());
+				addAccessForUxUis(UserAccess.singular(moduleName, documentName), edit.getUxUis());
 				Document document = module.getDocument(customer, documentName);
 				processViews(document);
 			}
 			else if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
 				AbstractDocumentOrQueryOrModelMenuItem aggregate = (AbstractDocumentOrQueryOrModelMenuItem) item;
+				String documentName = null;
 				String queryName = aggregate.getQueryName();
+				Set<String> uxuis = aggregate.getUxUis();
 				if (queryName != null) {
-					addMenuAccess(UserAccess.queryAggregate(moduleName, queryName), aggregate.getUxUis());
+					addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), uxuis);
+					MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
+					documentName = query.getDocumentName();
 				}
 				else {
-					String documentName = aggregate.getDocumentName();
+					documentName = aggregate.getDocumentName();
 					DocumentRef ref = module.getDocumentRefs().get(documentName);
 					queryName = ref.getDefaultQueryName();
 					if (queryName != null) {
-						addMenuAccess(UserAccess.queryAggregate(moduleName, queryName), aggregate.getUxUis());
+						addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), uxuis);
 					}
 					else {
 						String modelName = aggregate.getModelName();
 						if (modelName != null) {
-							addMenuAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), aggregate.getUxUis());
+							addAccessForUxUis(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuis);
 						}
 						else {
-							addMenuAccess(UserAccess.documentAggregate(moduleName, documentName), aggregate.getUxUis());
+							addAccessForUxUis(UserAccess.documentAggregate(moduleName, documentName), uxuis);
 						}
 					}
 				}
+				
+				addAccessForUxUis(UserAccess.singular(moduleName, documentName), uxuis);
+				Document document = module.getDocument(customer, documentName);
+				processViews(document);
 			}
 		}
 	}
 	
 	private void processViews(Document document) {
-		Set<String> processedUxUis = new TreeSet<>();
-		
 		for (UxUiMetadata uxui : router.getUxUis()) {
 			String uxuiName = uxui.getName();
-			View createView = document.getView(uxuiName, customer, ViewType.create.toString());
-			String uxuiKey = ViewType.create.toString() + createView.getOverriddenUxUiName();
+			ViewImpl createView = (ViewImpl) document.getView(uxuiName, customer, ViewType.create.toString());
+			String uxuiViewKey = null;
 
 			// create and edit view are the same - use edit view
 			if (ViewType.edit.toString().equals(createView.getName())) {
-				if (! processedUxUis.contains(uxuiKey)) {
-					processView(document, createView);
-					processedUxUis.add(uxuiKey);
+				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + createView.getOverriddenUxUiName();
+				if (! processedUxUiViews.contains(uxuiViewKey)) {
+					processedUxUiViews.add(uxuiViewKey);
+					processView(document, createView, uxuiName);
 				}
 			}
 			else {
-				if (! processedUxUis.contains(uxuiKey)) {
-					processView(document, createView);
-					processedUxUis.add(uxuiKey);
+				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + ViewType.create.toString() + createView.getOverriddenUxUiName();
+				if (! processedUxUiViews.contains(uxuiViewKey)) {
+					processedUxUiViews.add(uxuiViewKey);
+					processView(document, createView, uxuiName);
 				}
 
-				View editView = document.getView(uxuiName, customer, ViewType.edit.toString());
-				uxuiKey = createView.getOverriddenUxUiName();
-				if (uxuiKey == null) {
-					uxuiKey = "";
-				}
-				if (! processedUxUis.contains(uxuiKey)) {
-					processView(document,editView);
-					processedUxUis.add(uxuiKey);
+				ViewImpl editView = (ViewImpl) document.getView(uxuiName, customer, ViewType.edit.toString());
+				uxuiViewKey = document.getOwningModuleName() + '.' + document.getName() + ':' + editView.getOverriddenUxUiName();
+				if (! processedUxUiViews.contains(uxuiViewKey)) {
+					processedUxUiViews.add(uxuiViewKey);
+					processView(document, editView, uxuiName);
 				}
 			}
 		}
 	}
 	
-	private void processView(Document document, View view) {
-		final String overriddenUxUi = view.getOverriddenUxUiName();
-		
-		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view) {
-			@Override
-			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
-/*
-				// TODO  What about inline chart models.
-				ChartBuilderMetaData metaDataModel = chart.getModel();
-				if (metaDataModel != null) {
-					String moduleName = metaDataModel.getModuleName();
-					String queryName = metaDataModel.getQueryName();
-					if (queryName != null) {
-						addViewAccess(UserAccess.queryAggregate(moduleName, queryName), aggregate.getUxUis());
-					}
-					else {
-						String documentName = aggregate.getDocumentName();
-						DocumentRef ref = module.getDocumentRefs().get(documentName);
-						queryName = ref.getDefaultQueryName();
-						if (queryName != null) {
-							addMenuAccess(UserAccess.queryAggregate(moduleName, queryName), aggregate.getUxUis());
-						}
-						else {
-							String modelName = aggregate.getModelName();
-							if (modelName != null) {
-								addMenuAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), aggregate.getUxUis());
-							}
-							else {
-								addMenuAccess(UserAccess.documentAggregate(moduleName, documentName), aggregate.getUxUis());
-							}
-						}
-					}
-					String documentName = metaDataModel.getDocumentName();
-					String queryName = metaDataModel.getQueryName();
-					addViewAccess(UserAccess., moduleName);
-				}
-				chart.getModelName();
-				accessVectors.add(AccessVector.queryAggregate(moduleName, moduleName))
-				addViewAccess(UserAccess.queryAggregate(moduleName, "CHART" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-*/
+	private void processRoles(final Module module) {
+		for (Role role : module.getRoles()) {
+			Map<UserAccess, Set<String>> roleAccesses = ((RoleImpl) role).getAccesses();
+			for (Entry<UserAccess, Set<String>> entry : roleAccesses.entrySet()) {
+				addAccessForUxUis(entry.getKey(), entry.getValue());
 			}
-
-			@Override
-			public void visitDataGrid(org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid grid, boolean parentVisible, boolean parentEnabled) {
-//				zoomIn.getBinding()
-//				Reference reference = null; // get reference for the document name
-//				String documentName = reference.getDocumentName();
-//				accessVectors.add(AccessVector.singular(moduleName, documentName))
-				addViewAccess(UserAccess.queryAggregate(moduleName, "DATAGRID" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-			}
-			
-			// NB DataRepeater cannot zoom in
-			
-			@Override
-			public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
-//				grid.getModelName();
-//				grid.getQueryName();
-//				
-//				accessVectors - fuck need driving document
-				addViewAccess(UserAccess.queryAggregate(moduleName, "LISTGRID" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-				addViewAccess(UserAccess.singular(moduleName, "LISTGRID NEW DOCUMENT" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-			}
-			
-			@Override
-			public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
-//				repeater.getModelName();
-//				repeater.getQueryName()
-				// NB ListRepeater cannot zoom in
-				addViewAccess(UserAccess.queryAggregate(moduleName, "LISTREPEATER" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-			}
-			
-			@Override
-			public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
-				// TODO query name "query" or get document binding attribute and check if query, else use default doc query
-//				String queryName = lookup.getQuery();
-//				lookup.getBinding();
-//				Reference reference = null; // get reference for the query
-//				queryName = reference.getQueryName();
-//				String documentName = reference.getDocumentName();
-//				DocumentRef ref = module.getDocumentRefs().get(documentName);
-//				queryName = ref.getDefaultQueryName();
-				addViewAccess(UserAccess.queryAggregate(moduleName, "LOOKUP" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-				addViewAccess(UserAccess.singular(moduleName, "LOOKUP NEW DOCUMENT" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-			}
-			
-			@Override
-			public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
-//				map.getModelName();
-				addViewAccess(UserAccess.queryAggregate(moduleName, "MAP" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-				addViewAccess(UserAccess.singular(moduleName, "MAP NEW DOCUMENT" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-			}
-			
-			@Override
-			public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
-//				grid.getModelName();
-//				grid.getQueryName();
-				addViewAccess(UserAccess.queryAggregate(moduleName, "TREEGRID" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-				addViewAccess(UserAccess.singular(moduleName, "TREEGRID NEW DOCUMENT" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-			}
-			
-			@Override
-			public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
-//				zoomIn.getBinding()
-//				Reference reference = null; // get reference for the document name
-//				String documentName = reference.getDocumentName();
-//				accessVectors.add(AccessVector.singular(moduleName, documentName))
-				addViewAccess(UserAccess.singular(moduleName, "ZOOMIN NEW DOCUMENT" + UUID.randomUUID().toString()), view.getOverriddenUxUiName());
-			}
-		}.visit();
+		}
 	}
 	
-	private void addMenuAccess(@NotNull UserAccess access, @NotNull Set<String> uxuis) {
+	private void processView(Document document, ViewImpl view, String uxui) {
+		final String overriddenUxUi = view.getOverriddenUxUiName();
+		final Module module = customer.getModule(document.getOwningModuleName());
+		
+		Set<UserAccess> viewAccesses = view.getAccesses(customer, document, uxui);
+		if (viewAccesses != null) { // can be null when access control is turned off
+			for (UserAccess viewAccess : viewAccesses) {
+				if (viewAccess.isSingular()) {
+					boolean has = hasViewAccess(viewAccess);
+					addAccessForUxUi(viewAccess, overriddenUxUi);
+					if (! has) {
+						processViews(module.getDocument(customer, viewAccess.getDocumentName()));
+					}
+				}
+				else {
+					addAccessForUxUi(viewAccess, overriddenUxUi);
+				}
+			}
+		}
+	}
+	
+	private void addAccessForUxUis(@NotNull UserAccess access, @NotNull Set<String> uxuis) {
 		String accessString = access.toString();
 		Set<String> accessUxUis = accesses.get(accessString);
-		if (accessUxUis == null) {
+		if (accessUxUis == null) { // DNE
 			if (! uxuis.isEmpty()) {
 				accessUxUis = new HashSet<>(uxuis);
 				accesses.put(accessString, accessUxUis);
 			}
 			else {
-				accesses.putIfAbsent(accessString, null);
+				accesses.putIfAbsent(accessString, UserAccess.ALL_UX_UIS);
 			}
 		}
-		else {
-			accessUxUis.addAll(uxuis);
+		else if (accessUxUis != UserAccess.ALL_UX_UIS) {
+			if (! uxuis.isEmpty()) {
+				accessUxUis.addAll(uxuis);
+			}
+			else {
+				accesses.put(accessString, UserAccess.ALL_UX_UIS);
+			}
 		}
 	}
 
-//	private UserAccess determineUserAccess(String queryName, )
-	private void addViewAccess(@NotNull UserAccess access, @Nullable String uxui) {
+	private void addAccessForUxUi(@NotNull UserAccess access, @Nullable String uxui) {
 		String accessString = access.toString();
 		Set<String> accessUxUis = accesses.get(accessString);
 		if (accessUxUis == null) {
 			if (uxui != null) {
 				accessUxUis = new HashSet<>();
 				accessUxUis.add(uxui);
+				accesses.put(accessString, accessUxUis);
 			}
-			accesses.put(accessString, accessUxUis);
+			else {
+				accesses.putIfAbsent(accessString, UserAccess.ALL_UX_UIS);
+			}
 		}
-		else {
-			accessUxUis.add(uxui);
+		else if (accessUxUis != UserAccess.ALL_UX_UIS){
+			if (uxui != null) {
+				accessUxUis.add(uxui);
+			}
+			else {
+				accesses.put(accessString, UserAccess.ALL_UX_UIS);
+			}
 		}
+	}
+	
+	private boolean hasViewAccess(@NotNull UserAccess singularUserAccess) {
+		return accesses.containsKey(singularUserAccess.toString());
 	}
 }

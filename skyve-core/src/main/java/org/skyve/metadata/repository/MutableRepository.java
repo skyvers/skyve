@@ -2,6 +2,8 @@ package org.skyve.metadata.repository;
 
 import javax.annotation.Nonnull;
 
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
@@ -63,7 +65,7 @@ public interface MutableRepository {
 	 * Puts a customer overridden UX/UI specific view meta-data into this repository.
 	 * @param customer	The customer the view is for.
 	 * @param uxui	The UX/UI the view is for.
-	 * @param document	The document the document is for.
+	 * @param document	The document the view is for.
 	 * @param view	The view meta-data to put.
 	 * @return	The converted view.
 	 */
@@ -72,7 +74,7 @@ public interface MutableRepository {
 	/**
 	 * Puts a UX/UI specific view meta-data into this repository.
 	 * @param uxui	The UX/UI the view is for.
-	 * @param document	The document the document is for.
+	 * @param document	The document the view is for.
 	 * @param view	The view meta-data to put.
 	 * @return	The converted view.
 	 */
@@ -81,7 +83,7 @@ public interface MutableRepository {
 	/**
 	 * Puts a customer overridden UX/UI agnostic view meta-data into this repository.
 	 * @param customer	The customer the view is for.
-	 * @param document	The document the document is for.
+	 * @param document	The document the view is for.
 	 * @param view	The view meta-data to put.
 	 * @return	The converted view.
 	 */
@@ -94,4 +96,39 @@ public interface MutableRepository {
 	 * @return	The converted view.
 	 */
 	@Nonnull View putView(@Nonnull Document document, @Nonnull ViewMetaData view); 
+
+	/**
+	 * Puts a customer overridden action meta-data into this repository.
+	 * @param customer	The customer the view is for.
+	 * @param document	The document the action is for.
+	 * @param action	The action meta-data to put.
+	 * @return	The converted action.
+	 */
+	@Nonnull ActionMetaData putMetaDataAction(@Nonnull Customer customer, @Nonnull Document document, @Nonnull ActionMetaData action); 
+
+	/**
+	 * Puts an action meta-data into this repository.
+	 * @param document	The document the action is for.
+	 * @param action	The action meta-data to put.
+	 * @return	The converted action.
+	 */
+	@Nonnull ActionMetaData putMetaDataAction(@Nonnull Document document, @Nonnull ActionMetaData action); 
+
+
+	/**
+	 * Puts a customer overridden bizlet meta-data into this repository.
+	 * @param customer	The customer the view is for.
+	 * @param document	The document the action is for.
+	 * @param bizlet	The bizlet meta-data to put.
+	 * @return	The converted bizlet.
+	 */
+	@Nonnull BizletMetaData putMetaDataBizlet(@Nonnull Customer customer, @Nonnull Document document, @Nonnull BizletMetaData bizlet); 
+
+	/**
+	 * Puts a bizlet meta-data into this repository.
+	 * @param document	The document the bizlet is for.
+	 * @param action	The bizlet meta-data to put.
+	 * @return	The converted bizlet.
+	 */
+	@Nonnull BizletMetaData putMetaDataBizlet(@Nonnull Document document, @Nonnull BizletMetaData bizlet); 
 }

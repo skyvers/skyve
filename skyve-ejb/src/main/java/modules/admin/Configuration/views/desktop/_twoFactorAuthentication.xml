@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_twoFactorAuthentication" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.skyve.org/xml/common">
+	
+	<vbox border="true" borderTitle="admin.configuration.twofactor.twofactor.borderTitle" widgetId="tfaWidgetId">
+		<form>
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="1"/>
+	        <row>
+	            <item>
+	            	<combo binding="twoFactorType">
+	                	<onChangedHandlers>
+	                		<rerender clientValidation="false" />
+	                	</onChangedHandlers>
+	            	</combo>
+	            </item>
+	        </row>
+	    </form>
+	    
+	    <form visible="tfaEmailSelected">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="1"/>
+	        <row>
+	        	<item>
+	        		<spacer invisible="tfaEmailEnabled"/>
+	        	</item>
+	        	<item>
+	        		<blurb invisible="tfaEmailEnabled" escape="false" sanitise="relaxed">
+	        			<![CDATA[{i18n:admin.configuration.edit.twoFactor}]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	        <row>
+	            <item required="true">
+	                <textField binding="twoFactorEmailSubject" visible="tfaEmailEnabled" />
+	            </item>
+	        </row>
+	        <row>
+	            <item required="true">
+	                <html binding="twoFactorEmailBody" pixelWidth="600" pixelHeight="200" sanitise="none" mentionMarkers="{}" visible="tfaEmailEnabled" />
+	            </item>
+	        </row>
+	        <row>
+	            <item required="true">
+	                <textField binding="twofactorPushCodeTimeOutSeconds" visible="tfaEmailEnabled" />
+	            </item>
+	        </row>
+	    </form>
+    
+   	</vbox>
+</view>

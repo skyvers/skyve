@@ -112,30 +112,30 @@ public final class BindUtil {
 // Maybe MapBean (now DynamicBean) never used to set the document name.
 //					String documentName = bean.getBizDocument();
 //					if (documentName != null) {
-						try {
-							// Try to get the value from this bean
-							// Do not use BindUtil.getMetaDataForBinding as it may not be a document
-							// property, it could be a condition or an implicit property.
-							String displayValue = ExpressionEvaluator.format(expression, bean);
-							// if there is a postEvaluateDisplayValue function, apply it
-							if (postEvaluateDisplayValue != null) {
-								displayValue = postEvaluateDisplayValue.apply(displayValue);
-							}
-							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
-							// move the openCurlyBraceIndex along by the display value length so that
-							// any '{' occurrences replaced in as literals above are skipped.
-							openCurlyBraceIndex += displayValue.length();
-							// find the next occurrence
-							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex);
-							success = true;
-							
-							break;
+					try {
+						// Try to get the value from this bean
+						// Do not use BindUtil.getMetaDataForBinding as it may not be a document
+						// property, it could be a condition or an implicit property.
+						String displayValue = ExpressionEvaluator.format(expression, bean);
+						// if there is a postEvaluateDisplayValue function, apply it
+						if (postEvaluateDisplayValue != null) {
+							displayValue = postEvaluateDisplayValue.apply(displayValue);
 						}
-						catch (Exception e) {
-							cause = e;
-						}
+						result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
+						// move the openCurlyBraceIndex along by the display value length so that
+						// any '{' occurrences replaced in as literals above are skipped.
+						openCurlyBraceIndex += displayValue.length();
+						// find the next occurrence
+						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex);
+						success = true;
+						
+						break;
 					}
-//				}
+					catch (Exception e) {
+						cause = e;
+					}
+//					}
+				}
 				
 				if (! success) {
 					StringBuilder exMessage = new StringBuilder();
@@ -189,7 +189,7 @@ public final class BindUtil {
 					(expression.charAt(length - 1) == '}'));
 	}
 	
-	public static String validateMessageExpressions(Customer customer, Module module, Document document, String message) {
+	public static String validateMessageExpressions(String message, Customer customer, Document... documents) {
 		String error = null;
 		
 		StringBuilder result = new StringBuilder(message);
@@ -209,7 +209,20 @@ public final class BindUtil {
 						error = "Expression is empty";
 					}
 					else {
-						error = ExpressionEvaluator.validate(expression, null, customer, module, document);
+						boolean success = false;
+						StringBuilder errors = new StringBuilder(128);
+						for (Document document : documents) {
+							Module module = customer.getModule(document.getOwningModuleName());
+							error = ExpressionEvaluator.validate(expression, null, customer, module, document);
+							if (error == null) {
+								success = true;
+								break;
+							}
+							errors.append((errors.length() == 0) ? error : ". " + error);
+						}
+						if (! success) {
+							error = errors.toString();
+						}
 						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 					}
 				}
@@ -229,22 +242,31 @@ public final class BindUtil {
 	 * @param bindingPrefix	The binding prefix to prefix with.
 	 * @return	The prefixed message or null if message argument was null.
 	 */
-	public static String prefixMessageBindings(String message, String bindingPrefix) {
+	public static String prefixMessageExpressions(String message, String bindingPrefix) {
 		if (message == null) {
 			return null;
 		}
 
-		String bindingPrefixAndDot = bindingPrefix + '.';
-		
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
 		while (openCurlyBraceIndex >= 0) {
 			if ((openCurlyBraceIndex == 0) || // first char is '{' 
 					// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
 					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
-				result.insert(openCurlyBraceIndex + 1, bindingPrefixAndDot);
-				openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+
+				int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
+				if (closedCurlyBraceIndex < 0) {
+					throw new MetaDataException("Expression [" + message + "] has an unescaped opening '{' with no closing '}'");
+				}
+
+				String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
+				if (expression.length() == 2) {
+					throw new MetaDataException("Expression [" + message + "] is empty");
+				}
+				String prefixedExpression = ExpressionEvaluator.prefixBinding(expression, bindingPrefix);
+				result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, prefixedExpression);
 			}
+			openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 		}
 		return result.toString();
 	}
@@ -728,6 +750,7 @@ public final class BindUtil {
 			Attribute attribute = null;
 			try {
 				target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+				document = target.getDocument();
 				attribute = target.getAttribute();
 			}
 			catch (@SuppressWarnings("unused") MetaDataException e) {
@@ -760,7 +783,6 @@ public final class BindUtil {
 							if (lastDotIndex >= 0) {
 								Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
 								if ((owningBean != null) && (target != null)) {
-									internalDocument = (DocumentImpl) target.getDocument();
 									domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean, true);
 								}
 							}

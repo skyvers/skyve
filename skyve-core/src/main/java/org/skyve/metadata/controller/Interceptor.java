@@ -151,6 +151,18 @@ public abstract class Interceptor implements MetaData {
 	}
 
 	@SuppressWarnings({"unused", "static-method"})
+	public boolean beforePostDelete(PersistentBean bean)
+	throws Exception {
+		return false;
+	}
+	
+	@SuppressWarnings("unused")
+	public void afterPostDelete(PersistentBean bean)
+	throws Exception {
+		// no-op
+	}
+
+	@SuppressWarnings({"unused", "static-method"})
 	public boolean beforePostLoad(PersistentBean bean)
 	throws Exception {
 		return false;
@@ -275,6 +287,22 @@ public abstract class Interceptor implements MetaData {
 										BizPortWorkbook result,
 										WebContext webContext)
 	throws Exception {
+		// no-op
+	}
+	
+	/**
+	 * Note that this method should not throw any exceptions and should always succeed to enable correct state management after the render response.
+	 */
+	@SuppressWarnings({"unused", "static-method"})
+	public boolean beforePostRender(Bean bean, WebContext webContext) {
+		return false;
+	}
+	
+	/**
+	 * Note that this method should not throw any exceptions and should always succeed to enable correct state management after the render response.
+	 */
+	@SuppressWarnings("unused")
+	public void afterPostRender(Bean result, WebContext webContext) {
 		// no-op
 	}
 }

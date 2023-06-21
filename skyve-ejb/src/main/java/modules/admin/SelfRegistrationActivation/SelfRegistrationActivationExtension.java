@@ -14,13 +14,9 @@ import modules.admin.domain.SelfRegistrationActivation;
 import modules.admin.domain.User;
 
 public class SelfRegistrationActivationExtension extends SelfRegistrationActivation {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -852587779096146278L;
 
-	public User activateUser(String activationCode) {
+	public UserExtension activateUser(String activationCode) {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery userQuery = p.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		userQuery.getFilter().addEquals(User.activationCodePropertyName, activationCode);
@@ -80,4 +76,30 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 		return Util.getSkyveContextUrl() + "/login";
 	}
 
+	@Override
+	public String getPleaseSignIn() {
+		return Util.i18n("admin.selfRegistrationActivation.pleaseSignIn", this.getUser().getContact().getName(), this.getLoginUrl(),
+				this.getUser().getContact().getEmail1());
+	}
+
+	@Override
+	public String getSignInLink() {
+		return Util.i18n("admin.selfRegistrationActivation.signInLink", this.getLoginUrl());
+	}
+
+	@Override
+	public String getAlreadyActivated() {
+		return Util.i18n("admin.selfRegistrationActivation.alreadyActivated", this.getUser().getContact().getName(),
+				this.getLoginUrl());
+	}
+
+	@Override
+	public String getNoLongerValid() {
+		return Util.i18n("admin.selfRegistrationActivation.noLongerValid", this.getLoginUrl());
+	}
+
+	@Override
+	public String getNotRecognised() {
+		return Util.i18n("admin.selfRegistrationActivation.notRecognised", this.getLoginUrl());
+	}
 }

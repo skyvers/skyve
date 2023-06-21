@@ -100,7 +100,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 		if (AbstractContentManager.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_CONTENT_MANAGER_CLASS != null) {
 				try {
-					AbstractContentManager.IMPLEMENTATION_CLASS = (Class<? extends AbstractContentManager>) Class.forName(UtilImpl.SKYVE_CONTENT_MANAGER_CLASS);
+					AbstractContentManager.IMPLEMENTATION_CLASS = (Class<? extends AbstractContentManager>) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_CONTENT_MANAGER_CLASS);
 				}
 				catch (ClassNotFoundException e) {
 					throw new IllegalStateException("Could not find factories.contentManagerClass " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);

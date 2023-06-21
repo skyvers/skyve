@@ -61,6 +61,8 @@
 
   <xs:element name="dialogButton" type="tns:dialogButton"/>
 
+  <xs:element name="documentAggregate" type="tns:viewDocumentAggregateUserAccessMetaData"/>
+
   <xs:element name="download" type="tns:downloadAction"/>
 
   <xs:element name="dynamicImage" type="tns:dynamicImage"/>
@@ -109,6 +111,8 @@
 
   <xs:element name="map" type="tns:map"/>
 
+  <xs:element name="modelAggregate" type="tns:viewModelAggregateUserAccessMetaData"/>
+
   <xs:element name="new" type="tns:newAction"/>
 
   <xs:element name="noBucket" type="tns:noBucketMetaData"/>
@@ -123,9 +127,13 @@
 
   <xs:element name="password" type="tns:password"/>
 
+  <xs:element name="previousComplete" type="tns:viewPreviousCompleteUserAccessMetaData"/>
+
   <xs:element name="print" type="tns:printAction"/>
 
   <xs:element name="progressBar" type="tns:progressBar"/>
+
+  <xs:element name="queryAggregate" type="tns:viewQueryAggregateUserAccessMetaData"/>
 
   <xs:element name="queryListViewReference" type="tns:queryListViewReference"/>
 
@@ -152,6 +160,8 @@
   <xs:element name="setDisabled" type="tns:setDisabledEventAction"/>
 
   <xs:element name="setInvisible" type="tns:setInvisibleEventAction"/>
+
+  <xs:element name="singular" type="tns:viewSingularUserAccessMetaData"/>
 
   <xs:element name="slider" type="tns:slider"/>
 
@@ -455,6 +465,7 @@
         <xs:attribute name="pixelWidth" type="xs:int" use="required"/>
         <xs:attribute name="pixelHeight" type="xs:int" use="required"/>
         <xs:attribute name="sanitise" type="tns:sanitisation"/>
+        <xs:attribute name="mentionMarkers" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -665,6 +676,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="accesses" type="tns:accesses" form="qualified" minOccurs="0"/>
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required"/>
@@ -931,6 +943,77 @@
     <xs:attribute name="fromBinding" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="accesses">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:singular"/>
+        <xs:element ref="tns:documentAggregate"/>
+        <xs:element ref="tns:queryAggregate"/>
+        <xs:element ref="tns:modelAggregate"/>
+        <xs:element ref="tns:previousComplete"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="generate" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="viewSingularUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewDocumentAggregateUserAccessMetaData">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewDocumentAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewUserAccessMetaData" abstract="true">
+    <xs:sequence>
+      <xs:element name="uxui" type="tns:viewUserAccessUxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="viewUserAccessUxUiMetadata">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewQueryAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="query" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewModelAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="model" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewPreviousCompleteUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="staticImage">
     <xs:sequence>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
@@ -1042,6 +1125,7 @@
     <xs:attribute name="border" type="xs:boolean"/>
     <xs:attribute name="borderTitle" type="xs:string"/>
     <xs:attribute name="defaultLabelAlign" type="tns:horizontalAlignment"/>
+    <xs:attribute name="labelLayout" type="ns1:formLabelLayout"/>
     <xs:attribute name="disabled" type="xs:string"/>
     <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>

@@ -176,6 +176,12 @@ public class BulkUserCreationJob extends Job {
 			newUser.setPasswordResetToken(token);
 			newUser.setContact(contact);
 
+			// set default module
+			String defaultModuleName = bean.getDefaultModuleName();
+			if (defaultModuleName != null) {
+				newUser.setHomeModule(defaultModuleName);
+			}
+
 			// assign groups as selected
 			List<GroupExtension> groups = bean.getUserInvitationGroups();
 			for (GroupExtension group : groups) {

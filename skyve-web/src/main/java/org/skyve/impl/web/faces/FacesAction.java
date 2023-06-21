@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.primefaces.component.datatable.DataTable;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
+import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
@@ -50,6 +51,11 @@ public abstract class FacesAction<T> {
 			catch (InvocationTargetException e) {
 				throw e.getTargetException();
 			}
+		}
+		// Allow security problems out so they are redirected to the error page
+		catch (SecurityException e) {
+			persistence.setRollbackOnly();
+			throw e;
 		}
 		catch (Throwable t) {
 			persistence.setRollbackOnly();

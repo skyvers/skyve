@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.function.Function;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
@@ -40,6 +41,37 @@ public class Binder {
 
 	public static String formatMessage(String message, Function<String, String> postEvaluateDisplayValue, Bean... beans) {
 		return BindUtil.formatMessage(message, postEvaluateDisplayValue, beans);
+	}
+
+	public static String validateMessage(String message, Document... documents) {
+		return BindUtil.validateMessageExpressions(message, CORE.getCustomer(), documents);
+	}
+
+	public static boolean isSkyveExpression(String expression) {
+		return BindUtil.isSkyveExpression(expression);
+	}
+	
+	public static boolean containsSkyveExpressions(String message) {
+		return BindUtil.containsSkyveExpressions(message);
+	}
+	
+	public static String validateMessage(String message, String moduleName, String... documentNames) {
+		Customer c  = CORE.getCustomer();
+		Module m = c.getModule(moduleName);
+		int documentNamesLength = documentNames.length;
+		if (documentNamesLength > 1) {
+			Document[] documents = new Document[documentNamesLength];
+			for (int i = 0; i < documentNamesLength; i++) {
+				String documentName = documentNames[i];
+				documents[i] = m.getDocument(c, documentName);
+			}
+			return BindUtil.validateMessageExpressions(message, c, documents);
+		}
+		else if (documentNamesLength == 1) {
+			return BindUtil.validateMessageExpressions(message, c, m.getDocument(c, documentNames[0]));
+		}
+
+		return null;
 	}
 
 	public static String negateCondition(String condition) {

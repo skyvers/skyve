@@ -80,7 +80,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
     private void initialiseVisitorIfNull(DesignSpecification design) {
         if (visitor == null) {
             final View view = design.getDocument().getView(design.getUxui(), design.getCustomer(), View.ViewType.edit.toString());
-            visitor = new ReportViewVisitor(this, (CustomerImpl) design.getCustomer(), (ModuleImpl) design.getModule(), (DocumentImpl) design.getDocument(), (ViewImpl) view);
+            visitor = new ReportViewVisitor(this, (CustomerImpl) design.getCustomer(), (ModuleImpl) design.getModule(), (DocumentImpl) design.getDocument(), (ViewImpl) view, design.getUxui());
         }
     }
 }

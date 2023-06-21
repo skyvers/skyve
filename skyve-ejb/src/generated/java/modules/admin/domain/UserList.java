@@ -41,6 +41,9 @@ public class UserList extends AbstractTransientBean {
 	/** @hidden */
 	public static final String bulkCreateWithEmailPropertyName = "bulkCreateWithEmail";
 
+	/** @hidden */
+	public static final String defaultModuleNamePropertyName = "defaultModuleName";
+
 	/**
 	 * User Invitation Groups
 	 * <br/>
@@ -63,6 +66,11 @@ Provide a list separated by either comma or semicolon.
 	 * Bulk create with email
 	 **/
 	private Boolean bulkCreateWithEmail;
+
+	/**
+	 * Default Module Name
+	 **/
+	private String defaultModuleName;
 
 	@Override
 	@XmlTransient
@@ -199,6 +207,24 @@ Provide a list separated by either comma or semicolon.
 	public void setBulkCreateWithEmail(Boolean bulkCreateWithEmail) {
 		preset(bulkCreateWithEmailPropertyName, bulkCreateWithEmail);
 		this.bulkCreateWithEmail = bulkCreateWithEmail;
+	}
+
+	/**
+	 * {@link #defaultModuleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getDefaultModuleName() {
+		return defaultModuleName;
+	}
+
+	/**
+	 * {@link #defaultModuleName} mutator.
+	 * @param defaultModuleName	The new value.
+	 **/
+	@XmlElement
+	public void setDefaultModuleName(String defaultModuleName) {
+		preset(defaultModuleNamePropertyName, defaultModuleName);
+		this.defaultModuleName = defaultModuleName;
 	}
 
 	/**

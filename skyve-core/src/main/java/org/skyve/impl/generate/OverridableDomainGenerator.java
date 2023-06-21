@@ -2010,6 +2010,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param enums
 	 */
 	private static void appendEnumDefinition(Enumeration enumeration, String typeName, StringBuilder enums) {
+		
 		attributeJavadoc(enumeration, enums);
 		enums.append("\t@XmlEnum\n");
 		enums.append("\tpublic static enum ").append(typeName).append(" implements Enumeration {\n");
@@ -2033,7 +2034,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		enums.append("\t\t/** @hidden */\n");
 		enums.append("\t\tprivate DomainValue domainValue;\n\n");
 		enums.append("\t\t/** @hidden */\n");
-		enums.append("\t\tprivate static List<DomainValue> domainValues;\n\n");
+		enums.append("\t\tprivate static List<DomainValue> domainValues = Stream.of(values()).map(").append(typeName).append("::toDomainValue).collect(Collectors.toUnmodifiableList());\n\n");
 
 		// constructor
 		enums.append("\t\tprivate ").append(typeName).append("(String code, String description) {\n");
@@ -2084,14 +2085,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		enums.append("\t\t\treturn result;\n");
 		enums.append("\t\t}\n\n");
 
+		// toDomainValues
 		enums.append("\t\tpublic static List<DomainValue> toDomainValues() {\n");
-		enums.append("\t\t\tif (domainValues == null) {\n");
-		enums.append("\t\t\t\t").append(typeName).append("[] values = values();\n");
-		enums.append("\t\t\t\tdomainValues = new ArrayList<>(values.length);\n");
-		enums.append("\t\t\t\tfor (").append(typeName).append(" value : values) {\n");
-		enums.append("\t\t\t\t\tdomainValues.add(value.domainValue);\n");
-		enums.append("\t\t\t\t}\n");
-		enums.append("\t\t\t}\n\n");
 		enums.append("\t\t\treturn domainValues;\n");
 		enums.append("\t\t}\n");
 		enums.append("\t}\n\n");
@@ -2252,20 +2247,24 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													((referenceParentDocumentName == null) ? " no parent document (not a child document)" : " a parent document of " + referenceParentDocumentName));
 				}
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
-				methods.append("\t\telement.setParent(");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.setParent(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else if (inverse != null) {
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
-				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
 				if (owningDomainExtensionClassExists) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else {
@@ -2312,12 +2311,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("Element(").append(referenceClassName).append(" element) {\n");
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
-				methods.append("\t\telement.setParent(null);\n");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.setParent(null);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else if (inverse != null) {
 				methods.append("\t\tboolean result = ").append(name).append(".remove(element);\n");
-				methods.append("\t\telement.get").append(inverseMethodName).append("().remove(this);\n");
+				methods.append("\t\tif (result) {\n");
+				methods.append("\t\t\telement.get").append(inverseMethodName).append("().remove(this);\n");
+				methods.append("\t\t}\n");
 				methods.append("\t\treturn result;\n");
 			}
 			else {
@@ -2758,6 +2761,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			catch (Exception e) {
 				if (debug) System.err.println("Could not find action class for: " + e.getMessage());
+				skipGeneration = true;
 			}
 
 			// check if there is a factory extension annotation which skips this test
@@ -3107,7 +3111,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							imports.add("org.skyve.metadata.model.document.Bizlet.DomainValue");
 							imports.add("org.skyve.util.Util");
 							imports.add("java.util.List");
-							imports.add("java.util.ArrayList");
+							imports.add("java.util.stream.Stream");
+							imports.add("java.util.stream.Collectors");
 							imports.add("javax.xml.bind.annotation.XmlEnum");
 	
 							appendEnumDefinition(enumeration, propertySimpleClassName, enums);
