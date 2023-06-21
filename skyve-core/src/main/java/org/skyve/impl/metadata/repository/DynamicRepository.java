@@ -3,6 +3,8 @@ package org.skyve.impl.metadata.repository;
 import java.util.Collections;
 import java.util.List;
 
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
@@ -80,6 +82,30 @@ public class DynamicRepository extends AbstractDynamicOnDemandRepository {
 		return Long.MIN_VALUE;
 	}
 	
+	@Override
+	public ActionMetaData loadMetaDataAction(String customerName, String moduleName, String documentName, String actionName) {
+		// nothing to do as metadata will be added programmatically
+		return null;
+	}
+
+	@Override
+	public long metaDataActionLastModifiedMillis(String customerName, String moduleName, String documentName, String actionName) {
+		// never reload as metadata will be added programmatically
+		return Long.MIN_VALUE;
+	}
+
+	@Override
+	public BizletMetaData loadMetaDataBizlet(String customerName, String moduleName, String documentName) {
+		// nothing to do as metadata will be added programmatically
+		return null;
+	}
+
+	@Override
+	public long metaDataBizletLastModifiedMillis(String customerName, String moduleName, String documentName) {
+		// never reload as metadata will be added programmatically
+		return Long.MIN_VALUE;
+	}
+
 	@Override
 	public List<String> getAllCustomerNames() {
 		// TODO should I find the customer cache keys?

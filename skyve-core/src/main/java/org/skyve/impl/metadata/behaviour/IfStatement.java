@@ -25,7 +25,7 @@ public class IfStatement extends StatementMetaData {
 
 	private String condition;
 
-	@XmlElementWrapper(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "then")
+	@XmlElementWrapper(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "then", required = true)
 	@XmlElementRefs({@XmlElementRef(type = IfStatement.class),
 						@XmlElementRef(type = SetStatement.class)})
 	private List<StatementMetaData> thenStatements = new ArrayList<>();

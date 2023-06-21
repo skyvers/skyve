@@ -5,13 +5,14 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 /**
- * A bizlet allows callbacks to be made at pertinent times in the Bizhub server processing.
+ * A bizlet allows callbacks to be made at pertinent times in the Skyve server processing.
  * 
  * Event timing is as follows
  * 
@@ -19,9 +20,11 @@ import org.skyve.web.WebContext;
  * 
  * newInstance() - called after instantiation through the document.newInstance().
  * postLoad() - called after instantiation and population of data store values.
- * preSave() - called before flushing the values to the data store or User press of [Change] button (before document validation).
+ * preSave() - called (recursively for the object graph) before flushing the values to the data store (before document validation).
+ * postSave() - called (recursively for the object graph) after flushing the values to the data store (after document validation).
  * validate() - called after preSave() (and after document validation) but before flushing the values to the data store.
  * preDelete() - called before deletion from the data store.
+ * postDelete() - called after deletion from the data store.
  * 
  * Form level -
  * 
@@ -33,9 +36,10 @@ import org.skyve.web.WebContext;
  * 					(ie when ImplicitActionName.Add or ImplicitActionName.Edit is used).
  * preRerender() - called before a rerender is performed.
  * 					This occurs on zoom out operation (data/list/tree/map/calendar/lookup) and during rerender event action.
+ * postRender() - called after a HTML or JSON response has been sent and committed. This can be used to reset state set for the response (ie Tab Change).
  * @param <T>	The type of document bean we want to process with this Bizlet.
  */
-public abstract class Bizlet<T extends Bean> implements MetaData {
+public class Bizlet<T extends Bean> implements MetaData {
 	/**
 	 * Key/Value pairs for domains defined.
 	 */
@@ -85,6 +89,15 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 		}
 	}
 	
+	private BizletMetaData metaDataBizlet = null;
+	
+	/**
+	 * This method is used by Skyve to implement the default behaviour.
+	 */
+	public final void setMetaDataBizlet(BizletMetaData metaDataBizlet) {
+		this.metaDataBizlet = metaDataBizlet;
+	}
+	
 	/**
 	 * Called when a document is instantiated into a bean.
 	 * Use this method to run constructor-style initialization.
@@ -94,6 +107,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public T newInstance(T bean) throws Exception {
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.newInstance(bean);
+		}
 		return bean;
 	}
 	
@@ -104,7 +121,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public void validate(T bean, ValidationException e) throws Exception {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.validate(bean, e);
+		}
 	}
 
 	/**
@@ -115,10 +135,13 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * and at startup for a fat client.
 	 *
 	 * @param attributeName	The name of the attribute to get the domain for.
-	 * @return An empty List of {@link DomainValue}s.
+	 * @return the meta-data bizlet's domain values or null.
 	 */
-	@SuppressWarnings("static-method")
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			return metaDataBizlet.getConstantDomainValues(attributeName);
+		}
 		return null;
 	}
 
@@ -129,10 +152,13 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * and once per conversation in a fat client.
 	 * 
 	 * @param attributeName	The name of the attribute to get the domain for.
-	 * @return An empty List of {@link DomainValue}s.
+	 * @return the meta-data bizlet's domain values or null.
 	 */
-	@SuppressWarnings("static-method")
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			return metaDataBizlet.getVariantDomainValues(attributeName);
+		}
 		return null;
 	}	
 	
@@ -144,9 +170,13 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * 
 	 * @param attributeName	The name of the attribute to get the domain for.
 	 * @param bean	This bean to use to derive the values.
-	 * @return An empty List of {@link DomainValue}s.
+	 * @return the meta-data bizlet's domain values or null.
 	 */
 	public List<DomainValue> getDynamicDomainValues(String attributeName, T bean) throws Exception {
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			return metaDataBizlet.getDynamicDomainValues(attributeName, bean);
+		}
 		return null;
 	}
 
@@ -157,9 +187,13 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param attributeName	The name of the attribute to get the domain for.
 	 * @param value The value typed into the view widget used to complete upon.
 	 * @param bean	This bean to use to derive the values.
-	 * @return null.
+	 * @return the meta-data bizlet's completions or null.
 	 */
 	public List<String> complete(String attributeName, String value, T bean) throws Exception {
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			return metaDataBizlet.complete(attributeName, value, bean);
+		}
 		return null;
 	}
 
@@ -176,6 +210,12 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public T resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			@SuppressWarnings("unchecked")
+			T result = (T) metaDataBizlet.resolve(bizId, conversationBean);
+			return result;
+		}
 		return null;
 	}
 	
@@ -188,7 +228,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public void preSave(T bean) throws Exception {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.preSave(bean);
+		}
 	}
 	
 	/**
@@ -199,7 +242,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public void postSave(T bean) throws Exception {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.postSave(bean);
+		}
 	}
 
 	/**
@@ -211,7 +257,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public void preDelete(T bean) throws Exception {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.preDelete(bean);
+		}
 	}
 	
 	/**
@@ -224,7 +273,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public void postDelete(T bean) throws Exception {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.postDelete(bean);
+		}
 	}
 
 	/**
@@ -237,7 +289,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public void postLoad(T bean) throws Exception {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.postLoad(bean);
+		}
 	}
 	
 	/**
@@ -261,7 +316,10 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	public void preRerender(String source, T bean, WebContext webContext) throws Exception {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.preRerender(source, bean);
+		}
 	}
 	
 	/**
@@ -271,6 +329,9 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 * @param webContext	The web context.
 	 */
 	public void postRender(T bean, WebContext webContext) {
-		// do nothing
+		// Execute the metaDataBizlet if one exists
+		if (metaDataBizlet != null) {
+			metaDataBizlet.postRender(bean);
+		}
 	}
 }

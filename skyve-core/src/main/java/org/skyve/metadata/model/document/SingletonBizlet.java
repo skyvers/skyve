@@ -19,7 +19,8 @@ public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T
 		Persistence p = CORE.getPersistence();
 		T result = p.newDocumentQuery(bean.getBizModule(), bean.getBizDocument()).beanResult();
 		if (result == null) {
-			result = bean;
+			// Run the meta-data bizlet if it exists
+			result = super.newInstance(bean);
 		}
 		return result;
 	}

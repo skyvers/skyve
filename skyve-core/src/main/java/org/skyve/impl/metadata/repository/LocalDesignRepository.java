@@ -285,13 +285,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
 					String actionPrivilegeName = actionPrivilege.getName();
 					Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
-					if (getAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
-						throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
-														" for customer " + customer.getName() + 
-														" in module " + module.getName() +
-														" for document " + actionDocument.getName() + 
-														" for role " + role.getName() +
-														" does not reference a valid action");
+					if (getClassAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
+						if (getMetaDataAction(customer, actionDocument, actionPrivilegeName) == null) {
+							throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
+															" for customer " + customer.getName() + 
+															" in module " + module.getName() +
+															" for document " + actionDocument.getName() + 
+															" for role " + role.getName() +
+															" does not reference a valid action");
+						}
 					}
 				}
 			}

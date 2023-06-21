@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.view.Actions;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -147,26 +148,31 @@ public class ViewGenerator {
 			}
 			catch (@SuppressWarnings("unused") Exception e) {
 				try {
-					repository.getUploadAction(customer, document, actionName, false);
-					action.setImplicitName(ImplicitActionName.Upload);
+					repository.getMetaDataAction(customer, document, actionName);
 				}
 				catch (@SuppressWarnings("unused") Exception e1) {
 					try {
-						repository.getDownloadAction(customer, document, actionName, false);
-						action.setImplicitName(ImplicitActionName.Download);
+						repository.getUploadAction(customer, document, actionName, false);
+						action.setImplicitName(ImplicitActionName.Upload);
 					}
 					catch (@SuppressWarnings("unused") Exception e2) {
 						try {
-							repository.getBizExportAction(customer, document, actionName, false);
-							action.setImplicitName(ImplicitActionName.BizExport);
+							repository.getDownloadAction(customer, document, actionName, false);
+							action.setImplicitName(ImplicitActionName.Download);
 						}
 						catch (@SuppressWarnings("unused") Exception e3) {
 							try {
-								repository.getBizImportAction(customer, document, actionName, false);
-								action.setImplicitName(ImplicitActionName.BizImport);
+								repository.getBizExportAction(customer, document, actionName, false);
+								action.setImplicitName(ImplicitActionName.BizExport);
 							}
 							catch (@SuppressWarnings("unused") Exception e4) {
-								throw new MetaDataException(actionName + " cannot be found");
+								try {
+									repository.getBizImportAction(customer, document, actionName, false);
+									action.setImplicitName(ImplicitActionName.BizImport);
+								}
+								catch (@SuppressWarnings("unused") Exception e5) {
+									throw new MetaDataException(actionName + " cannot be found");
+								}
 							}
 						}
 					}
@@ -295,7 +301,16 @@ public class ViewGenerator {
 					List<DomainValue> domainValues = null;
 					try {
 						if (bizlet == null) {
+							// Note - Can't call document.getBizlet() here as we need to use the ViewGenerator's repository
 							bizlet = repository.getBizlet(customer, document, false);
+							BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, document);
+							if (bizlet != null) {
+								bizlet.setMetaDataBizlet(metaDataBizlet);
+							}
+							else if (metaDataBizlet != null) {
+								bizlet = new Bizlet<>();
+								bizlet.setMetaDataBizlet(metaDataBizlet);
+							}
 						}
 						domainValues = customer.getConstantDomainValues(bizlet, moduleName, documentName, attribute);
 					}

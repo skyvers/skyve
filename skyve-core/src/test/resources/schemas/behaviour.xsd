@@ -54,7 +54,9 @@
   </xs:complexType>
 
   <xs:complexType name="statementMetaData" abstract="true">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="set">

@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.behaviour.IfStatement;
 import org.skyve.impl.metadata.behaviour.SetStatement;
@@ -96,5 +97,12 @@ public class ActionMetaData implements NamedMetaData, ConvertableMetaData<Action
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
+	}
+	
+	/**
+	 * Execute this action.
+	 */
+	public void execute(Bean bean) {
+		statements.forEach(s -> s.execute(bean));
 	}
 }

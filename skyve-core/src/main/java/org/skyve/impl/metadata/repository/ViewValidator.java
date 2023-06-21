@@ -11,6 +11,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -2030,7 +2031,11 @@ class ViewValidator extends ViewVisitor {
 	
 	@Override
 	public void visitCustomAction(ActionImpl action) {
-		validateClassAction(action.getResourceName());
+		String resourceName = action.getResourceName();
+		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, document, resourceName);
+		if (metaDataAction == null) {
+			validateClassAction(resourceName);
+		}
 		validateAction(action);
 	}
 

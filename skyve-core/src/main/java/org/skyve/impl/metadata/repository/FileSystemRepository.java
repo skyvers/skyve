@@ -13,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SkyveException;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerModuleMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
@@ -169,12 +171,15 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 						if (documentFileName.equals(ACTIONS_NAME) && documentFile.isDirectory()) {
 							for (File actionFile : documentFile.listFiles()) {
 								String actionFileName = actionFile.getName();
-								if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java")) {
+								if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java") || actionFileName.endsWith(".xml")) {
 									String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
 
 									sb.setLength(0);
 									sb.append(key).append(moduleFileName).append('/');
 									sb.append(ACTIONS_NAMESPACE).append(actionName);
+									if (actionFileName.endsWith(".xml")) {
+										sb.append(META_DATA_SUFFIX);
+									}
 									String actionLocation = sb.toString();
 									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
 									addKey(actionLocation);
@@ -259,9 +264,18 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 						else if (documentFileName.equals(moduleFileName + "Bizlet.class")) {
 							sb.setLength(0);
 							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append("Bizlet");
+							sb.append(moduleFileName).append(BIZLET_SUFFIX);
 							String bizletLocation = sb.toString();
 							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+							addKey(bizletLocation);
+						}
+						// found the bizlet metadata file
+						else if (documentFileName.equals(moduleFileName + "Bizlet.xml")) {
+							sb.setLength(0);
+							sb.append(key).append(moduleFileName).append('/');
+							sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+							String bizletLocation = sb.toString();
+							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
 							addKey(bizletLocation);
 						}
 						// found the extension class file
@@ -622,6 +636,51 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 	
+	private String actionPath(String customerName, String moduleName, String documentName, String actionName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		if (customerName != null) {
+			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		result.append(MODULES_NAMESPACE);
+		result.append(moduleName).append('/');
+		result.append(documentName).append('/').append(ACTIONS_NAMESPACE);
+		result.append(actionName).append(".xml");
+		return result.toString();
+	}
+	
+	@Override
+	public ActionMetaData loadMetaDataAction(String customerName, String moduleName, String documentName, String actionName) {
+		ActionMetaData result = null;
+		
+		try {
+			String path = actionPath(customerName, moduleName, documentName, actionName);
+			result = XMLMetaData.unmarshalActionFile(path);
+			if (! actionName.equals(result.getName())) {
+				throw new MetaDataException("Action is defined with file name of " + path + 
+												" but the name attribute is " + result.getName());
+			}
+		} // try (populate Metadata)
+		catch (MetaDataException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new MetaDataException(e);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public long metaDataActionLastModifiedMillis(String customerName, String moduleName, String documentName, String actionName) {
+		String path = actionPath(customerName, moduleName, documentName, actionName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
+	}
+
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		// If dynamic, use the bizletClassName if defined
@@ -639,8 +698,49 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		StringBuilder key = new StringBuilder(128);
 		String documentName = document.getName();
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
-		key.append(documentName).append('/').append(documentName).append("Bizlet");
+		key.append(documentName).append('/').append(documentName).append(BIZLET_SUFFIX);
 		return getJavaMetaData(customer, key.toString(), false, runtime);
+	}
+
+	private String bizletPath(String customerName, String moduleName, String documentName) {
+		StringBuilder result = new StringBuilder(256);
+		result.append(absolutePath);
+		if (customerName != null) {
+			result.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		result.append(MODULES_NAMESPACE);
+		result.append(moduleName).append('/');
+		result.append(documentName).append('/');
+		result.append(documentName).append(BIZLET_SUFFIX).append(".xml");
+		return result.toString();
+	}
+	
+	@Override
+	public BizletMetaData loadMetaDataBizlet(String customerName, String moduleName, String documentName) {
+		BizletMetaData result = null;
+		
+		try {
+			String path = bizletPath(customerName, moduleName, documentName);
+			result = XMLMetaData.unmarshalBizletFile(path);
+		} // try (populate Metadata)
+		catch (MetaDataException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new MetaDataException(e);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public long metaDataBizletLastModifiedMillis(String customerName, String moduleName, String documentName) {
+		String path = bizletPath(customerName, moduleName, documentName);
+		File f = new File(path);
+		if (f.exists()) {
+			return f.lastModified();
+		}
+		return Long.MIN_VALUE;
 	}
 
 	@Override
@@ -710,7 +810,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getModel(customer, document, modelName, runtime);
 	}
 
-	protected <T extends MetaData> T getAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
+	protected <T extends MetaData> T getClassAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
 		// If dynamic, use the actions map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -736,7 +836,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName, boolean runtime) {
-		MetaData result = getAction(customer, document, actionName, true, runtime);
+		MetaData result = getClassAction(customer, document, actionName, true, runtime);
 		if (loadClasses) {
 			return (ServerSideAction<Bean>) result;
 		}
@@ -746,7 +846,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName, boolean runtime) {
-		MetaData result = getAction(customer, document, exportActionName, true, runtime);
+		MetaData result = getClassAction(customer, document, exportActionName, true, runtime);
 		if (loadClasses) {
 			return (BizExportAction) result;
 		}
@@ -756,7 +856,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName, boolean runtime) {
-		MetaData result = getAction(customer, document, importActionName, true, runtime);
+		MetaData result = getClassAction(customer, document, importActionName, true, runtime);
 		if (loadClasses) {
 			return (BizImportAction) result;
 		}
@@ -767,7 +867,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	@Override
 	@SuppressWarnings("unchecked")
 	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName, boolean runtime) {
-		MetaData result = getAction(customer, document, downloadActionName, true, runtime);
+		MetaData result = getClassAction(customer, document, downloadActionName, true, runtime);
 		if (loadClasses) {
 			return (DownloadAction<Bean>) result;
 		}
@@ -777,7 +877,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName, boolean runtime) {
-		return getAction(customer, document, uploadActionName, true, runtime);
+		return getClassAction(customer, document, uploadActionName, true, runtime);
 	}
 
 	@Override
@@ -851,8 +951,8 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 					try {
 						return Thread.currentThread().getContextClassLoader().loadClass(className);
 					}
-					catch (Exception e) {
-						throw new MetaDataException("A problem was encountered loading class " + className, e);
+					catch (@SuppressWarnings("unused") Exception e) {
+						return null; // its up to the caller to assert existence if required
 					}
 				}
 

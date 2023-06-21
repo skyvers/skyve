@@ -12,7 +12,7 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
-@XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
+@XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, propOrder = {"properties"})
 public abstract class StatementMetaData implements DecoratedMetaData {
 	private static final long serialVersionUID = 3100286315509858592L;
 	

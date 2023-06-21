@@ -29,12 +29,15 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.behaviour.ServerSideMetaDataAction;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.ModelImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -613,7 +616,16 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
-		return repository.getBizlet(customer, this, true);
+		Bizlet<T> result = repository.getBizlet(customer, this, true);
+		BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
+		if (result != null) {
+			result.setMetaDataBizlet(metaDataBizlet);
+		}
+		else if (metaDataBizlet != null) {
+			result = new Bizlet<>();
+			result.setMetaDataBizlet(metaDataBizlet);
+		}
+		return result;
 	}
 
 	@Override
@@ -638,6 +650,10 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	
 	@Override
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime) {
+		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, this, className);
+		if (metaDataAction != null) {
+			return new ServerSideMetaDataAction(metaDataAction);
+		}
 		return repository.getServerSideAction(customer, this, className, runtime);
 	}
 
@@ -670,7 +686,17 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
+			// Note - Can't call this.getBizlet() here as it has no runtime parameter
 			Bizlet<T> bizlet = repository.getBizlet(customer, this, runtime);
+			BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
+			if (bizlet != null) {
+				bizlet.setMetaDataBizlet(metaDataBizlet);
+			}
+			else if (metaDataBizlet != null) {
+				bizlet = new Bizlet<>();
+				bizlet.setMetaDataBizlet(metaDataBizlet);
+			}
+
 			try {
 				if (DomainType.constant.equals(domainType)) {
 					result = customer.getConstantDomainValues(bizlet,

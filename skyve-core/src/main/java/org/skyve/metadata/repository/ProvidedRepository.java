@@ -6,6 +6,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.MetaDataException;
@@ -50,6 +52,8 @@ public interface ProvidedRepository extends CachedRepository {
 	final String REPORTS_NAMESPACE = REPORTS_NAME + '/';
 	final String DOMAIN_NAME = "domain";
 	final String DOMAIN_NAMESPACE = DOMAIN_NAME + '/';
+	final String BIZLET_SUFFIX = "Bizlet";
+	final String META_DATA_SUFFIX = "MetaData";
 
 	@Nonnull List<String> getAllCustomerNames();
 
@@ -89,9 +93,26 @@ public interface ProvidedRepository extends CachedRepository {
 
 	boolean getUseScaffoldedViews();
 	
+	/**
+	 * 
+	 * @param customer
+	 * @param document
+	 * @param actionName
+	 * @return
+	 */
+	@Nullable ActionMetaData getMetaDataAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String actionName);
+
 	@Nullable String vtable(@Nonnull String customerName, @Nonnull String key);
 
 	<T extends Bean> @Nullable Bizlet<T> getBizlet(@Nonnull Customer customer, @Nonnull Document document, boolean runtime);
+
+	/**
+	 * 
+	 * @param customer
+	 * @param document
+	 * @return
+	 */
+	@Nullable BizletMetaData getMetaDataBizlet(@Nullable Customer customer, @Nonnull Document document);
 
 	/**
 	 * 

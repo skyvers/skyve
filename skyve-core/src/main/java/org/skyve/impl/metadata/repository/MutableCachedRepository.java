@@ -13,6 +13,8 @@ import javax.annotation.Nullable;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
@@ -489,13 +491,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 	}
 
 	private ViewImpl convertView(String searchCustomerName,
-								String searchUxUi, // only used to make the metadata name
-								Customer customer,
-								String moduleName,
-								String documentName,
-								Document document,
-								String uxui, // the current uxui used to resolve view components
-								ViewMetaData view) {
+									String searchUxUi, // only used to make the metadata name
+									Customer customer,
+									String moduleName,
+									String documentName,
+									Document document,
+									String uxui, // the current uxui used to resolve view components
+									ViewMetaData view) {
 		StringBuilder metaDataNameSB = new StringBuilder(128);
 		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		if (searchUxUi != null) {
@@ -598,7 +600,225 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		
 		return result;
 	}
+
+	@Override
+	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+		ActionMetaData result = null;
+		if (customer != null) {
+			// get customer overridden
+			result = getMetaDataActionInternal(customer.getName(), document, actionName);
+		}
+		if (result == null) { // not overridden
+			result = getMetaDataActionInternal(null, document, actionName);
+		}
+		return result;
+	}
+
+	private ActionMetaData getMetaDataActionInternal(String customerName, Document document, String actionName) {
+		StringBuilder actionKeySB = new StringBuilder(128);
+		if (customerName != null) {
+			actionKeySB.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		actionKeySB.append(MODULES_NAMESPACE);
+		String documentModuleName = document.getOwningModuleName();
+		String documentName = document.getName();
+		actionKeySB.append(documentModuleName).append('/').append(documentName).append('/').append(ACTIONS_NAMESPACE);
+		actionKeySB.append(actionName).append(META_DATA_SUFFIX);
+		String actionKey = actionKeySB.toString();
+		Optional<MetaData> result = cache.get(actionKey);
+		if (result != null) { // key is present
+			// Load if empty
+			if (result.isEmpty()) {
+				// Load the action
+				ActionMetaData action = loadMetaDataAction(customerName, documentModuleName, documentName, actionName);
+				if (action != null) {
+					action = convertMetaDataAction(customerName, documentModuleName, documentName, action);
+					if (action != null) {
+						result = Optional.of(action);
+						cache.put(actionKey, result);
+					}
+				}
+			}
+			else {
+				// Load if dev mode and new repository version
+				if (UtilImpl.DEV_MODE) {
+					ActionMetaData action = (ActionMetaData) result.get();
+					// check last modified for the action
+					if (action.getLastModifiedMillis() < metaDataActionLastModifiedMillis(customerName, documentModuleName, documentName, actionName)) {
+						// Load the action
+						ActionMetaData newAction = loadMetaDataAction(customerName, documentModuleName, documentName, actionName);
+						if (newAction != null) {
+							newAction = convertMetaDataAction(customerName, documentModuleName, documentName, newAction);
+							if (newAction != null) {
+								result = Optional.of(newAction);
+								cache.put(actionKey, result);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return ((result == null) || result.isEmpty()) ? null : (ActionMetaData) result.get();
+	}
+
+	private ActionMetaData convertMetaDataAction(String customerName,
+													String moduleName,
+													String documentName,
+													ActionMetaData action) {
+		StringBuilder metaDataNameSB = new StringBuilder(128);
+		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
+		metaDataNameSB.append(action.getName());
+		if (customerName != null) {
+			metaDataNameSB.append(" (").append(customerName).append(')');
+		}
+		String metaDataName = metaDataNameSB.toString();
+		
+		// Convert the action
+		return action.convert(metaDataName, getDelegator());
+	}
+
+	@Override
+	public ActionMetaData putMetaDataAction(Customer customer, Document document, ActionMetaData action) {
+		String customerName = customer.getName();
+		String moduleName = document.getOwningModuleName();
+		String documentName = document.getName();
+		ActionMetaData result = convertMetaDataAction(customerName, moduleName, documentName, action);
+		
+		StringBuilder actionKey = new StringBuilder(128);
+		actionKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		actionKey.append(MODULES_NAMESPACE).append(moduleName).append('/');
+		actionKey.append(documentName).append('/');
+		actionKey.append(ACTIONS_NAMESPACE).append(action.getName()).append(META_DATA_SUFFIX);
+		cache.put(actionKey.toString(), Optional.of(result));
+		
+		return result;
+	}
 	
+	@Override
+	public ActionMetaData putMetaDataAction(Document document, ActionMetaData action) {
+		String moduleName = document.getOwningModuleName();
+		String documentName = document.getName();
+		ActionMetaData result = convertMetaDataAction(null, moduleName, documentName, action);
+		
+		StringBuilder actionKey = new StringBuilder(128);
+		actionKey.append(MODULES_NAMESPACE).append(moduleName).append('/');
+		actionKey.append(documentName).append('/');
+		actionKey.append(ACTIONS_NAMESPACE).append(action.getName()).append(META_DATA_SUFFIX);
+		cache.put(actionKey.toString(), Optional.of(result));
+		
+		return result;
+	}
+
+	@Override
+	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
+		BizletMetaData result = null;
+		if (customer != null) {
+			// get customer overridden
+			result = getMetaDataBizletInternal(customer.getName(), document);
+		}
+		if (result == null) { // not overridden
+			result = getMetaDataBizletInternal(null, document);
+		}
+		return result;
+	}
+
+	private BizletMetaData getMetaDataBizletInternal(String customerName, Document document) {
+		StringBuilder bizletKeySB = new StringBuilder(128);
+		if (customerName != null) {
+			bizletKeySB.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		}
+		bizletKeySB.append(MODULES_NAMESPACE);
+		String documentModuleName = document.getOwningModuleName();
+		String documentName = document.getName();
+		bizletKeySB.append(documentModuleName).append('/').append(documentName).append('/');
+		bizletKeySB.append(documentName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+		String bizletKey = bizletKeySB.toString();
+		Optional<MetaData> result = cache.get(bizletKey);
+		if (result != null) { // key is present
+			// Load if empty
+			if (result.isEmpty()) {
+				// Load the bizlet
+				BizletMetaData bizlet = loadMetaDataBizlet(customerName, documentModuleName, documentName);
+				if (bizlet != null) {
+					bizlet = convertMetaDataBizlet(customerName, documentModuleName, documentName, bizlet);
+					if (bizlet != null) {
+						result = Optional.of(bizlet);
+						cache.put(bizletKey, result);
+					}
+				}
+			}
+			else {
+				// Load if dev mode and new repository version
+				if (UtilImpl.DEV_MODE) {
+					BizletMetaData bizlet = (BizletMetaData) result.get();
+					// check last modified for the bizlet
+					if (bizlet.getLastModifiedMillis() < metaDataBizletLastModifiedMillis(customerName, documentModuleName, documentName)) {
+						// Load the bizlet
+						BizletMetaData newBizlet = loadMetaDataBizlet(customerName, documentModuleName, documentName);
+						if (newBizlet != null) {
+							newBizlet = convertMetaDataBizlet(customerName, documentModuleName, documentName, newBizlet);
+							if (newBizlet != null) {
+								result = Optional.of(newBizlet);
+								cache.put(bizletKey, result);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return ((result == null) || result.isEmpty()) ? null : (BizletMetaData) result.get();
+	}
+
+	private BizletMetaData convertMetaDataBizlet(String customerName,
+													String moduleName,
+													String documentName,
+													BizletMetaData bizlet) {
+		StringBuilder metaDataNameSB = new StringBuilder(128);
+		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
+		metaDataNameSB.append(documentName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+		if (customerName != null) {
+			metaDataNameSB.append(" (").append(customerName).append(')');
+		}
+		String metaDataName = metaDataNameSB.toString();
+		
+		// Convert the bizlet
+		return bizlet.convert(metaDataName, getDelegator());
+	}
+
+	@Override
+	public BizletMetaData putMetaDataBizlet(Customer customer, Document document, BizletMetaData bizlet) {
+		String customerName = customer.getName();
+		String moduleName = document.getOwningModuleName();
+		String documentName = document.getName();
+		BizletMetaData result = convertMetaDataBizlet(customerName, moduleName, documentName, bizlet);
+		
+		StringBuilder bizletKey = new StringBuilder(128);
+		bizletKey.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
+		bizletKey.append(MODULES_NAMESPACE).append(moduleName).append('/');
+		bizletKey.append(documentName).append('/');
+		bizletKey.append(documentName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+		cache.put(bizletKey.toString(), Optional.of(result));
+		
+		return result;
+	}
+	
+	@Override
+	public BizletMetaData putMetaDataBizlet(Document document, BizletMetaData bizlet) {
+		String moduleName = document.getOwningModuleName();
+		String documentName = document.getName();
+		BizletMetaData result = convertMetaDataBizlet(null, moduleName, documentName, bizlet);
+		
+		StringBuilder bizletKey = new StringBuilder(128);
+		bizletKey.append(MODULES_NAMESPACE).append(moduleName).append('/');
+		bizletKey.append(documentName).append('/');
+		bizletKey.append(documentName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+		cache.put(bizletKey.toString(), Optional.of(result));
+		
+		return result;
+	}
+
 	/**
 	 * Called by populateKeys() implementations.
 	 * @param key

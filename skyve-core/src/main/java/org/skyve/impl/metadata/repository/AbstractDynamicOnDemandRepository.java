@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.controller.BizExportAction;
@@ -26,6 +28,11 @@ import org.skyve.metadata.view.model.map.MapModel;
 public abstract class AbstractDynamicOnDemandRepository extends MutableCachedRepository {
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+		return null;
+	}
+
+	@Override
+	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
 		return null;
 	}
 
@@ -59,6 +66,11 @@ public abstract class AbstractDynamicOnDemandRepository extends MutableCachedRep
 		return null;
 	}
 
+	@Override
+	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+		return null;
+	}
+	
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime) {
 		return null;
