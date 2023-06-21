@@ -10,5 +10,10 @@
 			<displayName>Name</displayName>
 			<length>1024</length>
 		</text>
+		<longInteger name="size">
+			<displayName>Size (MB)</displayName>
+			<converterName>LongIntegerSeparator</converterName>
+			<validator min="0"/>
+		</longInteger>
 	</attributes>
 </document>

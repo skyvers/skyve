@@ -41,6 +41,12 @@
 		<boolean name="boolean3">
 			<displayName>boolean3</displayName>
 		</boolean>
+		<boolean name="boolean4">
+			<displayName>boolean4</displayName>
+		</boolean>
+		<boolean name="boolean5">
+			<displayName>boolean5</displayName>
+		</boolean>
 		<date name="date1">
 			<displayName>date1</displayName>
 		</date>
@@ -49,6 +55,12 @@
 		</date>
 		<date name="date3">
 			<displayName>date3</displayName>
+		</date>
+		<date name="date4">
+			<displayName>date4</displayName>
+		</date>
+		<date name="date5">
+			<displayName>date5</displayName>
 		</date>
 		<dateTime name="dateTime1">
 			<displayName>dateTime1</displayName>
@@ -59,6 +71,12 @@
 		<dateTime name="dateTime3">
 			<displayName>dateTime3</displayName>
 		</dateTime>
+		<dateTime name="dateTime4">
+			<displayName>dateTime4</displayName>
+		</dateTime>
+		<dateTime name="dateTime5">
+			<displayName>dateTime5</displayName>
+		</dateTime>
 		<time name="time1">
 			<displayName>time1</displayName>
 		</time>
@@ -67,6 +85,12 @@
 		</time>
 		<time name="time3">
 			<displayName>time3</displayName>
+		</time>
+		<time name="time4">
+			<displayName>time4</displayName>
+		</time>
+		<time name="time5">
+			<displayName>time5</displayName>
 		</time>
 		<timestamp name="timestamp1">
 			<displayName>timestamp1</displayName>
@@ -77,6 +101,12 @@
 		<timestamp name="timestamp3">
 			<displayName>timestamp3</displayName>
 		</timestamp>
+		<timestamp name="timestamp4">
+			<displayName>timestamp4</displayName>
+		</timestamp>
+		<timestamp name="timestamp5">
+			<displayName>timestamp5</displayName>
+		</timestamp>
 		<decimal2 name="decimal21">
 			<displayName>decimal21</displayName>
 		</decimal2>
@@ -85,6 +115,12 @@
 		</decimal2>
 		<decimal2 name="decimal23">
 			<displayName>decimal23</displayName>
+		</decimal2>
+		<decimal2 name="decimal24">
+			<displayName>decimal24</displayName>
+		</decimal2>
+		<decimal2 name="decimal25">
+			<displayName>decimal25</displayName>
 		</decimal2>
 		<decimal5 name="decimal51">
 			<displayName>decimal51</displayName>
@@ -95,6 +131,12 @@
 		<decimal5 name="decimal53">
 			<displayName>decimal53</displayName>
 		</decimal5>
+		<decimal5 name="decimal54">
+			<displayName>decimal54</displayName>
+		</decimal5>
+		<decimal5 name="decimal55">
+			<displayName>decimal55</displayName>
+		</decimal5>
 		<decimal10 name="decimal101">
 			<displayName>decimal101</displayName>
 		</decimal10>
@@ -103,6 +145,12 @@
 		</decimal10>
 		<decimal10 name="decimal103">
 			<displayName>decimal103</displayName>
+		</decimal10>
+		<decimal10 name="decimal104">
+			<displayName>decimal104</displayName>
+		</decimal10>
+		<decimal10 name="decimal105">
+			<displayName>decimal105</displayName>
 		</decimal10>
 		<integer name="integer1">
 			<displayName>integer1</displayName>
@@ -113,6 +161,12 @@
 		<integer name="integer3">
 			<displayName>integer3</displayName>
 		</integer>
+		<integer name="integer4">
+			<displayName>integer4</displayName>
+		</integer>
+		<integer name="integer5">
+			<displayName>integer5</displayName>
+		</integer>
 		<longInteger name="longInteger1">
 			<displayName>longInteger1</displayName>
 		</longInteger>
@@ -121,6 +175,12 @@
 		</longInteger>
 		<longInteger name="longInteger3">
 			<displayName>longInteger3</displayName>
+		</longInteger>
+		<longInteger name="longInteger4">
+			<displayName>longInteger4</displayName>
+		</longInteger>
+		<longInteger name="longInteger5">
+			<displayName>longInteger5</displayName>
 		</longInteger>
 		<geometry name="geometry1">
 			<displayName>geometry1</displayName>
@@ -131,8 +191,26 @@
 		<geometry name="geometry3">
 			<displayName>geometry3</displayName>
 		</geometry>
+		<geometry name="geometry4">
+			<displayName>geometry4</displayName>
+		</geometry>
+		<geometry name="geometry5">
+			<displayName>geometry5</displayName>
+		</geometry>
 		<markup name="markup1">
 			<displayName>markup1</displayName>
+		</markup>
+		<markup name="markup2">
+			<displayName>markup2</displayName>
+		</markup>
+		<markup name="markup3">
+			<displayName>markup3</displayName>
+		</markup>
+		<markup name="markup4">
+			<displayName>markup4</displayName>
+		</markup>
+		<markup name="markup5">
+			<displayName>markup5</displayName>
 		</markup>
 		<text name="text5001">
 			<displayName>text 500 1</displayName>
@@ -144,6 +222,14 @@
 		</text>
 		<text name="text5003">
 			<displayName>text 500 3</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5004">
+			<displayName>text 500 4</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5005">
+			<displayName>text 500 5</displayName>
 			<length>500</length>
 		</text>
 	</attributes>

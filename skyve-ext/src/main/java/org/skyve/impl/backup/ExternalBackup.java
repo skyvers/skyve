@@ -76,4 +76,10 @@ public interface ExternalBackup {
 	 * @param destBackupName The name of the backup to move to.
 	 */
 	void moveBackup(String srcBackupName, String destBackupName);
+
+	/**
+	 * @param fileName The name of the backup.
+	 * @return The size of the backup in bytes.
+	 */
+	long getFileSize(String fileName);
 }
