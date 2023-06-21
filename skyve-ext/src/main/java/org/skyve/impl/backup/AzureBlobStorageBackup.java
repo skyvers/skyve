@@ -91,7 +91,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		final BlobProperties blobProperties = blobClient.getProperties();
 		long result = blobProperties.getBlobSize();
 
-		return result != 0 ? result : 0;
+		return result;
 	}
 
 	private static String getConnectionString() {

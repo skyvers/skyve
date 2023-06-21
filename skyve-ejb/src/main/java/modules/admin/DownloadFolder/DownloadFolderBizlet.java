@@ -18,7 +18,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
-import org.skyve.impl.backup.AzureBlobStorageBackup;
 import org.skyve.impl.backup.ExternalBackup;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
@@ -27,6 +26,7 @@ import org.skyve.util.FileUtil;
 
 import modules.admin.domain.DownloadFolder;
 
+// TODO These functions should be part of the BackupsModel
 public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
 	/**
 	 * fetch - generalised fetch for DownloadFolder
@@ -67,17 +67,15 @@ public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
 	public static Page fetchBackups(String dirPath, int startRow, int endRow) throws IOException {
 		Map<String, Long> backups = new TreeMap<>();
 		if (ExternalBackup.areExternalBackupsEnabled()) {
-			if (ExternalBackup.getInstance() instanceof AzureBlobStorageBackup) {
-				AzureBlobStorageBackup backupInstance = ((AzureBlobStorageBackup) ExternalBackup.getInstance());
-				for (String s : backupInstance.listBackups()) {
-					Long fileSize = Long.valueOf(backupInstance.getFileSize(s));
-					if (fileSize != null) {
-						fileSize = Long.valueOf(fileSize.longValue() / 1024);
-						backups.put(s, fileSize);
-					}
-					else {
-						backups.put(s, Long.valueOf(0));
-					}
+			ExternalBackup backupInstance = ExternalBackup.getInstance();
+			for (String s : backupInstance.listBackups()) {
+				Long fileSize = Long.valueOf(backupInstance.getFileSize(s));
+				if (fileSize != null) {
+					fileSize = Long.valueOf(fileSize.longValue() / 1024);
+					backups.put(s, fileSize);
+				}
+				else {
+					backups.put(s, Long.valueOf(0));
 				}
 			}
 		}
