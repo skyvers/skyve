@@ -2761,6 +2761,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			catch (Exception e) {
 				if (debug) System.err.println("Could not find action class for: " + e.getMessage());
+				skipGeneration = true;
 			}
 
 			// check if there is a factory extension annotation which skips this test
