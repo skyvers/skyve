@@ -289,7 +289,7 @@
 		// (redirectUrl URL is <Context URL>/login/oauth2/code/github)
 		"azureAdAuthClientId": null,
 		"azureAdAuthTenantId": null,
-		"azureAdAuthSecret": null
+		"azureAdAuthSecret": null,
 		// how long should the remember me token stay valid for in hours (336hrs = 14 days)
 		"rememberMeTokenTimeoutHours": 336
 	},
