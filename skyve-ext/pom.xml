@@ -153,7 +153,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xhtmlrenderer</groupId>
-			<artifactId>flying-saucer-pdf</artifactId>
+			<artifactId>flying-saucer-pdf-openpdf</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

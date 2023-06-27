@@ -27,20 +27,16 @@ import org.skyve.report.ReportFormat;
 
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.export.JExcelApiExporter;
+import net.sf.jasperreports.engine.export.HtmlExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+import net.sf.jasperreports.engine.export.JRExporterContext;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRRtfExporter;
 import net.sf.jasperreports.engine.export.JRTextExporter;
-import net.sf.jasperreports.engine.export.JRTextExporterParameter;
-import net.sf.jasperreports.engine.export.JRXhtmlExporter;
-import net.sf.jasperreports.engine.export.JRXlsAbstractExporterParameter;
+import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.JRXmlExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
@@ -48,6 +44,18 @@ import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.export.ExporterConfiguration;
+import net.sf.jasperreports.export.ExporterOutput;
+import net.sf.jasperreports.export.ReportExportConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleTextReportConfiguration;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
+import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
+import net.sf.jasperreports.export.SimpleXlsxReportConfiguration;
+import net.sf.jasperreports.export.SimpleXmlExporterOutput;
+import net.sf.jasperreports.web.util.WebHtmlResourceHandler;
 
 public final class JasperReportUtil {
 	private JasperReportUtil() {
@@ -272,78 +280,104 @@ public final class JasperReportUtil {
 									ReportFormat format,
 									OutputStream out)
 	throws Exception {
-		final JRAbstractExporter<?, ?, ?, ?> exporter = getExporter(format);
-
-		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
+		final JRAbstractExporter<? extends ReportExportConfiguration, ? extends ExporterConfiguration, ? extends ExporterOutput, ? extends JRExporterContext> exporter = getExporter(format, out);
+		exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
 		exporter.exportReport();
 	}
 
 	public static void runReport(List<JasperPrint> jasperPrintList,
 								 ReportFormat format,
 								 OutputStream out)
-			throws Exception {
-		final JRAbstractExporter<?, ?, ?, ?> exporter = getExporter(format);
-
-		exporter.setParameter(JRExporterParameter.JASPER_PRINT_LIST, jasperPrintList);
-		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
+	throws Exception {
+		final JRAbstractExporter<? extends ReportExportConfiguration, ? extends ExporterConfiguration, ? extends ExporterOutput, ? extends JRExporterContext> exporter = getExporter(format, out);
+		exporter.setExporterInput(SimpleExporterInput.getInstance(jasperPrintList));
 		exporter.exportReport();
 	}
 
-	private static JRAbstractExporter<?, ?, ?, ?> getExporter(ReportFormat format) {
-		JRAbstractExporter<?, ?, ?, ?> exporter;
+	private static JRAbstractExporter<? extends ReportExportConfiguration, ? extends ExporterConfiguration, ? extends ExporterOutput, ? extends JRExporterContext> getExporter(ReportFormat format, OutputStream out) {
+		JRAbstractExporter<? extends ReportExportConfiguration, ? extends ExporterConfiguration, ? extends ExporterOutput, ? extends JRExporterContext> result;
 		switch (format) {
 			case txt:
-				exporter = new JRTextExporter();
-				exporter.setParameter(JRTextExporterParameter.PAGE_WIDTH, Integer.valueOf(80));
-				exporter.setParameter(JRTextExporterParameter.PAGE_HEIGHT, Integer.valueOf(24));
+				SimpleTextReportConfiguration textConfig = new SimpleTextReportConfiguration();
+				textConfig.setPageWidthInChars(Integer.valueOf(80));
+				textConfig.setPageHeightInChars(Integer.valueOf(24));
+				JRTextExporter text = new JRTextExporter();
+				text.setConfiguration(textConfig);
+				text.setExporterOutput(new SimpleWriterExporterOutput(out));
+				result = text;
 				break;
 			case csv:
-				exporter = new JRCsvExporter();
+				JRCsvExporter csv = new JRCsvExporter();
+				csv.setExporterOutput(new SimpleWriterExporterOutput(out));
+				result = csv;
 				break;
 			case html:
-				exporter = new JRHtmlExporter();
-				exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, "image?image=");
-				break;
-			case xhtml:
-				exporter = new JRXhtmlExporter();
-				exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, "image?image=");
+				SimpleHtmlExporterOutput htmlOutput = new SimpleHtmlExporterOutput(out);
+				htmlOutput.setImageHandler(new WebHtmlResourceHandler("image?image={0}"));
+				HtmlExporter html = new HtmlExporter();
+				html.setExporterOutput(htmlOutput);
+				result = html;
 				break;
 			case pdf:
-				exporter = new JRPdfExporter();
+				JRPdfExporter pdf = new JRPdfExporter();
+				pdf.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+				result = pdf;
 				break;
 			case xls:
-				exporter = new JExcelApiExporter(); // JRXlsExporter(); POI doesn't handle embedded images very well
-				exporter.setParameter(JRXlsAbstractExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
-				exporter.setParameter(JRXlsAbstractExporterParameter.IS_WHITE_PAGE_BACKGROUND, Boolean.FALSE);
+				SimpleXlsReportConfiguration xlsConfig = new SimpleXlsReportConfiguration();
+				xlsConfig.setOnePagePerSheet(Boolean.FALSE);
+				xlsConfig.setWhitePageBackground(Boolean.FALSE);
+				xlsConfig.setDetectCellType(Boolean.TRUE);
+				JRXlsExporter xls = new JRXlsExporter();
+				xls.setConfiguration(xlsConfig);
+				xls.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+				result = xls;
 				break;
 			case rtf:
-				exporter = new JRRtfExporter();
+				JRRtfExporter rtf = new JRRtfExporter();
+				rtf.setExporterOutput(new SimpleWriterExporterOutput(out));
+				result = rtf;
 				break;
 			case odt:
-				exporter = new JROdtExporter();
+				JROdtExporter odt = new JROdtExporter();
+				odt.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+				result = odt;
 				break;
 			case ods:
-				exporter = new JROdsExporter();
+				JROdsExporter ods = new JROdsExporter();
+				ods.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+				result = ods;
 				break;
 			case docx:
-				exporter = new JRDocxExporter();
+				JRDocxExporter docx = new JRDocxExporter();
+				docx.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+				result = docx;
 				break;
 			case xlsx:
-				exporter = new JRXlsxExporter();
+				SimpleXlsxReportConfiguration xlsxConfig = new SimpleXlsxReportConfiguration();
+				xlsxConfig.setOnePagePerSheet(Boolean.FALSE);
+				xlsxConfig.setWhitePageBackground(Boolean.FALSE);
+				xlsxConfig.setDetectCellType(Boolean.TRUE);
+				JRXlsxExporter xlsx = new JRXlsxExporter();
+				xlsx.setConfiguration(xlsxConfig);
+				xlsx.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+				result = xlsx;
 				break;
 			case pptx:
-				exporter = new JRPptxExporter();
+				JRPptxExporter pptx = new JRPptxExporter();
+				pptx.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+				result = pptx;
 				break;
 			case xml:
-				exporter = new JRXmlExporter();
-//			exporter.setParameter(JRXmlExporterParameter.DTD_LOCATION, "");
+				JRXmlExporter xml = new JRXmlExporter();
+				xml.setExporterOutput(new SimpleXmlExporterOutput(out));
+				result = xml;
 				break;
 			default:
 				throw new IllegalStateException("Report format " + format + " not catered for.");
 		}
 
-		return exporter;
+		return result;
 	}
 
 	public static ListModel<Bean> getQueryListModel(Module module, String documentOrQueryOrModelName) {

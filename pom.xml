@@ -45,7 +45,7 @@
 		<hibernate-spatial.version>5.4.33.Final</hibernate-spatial.version>
 		<ireport.version>4.7.0</ireport.version>
 		<groovy.version>2.3.2</groovy.version>
-		<jasperreports.version>6.3.1</jasperreports.version>
+		<jasperreports.version>6.20.5</jasperreports.version>
 		<java.version>11</java.version>
 		<javassist.version>3.20.0-GA</javassist.version>
 		<javaee-api.version>7.0</javaee-api.version>
@@ -57,7 +57,7 @@
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.5.0</pf4j.version>
-		<poi.version>4.1.2</poi.version>
+		<poi.version>5.2.3</poi.version>
 		<primefaces.version>12.0.0</primefaces.version>
 		<primefaces-extensions.version>12.0.7</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
@@ -80,7 +80,7 @@
 		<spring.version>5.3.23</spring.version>
 		<reactive-streams.version>1.0.2</reactive-streams.version>
 		<!-- freemarker report versions -->
-		<flying-saucer.version>9.1.18</flying-saucer.version>
+		<flying-saucer.version>9.1.22</flying-saucer.version>
 		<freemarker.version>2.3.29</freemarker.version>
 		<cronutils.version>9.1.6</cronutils.version>
 
@@ -330,44 +330,16 @@
 				<version>${jasperreports.version}</version>
 				<exclusions>
 					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-context</artifactId>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-collections4</artifactId>
 					</exclusion>
 					<exclusion>
-						<groupId>bouncycastle</groupId>
-						<artifactId>bcmail-jdk14</artifactId>
+						<groupId>commons-digester</groupId>
+						<artifactId>commons-digester</artifactId>
 					</exclusion>
 					<exclusion>
-						<groupId>bouncycastle</groupId>
-						<artifactId>bcprov-jdk14</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>xml-apis</groupId>
-						<artifactId>xml-apis</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.bouncycastle</groupId>
-						<artifactId>bctsp-jdk14</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>eclipse</groupId>
-						<artifactId>jdtcore</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>commons-beanutils</groupId>
-						<artifactId>commons-beanutils</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>commons-collections</groupId>
-						<artifactId>commons-collections</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.codehaus.castor</groupId>
-						<artifactId>castor-xml</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.lucene</groupId>
-						<artifactId>*</artifactId>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -405,6 +377,12 @@
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi</artifactId>
 				<version>${poi.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-codec</groupId>
+						<artifactId>commons-codec</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.spatial4j</groupId>
@@ -475,12 +453,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xhtmlrenderer</groupId>
-				<artifactId>flying-saucer-pdf</artifactId>
+				<artifactId>flying-saucer-pdf-openpdf</artifactId>
 				<version>${flying-saucer.version}</version>
 				<exclusions>
 					<exclusion>
-						<groupId>com.lowagie</groupId>
-						<artifactId>itext</artifactId>
+						<groupId>com.github.librepdf</groupId>
+						<artifactId>openpdf</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>

@@ -3593,10 +3593,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							disabled,
 							formDisabled,
 							invisible,
-							(ReportFormat.html.equals(reportFormat) ||
-								ReportFormat.xhtml.equals(reportFormat)) ?
-									"_blank" :
-									null);
+							ReportFormat.html.equals(reportFormat) ? "_blank" : null);
 	}
 
 	/**

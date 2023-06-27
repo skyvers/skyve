@@ -121,7 +121,6 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="csv"/>
       <xs:enumeration value="html"/>
-      <xs:enumeration value="xhtml"/>
       <xs:enumeration value="pdf"/>
       <xs:enumeration value="xls"/>
       <xs:enumeration value="rtf"/>

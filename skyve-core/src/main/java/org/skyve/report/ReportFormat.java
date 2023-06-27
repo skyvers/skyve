@@ -20,11 +20,6 @@ public enum ReportFormat {
 	html,
 	
 	/**
-	 * schema validated HTML
-	 */
-	xhtml,
-	
-	/**
 	 * Adobe Portable Document Format
 	 */
 	pdf,

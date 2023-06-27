@@ -141,7 +141,6 @@ isc.ReportDialog.addClassProperties({
 				'ods': 'ODS (Open Document Spreadsheet Format)',
 				'odt': 'ODT (Open Document Text Format)',
 				'html': 'HTML (Hyper Text Markup Language)',
-				'xhtml': 'XHTML (Conformant Hyper Text Markup Language)',
 				'csv': 'CSV (Comma Separated Values)',
 				'xml': 'XML (JRXML Format)'
 			},
@@ -157,7 +156,6 @@ isc.ReportDialog.addClassProperties({
 				'odt': 'oo',
 				'ods': 'oo',
 				'html': 'html',
-				'xhtml': 'html',
 				'txt': 'txt',
 				'csv': 'csv',
 				'xml': 'xml'
@@ -227,7 +225,7 @@ isc.ReportDialog.addClassProperties({
 						form.getItem('isPretty').setValue(true);
                         form.getItem('showSummary').setValue(true);
 					}
-					else if ((value == 'html') || (value == 'xhtml')) {
+					else if (value == 'html') {
 						form.getItem('isPaginated').setValue(false);
 						form.getItem('isPretty').setValue(true);
                         form.getItem('showSummary').setValue(true);
@@ -526,7 +524,7 @@ isc.ReportDialog.addClassProperties({
 										values.tagId = isc.ReportDialog._tagId;
 									}
 
-									// Use a standard form POST, HTML/XHTML targeted to a blank window
+									// Use a standard form POST, HTML targeted to a blank window
 									var format = isc.ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
 									var fileNameNoSuffix = isc.ReportDialog._reportFormatForm.getItem("fileNameNoSuffix").getValue();
 									isc.ReportDialog._submitForm.setValue('values', isc.JSON.encode(values, {prettyPrint:false}));
@@ -534,9 +532,7 @@ isc.ReportDialog.addClassProperties({
 										isc.ReportDialog._submitForm.setValue('_c', isc.ReportDialog._c);
 									}
 									isc.ReportDialog._submitForm.setAction('export/' + fileNameNoSuffix + '.' + format);
-									isc.ReportDialog._submitForm.setTarget(((format === 'html') || (format === 'xhtml')) ?
-																		'_blank' :
-																		'_self');
+									isc.ReportDialog._submitForm.setTarget((format === 'html') ? '_blank' : '_self');
 									isc.ReportDialog._submitForm.submitForm();
 								}
 							}
@@ -673,7 +669,7 @@ isc.ReportDialog.addClassProperties({
 					src += '&' + name + '=' + encodeURI(view.toDisplay(binding, instance)).replaceAll('?', '%3F').replaceAll('&', '%26');
 				}
 			}
-			if ((format === 'html') || (format === 'xhtml')) {
+			if (format === 'html') {
 				window.open(src, 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
 			}
 			else {

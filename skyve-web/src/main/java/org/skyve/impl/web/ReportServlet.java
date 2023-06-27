@@ -251,13 +251,6 @@ public class ReportServlet extends HttpServlet {
 // TODO maybe I should UUEncode this thing to the client
 			session.setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
 			break;
-		case xhtml:
-			response.setContentType(MimeType.html.toString());
-			sb.append("inline; filename=\"").append(fileNameNoSuffix).append(".xhtml\"");
-			response.setHeader("Content-Disposition", sb.toString());
-// TODO maybe I should UUEncode this thing to the client
-			session.setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
-			break;
 		case pdf:
 			response.setContentType(MimeType.pdf.toString());
 			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".pdf\"");
