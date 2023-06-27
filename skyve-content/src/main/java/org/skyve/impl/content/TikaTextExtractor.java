@@ -67,13 +67,13 @@ public class TikaTextExtractor implements TextExtractor {
 					}
 					result.append(author);
 				}
-				// Keywords
-				String keywords = metadata.get(TikaCoreProperties.KEYWORDS);
-				if (keywords != null) {
+				// Subject and keywords (if present)
+				String subject = metadata.get(TikaCoreProperties.SUBJECT);
+				if (subject != null) {
 					if (result.length() > 0) {
 						result.append(". ");
 					}
-					result.append(keywords);
+					result.append(subject);
 				}
 			}
 		}

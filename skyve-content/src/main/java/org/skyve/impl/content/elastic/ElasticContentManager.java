@@ -18,7 +18,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
+//import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 //import org.elasticsearch.action.admin.indices.flush.FlushResponse;
