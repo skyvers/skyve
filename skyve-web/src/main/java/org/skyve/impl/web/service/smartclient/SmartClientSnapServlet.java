@@ -148,12 +148,12 @@ public class SmartClientSnapServlet extends HttpServlet {
 	
 		    	pw.append("isc.warn('");
 		    	if (t instanceof MessageException) {
-		    		SmartClientEditServlet.appendErrorText("The snapshot operation was unsuccessful", 
+		    		SmartClientEditServlet.appendErrorText("The Snapshot operation was unsuccessful", 
 		    												((MessageException) t).getMessages(),
 		    												pw);
 		    	}
 		    	else {
-			    	pw.append("The snapshot operation was unsuccessful: ");
+			    	pw.append("The Snapshot operation was unsuccessful: ");
 			    	pw.append(OWASP.escapeJsString(t.getMessage()));
 		    	}
 		    	pw.append("');");
@@ -206,7 +206,7 @@ public class SmartClientSnapServlet extends HttpServlet {
             // update snap
             sb.append("{title:'Update Snapshot");
             if (disabled) {
-            	sb.append(" (Select snapshot first)',enabled:false,");
+            	sb.append(" (Select a Snapshot first)',enabled:false,");
             } else {
             	sb.append("',");
             }
@@ -214,7 +214,7 @@ public class SmartClientSnapServlet extends HttpServlet {
             sb.append(escapedCode).append("')}},");
 
             // delete snap
-            sb.append("{title:'Delete SnapShot',icon:'icons/snap_delete.png',click:function(){").append(menuButtonId).append(".deleteSnap('");
+            sb.append("{title:'Delete Snapshot',icon:'icons/snap_delete.png',click:function(){").append(menuButtonId).append(".deleteSnap('");
             sb.append(escapedCode).append("')}}]}");
 	    }
         sb.append("]");

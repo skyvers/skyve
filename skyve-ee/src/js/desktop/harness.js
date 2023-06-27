@@ -18,7 +18,7 @@ isc.BizUtil.addClassProperties({
 			members: [
 				// LHS Menu Navigation panel
 				isc.VLayout.create({
-					ID: "navigation",
+					ID: "lhsmenu",
 					// should this be hard coded and should it be a percentage anyway
 					width: "30%",
 					showResizeBar: true,

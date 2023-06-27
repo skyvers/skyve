@@ -646,7 +646,7 @@ isc.BizListGrid.addMethods({
 
 		snapMenuButton.newSnap = function() {
 			isc.askForValue(
-				'Enter the new snapshot name', 
+				'Enter the new Snapshot name', 
 				function(value) {
 					if (value) {
 						isc.RPCManager.sendRequest({
@@ -752,7 +752,7 @@ isc.BizListGrid.addMethods({
 
 		// called from server
 		snapMenuButton.deleteSnap = function(snapId) {
-			isc.ask('Do you want to delete this snapshot?',
+			isc.ask('Do you want to delete this Snapshot?',
 						function(value) {
 							if (value) {
 								isc.RPCManager.sendRequest({

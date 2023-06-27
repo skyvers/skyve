@@ -33,7 +33,7 @@ isc.ReportDialog.addClassProperties({
 					'LEDGER': {width: 1224, height: 792}},
 
 	_available: [
-		{name: 'title', title: 'Column', required: true},
+		{name: 'title', title: 'Available Columns', required: true},
 		{name: 'line', 
 			title: 'Line', 
 			type: 'integer', 
@@ -60,7 +60,7 @@ isc.ReportDialog.addClassProperties({
 			width: 50}
 	],
 	_selected: [
-            {name: 'title', title: 'Column', required: true},
+            {name: 'title', title: 'Exported Columns', required: true},
 	  		{name: 'line', 
 	  			title: 'Line', 
 	  			type: 'integer', 
