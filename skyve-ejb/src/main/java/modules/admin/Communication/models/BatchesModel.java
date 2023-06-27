@@ -18,7 +18,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 
-import modules.admin.DownloadFolder.DownloadFolderBizlet;
+import modules.admin.DataMaintenance.models.BackupsModel;
 import modules.admin.domain.Communication;
 import modules.admin.domain.DownloadFolder;
 
@@ -84,7 +84,7 @@ public class BatchesModel extends ListModel<Communication> {
 	@Override
 	public Page fetch() throws Exception {
 		Communication communication = getBean();
-		return DownloadFolderBizlet.fetchFolders(communication.getBasePath(), getStartRow(), getEndRow());
+		return BackupsModel.fetchFolders(communication.getBasePath(), getStartRow(), getEndRow());
 	}
 
 	@Override
