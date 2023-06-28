@@ -2611,12 +2611,15 @@ isc.BizChart.addMethods({
 	
 	_resizeChart: function() {
 		if (this.chart) {
-			this.chart.canvas.parentNode.style.width = this.getWidth() + 'px';
-			this.chart.canvas.parentNode.style.height = this.getHeight() +  'px';
-			this.chart.canvas.width = this.getWidth() * 2;
-			this.chart.canvas.height = this.getHeight() * 2;
-			this.chart.canvas.style.width = this.getWidth() + 'px';
-			this.chart.canvas.style.height = this.getHeight() +  'px';
+			var w = this.getWidth();
+			var h = this.getHeight();
+			var c = this.chart.canvas;
+			c.parentNode.style.width = w + 'px';
+			c.parentNode.style.height = h + 'px';
+			c.width = w;
+			c.height = h;
+			c.style.width = w + 'px';
+			c.style.height = h + 'px';
 			this.chart.update();
 			this._resizeChartCalled = false;
 		}
@@ -2709,8 +2712,8 @@ isc.BizChart.addMethods({
 				if (! this.isDrawn()) {
 					this.draw();
 				}
-				var ctx = document.getElementById(this.ID + '_chart').getContext('2d');
-				this.chart = new Chart(ctx, this.chartConfig);
+				var chartCanvas = document.getElementById(this.ID + '_chart');
+				this.chart = new Chart(chartCanvas, this.chartConfig);
 			}
 		}
 	}
