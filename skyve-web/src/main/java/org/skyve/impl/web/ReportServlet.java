@@ -18,12 +18,17 @@ import javax.servlet.http.HttpSession;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.domain.messages.AccessException;
+import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.generate.jasperreports.DesignSpecification;
 import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
 import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
+import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.report.jasperreports.JasperReportUtil;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
@@ -39,9 +44,13 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
@@ -336,15 +345,25 @@ public class ReportServlet extends HttpServlet {
 				Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, valuesParam);
 				String module_QueryOrModel = (String) values.get("ds");
 				int _Index = module_QueryOrModel.indexOf('_');
-				Module module = customer.getModule(module_QueryOrModel.substring(0, _Index));
+				String moduleName = module_QueryOrModel.substring(0, _Index);
+				Module module = customer.getModule(moduleName);
 				String documentOrQueryOrModelName = module_QueryOrModel.substring(_Index + 1);
 				Document drivingDocument = null;
 				ListModel<Bean> model = null;
+				UxUi uxui = UserAgent.getUxUi(request);
 				int __Index = documentOrQueryOrModelName.indexOf("__");
 				if (__Index >= 0) {
 					String documentName = documentOrQueryOrModelName.substring(0, __Index);
-					Document document = module.getDocument(customer, documentName);
 					String modelName = documentOrQueryOrModelName.substring(__Index + 2);
+
+					if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
+						final String userName = user.getName();
+						UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
+						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+						throw new AccessException("this data", userName);
+					}
+
+					Document document = module.getDocument(customer, documentName);
 					model = document.getListModel(customer, modelName, true);
 
 					// Set the context bean in the list model
@@ -358,13 +377,31 @@ public class ReportServlet extends HttpServlet {
 				else {
 					MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 					if (query == null) {
+						if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName())) {
+							final String userName = user.getName();
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryOrModelName);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("this data", userName);
+						}
 						query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+					}
+					else {
+						if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName())) {
+							final String userName = user.getName();
+							UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryOrModelName);
+							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+							throw new AccessException("this data", userName);
+						}
 					}
 					if (query == null) {
 						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 					}
 					drivingDocument = module.getDocument(customer, query.getDocumentName());
 					model = EXT.newListModel(query);
+				}
+
+				if (! user.canReadDocument(drivingDocument)) {
+					throw new SecurityException("read this data", user.getName());
 				}
 
 				String tagId = (String) values.get("tagId");
@@ -421,10 +458,25 @@ public class ReportServlet extends HttpServlet {
 					List<Map<String, Object>> columns = (List<Map<String, Object>>) values.get("columns");
 					for (Map<String, Object> column : columns) {
 						ReportColumn reportColumn = new ReportColumn();
+						String name = (String) column.get("name");
+						// Check for column projection injection - ie the column name supplied
+						// 1. has no name, 2. is not part of the given model, is not a projected column in the model
+						if (name == null) {
+							throw new SecurityException("Malformed report columns", user.getName());
+						}
+						String binding = name.replace('_', '.');
+						if (! PersistentBean.FLAG_COMMENT_NAME.equals(binding)) { // allow bizFlagComment
+							MetaDataQueryColumn mdqc = model.getColumns().stream().filter(c -> binding.equals(c.getBinding()) || binding.equals(c.getName())).findAny().orElse(null);
+							if (mdqc == null) {
+								throw new SecurityException("Non-existent data", user.getName());
+							}
+							if ((mdqc instanceof MetaDataQueryProjectedColumn) && (! ((MetaDataQueryProjectedColumn) mdqc).isProjected())) {
+								throw new SecurityException("Non-projected data", user.getName());
+							}
+						}
+						reportColumn.setName(binding);
 						reportColumn.setLine(((Number) column.get("line")).intValue());
-						reportColumn.setName((String) column.get("name"));
 						reportColumn.setTitle((String) column.get("title"));
-						reportColumn.setType("text");
 						reportColumn.setWidth(((Number) column.get("width")).intValue());
 						String align = (String) column.get("align");
 						if (align != null) {
@@ -433,10 +485,16 @@ public class ReportServlet extends HttpServlet {
 						else {
 							reportColumn.setAlignment(ColumnAlignment.left);
 						}
-						if (drivingDocument != null && reportColumn.getName() != null) {
-							final Attribute attribute = drivingDocument.getAttribute(reportColumn.getName());
+						if ((drivingDocument != null) && (reportColumn.getName() != null)) {
+							final Attribute attribute = drivingDocument.getPolymorphicAttribute(customer, reportColumn.getName());
 							if (attribute != null) {
 								reportColumn.setAttributeType(attribute.getAttributeType());
+								if (attribute instanceof ConvertableField) {
+									Converter<?> converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+									if (converter != null) {
+										reportColumn.setFormatPattern(converter.getFormatPattern());
+									}
+								}
 							}
 						}
 

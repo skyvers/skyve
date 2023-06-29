@@ -5,10 +5,6 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
-import org.skyve.domain.types.converters.date.DD_MM_YYYY;
-import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
-import org.skyve.domain.types.converters.date.MM_DD_YYYY;
 import org.skyve.util.Binder;
 
 import modules.admin.domain.ReportParameter;
@@ -96,23 +92,13 @@ public class ReportParameterExtension extends ReportParameter {
 			try {
 				dateConverter.fromDisplayValue(this.getReportInputValue());
 			} catch (@SuppressWarnings("unused") Exception ex) {
-				String expectedDateFormat = "dd-mmm-yyyy";
-				if (dateConverter instanceof DD_MM_YYYY) {
-					expectedDateFormat = DD_MM_YYYY.PATTERN;
-				} else if (dateConverter instanceof DD_MMM_YYYY) {
-					expectedDateFormat = DD_MMM_YYYY.PATTERN;
-				} else if (dateConverter instanceof MM_DD_YYYY) {
-					expectedDateFormat = MM_DD_YYYY.PATTERN;
-				} else if (dateConverter instanceof MMM_DD_YYYY) {
-					expectedDateFormat = MMM_DD_YYYY.PATTERN;
-				}
-
+				String expectedDateFormat = dateConverter.getFormatPattern();
 				e.getMessages().add(new Message(
 						Binder.createCompoundBinding(Binder.createIndexedBinding(ReportTemplate.parametersPropertyName, index),
-								ReportParameter.reportInputValuePropertyName),
+														ReportParameter.reportInputValuePropertyName),
 						String.format("Could not parse date value '%s'. Expected a date in the format '%s'.",
-								this.getReportInputValue(),
-								expectedDateFormat)));
+										getReportInputValue(),
+										expectedDateFormat)));
 			}
 		} else if (Type.integer == this.getType() && this.getReportInputValue() != null) {
 			try {

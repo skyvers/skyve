@@ -49,6 +49,7 @@ import net.sf.jasperreports.export.ExporterOutput;
 import net.sf.jasperreports.export.ReportExportConfiguration;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
+import net.sf.jasperreports.export.SimpleOdsReportConfiguration;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimpleTextReportConfiguration;
 import net.sf.jasperreports.export.SimpleWriterExporterOutput;
@@ -326,6 +327,9 @@ public final class JasperReportUtil {
 			case xls:
 				SimpleXlsReportConfiguration xlsConfig = new SimpleXlsReportConfiguration();
 				xlsConfig.setOnePagePerSheet(Boolean.FALSE);
+				xlsConfig.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
+				xlsConfig.setRemoveEmptySpaceBetweenColumns(Boolean.TRUE);
+				xlsConfig.setUseTimeZone(Boolean.TRUE);
 				xlsConfig.setWhitePageBackground(Boolean.FALSE);
 				xlsConfig.setDetectCellType(Boolean.TRUE);
 				JRXlsExporter xls = new JRXlsExporter();
@@ -344,6 +348,13 @@ public final class JasperReportUtil {
 				result = odt;
 				break;
 			case ods:
+				SimpleOdsReportConfiguration odsConfig = new SimpleOdsReportConfiguration();
+				odsConfig.setOnePagePerSheet(Boolean.FALSE);
+				odsConfig.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
+				odsConfig.setRemoveEmptySpaceBetweenColumns(Boolean.TRUE);
+				odsConfig.setUseTimeZone(Boolean.TRUE);
+				odsConfig.setWhitePageBackground(Boolean.FALSE);
+				odsConfig.setDetectCellType(Boolean.TRUE);
 				JROdsExporter ods = new JROdsExporter();
 				ods.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
 				result = ods;
@@ -356,6 +367,9 @@ public final class JasperReportUtil {
 			case xlsx:
 				SimpleXlsxReportConfiguration xlsxConfig = new SimpleXlsxReportConfiguration();
 				xlsxConfig.setOnePagePerSheet(Boolean.FALSE);
+				xlsxConfig.setRemoveEmptySpaceBetweenRows(Boolean.TRUE);
+				xlsxConfig.setRemoveEmptySpaceBetweenColumns(Boolean.TRUE);
+				xlsxConfig.setUseTimeZone(Boolean.TRUE);
 				xlsxConfig.setWhitePageBackground(Boolean.FALSE);
 				xlsxConfig.setDetectCellType(Boolean.TRUE);
 				JRXlsxExporter xlsx = new JRXlsxExporter();
