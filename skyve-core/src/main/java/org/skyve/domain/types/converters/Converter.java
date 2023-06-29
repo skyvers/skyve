@@ -42,4 +42,10 @@ public interface Converter<T> {
 	 * @return	The validator.
 	 */
 	@Nullable Validator<T> getValidator();
+	
+	/**
+	 * The pattern used in java.text.Format subclasses, if any.
+	 * @return	The pattern to apply or null if there is no pattern used.
+	 */
+	@Nullable String getFormatPattern();
 }

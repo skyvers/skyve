@@ -51,4 +51,9 @@ public class IntegerConverter implements Converter<Integer> {
 	public Validator<Integer> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return null;
+	}
 }

@@ -53,4 +53,9 @@ public class Decimal5Integer implements Converter<Decimal5> {
 	public Validator<Decimal5> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return PATTERN;
+	}
 }

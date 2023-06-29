@@ -6,7 +6,7 @@ public class YYYY_MM_DD extends AbstractTimestampConverter {
 	private static final String PATTERN = "yyyy/MM/dd";
 
 	@Override
-	protected String getPattern() {
+	public String getFormatPattern() {
 		return PATTERN;
 	}
 	

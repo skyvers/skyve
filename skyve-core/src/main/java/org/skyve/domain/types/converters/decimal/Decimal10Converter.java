@@ -42,4 +42,9 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	public Validator<Decimal10> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return null;
+	}
 }

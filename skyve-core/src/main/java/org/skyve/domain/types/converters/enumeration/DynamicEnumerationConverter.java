@@ -108,4 +108,9 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	public Validator<String> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return null;
+	}
 }

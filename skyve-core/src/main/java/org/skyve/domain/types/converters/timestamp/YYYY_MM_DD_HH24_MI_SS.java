@@ -6,7 +6,7 @@ public class YYYY_MM_DD_HH24_MI_SS extends AbstractTimestampConverter {
 	public static final String PATTERN = "yyyy/MM/dd HH:mm:ss";
 
 	@Override
-	protected String getPattern() {
+	public String getFormatPattern() {
 		return PATTERN;
 	}
 	

@@ -13,7 +13,7 @@ public class HH24_MI_SS extends AbstractTimeConverter {
 	}
 
 	@Override
-	protected String getPattern() {
+	public String getFormatPattern() {
 		return PATTERN;
 	}
 	

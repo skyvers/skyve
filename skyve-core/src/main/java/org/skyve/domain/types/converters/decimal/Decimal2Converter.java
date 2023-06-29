@@ -42,4 +42,9 @@ public class Decimal2Converter implements Converter<Decimal2> {
 	public Validator<Decimal2> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return null;
+	}
 }

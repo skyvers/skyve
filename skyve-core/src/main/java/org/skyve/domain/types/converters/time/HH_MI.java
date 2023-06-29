@@ -6,7 +6,7 @@ public class HH_MI extends AbstractTimeConverter {
 	public static final String PATTERN = "hh:mm a";
 
 	@Override
-	protected String getPattern() {
+	public String getFormatPattern() {
 		return PATTERN;
 	}
 	

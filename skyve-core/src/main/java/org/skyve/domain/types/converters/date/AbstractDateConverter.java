@@ -25,18 +25,15 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	}
 
 	/**
-	 * The pattern for this Date converter
-	 * 
-	 * @return Date time format String pattern
+	 * The i18n key used to represent an error in conversion using this converter
+	 * @return	The i18n key.
 	 */
-	protected abstract String getPattern();
-
 	protected abstract String getI18nKey();
 	
 	@Override
 	public DateOnly fromDisplayValue(String displayValue) throws ConversionException {
 		try {
-			return new DateOnly(CORE.getDateFormat(getPattern()).parse(displayValue).getTime());
+			return new DateOnly(CORE.getDateFormat(getFormatPattern()).parse(displayValue).getTime());
 		}
 		catch (Exception e) {
 			throw new ConversionException(getI18nKey(), e);
@@ -46,7 +43,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	@Override
 	public String toDisplayValue(DateOnly value) throws ConversionException {
 		try {
-			return CORE.getDateFormat(getPattern()).format(value);
+			return CORE.getDateFormat(getFormatPattern()).format(value);
 		}
 		catch  (Exception e) {
 			throw new ConversionException(getI18nKey(), e);

@@ -54,4 +54,9 @@ public class Decimal5TwoDecimalPlacesPercentage implements Converter<Decimal5> {
 	public Validator<Decimal5> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return PATTERN;
+	}
 }

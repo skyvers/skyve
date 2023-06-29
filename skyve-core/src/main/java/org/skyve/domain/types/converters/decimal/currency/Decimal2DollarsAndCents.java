@@ -57,4 +57,9 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	public Validator<Decimal2> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return PATTERN;
+	}
 }

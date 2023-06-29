@@ -52,4 +52,9 @@ public class LongIntegerSeparator implements Converter<Long> {
 	public Validator<Long> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return null;
+	}
 }

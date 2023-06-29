@@ -25,18 +25,15 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	}
 
 	/**
-	 * The pattern for this DateTime converter
-	 * 
-	 * @return Date time format String pattern
+	 * The i18n key used to represent an error in conversion using this converter
+	 * @return	The i18n key.
 	 */
-	protected abstract String getPattern();
-
 	protected abstract String getI18nKey();
 	
 	@Override
 	public DateTime fromDisplayValue(String displayValue) throws ConversionException {
 		try {
-			return new DateTime(CORE.getDateFormat(getPattern()).parse(displayValue).getTime());
+			return new DateTime(CORE.getDateFormat(getFormatPattern()).parse(displayValue).getTime());
 		}
 		catch (Exception e) {
 			throw new ConversionException(getI18nKey(), e);
@@ -46,7 +43,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	@Override
 	public String toDisplayValue(DateTime value) throws ConversionException {
 		try {
-			return CORE.getDateFormat(getPattern()).format(value);
+			return CORE.getDateFormat(getFormatPattern()).format(value);
 		}
 		catch (Exception e) {
 			throw new ConversionException(getI18nKey(), e);

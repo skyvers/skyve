@@ -71,9 +71,15 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
+import org.skyve.domain.types.converters.date.DD_MM_YYYY;
 import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
 import org.skyve.domain.types.converters.date.MM_DD_YYYY;
 import org.skyve.domain.types.converters.date.YYYY_MM_DD;
+import org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH24_MI;
+import org.skyve.domain.types.converters.datetime.DD_MMM_YYYY_HH_MI;
+import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
+import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MMM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI;
@@ -84,6 +90,10 @@ import org.skyve.domain.types.converters.time.HH24_MI;
 import org.skyve.domain.types.converters.time.HH24_MI_SS;
 import org.skyve.domain.types.converters.time.HH_MI;
 import org.skyve.domain.types.converters.time.HH_MI_SS;
+import org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS;
+import org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH_MI_SS;
+import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
+import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
@@ -3125,29 +3135,29 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setShowButtonBar(true);
 
 		String converterName = converter.getClass().getSimpleName();
-		if ("DD_MM_YYYY".equals(converterName)) {
-			result.setPattern("dd/MM/yyyy");
+		if (DD_MM_YYYY.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MM_YYYY.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setMask("99/99/9999");
 		}
-		else if ("DD_MM_YYYY_HH_MI".equals(converterName)) {
-			result.setPattern("dd/MM/yyyy hh:mm a");
+		else if (DD_MM_YYYY_HH_MI.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MM_YYYY_HH_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setHourFormat("12");
 			result.setMask("99/99/9999 99:99 aa");
 		}
-		else if ("DD_MM_YYYY_HH24_MI".equals(converterName)) {
-			result.setPattern("dd/MM/yyyy HH:mm");
+		else if (DD_MM_YYYY_HH24_MI.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MM_YYYY_HH24_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setMask("99/99/9999 99:99");
 		}
-		else if ("DD_MM_YYYY_HH_MI_SS".equals(converterName)) {
-			result.setPattern("dd/MM/yyyy hh:mm:ss a");
+		else if (DD_MM_YYYY_HH_MI_SS.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MM_YYYY_HH_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
@@ -3155,37 +3165,37 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99 aa");
 		}
-		else if ("DD_MM_YYYY_HH24_MI_SS".equals(converterName)) {
-			result.setPattern("dd/MM/yyyy HH:mm:ss");
+		else if (DD_MM_YYYY_HH24_MI_SS.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MM_YYYY_HH24_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99");
 		}
-		else if ("DD_MMM_YYYY".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy");
+		else if (DD_MMM_YYYY.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MMM_YYYY.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setMask("99-aaa-9999");
 		}
-		else if ("DD_MMM_YYYY_HH_MI".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy hh:mm a");
+		else if (DD_MMM_YYYY_HH_MI.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MMM_YYYY_HH_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setHourFormat("12");
 			result.setMask("99-aaa-9999 99:99 aa");
 		}
-		else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy HH:mm");
+		else if (DD_MMM_YYYY_HH24_MI.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MMM_YYYY_HH24_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setMask("99-aaa-9999 99:99");
 		}
-		else if ("DD_MMM_YYYY_HH_MI_SS".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy hh:mm:ss a");
+		else if (DD_MMM_YYYY_HH_MI_SS.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MMM_YYYY_HH_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
@@ -3193,21 +3203,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("99-aaa-9999 99:99:99 aa");
 		}
-		else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
-			result.setPattern("dd-MMM-yyyy HH:mm:ss");
+		else if (DD_MMM_YYYY_HH24_MI_SS.class.getSimpleName().equals(converterName)) {
+			result.setPattern(DD_MMM_YYYY_HH24_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setShowSeconds(true);
 			result.setMask("99-aaa-9999 99:99:99");
 		}
-		else if ("MM_DD_YYYY".equals(converterName)) {
+		else if (MM_DD_YYYY.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MM_DD_YYYY.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setMask("99/99/9999");
 		}
-		else if ("MM_DD_YYYY_HH_MI".equals(converterName)) {
+		else if (MM_DD_YYYY_HH_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3215,14 +3225,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setHourFormat("12");
 			result.setMask("99/99/9999 99:99 aa");
 		}
-		else if ("MM_DD_YYYY_HH24_MI".equals(converterName)) {
+		else if (MM_DD_YYYY_HH24_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setMask("99/99/9999 99:99");
 		}
-		else if ("MM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+		else if (MM_DD_YYYY_HH_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3231,7 +3241,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99 aa");
 		}
-		else if ("MM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+		else if (MM_DD_YYYY_HH24_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MM_DD_YYYY_HH24_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3239,13 +3249,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("99/99/9999 99:99:99");
 		}
-		else if ("MMM_DD_YYYY".equals(converterName)) {
+		else if (MMM_DD_YYYY.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setMask("aaa-99-9999");
 		}
-		else if ("MMM_DD_YYYY_HH_MI".equals(converterName)) {
+		else if (MMM_DD_YYYY_HH_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3253,14 +3263,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setHourFormat("12");
 			result.setMask("aaa-99-9999 99:99 aa");
 		}
-		else if ("MMM_DD_YYYY_HH24_MI".equals(converterName)) {
+		else if (MMM_DD_YYYY_HH24_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setMask("aaa-99-9999 99:99");
 		}
-		else if ("MMM_DD_YYYY_HH_MI_SS".equals(converterName)) {
+		else if (MMM_DD_YYYY_HH_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3269,7 +3279,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("aaa-99-9999 99:99:99 aa");
 		}
-		else if ("MMM_DD_YYYY_HH24_MI_SS".equals(converterName)) {
+		else if (MMM_DD_YYYY_HH24_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(MMM_DD_YYYY_HH24_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3277,13 +3287,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("aaa-99-9999 99:99:99");
 		}
-		else if ("YYYY_MM_DD".equals(converterName)) {
+		else if (YYYY_MM_DD.class.getSimpleName().equals(converterName)) {
 			result.setPattern(YYYY_MM_DD.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setMask("9999/99/99");
 		}
-		else if ("YYYY_MM_DD_HH_MI".equals(converterName)) {
+		else if (YYYY_MM_DD_HH_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3291,14 +3301,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setHourFormat("12");
 			result.setMask("9999/99/99 99:99 aa");
 		}
-		else if ("YYYY_MM_DD_HH24_MI".equals(converterName)) {
+		else if (YYYY_MM_DD_HH24_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH24_MI.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
 			result.setShowTime(true);
 			result.setMask("9999/99/99 99:99");
 		}
-		else if ("YYYY_MM_DD_HH_MI_SS".equals(converterName)) {
+		else if (YYYY_MM_DD_HH_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3307,7 +3317,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("9999/99/99 99:99:99 aa");
 		}
-		else if ("YYYY_MM_DD_HH24_MI_SS".equals(converterName)) {
+		else if (YYYY_MM_DD_HH24_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(YYYY_MM_DD_HH24_MI_SS.PATTERN);
 			result.setMonthNavigator(true);
 			result.setYearNavigator(true);
@@ -3315,25 +3325,25 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setShowSeconds(true);
 			result.setMask("9999/99/99 99:99:99");
 		}
-		else if ("HH_MI".equals(converterName)) {
+		else if (HH_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(HH_MI.PATTERN);
 			result.setTimeOnly(true);
 			result.setHourFormat("12");
 			result.setMask("99:99 aa");
 		}
-		else if ("HH24_MI".equals(converterName)) {
+		else if (HH24_MI.class.getSimpleName().equals(converterName)) {
 			result.setPattern(HH24_MI.PATTERN);
 			result.setTimeOnly(true);
 			result.setMask("99:99");
 		}
-		else if ("HH_MI_SS".equals(converterName)) {
+		else if (HH_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(HH_MI_SS.PATTERN);
 			result.setTimeOnly(true);
 			result.setHourFormat("12");
 			result.setShowSeconds(true);
 			result.setMask("99:99:99 aa");
 		}
-		else if ("HH24_MI_SS".equals(converterName)) {
+		else if (HH24_MI_SS.class.getSimpleName().equals(converterName)) {
 			result.setPattern(HH24_MI_SS.PATTERN);
 			result.setShowButtonBar(true);
 			result.setTimeOnly(true);

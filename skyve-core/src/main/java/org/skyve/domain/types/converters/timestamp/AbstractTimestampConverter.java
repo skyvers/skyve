@@ -25,18 +25,15 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	}
 
 	/**
-	 * The pattern for this Timestamp converter
-	 * 
-	 * @return Timestamp format String pattern
+	 * The i18n key used to represent an error in conversion using this converter
+	 * @return	The i18n key.
 	 */
-	protected abstract String getPattern();
-
 	protected abstract String getI18nKey();
 	
 	@Override
 	public Timestamp fromDisplayValue(String displayValue) throws ConversionException {
 		try {
-			return new Timestamp(CORE.getDateFormat(getPattern()).parse(displayValue).getTime());
+			return new Timestamp(CORE.getDateFormat(getFormatPattern()).parse(displayValue).getTime());
 		}
 		catch (Exception e) {
 			throw new ConversionException(getI18nKey(), e);
@@ -46,7 +43,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	@Override
 	public String toDisplayValue(Timestamp value) throws ConversionException {
 		try {
-			return CORE.getDateFormat(getPattern()).format(value);
+			return CORE.getDateFormat(getFormatPattern()).format(value);
 		}
 		catch (Exception e) {
 			throw new ConversionException(getI18nKey(), e);

@@ -44,4 +44,9 @@ public class GeometryConverter implements Converter<Geometry> {
 	public Validator<Geometry> getValidator() {
 		return null;
 	}
+	
+	@Override
+	public String getFormatPattern() {
+		return null;
+	}
 }
