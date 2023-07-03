@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.BiPredicate;
 
+import org.skyve.impl.generate.client.flutter.FlutterGenerator.GeneratorConfig;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
@@ -20,29 +22,37 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.menu.MenuRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FlutterRouting {
+    
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
 	private FlutterGenerator generator;
 	private Set<String> imports = new TreeSet<>();
 	private Set<String> routes = new TreeSet<>();
 	private StringBuilder menu = new StringBuilder(1024);
 	private int indentationLevel = 0;
 	private Customer customer; 
-	
+
 	public FlutterRouting(FlutterGenerator generator) {
 		this.generator = generator;
-		this.customer = generator.customer;
+		this.customer = generator.getConfig().getCustomer();
 		menu.append("const menu = [\n");
 	}
-	
+
 	void create() throws IOException {
 		menuImportsAndRoutes();
 		viewImportsAndRoutes();
 		
-		Map<String, String> substitutions = new TreeMap<>();
-		StringBuilder sb = new StringBuilder(1024);
-		sb.append("import 'package:").append(generator.projectName).append("/widgets/skyve_menu.dart';");
-		imports.add(sb.toString());
+        Map<String, String> substitutions = new TreeMap<>();
+        StringBuilder sb = new StringBuilder(1024);
+        sb.append("import 'package:")
+          .append(generator.getConfig()
+                           .getProjectName())
+          .append("/widgets/skyve_menu.dart';");
+        imports.add(sb.toString());
 		sb.setLength(0);
 		imports.forEach(i -> sb.append(i).append('\n'));
 		sb.setLength(sb.length() - 1); // remove \n
@@ -79,7 +89,22 @@ public class FlutterRouting {
 	}
 	
 	private void menuImportsAndRoutes() {
-		new MenuRenderer(generator.uxui, null) {
+        final GeneratorConfig config = generator.getConfig();
+        String uxui = config.getUxui();
+
+        final BiPredicate<Module, Document> configAllows = (m, d) -> {
+            String moduleName = m.getName();
+            String docName = d.getName();
+            if (config.allowsMoDoc(moduleName, docName)) {
+                log.debug("Generating " + moduleName + "-" + docName);
+                return true;
+            } else {
+                log.debug("Filtered out " + moduleName + "-" + docName);
+                return false;
+            }
+        };
+
+        new MenuRenderer(uxui, null) {
 			@Override
 			public void renderCalendarItem(CalendarItem item,
 											Module menuModule,
@@ -88,6 +113,11 @@ public class FlutterRouting {
 											String itemQueryName,
 											String icon16,
 											String iconStyleClass) {
+
+                if (!configAllows.test(itemModule, itemDocument)) {
+                    return;
+                }
+
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
 				String viewName = ((modelName == null) ? itemQueryName : modelName) + "Cal";
@@ -121,6 +151,11 @@ public class FlutterRouting {
 										Document itemDocument,
 										String icon16,
 										String iconStyleClass) {
+			    
+                if (!configAllows.test(itemModule, itemDocument)) {
+                    return;
+                }
+			    
 				String moduleName = itemModule.getName();
 				String viewName = itemDocument.getName();
 				FlutterEditView view = new FlutterEditView(generator, moduleName, viewName);
@@ -136,6 +171,11 @@ public class FlutterRouting {
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
+			    
+                if (!configAllows.test(itemModule, itemDocument)) {
+                    return;
+                }
+			    
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
 				String viewName = ((modelName == null) ? itemQueryName : modelName) + "List";
@@ -167,6 +207,11 @@ public class FlutterRouting {
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
+			    
+                if (!configAllows.test(itemModule, itemDocument)) {
+                    return;
+                }
+			    
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
 				String viewName = ((modelName == null) ? itemQueryName : modelName) + "Map";
@@ -181,6 +226,11 @@ public class FlutterRouting {
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
+			    
+                if (!configAllows.test(itemModule, itemDocument)) {
+                    return;
+                }
+
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
 				String viewName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
@@ -194,21 +244,31 @@ public class FlutterRouting {
 
 		// Add the import
 		StringBuilder sb = new StringBuilder(128);
-		sb.append("import 'package:").append(generator.projectName).append("/views/").append(view.moduleName).append('/').append(view.fileName).append("';");
+        sb.append("import 'package:")
+          .append(generator.getConfig().getProjectName())
+          .append("/views/")
+          .append(view.moduleName)
+          .append('/')
+          .append(view.fileName)
+          .append("';");
 		imports.add(sb.toString());
 
 		indent();
 		// TODO implement FA icon
 		if (item != null) {
-			menu.append("SkyveMenuData(label: '").append(item.getLocalisedName()).append("', routeName: ").append(className)
-					.append(".routeName").append(", icon: null),\n");
+            menu.append("SkyveMenuData(label: '")
+                .append(item.getLocalisedName())
+                .append("', routeName: ")
+                .append(className)
+                .append(".routeName")
+                .append(", icon: null),\n");
 		}
 
 		// Create the GoRoute declaration
 		String pattern = "GoRoute(path: %s.routeName, builder: (context, state) => %s(queryParams: state.queryParams)),";
 		String goRoute = String.format(pattern, className, className);
 		routes.add(goRoute);
-		
+
 		generator.views.add(view);
 	}
 

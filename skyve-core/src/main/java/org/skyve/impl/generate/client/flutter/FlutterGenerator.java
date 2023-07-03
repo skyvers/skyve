@@ -1,49 +1,57 @@
 package org.skyve.impl.generate.client.flutter;
 
+import static java.util.Collections.singletonMap;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.customer.Customer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FlutterGenerator {
     public static final String INDENT = "  ";
     
-    String uxui;
-    String projectName;
-    File projectPath;
-    File libPath;
-    File libViewsPath;
-    Set<FlutterView> views = new TreeSet<>();
-    Customer customer;
+    private Logger log = LoggerFactory.getLogger(getClass());
 
-    public FlutterGenerator(String uxui, String projectName, String projectPath, String customerName) {
-        Validate.notEmpty(uxui);
-        Validate.notEmpty(projectName);
-        Validate.notEmpty(projectPath);
-        Validate.notEmpty(customerName);
-        this.uxui = uxui;
-        this.projectName = projectName;
-        this.projectPath = new File(projectPath);
+    private GeneratorConfig config;
+    Set<FlutterView> views = new TreeSet<>();
+
+    private File projectPath;
+
+    public FlutterGenerator(GeneratorConfig config) {
+        this.config = config;
+        Validate.notEmpty(config.getUxui());
+        Validate.notEmpty(config.getProjectName());
+        Validate.notEmpty(config.getProjectPath());
+        Validate.notEmpty(config.getCustomerName());
+
+        this.projectPath = new File(config.getProjectPath());
         if (!this.projectPath.exists()) {
             throw new IllegalArgumentException("Project folder " + projectPath + " does not exist");
         }
-        this.libPath = new File(projectPath, "lib/");
-        this.libViewsPath = new File(projectPath, "lib/views/");
+        config.setLibViewsPath(new File(projectPath, "lib/views/"));
 
-        this.customer = ProvidedRepositoryFactory.get().getCustomer(customerName);
+        config.setCustomer(ProvidedRepositoryFactory.get()
+                                                    .getCustomer(config.getCustomerName()));
+    }
+
+    public GeneratorConfig getConfig() {
+        return config;
     }
 
     void refreshFile(String resourcePath, String flutterPath, Map<String, String> substitutions) throws IOException {
@@ -65,6 +73,8 @@ public class FlutterGenerator {
         for (Entry<String, String> substitution : substitutions.entrySet()) {
             flutterContent = flutterContent.replace(substitution.getKey(), substitution.getValue());
         }
+
+        log.debug(String.format("Refreshing file '%s' with substitutions: %s", file, substitutions.keySet()));
 
         try (FileWriter fw = new FileWriter(file)) {
             fw.write(flutterContent);
@@ -95,9 +105,10 @@ public class FlutterGenerator {
     }
 
     public void generate() throws IOException {
+        File libViewsPath = config.getLibViewsPath();
         libViewsPath.mkdirs();
-        
-        Map<String, String> substitutions = Collections.singletonMap("##PROJECT##", projectName);
+
+        Map<String, String> substitutions = singletonMap("##PROJECT##", config.getProjectName());
         refreshFile("pubspec.yaml", "pubspec.yaml", substitutions);
 
         // lib views folder
@@ -135,9 +146,11 @@ public class FlutterGenerator {
         refreshFile("lib/widgets/skyve_vbox.dart", "lib/widgets/skyve_vbox.dart", substitutions);
         refreshFile("lib/widgets/skyve_view.dart", "lib/widgets/skyve_view.dart", substitutions);
         refreshFile("lib/widgets/skyve_contentlink.dart", "lib/widgets/skyve_contentlink.dart", substitutions);
-        refreshFile("lib/widgets/skyve_contentsignature.dart", "lib/widgets/skyve_contentsignature.dart", substitutions);
+        refreshFile("lib/widgets/skyve_contentsignature.dart", "lib/widgets/skyve_contentsignature.dart",
+                substitutions);
         refreshFile("lib/widgets/skyve_html.dart", "lib/widgets/skyve_html.dart", substitutions);
-        refreshFile("lib/widgets/skyve_lookupdescription.dart", "lib/widgets/skyve_lookupdescription.dart", substitutions);
+        refreshFile("lib/widgets/skyve_lookupdescription.dart", "lib/widgets/skyve_lookupdescription.dart",
+                substitutions);
         refreshFile("lib/widgets/skyve_password.dart", "lib/widgets/skyve_password.dart", substitutions);
         refreshFile("lib/widgets/skyve_radio.dart", "lib/widgets/skyve_radio.dart", substitutions);
         refreshFile("lib/widgets/skyve_richtext.dart", "lib/widgets/skyve_richtext.dart", substitutions);
@@ -160,5 +173,117 @@ public class FlutterGenerator {
             view.create();
         }
     }
-    
+
+    public static class GeneratorConfig {
+
+        private String uxui;
+        private String projectName;
+        private String projectPath;
+        private File libViewsPath;
+        private String customerName;
+        private Collection<MoDoc> modocWhitelist = new ArrayList<>();
+        private Customer customer;
+
+        public String getUxui() {
+            return uxui;
+        }
+
+        public void setCustomer(Customer customer) {
+            this.customer = customer;
+        }
+
+        public Customer getCustomer() {
+            return customer;
+        }
+
+        public void setUxui(String uxui) {
+            this.uxui = uxui;
+        }
+
+        public String getProjectName() {
+            return projectName;
+        }
+
+        public void setProjectName(String projectName) {
+            this.projectName = projectName;
+        }
+
+        public String getProjectPath() {
+            return projectPath;
+        }
+
+        public void setProjectPath(String projectPath) {
+            this.projectPath = projectPath;
+        }
+
+        public String getCustomerName() {
+            return customerName;
+        }
+
+        public void setCustomerName(String customerName) {
+            this.customerName = customerName;
+        }
+
+        public Collection<MoDoc> getModocWhitelist() {
+            return modocWhitelist;
+        }
+
+        public void addModocWhitelistEnty(String modocEntry) {
+            modocWhitelist.add(MoDoc.fromString(modocEntry));
+        }
+
+        public File getLibViewsPath() {
+            return libViewsPath;
+        }
+
+        public void setLibViewsPath(File libViewsPath) {
+            this.libViewsPath = libViewsPath;
+        }
+
+        public boolean allowsMoDoc(String module, String document) {
+
+            return modocWhitelist.stream()
+                                 .anyMatch(md -> md.matches(module, document));
+        }
+    }
+
+    public static class MoDoc {
+
+        public static final String WILDCARD = "*";
+
+        private final String module;
+        private final String document;
+
+        public MoDoc(String module, String document) {
+            this.module = Validate.notEmpty(module);
+            this.document = Validate.notEmpty(document);
+        }
+
+        public static MoDoc fromString(String modocString) {
+
+            String module = StringUtils.substringBefore(modocString, ".");
+            String document = StringUtils.substringAfter(modocString, ".");
+
+            return new MoDoc(module, document);
+        }
+
+        public String getModule() {
+            return module;
+        }
+
+        public String getDocument() {
+            return document;
+        }
+
+        public boolean matches(String mod, String doc) {
+
+            return (this.module.equals(WILDCARD) || this.module.equals(mod))
+                    && (this.document.equals(WILDCARD) || this.document.equals(doc));
+        }
+
+        @Override
+        public String toString() {
+            return "MoDoc[" + module + "." + document + "]";
+        }
+    }
 }

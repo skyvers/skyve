@@ -1,5 +1,6 @@
 package org.skyve.toolchain.flutter;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.generate.client.flutter.FlutterGenerator;
+import org.skyve.impl.generate.client.flutter.FlutterGenerator.GeneratorConfig;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -57,10 +59,13 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
     @Parameter(required = true, defaultValue = "src/main/java/")
     private String srcDir;
 
+    @Parameter(property = "modocWhitelist", required = true, defaultValue = "*.*")
+    private List<String> modocWhitelist;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
 
-        getLog().info("Running flutter-init");
+        info("Running flutter-init");
 
         try {
             customer = getDefaultOrPromptCustomer(customer);
@@ -84,11 +89,21 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         debugParam("projectName", projectName);
         debugParam("projectPath", projectPath);
         debugParam("customer", customer);
+        debugParam("modocWhitelist", modocWhitelist.stream()
+                                                   .collect(joining(", ")));
 
         try {
             Weld weld = bootstrapSkyve();
 
-            FlutterGenerator generator = new FlutterGenerator(uxui, projectName, projectPath, customer);
+            GeneratorConfig config = new FlutterGenerator.GeneratorConfig();
+            config.setUxui(uxui);
+            config.setProjectName(projectName);
+            config.setProjectPath(projectPath);
+            config.setCustomerName(customer);
+
+            modocWhitelist.forEach(config::addModocWhitelistEnty);
+
+            FlutterGenerator generator = new FlutterGenerator(config);
             generator.generate();
 
             weld.shutdown();
@@ -150,7 +165,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
                 .exists()) {
             if (clear) {
                 try {
-                    // Delete the contents of the output directory, 
+                    // Delete the contents of the output directory,
                     // this should play a bit nicer while having the project
                     // open in another editor.
                     debug("Deleting contents of: " + root);
@@ -187,13 +202,19 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
         return root;
     }
 
-    private void debug(String msg) {
+    private void debug(CharSequence msg) {
 
         getLog().debug("[flutter-init] " + msg);
+    }
+
+    private void info(CharSequence msg) {
+
+        getLog().info("[flutter-init] " + msg);
     }
 
     private void debugParam(String name, Object value) {
 
         debug(name + "=" + value);
     }
+
 }

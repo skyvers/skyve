@@ -12,8 +12,6 @@ import org.skyve.web.UserAgentType;
 public class FlutterViewRenderer extends ClientViewRenderer {
 	static final String STARTING_INDENT = "";
 
-	protected Set<String> imports;
-
 	protected FlutterViewRenderer(User user,
 									Module module,
 									Document document,
@@ -21,7 +19,6 @@ public class FlutterViewRenderer extends ClientViewRenderer {
 									String uxui,
 									Set<String> imports) {
 		super(user, module, document, view, uxui);
-		this.imports = imports;
 		FlutterComponentRenderer newCR = new FlutterComponentRenderer(imports, STARTING_INDENT);
 		newCR.setUserAgentType(UserAgentType.desktop);
 		FlutterLayoutRenderer newLR = new FlutterLayoutRenderer(imports);
