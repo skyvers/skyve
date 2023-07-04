@@ -37,6 +37,13 @@ public abstract class AbstractQuery {
 
 	public abstract String toQueryString();
 
+	/**
+	 * Returns exactly one result from this query; or throws a NoResultsException or 
+	 * ManyResultsException based on the number of results.
+	 * 
+	 * @param results The complete list of results
+	 * @return The single result from the list, or an exception if the list does not contain one result
+	 */
 	public static <T> T assertOneResult(List<T> results) {
 		if (results.size() == 1) {
 			return results.get(0);
@@ -49,6 +56,13 @@ public abstract class AbstractQuery {
 		}
 	}
 	
+	/**
+	 * Returns the first result from this query, or null if there are no
+	 * results.
+	 * 
+	 * @param results The list of all results
+	 * @return The first result, or null
+	 */
 	public static <T> T returnOneResult(List<T> results) {
 		if (results.isEmpty()) {
 			return null;
