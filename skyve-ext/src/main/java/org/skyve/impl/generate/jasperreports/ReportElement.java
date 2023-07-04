@@ -39,23 +39,10 @@ public class ReportElement {
 		 * @return
 		 */
 		public static ElementAlignment fromHorizontalAlignment(HorizontalAlignment ha) {
-			ElementAlignment itemAlignment = null;
 			if (ha != null) {
-				switch (ha) {
-				case centre:
-					itemAlignment = ReportElement.ElementAlignment.center; // note Jasper spelling
-					break;
-				case right:
-					itemAlignment = ReportElement.ElementAlignment.right;
-					break;
-				case left:
-					itemAlignment = ReportElement.ElementAlignment.left;
-					break;
-				default:
-					break;
-				}
+				return ElementAlignment.valueOf(ha.toAlignmentString()); // note Jasper spelling
 			}
-			return itemAlignment;
+			return null;
 		}
 	}
 
@@ -533,8 +520,8 @@ public class ReportElement {
 	 * @param italic
 	 * @param printWhenExpression
 	 */
-	public ReportElement(ReportElement.ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top, Integer left,
-			Integer width, Integer height, Boolean border, ReportElement.ElementAlignment alignment, Boolean bold, Boolean italic, String invisibleConditionName) {
+	public ReportElement(ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top, Integer left,
+			Integer width, Integer height, Boolean border, ElementAlignment alignment, Boolean bold, Boolean italic, String invisibleConditionName) {
 
 		this.setElementType(type);
 
@@ -565,7 +552,7 @@ public class ReportElement {
 
 		// alignment
 		if (alignment == null) {
-			this.setElementAlignment(ReportElement.ElementAlignment.left);
+			this.setElementAlignment(ElementAlignment.left);
 		} else {
 			this.setElementAlignment(alignment);
 		}
@@ -582,7 +569,7 @@ public class ReportElement {
 	 * @param width
 	 * @param invisibleConditionName
 	 */
-	public ReportElement(ReportElement.ElementType type, String name, String valueExpression, Integer top, Integer left, Integer width, String invisibleConditionName) {
+	public ReportElement(ElementType type, String name, String valueExpression, Integer top, Integer left, Integer width, String invisibleConditionName) {
 		this(type, name, valueExpression, null, null, top, left, width, null, null, null, Boolean.FALSE,
 				Boolean.FALSE, invisibleConditionName);
 	}

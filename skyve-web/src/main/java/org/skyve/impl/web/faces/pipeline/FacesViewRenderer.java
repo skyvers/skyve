@@ -9,6 +9,7 @@ import javax.faces.component.UIComponentBase;
 
 import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.picklist.PickList;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -16,7 +17,6 @@ import org.skyve.domain.types.converters.date.MMM_DD_YYYY;
 import org.skyve.domain.types.converters.date.MM_DD_YYYY;
 import org.skyve.domain.types.converters.date.YYYY_MM_DD;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
@@ -149,6 +149,7 @@ import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
+import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -831,7 +832,8 @@ public class FacesViewRenderer extends ViewRenderer {
 												geometry,
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
-												required);
+												required,
+												CORE.getCustomisations().determineDefaultTextAlignment(AttributeType.geometry));
 		eventSource = c.getEventSource();
         addComponent(title, 
         				formColspan,
@@ -1436,6 +1438,8 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		String binding = column.getBinding();
+		HorizontalAlignment alignment = column.getAlignment();
+		Integer pixelWidth = column.getPixelWidth();
 		
 		TargetMetaData target = getCurrentTarget();
 		
@@ -1445,18 +1449,22 @@ public class FacesViewRenderer extends ViewRenderer {
 		else {
 			if (target != null) {
 				Attribute targetAttribute = target.getAttribute();
-				
-				if (targetAttribute instanceof Association) {
-					binding = BindUtil.createCompoundBinding(binding, Bean.BIZ_KEY);
+				if (targetAttribute != null) {
+					AttributeType attributeType = targetAttribute.getAttributeType();
+					Customisations customisations = CORE.getCustomisations();
+					if (alignment == null) {
+						alignment = customisations.determineDefaultTextAlignment(attributeType);
+					}
+					if (pixelWidth == null) {
+						pixelWidth = customisations.determineDefaultColumnWidth(attributeType);
+					}
+
+					if (targetAttribute instanceof Association) {
+						binding = BindUtil.createCompoundBinding(binding, Bean.BIZ_KEY);
+					}
 				}
 			}
 		}
-		
-		HorizontalAlignment alignment = column.getAlignment();
-		if (alignment == null && target != null && target.getAttribute() != null) {
-            alignment = ViewGenerator.determineDefaultColumnAlignment(target.getAttribute().getAttributeType());
-        }
-		
 		
 		current = cb.addDataGridBoundColumn(null,
 												current, 
@@ -1466,7 +1474,8 @@ public class FacesViewRenderer extends ViewRenderer {
 												title, 
 												binding, 
 												gridColumnExpression,
-												alignment);
+												alignment,
+												pixelWidth);
 	}
 
 	@Override
@@ -1491,7 +1500,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment == null && target != null && target.getAttribute() != null) {
-            alignment = ViewGenerator.determineDefaultColumnAlignment(target.getAttribute().getAttributeType());
+            alignment = CORE.getCustomisations().determineDefaultTextAlignment(target.getAttribute().getAttributeType());
         }
 		
         current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
@@ -1580,12 +1589,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
 		EventSourceComponent c = cb.colourPicker(null,
 													dataWidgetVar,
 													colour,
 													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 													title,
-													required);
+													required,
+													(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null);
 		eventSource = c.getEventSource();
 		addComponent(title, 
 						formColspan,
@@ -1700,24 +1712,27 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBoundColumnContentLink(String value, ContentLink link) {
-		renderContentLink(value, 0, link);
+		renderContentLink(0, link);
 	}
 
 	@Override
 	public void renderFormContentLink(String value, ContentLink link) {
-		renderContentLink(value, getCurrentWidgetColspan(), link);
+		renderContentLink(getCurrentWidgetColspan(), link);
 	}
 	
-	private void renderContentLink(String value, int formColspan, ContentLink link) {
+	private void renderContentLink(int formColspan, ContentLink link) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
 		UIComponent c = cb.contentLink(null,
 										dataWidgetVar,
 										link,
 										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 										title,
-										required);
+										required,
+										(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null);
 		addComponent(title, 
 						formColspan,
 						required, 
@@ -1857,19 +1872,24 @@ public class FacesViewRenderer extends ViewRenderer {
 	
 	public void renderLookupDescription(MetaDataQueryDefinition query,
 											int formColspan,
-											boolean canCreate,
-											boolean canUpdate,
+											// No zooming in PF
+											@SuppressWarnings("unused") boolean canCreate,
+											// No zooming in PF
+											@SuppressWarnings("unused") boolean canUpdate,
 											String descriptionBinding,
 											LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
 		EventSourceComponent c = cb.lookupDescription(null,
 														dataWidgetVar, 
 														lookup, 
 														(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 														title, 
 														required,
+														(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null,
 														descriptionBinding,
 														query);
         eventSource = c.getEventSource();
@@ -1920,12 +1940,15 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		Form currentForm = getCurrentForm();
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
         EventSourceComponent c = cb.password(null,
 												dataWidgetVar,
 												password,
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
-												required);
+												required,
+												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null);
         eventSource = c.getEventSource();
         addComponent(title, 
         				formColspan,
@@ -2112,6 +2135,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
+												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null,
 												convertConverter(converter, type));
         eventSource = c.getEventSource();
         addComponent(title, 
@@ -2166,6 +2190,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
+												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null,
 												length);
         eventSource = c.getEventSource();
         addComponent(title, 
@@ -2247,6 +2272,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 											title, 
 											required,
+											CORE.getCustomisations().determineDefaultTextAlignment(type),
 											length,
 											converter,
 											format,

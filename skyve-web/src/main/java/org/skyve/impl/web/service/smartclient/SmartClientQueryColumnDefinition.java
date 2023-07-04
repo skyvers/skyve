@@ -1,6 +1,5 @@
 package org.skyve.impl.web.service.smartclient;
 
-import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -29,10 +28,8 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	private boolean onlyEqualsFilterOperators = false;
 	private boolean onlyContainsFilterOperator = false;
 	private boolean hasTextFilterOperators = false;
-	protected Integer pixelWidth;
 	protected Integer pixelHeight;
 	protected String emptyThumbnailRelativeFile;
-	protected HorizontalAlignment align;
 	
 	protected SmartClientQueryColumnDefinition(User user,
 												Customer customer, 
@@ -52,8 +49,14 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		if (displayName != null) {
 			title = displayName;
 		}
-		align = column.getAlignment();
-		pixelWidth = column.getPixelWidth();
+		HorizontalAlignment columnAlignment = column.getAlignment();
+		if (columnAlignment != null) {
+			align = columnAlignment;
+		}
+		Integer columnPixelWidth = column.getPixelWidth();
+		if (columnPixelWidth != null) {
+			pixelWidth = columnPixelWidth;
+		}
 		escape = column.isEscape();
 
 		Attribute attribute = (target != null) ? target.getAttribute() : null;
@@ -112,13 +115,6 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 						onlyEqualsFilterOperators = true;
 					}
 				}
-			}
-			
-			if (align == null) {
-				align = ViewGenerator.determineDefaultColumnAlignment(attributeType);
-			}
-			if (pixelWidth == null) {
-				pixelWidth = ViewGenerator.determineDefaultColumnWidth(attributeType);
 			}
 		}
 
@@ -181,22 +177,6 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		this.detail = detail;
 	}
 
-    public HorizontalAlignment getAlign() {
-		return align;
-	}
-
-	public void setAlign(HorizontalAlignment align) {
-		this.align = align;
-	}
-
-	public Integer getPixelWidth() {
-		return pixelWidth;
-	}
-
-	public void setPixelWidth(Integer pixelWidth) {
-		this.pixelWidth = pixelWidth;
-	}
-
 	public Integer getPixelHeight() {
 		return pixelHeight;
 	}
@@ -242,7 +222,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		else {
 			result.append('\'');
 		}
-		appendEditorProperties(result, false, pixelWidth, pixelHeight, emptyThumbnailRelativeFile);
+		appendEditorProperties(result, false, pixelHeight, emptyThumbnailRelativeFile);
 		if (valueMap != null) {
 			result.append(",valueMap:").append(valueMap);
 		}

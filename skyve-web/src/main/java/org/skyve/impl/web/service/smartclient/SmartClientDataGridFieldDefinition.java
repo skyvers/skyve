@@ -1,8 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
-import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -19,9 +17,7 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefinition {
-    protected HorizontalAlignment align;
     protected boolean editable;
-    protected Integer pixelWidth;
     protected String defaultValueJavascriptExpression;
 
     protected SmartClientDataGridFieldDefinition(User user,
@@ -83,22 +79,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 				editorType = null;
 			}
 		}
-
-		// set the default alignment
-		if (attribute != null) {
-			AttributeType attributeType = attribute.getAttributeType();
-			align = ViewGenerator.determineDefaultColumnAlignment(attributeType);
-			pixelWidth = ViewGenerator.determineDefaultColumnWidth(attributeType);
-		}
     }
-
-    public HorizontalAlignment getAlign() {
-		return align;
-	}
-
-	public void setAlign(HorizontalAlignment align) {
-		this.align = align;
-	}
 
 	public boolean getEditable() {
 		return editable;
@@ -106,14 +87,6 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 
 	public void setEditable(boolean editable) {
 		this.editable = editable;
-	}
-	
-	public Integer getPixelWidth() {
-		return pixelWidth;
-	}
-
-	public void setPixelWidth(Integer pixelWidth) {
-		this.pixelWidth = pixelWidth;
 	}
 
 	public String toJavascript() {
@@ -131,7 +104,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         if (editorType != null) {
             result.append(",editorType:'").append(editorType).append('\'');
         }
-        appendEditorProperties(result, true, pixelWidth, null, null);
+        appendEditorProperties(result, true, null, null);
         if (required) {
         	result.append(",bizRequired:true,requiredMessage:'");
         	result.append(OWASP.escapeJsString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');

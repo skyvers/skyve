@@ -1722,6 +1722,7 @@ isc.BizLookupDescriptionItem.addMethods({
 			type: 'comboBox', 
 			showTitle: false,
 			width: '*',
+			textAlign: config.textAlign,
 			selectOnFocus: true,
 			fetchMissingValues: false,
 //			addUnknownValues: false, This triggers a fetch on blur

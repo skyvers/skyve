@@ -11,7 +11,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
@@ -2114,26 +2113,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 	
 	public abstract void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server);
 
-	public static HorizontalAlignment determineDefaultColumnAlignment(AttributeType attributeType) {
-		if (AttributeType.date.equals(attributeType) || 
-				AttributeType.dateTime.equals(attributeType) ||
-				AttributeType.time.equals(attributeType) || 
-				AttributeType.timestamp.equals(attributeType) ||
-				AttributeType.decimal2.equals(attributeType) || 
-				AttributeType.decimal5.equals(attributeType) ||
-				AttributeType.decimal10.equals(attributeType) || 
-				AttributeType.integer.equals(attributeType) ||
-				AttributeType.longInteger.equals(attributeType)) {
-			return HorizontalAlignment.right;
-		}
-		if (AttributeType.bool.equals(attributeType) || 
-				AttributeType.content.equals(attributeType) ||
-				AttributeType.image.equals(attributeType)) {
-			return HorizontalAlignment.centre;
-		}
-		return HorizontalAlignment.left;
-	}
-	
 	@SuppressWarnings("static-method")
 	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType)) {

@@ -35,6 +35,7 @@ import org.skyve.cache.JCacheConfig;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -47,6 +48,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
+import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
@@ -535,6 +537,18 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 			catch (Exception e) {
 				throw new IllegalStateException("Could not create factories.numberGeneratorClass " + UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS, e);
+			}
+		}
+
+		UtilImpl.SKYVE_CUSTOMISATIONS_CLASS = getString("factories", "customisationsClass", factories, false);
+		if (UtilImpl.SKYVE_CUSTOMISATIONS_CLASS != null) {
+			try {
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_CUSTOMISATIONS_CLASS);
+				Customisations customisations = (Customisations) loadedClass.getDeclaredConstructor().newInstance();
+				CustomisationsStaticSingleton.set(customisations);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create factories.customisationsClass " + UtilImpl.SKYVE_CUSTOMISATIONS_CLASS, e);
 			}
 		}
 

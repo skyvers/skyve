@@ -3,14 +3,12 @@ package org.skyve.impl.web.service.smartclient;
 import java.util.List;
 
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -19,7 +17,6 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefinition {
-	private HorizontalAlignment textAlign;
 	private String helpText;
 
 	protected SmartClientFieldDefinition(User user,
@@ -30,16 +27,15 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 											boolean runtime) {
 		super(user, customer, module, document, widget, null, runtime);
 		Attribute attribute = target.getAttribute();
+
 		if (attribute != null) {
 			helpText = attribute.getLocalisedDescription();
-			if (AttributeType.time.equals(attribute.getAttributeType())) {
-				textAlign = HorizontalAlignment.right;
-			}
 		}
+		
 		// Use a drop down for grids but in the edit view, use the text field as specified
 		if (widget instanceof TextField) {
 			editorType = null; // is set to "select" in the SmartClientAttributeDefinition
-			valueMap = null; // ensure there is no value map of SC will create a combo anyway
+			valueMap = null; // ensure there is no value map or SC will create a combo anyway
 		}
 		// Use a drop down for grids but in the edit view, use the radio group as specified
 		else if (widget instanceof Radio) {
@@ -101,10 +97,11 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 			result.append(",validators:[").append(validation).append(']');
 		}
 		
-		if (textAlign != null) {
-			result.append(",textAlign:'").append(textAlign.toAlignmentString()).append('\'');
+		// This alignment here is text alignment, not the alignment within the form item which is handled in SmartClientViewRenderer.renderFormItem().
+		if (align != null) {
+			result.append(",textAlign:'").append(align.toAlignmentString()).append('\'');
 		}
-		
+
 	    if (helpText != null) {
 			result.append(",icons:[{src:'icons/help.png',tabIndex:-1,showOver:true,neverDisable:true,prompt:'");
 			result.append(OWASP.escapeJsString(helpText, false, true));

@@ -374,7 +374,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression,
-												HorizontalAlignment alignment) {
+												HorizontalAlignment alignment,
+												Integer pixelWidth) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridBoundColumn(result, 
@@ -385,7 +386,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 														columnTitle,
 														columnBinding,
 														gridColumnExpression,
-														alignment);
+														alignment,
+														pixelWidth);
 		}
 		return result;
 	}
@@ -475,10 +477,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											Geometry geometry,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledConditionName, title, required);
+			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledConditionName, title, required, textAlignment);
 		}
 		return result;
 	}
@@ -592,7 +595,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												ColourPicker colour,
 												String formDisabledConditionName,
 												String title,
-												boolean required) {
+												boolean required,
+												HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.colourPicker(result,
@@ -600,7 +604,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											colour,
 											formDisabledConditionName,
 											title,
-											required);
+											required,
+											textAlignment);
 		}
 		return result;
 	}
@@ -639,10 +644,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									ContentLink link,
 									String formDisabledConditionName,
 									String title,
-									boolean required) {
+									boolean required,
+									HorizontalAlignment textAlignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.contentLink(result, dataWidgetVar, link, formDisabledConditionName, title, required);
+			result = builder.contentLink(result, dataWidgetVar, link, formDisabledConditionName, title, required, textAlignment);
 		}
 		return result;
 	}
@@ -682,6 +688,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 													String formDisabledConditionName,
 													String title,
 													boolean required,
+													HorizontalAlignment textAlignment,
 													String displayBinding,
 													QueryDefinition query) {
 		EventSourceComponent result = component;
@@ -692,6 +699,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												formDisabledConditionName,
 												title,
 												required,
+												textAlignment,
 												displayBinding,
 												query);
 		}
@@ -704,10 +712,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											Password password,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, required);
+			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, required, textAlignment);
 		}
 		return result;
 	}
@@ -747,10 +756,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											String formDisabledConditionName,
 											String title,
 											boolean required,
+											HorizontalAlignment textAlignment,
 											javax.faces.convert.Converter facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required, facesConverter);
+			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required, textAlignment, facesConverter);
 		}
 		return result;
 	}
@@ -762,10 +772,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											String formDisabledConditionName,
 											String title,
 											boolean required,
+											HorizontalAlignment textAlignment,
 											Integer length) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, required, length);
+			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, required, textAlignment, length);
 		}
 		return result;
 	}
@@ -777,6 +788,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String formDisabledConditionName,
 										String title,
 										boolean required,
+										HorizontalAlignment textAlignment,
 										Integer length,
 										Converter<?> converter,
 										Format<?> format,
@@ -789,6 +801,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									formDisabledConditionName,
 									title,
 									required,
+									textAlignment,
 									length,
 									converter,
 									format,

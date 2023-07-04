@@ -7,10 +7,12 @@ import java.util.SortedMap;
 
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.repository.Repository;
@@ -96,6 +98,14 @@ public class CORE {
 	 */
 	public static Repository getRepository() {
 		return ProvidedRepositoryFactory.get();
+	}
+	
+	/**
+	 * Get the Skyve Customisations.
+	 * @return	A Customisations.
+	 */
+	public static Customisations getCustomisations() {
+		return CustomisationsStaticSingleton.get();
 	}
 	
 	/**

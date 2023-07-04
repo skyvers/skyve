@@ -1284,14 +1284,19 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 
 			def.setTitle(title);
-			HorizontalAlignment textAlignment = column.getAlignment();
-			if (textAlignment != null) {
-				def.setAlign(textAlignment);
+			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
+			def.setEscape(! Boolean.FALSE.equals(column.getEscape()));
+
+			// NB - Text alignment and pixel width defaults are set in SmartClientDataGridFieldDefinition constructor
+			HorizontalAlignment columnAlignment = column.getAlignment();
+			if (columnAlignment != null) {
+				def.setAlign(columnAlignment);
+			}
+			Integer pixelWidth = column.getPixelWidth();
+			if (pixelWidth != null) {
+				def.setPixelWidth(pixelWidth);
 			}
 			
-			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
-			def.setPixelWidth(column.getPixelWidth());
-			def.setEscape(! Boolean.FALSE.equals(column.getEscape()));
 			code.append('{').append(def.toJavascript()).append("},");
 
 			SmartClientLookupDefinition lookup = def.getLookup();

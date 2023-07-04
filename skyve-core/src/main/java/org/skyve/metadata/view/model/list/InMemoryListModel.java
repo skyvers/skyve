@@ -254,7 +254,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			result.setRows(rows);
 		}
 		else {
-			result.setRows(new ArrayList<Bean>(0));
+			result.setRows(new ArrayList<>(0));
 		}
 		
 		return result;

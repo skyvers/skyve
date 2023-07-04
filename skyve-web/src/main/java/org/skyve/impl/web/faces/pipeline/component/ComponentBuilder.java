@@ -213,7 +213,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														String columnTitle,
 														String columnBinding,
 														StringBuilder gridColumnExpression,
-														HorizontalAlignment horizontalAlignment);
+														HorizontalAlignment horizontalAlignment,
+														Integer pixelWidth);
 	public abstract UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current);
 	public abstract UIComponent addDataGridContainerColumn(UIComponent component,
 															UIComponent current,
@@ -274,7 +275,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													Geometry geometry, 
 													String formDisabledConditionName,
 													String title, 
-													boolean required);
+													boolean required,
+													HorizontalAlignment textAlignment);
 
 	public abstract EventSourceComponent geometryMap(EventSourceComponent component, 
 														GeometryMap geometry, 
@@ -301,8 +303,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														ColourPicker colour, 
 														String formDisabledConditionName,
 														String title, 
-														boolean required);
+														boolean required,
+														HorizontalAlignment textAlignment);
 	
+	// Note: We cannot set the text alignment of a combo easily with inline styling
 	public abstract EventSourceComponent combo(EventSourceComponent component, 
 												String dataWidgetVar, 
 												Combo combo, 
@@ -322,7 +326,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												ContentLink link, 
 												String formDisabledConditionName,
 												String title, 
-												boolean required);
+												boolean required,
+												HorizontalAlignment textAlignment);
 	
 	public abstract UIComponent addContentSignature(UIComponent component,
 														UIComponent layout, 
@@ -344,6 +349,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															String formDisabledConditionName,
 															String title,
 															boolean required,
+															HorizontalAlignment textAlignment,
 															String displayBinding,
 															QueryDefinition query);
 	
@@ -352,7 +358,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													Password password,
 													String formDisabledConditionName,
 													String title,
-													boolean required);
+													boolean required,
+													HorizontalAlignment textAlignment);
 
 	public abstract EventSourceComponent radio(EventSourceComponent component, 
 												String dataWidgetVar,
@@ -374,6 +381,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													String formDisabledConditionName,
 													String title,
 													boolean required,
+													HorizontalAlignment textAlignment,
 													javax.faces.convert.Converter facesConverter);
 	
 	public abstract EventSourceComponent text(EventSourceComponent component, 
@@ -382,6 +390,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String formDisabledConditionName,
 												String title, 
 												boolean required,
+												HorizontalAlignment textAlignment,
 												Integer length,
 												Converter<?> converter,
 												Format<?> format,
@@ -393,6 +402,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													String formDisabledConditionName,
 													String title,
 													boolean required,
+													HorizontalAlignment textAlignment,
 													Integer length);
 	
 	public HtmlOutputLink outputLink(String dataWidgetVar, 

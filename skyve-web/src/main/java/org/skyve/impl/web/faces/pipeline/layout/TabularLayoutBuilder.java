@@ -346,14 +346,16 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 									String widgetId) {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
 		setInvisible(result, invisibleConditionName, null);
-		setSize(result, 
-					null, 
-					pixelWidth, 
-					responsiveWidth, 
-					percentageWidth, 
-					pixelHeight, 
-					percentageHeight, 
-					NINETY_EIGHT);
+		setSizeAndTextAlignStyle(result, 
+									null,
+									null, 
+									pixelWidth, 
+									responsiveWidth, 
+									percentageWidth, 
+									pixelHeight, 
+									percentageHeight, 
+									NINETY_EIGHT,
+									null);
 		setId(result, widgetId);
 		result.setStyleClass("ui-panelgrid-blank");
 		return result;

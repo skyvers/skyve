@@ -1,0 +1,25 @@
+package org.skyve.metadata.controller;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.metadata.model.Attribute.AttributeType;
+
+/**
+ * Enables the customisation of certain Skyve functions.
+ * A class implementing this interface can be set in factories.customisationsClass of the JSON configuration.
+ * The NoCustomisations class represents the Skyve defaults and can be extended for you own implementations.
+ */
+public interface Customisations {
+	/**
+	 * Determine the default text alignment to use in columns and within textual widgets given an attribute type.
+	 */
+	@Nonnull HorizontalAlignment determineDefaultTextAlignment(AttributeType attributeType);
+
+	/**
+	 * Determine the default column width in pixels given an attribute type.
+	 * <code>null</code> may be returned if there is no default.
+	 */
+	@Nullable Integer determineDefaultColumnWidth(AttributeType attributeType);
+}

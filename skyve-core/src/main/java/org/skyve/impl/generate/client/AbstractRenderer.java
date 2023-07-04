@@ -46,18 +46,8 @@ public abstract class AbstractRenderer {
 	}
 
 	protected void setTextAlign(RenderedComponent component, HorizontalAlignment textAlignment) {
-		String styleClass = null;
-		if (HorizontalAlignment.left.equals(textAlignment)) {
-			styleClass = "left";
-		} 
-		else if (HorizontalAlignment.centre.equals(textAlignment)) {
-			styleClass = "center";
-		} 
-		else if (HorizontalAlignment.right.equals(textAlignment)) {
-			styleClass = "right";
-		}
-		if (styleClass != null) {
-			component.getOutput().append(' ').append(getClassName()).append("=\"").append(styleClass).append('\"');
+		if (textAlignment != null) {
+			component.getOutput().append(' ').append(getClassName()).append("=\"").append(textAlignment.toAlignmentString()).append('\"');
 		}
 	}
 	

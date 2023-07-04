@@ -8,6 +8,7 @@ import javax.faces.component.html.HtmlPanelGroup;
 
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.toolbar.Toolbar;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
@@ -62,23 +63,27 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	protected void setSize(UIComponent component, 
-							String existingStyle, 
-							Integer pixelWidth, 
-							Integer responsiveWidth,
-							Integer percentageWidth,
-							Integer pixelHeight, 
-							Integer percentageHeight, 
-							Integer defaultPercentageWidth) {
+	protected void setSizeAndTextAlignStyle(UIComponent component, 
+												String styleAttributeNameOverride,
+												String existingStyle, 
+												Integer pixelWidth, 
+												Integer responsiveWidth,
+												Integer percentageWidth,
+												Integer pixelHeight, 
+												Integer percentageHeight, 
+												Integer defaultPercentageWidth,
+												HorizontalAlignment textAlign) {
 		// Ensure no default percentage width is ever set for this renderer.
 		// Leave this to the responsive shit.
-		super.setSize(component, 
-						existingStyle, 
-						pixelWidth, 
-						responsiveWidth, 
-						percentageWidth, 
-						pixelHeight, 
-						percentageHeight, 
-						null);
+		super.setSizeAndTextAlignStyle(component,
+										styleAttributeNameOverride,
+										existingStyle, 
+										pixelWidth, 
+										responsiveWidth, 
+										percentageWidth, 
+										pixelHeight, 
+										percentageHeight, 
+										null,
+										textAlign);
 	}
 }

@@ -10,6 +10,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
@@ -300,7 +301,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 												ColourPicker colour,
 												String formDisabledConditionName,
 												String title,
-												boolean required) {
+												boolean required,
+												HorizontalAlignment textAlignment) {
 		return putByBinding(colour, component);
 	}
 	
@@ -330,7 +332,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 									ContentLink link,
 									String formDisabledConditionName,
 									String title,
-									boolean required) {
+									boolean required,
+									HorizontalAlignment textAlignment) {
 		return putByBinding(link, component);
 	}
 	
@@ -351,6 +354,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 													String formDisabledConditionName,
 													String title,
 													boolean required,
+													HorizontalAlignment textAlignment,
 													String displayBinding,
 													QueryDefinition query) {
 		return putByBinding(lookup, component);
@@ -372,7 +376,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											Password password,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											HorizontalAlignment textAlignment) {
 		return putByBinding(password, component);
 	}
 	
@@ -403,6 +408,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											String formDisabledConditionName,
 											String title,
 											boolean required,
+											HorizontalAlignment textAlignment,
 											javax.faces.convert.Converter facesConverter) {
 		return putByBinding(spinner, component);
 	}
@@ -423,6 +429,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String formDisabledConditionName,
 										String title,
 										boolean required,
+										HorizontalAlignment textAlignment,
 										Integer length,
 										Converter<?> converter,
 										Format<?> format,
@@ -437,6 +444,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 											String formDisabledConditionName,
 											String title,
 											boolean required,
+											HorizontalAlignment textAlignment,
 											Integer length) {
 		return putByBinding(text, component);
 	}

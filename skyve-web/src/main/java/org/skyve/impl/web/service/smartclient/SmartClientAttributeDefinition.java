@@ -2,6 +2,7 @@ package org.skyve.impl.web.service.smartclient;
 
 import java.util.List;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
@@ -42,9 +43,11 @@ import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -74,6 +77,8 @@ public class SmartClientAttributeDefinition {
 	protected boolean required = false;
 	protected boolean triStateCheckBox = false;
     protected boolean escape = true;
+    protected Integer pixelWidth;
+    protected HorizontalAlignment align;
 	protected TargetMetaData target;
 	
 	protected SmartClientAttributeDefinition(User user,
@@ -104,15 +109,24 @@ public class SmartClientAttributeDefinition {
 				else {
 					title = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
 				}
+				align = HorizontalAlignment.left;
 			}
 			else if (binding.endsWith(Bean.ORDINAL_NAME)) {
 				title = DocumentImpl.getBizOrdinalAttribute().getLocalisedDisplayName();
+				align = HorizontalAlignment.right;
 			}
 		}
 		
 		if ((bindingDocument != null) && (bindingAttribute != null)) {
+			AttributeType attributeType = bindingAttribute.getAttributeType();
+
 			title = bindingAttribute.getLocalisedDisplayName();
 			required = bindingAttribute.isRequired();
+
+			// set the default alignment and pixelWidth
+			Customisations customisations = CORE.getCustomisations();
+			align = customisations.determineDefaultTextAlignment(attributeType);
+			pixelWidth = customisations.determineDefaultColumnWidth(attributeType);
 
 			DomainType domainType = bindingAttribute.getDomainType();
 			if (domainType != null) {
@@ -279,7 +293,6 @@ public class SmartClientAttributeDefinition {
 				}
 			}
 			
-			AttributeType attributeType = bindingAttribute.getAttributeType();
 			Converter<?> converter = null;
 			if (bindingAttribute instanceof LengthField) {
 				LengthField field = (LengthField) bindingAttribute;
@@ -491,6 +504,22 @@ public class SmartClientAttributeDefinition {
 		this.textBoxStyle = textBoxStyle;
 	}
 	
+	public Integer getPixelWidth() {
+		return pixelWidth;
+	}
+
+	public void setPixelWidth(Integer pixelWidth) {
+		this.pixelWidth = pixelWidth;
+	}
+
+	public HorizontalAlignment getAlign() {
+		return align;
+	}
+
+	public void setAlign(HorizontalAlignment align) {
+		this.align = align;
+	}
+
 	/**
 	 * My spec is
 	 * A - alphanumeric
@@ -575,7 +604,6 @@ public class SmartClientAttributeDefinition {
 	//		this hangs the UI when trying to display the list
 	void appendEditorProperties(StringBuilder result,
 									boolean forDataGrid,
-									Integer pixelWidth,
 									Integer pixelHeight,
 									String emptyThumbnailRelativeFile) {
 		if (lookup == null) {

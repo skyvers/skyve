@@ -247,19 +247,21 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 	// respect responsive width if it is defined in this renderer
 	@Override
-	protected void setSize(UIComponent component, 
-							String existingStyle, 
-							Integer pixelWidth, 
-							Integer responsiveWidth,
-							Integer percentageWidth, 
-							Integer pixelHeight, 
-							Integer percentageHeight, 
-							Integer defaultPercentageWidth) {
+	protected void setSizeAndTextAlignStyle(UIComponent component, 
+												String styleAttributeNameOverride, // if null, "style" is used
+												String existingStyle, 
+												Integer pixelWidth, 
+												Integer responsiveWidth,
+												Integer percentageWidth, 
+												Integer pixelHeight, 
+												Integer percentageHeight, 
+												Integer defaultPercentageWidth,
+												HorizontalAlignment textAlign) {
 		if (responsiveWidth != null) {
-			super.setSize(component, existingStyle, null, responsiveWidth, null, pixelHeight, percentageHeight, null);
+			super.setSizeAndTextAlignStyle(component, styleAttributeNameOverride, existingStyle, null, responsiveWidth, null, pixelHeight, percentageHeight, null, textAlign);
 		}
 		else {
-			super.setSize(component, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
+			super.setSizeAndTextAlignStyle(component, styleAttributeNameOverride, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null, textAlign);
 		}
 	}
 	

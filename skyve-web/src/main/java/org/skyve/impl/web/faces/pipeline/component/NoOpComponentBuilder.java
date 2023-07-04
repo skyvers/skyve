@@ -200,7 +200,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression,
-												HorizontalAlignment alignment) {
+												HorizontalAlignment alignment,
+												Integer pixelWidth) {
 		return component;
 	}
 
@@ -257,7 +258,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 											Geometry geometry,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											HorizontalAlignment textAlignment) {
 		return component;
 	}
 
@@ -325,7 +327,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 												ColourPicker colour,
 												String formDisabledConditionName,
 												String title,
-												boolean required) {
+												boolean required,
+												HorizontalAlignment textAlignment) {
 		return component;
 	}
 
@@ -355,7 +358,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									ContentLink link,
 									String formDisabledConditionName,
 									String title,
-									boolean required) {
+									boolean required,
+									HorizontalAlignment textAlignment) {
 		return component;
 	}
 
@@ -386,6 +390,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 													String formDisabledConditionName,
 													String title,
 													boolean required,
+													HorizontalAlignment textAlignment,
 													String displayBinding,
 													QueryDefinition query) {
 		return component;
@@ -397,7 +402,8 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 											Password password,
 											String formDisabledConditionName,
 											String title,
-											boolean required) {
+											boolean required,
+											HorizontalAlignment textAlignment) {
 		return component;
 	}
 
@@ -427,6 +433,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 											String formDisabledConditionName,
 											String title,
 											boolean required,
+											HorizontalAlignment textAlignment,
 											javax.faces.convert.Converter facesConverter) {
 		return component;
 	}
@@ -438,6 +445,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 											String formDisabledConditionName,
 											String title,
 											boolean required,
+											HorizontalAlignment textAlignment,
 											Integer length) {
 		return component;
 	}
@@ -449,6 +457,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String formDisabledConditionName,
 										String title,
 										boolean required,
+										HorizontalAlignment textAlignment,
 										Integer length,
 										Converter<?> converter,
 										Format<?> format,

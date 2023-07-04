@@ -110,29 +110,21 @@ public abstract class AbstractFacesBuilder {
 	}
 
 	protected void setTextAlign(UIComponent component, HorizontalAlignment textAlignment) {
-		String styleClass = null;
-		if (HorizontalAlignment.left.equals(textAlignment)) {
-			styleClass = "left";
-		} 
-		else if (HorizontalAlignment.centre.equals(textAlignment)) {
-			styleClass = "center";
-		} 
-		else if (HorizontalAlignment.right.equals(textAlignment)) {
-			styleClass = "right";
-		}
-		if (styleClass != null) {
-			component.setValueExpression("styleClass", ef.createValueExpression(styleClass, String.class));
+		if (textAlignment != null) {
+			component.setValueExpression("styleClass", ef.createValueExpression(textAlignment.toAlignmentString(), String.class));
 		}
 	}
 	
-	protected void setSize(UIComponent component, 
-							String existingStyle, 
-							Integer pixelWidth, 
-							Integer responsiveWidth,
-							Integer percentageWidth,
-							Integer pixelHeight, 
-							Integer percentageHeight, 
-							Integer defaultPercentageWidth) {
+	protected void setSizeAndTextAlignStyle(UIComponent component,
+												String textAlignStyleAttributeName, // if null, "style" is used.
+												String existingStyle, 
+												Integer pixelWidth, 
+												Integer responsiveWidth,
+												Integer percentageWidth,
+												Integer pixelHeight, 
+												Integer percentageHeight, 
+												Integer defaultPercentageWidth,
+												HorizontalAlignment textAlign) {
 		StringBuilder style = new StringBuilder(64);
 		boolean noWidth = true;
 		if (existingStyle != null) {
@@ -166,6 +158,14 @@ public abstract class AbstractFacesBuilder {
 				style.append(';');
 			}
 			style.append("height:").append(percentageHeight).append("%");
+		}
+		if (textAlign != null) {
+			if (textAlignStyleAttributeName == null) {
+				style.append(";text-align:").append(textAlign.toAlignmentString());
+			}
+			else {
+				component.setValueExpression(textAlignStyleAttributeName, ef.createValueExpression("text-align:" + textAlign.toAlignmentString(), String.class));
+			}
 		}
 		component.setValueExpression("style", ef.createValueExpression(style.toString(), String.class));
 	}
@@ -319,7 +319,7 @@ public abstract class AbstractFacesBuilder {
 		String existingStyle = noWrap ? 
 								(top ? "white-space:nowrap;vertical-align:top !important;" : "white-space:nowrap;") :
 								(top ? "vertical-align:top !important;" : null);
-		setSize(result, existingStyle, pixelWidth, responsiveWidth, percentageWidth, null, null, null);
+		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, responsiveWidth, percentageWidth, null, null, null, null);
 
 		return result;
 	}
