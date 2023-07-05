@@ -164,7 +164,9 @@ public abstract class AbstractFacesBuilder {
 				style.append(";text-align:").append(textAlign.toAlignmentString());
 			}
 			else {
-				component.setValueExpression(textAlignStyleAttributeName, ef.createValueExpression("text-align:" + textAlign.toAlignmentString(), String.class));
+				// Also add padding back in for right aligned temporal inputs
+				String textAlignStyle = ((textAlign == HorizontalAlignment.right) ? "padding-right:0.5rem;text-align:" : "text-align:") + textAlign.toAlignmentString();
+				component.setValueExpression(textAlignStyleAttributeName, ef.createValueExpression(textAlignStyle, String.class));
 			}
 		}
 		component.setValueExpression("style", ef.createValueExpression(style.toString(), String.class));

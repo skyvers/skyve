@@ -4390,24 +4390,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		} 
 		
 		if (alignment != null) {
-			
-			style.append("text-align:");
-			
-			switch (alignment) {
-			case left:
-				style.append("left");
-				break;
-			case right:
-				style.append("right");
-				break;
-			default:
-				style.append("centre");
-				break;
-			}
-			
-			style.append(" !important;");
+			style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
 		} 
-		
 		
 		if (style.length() > 0) {
 			result.setStyle(style.toString());
