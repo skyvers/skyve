@@ -212,7 +212,9 @@
 		// Skyve content manager class
 		"contentManagerClass": null,
 		// Skyve number generator class
-		"numberGeneratorClass": null
+		"numberGeneratorClass": null,
+		// Skyve customisations class
+		"customisationsClass": null
 	},
 	// SMTP Settings
 	"smtp": {
