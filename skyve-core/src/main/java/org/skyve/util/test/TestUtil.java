@@ -506,11 +506,17 @@ public class TestUtil {
 	 * @param regularExpression The regular expression to comply to
 	 * @return A regex compliant random string, or null
 	 */
-	private static String randomRegex(String regularExpression) {
+	private static String randomRegex(String regularExpression, Integer length) {
 		Generex generex = new Generex(regularExpression);
 		// Generate random String matching the regex
 		try {
 			String result = generex.random();
+
+			// make sure the generated regex does not exceed the attribute's maximum length
+			if (length != null) {
+				result = StringUtils.truncate(result, length.intValue());
+			}
+
 			// strip boundaries
 			if (result.startsWith("^") && result.endsWith("$")) {
 				return StringUtils.substringBetween(result, "^", "$");
@@ -614,7 +620,7 @@ public class TestUtil {
 					if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
 							&& text.getValidator().getType() == null) {
 						// return text matching the regex
-						String xeger = randomRegex(text.getValidator().getRegularExpression());
+						String xeger = randomRegex(text.getValidator().getRegularExpression(), length);
 						if (xeger != null) {
 							return xeger;
 						}
@@ -625,7 +631,7 @@ public class TestUtil {
 				} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
 						&& text.getValidator().getType() == null) {
 					// check if this string has a regex and no validator type
-					String xeger = randomRegex(text.getValidator().getRegularExpression());
+					String xeger = randomRegex(text.getValidator().getRegularExpression(), length);
 					if (xeger != null) {
 						return xeger;
 					}
@@ -635,7 +641,7 @@ public class TestUtil {
 						return randomEmail(((LengthField) text).getLength());
 					} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
 						// check if this string has a regex via a validator type
-						String xeger = randomRegex(text.getValidator().getRegularExpression());
+						String xeger = randomRegex(text.getValidator().getRegularExpression(), length);
 						if (xeger != null) {
 							return xeger;
 						}
