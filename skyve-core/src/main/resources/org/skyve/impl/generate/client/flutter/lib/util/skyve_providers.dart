@@ -32,8 +32,8 @@ final containerMetaDataProvider =
 
 final containerMenuProvider = FutureProvider((ref) async {
   // Prefer global menu variable (if defined)
-  if (menu != null) {
-    return menu!;
+  if (menu != []) {
+    return menu;
   }
 
   return Future<List<SkyveModuleMenuModel>>(() async {
@@ -89,7 +89,9 @@ final containerRouterProvider = Provider((ref) {
     }
   }
 
-  return GoRouter(initialLocation: '/', redirect: redirect, routes: [
+  List<GoRoute> allRoutes = [];
+  allRoutes.addAll(goRoutes);
+  allRoutes.addAll([
     GoRoute(
       name: 'Login',
       path: AutoLogIn.routeName,
@@ -118,6 +120,8 @@ final containerRouterProvider = Provider((ref) {
           return SkyveEditView(m: m, d: d, i: i);
         }),
   ]);
+
+  return GoRouter(initialLocation: '/', redirect: redirect, routes: allRoutes);
 });
 
 final containerViewProvider =

@@ -39,7 +39,7 @@ public class FlutterRouting {
 	public FlutterRouting(FlutterGenerator generator) {
 		this.generator = generator;
 		this.customer = generator.getConfig().getCustomer();
-		menu.append("const menu = [\n");
+		menu.append(" \n");
 	}
 
 	void create() throws IOException {
@@ -59,14 +59,12 @@ public class FlutterRouting {
 		substitutions.put("##IMPORTS##", sb.toString());
 		
 		menu.setLength(menu.length() - 2); // remove ,\n
-		menu.append("\n];");
+		menu.append("\n");
 		substitutions.put("##MENU##", menu.toString());
 
 		
 		sb.setLength(0);
-		sb.append("final List<GoRoute> _goRoutes = [\n");
 		routes.forEach(r -> sb.append(INDENT).append(INDENT).append(r).append('\n'));
-		sb.append(INDENT).append("];\n");
 		substitutions.put("##ROUTES##", sb.toString());
 
 		generator.refreshFile("lib/main.dart", "lib/main.dart", substitutions);
@@ -136,7 +134,8 @@ public class FlutterRouting {
 
 			@Override
 			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu skyveMenu, Module menuModule, boolean open) {
-				openMenuModule(menuModule.getLocalisedTitle());
+			    
+				openMenuModule(menuModule.getName(), menuModule.getLocalisedTitle());
 			}
 
 			@Override
@@ -256,12 +255,11 @@ public class FlutterRouting {
 		indent();
 		// TODO implement FA icon
 		if (item != null) {
-            menu.append("SkyveMenuData(label: '")
-                .append(item.getLocalisedName())
-                .append("', routeName: ")
-                .append(className)
-                .append(".routeName")
-                .append(", icon: null),\n");
+		    
+            menu.append("SkyveNavigationMenuItemModel(");
+            menu.append("title: '").append(item.getLocalisedName()).append("', ");
+            menu.append("path: ").append(className).append(".routeName");
+            menu.append("),\n");
 		}
 
 		// Create the GoRoute declaration
@@ -272,11 +270,16 @@ public class FlutterRouting {
 		generator.views.add(view);
 	}
 
-	private void openMenuModule(String moduleName) {
-		indent();
-		menu.append("SkyveMenuModule(label: '").append(moduleName).append("', items: [\n");
-		indentationLevel++;
-	}
+    private void openMenuModule(String moduleName, String moduleTitle) {
+        indent();
+
+        menu.append("SkyveModuleMenuModel(");
+        menu.append("module: '").append(moduleName).append("', ");
+        menu.append("title: '").append(moduleTitle).append("', ");
+        menu.append("open: false, ");
+        menu.append("items: [\n");
+        indentationLevel++;
+    }
 
 	private void closeMenuModule() {
 		closeCollapsibleMenu();
@@ -284,7 +287,8 @@ public class FlutterRouting {
 
 	private void openMenuGroup(String menuGroupName) {
 		indent();
-		menu.append("SkyveMenuGroup(label: '").append(menuGroupName).append("', children: [\n");
+		
+		menu.append("SkyveMenuGroupModel(title: '").append(menuGroupName).append("', items: [\n");
 		indentationLevel++;
 	}
 
