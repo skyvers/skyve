@@ -9,13 +9,13 @@ import 'package:flutter/foundation.dart';
 class SkyveRestClient {
   // if served from the web, use host/ or host/context/
   // NB change this to use chrome (web) for running or debugging
-  static final String _baseUri = (kIsWeb
-      ? (Uri.base.origin +
-          (Uri.base.pathSegments.isEmpty
-              ? '/'
-              : '/${Uri.base.pathSegments[0]}/'))
-      : 'http://localhost:8080/skyve/');
-  // static const _baseUri = 'http://10.0.2.2:8080/skyve/';
+  // static final String _baseUri = (kIsWeb
+  //     ? (Uri.base.origin +
+  //         (Uri.base.pathSegments.isEmpty
+  //             ? '/'
+  //             : '/${Uri.base.pathSegments[0]}/'))
+  //     : 'http://localhost:8080/skyve/');
+  static const _baseUri = 'http://10.0.2.2:8080/skyve/';
 
   static final instance = SkyveRestClient._internal();
   bool _loggedIn = false;
