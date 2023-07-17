@@ -1,7 +1,24 @@
 package org.skyve.impl.generate.client.flutter;
 
+import static org.skyve.metadata.controller.ImplicitActionName.Add;
+import static org.skyve.metadata.controller.ImplicitActionName.BizExport;
+import static org.skyve.metadata.controller.ImplicitActionName.BizImport;
+import static org.skyve.metadata.controller.ImplicitActionName.Cancel;
+import static org.skyve.metadata.controller.ImplicitActionName.Delete;
+import static org.skyve.metadata.controller.ImplicitActionName.Download;
+import static org.skyve.metadata.controller.ImplicitActionName.Edit;
+import static org.skyve.metadata.controller.ImplicitActionName.New;
+import static org.skyve.metadata.controller.ImplicitActionName.OK;
+import static org.skyve.metadata.controller.ImplicitActionName.Print;
+import static org.skyve.metadata.controller.ImplicitActionName.Remove;
+import static org.skyve.metadata.controller.ImplicitActionName.Report;
+import static org.skyve.metadata.controller.ImplicitActionName.Save;
+import static org.skyve.metadata.controller.ImplicitActionName.Upload;
+import static org.skyve.metadata.controller.ImplicitActionName.ZoomOut;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.skyve.domain.Bean;
@@ -47,7 +64,10 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import com.google.common.collect.ImmutableMap;
+
 public class FlutterComponentRenderer extends ComponentRenderer {
+    
 	public static final String BORDER_IMPORT = "widgets/skyve_border";
 	public static final String BUTTON_IMPORT = "widgets/skyve_button";
 	public static final String CHECKBOX_IMPORT = "widgets/skyve_checkbox";
@@ -77,7 +97,29 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	private static final String STATICIMAGE_IMPORT = "widgets/skyve_staticimage";
 	private static final String DYNAMICIMAGE_IMPORT = "widgets/skyve_dynamicimage";
 	private static final String BLURB_IMPORT = "widgets/skyve_blurb";
-	
+
+    /**
+     * Map from ImplicitActionName to a single character 'actionType' for use in buttons. Mimics
+     * output of ViewRenderer.preProcessAction().
+     */
+    private static final Map<ImplicitActionName, String> actionToType = ImmutableMap.<ImplicitActionName, String>builder()
+                                                                                    .put(Add, "A")
+                                                                                    .put(BizExport, "X")
+                                                                                    .put(BizImport, "I")
+                                                                                    .put(Download, "L")
+                                                                                    .put(Upload, "U")
+                                                                                    .put(Cancel, "C")
+                                                                                    .put(Delete, "D")
+                                                                                    .put(Edit, "E")
+                                                                                    .put(New, "N")
+                                                                                    .put(OK, "O")
+                                                                                    .put(Remove, "R")
+                                                                                    .put(Report, "P")
+                                                                                    .put(Save, "S")
+                                                                                    .put(ZoomOut, "Z")
+                                                                                    .put(Print, "V")
+                                                                                    .build();
+
 	private Set<String> imports;
 	private String startingIndent;
 
@@ -166,26 +208,30 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		imports.add(BUTTON_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
+		
         output.append("const SkyveButton(name: '")
               .append(button.getActionName())
               .append("', label: '")
               .append(action.getLocalisedDisplayName())
               .append("', type: '")
-              .append(deriveActionType(action))
+              .append(deriveActionType(action.getImplicitName()))
               .append("'),");
 		return result;
 	}
 	
-	private String deriveActionType(Action action) {
-	    
-	    // FIXME
-	    // org.skyve.impl.generate.ViewRenderer has actionType char calculation
-	    // or
-	    // MetaDataServlet has json generation with, eg, 'type': 'zoomOutAction'
-	    // FIXME
+    private String deriveActionType(ImplicitActionName implicitName) {
 
-	    return "someAction";
-	}
+        if (implicitName == null) {
+            return " ";
+        }
+
+        String actionType = actionToType.get(implicitName);
+        if (actionType == null) {
+            throw new FlutterGeneratorException(implicitName + " not catered for");
+        }
+
+        return actionType;
+    }
 
 	@Override
 	public RenderedComponent reportButton(RenderedComponent component, Button button, Action action) {
@@ -196,9 +242,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
               .append(button.getActionName())
               .append("', label: '")
               .append(action.getLocalisedDisplayName())
-              .append("', type: '")
-              .append(deriveActionType(action))
-              .append("'),");
+              .append("', type: 'P'),");
 		return result;
 	}
 
@@ -215,9 +259,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
               .append(button.getActionName())
               .append("', label: '")
               .append(action.getLocalisedDisplayName())
-              .append("', type: '")
-              .append(deriveActionType(action))
-              .append("'),");
+              .append("', type: 'L'),");
 		return result;
 	}
 
@@ -659,7 +701,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
               .append("', label: '")
               .append(title)
               .append("', type: '")
-              .append(deriveActionType(action))
+              .append(deriveActionType(name))
               .append("'),");
 		return result;
 	}
