@@ -14,8 +14,13 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class FlutterListView extends FlutterView {
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
+
     private Document document;
     private ListModel<Bean> model;
     private MetaDataQueryDefinition query;
@@ -36,12 +41,12 @@ class FlutterListView extends FlutterView {
 
     @Override
     protected void create(FileWriter fw) throws IOException {
+
         String documentName = document.getName();
         Map<String, String> subs = new TreeMap<>();
         subs.put("##PROJECT##", getConfig().getProjectName());
         subs.put("##MODULE##", moduleName);
         subs.put("##VIEW##", viewName);
-        subs.put("##DOCUMENT##", documentName);
         subs.put("##QUERY##", query.getName());
         subs.put("##EDIT_DART##", BindUtil.toJavaStaticIdentifier(documentName)
                                           .toLowerCase());
@@ -50,6 +55,7 @@ class FlutterListView extends FlutterView {
 
         addQuerySubstitutes(subs);
 
+        log.debug("Creating list view '{}' with query: {}", viewName, query.getName());
         fw.write(substitute("templates/list.dart", subs));
     }
 

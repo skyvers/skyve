@@ -86,7 +86,7 @@ class _##CLASS##State extends State<##CLASS##> {
   }
 
   void _load() async {
-    final rows = await SkyveRestClient().fetchQuery('##MODULE##', '##DOCUMENT##', '##QUERY##', 0, 75);
+    final rows = await SkyveRestClient().fetchQuery('##MODULE##', null, '##QUERY##', 0, 75);
     setState(() {
       _rows = rows;
       _loaded = true;
