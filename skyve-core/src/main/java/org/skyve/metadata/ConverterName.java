@@ -52,7 +52,6 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum ConverterName {
-	//@formatter:off
 	DD_MM_YYYY(new DD_MM_YYYY()),
 	DD_MMM_YYYY(new DD_MMM_YYYY()),
 	MM_DD_YYYY(new MM_DD_YYYY()),
@@ -108,7 +107,6 @@ public enum ConverterName {
 	YYYY_MM_DD_HH_MI_SS(new YYYY_MM_DD_HH_MI_SS()),
 	YYYY_MM_DD_HH24_MI_SS(new YYYY_MM_DD_HH24_MI_SS()),
 	YYYY_MM_DD_Timestamp(new org.skyve.domain.types.converters.timestamp.YYYY_MM_DD());
-	//@formatter:on
 	
 	private Converter<?> converter;
 	private ConverterName(Converter<?> converter) {
@@ -118,7 +116,7 @@ public enum ConverterName {
 	public Converter<?> getConverter() {
 		return converter;
 	}
-	
+
 	public static ConverterName valueOf(Converter<?> converter) {
 		if (converter instanceof DD_MM_YYYY) {
 			return DD_MM_YYYY;

@@ -551,6 +551,9 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new IllegalStateException("Could not create factories.customisationsClass " + UtilImpl.SKYVE_CUSTOMISATIONS_CLASS, e);
 			}
 		}
+		Customisations customisations = CustomisationsStaticSingleton.get();
+		customisations.registerCustomExpressions();
+		customisations.registerCustomFormatters();
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);

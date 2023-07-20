@@ -102,7 +102,7 @@ public class Desktop extends Harness {
 					constructMenu(bizModule, uxui.getName(), sb);
 					menuScript = sb.toString();
 					sb.setLength(0); 
-					listDataSources(customer, user, sb);
+					listDataSources(customer, user, uxui.getName(), sb);
 					dataSourceScript = sb.toString();
 					sb.setLength(0);
 	
@@ -521,7 +521,7 @@ public class Desktop extends Harness {
 		result.append(']');
 	}
 
-	private static void listDataSources(Customer customer, UserImpl user, StringBuilder result) {
+	private static void listDataSources(Customer customer, UserImpl user, String uxui, StringBuilder result) {
 		StringBuilder dataSources = new StringBuilder(1024);
 
 		result.append(",[");
@@ -532,13 +532,13 @@ public class Desktop extends Harness {
 				String homeDocumentName = module.getHomeDocumentName();
 				if (homeDocumentName != null) {
 					MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
-					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
 				}
 			}
 			
 			String moduleName = module.getName();
 			Menu menu = user.getModuleMenu(moduleName);
-			listDataSourcesForMenuItems(user, customer, moduleName, module, menu.getItems(), dataSources, visitedQueryNames);
+			listDataSourcesForMenuItems(user, customer, moduleName, module, menu.getItems(), uxui, dataSources, visitedQueryNames);
 		}
 		if (dataSources.length() > 0) { // we have appended some data sources
 			dataSources.setLength(dataSources.length() - 2); // remove the last data source comma
@@ -552,11 +552,12 @@ public class Desktop extends Harness {
 														String moduleName, 
 														Module module, 
 														List<MenuItem> items,
+														String uxui,
 														StringBuilder dataSources,
 														Set<String> visitedQueryNames) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup) {
-				listDataSourcesForMenuItems(user, customer, moduleName, module, ((MenuGroup) item).getItems(), dataSources, visitedQueryNames);
+				listDataSourcesForMenuItems(user, customer, moduleName, module, ((MenuGroup) item).getItems(), uxui, dataSources, visitedQueryNames);
 			} 
 			else if ((item instanceof ListItem) || (item instanceof TreeItem)) {
 				ListItem grid = (ListItem) item;
@@ -568,7 +569,7 @@ public class Desktop extends Harness {
 				
 				if (queryName != null) { // its a query
 					query = module.getMetaDataQuery(queryName);
-					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
 				}
 				else {
 					if (modelName != null) { // its a model
@@ -578,13 +579,14 @@ public class Desktop extends Harness {
 																			module, 
 																			document,
 																			modelName,
+																			uxui,
 																			true,
 																			dataSources, 
 																			visitedQueryNames);
 					}
 					else {
 						query = module.getDocumentDefaultQuery(customer, documentName);
-						SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
+						SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
 					}
 				}
 			}

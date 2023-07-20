@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGridBoundColumn> {
@@ -43,41 +44,58 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 			escape(b.booleanValue());
 		}
 		sanitise(column.getSanitise());
+		formatter(column.getFormatterName());
+		customFormatter(column.getCustomFormatterName());
 
 		WidgetReference widget = column.getInputWidget();
 		if (widget != null) {
 			InputWidget input = widget.getWidget();
 			if (input instanceof ContentImage) {
 				inputWidget(new FluentContentImage().from(input));
-			} else if (input instanceof ContentLink) {
+			}
+			else if (input instanceof ContentLink) {
 				inputWidget(new FluentContentLink().from(input));
-			} else if (input instanceof CheckBox) {
+			}
+			else if (input instanceof CheckBox) {
 				inputWidget(new FluentCheckBox().from(input));
-			} else if (input instanceof ColourPicker) {
+			}
+			else if (input instanceof ColourPicker) {
 				inputWidget(new FluentColourPicker().from(input));
-			} else if (input instanceof Combo) {
+			}
+			else if (input instanceof Combo) {
 				inputWidget(new FluentCombo().from(input));
-			} else if (input instanceof Geometry) {
+			}
+			else if (input instanceof Geometry) {
 				inputWidget(new FluentGeometry().from(input));
-			} else if (input instanceof HTML) {
+			}
+			else if (input instanceof HTML) {
 				inputWidget(new FluentHTML().from(input));
-			} else if (input instanceof LookupDescription) {
+			}
+			else if (input instanceof LookupDescription) {
 				inputWidget(new FluentLookupDescription().from(input));
-			} else if (input instanceof Password) {
+			}
+			else if (input instanceof Password) {
 				inputWidget(new FluentPassword().from(input));
-			} else if (input instanceof Radio) {
+			}
+			else if (input instanceof Radio) {
 				inputWidget(new FluentRadio().from(input));
-			} else if (input instanceof RichText) {
+			}
+			else if (input instanceof RichText) {
 				inputWidget(new FluentRichText().from(input));
-			} else if (input instanceof Slider) {
+			}
+			else if (input instanceof Slider) {
 				inputWidget(new FluentSlider().from(input));
-			} else if (input instanceof Spinner) {
+			}
+			else if (input instanceof Spinner) {
 				inputWidget(new FluentSpinner().from(input));
-			} else if (input instanceof TextField) {
+			}
+			else if (input instanceof TextField) {
 				inputWidget(new FluentTextField().from(input));
-			} else if (input instanceof TextArea) {
+			}
+			else if (input instanceof TextArea) {
 				inputWidget(new FluentTextArea().from(input));
-			} else {
+			}
+			else {
 				throw new IllegalStateException(widget + " is not catered for");
 			}
 		}
@@ -102,6 +120,16 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 
 	public FluentDataGridBoundColumn sanitise(Sanitisation sanitise) {
 		column.setSanitise(sanitise);
+		return this;
+	}
+
+	public FluentDataGridBoundColumn formatter(FormatterName formatterName) {
+		column.setFormatterName(formatterName);
+		return this;
+	}
+
+	public FluentDataGridBoundColumn customFormatter(String customFormatterName) {
+		column.setCustomFormatterName(customFormatterName);
 		return this;
 	}
 

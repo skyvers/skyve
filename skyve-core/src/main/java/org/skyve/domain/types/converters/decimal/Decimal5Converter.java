@@ -9,6 +9,11 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class Decimal5Converter implements Converter<Decimal5> {
 	@Override
+	public Class<Decimal5> getValueType() {
+		return Decimal5.class;
+	}
+	
+	@Override
 	public Decimal5 fromDisplayValue(String displayValue) throws ConversionException {
 		try {
 			return new Decimal5(displayValue);

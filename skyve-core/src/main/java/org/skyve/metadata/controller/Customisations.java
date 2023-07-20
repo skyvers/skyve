@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.report.ReportFormat;
 
 /**
  * Enables the customisation of certain Skyve functions.
@@ -15,11 +16,25 @@ public interface Customisations {
 	/**
 	 * Determine the default text alignment to use in columns and within textual widgets given an attribute type.
 	 */
-	@Nonnull HorizontalAlignment determineDefaultTextAlignment(AttributeType attributeType);
+	@Nonnull HorizontalAlignment determineDefaultTextAlignment(String uxui, AttributeType attributeType);
 
 	/**
 	 * Determine the default column width in pixels given an attribute type.
 	 * <code>null</code> may be returned if there is no default.
 	 */
-	@Nullable Integer determineDefaultColumnWidth(AttributeType attributeType);
+	@Nullable Integer determineDefaultColumnWidth(String uxui, AttributeType attributeType);
+
+	/**
+	 * Register ExpressionEvaluators for use in this Skyve deployment using ExpressionEvaluator.register().
+	 */
+	void registerExpressions();
+	
+	/**
+	 * Regsiter Formatters for use in this Skyve deployment using Formatters.register().
+	 */
+	void registerFormatters();
+
+	@Nonnull ReportFormat[] listGridExportFormats();
+	
+//	@Nonnull ViewGenerator viewGenerator();
 }

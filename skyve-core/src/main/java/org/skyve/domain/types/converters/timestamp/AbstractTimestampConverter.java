@@ -15,6 +15,11 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	}
 
 	@Override
+	public Class<Timestamp> getValueType() {
+		return Timestamp.class;
+	}
+	
+	@Override
 	public Format<Timestamp> getFormat() {
 		return null;
 	}

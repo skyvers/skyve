@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.FormatterName;
+import org.skyve.metadata.view.FormattedText;
 import org.skyve.metadata.view.TextOutput;
 
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "column")
@@ -19,8 +21,10 @@ import org.skyve.metadata.view.TextOutput;
 							"filterable", 
 							"editable",
 							"escape",
-							"sanitise"})
-public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMetaData implements TextOutput {
+							"sanitise",
+							"formatterName",
+							"customFormatterName"})
+public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMetaData implements TextOutput, FormattedText {
 	private static final long serialVersionUID = 7831641243591117311L;
 
 	// Indicates whether the column is selected - appears in the projection.
@@ -44,6 +48,12 @@ public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMet
 	// Sanitise expressions relating to the view technology - <script> for HTML (to prevent XSS)
 	private Sanitisation sanitise;
 
+	// A built-in Skyve formatter
+	private FormatterName formatterName;
+	
+	// A custom formatter for the Skyve project (added from Customisations class specified in JSON)
+	private String customFormatterName;
+	
 	public Boolean getProjected() {
 		return projected;
 	}
@@ -108,5 +118,25 @@ public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMet
 	@XmlAttribute
 	public void setSanitise(Sanitisation sanitise) {
 		this.sanitise = sanitise;
+	}
+
+	@Override
+	public FormatterName getFormatterName() {
+		return formatterName;
+	}
+
+	@XmlAttribute(name = "formatter")
+	public void setFormatterName(FormatterName formatterName) {
+		this.formatterName = formatterName;
+	}
+
+	@Override
+	public String getCustomFormatterName() {
+		return customFormatterName;
+	}
+
+	@XmlAttribute(name = "customFormatter")
+	public void setCustomFormatterName(String customFormatterName) {
+		this.customFormatterName = UtilImpl.processStringValue(customFormatterName);
 	}
 }

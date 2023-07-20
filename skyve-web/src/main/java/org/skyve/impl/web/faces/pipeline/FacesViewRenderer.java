@@ -833,7 +833,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
-												CORE.getCustomisations().determineDefaultTextAlignment(AttributeType.geometry));
+												CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, AttributeType.geometry));
 		eventSource = c.getEventSource();
         addComponent(title, 
         				formColspan,
@@ -902,7 +902,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private void renderDialogButton(String label, int formColspan, DialogButton button) {
-		UIComponent bn = cb.label(null, "dialogButton"); // TODO dialog button
+		UIComponent bn = cb.label(null, "dialogButton " + label); // TODO dialog button
 	    addComponent(null, 
 	    				formColspan,
 	    				false, 
@@ -1214,6 +1214,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										module.getName(),
 										getCurrentListWidgetModelDocumentName(),
 										getCurrentListWidgetModelName(),
+										currentUxUi,
 										getCurrentListWidgetModel(),
 										document,
 										title,
@@ -1252,7 +1253,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		UIComponent r = cb.listRepeater(null,
 											getCurrentListWidgetModelDocumentName(), 
 											getCurrentListWidgetModelName(), 
-											getCurrentListWidgetModel(), 
+											currentUxUi,
+											getCurrentListWidgetModel(),
 											repeater.getFilterParameters(),
 											repeater.getParameters(),
 											title,
@@ -1453,10 +1455,10 @@ public class FacesViewRenderer extends ViewRenderer {
 					AttributeType attributeType = targetAttribute.getAttributeType();
 					Customisations customisations = CORE.getCustomisations();
 					if (alignment == null) {
-						alignment = customisations.determineDefaultTextAlignment(attributeType);
+						alignment = customisations.determineDefaultTextAlignment(currentUxUi, attributeType);
 					}
 					if (pixelWidth == null) {
-						pixelWidth = customisations.determineDefaultColumnWidth(attributeType);
+						pixelWidth = customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
 					}
 
 					if (targetAttribute instanceof Association) {
@@ -1500,7 +1502,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment == null && target != null && target.getAttribute() != null) {
-            alignment = CORE.getCustomisations().determineDefaultTextAlignment(target.getAttribute().getAttributeType());
+            alignment = CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, target.getAttribute().getAttributeType());
         }
 		
         current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
@@ -1597,7 +1599,7 @@ public class FacesViewRenderer extends ViewRenderer {
 													(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 													title,
 													required,
-													(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null);
+													(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) : null);
 		eventSource = c.getEventSource();
 		addComponent(title, 
 						formColspan,
@@ -1732,7 +1734,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 										title,
 										required,
-										(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null);
+										(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) : null);
 		addComponent(title, 
 						formColspan,
 						required, 
@@ -1889,7 +1891,7 @@ public class FacesViewRenderer extends ViewRenderer {
 														(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 														title, 
 														required,
-														(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null,
+														(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) : null,
 														descriptionBinding,
 														query);
         eventSource = c.getEventSource();
@@ -1948,7 +1950,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
-												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null);
+												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) : null);
         eventSource = c.getEventSource();
         addComponent(title, 
         				formColspan,
@@ -2135,7 +2137,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
-												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null,
+												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) : null,
 												convertConverter(converter, type));
         eventSource = c.getEventSource();
         addComponent(title, 
@@ -2190,7 +2192,7 @@ public class FacesViewRenderer extends ViewRenderer {
 												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 												title,
 												required,
-												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(attribute.getAttributeType()) : null,
+												(attribute != null) ? CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, attribute.getAttributeType()) : null,
 												length);
         eventSource = c.getEventSource();
         addComponent(title, 
@@ -2272,7 +2274,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											(currentForm == null) ? null : currentForm.getDisabledConditionName(),
 											title, 
 											required,
-											CORE.getCustomisations().determineDefaultTextAlignment(type),
+											CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, type),
 											length,
 											converter,
 											format,

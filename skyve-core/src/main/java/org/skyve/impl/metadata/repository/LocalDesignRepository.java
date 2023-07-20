@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.skyve.domain.types.formatters.Formatter;
+import org.skyve.domain.types.formatters.Formatters;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
@@ -25,6 +27,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
@@ -241,15 +244,16 @@ public class LocalDesignRepository extends FileSystemRepository {
 															" with column binding " + binding +
 															" is not a valid binding.", e);
 						}
-	
+
+						MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn) ? (MetaDataQueryProjectedColumn) column : null;
+
 						Document targetDocument = target.getDocument();
 						Attribute targetAttribute = target.getAttribute();
 						if ((! targetDocument.isPersistable()) || // non-persistent document
 								((targetAttribute != null) && 
 									(! BindUtil.isImplicit(targetAttribute.getName())) &&
 									(! targetAttribute.isPersistent()))) { // transient non-implicit attribute
-							if (column instanceof MetaDataQueryProjectedColumn) {
-								MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+							if (projectedColumn != null) {
 								if (projectedColumn.isSortable() || projectedColumn.isFilterable() || projectedColumn.isEditable()) {
 									throw new MetaDataException("Query " + query.getName() + 
 																" in module " + query.getOwningModule().getName() +
@@ -259,6 +263,40 @@ public class LocalDesignRepository extends FileSystemRepository {
 							}
 						}
 						
+						// Check that the formatter or customerFormatter are compatible if defined
+						if ((projectedColumn != null) && (targetAttribute != null)) {
+							AttributeType targetAttributeType = targetAttribute.getAttributeType();
+							FormatterName formatterName = projectedColumn.getFormatterName();
+							if (formatterName != null) {
+								// Check any implicit formatter is compatible with the column attribute type
+								if (! formatterName.getFormatter().getValueType().isAssignableFrom(targetAttributeType.getImplementingType())) {
+									throw new MetaDataException("Query " + query.getName() + 
+																" in module " + query.getOwningModule().getName() +
+																" with column binding " + binding +
+																" has formatter " + formatterName.name() + 
+																" for type " + formatterName.getFormatter().getValueType() + 
+																" but the column binding is to attribute type " + targetAttributeType + 
+																" of incompatible type " + targetAttributeType.getImplementingType());
+								}
+							}
+							String customFormatterName = projectedColumn.getCustomFormatterName();
+							if (customFormatterName != null) {
+								// Check any custom formatter is compatible with the column attribute type
+								// NB Formatter existence checked in ModuleMetaData.convert()
+								Formatter<?> formatter = Formatters.get(customFormatterName);
+								if ((formatter != null) && 
+										(! formatter.getValueType().isAssignableFrom(targetAttributeType.getImplementingType()))) {
+									throw new MetaDataException("Query " + query.getName() + 
+																" in module " + query.getOwningModule().getName() +
+																" with column binding " + binding +
+																" has formatter " + customFormatterName + 
+																" for type " + formatter.getValueType() + 
+																" but the column binding is to attribute type " + targetAttributeType + 
+																" of incompatible type " + targetAttributeType.getImplementingType());
+								}
+							}
+						}
+
 						// Customer overridden documents that are used in metadata queries cause an error unless 
 						// <association>.bizId is used as the binding.
 						if ((targetAttribute != null) && AttributeType.association.equals(targetAttribute.getAttributeType()) &&

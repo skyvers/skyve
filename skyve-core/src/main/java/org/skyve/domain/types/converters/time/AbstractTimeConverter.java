@@ -15,6 +15,11 @@ public abstract class AbstractTimeConverter implements Converter<TimeOnly> {
 	}
 
 	@Override
+	public Class<TimeOnly> getValueType() {
+		return TimeOnly.class;
+	}
+	
+	@Override
 	public Format<TimeOnly> getFormat() {
 		return null;
 	}

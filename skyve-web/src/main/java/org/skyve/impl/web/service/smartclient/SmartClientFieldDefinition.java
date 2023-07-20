@@ -24,8 +24,9 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 											Module module, 
 											Document document, 
 											InputWidget widget,
-											boolean runtime) {
-		super(user, customer, module, document, widget, null, runtime);
+											boolean runtime,
+											String uxui) {
+		super(user, customer, module, document, widget, null, runtime, uxui);
 		Attribute attribute = target.getAttribute();
 
 		if (attribute != null) {

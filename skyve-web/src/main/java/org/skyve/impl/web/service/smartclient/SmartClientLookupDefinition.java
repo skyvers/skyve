@@ -38,7 +38,8 @@ public class SmartClientLookupDefinition {
 		    								Document document,
 		    								Relation relation,
 		    								LookupDescription lookup,
-		    								boolean runtime) {
+		    								boolean runtime,
+		    								String uxui) {
         this.bindingToDataGrid = bindingToDataGrid;
         String queryName = (lookup == null) ? null : lookup.getQuery();
         // Use reference query name if none provided in lookup
@@ -91,7 +92,8 @@ public class SmartClientLookupDefinition {
 																                                        module,
 																                                        queryDocument,
 																                                        column,
-																                                        runtime);
+																                                        runtime,
+																                                        uxui);
 
                     	pickListFields.add(def.getName());
                     	// only add fields that are filterable and can use the substring operator

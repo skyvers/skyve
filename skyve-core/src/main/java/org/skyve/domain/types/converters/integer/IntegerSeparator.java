@@ -9,6 +9,11 @@ import org.skyve.util.BeanValidator;
 
 public class IntegerSeparator implements Converter<Integer> {
 	@Override
+	public Class<Integer> getValueType() {
+		return Integer.class;
+	}
+	
+	@Override
 	public Integer fromDisplayValue(String displayValue) throws ConversionException {
 		try {
 			String result = displayValue.replace(",", "");

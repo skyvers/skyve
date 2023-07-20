@@ -12,8 +12,13 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class Decimal2OneDecimalPlace implements Converter<Decimal2> {
-	private static final String PATTERN = "###,###,###,##0.0";
+	public static final String PATTERN = "###,###,###,##0.0";
 
+	@Override
+	public Class<Decimal2> getValueType() {
+		return Decimal2.class;
+	}
+	
 	@Override
 	public String toDisplayValue(Decimal2 value) throws ConversionException {
 		try {

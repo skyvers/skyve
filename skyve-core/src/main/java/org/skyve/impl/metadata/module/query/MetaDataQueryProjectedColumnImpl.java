@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.module.query;
 
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
@@ -19,6 +20,10 @@ public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColum
 	private boolean escape = true;
 	
 	private Sanitisation sanitise = Sanitisation.relaxed;
+
+	private FormatterName formatterName;
+	
+	private String customFormatterName;
 
 	@Override
 	public String getExpression() {
@@ -81,5 +86,23 @@ public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColum
 
 	public void setSanitise(Sanitisation sanitise) {
 		this.sanitise = sanitise;
+	}
+
+	@Override
+	public FormatterName getFormatterName() {
+		return formatterName;
+	}
+
+	public void setFormatterName(FormatterName formatterName) {
+		this.formatterName = formatterName;
+	}
+
+	@Override
+	public String getCustomFormatterName() {
+		return customFormatterName;
+	}
+
+	public void setCustomFormatterName(String customFormatterName) {
+		this.customFormatterName = customFormatterName;
 	}
 }

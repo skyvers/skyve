@@ -26,7 +26,8 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 			                                        Document document, 
 			                                        InputWidget widget,
 			                                        String dataGridBindingOverride,
-			                                        boolean runtime) {
+			                                        boolean runtime,
+			                                        String uxui) {
 		super(user,
 				customer,
 				module,
@@ -34,7 +35,8 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 				(dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride,
 				null,
 				runtime,
-				false);
+				false,
+				uxui);
         // for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
 		if ("enum".equals(type)) {
 			type = "text";
@@ -69,7 +71,8 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         												document,
         												(Relation) attribute,
         												(LookupDescription) widget,
-        												runtime);
+        												runtime,
+        												uxui);
         }
 
         // By default a SmartClientDataGridDefinition sets memo fields to a text area.

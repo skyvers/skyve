@@ -407,6 +407,8 @@
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="escape" type="xs:boolean"/>
         <xs:attribute name="sanitise" type="ns2:sanitisation"/>
+        <xs:attribute name="formatter" type="ns1:formatterName"/>
+        <xs:attribute name="customFormatter" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

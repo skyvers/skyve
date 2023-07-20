@@ -9,13 +9,15 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.FormatterName;
+import org.skyve.metadata.view.FormattedText;
 import org.skyve.metadata.view.TextOutput;
 import org.skyve.metadata.view.widget.bound.Bound;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "boundColumn")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"binding", "editable", "inputWidget", "escape", "sanitise"})
-public class DataGridBoundColumn extends DataGridColumn implements Bound, TextOutput {
+			propOrder = {"binding", "editable", "inputWidget", "escape", "sanitise", "formatterName", "customFormatterName"})
+public class DataGridBoundColumn extends DataGridColumn implements Bound, TextOutput, FormattedText {
 	private static final long serialVersionUID = -26924109323814766L;
 
 	private String binding;
@@ -23,7 +25,9 @@ public class DataGridBoundColumn extends DataGridColumn implements Bound, TextOu
 	private Boolean editable;
 	private Boolean escape;
 	private Sanitisation sanitise;
-
+	private FormatterName formatterName;
+	private String customFormatterName;
+	
 	@Override
 	public String getBinding() {
 		return binding;
@@ -80,5 +84,25 @@ public class DataGridBoundColumn extends DataGridColumn implements Bound, TextOu
 	@XmlAttribute
 	public void setSanitise(Sanitisation sanitise) {
 		this.sanitise = sanitise;
+	}
+
+	@Override
+	public FormatterName getFormatterName() {
+		return formatterName;
+	}
+
+	@XmlAttribute(name = "formatter")
+	public void setFormatterName(FormatterName formatterName) {
+		this.formatterName = formatterName;
+	}
+
+	@Override
+	public String getCustomFormatterName() {
+		return customFormatterName;
+	}
+
+	@XmlAttribute(name = "customFormatter")
+	public void setCustomFormatterName(String customFormatterName) {
+		this.customFormatterName = UtilImpl.processStringValue(customFormatterName);
 	}
 }

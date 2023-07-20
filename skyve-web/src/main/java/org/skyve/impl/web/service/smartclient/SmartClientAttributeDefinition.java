@@ -88,7 +88,8 @@ public class SmartClientAttributeDefinition {
 												String binding,
 												String name,
 												boolean runtime,
-												boolean isQueryColumn) {
+												boolean isQueryColumn,
+												String uxui) {
 		this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 		title = this.name;
 
@@ -125,8 +126,8 @@ public class SmartClientAttributeDefinition {
 
 			// set the default alignment and pixelWidth
 			Customisations customisations = CORE.getCustomisations();
-			align = customisations.determineDefaultTextAlignment(attributeType);
-			pixelWidth = customisations.determineDefaultColumnWidth(attributeType);
+			align = customisations.determineDefaultTextAlignment(uxui, attributeType);
+			pixelWidth = customisations.determineDefaultColumnWidth(uxui, attributeType);
 
 			DomainType domainType = bindingAttribute.getDomainType();
 			if (domainType != null) {

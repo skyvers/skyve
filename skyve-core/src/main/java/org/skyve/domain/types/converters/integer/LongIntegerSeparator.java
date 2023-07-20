@@ -9,6 +9,11 @@ import org.skyve.util.BeanValidator;
 
 public class LongIntegerSeparator implements Converter<Long> {
 	@Override
+	public Class<Long> getValueType() {
+		return Long.class;
+	}
+	
+	@Override
 	public Long fromDisplayValue(String displayValue) throws ConversionException {
 		try {
 			String result = displayValue.replace(",", "");

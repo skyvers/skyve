@@ -20,6 +20,7 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -298,6 +299,82 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("100.00", Binder.formatMessage("{el:newDecimal2(100)}", bean));
 	}
 	
+	@Test
+	public void testExpressionFormatting() throws Exception {
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 2);
+		bean.setDecimal2(Decimal2.ONE_THOUSAND);
+		bean.setDecimal5(Decimal5.ONE_HUNDRED);
+		bean.setDecimal10(Decimal10.ONE_HUNDRED);
+		
+		final String currentDateString = FormatterName.DD_MMM_YYYY.getFormatter().toDisplayValue(new DateOnly());
+		final String currentTimeString = FormatterName.HH24_MI.getFormatter().toDisplayValue(new TimeOnly());
+		final String currentDateTimeString = FormatterName.YYYY_MM_DD_HH24_MI.getFormatter().toDisplayValue(new DateTime());
+		final String currentTimestampString = FormatterName.MMM_DD_YYYY_HH24_MI_SS.getFormatter().toDisplayValue(new Timestamp());
+		
+		Assert.assertEquals(currentDateString, Binder.formatMessage("{DATE|DD_MMM_YYYY}", bean));
+		Assert.assertEquals(currentTimeString, Binder.formatMessage("{TIME|HH24_MI}", bean));
+		Assert.assertEquals(currentDateTimeString, Binder.formatMessage("{DATETIME|YYYY_MM_DD_HH24_MI}", bean));
+		Assert.assertEquals(currentTimestampString, Binder.formatMessage("{TIMESTAMP|MMM_DD_YYYY_HH24_MI_SS}", bean));
+		Assert.assertEquals("01-Jan-1970", Binder.formatMessage("{TIME|DD_MMM_YYYY}", bean));
+		Assert.assertEquals(currentDateString, Binder.formatMessage("{DATETIME|DD_MMM_YYYY}", bean));
+		Assert.assertEquals(currentDateString, Binder.formatMessage("{TIMESTAMP|DD_MMM_YYYY}", bean));
+		
+		Assert.assertEquals("1,000.0", Binder.formatMessage("{decimal2|OneDecimalPlace}", bean));
+		Assert.assertEquals("1,000.00", Binder.formatMessage("{ decimal2 | TwoDecimalPlaces }", bean));
+		Assert.assertEquals("1,000.000", Binder.formatMessage("{bean:decimal2|ThreeDecimalPlaces}", bean));
+		Assert.assertEquals("1,000.0000", Binder.formatMessage("{bean: decimal2 | FourDecimalPlaces }", bean));
+		Assert.assertEquals("1,000.00000", Binder.formatMessage("{bean : decimal2 | FiveDecimalPlaces }", bean));
+
+		Assert.assertEquals("100.0", Binder.formatMessage("{decimal5|OneDecimalPlace}", bean));
+		Assert.assertEquals("100.00", Binder.formatMessage("{ decimal5 | TwoDecimalPlaces }", bean));
+		Assert.assertEquals("100.000", Binder.formatMessage("{bean:decimal5|ThreeDecimalPlaces}", bean));
+		Assert.assertEquals("100.0000", Binder.formatMessage("{bean: decimal5 | FourDecimalPlaces }", bean));
+		Assert.assertEquals("100.00000", Binder.formatMessage("{bean : decimal5 | FiveDecimalPlaces }", bean));
+
+		Assert.assertEquals("100", Binder.formatMessage("{decimal10|OneOptionalDecimalPlace}", bean));
+		Assert.assertEquals("100", Binder.formatMessage("{ decimal10 | TwoOptionalDecimalPlaces }", bean));
+		Assert.assertEquals("100", Binder.formatMessage("{bean:decimal10|ThreeOptionalDecimalPlaces}", bean));
+		Assert.assertEquals("100", Binder.formatMessage("{bean: decimal10 | FourOptionalDecimalPlaces }", bean));
+		Assert.assertEquals("100", Binder.formatMessage("{bean : decimal10 | FiveOptionalDecimalPlaces }", bean));
+
+		bean.setDecimal10(new Decimal10("1.0123456789"));
+		Assert.assertEquals("1", Binder.formatMessage("{decimal10|OneOptionalDecimalPlace}", bean));
+		Assert.assertEquals("1.01", Binder.formatMessage("{ decimal10 | TwoOptionalDecimalPlaces }", bean));
+		Assert.assertEquals("1.012", Binder.formatMessage("{bean:decimal10|ThreeOptionalDecimalPlaces}", bean));
+		Assert.assertEquals("1.0123", Binder.formatMessage("{bean: decimal10 | FourOptionalDecimalPlaces }", bean));
+		Assert.assertEquals("1.01235", Binder.formatMessage("{bean : decimal10 | FiveOptionalDecimalPlaces }", bean));
+		Assert.assertEquals("1.012346", Binder.formatMessage("{bean : decimal10 | SixOptionalDecimalPlaces }", bean));
+
+/*
+		Assert.assertEquals("Text", Binder.formatMessage("{disp:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{desc:text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
+		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
+		Assert.assertEquals("Stash", Binder.formatMessage("{el:stash['text']}", bean));
+		Assert.assertEquals("Attribute", Binder.formatMessage("{el:user.attributes['text']}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{el:stash['nothing']}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{el:user.attributes['nothing']}", bean));
+
+		Assert.assertEquals("some.non-existent.key", Binder.formatMessage("{i18n:some.non-existent.key}", bean));
+		Assert.assertEquals("Yes", Binder.formatMessage("{role:admin.BasicUser}", bean));
+		Assert.assertEquals("Stash", Binder.formatMessage("{stash:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{stash:nothing}", bean));
+		Assert.assertEquals("Attribute", Binder.formatMessage("{user:text}", bean));
+		Assert.assertEquals("", Binder.formatMessage("{user:nothing}", bean));
+		
+		// Test functions and imports
+		Assert.assertEquals(currentDate, Binder.formatMessage("{el:newDateOnly()}", bean));
+		Assert.assertEquals(tomorrowsDate, Binder.formatMessage("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", bean));
+		Assert.assertEquals(String.valueOf(new DateOnly().toLocalDate().getYear()),
+				Binder.formatMessage("{el:newDateOnly().toLocalDate().getYear()}", bean));
+		Assert.assertEquals(currentTime, Binder.formatMessage("{el:newTimeOnly()}", bean));
+		Assert.assertEquals(currentDateTime, Binder.formatMessage("{el:newDateTime()}", bean));
+		Assert.assertEquals(currentTimestamp, Binder.formatMessage("{el:newTimestamp()}", bean));
+		Assert.assertEquals("0.00", Binder.formatMessage("{el:Decimal2.ZERO}", bean));
+		Assert.assertEquals("100.00", Binder.formatMessage("{el:newDecimal2(100)}", bean));
+*/
+	}
+
 	@Test
 	public void testDynamicExpressions() throws Exception {
 		DynamicPersistentBean bean = Util.constructRandomInstance(u, m, aadpd, 2);

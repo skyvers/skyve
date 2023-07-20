@@ -5,7 +5,7 @@ import java.text.ParseException;
 import javax.swing.text.MaskFormatter;
 import javax.xml.bind.annotation.XmlType;
 
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.skyve.impl.util.XMLMetaData;
 
 public class Format<T> {

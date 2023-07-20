@@ -5,6 +5,8 @@ import java.io.Serializable;
 public final class UxUi implements Serializable {
 	private static final long serialVersionUID = 6408014926938963507L;
 
+	public static final String DESKTOP_NAME = "desktop";
+
 	private String name;
 	private String scSkin;
 	private String pfTemplateName;

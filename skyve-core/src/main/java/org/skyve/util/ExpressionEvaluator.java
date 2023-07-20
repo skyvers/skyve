@@ -25,6 +25,7 @@ import org.skyve.impl.bind.I18NExpressionEvaluator;
 import org.skyve.impl.bind.RoleExpressionEvaluator;
 import org.skyve.impl.bind.StashExpressionEvaluator;
 import org.skyve.impl.bind.UserAttributesExpressionEvaluator;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -42,25 +43,27 @@ public abstract class ExpressionEvaluator {
 	public static final String TIMESTAMP_EXPRESSION = "TIMESTAMP";
 	public static final String URL_EXPRESSION = "URL";
 
-	private static Map<String, ExpressionEvaluator> evaluators = new TreeMap<>();
+	private static final Map<String, ExpressionEvaluator> EVALUATORS = new TreeMap<>();
 	private static final ExpressionEvaluator DEFAULT_EVALUATOR = new BindingExpressionEvaluator();
 	
 	public static void register(@Nonnull String evaluatorPrefix, @Nonnull ExpressionEvaluator evaluator) {
-		evaluators.put(evaluatorPrefix, evaluator);
+		if (EVALUATORS.put(evaluatorPrefix, evaluator) != null) {
+			throw new IllegalStateException("ExpressionEvaluator prefix " + evaluatorPrefix + " is already registered and cannot be registered again.");
+		}
 	}
 	
 	static {
-		evaluators.put(BindingExpressionEvaluator.PREFIX, DEFAULT_EVALUATOR);
-		evaluators.put(ELExpressionEvaluator.EL_PREFIX, new ELExpressionEvaluator(true));
-		evaluators.put(DisplayNameExpressionEvaluator.PREFIX, new DisplayNameExpressionEvaluator());
-		evaluators.put(DescriptionExpressionEvaluator.PREFIX, new DescriptionExpressionEvaluator());
-		evaluators.put(I18NExpressionEvaluator.PREFIX, new I18NExpressionEvaluator());
-		evaluators.put(RoleExpressionEvaluator.PREFIX, new RoleExpressionEvaluator());
-		evaluators.put(StashExpressionEvaluator.PREFIX, new StashExpressionEvaluator());
-		evaluators.put(UserAttributesExpressionEvaluator.PREFIX, new UserAttributesExpressionEvaluator());
-		evaluators.put(ELExpressionEvaluator.RTEL_PREFIX, new ELExpressionEvaluator(false));
+		EVALUATORS.put(BindingExpressionEvaluator.PREFIX, DEFAULT_EVALUATOR);
+		EVALUATORS.put(ELExpressionEvaluator.EL_PREFIX, new ELExpressionEvaluator(true));
+		EVALUATORS.put(DisplayNameExpressionEvaluator.PREFIX, new DisplayNameExpressionEvaluator());
+		EVALUATORS.put(DescriptionExpressionEvaluator.PREFIX, new DescriptionExpressionEvaluator());
+		EVALUATORS.put(I18NExpressionEvaluator.PREFIX, new I18NExpressionEvaluator());
+		EVALUATORS.put(RoleExpressionEvaluator.PREFIX, new RoleExpressionEvaluator());
+		EVALUATORS.put(StashExpressionEvaluator.PREFIX, new StashExpressionEvaluator());
+		EVALUATORS.put(UserAttributesExpressionEvaluator.PREFIX, new UserAttributesExpressionEvaluator());
+		EVALUATORS.put(ELExpressionEvaluator.RTEL_PREFIX, new ELExpressionEvaluator(false));
 	}
-	
+
 	public static @Nonnull String format(@Nonnull String expression) {
 		return format(expression, null);
 	}
@@ -154,7 +157,7 @@ public abstract class ExpressionEvaluator {
 		String prefix = expression.substring(1, colonIndex).trim();
 		String expressionWithoutPrefix = expression.substring(colonIndex + 1, expression.length() - 1).trim();
 
-		ExpressionEvaluator eval = evaluators.get(prefix);
+		ExpressionEvaluator eval = EVALUATORS.get(prefix);
 		if (eval == null) {
 			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
 		}
@@ -190,7 +193,7 @@ public abstract class ExpressionEvaluator {
 		String prefix = expression.substring(1, colonIndex).trim();
 		String expressionWithoutPrefix = expression.substring(colonIndex + 1, expression.length() - 1).trim();
 
-		ExpressionEvaluator eval = evaluators.get(prefix);
+		ExpressionEvaluator eval = EVALUATORS.get(prefix);
 		if (eval == null) {
 			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
 		}
@@ -254,7 +257,7 @@ public abstract class ExpressionEvaluator {
 							result = new ArrayList<>();
 							
 							// Check expression prefixes
-							for (String prefix : evaluators.keySet()) {
+							for (String prefix : EVALUATORS.keySet()) {
 								if (prefix.startsWith(fragmentWithoutPrefix)) {
 									result.add(prefix);
 								}
@@ -304,7 +307,7 @@ public abstract class ExpressionEvaluator {
 						}
 						else {
 							String prefix = fragment.substring(openCurlyBraceIndex + 1, colonIndex).trim();
-							ExpressionEvaluator eval = evaluators.get(prefix);
+							ExpressionEvaluator eval = EVALUATORS.get(prefix);
 							if (eval != null) { // only complete if we have a valid evaluator
 								fragmentWithoutPrefix = (fragment.length() > (colonIndex + 1)) ?
 															fragment.substring(colonIndex + 1, fragment.length()).trim() :
@@ -343,13 +346,29 @@ public abstract class ExpressionEvaluator {
 	}
 	
 	private static Object process(String expression, Bean bean, boolean format) {
-		int colonIndex = expression.indexOf(':');
+		String expressionWithoutSuffix = expression;
+		String formatName = null;
+		
+		// Look for a format suffix and extract the format name
+		int pipeIndex = expression.lastIndexOf('|');
+		if (pipeIndex > -1) { // fpound a pipe format suffix
+			String formatSuffix = expression.substring(pipeIndex, expression.length() - 1); // assume '}' on end
+			if (! formatSuffix.isEmpty()) {
+				expressionWithoutSuffix = expression.replace(formatSuffix, "");
+				formatName = UtilImpl.processStringValue(formatSuffix.substring(1)); //remove '|' at beginning
+			}
+		}
+		
+		int colonIndex = expressionWithoutSuffix.indexOf(':');
 		if (colonIndex < 0) {
 			// Remove {} and trim.
-			String expressionWithoutPrefix = expression.substring(1, expression.length() - 1).trim();
+			String expressionWithoutPrefix = expressionWithoutSuffix.substring(1, expressionWithoutSuffix.length() - 1).trim();
 
 			if (USER_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getName();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return (result == null) ? "" : result;
 				}
@@ -357,6 +376,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (USERID_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getId();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return (result == null) ? "" : result;
 				}
@@ -364,6 +386,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (USERNAME_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getContactName();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return (result == null) ? "" : result;
 				}
@@ -371,6 +396,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (DATAGROUPID_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getDataGroupId();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return (result == null) ? "" : result;
 				}
@@ -378,6 +406,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (CONTACTID_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getUser().getContactId();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return (result == null) ? "" : result;
 				}
@@ -385,6 +416,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (CUSTOMER_EXPRESSION.equals(expressionWithoutPrefix)) {
 				String result = CORE.getCustomer().getName();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return (result == null) ? "" : result;
 				}
@@ -392,6 +426,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (DATE_EXPRESSION.equals(expressionWithoutPrefix)) {
 				DateOnly result = new DateOnly();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
@@ -399,6 +436,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (TIME_EXPRESSION.equals(expressionWithoutPrefix)) {
 				TimeOnly result = new TimeOnly();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
@@ -406,6 +446,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (DATETIME_EXPRESSION.equals(expressionWithoutPrefix)) {
 				DateTime result = new DateTime();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
@@ -413,6 +456,9 @@ public abstract class ExpressionEvaluator {
 			}
 			if (TIMESTAMP_EXPRESSION.equals(expressionWithoutPrefix)) {
 				Timestamp result = new Timestamp();
+				if (formatName != null) {
+					return CORE.format(formatName, result);
+				}
 				if (format) {
 					return BindUtil.toDisplay(CORE.getCustomer(), null, null, result);
 				}
@@ -422,23 +468,36 @@ public abstract class ExpressionEvaluator {
 				if (bean == null) {
 					return format ? "" : null;
 				}
+				if (formatName != null) {
+					return CORE.format(formatName, Util.getDocumentUrl(bean));
+				}
 				return Util.getDocumentUrl(bean);
 			}
 
-			return format ? 
-						DEFAULT_EVALUATOR.formatWithoutPrefix(expressionWithoutPrefix, bean) :
-							DEFAULT_EVALUATOR.evaluateWithoutPrefix(expressionWithoutPrefix, bean);
+			if (formatName != null) {
+				return CORE.format(formatName, DEFAULT_EVALUATOR.evaluateWithoutPrefix(expressionWithoutPrefix, bean));
+			}
+			if (format) {
+				return DEFAULT_EVALUATOR.formatWithoutPrefix(expressionWithoutPrefix, bean);
+			}
+			return DEFAULT_EVALUATOR.evaluateWithoutPrefix(expressionWithoutPrefix, bean);
 		}
 		
-		String prefix = expression.substring(1, colonIndex).trim();
-		String expressionWithoutPrefix = expression.substring(colonIndex + 1, expression.length() - 1).trim();
+		String prefix = expressionWithoutSuffix.substring(1, colonIndex).trim();
+		String expressionWithoutPrefix = expressionWithoutSuffix.substring(colonIndex + 1, expressionWithoutSuffix.length() - 1).trim();
 
-		ExpressionEvaluator eval = evaluators.get(prefix);
+		ExpressionEvaluator eval = EVALUATORS.get(prefix);
 		if (eval == null) {
 			throw new DomainException("Cannot find an expression evaluator for prefix " + prefix);
 		}
 		
-		return format ? eval.formatWithoutPrefix(expressionWithoutPrefix, bean) : eval.evaluateWithoutPrefix(expressionWithoutPrefix, bean);
+		if (formatName != null) {
+			return CORE.format(formatName, eval.evaluateWithoutPrefix(expressionWithoutPrefix, bean));
+		}
+		if (format) {
+			return eval.formatWithoutPrefix(expressionWithoutPrefix, bean);
+		}
+		return eval.evaluateWithoutPrefix(expressionWithoutPrefix, bean);
 	}
 	
 	public abstract @Nonnull String formatWithoutPrefix(@Nonnull String expression, @Nullable Bean bean);

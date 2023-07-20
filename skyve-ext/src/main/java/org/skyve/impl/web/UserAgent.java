@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
@@ -40,7 +41,7 @@ public class UserAgent {
 
 	private static Map<String, UserAgentType> typeCache = new TreeMap<>();
 
-	public static UserAgentType getType(HttpServletRequest request) {
+	public static @Nonnull UserAgentType getType(@Nonnull HttpServletRequest request) {
 		boolean touchEnabled = false;
 
 		// See if UserAgentType is already set as a request attribute (from device.jsp)
@@ -100,7 +101,7 @@ public class UserAgent {
 		return result;
 	}
 	
-	public static UxUi getUxUi(HttpServletRequest request) throws Exception {
+	public static @Nonnull UxUi getUxUi(@Nonnull HttpServletRequest request) throws Exception {
 		UxUi result = (UxUi) request.getAttribute(AbstractWebContext.UXUI);
 		if (result == null) {
 			Router router = CORE.getRepository().getRouter();

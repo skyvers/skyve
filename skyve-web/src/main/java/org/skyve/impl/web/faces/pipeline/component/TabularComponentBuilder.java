@@ -675,10 +675,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
 	        gridColumnExpression.append('{').append(columnBinding).append('}');
-	        result.getChildren().add(outputText(dataWidgetVar,
-	        										gridColumnExpression.toString(),
-	        										! Boolean.FALSE.equals(column.getEscape()),
-	        										column.getSanitise()));
+	        result.getChildren().add(columnOutputText(dataWidgetVar,
+		        										gridColumnExpression.toString(),
+		        										! Boolean.FALSE.equals(column.getEscape()),
+		        										column.getSanitise()));
 		}
 
 		return result;
@@ -1286,6 +1286,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String moduleName,
 									String modelDocumentName,
 									String modelName,
+									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
 									String title,
@@ -1476,7 +1477,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children, showFilter, result.getWidgetVar());
+        addListGridDataColumns(model, children, showFilter, result.getWidgetVar(), uxui);
         if ((canCreateDocument && createRendered) || zoomRendered || showFilter) {
         	final UIComponent actionColumn = createListGridActionColumn(owningModuleName,
 									        								drivingDocumentName,
@@ -1546,7 +1547,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	protected void addListGridDataColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo,
 											boolean showFilter,
-											String tableVar) {
+											String tableVar,
+											String uxui) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
 		Module module = customer.getModule(document.getOwningModuleName());
@@ -1650,7 +1652,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			StringBuilder style = new StringBuilder(64);
 			Integer pixelWidth = queryColumn.getPixelWidth();
 			if (pixelWidth == null) {
-				pixelWidth = customisations.determineDefaultColumnWidth(attributeType);
+				pixelWidth = customisations.determineDefaultColumnWidth(uxui, attributeType);
 			}
 
 			String value = null;
@@ -1718,7 +1720,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 			HorizontalAlignment alignment = queryColumn.getAlignment();
 			if (alignment == null) {
-				alignment = customisations.determineDefaultTextAlignment(attributeType);
+				alignment = customisations.determineDefaultTextAlignment(uxui, attributeType);
 			} 
 			
 			if (alignment != null) {	
@@ -1874,6 +1876,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
+										String uxui,
 										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
@@ -1958,7 +1961,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			addListGridHeader(title, result);
 		}
         List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children, false, result.getWidgetVar());
+        addListGridDataColumns(model, children, false, result.getWidgetVar(), uxui);
 
         result.setStyleClass(repeaterStyleClass(showColumnHeaders, showGrid));
         result.setEmptyMessage("");
@@ -3869,7 +3872,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UIOutput outputText(String dataWidgetVar, String binding, boolean escape, Sanitisation sanitise) {
+	private UIOutput columnOutputText(String dataWidgetVar, String binding, boolean escape, Sanitisation sanitise) {
 		// escape bindings with ' as \' as the binding could be for blurb expressions
 		String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
 		ValueExpression ve = createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, String.class, escape, sanitise);

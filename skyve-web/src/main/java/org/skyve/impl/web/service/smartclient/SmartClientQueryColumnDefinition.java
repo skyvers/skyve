@@ -36,7 +36,8 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 												Module module, 
 												Document document, 
 												MetaDataQueryColumn column,
-												boolean runtime) {
+												boolean runtime,
+												String uxui) {
 		super(user,
 				customer, 
 				module,
@@ -44,7 +45,8 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 				column.getBinding(),
 				column.getName(),
 				runtime,
-				true);
+				true,
+				uxui);
 		String displayName = column.getLocalisedDisplayName();
 		if (displayName != null) {
 			title = displayName;
@@ -111,7 +113,8 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 																	document,
 																	(Relation) attribute,
 																	null,
-																	runtime);
+																	runtime,
+																	uxui);
 						onlyEqualsFilterOperators = true;
 					}
 				}

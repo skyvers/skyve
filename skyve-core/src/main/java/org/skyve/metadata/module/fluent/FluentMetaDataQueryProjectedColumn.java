@@ -2,6 +2,7 @@ package org.skyve.metadata.module.fluent;
 
 import org.skyve.impl.metadata.repository.module.MetaDataQueryColumnMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryProjectedColumnMetaData;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
@@ -25,6 +26,8 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 		editable(column.isEditable());
 		escape(column.isEscape());
 		sanitise(column.getSanitise());
+		formatter(column.getFormatterName());
+		customFormatter(column.getCustomFormatterName());
 		return this;
 	}
 	
@@ -60,6 +63,16 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	
 	public FluentMetaDataQueryProjectedColumn sanitise(Sanitisation sanitise) {
 		column.setSanitise(sanitise);
+		return this;
+	}
+
+	public FluentMetaDataQueryProjectedColumn formatter(FormatterName formatterName) {
+		column.setFormatterName(formatterName);
+		return this;
+	}
+
+	public FluentMetaDataQueryProjectedColumn customFormatter(String customFormatterName) {
+		column.setCustomFormatterName(customFormatterName);
 		return this;
 	}
 

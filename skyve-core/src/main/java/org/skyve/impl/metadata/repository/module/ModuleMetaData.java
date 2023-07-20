@@ -16,6 +16,8 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.domain.types.formatters.Formatter;
+import org.skyve.domain.types.formatters.Formatters;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
@@ -38,6 +40,7 @@ import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -429,6 +432,22 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 								Sanitisation sanitise = projectedRepositoryColumn.getSanitise();
 								if (sanitise != null) {
 									projectedColumn.setSanitise(sanitise);
+								}
+								FormatterName formatterName = projectedRepositoryColumn.getFormatterName();
+								String customFormatterName = projectedRepositoryColumn.getCustomFormatterName();
+								if ((formatterName != null) && (customFormatterName != null)) {
+									throw new MetaDataException(metaDataName + " : formatter and customFormatter cannot both be defined in column " + 
+																	column.getBinding() +  " in query " + documentQueryImpl.getName());
+								}
+								else if (formatterName != null) {
+									projectedColumn.setFormatterName(formatterName);
+								}
+								else if (customFormatterName != null) {
+									Formatter<?> customFormatter = Formatters.get(customFormatterName);
+									if (customFormatter == null) {
+										throw new MetaDataException(metaDataName + " : customFormatter " + customFormatterName + " is not defined");
+									}
+									projectedColumn.setCustomFormatterName(customFormatterName);
 								}
 							}
 							else if ((contentColumn != null) && (contentRepositoryColumn != null)) {

@@ -15,6 +15,11 @@ public class Decimal10DollarsAndCents implements Converter<Decimal10> {
 	private static final String PATTERN = "###,###,###,##0.00";
 
 	@Override
+	public Class<Decimal10> getValueType() {
+		return Decimal10.class;
+	}
+	
+	@Override
 	public String toDisplayValue(Decimal10 value) throws ConversionException {
 		try {
 			DecimalFormat df = CORE.getDecimalFormat(PATTERN);
