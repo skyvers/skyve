@@ -437,8 +437,8 @@ public class SmartClientEditServlet extends HttpServlet {
             if (Operation.fetch.equals(operation)) {
                 pw.append("\"startRow\":0,\"endRow\":0,\"totalRows\":0,");
             }
-            pw.append("data:\"An error occured while processing your request.<br/>");
-    	
+            pw.append("\"data\":\"An error occured while processing your request.<br/>");
+
             String message = t.getMessage();
             if (message != null) {
                 pw.append(OWASP.escapeJsString(message)).append('"');
