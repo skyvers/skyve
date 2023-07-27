@@ -151,6 +151,7 @@ import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
 import org.skyve.impl.web.faces.converters.select.TriStateCheckboxBooleanConverter;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -671,10 +672,25 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// this is not an inline grid or the column is not editable
 		boolean inline = (widget instanceof DataGrid) ?
 							Boolean.TRUE.equals(((DataGrid) widget).getInline()) :
-							true;
+							false;
 		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
-	        gridColumnExpression.append('{').append(columnBinding).append('}');
+			FormatterName formatterName = column.getFormatterName();
+			String customFormatterName = column.getCustomFormatterName();
+			String formatter = null;
+			if (formatterName != null) {
+				formatter = formatterName.name();
+			}
+			else if (customFormatterName != null) {
+				formatter = customFormatterName;
+			}
+			if (formatter != null) {
+		        gridColumnExpression.append('{').append(columnBinding).append('|').append(formatter).append('}');
+			}
+			else {
+		        gridColumnExpression.append('{').append(columnBinding).append('}');
+			}
+
 	        result.getChildren().add(columnOutputText(dataWidgetVar,
 		        										gridColumnExpression.toString(),
 		        										! Boolean.FALSE.equals(column.getEscape()),
@@ -1567,7 +1583,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			String name = queryColumn.getName();
 			String binding = queryColumn.getBinding();
-
 			// Sort out a display name and filter facet
 			String displayName = queryColumn.getLocalisedDisplayName();
 			UIComponent specialFilterComponent = null;
@@ -1657,7 +1672,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			String value = null;
 			if (projectedQueryColumn != null) { // projected column
-				value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
+				FormatterName formatterName = projectedQueryColumn.getFormatterName();
+				String customFormatterName = projectedQueryColumn.getCustomFormatterName();
+				String formatter = null;
+				if (formatterName != null) {
+					formatter = formatterName.name();
+				}
+				else if (customFormatterName != null) {
+					formatter = customFormatterName;
+				}
+				if (formatter != null) {
+					value = new StringBuilder(64).append("#{row['{").append((name != null) ? name : binding).append('|').append(formatter).append("}']}").toString();
+				}
+				else {
+					value = new StringBuilder(64).append("#{row['{").append((name != null) ? name : binding).append("}']}").toString();
+				}
 			}
 			else { // content column
 				MetaDataQueryContentColumn contentColumn = (MetaDataQueryContentColumn) queryColumn;

@@ -567,7 +567,7 @@ public class FacesViewRenderer extends ViewRenderer {
 				AbstractDataWidget currentDataWidget = getCurrentDataWidget();
 				boolean inline = (currentDataWidget instanceof DataGrid) ? 
 									Boolean.TRUE.equals(((DataGrid) currentDataWidget).getInline()) :
-									true;
+									false;
 				if (inline) {
 					current.getChildren().add(component);
 				}
