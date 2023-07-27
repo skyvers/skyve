@@ -7,19 +7,19 @@ public class DescriptionExpressionEvaluator extends MetaDataExpressionEvaluator 
 	public static final String PREFIX = "desc";
 	
 	@Override
-	public Object evaluateWithoutPrefix(String expression, Bean bean) {
+	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
 		Attribute a = obtainAttribute(expression, bean);
 		return (a == null) ? null : a.getLocalisedDescription();
 	}
 
 	@Override
-	public String formatWithoutPrefix(String expression, Bean bean) {
-		Object result = evaluateWithoutPrefix(expression, bean);
+	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+		Object result = evaluateWithoutPrefixOrSuffix(expression, bean);
 		return (result == null) ? "" : result.toString();
 	}
 	
 	@Override
-	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
 		expression.insert(0, '.');
 		expression.insert(0, binding);
 	}

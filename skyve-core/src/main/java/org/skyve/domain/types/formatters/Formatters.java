@@ -1,6 +1,8 @@
 package org.skyve.domain.types.formatters;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
@@ -42,5 +44,13 @@ public class Formatters {
 	@SuppressWarnings("unchecked")
 	public static <T> @Nullable Formatter<T> get(@Nonnull String name) {
 		return (Formatter<T>) FORMATTERS.get(name);
+	}
+	
+	/**
+	 * Get the Set of formatter names.
+	 * @return	An unmodified set of all formatter names registered
+	 */
+	public static Set<String> getNames() {
+		return Collections.unmodifiableSet(FORMATTERS.keySet());
 	}
 }

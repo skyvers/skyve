@@ -15,7 +15,7 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	public static final String PREFIX = "role";
 	
 	@Override
-	public Object evaluateWithoutPrefix(String expression, Bean bean) {
+	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
 		int dotIndex = expression.indexOf('.');
 		return CORE.getUser().isInRole(expression.substring(0, dotIndex),
 										expression.substring(dotIndex + 1)) ?
@@ -24,16 +24,16 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	public String formatWithoutPrefix(String expression, Bean bean) {
-		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefix(expression, bean));
+	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
 	@Override
-	public String validateWithoutPrefix(String expression,
-											Class<?> returnType,
-											Customer customer,
-											Module module,
-											Document document) {
+	public String validateWithoutPrefixOrSuffix(String expression,
+													Class<?> returnType,
+													Customer customer,
+													Module module,
+													Document document) {
 		if (expression.indexOf('.') <= 0) {
 			return "Role " + expression + " needs to be in the format <module>.<role>";
 		}
@@ -41,10 +41,10 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public List<String> completeWithoutPrefix(String fragment,
-												Customer customer,
-												Module module,
-												Document document) {
+	public List<String> completeWithoutPrefixOrSuffix(String fragment,
+														Customer customer,
+														Module module,
+														Document document) {
 		List<String> result = new ArrayList<>();
 		
 		for (Module m : customer.getModules()) {
@@ -62,7 +62,7 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
 		// nothing to do here as the binding has nothing to do with role expressions
 	}
 }

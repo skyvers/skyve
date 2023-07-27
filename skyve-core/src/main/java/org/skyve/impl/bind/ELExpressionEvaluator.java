@@ -138,22 +138,22 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	public Object evaluateWithoutPrefix(String expression, Bean bean) {
+	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
 		ELProcessor elp = newSkyveEvaluationProcessor(bean);
 		return elp.eval(expression);
 	}
 
 	@Override
-	public String formatWithoutPrefix(String expression, Bean bean) {
-		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefix(expression, bean));
+	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
 	@Override
-	public String validateWithoutPrefix(String expression,
-											Class<?> returnType,
-											Customer customer,
-											Module module,
-											Document document) {
+	public String validateWithoutPrefixOrSuffix(String expression,
+													Class<?> returnType,
+													Customer customer,
+													Module module,
+													Document document) {
 		String result = null;
 
 		if (typesafe) {
@@ -191,10 +191,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public List<String> completeWithoutPrefix(String fragment,
-												Customer customer,
-												Module module,
-												Document document) {
+	public List<String> completeWithoutPrefixOrSuffix(String fragment,
+														Customer customer,
+														Module module,
+														Document document) {
 		List<String> result = new ArrayList<>();
 		
 		String input = (fragment == null) ? "" : fragment;
@@ -360,7 +360,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
 		// Append binding to "bean."
 		int beanIndex = expression.indexOf("bean.");
 		while (beanIndex >= 0) {

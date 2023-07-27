@@ -14,34 +14,34 @@ public class I18NExpressionEvaluator extends ExpressionEvaluator {
 	public static final String PREFIX = "i18n";
 	
 	@Override
-	public Object evaluateWithoutPrefix(String expression, Bean bean) {
-		return formatWithoutPrefix(expression, bean);
+	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+		return formatWithoutPrefixOrSuffix(expression, bean);
 	}
 
 	@Override
-	public String formatWithoutPrefix(String expression, Bean bean) {
+	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
 		return Util.i18n(expression);
 	}
 	
 	@Override
-	public String validateWithoutPrefix(String expression,
-											Class<?> returnType,
-											Customer customer,
-											Module module,
-											Document document) {
+	public String validateWithoutPrefixOrSuffix(String expression,
+													Class<?> returnType,
+													Customer customer,
+													Module module,
+													Document document) {
 		return null; // any key is valid
 	}
 	
 	@Override
-	public List<String> completeWithoutPrefix(String fragment,
-												Customer customer, 
-												Module module,
-												Document document) {
+	public List<String> completeWithoutPrefixOrSuffix(String fragment,
+														Customer customer, 
+														Module module,
+														Document document) {
 		return Collections.emptyList(); // any key is valid
 	}
 
 	@Override
-	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
 		// nothing to do here as i18n uses keys
 	}
 }

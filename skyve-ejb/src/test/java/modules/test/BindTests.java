@@ -345,34 +345,9 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("1.01235", Binder.formatMessage("{bean : decimal10 | FiveOptionalDecimalPlaces }", bean));
 		Assert.assertEquals("1.012346", Binder.formatMessage("{bean : decimal10 | SixOptionalDecimalPlaces }", bean));
 
-/*
-		Assert.assertEquals("Text", Binder.formatMessage("{disp:text}", bean));
-		Assert.assertEquals("", Binder.formatMessage("{desc:text}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
-		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
-		Assert.assertEquals("Stash", Binder.formatMessage("{el:stash['text']}", bean));
-		Assert.assertEquals("Attribute", Binder.formatMessage("{el:user.attributes['text']}", bean));
-		Assert.assertEquals("", Binder.formatMessage("{el:stash['nothing']}", bean));
-		Assert.assertEquals("", Binder.formatMessage("{el:user.attributes['nothing']}", bean));
-
-		Assert.assertEquals("some.non-existent.key", Binder.formatMessage("{i18n:some.non-existent.key}", bean));
-		Assert.assertEquals("Yes", Binder.formatMessage("{role:admin.BasicUser}", bean));
-		Assert.assertEquals("Stash", Binder.formatMessage("{stash:text}", bean));
-		Assert.assertEquals("", Binder.formatMessage("{stash:nothing}", bean));
-		Assert.assertEquals("Attribute", Binder.formatMessage("{user:text}", bean));
-		Assert.assertEquals("", Binder.formatMessage("{user:nothing}", bean));
-		
-		// Test functions and imports
-		Assert.assertEquals(currentDate, Binder.formatMessage("{el:newDateOnly()}", bean));
-		Assert.assertEquals(tomorrowsDate, Binder.formatMessage("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", bean));
-		Assert.assertEquals(String.valueOf(new DateOnly().toLocalDate().getYear()),
-				Binder.formatMessage("{el:newDateOnly().toLocalDate().getYear()}", bean));
-		Assert.assertEquals(currentTime, Binder.formatMessage("{el:newTimeOnly()}", bean));
-		Assert.assertEquals(currentDateTime, Binder.formatMessage("{el:newDateTime()}", bean));
-		Assert.assertEquals(currentTimestamp, Binder.formatMessage("{el:newTimestamp()}", bean));
-		Assert.assertEquals("0.00", Binder.formatMessage("{el:Decimal2.ZERO}", bean));
-		Assert.assertEquals("100.00", Binder.formatMessage("{el:newDecimal2(100)}", bean));
-*/
+		Assert.assertEquals("1.01", Binder.formatMessage("{el:bean.decimal10|TwoOptionalDecimalPlaces}", bean));
+		Assert.assertEquals("0", Binder.formatMessage("{el:Decimal2.ZERO|TwoOptionalDecimalPlaces}", bean));
+		Assert.assertEquals("100", Binder.formatMessage("{el:newDecimal2(100)|TwoOptionalDecimalPlaces}", bean));
 	}
 
 	@Test
@@ -430,6 +405,7 @@ public class BindTests extends AbstractSkyveTest {
 
 	@Test
 	public void testExpressionValidation() throws Exception {
+		// Test implicit expressions
 		Assert.assertNull(BindUtil.validateMessageExpressions("{USER}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{USERID}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{USERNAME}", c, aapd));
@@ -442,6 +418,7 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(BindUtil.validateMessageExpressions("{TIMESTAMP}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{URL}", c, aapd));
 		
+		// Test basic expressions and trimming
 		Assert.assertNull(BindUtil.validateMessageExpressions("{text}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{ text }", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{bean:text}", c, aapd));
@@ -468,13 +445,22 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(BindUtil.validateMessageExpressions("{user:text}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{user:nothing}", c, aapd));
 		
+		// Test malformed and escaped expressions
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("}", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{|}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{ |}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{| }", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{|", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{ |", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("|}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("|", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{text\\}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("\\{text}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("\\{{text}", c, aapd));
 		
+		// Test EL operators
 		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.normalInteger + bean.normalInteger}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.longInteger + bean.longInteger}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{el:bean.decimal2.bigDecimalValue() + bean.decimal2.bigDecimalValue()}", c, aapd));
@@ -494,6 +480,7 @@ public class BindTests extends AbstractSkyveTest {
 		// But concaty method name is not chacked coz we lost the type information retrieving from the stash
 		Assert.assertNull(BindUtil.validateMessageExpressions("{el:stash['key'].concaty(bean.text)}", c, aapd));
 
+		// Test type validation
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedAssociation}", Bean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:empty bean.aggregatedAssociation}", Boolean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{el:bean.aggregatedCollection}", List.class, c, m, aapd));
@@ -517,6 +504,15 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNull(ExpressionEvaluator.validate("{condition}", Boolean.class, c, m, aapd));
 		Assert.assertNull(ExpressionEvaluator.validate("{aggregatedAssociation.condition}", Boolean.class, c, m, aapd));
 
+		// Test formatter validation
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{USER|Bogus}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{USER|DD_MMM_YYYY}", c, aapd));
+		Assert.assertNull(BindUtil.validateMessageExpressions("{TIMESTAMP|DD_MMM_YYYY}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{TIMESTAMP|OneDecimalPlace}", c, aapd));
+		// Any formatter should return a String
+		Assert.assertNotNull(ExpressionEvaluator.validate("{date|MM_DD_YYYY}", DateOnly.class, c, m, aapd));
+		Assert.assertNotNull(ExpressionEvaluator.validate("{el:bean.date|DD_MMM_YYYY}", String.class, c, m, aapd));
+		
 		// Test functions
 		Assert.assertNull(BindUtil.validateMessageExpressions("{rtel:newDateOnly()}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("{el:newDateOnly()}", c, aapd));
