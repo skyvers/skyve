@@ -288,7 +288,7 @@
 		<many-to-one name="parent" entity-name="adminDynamicEntity" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_DynamicRelation_parent" />
 		<property name="relatedModuleName" length="128" />
 		<property name="relatedDocumentName" length="128" />
-		<property name="relatedId" length="36" />
+		<property name="relatedId" length="36" index="IDX_relatedId" />
 		<property name="attributeName" length="500" />
 		<property name="ordinal" />
 		<filter name="adminDynamicRelationNoneFilter" condition="1=0"/>
