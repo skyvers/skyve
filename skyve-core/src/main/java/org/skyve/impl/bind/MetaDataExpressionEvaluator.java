@@ -34,11 +34,11 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	public String validateWithoutPrefix(String expression,
-											Class<?> returnType,
-											Customer customer,
-											Module module,
-											Document document) {
+	public String validateWithoutPrefixOrSuffix(String expression,
+													Class<?> returnType,
+													Customer customer,
+													Module module,
+													Document document) {
 		if (customer == null) {
 			throw new IllegalArgumentException("customer can't be null for a binding expression");
 		}
@@ -61,8 +61,9 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
 				Attribute relation = target.getAttribute();
 				if (relation instanceof Relation) {
+					Module owningModule = customer.getModule(target.getDocument().getOwningModuleName());
 					String contextDocumentName = ((Relation) relation).getDocumentName();
-					contextDocument = module.getDocument(customer, contextDocumentName);
+					contextDocument = owningModule.getDocument(customer, contextDocumentName);
 				}
 				else {
 					if (ChildBean.PARENT_NAME.equals(penultimateBinding) || penultimateBinding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
@@ -148,10 +149,10 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public List<String> completeWithoutPrefix(String fragment,
-												Customer customer,
-												Module module,
-												Document document) {
+	public List<String> completeWithoutPrefixOrSuffix(String fragment,
+														Customer customer,
+														Module module,
+														Document document) {
 		List<String> result = new ArrayList<>();
 		
 		Document targetDocument = null;
