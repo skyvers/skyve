@@ -61,6 +61,15 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 		}
 		escape = column.isEscape();
 
+		// Set up for formatted columns
+		if (column instanceof MetaDataQueryProjectedColumn) {
+			MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+			if ((projectedColumn.getFormatterName() != null) || (projectedColumn.getCustomFormatterName() != null)) {
+				setHasDisplayField(true);
+				sortByField = name; // sort by the code field, not _display_*
+			}
+		}
+		
 		Attribute attribute = (target != null) ? target.getAttribute() : null;
 		if (attribute != null) {
 			AttributeType attributeType = attribute.getAttributeType();

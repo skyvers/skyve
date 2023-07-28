@@ -1277,11 +1277,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (dataWidgetColumnInputWidget != null) {
 			SmartClientDataGridFieldDefinition def = null;
 			String binding = column.getBinding();
+			boolean hasFormatter = (column.getFormatterName() != null) || (column.getCustomFormatterName() != null);
 			if (binding == null) { // column bound to collection for the grid
-				def = getDataGridField(document, dataWidgetColumnInputWidget, dataWidgetBinding, true);
+				def = getDataGridField(document, dataWidgetColumnInputWidget, dataWidgetBinding, hasFormatter, true);
 			} 
 			else {
-				def = getDataGridField(dataWidgetDocument, dataWidgetColumnInputWidget, null, true);
+				def = getDataGridField(dataWidgetDocument, dataWidgetColumnInputWidget, null, hasFormatter, true);
 			}
 
 			def.setTitle(title);
@@ -2975,8 +2976,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") Document document,
     															InputWidget widget,
     															String dataGridBinding,
+    															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, runtime, currentUxUi);
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, currentUxUi);
     }
 
     /**

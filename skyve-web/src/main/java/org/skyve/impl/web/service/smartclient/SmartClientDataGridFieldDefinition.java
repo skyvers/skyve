@@ -26,6 +26,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 			                                        Document document, 
 			                                        InputWidget widget,
 			                                        String dataGridBindingOverride,
+			                                        boolean hasFormatter,
 			                                        boolean runtime,
 			                                        String uxui) {
 		super(user,
@@ -37,7 +38,9 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 				runtime,
 				false,
 				uxui);
-        // for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
+		setHasDisplayField(hasFormatter);
+		
+		// for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
 		if ("enum".equals(type)) {
 			type = "text";
 		}
