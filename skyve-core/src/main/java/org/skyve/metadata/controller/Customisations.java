@@ -25,16 +25,17 @@ public interface Customisations {
 	@Nullable Integer determineDefaultColumnWidth(String uxui, AttributeType attributeType);
 
 	/**
-	 * Register ExpressionEvaluators for use in this Skyve deployment using ExpressionEvaluator.register().
+	 * Register custom ExpressionEvaluators for use in this Skyve deployment using ExpressionEvaluator.register().
 	 */
-	void registerExpressions();
+	void registerCustomExpressions();
 	
 	/**
-	 * Regsiter Formatters for use in this Skyve deployment using Formatters.register().
+	 * Register custom Formatters for use in this Skyve deployment using Formatters.register().
 	 */
-	void registerFormatters();
+	void registerCustomFormatters();
 
+	// TODO use this in SC.
 	@Nonnull ReportFormat[] listGridExportFormats();
-	
+// TODO add the view generator bit in	
 //	@Nonnull ViewGenerator viewGenerator();
 }
