@@ -34,8 +34,12 @@ public interface Customisations {
 	 */
 	void registerCustomFormatters();
 
-	// TODO use this in SC.
+	/**
+	 * Determine the list grid export formats allowed.
+	 * @return	The array of allowed formats.
+	 */
 	@Nonnull ReportFormat[] listGridExportFormats();
+	
 // TODO add the view generator bit in	
 //	@Nonnull ViewGenerator viewGenerator();
 }

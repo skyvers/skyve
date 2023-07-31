@@ -53,7 +53,7 @@ public class NoCustomisations implements Customisations {
 
 	@Override
 	public ReportFormat[] listGridExportFormats() {
-		return ReportFormat.values();
+		return ReportFormat.values(); // ordered as per the report format enum
 	}
 
 	@Override

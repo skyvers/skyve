@@ -106,6 +106,7 @@ public class Desktop extends Harness {
 					dataSourceScript = sb.toString();
 					sb.setLength(0);
 	
+					// Set the first view to show
 					WebAction a = Desktop.this.getWebActionParameter();
 					if (WebAction.e.equals(a)) { // edit
 						sb.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
