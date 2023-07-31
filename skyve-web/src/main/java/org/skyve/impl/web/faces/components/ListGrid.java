@@ -22,6 +22,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Util;
@@ -82,11 +83,14 @@ public class ListGrid extends HtmlPanelGroup {
 				@Override
 				public Void callback() throws Exception {
 			    	componentBuilder.setManagedBeanName(managedBeanName);
-			    	componentBuilder.setUserAgentType(UserAgent.getType((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()));
+			    	HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+			    	componentBuilder.setUserAgentType(UserAgent.getType(request));
+			    	UxUi uxui = UserAgent.getUxUi(request);
 					ListGrid.this.getChildren().add(ListGrid.generate(moduleName,
 																		documentName,
 																		queryName,
 																		modelName,
+																		uxui.getName(),
 																		createRendered,
 																		createDisabled,
 																		zoomRendered,
@@ -108,6 +112,7 @@ public class ListGrid extends HtmlPanelGroup {
 										String documentName,
 										String queryName,
 										String modelName,
+										String uxui,
 										Boolean createRendered,
 										boolean createDisabled,
 										Boolean zoomRendered,
@@ -150,6 +155,7 @@ public class ListGrid extends HtmlPanelGroup {
 											moduleName,
 											documentName,
 											name,
+											uxui,
 											model,
 											null,
 											null,

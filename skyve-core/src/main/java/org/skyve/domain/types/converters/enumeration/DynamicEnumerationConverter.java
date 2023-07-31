@@ -22,6 +22,11 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	}
 	
 	@Override
+	public Class<String> getValueType() {
+		return String.class;
+	}
+	
+	@Override
 	public String toDisplayValue(String value) throws ConversionException {
 		try {
 			// check code first

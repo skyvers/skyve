@@ -15,6 +15,11 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	}
 
 	@Override
+	public Class<DateTime> getValueType() {
+		return DateTime.class;
+	}
+	
+	@Override
 	public Format<DateTime> getFormat() {
 		return null;
 	}

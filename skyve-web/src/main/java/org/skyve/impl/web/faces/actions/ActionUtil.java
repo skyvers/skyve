@@ -104,10 +104,10 @@ public class ActionUtil {
 		// Get the view's bean
 		Bean contextBean = facesView.getBean();
 		
-		// Put the dehydrated view in the session (keep post refresh state if required)
+		// Put the view in the session (keep post render state if required)
+		// NB The view will be dehydrated in the SkyveFacesPhaseListener (after Bizlet.postRender() is called - so it has a webContext)
 		Bizlet<? extends Bean> postRenderBizlet = facesView.getPostRenderBizlet();
 		Bean postRenderBean = facesView.getPostRenderBean();
-		facesView.dehydrate();
 		facesView.setPostRender(postRenderBizlet, postRenderBean);
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		ec.getSessionMap().put(FacesUtil.MANAGED_BEAN_NAME_KEY, facesView);

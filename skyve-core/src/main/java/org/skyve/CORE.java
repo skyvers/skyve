@@ -5,12 +5,18 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.SortedMap;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.domain.number.NumberGenerator;
+import org.skyve.domain.types.formatters.Formatter;
+import org.skyve.domain.types.formatters.Formatters;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
@@ -38,7 +44,7 @@ public class CORE {
 	 * 
 	 * @return The persistence object.
 	 */
-	public static Persistence getPersistence() {
+	public static @Nonnull Persistence getPersistence() {
 		return AbstractPersistence.get();
 	}
 	
@@ -50,7 +56,7 @@ public class CORE {
 	 * 
 	 * @return The new ordering specification.
 	 */
-	public static Ordering newOrdering(String by, SortDirection sort) {
+	public static @Nonnull Ordering newOrdering(@Nonnull String by, @Nonnull SortDirection sort) {
 		return new CollectionImpl.OrderingImpl(by, sort);
 	}
 	
@@ -58,7 +64,7 @@ public class CORE {
 	 * Get the Skyve number generator.
 	 * @return	A NumberGenerator.
 	 */
-	public static NumberGenerator getNumberGenerator() {
+	public static @Nonnull NumberGenerator getNumberGenerator() {
 		return NumberGeneratorStaticSingleton.get();
 	}
 	
@@ -67,7 +73,7 @@ public class CORE {
 	 * 
 	 * @return The current user.
 	 */
-	public static User getUser() {
+	public static @Nonnull User getUser() {
 		return AbstractPersistence.get().getUser();
 	}
 
@@ -76,7 +82,7 @@ public class CORE {
 	 * 
 	 * @return The current customer.
 	 */
-	public static Customer getCustomer() {
+	public static @Nonnull Customer getCustomer() {
 		return AbstractPersistence.get().getUser().getCustomer();
 	}
 
@@ -84,7 +90,7 @@ public class CORE {
 	 * A place (thread-local), where state can be stashed for the duration of the conversation.
 	 * Bear in mind that this map is serialised and cached in the conversation so manage its size aggressively.
 	 */
-	public static SortedMap<String, Object> getStash() {
+	public static @Nonnull SortedMap<String, Object> getStash() {
 		return AbstractPersistence.get().getStash();
 	}
 	
@@ -96,7 +102,7 @@ public class CORE {
 	 * 
 	 * @return The repository.
 	 */
-	public static Repository getRepository() {
+	public static @Nonnull Repository getRepository() {
 		return ProvidedRepositoryFactory.get();
 	}
 	
@@ -104,17 +110,48 @@ public class CORE {
 	 * Get the Skyve Customisations.
 	 * @return	A Customisations.
 	 */
-	public static Customisations getCustomisations() {
+	public static @Nonnull Customisations getCustomisations() {
 		return CustomisationsStaticSingleton.get();
 	}
-	
+
+	/**
+	 * Format a value a using a standard Skyve formatter
+	 * @param name The Formatter Name
+	 * @param valueToFormat The value to format
+	 * @return	The formatted value.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> @Nonnull String format(@Nonnull FormatterName name, @Nullable T valueToFormat) {
+		if (valueToFormat == null) {
+			return "";
+		}
+		return ((Formatter<T>) name.getFormatter()).toDisplayValue(valueToFormat);
+	}
+
+	/**
+	 * Format a value a using a custom formatter (added by Customisations in JSON)
+	 * @param name The Formatter name
+	 * @param valueToFormat The value to format
+	 * @return	The formatted value.
+	 */
+	public static <T> @Nonnull String format(@Nonnull String name, @Nullable T valueToFormat) {
+		if (valueToFormat == null) {
+			return "";
+		}
+		Formatter<T> formatter = Formatters.get(name);
+		if (formatter == null) {
+			return valueToFormat.toString();
+		}
+		return formatter.toDisplayValue(valueToFormat);
+	}
+
 	/**
 	 * Get a date format for the current thread of execution.
 	 * Since format objects are not thread-safe, this convenience method exists to return a new one each time.
 	 * 
 	 * @return A date format.
 	 */
-	public static SimpleDateFormat getDateFormat(String formatString) {
+	public static @Nonnull SimpleDateFormat getDateFormat(@Nonnull String formatString) {
 		SimpleDateFormat result = new SimpleDateFormat(formatString, Locale.ENGLISH);
 		result.setLenient(false);
 		return result;
@@ -126,15 +163,15 @@ public class CORE {
      * 
      * @return A decimal format.
      */
-	public static DecimalFormat getDecimalFormat(String formatString) {
+	public static @Nonnull DecimalFormat getDecimalFormat(@Nonnull String formatString) {
 		return new DecimalFormat(formatString);
 	}
 	
-	public static SimpleDateFormat getSerializableDateFormat() {
+	public static @Nonnull SimpleDateFormat getSerializableDateFormat() {
 		return getDateFormat("yyyy-MM-dd");
 	}
 
-	public static SimpleDateFormat getSerializableTimeFormat() {
+	public static @Nonnull SimpleDateFormat getSerializableTimeFormat() {
 		return getDateFormat("HH:mm:ss");
 	}
 }

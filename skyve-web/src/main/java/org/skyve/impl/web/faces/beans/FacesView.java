@@ -671,7 +671,8 @@ public class FacesView<T extends Bean> extends Harness {
 		String completeModule = (String) attributes.get("module");
 		String completeDocument = (String) attributes.get("document");
 		String completeQuery = (String) attributes.get("query");
-		String completeModel = (String) attributes.get("model");
+		// TODO Finish this once we have list models for lookup descriptions
+		// String completeModel = (String) attributes.get("model");
 		String displayBinding = (String) attributes.get("display");
 
 		// Take a defensive copy of the parameters collection and add the query to the description binding

@@ -14,6 +14,7 @@ public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 									String moduleName,
 									String modelDocumentName,
 									String modelName,
+									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
 									String title,

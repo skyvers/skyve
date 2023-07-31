@@ -125,42 +125,76 @@ isc.ReportDialog.addClassProperties({
 isc.ReportDialog.addClassProperties({
 	// create a report format picklist
 	_createReportFormatPickList: function(colSpan, onChangeFunction) { // callback for onchange event
+		var valueMap = {};
+		var valueIcons = {};
+		// An array of report format names from org.skyve.report.ReportFormat.
+		for (var i = 0, l = SKYVE.Util.allowedReportFormats.length; i < l; i++) {
+			var format = SKYVE.Util.allowedReportFormats[i];
+			if (format == 'pdf') {
+				valueMap[format] = 'PDF (Adobe Portable Document Format)';
+				valueIcons[format] = format;
+			}
+			else if (format == 'docx') {
+				valueMap[format] = 'DOCX (Word Document - Office 2007)';
+				valueIcons[format] = 'rtf';
+			}
+			else if (format == 'xlsx') {
+				valueMap[format] = 'XLSX (Excel Document - Office 2007)';
+				valueIcons[format] = 'xls';
+			}
+			else if (format == 'pptx') {
+				valueMap[format] = 'PPTX (Powerpoint Document - Office 2007)';
+				valueIcons[format] = format;
+			}
+			else if (format == 'xls') {
+				valueMap[format] = 'XLS (Excel - 98-2003)';
+				valueIcons[format] = format;
+			}
+			else if (format == 'rtf') {
+				valueMap[format] = 'RTF (Rich Text Format)';
+				valueIcons[format] = format;
+			}
+			else if (format == 'ods') {
+				valueMap[format] = 'ODS (Open Document Spreadsheet Format)';
+				valueIcons[format] = 'oo';
+			}
+			else if (format == 'odt') {
+				valueMap[format] = 'ODT (Open Document Text Format)';
+				valueIcons[format] = 'oo';
+			}
+			else if (format == 'html') {
+				valueMap[format] = 'HTML (Hyper Text Markup Language)';
+				valueIcons[format] = format;
+			}
+			else if (format == 'csv') {
+				valueMap[format] = 'CSV (Comma Separated Values)';
+				valueIcons[format] = format;
+			}
+			else if (format == 'xml') {
+				valueMap[format] = 'XML (JRXML Format)';
+				valueIcons[format] = format;
+			}
+			else if (format == 'txt') {
+				valueMap[format] = 'TXT (Text Format)';
+				valueIcons[format] = format;
+			}
+			else {
+				valueMap[format] = format;
+				valueIcons[format] = format;
+			}
+		} 
+
 		return {
 			name: 'reportFormat', 
 			showTitle: false, 
 			type: 'select',
 			width: 300,
 			required: true,
-			valueMap: {
-				'pdf': 'PDF (Adobe Portable Document Format)',
-				'docx': 'DOCX (Word Document - Office 2007)',
-				'xlsx': 'XLSX (Excel Document - Office 2007)',
-				'pptx': 'PPTX (Powerpoint Document - Office 2007)',
-				'xls': 'XLS (Excel - 98-2003)',
-				'rtf': 'RTF (Rich Text Format)',
-				'ods': 'ODS (Open Document Spreadsheet Format)',
-				'odt': 'ODT (Open Document Text Format)',
-				'html': 'HTML (Hyper Text Markup Language)',
-				'csv': 'CSV (Comma Separated Values)',
-				'xml': 'XML (JRXML Format)'
-			},
+			valueMap: valueMap,
 			imageURLPrefix: 'reporting/',
 			imageURLSuffix: '.png',
-			valueIcons: {
-				'pdf': 'pdf',
-				'docx': 'rtf',
-				'xlsx': 'xls',
-				'pptx': 'pptx',
-				'xls': 'xls',
-				'rtf': 'rtf',
-				'odt': 'oo',
-				'ods': 'oo',
-				'html': 'html',
-				'txt': 'txt',
-				'csv': 'csv',
-				'xml': 'xml'
-			},
-			defaultValue: 'pdf',
+			valueIcons: valueIcons,
+			defaultValue: SKYVE.Util.allowedReportFormats[0],
 			colSpan: colSpan,
 			change: onChangeFunction
 		};
@@ -206,101 +240,7 @@ isc.ReportDialog.addClassProperties({
 			isc.ReportDialog._selectedColumnList
 		]
 	}),
-
-	_reportFormatForm: isc.DynamicForm.create({
-		valuesManager: isc.ReportDialog._valuesManager,
-		numCols: 7,
-		colWidths: [60, 200, 40, 30, '*', 60, '*'],
-		padding: 15,
-		items: [
-	        isc.ReportDialog._createReportFormatPickList(
-	        	3,
-	        	function(form, item, value, oldValue) {
-					if ((value == 'pdf') ||
-							(value == 'docx') ||
-							(value == 'pptx') ||
-							(value == 'rtf') ||
-							(value == 'odt')) {
-						form.getItem('isPaginated').setValue(true);
-						form.getItem('isPretty').setValue(true);
-                        form.getItem('showSummary').setValue(true);
-					}
-					else if (value == 'html') {
-						form.getItem('isPaginated').setValue(false);
-						form.getItem('isPretty').setValue(true);
-                        form.getItem('showSummary').setValue(true);
-					}
-					else {
-						form.getItem('isPaginated').setValue(false);
-						form.getItem('isPretty').setValue(false);
-						form.getItem('showSummary').setValue(false);
-					}
-					form.getItem('fileNameSuffix').setValue('.' + value);
-				}
-	        ),
-			{name: "isPaginated",
-				title: "Paginated Report",
-				type: "checkbox",
-				required: true,
-				defaultValue: true
-			},
-			{name: 'style',
-				title: 'Style',
-				type: 'radioGroup',
-				vertical: true,
-				required: true,
-				rowSpan: 2,
-				valueMap: {tabular: 'Tabular', columnar: 'Columnar'},
-				defaultValue: 'tabular',
-				change: function(form, item, value, oldValue) {
-					if (value == "columnar") {
-						// hide table columns
-						isc.ReportDialog._columnList.hideField("line");
-						isc.ReportDialog._columnList.hideField("width");
-						isc.ReportDialog._selectedColumnList.hideField("line");
-						isc.ReportDialog._selectedColumnList.hideField("width");
-					}
-					else {
-						// show table columns
-						isc.ReportDialog._columnList.showField("line");
-						isc.ReportDialog._columnList.showField("width");
-						isc.ReportDialog._selectedColumnList.showField("line");
-						isc.ReportDialog._selectedColumnList.showField("width");
-					}
-				}
-			},
-			{name: "fileNameNoSuffix",
-				title: "Filename",
-				type: "text",
-				required: true,
-				width: '100%',
-				defaultValue: "export"
-			},
-			{name: "fileNameSuffix",
-				showTitle: false,
-				type: "staticText",
-				startRow: false,
-				endRow: false,
-				defaultValue: ".pdf"
-			},
-			{name: "isPretty",
-				title: "Pixel Perfect",
-				type: "checkbox",
-				required: true,
-				defaultValue: true
-			},
-            {type: "spacer"},
-            {type: "spacer"},
-            {type: "spacer"},
-            {name: "showSummary",
-                title: "Show Summary",
-                type: "checkbox",
-                required: true,
-                defaultValue: true
-            }
-		]
-	}),
-	
+	_reportFormatForm: null,
 	_pageFormatForm: isc.DynamicForm.create({
 		valuesManager: isc.ReportDialog._valuesManager,
 		numCols: 10,
@@ -500,6 +440,97 @@ isc.ReportDialog.addClassProperties({
 	// construct the interface
 	_createExport: function() {
 		if (isc.ReportDialog._exportLayout == null) {
+			var changeHandler = function(form, item, value, oldValue) {
+				if ((value == 'pdf') ||
+						(value == 'docx') ||
+						(value == 'pptx') ||
+						(value == 'rtf') ||
+						(value == 'odt')) {
+					form.getItem('isPaginated').setValue(true);
+					form.getItem('isPretty').setValue(true);
+                    form.getItem('showSummary').setValue(true);
+				}
+				else if (value == 'html') {
+					form.getItem('isPaginated').setValue(false);
+					form.getItem('isPretty').setValue(true);
+                    form.getItem('showSummary').setValue(true);
+				}
+				else {
+					form.getItem('isPaginated').setValue(false);
+					form.getItem('isPretty').setValue(false);
+					form.getItem('showSummary').setValue(false);
+				}
+				form.getItem('fileNameSuffix').setValue('.' + value);
+			};
+
+			isc.ReportDialog._reportFormatForm = isc.DynamicForm.create({
+				valuesManager: isc.ReportDialog._valuesManager,
+				numCols: 7,
+				colWidths: [60, 200, 40, 30, '*', 60, '*'],
+				padding: 15,
+				items: [
+			        isc.ReportDialog._createReportFormatPickList(3, changeHandler),
+					{name: "isPaginated",
+						title: "Paginated Report",
+						type: "checkbox",
+						required: true
+					},
+					{name: 'style',
+						title: 'Style',
+						type: 'radioGroup',
+						vertical: true,
+						required: true,
+						rowSpan: 2,
+						valueMap: {tabular: 'Tabular', columnar: 'Columnar'},
+						defaultValue: 'tabular',
+						change: function(form, item, value, oldValue) {
+							if (value == "columnar") {
+								// hide table columns
+								isc.ReportDialog._columnList.hideField("line");
+								isc.ReportDialog._columnList.hideField("width");
+								isc.ReportDialog._selectedColumnList.hideField("line");
+								isc.ReportDialog._selectedColumnList.hideField("width");
+							}
+							else {
+								// show table columns
+								isc.ReportDialog._columnList.showField("line");
+								isc.ReportDialog._columnList.showField("width");
+								isc.ReportDialog._selectedColumnList.showField("line");
+								isc.ReportDialog._selectedColumnList.showField("width");
+							}
+						}
+					},
+					{name: "fileNameNoSuffix",
+						title: "Filename",
+						type: "text",
+						required: true,
+						width: '100%',
+						defaultValue: "export"
+					},
+					{name: "fileNameSuffix",
+						showTitle: false,
+						type: "staticText",
+						startRow: false,
+						endRow: false
+					},
+					{name: "isPretty",
+						title: "Pixel Perfect",
+						type: "checkbox",
+						required: true
+					},
+		            {type: "spacer"},
+		            {type: "spacer"},
+		            {type: "spacer"},
+		            {name: "showSummary",
+		                title: "Show Summary",
+		                type: "checkbox",
+		                required: true
+		            }
+				]
+			}),
+			
+			changeHandler(isc.ReportDialog._reportFormatForm, null, SKYVE.Util.allowedReportFormats[0], null);
+			
 			isc.ReportDialog._exportLayout = isc.VLayout.create({
 				backgroundImage: 'background.png',
 				backgroundRepeat: 'repeat',

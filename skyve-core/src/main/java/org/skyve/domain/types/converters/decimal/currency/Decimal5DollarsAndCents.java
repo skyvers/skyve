@@ -16,6 +16,11 @@ public class Decimal5DollarsAndCents implements Converter<Decimal5> {
 	private static final String PATTERN = "###,###,###,##0.00";
 
 	@Override
+	public Class<Decimal5> getValueType() {
+		return Decimal5.class;
+	}
+	
+	@Override
 	public String toDisplayValue(Decimal5 value) throws ConversionException {
 		try {
 			DecimalFormat df = CORE.getDecimalFormat(PATTERN);

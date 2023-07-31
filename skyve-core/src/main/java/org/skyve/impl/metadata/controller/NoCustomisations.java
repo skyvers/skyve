@@ -3,13 +3,14 @@ package org.skyve.impl.metadata.controller;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.report.ReportFormat;
 
 /**
  * The default Skyve behaviour with no customisations.
  */
 public class NoCustomisations implements Customisations {
 	@Override
-	public HorizontalAlignment determineDefaultTextAlignment(AttributeType attributeType) {
+	public HorizontalAlignment determineDefaultTextAlignment(String uxui, AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType) || 
 				AttributeType.dateTime.equals(attributeType) ||
 				AttributeType.time.equals(attributeType) || 
@@ -30,7 +31,7 @@ public class NoCustomisations implements Customisations {
 	}
 	
 	@Override
-	public Integer determineDefaultColumnWidth(AttributeType attributeType) {
+	public Integer determineDefaultColumnWidth(String uxui, AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType)) {
 			return Integer.valueOf(110);
 		}
@@ -48,5 +49,20 @@ public class NoCustomisations implements Customisations {
 		}
 
 		return null;
+	}
+
+	@Override
+	public ReportFormat[] listGridExportFormats() {
+		return ReportFormat.values(); // ordered as per the report format enum
+	}
+
+	@Override
+	public void registerCustomExpressions() {
+		// No custom expressions
+	}
+	
+	@Override
+	public void registerCustomFormatters() {
+		// No custom formatters
 	}
 }

@@ -14,34 +14,34 @@ public class StashExpressionEvaluator extends ExpressionEvaluator {
 	public static final String PREFIX = "stash";
 	
 	@Override
-	public Object evaluateWithoutPrefix(String expression, Bean bean) {
+	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
 		return CORE.getStash().get(expression);
 	}
 
 	@Override
-	public String formatWithoutPrefix(String expression, Bean bean) {
-		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefix(expression, bean));
+	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+		return BindUtil.toDisplay(CORE.getCustomer(), null, null, evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
 	@Override
-	public String validateWithoutPrefix(String expression,
-											Class<?> returnType,
-											Customer customer,
-											Module module,
-											Document document) {
+	public String validateWithoutPrefixOrSuffix(String expression,
+													Class<?> returnType,
+													Customer customer,
+													Module module,
+													Document document) {
 		return null; // any key is valid
 	}
 	
 	@Override
-	public List<String> completeWithoutPrefix(String fragment,
-												Customer customer, 
-												Module module,
-												Document document) {
+	public List<String> completeWithoutPrefixOrSuffix(String fragment,
+														Customer customer, 
+														Module module,
+														Document document) {
 		return Collections.emptyList(); // any key is valid
 	}
 
 	@Override
-	public void prefixBindingWithoutPrefix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
 		// nothing to do here as stash uses keys
 	}
 }

@@ -18,6 +18,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
@@ -171,7 +172,7 @@ public final class ComparisonJSONManipulator {
 						propertyWidget.setBinding(propertyName);
 					}
 					
-					SmartClientFieldDefinition field = new SmartClientFieldDefinition(user, customer, nodeModule, nodeDocument, propertyWidget, true);
+					SmartClientFieldDefinition field = new SmartClientFieldDefinition(user, customer, nodeModule, nodeDocument, propertyWidget, true, UxUi.DESKTOP_NAME);
 					String type = field.getType();
 					item.put(TYPE_KEY, type);
 					String editorType = field.getEditorType();

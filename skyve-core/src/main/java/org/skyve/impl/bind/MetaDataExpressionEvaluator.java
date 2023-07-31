@@ -13,7 +13,6 @@ import org.skyve.impl.metadata.model.document.InverseMany;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
@@ -35,11 +34,11 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	public String validateWithoutPrefix(String expression,
-											Class<?> returnType,
-											Customer customer,
-											Module module,
-											Document document) {
+	public String validateWithoutPrefixOrSuffix(String expression,
+													Class<?> returnType,
+													Customer customer,
+													Module module,
+													Document document) {
 		if (customer == null) {
 			throw new IllegalArgumentException("customer can't be null for a binding expression");
 		}
@@ -60,30 +59,27 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 			ultimateBinding = expression.substring(lastDotIndex + 1);
 			try {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
-				if (target == null) {
-					error = "Binding " + penultimateBinding + " does not resolve to a relation.";
+				Attribute relation = target.getAttribute();
+				if (relation instanceof Relation) {
+					Module owningModule = customer.getModule(target.getDocument().getOwningModuleName());
+					String contextDocumentName = ((Relation) relation).getDocumentName();
+					contextDocument = owningModule.getDocument(customer, contextDocumentName);
 				}
 				else {
-					Attribute relation = target.getAttribute();
-					if (relation instanceof Relation) {
-						String contextDocumentName = ((Relation) relation).getDocumentName();
-						contextDocument = module.getDocument(customer, contextDocumentName);
+					if (ChildBean.PARENT_NAME.equals(penultimateBinding) || penultimateBinding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+						contextDocument = target.getDocument();
+						contextDocument = contextDocument.getParentDocument(customer);
+						if (contextDocument == null) {
+							error = "Binding " + penultimateBinding + " does not resolve to a parent document.";
+						}
 					}
 					else {
-						if (ChildBean.PARENT_NAME.equals(penultimateBinding) || penultimateBinding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-							contextDocument = target.getDocument();
-							contextDocument = contextDocument.getParentDocument(customer);
-							if (contextDocument == null) {
-								error = "Binding " + penultimateBinding + " does not resolve to a parent document.";
-							}
-						}
-						else {
-							error = "Binding " + penultimateBinding + " does not resolve to a relation.";
-						}
+						error = "Binding " + penultimateBinding + " does not resolve to a relation.";
 					}
 				}
 			}
 			catch (Exception e) {
+				e.printStackTrace();
 				error = e.getMessage();
 				if (error == null) {
 					error = "Binding " + penultimateBinding + " does not resolve to a document attribute.";
@@ -94,68 +90,54 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 			}
 		}
 		
-		if (contextDocument == null) {
-			if (error == null) {
+		if (error == null) { // continue unless we have an error already
+			if (contextDocument == null) {
 				error = "Binding " + expression + " does not resolve to a document attribute.";
 			}
-		}
-		else {
-			if (contextDocument.getCondition(ultimateBinding) != null) {
-				if ((returnType != null) && (! returnType.isAssignableFrom(Boolean.class))) {
-					error = "Binding " + expression + " resolves to a boolean condition that is incompatible with required type of " + returnType;
-				}
-			}
 			else {
-				Class<?> implicitClass = BindUtil.implicitAttributeType(ultimateBinding);
-				if (implicitClass != null) {
-					if ((returnType != null) && (! returnType.isAssignableFrom(implicitClass))) {
-						error = "Binding " + expression + " resolves to implicit attribute " + ultimateBinding + 
-									" of type " + implicitClass + 
-									" that is incompatible with required type of " + returnType;
+				if (contextDocument.getCondition(ultimateBinding) != null) {
+					if ((returnType != null) && (! returnType.isAssignableFrom(Boolean.class))) {
+						error = "Binding " + expression + " resolves to a boolean condition that is incompatible with required type of " + returnType;
 					}
 				}
 				else {
-					// Check the document hierarchy for the attribute
-					Attribute attribute = contextDocument.getAttribute(ultimateBinding);
-					if (attribute == null) {
-						Extends inherits = contextDocument.getExtends();
-						while (inherits != null) {
-							contextDocument = customer.getModule(contextDocument.getOwningModuleName()).getDocument(customer, inherits.getDocumentName());
-							attribute = contextDocument.getAttribute(ultimateBinding);
-							if (attribute == null) {
-								inherits = contextDocument.getExtends();
-							}
-							else {
-								inherits = null;
-							}
+					Class<?> implicitClass = BindUtil.implicitAttributeType(ultimateBinding);
+					if (implicitClass != null) {
+						if ((returnType != null) && (! returnType.isAssignableFrom(implicitClass))) {
+							error = "Binding " + expression + " resolves to implicit attribute " + ultimateBinding + 
+										" of type " + implicitClass + 
+										" that is incompatible with required type of " + returnType;
 						}
 					}
-	
-					if (attribute == null) {
-						error = "Binding " + expression + " does not resolve to a document attribute, condition or an implicit attribute.";
-					}
 					else {
-						if (returnType != null) {
-							AttributeType type = attribute.getAttributeType();
-							Class<?> attributeClass = null;
-							if ((AttributeType.association == type) || (AttributeType.inverseOne == type)) {
-								DocumentImpl d = (DocumentImpl) customer.getModule(contextDocument.getOwningModuleName()).getDocument(customer, ((Relation) attribute).getDocumentName());
-								try {
-									attributeClass = d.getBeanClass(customer);
+						// Check the document hierarchy for the attribute
+						Attribute attribute = contextDocument.getPolymorphicAttribute(customer, ultimateBinding);
+						if (attribute == null) {
+							error = "Binding " + expression + " does not resolve to a document attribute, condition or an implicit attribute.";
+						}
+						else {
+							if (returnType != null) {
+								AttributeType type = attribute.getAttributeType();
+								Class<?> attributeClass = null;
+								if ((AttributeType.association == type) || (AttributeType.inverseOne == type)) {
+									DocumentImpl d = (DocumentImpl) customer.getModule(contextDocument.getOwningModuleName()).getDocument(customer, ((Relation) attribute).getDocumentName());
+									try {
+										attributeClass = d.getBeanClass(customer);
+									}
+									catch (ClassNotFoundException e) {
+										e.printStackTrace();
+										error = "Binding " + expression + " resolves to an attribute of type " + type + 
+												" but the document class for document " + d.getOwningModuleName() + '.' + d.getName() + " cannot be loaded:- " + e.toString();
+									}
 								}
-								catch (ClassNotFoundException e) {
-									e.printStackTrace();
-									error = "Binding " + expression + " resolves to an attribute of type " + type + 
-											" but the document class for document " + d.getOwningModuleName() + '.' + d.getName() + " cannot be loaded:- " + e.toString();
+								else {
+									attributeClass = type.getImplementingType();
 								}
-							}
-							else {
-								attributeClass = type.getImplementingType();
-							}
-	
-							if (! returnType.isAssignableFrom(attributeClass)) {
-								error = "Binding " + expression + " resolves to an attribute of type " + attributeClass + 
-											" that is incompatible with required type of " + returnType;
+		
+								if (! returnType.isAssignableFrom(attributeClass)) {
+									error = "Binding " + expression + " resolves to an attribute of type " + attributeClass + 
+												" that is incompatible with required type of " + returnType;
+								}
 							}
 						}
 					}
@@ -167,10 +149,10 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	@Override
-	public List<String> completeWithoutPrefix(String fragment,
-												Customer customer,
-												Module module,
-												Document document) {
+	public List<String> completeWithoutPrefixOrSuffix(String fragment,
+														Customer customer,
+														Module module,
+														Document document) {
 		List<String> result = new ArrayList<>();
 		
 		Document targetDocument = null;

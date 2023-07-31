@@ -1,10 +1,12 @@
 package org.skyve.metadata.module.query;
 
+import org.skyve.metadata.view.FormattedText;
+
 /**
  * A column that has a binding or expression that projects a value in the document query.
  * @author mike
  */
-public interface MetaDataQueryProjectedColumn extends MetaDataQueryColumn {
+public interface MetaDataQueryProjectedColumn extends MetaDataQueryColumn, FormattedText {
 	public String getExpression();
 
 	/**

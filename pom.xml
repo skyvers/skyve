@@ -31,7 +31,8 @@
 		<commons-codec.version>1.15</commons-codec.version>
 		<commons-fileupload.version>1.5</commons-fileupload.version>
 		<commons-io.version>2.11.0</commons-io.version>
-		<commons-lang3.version>3.11</commons-lang3.version>
+		<commons-lang3.version>3.12.0</commons-lang3.version>
+		<commons-text.version>1.10.0</commons-text.version>
 		<commons-validator.version>1.7</commons-validator.version>
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
 		<ehcache.version>3.9.0</ehcache.version>
@@ -214,6 +215,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>${commons-lang3.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>${commons-text.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>

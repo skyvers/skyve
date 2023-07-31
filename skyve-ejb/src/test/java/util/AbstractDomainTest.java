@@ -299,6 +299,11 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 				}
 			}
 
+			// if this is a domain attribute (constant, dynamic or variant), use a different attribute
+			if (attribute.getDomainType() != null) {
+				continue;
+			}
+
 			// try use a persistent attribute if we can
 			if (!attribute.isPersistent()) {
 				transientAttribute = attribute;

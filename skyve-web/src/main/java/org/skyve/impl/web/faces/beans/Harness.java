@@ -19,6 +19,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.report.ReportFormat;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
@@ -228,6 +229,15 @@ public abstract class Harness extends Localisable {
 			sb.append("u.mapZoom=").append(UtilImpl.MAP_ZOOM).append(';');
 		}
 		sb.append("u.ckEditorConfigFileUrl='").append(UtilImpl.CKEDITOR_CONFIG_FILE_URL).append("';");
+
+		// Set report formats for export from Customisations
+		sb.append("u.allowedReportFormats=[");
+		for (ReportFormat format : CORE.getCustomisations().listGridExportFormats()) {
+			sb.append('\'').append(format.name()).append("',");
+		}
+		sb.setLength(sb.length() - 1); // remove last comma
+		sb.append("];");
+
 		apiScript = sb.toString();
 	}
 	

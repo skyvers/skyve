@@ -1058,7 +1058,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (queryName != null) { // its a query
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
-			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
+			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, null);
 			code.insert(0, ds);
 		}
 		else {
@@ -1069,6 +1069,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																					module, 
 																					document,
 																					modelName,
+																					currentUxUi,
 																					false,
 																					ds, 
 																					null);
@@ -1077,7 +1078,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			else {
 				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, null);
 				code.insert(0, ds);
 			}
 		}
@@ -1276,11 +1277,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (dataWidgetColumnInputWidget != null) {
 			SmartClientDataGridFieldDefinition def = null;
 			String binding = column.getBinding();
+			boolean hasFormatter = (column.getFormatterName() != null) || (column.getCustomFormatterName() != null);
 			if (binding == null) { // column bound to collection for the grid
-				def = getDataGridField(document, dataWidgetColumnInputWidget, dataWidgetBinding, true);
+				def = getDataGridField(document, dataWidgetColumnInputWidget, dataWidgetBinding, hasFormatter, true);
 			} 
 			else {
-				def = getDataGridField(dataWidgetDocument, dataWidgetColumnInputWidget, null, true);
+				def = getDataGridField(dataWidgetDocument, dataWidgetColumnInputWidget, null, hasFormatter, true);
 			}
 
 			def.setTitle(title);
@@ -1308,6 +1310,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																	lookup.getQuery(),
 																	optionDataSource,
 																	(LookupDescription) dataWidgetColumnInputWidget, 
+																	currentUxUi,
 																	false,
 																	ds,
 																	null);
@@ -1590,6 +1593,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 															query,
 															optionDataSource,
 															lookup,
+															currentUxUi,
 															false,
 															ds,
 															null);
@@ -2947,8 +2951,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																	Module module,
 																	Document document,
 																	MetaDataQueryColumn column,
-																	boolean runtime) {
-		return new SmartClientQueryColumnDefinition(user, customer, module, document, column, runtime);
+																	boolean runtime,
+																	String uxui) {
+		return new SmartClientQueryColumnDefinition(user, customer, module, document, column, runtime, uxui);
 	}
 
 	/**
@@ -2965,14 +2970,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document, 
 												InputWidget widget,
 												boolean runtime) {
-		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime);
+		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime, currentUxUi);
 	}
 	
 	public SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") Document document,
     															InputWidget widget,
     															String dataGridBinding,
+    															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, runtime);
+    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, currentUxUi);
     }
 
     /**
@@ -2992,6 +2998,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														Module owningModule,
 														Document owningDocument,
 														String modelName,
+														String uxui,
 														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
@@ -3016,6 +3023,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											model.getColumns(),
 											null, 
 											null, 
+											uxui,
 											config, 
 											toAppendTo, 
 											visitedQueryNames);
@@ -3037,6 +3045,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														MetaDataQueryDefinition query,
 														String dataSourceIDOverride,
 														LookupDescription forLookup,
+														String uxui,
 														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
@@ -3057,6 +3066,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											query.getColumns(),
 											dataSourceIDOverride, 
 											forLookup, 
+											uxui,
 											config, 
 											toAppendTo, 
 											visitedQueryNames);
@@ -3076,6 +3086,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														List<MetaDataQueryColumn> columns,
 														String dataSourceIDOverride,
 														LookupDescription forLookup,
+														String uxui,
 														// indicates that this is for configuration in the harness page
 														boolean config,
 														StringBuilder toAppendTo,
@@ -3185,7 +3196,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				continue;
 			}
 
-			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true);
+			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true, uxui);
 			if (def.isHasDisplayField()) {
 				hiddenBindingsList.add("_display_" + def.getName());
 			}
@@ -3216,6 +3227,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																		lookup.getQuery(),
 																		lookup.getOptionDataSource(),
 																		null,
+																		uxui,
 																		config,
 																		childDataSourceDefinition,
 																		visitedQueryNames);

@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.types.formatters.Formatter;
+import org.skyve.domain.types.formatters.Formatters;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -95,6 +97,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
@@ -140,145 +143,146 @@ class ViewValidator extends ViewVisitor {
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 	}
 
-	private void validateBinding(String bindingPrefix,
-									String binding, 
-									boolean bindingRequired,
-									boolean compoundBindingInvalid, 
-									boolean domainValuesRequired,
-									boolean scalarBindingOnly,
-									String widgetIdentifier,
-									AttributeType... assertTypes) {
-		validateBinding(module,
-							document,
-							bindingPrefix,
-							binding,
-							bindingRequired,
-							compoundBindingInvalid,
-							domainValuesRequired,
-							scalarBindingOnly,
-							widgetIdentifier,
-							assertTypes);
+	private Class<?> validateBinding(String bindingPrefix,
+										String binding, 
+										boolean bindingRequired,
+										boolean compoundBindingInvalid, 
+										boolean domainValuesRequired,
+										boolean scalarBindingOnly,
+										String widgetIdentifier,
+										AttributeType... assertTypes) {
+		return validateBinding(module,
+								document,
+								bindingPrefix,
+								binding,
+								bindingRequired,
+								compoundBindingInvalid,
+								domainValuesRequired,
+								scalarBindingOnly,
+								widgetIdentifier,
+								assertTypes);
 	}
 
-	private void validateBinding(Module contextModule,
-									Document contextDocument,
-									String bindingPrefix,
-									String binding, 
-									boolean bindingRequired,
-									boolean compoundBindingInvalid, 
-									boolean domainValuesRequired,
-									boolean scalarBindingOnly,
-									String widgetIdentifier,
-									AttributeType... assertTypes) {
+	private Class<?> validateBinding(Module contextModule,
+										Document contextDocument,
+										String bindingPrefix,
+										String binding, 
+										boolean bindingRequired,
+										boolean compoundBindingInvalid, 
+										boolean domainValuesRequired,
+										boolean scalarBindingOnly,
+										String widgetIdentifier,
+										AttributeType... assertTypes) {
 		if (bindingRequired && (binding == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - binding is required.");
 		}
+		if (binding == null) {
+			return null;
+		}
 
-		if (binding != null) {
-			if (compoundBindingInvalid) {
-				if (binding.indexOf('.') >= 0) {
-					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Compound binding is not allowed here");
-				}
+		if (compoundBindingInvalid) {
+			if (binding.indexOf('.') >= 0) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Compound binding is not allowed here");
 			}
-			String bindingToTest = binding;
-			if (bindingPrefix != null) {
-				bindingToTest = new StringBuilder(64).append(bindingPrefix).append('.').append(binding).toString();
+		}
+		String bindingToTest = binding;
+		if (bindingPrefix != null) {
+			bindingToTest = new StringBuilder(64).append(bindingPrefix).append('.').append(binding).toString();
+		}
+		else {
+			// conditions can be used in parameter bindings for reports etc
+			String testConditionName = bindingToTest;
+			if (testConditionName.startsWith("not")) {
+				testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
+			}
+
+			if (contextDocument.getConditionNames().contains(testConditionName)) {
+				return Boolean.class;
+			}
+		}
+		
+		TargetMetaData target = null;
+		try {
+			target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, bindingToTest);
+		}
+		catch (MetaDataException e) {
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
+		}
+		
+		if (target == null) {
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Binding points nowhere");
+		}
+		Attribute attribute = target.getAttribute();
+		AttributeType attributeType = (attribute == null) ? null : attribute.getAttributeType();
+		Class<?> result = (attributeType == null) ? null : attributeType.getImplementingType();
+
+		if (domainValuesRequired) {
+			if (attribute == null) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+												" - Binding points to an implicit attribute or a condition that cannot have domain values defined.");
+			}
+			if (attribute.getDomainType() == null) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+												" - Binding points to an attribute that does not have domain values defined.");
+			}
+		}
+
+		if ((assertTypes != null) && (assertTypes.length > 0)) {
+			// If we have a parent binding it had better be used where an association binding can be used (and not require domain values)
+			if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+				boolean typeMatch = false;
+				for (AttributeType assertType : assertTypes) {
+					if (assertType.equals(AttributeType.association)) {
+						typeMatch = true;
+						break;
+					}
+				}
+				if (! typeMatch) {
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+							" - Parent binding used where an association is not valid.");
+				}
 			}
 			else {
-				// conditions can be used in parameter bindings for reports etc
-				String testConditionName = bindingToTest;
-				if (testConditionName.startsWith("not")) {
-					testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
-				}
-
-				if (contextDocument.getConditionNames().contains(testConditionName)) {
-					return;
-				}
-			}
-			
-			TargetMetaData target = null;
-			try {
-				target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, bindingToTest);
-			}
-			catch (MetaDataException e) {
-				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
-			}
-			
-			if (target == null) {
-				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Binding points nowhere");
-			}
-			Attribute attribute = target.getAttribute();
-			if (domainValuesRequired) {
 				if (attribute == null) {
 					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-													" - Binding points to an implicit attribute or a condition that cannot have domain values defined.");
+													" - Binding points to an implicit attribute or a condition.");
 				}
-			}
 
-			if ((assertTypes != null) && (assertTypes.length > 0)) {
-				// If we have a parent binding it had better be used where an association binding can be used (and not require domain values)
-				if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-					boolean typeMatch = false;
+				boolean typeMatch = false;
+				for (AttributeType assertType : assertTypes) {
+					if (assertType.equals(attributeType)) {
+						typeMatch = true;
+						break;
+					}
+				}
+				if (! typeMatch) {
+					StringBuilder msg = new StringBuilder(128);
+					msg.append(widgetIdentifier).append(" in ").append(viewIdentifier);
+					msg.append(" - Binding points to an attribute of type ").append(attributeType).append(", not one of ");
 					for (AttributeType assertType : assertTypes) {
-						if (assertType.equals(AttributeType.association)) {
-							typeMatch = true;
-							break;
-						}
+						msg.append(assertType).append(", ");
 					}
-					if (! typeMatch) {
-						throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-								" - Parent binding used where an association is not valid.");
-					}
-				}
-				else {
-					if (attribute == null) {
-						throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-														" - Binding points to an implicit attribute or a condition.");
-					}
-	
-					AttributeType type = attribute.getAttributeType();
-					boolean typeMatch = false;
-					for (AttributeType assertType : assertTypes) {
-						if (assertType.equals(type)) {
-							typeMatch = true;
-							break;
-						}
-					}
-					if (! typeMatch) {
-						StringBuilder msg = new StringBuilder(128);
-						msg.append(widgetIdentifier).append(" in ").append(viewIdentifier);
-						msg.append(" - Binding points to an attribute of type ").append(type).append(", not one of ");
-						for (AttributeType assertType : assertTypes) {
-							msg.append(assertType).append(", ");
-						}
-						msg.setLength(msg.length() - 2); // remove last comma
-						msg.append('.');
-						throw new MetaDataException(msg.toString());
-					}
-				}
-			}
-			
-			if (domainValuesRequired) {
-				if (attribute.getDomainType() == null) {
-					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-													" - Binding points to an attribute that does not have domain values defined.");
-				}
-			}
-			
-			// Can only check this if the attribute is defined.
-			// Bindings to implicit attributes are always scalar.
-			// NB check assert type in outer if coz we dont need to do the test if we are asserting a type
-			if (scalarBindingOnly && ((assertTypes == null) || (assertTypes.length == 0)) && (attribute != null)) {
-				AttributeType type = attribute.getAttributeType();
-				if (AttributeType.association.equals(type) || 
-						AttributeType.collection.equals(type) || 
-						AttributeType.inverseMany.equals(type) ||
-						AttributeType.inverseOne.equals(type)) {
-					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier +
-													" - Binding points to an attribute that is not scalar (pointing to an association or collection or inverse)");
+					msg.setLength(msg.length() - 2); // remove last comma
+					msg.append('.');
+					throw new MetaDataException(msg.toString());
 				}
 			}
 		}
+		
+		// Can only check this if the attribute is defined.
+		// Bindings to implicit attributes are always scalar.
+		// NB check assert type in outer if coz we dont need to do the test if we are asserting a type
+		if (scalarBindingOnly && ((assertTypes == null) || (assertTypes.length == 0)) && (attribute != null)) {
+			if (AttributeType.association.equals(attributeType) || 
+					AttributeType.collection.equals(attributeType) || 
+					AttributeType.inverseMany.equals(attributeType) ||
+					AttributeType.inverseOne.equals(attributeType)) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier +
+												" - Binding points to an attribute that is not scalar (pointing to an association or collection or inverse)");
+			}
+		}
+		
+		return result;
 	}
 	
 	private void validateConditionName(String conditionName, String widgetIdentifier) {
@@ -861,13 +865,42 @@ class ViewValidator extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String columnIdentifier = "Column " + column.getTitle() + " of " + dataWidgetIdentifier;
-		validateBinding(dataWidgetBinding,
-							column.getBinding(),
-							false,
-							false,
-							false,
-							false,
-							columnIdentifier);
+		Class<?> columnType = validateBinding(dataWidgetBinding,
+												column.getBinding(),
+												false,
+												false,
+												false,
+												false,
+												columnIdentifier);
+		FormatterName formatterName = column.getFormatterName();
+		String customFormatterName = column.getCustomFormatterName();
+		if ((formatterName != null) && (customFormatterName != null)) {
+			throw new MetaDataException(columnIdentifier + " in " + viewIdentifier + " cannot have a both a formatter and a customFormatter defined.");
+		}
+		else if (formatterName != null) {
+			if (columnType != null) {
+				if (! formatterName.getFormatter().getValueType().isAssignableFrom(columnType)) {
+					throw new MetaDataException(columnIdentifier + " in " + viewIdentifier + 
+												" has formatter " + formatterName.name() + 
+												" for type " + formatterName.getFormatter().getValueType() + 
+												" but the column binding of type " + columnType + " is incompatible");
+					
+				}
+			}
+		}
+		else if (customFormatterName != null) {
+			Formatter<?> customFormatter = Formatters.get(customFormatterName);
+			if (customFormatter == null) {
+				throw new MetaDataException(columnIdentifier + " in " + viewIdentifier + " has a customFormatter of " + customFormatterName + " that is not defined");
+			}
+			if (! customFormatter.getValueType().isAssignableFrom(columnType)) {
+				throw new MetaDataException(columnIdentifier + " in " + viewIdentifier + 
+											" has customFormatter " + customFormatterName + 
+											" for type " + customFormatter.getValueType() + 
+											" but the column binding of type " + columnType + " is incompatible");
+				
+			}
+		}
 	}
 
 	@Override

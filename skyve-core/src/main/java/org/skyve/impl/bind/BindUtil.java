@@ -108,7 +108,7 @@ public final class BindUtil {
 // The document name null check was commented out because PersistenceTest did not pass.
 // Genn'd EL expressions in AllAttributesPersistent didn't get past the documentName test below
 // because they were a hibernate proxy getting initiailised on construction.
-// I cant work out why this test was here but it must have been guarding something.
+// I can't work out why this test was here but it must have been guarding something.
 // Maybe MapBean (now DynamicBean) never used to set the document name.
 //					String documentName = bean.getBizDocument();
 //					if (documentName != null) {

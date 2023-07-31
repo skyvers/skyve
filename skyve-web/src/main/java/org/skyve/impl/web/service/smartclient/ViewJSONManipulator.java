@@ -101,6 +101,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
 import org.skyve.impl.web.WebUtil;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
@@ -737,7 +738,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	protected void addFormat(String valueTemplate, boolean escape, Sanitisation sanitise) {
+	protected void addAnonymousFormat(String valueTemplate, boolean escape, Sanitisation sanitise) {
+		addNamedFormat("_" + formatCounter++, valueTemplate, escape, sanitise);
+	}
+	
+	protected void addNamedFormat(String name, String valueTemplate, boolean escape, Sanitisation sanitise) {
 		if (valueTemplate != null) {
 			String currentBindingPrefix = currentBindings.getBindingPrefix();
 			String formatKey = (currentBindingPrefix == null) ? "" : currentBindingPrefix;
@@ -746,7 +751,6 @@ public class ViewJSONManipulator extends ViewVisitor {
 				formatMap = new TreeMap<>();
 				formats.put(formatKey, formatMap);
 			}
-			String name = "_" + formatCounter++;
 			formatMap.put(name, new ViewFormat(valueTemplate, escape, sanitise));
 		}
 	}
@@ -1180,7 +1184,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				if (parentVisible && visible(blurb)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
-						addFormat(markup, ! Boolean.FALSE.equals(blurb.getEscape()), blurb.getSanitise());
+						addAnonymousFormat(markup, ! Boolean.FALSE.equals(blurb.getEscape()), blurb.getSanitise());
 					}
 					else {
 						// ensure the format counter is incremented to stay in sync with the generated edit view
@@ -1232,7 +1236,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				if (parentVisible && visible(label)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
-						addFormat(value, ! Boolean.FALSE.equals(label.getEscape()), label.getSanitise());
+						addAnonymousFormat(value, ! Boolean.FALSE.equals(label.getEscape()), label.getSanitise());
 					}
 					else {
 						// ensure the format counter is incremented to stay in sync with the generated edit view
@@ -1293,7 +1297,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		
 		if (! visitingDataWidget) {
-			addFormat(htmlGuts.toString(), false, Sanitisation.none);
+			addAnonymousFormat(htmlGuts.toString(), false, Sanitisation.none);
 			htmlGuts.setLength(0);
 			
 			addCondition(link.getInvisibleConditionName());
@@ -1618,7 +1622,21 @@ public class ViewJSONManipulator extends ViewVisitor {
 						visitedDataWidgetHasEditableColumns && 
 						(! Boolean.FALSE.equals(column.getEditable())))) {
 				// Note that HTML escaping is taken care by SC client-side for data grid columns
-				addBinding(column.getBinding(), true, false, column.getSanitise());
+				String binding = column.getBinding();
+				String formatter = null;
+				FormatterName formatterName = column.getFormatterName();
+				if (formatterName != null) {
+					formatter = formatterName.name();
+				}
+				else {
+					formatter = column.getCustomFormatterName();
+				}
+				Sanitisation sanitise = column.getSanitise();
+				if (formatter != null) {
+					StringBuilder expression = new StringBuilder(64).append('{').append(binding).append('|').append(formatter).append('}');
+					addNamedFormat("_display_" + BindUtil.sanitiseBinding(binding), expression.toString(), false, sanitise);
+				}
+				addBinding(binding, true, false, sanitise);
 			}
 		}
 	}
@@ -1641,7 +1659,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
 												boolean parentVisible,
 												boolean parentEnabled) {
-		addFormat(UtilImpl.processStringValue(htmlGuts.toString()), false, Sanitisation.none);
+		addAnonymousFormat(UtilImpl.processStringValue(htmlGuts.toString()), false, Sanitisation.none);
 	}
 
 	@Override

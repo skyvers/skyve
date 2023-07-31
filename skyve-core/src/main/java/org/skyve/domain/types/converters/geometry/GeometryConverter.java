@@ -11,6 +11,11 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class GeometryConverter implements Converter<Geometry> {
 	@Override
+	public Class<Geometry> getValueType() {
+		return Geometry.class;
+	}
+	
+	@Override
 	public Geometry fromDisplayValue(String displayValue) throws ConversionException {
 		try {
 			return new WKTReader().read(displayValue);

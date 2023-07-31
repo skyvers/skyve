@@ -432,6 +432,7 @@ public class MetaDataServlet extends HttpServlet {
 																			menuModule, 
 																			itemDocument,
 																			modelName,
+																			uxui,
 																			true,
 																			dataSourceJson, 
 																			visitedDataSourceNames);
@@ -491,7 +492,7 @@ public class MetaDataServlet extends HttpServlet {
 						continue;
 					}
 
-					SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true);
+					SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true, uxui);
 					dataSourceJson.append("{\"name\":\"").append(def.getName());
 					dataSourceJson.append("\",\"title\":\"").append(OWASP.escapeJsonString(def.getTitle()));
 					dataSourceJson.append("\",\"type\":\"").append(def.getType());

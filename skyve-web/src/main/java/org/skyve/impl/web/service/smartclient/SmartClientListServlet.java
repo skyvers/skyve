@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -45,6 +49,7 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -432,39 +437,6 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
-
-		// Determine if any display bindings are required for dynamic or variant domain attributes.
-		// Map of binding to synthesized display binding for SC.
-		Map<String, String> displayBindings = new TreeMap<>();
-		for (MetaDataQueryColumn column : model.getColumns()) {
-			String binding = column.getBinding();
-			if (binding != null) {
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, queryDocument, binding);
-				if (target != null) {
-					Attribute attribute = target.getAttribute();
-					if (attribute != null) {
-						DomainType domainType = attribute.getDomainType();
-						if ((domainType == DomainType.variant) || (domainType == DomainType.dynamic)) {
-							displayBindings.put(binding, "_display_" + BindUtil.sanitiseBinding(binding));
-						}
-					}
-				}
-			}
-		}
-
-		// Add the display bindings in if some are required
-		if (! displayBindings.isEmpty()) {
-			for (Bean bean : beans) {
-				for (Entry<String, String> entry : displayBindings.entrySet()) {
-					String display = BindUtil.getDisplay(customer, bean, entry.getKey());
-					bean.putDynamic(entry.getValue(), display);
-				}
-			}
-		}
-		
-		// Sanitise rows
-		// Note that HTML escaping is taken care by SC client-side for data grid columns
-		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), false);
 		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
@@ -476,16 +448,8 @@ public class SmartClientListServlet extends HttpServlet {
 																		Long.valueOf(page.getTotalRows()), 
 																		Integer.valueOf(page.getRows().size())));
 
-		// Setup projections from the model plus any added display bindings
-		Set<String> projections = null;
-		if (! displayBindings.isEmpty()) {
-			projections = new TreeSet<>(model.getProjections());
-			projections.addAll(displayBindings.values());
-		}
-		else {
-			projections = model.getProjections();
-		}
-		
+		Set<String> projections = processRows(beans, model, customer, module, queryDocument);
+
 		message.append("{\"response\":{");
 		message.append("\"status\":0,");
 		// If SmartClient requests a start row > what we have in the set
@@ -502,7 +466,7 @@ public class SmartClientListServlet extends HttpServlet {
 		pw.append(message);
     }
     
-	private static void addFilterCriteriaToQuery(Module module,
+    private static void addFilterCriteriaToQuery(Module module,
 													Document document,
 		    										User user,
 		    										SmartClientFilterOperator filterOperator,
@@ -559,7 +523,87 @@ public class SmartClientListServlet extends HttpServlet {
 										model);
     }
 
-	static void checkCsrfToken(HttpSession session,
+    // Add display values and sanitise
+    // Returns the projections required from JSON.marshall()
+	private static Set<String> processRows(List<Bean> beans,
+										ListModel<Bean> model,
+										Customer customer,
+										Module module,
+										Document document) {
+		// Determine if any display bindings are required for dynamic or variant domain attributes or
+		// for formats defined on the columns.
+		// Map of binding to synthesized display binding for SC.
+		Map<String, String> displayBindings = new TreeMap<>();
+		// Map of binding to synthesized formatted display for SC.
+		Map<String, Pair<String, String>> formatBindings = new TreeMap<>();
+		for (MetaDataQueryColumn column : model.getColumns()) {
+			String binding = column.getBinding();
+			String name = column.getName();
+			String key = (binding != null) ? binding : name;
+			
+			// Check for formatters on the column
+			if (column instanceof MetaDataQueryProjectedColumn) {
+				MetaDataQueryProjectedColumn projectedColumn = (MetaDataQueryProjectedColumn) column;
+				FormatterName formatterName = projectedColumn.getFormatterName();
+				if (formatterName != null) {
+					formatBindings.put(key, new ImmutablePair<>(formatterName.name(), "_display_" + BindUtil.sanitiseBinding(key)));
+					continue;
+				}
+				String customFormatterName = projectedColumn.getCustomFormatterName();
+				if (customFormatterName != null) {
+					formatBindings.put(key, new ImmutablePair<>(customFormatterName, "_display_" + BindUtil.sanitiseBinding(key)));
+					continue;
+				}
+			}
+
+			// Check for variant or dynamic domain types
+			if (binding != null) {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+				Attribute attribute = target.getAttribute();
+				if (attribute != null) {
+					DomainType domainType = attribute.getDomainType();
+					if ((domainType == DomainType.variant) || (domainType == DomainType.dynamic)) {
+						displayBindings.put(binding, "_display_" + BindUtil.sanitiseBinding(binding));
+					}
+				}
+			}
+		}
+
+		// Add the display/format bindings in if some are required
+		if ((! displayBindings.isEmpty()) || (! formatBindings.isEmpty())) {
+			for (Bean bean : beans) {
+				for (Entry<String, Pair<String, String>> entry : formatBindings.entrySet()) {
+					Pair<String, String> value = entry.getValue();
+					String display = CORE.format(value.getLeft(), Binder.get(bean, entry.getKey()));
+					bean.putDynamic(value.getRight(), display);
+				}
+				for (Entry<String, String> entry : displayBindings.entrySet()) {
+					String display = BindUtil.getDisplay(customer, bean, entry.getKey());
+					bean.putDynamic(entry.getValue(), display);
+				}
+			}
+		}
+		
+		// Sanitise rows
+		// Note that HTML escaping is taken care by SC client-side for data grid columns
+		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), false);
+		
+		// Setup projections from the model plus any added display/format bindings
+		Set<String> result = null;
+		if ((! displayBindings.isEmpty()) || (! formatBindings.isEmpty())) {
+			result = new TreeSet<>(model.getProjections());
+			result.addAll(displayBindings.values());
+			for (Pair<String, String> value : formatBindings.values()) {
+				result.add(value.getRight());
+			}
+		}
+		else {
+			result = model.getProjections();
+		}
+		return result;
+    }
+    
+    static void checkCsrfToken(HttpSession session,
 								HttpServletRequest request,
 								HttpServletResponse response,
 								Integer currentCsrfToken) {
@@ -1480,7 +1524,7 @@ public class SmartClientListServlet extends HttpServlet {
 		Bean bean = model.update(bizId, properties);
 
 		// return the updated row
-		pw.append(returnUpdatedMessage(customer, model, bean, rowIsTagged));
+		pw.append(returnUpdatedMessage(customer, module, document, model, bean, rowIsTagged));
     }
 
 	private static void tag(Customer customer,
@@ -1520,6 +1564,8 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	private static String returnUpdatedMessage(Customer customer,
+												Module module,
+												Document document,
 												ListModel<Bean> model, 
 												Bean bean,
 												boolean rowIstagged)
@@ -1527,11 +1573,14 @@ public class SmartClientListServlet extends HttpServlet {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
+		Set<String> projections = processRows(Collections.singletonList(bean), model, customer, module, document);
+		String json = JSON.marshall(customer, bean, projections);
+
 		// reinstate whether the record is tagged or not.
-		String json = JSON.marshall(customer, bean, model.getProjections());
 		if (rowIstagged) {
 			json = json.replace(PersistentBean.TAGGED_NAME + "\":null", PersistentBean.TAGGED_NAME + "\":true");
 		}
+		
 		message.append(json);
 		message.append("}}");
 		

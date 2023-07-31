@@ -13,6 +13,11 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	public final AttributeType getAttributeType() {
 		return AttributeType.date;
 	}
+	
+	@Override
+	public Class<DateOnly> getValueType() {
+		return DateOnly.class;
+	}
 
 	@Override
 	public Format<DateOnly> getFormat() {

@@ -45,6 +45,7 @@
 			<description>
 				The ID for the related dynamic entity (admin.DynamicEntity) OR a real entity.
 			</description>
+			<index>database</index>
 		</id>
 		<text name="attributeName" required="true">
 			<displayName>Attribute Name</displayName>

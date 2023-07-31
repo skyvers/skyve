@@ -35,6 +35,7 @@ SKYVE.Util = function() {
 		mapCentre: null,
 		mapZoom: 1,
 		CONTEXT_URL: context,
+		allowedReportFormats: null,
 		
 		loadJS: function(scriptPath, callback) {
 		    var scriptNode = document.createElement('SCRIPT');
