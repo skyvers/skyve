@@ -112,6 +112,7 @@ import org.skyve.impl.web.faces.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.impl.web.faces.converters.datetime.YYYY_MM_DD_HH_MI;
 import org.skyve.impl.web.faces.converters.decimal.Decimal10Converter;
+import org.skyve.impl.web.faces.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2Converter;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2IntegerPercentage;
@@ -2386,6 +2387,9 @@ public class FacesViewRenderer extends ViewRenderer {
 			// Decimal
 			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal10Converter) {
 				result = new Decimal10Converter();
+			}
+			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces) {
+				result = new Decimal10TwoDecimalPlaces();
 			}
 			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2Converter) {
 				result = new Decimal2Converter();

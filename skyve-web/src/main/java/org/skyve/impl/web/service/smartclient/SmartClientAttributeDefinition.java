@@ -7,6 +7,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
@@ -377,6 +378,9 @@ public class SmartClientAttributeDefinition {
 				break;
 			case decimal10:
 				type = "bizDecimal10";
+				if (converter instanceof Decimal10TwoDecimalPlaces) {
+					type = "bizDecimal2";
+				}
 				break;
 			case enumeration:
 				type = "enum";
