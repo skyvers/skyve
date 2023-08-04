@@ -70,4 +70,5 @@
 		<route outcome="/external/home.xhtml" />
 	</uxui>
 	<unsecured>/external/public.xhtml</unsecured>
+	<unsecured>/registration.xhtml</unsecured>
 </router>

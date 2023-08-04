@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
+		dir="#{skyveRegistration.dir}">
+	<f:view contentType="text/html" encoding="UTF-8">
+		<f:metadata>
+			<f:viewParam name="a" value="#{skyveRegistration.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyveRegistration.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyveRegistration.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyveRegistration.queryNameParameter}" />
+			<f:viewParam name="i" value="#{skyveRegistration.bizIdParameter}" />
+			<f:viewParam name="c" value="#{skyveRegistration.bizCustomerParameter}" />
+			<f:event type="preRenderView" listener="#{skyveRegistration.preRender}"/>
+		</f:metadata>
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyveRegistration.templateName).concat('/view.xhtml')}">
+			<ui:param name="bean" value="#{skyveRegistration}" />
+			<ui:param name="showMenu" value="false" />
+			<ui:param name="resetMenu" value="false" />
+			<ui:param name="showSwitchMode" value="false" />
+			<ui:param name="showLogout" value="false" />
+			<ui:define name="head">
+				<script type="text/javascript">
+				  var onloadCallback = function() {
+				    alert("grecaptcha is ready!");
+				  };
+				</script>
+				<script src='https://www.google.com/recaptcha/api.js'></script>
+			</ui:define>
+			<ui:define name="body">
+				<s:conversation managedBean="skyveRegistration" />
+				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty skyveRegistration.user}">
+					<h1 style="text-align: center"><h:outputText escape="false" value="#{skyveRegistration.i18n['page.public.noPublicUser']}" /></h1>
+				</h:panelGroup>
+				<s:csrfForm managedBean="skyveRegistration" rendered="#{not empty skyveRegistration.user}">
+					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+						<ui:param name="bean" value="#{skyveRegistration}" />
+					</ui:include>
+					<s:view module="#{skyveRegistration.bizModuleParameter}"
+								document="#{skyveRegistration.bizDocumentParameter}"
+								managedBean="skyveRegistration"
+								update="@form" />
+					<h:panelGroup style="display: inline-block;" rendered="#{not empty skyveRegistration.getRecaptchaKey()}">
+						<!-- A table to brute force the captcha to centre as it is an iframe -->
+						<table style="position: absolute;">
+							<tr>
+								<td style="width:50%" />
+								<td>
+									<div class="g-recaptcha" data-sitekey="{#skyveRegistration.getRecaptchaKey()}"></div>
+								</td>
+								<td style="width:50%" />
+							</tr>
+						</table>
+					</h:panelGroup>
+				</s:csrfForm>
+				
+				<h:outputScript>
+<!-- 					function isCaptchaChecked() { -->
+<!-- 					  alert('Recaptcha is checked !'); -->
+<!-- 					  return grecaptcha && grecaptcha.getResponse().length !== 0; -->
+<!-- 					} -->
+				</h:outputScript>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

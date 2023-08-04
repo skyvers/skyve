@@ -3,10 +3,10 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/router ../../schemas/router.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<uxui name="external">
-		<route outcome="/external/public.xhtml">
+		<route outcome="/registration.xhtml">
 			<criteria webAction="e" module="admin" document="SelfRegistration" />
 		</route>
-		<route outcome="/external/public.xhtml">
+		<route outcome="/registration.xhtml">
 			<criteria webAction="e" module="admin" document="SelfRegistrationActivation" />
 		</route>
 	</uxui>
