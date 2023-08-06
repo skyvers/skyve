@@ -79,8 +79,8 @@ class AccessProcessor {
 			addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
 		}
 		else if (homeRef == ViewType.edit) {
-			addAccessForUxUis(UserAccess.singular(moduleName, homeDocumentName), Collections.emptySet());
 			Document document = module.getDocument(customer, homeDocumentName);
+			addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), homeDocumentName), Collections.emptySet());
 			processViews(document);
 		}
 	}
@@ -94,8 +94,8 @@ class AccessProcessor {
 			else if (item instanceof EditItem) {
 				EditItem edit = (EditItem) item;
 				String documentName = edit.getDocumentName();
-				addAccessForUxUis(UserAccess.singular(moduleName, documentName), edit.getUxUis());
 				Document document = module.getDocument(customer, documentName);
+				addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), documentName), edit.getUxUis());
 				processViews(document);
 			}
 			else if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
@@ -126,8 +126,8 @@ class AccessProcessor {
 					}
 				}
 				
-				addAccessForUxUis(UserAccess.singular(moduleName, documentName), uxuis);
 				Document document = module.getDocument(customer, documentName);
+				addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), documentName), uxuis);
 				processViews(document);
 			}
 		}

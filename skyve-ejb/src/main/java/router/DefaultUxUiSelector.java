@@ -17,25 +17,23 @@ import org.skyve.web.WebContext;
 
 import modules.admin.domain.Startup;
 
-import static router.UxUis.*;
-
 public class DefaultUxUiSelector implements UxUiSelector {
 	public static final String DISMISS_STARTUP = "DISMISS_STARTUP";
 
 	private static final Map<String, UxUi> uxuis = new TreeMap<>();
 	static {
-		uxuis.put(PHONE.getName(), PHONE);
-		uxuis.put(TABLET.getName(), TABLET);
-		uxuis.put(DESKTOP.getName(), DESKTOP);
-		uxuis.put(EXTERNAL.getName(), EXTERNAL);
-		uxuis.put(STARTUP.getName(), STARTUP);
+		uxuis.put(UxUis.PHONE.getName(), UxUis.PHONE);
+		uxuis.put(UxUis.TABLET.getName(), UxUis.TABLET);
+		uxuis.put(UxUis.DESKTOP.getName(), UxUis.DESKTOP);
+		uxuis.put(UxUis.EXTERNAL.getName(), UxUis.EXTERNAL);
+		uxuis.put(UxUis.STARTUP.getName(), UxUis.STARTUP);
 	}
 
 	@Override
 	public UxUi select(UserAgentType userAgentType, HttpServletRequest request) {
 		// public pages are destined for external UX/UI always
 		if (request.getUserPrincipal() == null) {
-			return EXTERNAL;
+			return UxUis.EXTERNAL;
 		}
 
 		HttpSession session = request.getSession(false);
@@ -47,7 +45,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 			Object dismissed = session != null ? session.getAttribute(DISMISS_STARTUP) : null;
 			if (! Boolean.TRUE.equals(dismissed)) {
 				Util.LOGGER.info("ROUTING TO STARTUP");
-				return STARTUP;
+				return UxUis.STARTUP;
 			}
 		}
 
@@ -61,14 +59,14 @@ public class DefaultUxUiSelector implements UxUiSelector {
 
 		switch (userAgentType) {
 			case phone:
-				return PHONE;
+				return UxUis.PHONE;
 			case tablet:
-				return TABLET;
+				return UxUis.TABLET;
 			// uncomment to use Smart Client by default for desktop user agents
 			//case desktop:
-			//return DESKTOP;
+			//return UxUis.DESKTOP;
 			default:
-				return EXTERNAL;
+				return UxUis.EXTERNAL;
 		}
 	}
 	
@@ -76,13 +74,13 @@ public class DefaultUxUiSelector implements UxUiSelector {
 	public UxUi emulate(UserAgentType userAgentType, HttpServletRequest request) {
 		switch (userAgentType) {
 			case phone:
-				return PHONE;
+				return UxUis.PHONE;
 			case tablet:
-				return TABLET;
+				return UxUis.TABLET;
 			case desktop:
-				return DESKTOP;
+				return UxUis.DESKTOP;
 			default:
-				return EXTERNAL;
+				return UxUis.EXTERNAL;
 		}
 	}
 }

@@ -150,11 +150,15 @@ public abstract class Harness extends Localisable {
 				homeModule = customer.getModule(bizModuleParameter);
 			}
 			bizDocumentParameter = homeModule.getHomeDocumentName();
-
+			
 			viewType = homeModule.getHomeRef();
 			
 			if (ViewType.edit.equals(viewType)) {
 				webActionParameter = WebAction.e;
+
+				// Set to document owning module in case the home document is imported in the home module
+				Document homeDocument = homeModule.getDocument(customer, bizDocumentParameter);
+				bizModuleParameter = homeDocument.getOwningModuleName();
 			}
 			else {
 				if (queryNameParameter == null) {

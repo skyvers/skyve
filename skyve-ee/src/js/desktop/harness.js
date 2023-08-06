@@ -101,7 +101,7 @@ isc.BizUtil.addClassProperties({
 						}
 
 						// get the new view and edit a new record
-						isc.BizUtil.getEditView(viewer.data.root.name, 
+						isc.BizUtil.getEditView(leaf.module ? leaf.module : viewer.data.root.name, 
 													leaf.name,
 													function(view) { // the view
 														details.addMember(view);

@@ -386,6 +386,11 @@ public class Desktop extends Harness {
 										String icon16,
 										String iconStyleClass) {
 				result.append("{name:'").append(itemDocument.getName());
+				String menuModuleName = (menuModule == null) ? null : menuModule.getName();
+				String itemModuleName = (itemModule == null) ? null : itemModule.getName();
+				if ((menuModuleName != null) && (! menuModuleName.equals(itemModuleName))) {
+					result.append("',module:'").append(itemModuleName);
+				}
 				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "edit", itemModule, itemDocument);
 			}
 			
