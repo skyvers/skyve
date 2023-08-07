@@ -19,6 +19,7 @@ import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
 import org.skyve.domain.types.converters.decimal.Decimal10Converter;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal2Converter;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
@@ -90,6 +91,7 @@ public class ConversionException extends DomainException implements MessageExcep
 	
 	private static final String I18N_DECIMAL_PREFIX = I18N_PREFIX + "decimal.";
 	public static final String DECIMAL_10_CONVERTER_KEY = I18N_DECIMAL_PREFIX + Decimal10Converter.class.getSimpleName();
+	public static final String DECIMAL_10_TWO_DECIMAL_PLACES_KEY = I18N_DECIMAL_PREFIX + Decimal10TwoDecimalPlaces.class.getSimpleName();
 	public static final String DECIMAL_2_CONVERTER_KEY = I18N_DECIMAL_PREFIX + Decimal2Converter.class.getSimpleName();
 	public static final String DECIMAL_2_INTEGER_KEY = I18N_DECIMAL_PREFIX + Decimal2Integer.class.getSimpleName();
 	public static final String DECIMAL_2_INTEGER_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal2IntegerPercentage.class.getSimpleName();
@@ -102,7 +104,6 @@ public class ConversionException extends DomainException implements MessageExcep
 	public static final String DECIMAL_5_TIME_DURATION_KEY = I18N_DECIMAL_PREFIX + Decimal5TimeDuration.class.getSimpleName();
 	public static final String DECIMAL_5_TWO_DECIMAL_PLACES_KEY = I18N_DECIMAL_PREFIX + Decimal5TwoDecimalPlaces.class.getSimpleName();
 	public static final String DECIMAL_5_TWO_DECIMAL_PLACES_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal5TwoDecimalPlacesPercentage.class.getSimpleName();
-
 	private static final String I18N_CURRENCY_PREFIX = I18N_DECIMAL_PREFIX + "currency.";
 	public static final String DECIMAL_10_DOLLARS_AND_CENTS_KEY = I18N_CURRENCY_PREFIX + Decimal10DollarsAndCents.class.getSimpleName();
 	public static final String DECIMAL_2_DOLLARS_AND_CENTS_KEY = I18N_CURRENCY_PREFIX + Decimal2DollarsAndCents.class.getSimpleName();

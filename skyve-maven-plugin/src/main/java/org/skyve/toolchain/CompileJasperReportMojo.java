@@ -31,6 +31,7 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
+			configureClasspath();
 			final String reportName = prompter.prompt("Please enter the name of the report");
 			final List<File> reportsToCompile = getReports(reportName);
 			if (reportsToCompile.isEmpty()) {

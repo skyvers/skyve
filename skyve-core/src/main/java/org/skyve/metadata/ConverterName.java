@@ -18,6 +18,7 @@ import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
@@ -71,7 +72,8 @@ public enum ConverterName {
 	MMM_DD_YYYY_DateTime(new org.skyve.domain.types.converters.datetime.MMM_DD_YYYY()), 
 	YYYY_MM_DD_HH_MI(new YYYY_MM_DD_HH_MI()), 
 	YYYY_MM_DD_HH24_MI(new YYYY_MM_DD_HH24_MI()),
-	YYYY_MM_DD_DateTime(new org.skyve.domain.types.converters.datetime.YYYY_MM_DD()), 
+	YYYY_MM_DD_DateTime(new org.skyve.domain.types.converters.datetime.YYYY_MM_DD()),
+	Decimal10TwoDecimalPlaces(new Decimal10TwoDecimalPlaces()),
 	Decimal2DollarsAndCents(new Decimal2DollarsAndCents()),
 	Decimal2DollarsAndCentsAbsolute(new Decimal2DollarsAndCentsAbsolute()),
 	Decimal2Integer(new Decimal2Integer()),
@@ -165,6 +167,9 @@ public enum ConverterName {
 		}
 		else if (converter instanceof org.skyve.domain.types.converters.datetime.MMM_DD_YYYY) {
 			return MMM_DD_YYYY_DateTime;
+		}
+		else if (converter instanceof Decimal10TwoDecimalPlaces) {
+			return Decimal10TwoDecimalPlaces;
 		}
 		else if (converter instanceof Decimal2DollarsAndCents) {
 			return Decimal2DollarsAndCents;

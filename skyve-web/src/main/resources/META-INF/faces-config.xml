@@ -128,6 +128,10 @@
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10Converter</converter-class>
 	</converter>
 	<converter>
+		<converter-id>Decimal10TwoDecimalPlaces</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10TwoDecimalPlaces</converter-class>
+	</converter>
+	<converter>
 		<converter-for-class>org.skyve.domain.types.Decimal2</converter-for-class>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2Converter</converter-class>
 	</converter>
