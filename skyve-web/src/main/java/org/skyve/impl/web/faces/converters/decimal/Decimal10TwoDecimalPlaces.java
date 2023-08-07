@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces.converters.decimal;
 
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Decimal10;
-import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.util.UtilImpl;
 
 import javax.faces.application.FacesMessage;
