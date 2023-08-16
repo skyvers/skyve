@@ -248,18 +248,18 @@ public class BindTests extends AbstractSkyveTest {
 		CORE.getStash().put("text", "Stash");
 		CORE.getUser().getAttributes().put("text", "Attribute");
 		
-		final String currentDate = CORE.getCustomer().getDefaultDateConverter().toDisplayValue(new DateOnly());
-		final String tomorrowsDate = CORE.getCustomer().getDefaultDateConverter().toDisplayValue(Time.addDaysToNew(new DateOnly(), 1));
-		final String currentTime = CORE.getCustomer().getDefaultTimeConverter().toDisplayValue(new TimeOnly());
-		final String currentDateTime = CORE.getCustomer().getDefaultDateTimeConverter().toDisplayValue(new DateTime());
-		final String currentTimestamp = CORE.getCustomer().getDefaultTimestampConverter().toDisplayValue(new Timestamp());
-		
 		Assert.assertEquals("TestUser", Binder.formatMessage("{USER}", bean));
 		Assert.assertEquals("TestUser", Binder.formatMessage("{USERID}", bean));
 		Assert.assertEquals("", Binder.formatMessage("{USERNAME}", bean));
 		Assert.assertEquals("", Binder.formatMessage("{DATAGROUPID}", bean));
 		Assert.assertNotEquals("", Binder.formatMessage("{CONTACTID}", bean));
 		Assert.assertEquals("bizhub", Binder.formatMessage("{CUSTOMER}", bean));
+
+		String currentDate = CORE.getCustomer().getDefaultDateConverter().toDisplayValue(new DateOnly());
+		String currentTime = CORE.getCustomer().getDefaultTimeConverter().toDisplayValue(new TimeOnly());
+		String currentDateTime = CORE.getCustomer().getDefaultDateTimeConverter().toDisplayValue(new DateTime());
+		String currentTimestamp = CORE.getCustomer().getDefaultTimestampConverter().toDisplayValue(new Timestamp());
+		
 		Assert.assertEquals(currentDate, Binder.formatMessage("{DATE}", bean));
 		Assert.assertEquals(currentTime, Binder.formatMessage("{TIME}", bean));
 		Assert.assertEquals(currentDateTime, Binder.formatMessage("{DATETIME}", bean));
@@ -288,6 +288,13 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("", Binder.formatMessage("{user:nothing}", bean));
 		
 		// Test functions and imports
+		// NB re-evaluate these in case we've ticked over a boundary in the mean time. 
+		currentDate = CORE.getCustomer().getDefaultDateConverter().toDisplayValue(new DateOnly());
+		String tomorrowsDate = CORE.getCustomer().getDefaultDateConverter().toDisplayValue(Time.addDaysToNew(new DateOnly(), 1));
+		currentTime = CORE.getCustomer().getDefaultTimeConverter().toDisplayValue(new TimeOnly());
+		currentDateTime = CORE.getCustomer().getDefaultDateTimeConverter().toDisplayValue(new DateTime());
+		currentTimestamp = CORE.getCustomer().getDefaultTimestampConverter().toDisplayValue(new Timestamp());
+
 		Assert.assertEquals(currentDate, Binder.formatMessage("{el:newDateOnly()}", bean));
 		Assert.assertEquals(tomorrowsDate, Binder.formatMessage("{el:newDateOnlyFromLocalDate(newDateOnly().toLocalDate().plusDays(1))}", bean));
 		Assert.assertEquals(String.valueOf(new DateOnly().toLocalDate().getYear()),

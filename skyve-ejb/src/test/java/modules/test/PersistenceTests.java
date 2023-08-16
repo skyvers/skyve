@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.beanutils.DynaBean;
 import org.hibernate.Session;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -1011,6 +1012,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
+	@Ignore("Doesnt run on the current version of H2 bundled.")
 	public void testGeometry() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test = p.save(test);
