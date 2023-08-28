@@ -23,7 +23,7 @@ abstract class FluentFocusableInputWidget<T extends FluentFocusableInputWidget<T
 
 	@SuppressWarnings("unchecked")
 	public T addBlurAction(FluentEventAction action) {
-		get().getFocusActions().add(action.get());
+		get().getBlurActions().add(action.get());
 		return (T) this;
 	}
 
