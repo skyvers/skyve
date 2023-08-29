@@ -150,7 +150,16 @@ public abstract class BeanVisitor {
 						if ((childRelation instanceof Association) ||
 								((childRelation instanceof Inverse) && 
 									InverseCardinality.one.equals(((Inverse) childRelation).getCardinality()))) {
-							Bean child = (bean == null) ? null : (Bean) Binder.get(bean, relationName);
+							Bean child = null;
+							if (bean != null) {
+								try {
+									child = (Bean) Binder.get(bean, relationName);
+								}
+								catch (ClassCastException e) {
+									throw new DomainException("Is relation " + relationName + " property getter overridden in the document extension class?" +
+																	" Possible bean accessor clash with is/get methods?", e);
+								}
+							}
 							if ((child != null) || visitNulls) {
 								// If we have a child bean instance, check for a polymorphic reference
 								if (child != null) {
@@ -178,8 +187,18 @@ public abstract class BeanVisitor {
 							}
 						}
 						else { // collection or many-sided inverse
-							@SuppressWarnings("unchecked")
-							List<Bean> children = (bean == null) ? null : (List<Bean>) Binder.get(bean, relationName);
+							List<Bean> children = null;
+							if (bean != null) {
+								try {
+									@SuppressWarnings("unchecked")
+									List<Bean> temp = (List<Bean>) Binder.get(bean, relationName);
+									children = temp;
+								}
+								catch (ClassCastException e) {
+									throw new DomainException("Is relation " + relationName + " property getter overridden in the document extension class?" +
+																	" Possible bean accessor clash with is/get methods?", e);
+								}
+							}
 							if (children != null) {
 								int i = 0;
 								for (Bean child : children) {
@@ -245,7 +264,16 @@ public abstract class BeanVisitor {
 				if ((parentDocument != null) && 
 						// child document, not a hierarchical document
 						(! document.getName().equals(parentDocument.getName()))) {
-					Bean parent = (bean == null) ? null : (Bean) Binder.get(bean, ChildBean.PARENT_NAME);
+					Bean parent = null;
+					if (bean != null) {
+						try {
+							parent = (Bean) Binder.get(bean, ChildBean.PARENT_NAME);
+						}
+						catch (ClassCastException e) {
+							throw new DomainException("Is parent property getter overridden in the document extension class?" +
+															" Possible bean accessor clash with is/get methods?", e);
+						}
+					}
 					if ((parent != null) || visitNulls) {
 						// If we have a parent bean instance, check for a polymorphic reference
 						if (parent != null) {
