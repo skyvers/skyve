@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
@@ -228,7 +229,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderedView(String icon16x16Url, String icon32x32Url) {
-        // Add the toolbar(s) if this is a full view render or
+		// Add the toolbar(s) if this is a full view render or
         // a view with a widgetId = actions widgetId
         if ((widgetId == null) || widgetId.equals(view.getActionsWidgetId()))  {
 			// Add the toolbar(s) if it/they has/have contents
@@ -251,7 +252,13 @@ public class FacesViewRenderer extends ViewRenderer {
 				}
 			}
     	}
+        
+        // Add any script UIComponents created at the end (in order)
+    	facesView.getChildren().addAll(scripts);
 	}
+
+	// NB this is a list of UI component so that script visibility can be controlled - ie rendered="<condition>"
+	private List<UIComponent> scripts = new ArrayList<>();
 
 	@Override
 	public void renderTabPane(TabPane tabPane) {
@@ -270,12 +277,16 @@ public class FacesViewRenderer extends ViewRenderer {
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
 			fragment = component;
 		}
+		
+		// These are added in the order they are encountered to ensure rendering works for nested tab panes correctly
+		// Add scripts if we are rendering the whole view or we are within the fragment being rendered
+		if ((widgetId == null) || ((widgetId != null) && (fragment != null))) {
+			scripts.add(cb.tabPaneScript(null, tabPane, module.getName(), document.getName(), current.getId()));
+		}
 	}
 
 	@Override
 	public void renderedTabPane(TabPane tabPane) {
-		UIComponent script = cb.tabPaneScript(null, tabPane, module.getName(), document.getName(), current.getId());
-		
 		addedToContainer();
 
 		// stop rendering if appropriate
@@ -284,10 +295,8 @@ public class FacesViewRenderer extends ViewRenderer {
 			fragment.setParent(null);
 			facesView.getChildren().add(fragment);
 			fragment = null;
-			facesView.getChildren().add(script);
-		}
-		else {
-			current.getChildren().add(script);
+			// Add the scripts required for this fragment here (and not in renderedView()
+			facesView.getChildren().addAll(scripts);
 		}
 	}
 
