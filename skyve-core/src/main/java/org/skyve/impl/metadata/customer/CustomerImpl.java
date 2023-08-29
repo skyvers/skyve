@@ -537,6 +537,18 @@ public class CustomerImpl implements Customer {
 		}
 	}
 
+	public void notifyPreRestore() {
+		for (ObserverMetaData observer : observers.values()) {
+			observer.getObserver().preRestore(this);
+		}
+	}
+
+	public void notifyPostRestore() {
+		for (ObserverMetaData observer : observers.values()) {
+			observer.getObserver().postRestore(this);
+		}
+	}
+
 	public boolean interceptBeforeNewInstance(Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeNewInstance(bean)) {

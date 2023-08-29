@@ -31,6 +31,7 @@ import org.skyve.impl.backup.RestoreOptions.ContentOption;
 import org.skyve.impl.backup.RestoreOptions.IndexingOption;
 import org.skyve.impl.backup.RestoreOptions.PreProcess;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
@@ -54,9 +55,13 @@ public class RestoreJob extends CancellableJob {
 		restore((RestoreOptions) bean);
 	}
 
-	private void restore(RestoreOptions options)
-	throws Exception {
-		String customerName = CORE.getUser().getCustomerName();
+	private void restore(RestoreOptions options) throws Exception {
+		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
+		String customerName = customer.getName();
+
+		// Notify observers that we are starting a restore for this customer
+		customer.notifyPreRestore();
+
 		Collection<String> log = getLog();
 		String trace;
 
@@ -81,7 +86,8 @@ public class RestoreJob extends CancellableJob {
 				return;
 			}
 
-			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore in progress - system unavailable until restore is complete."));
+			EXT.push(new PushMessage().growl(MessageSeverity.info,
+												"System Restore in progress - system unavailable until restore is complete."));
 
 			String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
 			File extractDir = new File(backup.getParentFile(), extractDirName);
@@ -104,7 +110,7 @@ public class RestoreJob extends CancellableJob {
 			setPercentComplete(50);
 
 			PreProcess restorePreProcess = options.getPreProcess();
-			ContentOption contrentRestoreOption =  options.getContentOption();
+			ContentOption contrentRestoreOption = options.getContentOption();
 
 			boolean truncateDatabase = PreProcess.deleteData.equals(restorePreProcess);
 			if (truncateDatabase) {
@@ -175,11 +181,18 @@ public class RestoreJob extends CancellableJob {
 			setPercentComplete(100);
 
 			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
-		} finally {
-			if (deleteLocalBackup) {
-				if (!backup.delete()) {
-					Util.LOGGER.warning("Failed to delete local backup " + backup.getAbsolutePath());
+		}
+		finally {
+			try {
+				if (deleteLocalBackup) {
+					if (! backup.delete()) {
+						Util.LOGGER.warning("Failed to delete local backup " + backup.getAbsolutePath());
+					}
 				}
+			}
+			finally {
+				// Notify observers that we are finished a restore for this customer
+				customer.notifyPostRestore();
 			}
 		}
 	}
@@ -200,8 +213,8 @@ public class RestoreJob extends CancellableJob {
 		}
 
 		Collection<Table> tables = createUsingBackup ?
-										BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
-										BackupUtil.getTables();
+									BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
+									BackupUtil.getTables();
 
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
@@ -233,7 +246,7 @@ public class RestoreJob extends CancellableJob {
 								boolean extensionTables,
 								ContentOption contentRestoreOption,
 								IndexingOption indexingOption)
-	throws Exception {
+			throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			for (Table table : tables) {
 				if (table instanceof JoinTable) {
@@ -350,7 +363,7 @@ public class RestoreJob extends CancellableJob {
 										else {
 											statement.setObject(index++,
 																	dialect.convertToPersistedValue(geometry),
-																	geometrySqlType);
+													geometrySqlType);
 										}
 									}
 									else if (AttributeType.bool.equals(attributeType)) {
@@ -446,7 +459,6 @@ public class RestoreJob extends CancellableJob {
 							log.add(trace);
 							Util.LOGGER.severe(trace);
 
-
 							StringBuilder sb = new StringBuilder(512);
 							sb.append("VALUES  :- ");
 							if (values == null) {
@@ -476,7 +488,7 @@ public class RestoreJob extends CancellableJob {
 	private void restoreForeignKeys(File backupDirectory,
 										Collection<Table> tables,
 										Connection connection)
-	throws Exception {
+			throws Exception {
 		Collection<String> log = getLog();
 		String trace;
 
@@ -548,7 +560,7 @@ public class RestoreJob extends CancellableJob {
 								statement.setString(i, values.get(Bean.DOCUMENT_ID));
 								statement.executeUpdate();
 								rowCount++;
-								
+
 								if ((rowCount % 1000L) == 0L) {
 									connection.commit();
 									if ((rowCount % 10000L) == 0L) {
