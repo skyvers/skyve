@@ -22,7 +22,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 		documentRef(enumeration.getDocumentRef());
 		attributeRef(enumeration.getAttributeRef());
 		
-		for (EnumeratedValue value : enumeration.getValues()) {
+		for (EnumeratedValue value : enumeration.getXmlValues()) {
 			addValue(new FluentEnumeratedValue().from(value));
 		}
 		
