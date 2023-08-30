@@ -20,7 +20,10 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 		required(association.isRequired());
 		type(association.getType());
 		embeddedColumnsPrefix(association.getEmbeddedColumnsPrefix());
-		databaseIndex(! Boolean.FALSE.equals(association.getDatabaseIndex()));
+		Boolean index = association.getDatabaseIndex();
+		if (index != null) {
+			databaseIndex(index.booleanValue());
+		}
 		return this;
 	}
 	
