@@ -24,11 +24,6 @@
 			<ui:param name="showSwitchMode" value="false" />
 			<ui:param name="showLogout" value="false" />
 			<ui:define name="head">
-				<script type="text/javascript">
-				  var onloadCallback = function() {
-				    alert("grecaptcha is ready!");
-				  };
-				</script>
 				<script src='https://www.google.com/recaptcha/api.js'></script>
 			</ui:define>
 			<ui:define name="body">
@@ -36,21 +31,25 @@
 				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty skyveRegistration.user}">
 					<h1 style="text-align: center"><h:outputText escape="false" value="#{skyveRegistration.i18n['page.public.noPublicUser']}" /></h1>
 				</h:panelGroup>
-				<s:csrfForm managedBean="skyveRegistration" rendered="#{not empty skyveRegistration.user}">
-					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+				<s:csrfForm managedBean="skyveRegistration" rendered="#{not empty skyveRegistration.getRecaptchaKey()}">
+					<ui:fragment src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyveRegistration}" />
-					</ui:include>
-					<s:view module="#{skyveRegistration.bizModuleParameter}"
-								document="#{skyveRegistration.bizDocumentParameter}"
-								managedBean="skyveRegistration"
-								update="@form" />
+					</ui:fragment>
+					
+					<h:panelGroup rendered="isCaptchaChecked">
+						<s:view module="#{skyveRegistration.bizModuleParameter}"
+									document="#{skyveRegistration.bizDocumentParameter}"
+									managedBean="skyveRegistration"
+									update="@form" 
+									id="form"/>
+					</h:panelGroup>
 					<h:panelGroup style="display: inline-block;" rendered="#{not empty skyveRegistration.getRecaptchaKey()}">
 						<!-- A table to brute force the captcha to centre as it is an iframe -->
 						<table style="position: absolute;">
 							<tr>
 								<td style="width:50%" />
 								<td>
-									<div class="g-recaptcha" data-sitekey="{#skyveRegistration.getRecaptchaKey()}"></div>
+									<div class="g-recaptcha" data-sitekey="#{skyveRegistration.getRecaptchaKey()}" data-callback="reload"></div>
 								</td>
 								<td style="width:50%" />
 							</tr>
@@ -59,10 +58,17 @@
 				</s:csrfForm>
 				
 				<h:outputScript>
-<!-- 					function isCaptchaChecked() { -->
-<!-- 					  alert('Recaptcha is checked !'); -->
-<!-- 					  return grecaptcha && grecaptcha.getResponse().length !== 0; -->
-<!-- 					} -->
+					function isCaptchaChecked() {
+						alert(2);
+					  	return grecaptcha &amp;&amp; grecaptcha.getResponse().length !== 0;
+                    }
+				</h:outputScript>
+
+				<h:outputScript>	
+					function reload(){
+						alert(1);
+						document.getElementById("form").contentWindow.location.reload(true);
+					}
 				</h:outputScript>
 			</ui:define>
 		</ui:composition>
