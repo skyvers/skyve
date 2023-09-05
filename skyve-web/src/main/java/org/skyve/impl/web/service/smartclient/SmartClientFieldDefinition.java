@@ -100,7 +100,10 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 		
 		// This alignment here is text alignment, not the alignment within the form item which is handled in SmartClientViewRenderer.renderFormItem().
 		if (align != null) {
-			result.append(",textAlign:'").append(align.toAlignmentString()).append('\'');
+			// NB in SC textAlign affects the alignment of a checkbox in its item, so exclude for checkboxes
+			if (! "checkbox".equals(type)) {
+            	result.append(",textAlign:'").append(align.toAlignmentString()).append('\'');
+            }
 		}
 
 	    if (helpText != null) {
