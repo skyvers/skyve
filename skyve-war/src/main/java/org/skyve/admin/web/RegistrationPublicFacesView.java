@@ -22,27 +22,19 @@ public class RegistrationPublicFacesView extends PublicFacesView<SelfRegistratio
 	private static final long serialVersionUID = -3606463122925431489L;
 
 	@Override
-	public String getBizCustomerParameter() {
-		return super.getBizCustomerParameter();
-	}
-	
-	@Override
-	public void setBizCustomerParameter(java.lang.String bizCustomerParameter) {
-		super.setBizCustomerParameter(bizCustomerParameter);
-	}
-
-	@Override
 	public void preRender() {
 		super.preRender();
 	}
 	
 	// retrieves the recaptcha key if it exists
 	@SuppressWarnings("static-method")
-	public String getRecaptchaKey() {
-		if (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null) {
-			return UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
-		}
-		return null;
-	}
+    public String getRecaptchaKey() {
+
+        this.getCurrentBean()
+            .getBean()
+            .getRecaptchaResponse();
+
+        return UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
+    }
 
 }

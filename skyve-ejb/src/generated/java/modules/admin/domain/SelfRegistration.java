@@ -56,6 +56,9 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	/** @hidden */
 	public static final String userPropertyName = "user";
 
+	/** @hidden */
+	public static final String recaptchaResponsePropertyName = "recaptchaResponse";
+
 	/**
 	 * Activation Url
 	 **/
@@ -99,6 +102,13 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 * The new user to create for this registration
 	 **/
 	private UserExtension user = null;
+
+	/**
+	 * Recaptcha Response
+	 * <br/>
+	 * XYZ
+	 **/
+	private String recaptchaResponse;
 
 	@Override
 	@XmlTransient
@@ -266,6 +276,23 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 			preset(userPropertyName, user);
 			this.user = user;
 		}
+	}
+
+	/**
+	 * {@link #recaptchaResponse} accessor.
+	 * @return	The value.
+	 **/
+	public String getRecaptchaResponse() {
+		return recaptchaResponse;
+	}
+
+	/**
+	 * {@link #recaptchaResponse} mutator.
+	 * @param recaptchaResponse	The new value.
+	 **/
+	@XmlElement
+	public void setRecaptchaResponse(String recaptchaResponse) {
+		this.recaptchaResponse = recaptchaResponse;
 	}
 
 	/**

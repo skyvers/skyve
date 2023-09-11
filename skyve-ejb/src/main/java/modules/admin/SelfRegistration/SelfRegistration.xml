@@ -40,6 +40,11 @@
             <displayName>admin.selfRegistration.association.user.displayName</displayName>
             <documentName>User</documentName>
         </association>
+        <text name="recaptchaResponse" persistent="false" audited="false" trackChanges="false">
+            <documentation>XYZ</documentation>
+            <displayName>Recaptcha Response</displayName>
+            <length>2000</length>
+        </text>
     </attributes>
     <conditions>
     	<condition name="confirmEmailInvalid" usage="view">

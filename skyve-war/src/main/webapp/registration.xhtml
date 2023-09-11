@@ -24,32 +24,47 @@
 			<ui:param name="showSwitchMode" value="false" />
 			<ui:param name="showLogout" value="false" />
 			<ui:define name="head">
-				<script src='https://www.google.com/recaptcha/api.js'></script>
+                <script type="text/javascript">
+					function capchtaCallback(response){
+						console.debug("Got captcha callback response: ", response);
+						document.getElementById("recaptchaResponse").value = response;
+					}
+					
+					function captchaExpired() {
+						console.debug("Captcha expired");
+						document.getElementById("recaptchaResponse").value = '';
+					}
+                </script>
+                <script src='https://www.google.com/recaptcha/api.js'></script>
 			</ui:define>
 			<ui:define name="body">
 				<s:conversation managedBean="skyveRegistration" />
 				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty skyveRegistration.user}">
 					<h1 style="text-align: center"><h:outputText escape="false" value="#{skyveRegistration.i18n['page.public.noPublicUser']}" /></h1>
 				</h:panelGroup>
-				<s:csrfForm managedBean="skyveRegistration" rendered="#{not empty skyveRegistration.getRecaptchaKey()}">
+				<s:csrfForm managedBean="skyveRegistration" rendered="#{not empty skyveRegistration.recaptchaKey}">
 					<ui:fragment src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyveRegistration}" />
 					</ui:fragment>
 					
-					<h:panelGroup rendered="isCaptchaChecked">
+					<h:panelGroup>
 						<s:view module="#{skyveRegistration.bizModuleParameter}"
 									document="#{skyveRegistration.bizDocumentParameter}"
 									managedBean="skyveRegistration"
 									update="@form" 
 									id="form"/>
+						<h:inputHidden value="#{skyveRegistration.currentBean['recaptchaResponse']}" id="recaptchaResponse" />
 					</h:panelGroup>
-					<h:panelGroup style="display: inline-block;" rendered="#{not empty skyveRegistration.getRecaptchaKey()}">
+					<h:panelGroup style="display: inline-block;" rendered="#{not empty skyveRegistration.recaptchaKey}">
 						<!-- A table to brute force the captcha to centre as it is an iframe -->
 						<table style="position: absolute;">
 							<tr>
 								<td style="width:50%" />
 								<td>
-									<div class="g-recaptcha" data-sitekey="#{skyveRegistration.getRecaptchaKey()}" data-callback="reload"></div>
+									<div class="g-recaptcha" 
+									     data-sitekey="#{skyveRegistration.getRecaptchaKey()}" 
+									     data-callback="capchtaCallback"
+									     data-expired-callback="captchaExpired"></div>
 								</td>
 								<td style="width:50%" />
 							</tr>
@@ -57,19 +72,6 @@
 					</h:panelGroup>
 				</s:csrfForm>
 				
-				<h:outputScript>
-					function isCaptchaChecked() {
-						alert(2);
-					  	return grecaptcha &amp;&amp; grecaptcha.getResponse().length !== 0;
-                    }
-				</h:outputScript>
-
-				<h:outputScript>	
-					function reload(){
-						alert(1);
-						document.getElementById("form").contentWindow.location.reload(true);
-					}
-				</h:outputScript>
 			</ui:define>
 		</ui:composition>
 	</f:view>
