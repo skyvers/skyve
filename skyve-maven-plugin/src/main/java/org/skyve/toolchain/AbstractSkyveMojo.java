@@ -7,7 +7,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
-import org.codehaus.plexus.util.StringUtils;
+import org.skyve.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -75,8 +75,9 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
     }
 
     protected String getDefaultOrPromptCustomer(String defaultCustomer) throws FileNotFoundException, PrompterException {
-        if (StringUtils.isNotBlank(defaultCustomer)) {
-            return defaultCustomer;
+        String processedDefaultCustomer = Util.processStringValue(defaultCustomer);
+    	if (processedDefaultCustomer != null) {
+            return processedDefaultCustomer;
         }
 
         final Path customersDirectory = getCustomersDirectory();
@@ -104,8 +105,9 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
     }
 
     protected String getDefaultOrPrompt(String defaultValue, String promptMessage) throws PrompterException {
-        if (StringUtils.isNotBlank(defaultValue)) {
-            return defaultValue;
+    	String processedDefaultValue = Util.processStringValue(defaultValue);
+    	if (processedDefaultValue != null) {
+            return processedDefaultValue;
         }
 
         return prompter.prompt(promptMessage);
