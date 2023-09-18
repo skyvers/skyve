@@ -2,6 +2,8 @@ package modules.admin.SelfRegistration;
 
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
+import java.net.http.HttpClient;
+
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -23,16 +25,26 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 	
 	@Override
 	public void validate(SelfRegistrationExtension bean, ValidationException e) throws Exception {
-	    if (trimToEmpty(bean.getRecaptchaResponse()).isEmpty()) {
-	        e.getMessages()
-	        .add(new Message("XYZ: Recaptcha Response Missing or Empty"));
-	    }
+	    validateRecaptchaResponse(bean, e);
 
 	    // validate that this email address hasn't already been registered (prompts to login)
 		validateUniqueEmail(bean.getUser().getContact().getEmail1(), e);
 
 		super.validate(bean, e);
 	}
+
+    private void validateRecaptchaResponse(SelfRegistrationExtension bean, ValidationException e) {
+        String responseValue = trimToEmpty(bean.getRecaptchaResponse());
+        if (responseValue.isEmpty()) {
+            e.getMessages()
+             .add(new Message("XYZ: Recaptcha Response Missing or Empty"));
+            return;
+        }
+        
+        // TODO retries?
+        HttpClient client = HttpClient.newBuilder().build();
+        client.
+    }
 	
 	/**
 	 * Checks that a {@link User} does not already exist in the system with the same username
