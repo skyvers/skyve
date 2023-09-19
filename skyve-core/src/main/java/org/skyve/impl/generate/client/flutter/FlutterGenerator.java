@@ -120,8 +120,11 @@ public class FlutterGenerator {
         refreshAll("lib/util", List.of("skyve_rest_client.dart", "skyve_providers.dart"), substitutions);
 
         // lib models folder
-        refreshAll("lib/models",
-                List.of("skyve_datasource_models.dart", "skyve_menu_models.dart", "skyve_view_models.dart"),
+        refreshAll("lib/models", //
+                List.of("skyve_datasource_models.dart", //
+                        "skyve_menu_models.dart", //
+                        "skyve_view_models.dart", //
+                        "bean_container.dart"),
                 substitutions);
 
         // lib widgets folder
@@ -228,7 +231,7 @@ public class FlutterGenerator {
             return modocWhitelist;
         }
 
-        public void addModocWhitelistEnty(String modocEntry) {
+        public void addModocWhitelistEntry(String modocEntry) {
             modocWhitelist.add(MoDoc.fromString(modocEntry));
         }
 

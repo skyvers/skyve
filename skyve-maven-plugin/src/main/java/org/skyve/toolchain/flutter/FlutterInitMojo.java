@@ -101,7 +101,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
             config.setProjectPath(projectPath);
             config.setCustomerName(customer);
 
-            modocWhitelist.forEach(config::addModocWhitelistEnty);
+            modocWhitelist.forEach(config::addModocWhitelistEntry);
 
             FlutterGenerator generator = new FlutterGenerator(config);
             generator.generate();

@@ -37,7 +37,7 @@ class SkyveViewModel implements SkyveView {
           final String name = action['name'];
           final String show = action['show'];
           final String? resourceName = action['resourceName'];
-          result.add(SkyveButton(type: actionType, name: name, label: label));
+          // result.add(SkyveButton(type: actionType, name: name, label: label)); // FIXME
         }
       }
     }

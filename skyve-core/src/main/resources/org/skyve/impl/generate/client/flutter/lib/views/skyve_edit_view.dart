@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/bean_container.dart';
 import '../util/skyve_providers.dart';
 import '../util/skyve_rest_client.dart';
 import '../widgets/skyve_view.dart';
@@ -20,7 +21,11 @@ class SkyveEditView extends ConsumerStatefulWidget {
 }
 
 class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
-  Map<String, dynamic> _bean = {'_title': 'Loading'};
+  BeanContainer container = BeanContainer.loading();
+
+  get _bean {
+    return container.values;
+  }
 
   @override
   void initState() {
@@ -60,9 +65,9 @@ class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
 
   void _load(String m, String d, String? i) async {
     if (_bean['bizId'] == null) {
-      final bean = await SkyveRestClient().edit(m, d, i);
+      final BeanContainer container = await SkyveRestClient().edit(m, d, i);
       setState(() {
-        _bean = bean;
+        this.container = container;
       });
     }
   }
