@@ -634,43 +634,43 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormButton(Action action,
+	public void renderFormButton(String name,
 									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
+									Action action,
 									Button button) {
 		Form currentForm = getCurrentForm();
-		renderButton(action,
-						label,
+		renderButton(label,
 						getCurrentWidgetColspan(),
 						iconStyleClass,
 						toolTip,
 						confirmationText,
+						action,
 						button,
 						(currentForm == null) ? null : currentForm.getDisabledConditionName());
 	}
 
 	@Override
-	public void renderButton(Action action,
+	public void renderButton(String name,
 								String label,
 								String iconUrl,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
-								char type,
+								Action action,
 								Button button) {
-		renderButton(action, label, 0, iconStyleClass, toolTip, confirmationText, button, null);
+		renderButton(label, 0, iconStyleClass, toolTip, confirmationText, action, button, null);
 	}
 	
-	private void renderButton(Action action,
-								String label,
+	private void renderButton(String label,
 								int formColspan,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
+								Action action,
 								Button button,
 								String formDisabledConditionName) {
 		ImplicitActionName name = action.getImplicitName();
@@ -2598,12 +2598,12 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderCustomAction(String label,
+	public void renderCustomAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
@@ -2623,90 +2623,90 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderAddAction(String label,
+	public void renderAddAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 //		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Add);
 	}
 
 	@Override
-	public void renderRemoveAction(String label,
+	public void renderRemoveAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type, 
 									ActionImpl action,
 									boolean canDelete) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Remove, canDelete);
 	}
 
 	@Override
-	public void renderZoomOutAction(String label,
+	public void renderZoomOutAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.ZoomOut, false);
 	}
 
 	@Override
-	public void renderNavigateAction(String label,
+	public void renderNavigateAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 //		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Navigate, false);
 	}
 
 	@Override
-	public void renderOKAction(String label,
+	public void renderOKAction(String name,
+								String label,
 								String iconUrl,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
-								char type,
 								ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.OK, false);
 	}
 
 	@Override
-	public void renderSaveAction(String label,
+	public void renderSaveAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Save, false);
 	}
 
 	@Override
-	public void renderCancelAction(String label,
+	public void renderCancelAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Cancel, false);
 	}
 
 	@Override
-	public void renderDeleteAction(String label,
+	public void renderDeleteAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Delete, false);
 	}
@@ -2718,89 +2718,89 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param action
 	 */
 	@Override
-	public void renderReportAction(String label,
+	public void renderReportAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Report, false);
 	}
 
 	@Override
-	public void renderBizExportAction(String label,
+	public void renderBizExportAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizExport, false);
 	}
 
 	@Override
-	public void renderBizImportAction(String label,
+	public void renderBizImportAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.BizImport, false);
 	}
 
 	@Override
-	public void renderDownloadAction(String label,
+	public void renderDownloadAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Download, false);
 	}
 
 	@Override
-	public void renderUploadAction(String label,
+	public void renderUploadAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.Upload, false);
 	}
 
 	@Override
-	public void renderNewAction(String label,
+	public void renderNewAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 //		processImplicitAction(label, iconStyleClass, toolTip, confirmationText, action, ImplicitActionName.New, false);
 	}
 
 	@Override
-	public void renderEditAction(String label,
+	public void renderEditAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Edit);
 	}
 
 	@Override
-	public void renderPrintAction(String label,
+	public void renderPrintAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		// TODO implement
 	}

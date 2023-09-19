@@ -544,15 +544,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormButton(Action action,
+	public void renderFormButton(String name,
 									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
+									Action action,
 									Button button) {
-		String buttonCode = generateButton(action.getResourceName(),
+		String buttonCode = generateButton(name,
 											action.getImplicitName(),
 											label,
 											action.getClientValidation(),
@@ -560,7 +560,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											iconStyleClass,
 											toolTip,
 											confirmationText,
-											type,
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
@@ -573,15 +572,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderButton(Action action,
+	public void renderButton(String name,
 								String label,
 								String iconUrl,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
-								char type,
+								Action action,
 								Button button) {
-		String buttonCode = generateButton(action.getResourceName(),
+		String buttonCode = generateButton(name,
 											action.getImplicitName(),
 											label,
 											action.getClientValidation(),
@@ -589,7 +588,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											iconStyleClass,
 											toolTip,
 											confirmationText,
-											type,
 											action.getParameters(),
 											action.getDisabledConditionName(),
 											action.getInvisibleConditionName(),
@@ -1859,14 +1857,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderCustomAction(String label,
+	public void renderCustomAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(action.getResourceName(), 
+		addAction(name, 
 					null, 
 					label,
 					action.getInActionPanel(),
@@ -1875,7 +1873,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -1883,14 +1880,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderAddAction(String label,
+	public void renderAddAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Add,
 					label,
 					action.getInActionPanel(),
@@ -1899,7 +1896,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -1907,15 +1903,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderRemoveAction(String label,
+	public void renderRemoveAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action,
 									boolean canDelete) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Remove,
 					label,
 					action.getInActionPanel(),
@@ -1924,7 +1920,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -1932,14 +1927,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderZoomOutAction(String label,
+	public void renderZoomOutAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.ZoomOut,
 					label,
 					action.getInActionPanel(),
@@ -1948,7 +1943,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -1956,14 +1950,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderNavigateAction(String label,
+	public void renderNavigateAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Navigate,
 					label,
 					action.getInActionPanel(),
@@ -1972,7 +1966,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -1980,14 +1973,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderOKAction(String label,
+	public void renderOKAction(String name,
+								String label,
 								String iconUrl,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
-								char type,
 								ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.OK,
 					label,
 					action.getInActionPanel(),
@@ -1996,7 +1989,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2004,14 +1996,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderSaveAction(String label,
+	public void renderSaveAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Save,
 					label,
 					action.getInActionPanel(),
@@ -2020,7 +2012,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2028,14 +2019,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderCancelAction(String label,
+	public void renderCancelAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Cancel,
 					label,
 					action.getInActionPanel(),
@@ -2044,7 +2035,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2052,14 +2042,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderDeleteAction(String label,
+	public void renderDeleteAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Delete,
 					label,
 					action.getInActionPanel(),
@@ -2068,7 +2058,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2076,14 +2065,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderReportAction(String label,
+	public void renderReportAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Report,
 					label,
 					action.getInActionPanel(),
@@ -2092,7 +2081,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2100,14 +2088,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderBizExportAction(String label,
+	public void renderBizExportAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
-		addAction(action.getResourceName(),
+		addAction(name,
 					ImplicitActionName.BizExport,
 					label,
 					action.getInActionPanel(),
@@ -2116,7 +2104,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2124,14 +2111,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderBizImportAction(String label,
+	public void renderBizImportAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
-		addAction(action.getResourceName(),
+		addAction(name,
 					ImplicitActionName.BizImport,
 					label,
 					action.getInActionPanel(),
@@ -2140,7 +2127,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2148,14 +2134,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderDownloadAction(String label,
+	public void renderDownloadAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
-		addAction(action.getResourceName(),
+		addAction(name,
 					ImplicitActionName.Download,
 					label,
 					action.getInActionPanel(),
@@ -2164,7 +2150,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2172,14 +2157,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderUploadAction(String label,
+	public void renderUploadAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(action.getResourceName(),
+		addAction(name,
 					ImplicitActionName.Upload,
 					label,
 					action.getInActionPanel(),
@@ -2188,7 +2173,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2196,14 +2180,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderNewAction(String label,
+	public void renderNewAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.New,
 					label,
 					action.getInActionPanel(),
@@ -2212,7 +2196,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2220,14 +2203,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderEditAction(String label,
+	public void renderEditAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Edit,
 					label,
 					action.getInActionPanel(),
@@ -2236,7 +2219,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2244,14 +2226,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderPrintAction(String label,
+	public void renderPrintAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
-		addAction(null,
+		addAction(name,
 					ImplicitActionName.Print,
 					label,
 					action.getInActionPanel(),
@@ -2260,7 +2242,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					iconStyleClass,
 					toolTip,
 					confirmationText,
-					type,
 					action.getParameters(),
 					action.getDisabledConditionName(),
 					action.getInvisibleConditionName(),
@@ -2710,7 +2691,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private void addAction(String resourceName,
+	private void addAction(String actionName,
 							ImplicitActionName implicitName,
 							String displayName,
 							Boolean inActionPanel,
@@ -2719,7 +2700,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 							String iconStyleClass,
 							String tooltip,
 							String confirmationText,
-							char type,
 							List<Parameter> parameters,
 							String disabledConditionName,
 							String invisibleConditionName,
@@ -2727,7 +2707,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (! Boolean.FALSE.equals(inActionPanel) && 
 				(! ImplicitActionName.Add.equals(implicitName)) &&
 				(! ImplicitActionName.Edit.equals(implicitName))) {
-			String buttonCode = generateButton(resourceName,
+			String buttonCode = generateButton(actionName,
 												implicitName,
 												displayName,
 												clientValidation,
@@ -2735,7 +2715,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												iconStyleClass,
 												tooltip,
 												confirmationText,
-												type,
 												parameters,
 												disabledConditionName,
 												invisibleConditionName,
@@ -2783,7 +2762,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		return result.toString();
 	}
 
-	private String generateButton(String resourceName,
+	private String generateButton(String actionName,
 									ImplicitActionName implicitName,
 									String label,
 									Boolean clientValidation,
@@ -2791,7 +2770,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									List<Parameter> parameters,
 									String disabledConditionName,
 									String invisibleConditionName,
@@ -2800,24 +2778,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizButton.create({validate:");
 		result.append(! Boolean.FALSE.equals(clientValidation));
-
+		result.append(",type:");
 		if (implicitName == null) {
-			result.append(",actionName:'").append(resourceName);
+			result.append("null");
 		}
 		else {
-			result.append(",actionName:'");
-			if (ImplicitActionName.BizExport.equals(implicitName) ||
-					ImplicitActionName.BizImport.equals(implicitName) ||
-					ImplicitActionName.Download.equals(implicitName) ||
-					ImplicitActionName.Upload.equals(implicitName)) {
-				result.append(resourceName);
-			}
-			else {
-				result.append(implicitName);
-			}
+			result.append('\'').append(implicitName).append('\'');
 		}
-		result.append("',type:'");
-		result.append(type);
+		result.append(",actionName:'").append(actionName);
 		if ((label != null) || (iconStyleClass != null)) {
 			result.append("',displayName:'");
 			if (iconStyleClass != null) {

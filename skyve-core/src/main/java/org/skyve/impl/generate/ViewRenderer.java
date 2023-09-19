@@ -475,12 +475,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	public abstract void renderedFormRow(FormRow row);
 
+	private String actionName;
 	private String actionLabel;
 	private String actionIconUrl;
 	private String actionIconStyleClass;
 	private String actionToolTip;
 	private String actionConfirmationText;
-	private char actionType;
 	
 	/**
 	 * @param action
@@ -504,9 +504,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 			if (! user.canExecuteAction(document, resourceName)) {
 				result = false;
 			}
-			actionType = ' ';
+			actionName = resourceName;
 		}
 		else {
+			actionName = implicitName.name();
 			switch (implicitName) {
 				case Add:
 					if (! user.canCreateDocument(document)) {
@@ -518,7 +519,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-plus";
 					}
-					actionType = 'A';
 					break;
 				case BizExport:
 					if (! user.canExecuteAction(document, resourceName)) {
@@ -530,7 +530,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-cloud-upload";
 					}
-					actionType = 'X';
+					actionName = resourceName;
 					break;
 				case BizImport:
 					if (! user.canExecuteAction(document, resourceName)) {
@@ -542,7 +542,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-cloud-download";
 					}
-					actionType = 'I';
+					actionName = resourceName;
 					break;
 				case Download:
 					if (! user.canExecuteAction(document, resourceName)) {
@@ -554,7 +554,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-download";
 					}
-					actionType = 'L';
+					actionName = resourceName;
 					break;
 				case Upload:
 					if (! user.canExecuteAction(document, resourceName)) {
@@ -566,7 +566,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-upload";
 					}
-					actionType = 'U';
+					actionName = resourceName;
 					break;
 				case Cancel:
 					if (relativeIconFileName == null) {
@@ -575,7 +575,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-chevron-left";
 					}
-					actionType = 'C';
 					break;
 				case Delete:
 					if (! user.canDeleteDocument(document)) {
@@ -591,7 +590,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 						actionConfirmationText = "ui.delete.confirmation";
 						actionConfirmationParam = document.getLocalisedSingularAlias();
 					}
-					actionType = 'D';
 					break;
 				case Edit:
 					if (! user.canReadDocument(document)) {
@@ -603,7 +601,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-pencil";
 					}
-					actionType = 'E';
 					break;
 				case New:
 					if (! user.canCreateDocument(document)) {
@@ -615,7 +612,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-plus";
 					}
-					actionType = 'N';
 					break;
 				case OK:
 					if ((! user.canUpdateDocument(document)) && 
@@ -628,7 +624,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-check";
 					}
-					actionType = 'O';
 					break;
 				case Remove:
 					if (! user.canDeleteDocument(document)) {
@@ -643,7 +638,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionConfirmationText == null) {
 						actionConfirmationText = "ui.remove.confirmation";
 					}
-					actionType = 'R';
 					break;
 				case Report:
 					if (relativeIconFileName == null) {
@@ -652,7 +646,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-newspaper-o";
 					}
-					actionType = 'P';
 					break;
 				case Save:
 					if ((! user.canUpdateDocument(document)) && 
@@ -665,7 +658,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-save";
 					}
-					actionType = 'S';
 					break;
 				case ZoomOut:
 					if (relativeIconFileName == null) {
@@ -674,7 +666,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-reply";
 					}
-					actionType = 'Z';
 					break;
 				case Print:
 					if (relativeIconFileName == null) {
@@ -683,7 +674,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					if (actionIconStyleClass == null) {
 						actionIconStyleClass = "fa fa-newspaper-o";
 					}
-					actionType = 'V';
 					break;
 				default:
 					throw new IllegalArgumentException(implicitName + " not catered for");
@@ -718,23 +708,23 @@ public abstract class ViewRenderer extends ViewVisitor {
 		Action action = view.getAction(button.getActionName());
 		if (preProcessAction(action.getImplicitName(), action, button.getShow())) {
 			if (currentFormItem != null) {
-				renderFormButton(action,
+				renderFormButton(actionName,
 									actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
 									actionToolTip,
 									actionConfirmationText,
-									actionType,
+									action,
 									button);
 			}
 			else {
-				renderButton(action,
+				renderButton(actionName,
 								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
+								action,
 								button);
 			}
 		}
@@ -743,21 +733,21 @@ public abstract class ViewRenderer extends ViewVisitor {
 		}
 	}
 
-	public abstract void renderFormButton(Action action,
+	public abstract void renderFormButton(String name,
+											String label,
+											String iconUrl,
+											String iconStyleClass,
+											String toolTip,
+											String confirmationText,
+											Action action,
+											Button button);
+	public abstract void renderButton(String name,
 										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
-										Button button);
-	public abstract void renderButton(Action action,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										char type,
+										Action action,
 										Button button);
 
 	@Override
@@ -1750,359 +1740,359 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitCustomAction(ActionImpl action) {
 		if (preProcessAction(null, action, null)) {
-			renderCustomAction(actionLabel,
+			renderCustomAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderCustomAction(String label,
+	public abstract void renderCustomAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitAddAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Add, action, null)) {
-			renderAddAction(actionLabel,
+			renderAddAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 	
-	public abstract void renderAddAction(String label,
+	public abstract void renderAddAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action);
 
 	@Override
 	public final void visitRemoveAction(ActionImpl action) {
 		boolean canDelete = preProcessAction(ImplicitActionName.Remove, action, null);
-		renderRemoveAction(actionLabel,
+		renderRemoveAction(actionName,
+							actionLabel,
 							actionIconUrl,
 							actionIconStyleClass,
 							actionToolTip,
 							actionConfirmationText,
-							actionType,
 							action,
 							canDelete);
 	}
 
-	public abstract void renderRemoveAction(String label,
+	public abstract void renderRemoveAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action,
 												boolean canDelete);
 
 	@Override
 	public final void visitZoomOutAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.ZoomOut, action, null)) {
-			renderZoomOutAction(actionLabel,
+			renderZoomOutAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderZoomOutAction(String label,
+	public abstract void renderZoomOutAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 	
 	@Override
 	public final void visitNavigateAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Navigate, action, null)) {
-			renderNavigateAction(actionLabel,
+			renderNavigateAction(actionName,
+									actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
 									actionToolTip,
 									actionConfirmationText,
-									actionType,
 									action);
 		}
 	}
 
-	public abstract void renderNavigateAction(String label,
+	public abstract void renderNavigateAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitOKAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.OK, action, null)) {
-			renderOKAction(actionLabel,
+			renderOKAction(actionName,
+							actionLabel,
 							actionIconUrl,
 							actionIconStyleClass,
 							actionToolTip,
 							actionConfirmationText,
-							actionType,
 							action);
 		}
 	}
 
-	public abstract void renderOKAction(String label,
+	public abstract void renderOKAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action);
 
 	@Override
 	public final void visitSaveAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Save, action, null)) {
-			renderSaveAction(actionLabel,
+			renderSaveAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderSaveAction(String label,
+	public abstract void renderSaveAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action);
 
 	@Override
 	public final void visitCancelAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Cancel, action, null)) {
-			renderCancelAction(actionLabel,
+			renderCancelAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderCancelAction(String label,
+	public abstract void renderCancelAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitDeleteAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Delete, action, null)) {
-			renderDeleteAction(actionLabel,
+			renderDeleteAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderDeleteAction(String label,
+	public abstract void renderDeleteAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitReportAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Report, action, null)) {
-			renderReportAction(actionLabel,
+			renderReportAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderReportAction(String label,
+	public abstract void renderReportAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitBizExportAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.BizExport, action, null)) {
-			renderBizExportAction(actionLabel,
+			renderBizExportAction(actionName,
+									actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
 									actionToolTip,
 									actionConfirmationText,
-									actionType,
 									action);
 		}
 	}
 
-	public abstract void renderBizExportAction(String label,
+	public abstract void renderBizExportAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitBizImportAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.BizImport, action, null)) {
-			renderBizImportAction(actionLabel,
+			renderBizImportAction(actionName,
+									actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
 									actionToolTip,
 									actionConfirmationText,
-									actionType,
 									action);
 		}
 	}
 
-	public abstract void renderBizImportAction(String label,
+	public abstract void renderBizImportAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitDownloadAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Download, action, null)) {
-			renderDownloadAction(actionLabel,
+			renderDownloadAction(actionName,
+									actionLabel,
 									actionIconUrl,
 									actionIconStyleClass,
 									actionToolTip,
 									actionConfirmationText,
-									actionType,
 									action);
 		}
 	}
 
-	public abstract void renderDownloadAction(String label,
+	public abstract void renderDownloadAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitUploadAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Upload, action, null)) {
-			renderUploadAction(actionLabel,
+			renderUploadAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderUploadAction(String label,
+	public abstract void renderUploadAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action);
 
 	@Override
 	public final void visitNewAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.New, action, null)) {
-			renderNewAction(actionLabel,
+			renderNewAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderNewAction(String label,
+	public abstract void renderNewAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action);
 
 	@Override
 	public final void visitEditAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Edit, action, null)) {
-			renderEditAction(actionLabel,
+			renderEditAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 
-	public abstract void renderEditAction(String label,
+	public abstract void renderEditAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action);
 
 	@Override
 	public final void visitPrintAction(ActionImpl action) {
 		if (preProcessAction(ImplicitActionName.Print, action, null)) {
-			renderPrintAction(actionLabel,
+			renderPrintAction(actionName,
+								actionLabel,
 								actionIconUrl,
 								actionIconStyleClass,
 								actionToolTip,
 								actionConfirmationText,
-								actionType,
 								action);
 		}
 	}
 	
-	public abstract void renderPrintAction(String label,
+	public abstract void renderPrintAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action);
 
 	@Override
