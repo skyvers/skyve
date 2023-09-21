@@ -144,10 +144,10 @@ final containerViewProvider =
     if (client.loggedIn) {
       final Map<String, dynamic> json = await client.view(m, d);
       final SkyveViewModel view =
-          SkyveViewModel(module: m, document: d, json: json);
+          SkyveViewModel(module: m, document: d, jsonMetaData: json);
       views[modoc] = view;
       return view;
     }
-    return SkyveViewModel(module: m, document: d, json: {});
+    return SkyveViewModel(module: m, document: d, jsonMetaData: {});
   });
 });

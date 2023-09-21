@@ -7,7 +7,7 @@ import '../util/skyve_rest_client.dart';
 typedef BeanSupplier = BeanContainer Function();
 
 class SkyveButton extends StatelessWidget {
-  static const List<String> _poppingActions = ['ok', 'remove'];
+  static const List<String> _poppingActions = ['OK', 'Remove'];
 
   final String actionType;
   final String actionName;
@@ -24,7 +24,7 @@ class SkyveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (actionType == 'cancel') {
+    if (actionType == 'Cancel') {
       return ElevatedButton(onPressed: () => _pop(context), child: Text(label));
     } else {
       return ElevatedButton(
@@ -36,6 +36,8 @@ class SkyveButton extends StatelessWidget {
     final GoRouter router = GoRouter.of(context);
     if (router.canPop()) {
       router.pop();
+    } else {
+      debugPrint("WARN: Couldn't pop...");
     }
   }
 

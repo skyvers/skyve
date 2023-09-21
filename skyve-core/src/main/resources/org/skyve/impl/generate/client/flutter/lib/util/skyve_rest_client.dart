@@ -223,12 +223,8 @@ class SkyveRestClient {
 
     // Servlet expects form data under key 'bean'
     // as json string
-    requestBean.values['decimal10'] = '123.123';
     String beanJson = jsonEncode(requestBean.values);
     formData['bean'] = beanJson;
-
-    // debugPrint('Posting update for ${requestBean.bizId}');
-    // formData.forEach((key, value) => debugPrint('$key=$value'));
 
     Response<String> response = await _postForm(url, formData);
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen_test/models/bean_container.dart';
 import '../widgets/skyve_blurb.dart';
 import '../widgets/skyve_button.dart';
 import '../widgets/skyve_contentimage.dart';
@@ -15,29 +16,36 @@ import '../widgets/skyve_view.dart';
 class SkyveViewModel implements SkyveView {
   final String module;
   final String document;
-  final Map<String, dynamic> json;
+  final Map<String, dynamic> jsonMetaData;
 
   const SkyveViewModel(
-      {required this.module, required this.document, required this.json});
+      {required this.module,
+      required this.document,
+      required this.jsonMetaData});
 
   @override
-  List<Widget> actions(BuildContext context, Map<String, dynamic> bean) {
-    List<dynamic>? actions = json['actions'];
+  List<Widget> actions(BuildContext context, BeanContainerState state) {
+    List<dynamic>? actions = jsonMetaData['actions'];
     final List<Widget> result = [];
     if (actions != null) {
       for (Map<String, dynamic> action in actions) {
         final bool inActionPanel = action['inActionPanel'];
         if (inActionPanel) {
-          final String type = action['type'];
+          // final String type = action['type'];
           final String actionType = action['actionType'];
-          final bool clientValidation = action['clientValidation'];
-          final String? fontIcon = action['fontIcon'];
-          final String? iconUrl = action['iconUrl'];
+          final String actionName = action['actionName'];
+          // final bool clientValidation = action['clientValidation'];
+          // final String? fontIcon = action['fontIcon'];
+          // final String? iconUrl = action['iconUrl'];
           final String label = action['label'];
-          final String name = action['name'];
-          final String show = action['show'];
-          final String? resourceName = action['resourceName'];
-          // result.add(SkyveButton(type: actionType, name: name, label: label)); // FIXME
+          // final String name = action['name'];
+          // final String show = action['show'];
+          // final String? resourceName = action['resourceName'];
+          result.add(SkyveButton(
+              actionType: actionType,
+              actionName: actionName,
+              label: label,
+              state: state));
         }
       }
     }
@@ -45,8 +53,8 @@ class SkyveViewModel implements SkyveView {
   }
 
   @override
-  List<Widget> contained(BuildContext context, Map<String, dynamic> bean) {
-    return _many(context, json['contained'], bean);
+  List<Widget> contained(BuildContext context, BeanContainerState state) {
+    return _many(context, jsonMetaData['contained'], state.container.values);
   }
 
   static List<Widget> _many(BuildContext context, List<dynamic> contained,
@@ -219,7 +227,9 @@ class SkyveViewModel implements SkyveView {
         return const Text('textArea');
       case 'textField':
         return SkyveTextField(
-            label: formLabel ?? '', initialValue: nvl(bean[model['binding']]));
+            beanValues: bean,
+            propertyKey: model['binding'],
+            label: formLabel ?? '');
       case 'toggleDisabled':
         return const Text('toggleDisabled');
       case 'toggleVisibility':

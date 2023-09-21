@@ -570,16 +570,17 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
-		imports.add(TEXTFIELD_IMPORT);
-		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
-		StringBuilder output = result.getOutput();
-		// output.append("TextFormField(decoration: const InputDecoration(border: OutlineInputBorder(), labelText:
-		// '").append(title);
+        imports.add(TEXTFIELD_IMPORT);
+        RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 
-		output.append("SkyveTextField(label: '").append(title);
-		output.append("', initialValue: nvl(_bean['").append(BindUtil.sanitiseBinding(text.getBinding())).append("'])),");
-		return result;
-	}
+        final String stfTemplate = "SkyveTextField(label: '%s', beanValues: _bean, propertyKey: '%s'),";
+        String stfCode = String.format(stfTemplate, title, BindUtil.sanitiseBinding(text.getBinding()));
+
+        result.getOutput()
+              .append(stfCode);
+
+        return result;
+    }
 
 	@Override
 	public RenderedComponent textArea(RenderedComponent component,

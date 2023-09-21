@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/bean_container.dart';
 import '../util/skyve_providers.dart';
 import '../util/skyve_rest_client.dart';
+import '../widgets/skyve_button.dart';
 import '../widgets/skyve_view.dart';
 import '../widgets/skyve_toolbar.dart';
 
@@ -20,8 +21,19 @@ class SkyveEditView extends ConsumerStatefulWidget {
   }
 }
 
-class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
-  BeanContainer container = BeanContainer.loading();
+class _SkyveEditViewState extends ConsumerState<SkyveEditView>
+    implements BeanContainerState {
+  BeanContainer _container = BeanContainer.loading();
+
+  @override
+  set container(BeanContainer container) {
+    setState(() {
+      _container = container;
+    });
+  }
+
+  @override
+  BeanContainer get container => _container;
 
   get _bean {
     return container.values;
@@ -42,7 +54,7 @@ class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
   }
 
   _build(BuildContext context, SkyveView view) {
-    List<Widget> widgets = List.from(view.contained(context, _bean));
+    List<Widget> widgets = List.from(view.contained(context, this));
     widgets.insert(
         0,
         SkyveToolbar(children: [
@@ -51,7 +63,7 @@ class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
               child: Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 8.0,
-                  children: view.actions(context, _bean)))
+                  children: view.actions(context, this)))
         ]));
 
     return SkyveView.responsiveView(
@@ -65,10 +77,10 @@ class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
 
   void _load(String m, String d, String? i) async {
     if (_bean['bizId'] == null) {
-      final BeanContainer container = await SkyveRestClient().edit(m, d, i);
-      setState(() {
-        this.container = container;
-      });
+      container = await SkyveRestClient().edit(m, d, i);
+
+
+
     }
   }
 }

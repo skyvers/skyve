@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/skyve_button.dart';
 import 'skyve_menu.dart';
 
 String nvl(dynamic value) {
@@ -12,10 +13,10 @@ abstract class SkyveView {
   static const int xl = 1200;
 
   /// Produces the widgets for the action bar.
-  List<Widget> actions(BuildContext context, Map<String, dynamic> bean);
+  List<Widget> actions(BuildContext context, BeanContainerState state);
 
   /// Produces the widgets for the view.
-  List<Widget> contained(BuildContext context, Map<String, dynamic> bean);
+  List<Widget> contained(BuildContext context, BeanContainerState state);
 
   static Widget responsiveView(
       BuildContext context, String viewTitle, Widget view) {
