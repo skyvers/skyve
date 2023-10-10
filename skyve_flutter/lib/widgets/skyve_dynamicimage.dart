@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'skyve_textField.dart';
+import 'skyve_textfield.dart';
 
 class SkyveDynamicImage extends StatelessWidget {
   final String label;
