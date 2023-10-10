@@ -547,21 +547,28 @@ isc.BizListGrid.addMethods({
 															chartItem.click);
 		me._chartButton.setDisabled(true);
 
-
-/*
-		var printItem = {title: "Print", 
-        	//enabled: false, 
-        	icon: "../images/icons/print.png",
-        	click: function() {
-				isc.Canvas.showPrintPreview(isc.ListView.contents)
-        	}
+		var zoomInNewTab = {
+			title: "Zoom In New Tab", 
+			icon: "../images/icons/fa-share-square-o.png",
+			click: function() {
+				var url = "?a=e&m=" 
+						  + me._eventRecord.bizModule 
+						  +"&d=" 
+						  + me._eventRecord.bizDocument 
+						  + "&i=" 
+						  + me._eventRecord.bizId;
+				window.open(url, '_blank').focus();
+			}
         };
-*/
-
+        
 		var contextMenuData = (config && config.isPickList) ? [pickItem] : [];
 		if (me.showAdd) {
 			contextMenuData.add(newItem);
 		}
+		
+		// add the new context menu Open New Tab
+		contextMenuData.add(zoomInNewTab);
+		
 		if (me.showZoom) {
 			contextMenuData.add(me._zoomItem);
 		}

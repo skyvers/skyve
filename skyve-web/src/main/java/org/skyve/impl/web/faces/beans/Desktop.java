@@ -173,7 +173,7 @@ public class Desktop extends Harness {
     	result.append("<td width=\"10%\" align=\"right\">");
 		result.append("<img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:setUxUi();\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"fa fa-2x fa-share-square-o\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:setUxUi();\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"fa fa-2x fa-retweet\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"fa fa-2x fa-search\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp({help});\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"fa fa-2x fa-info-circle\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"fa fa-2x fa-home\"></i></a></td>");
