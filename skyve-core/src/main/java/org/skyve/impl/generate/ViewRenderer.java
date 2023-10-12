@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
+import org.skyve.impl.metadata.view.container.CollapsibleHBox;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -21,8 +22,8 @@ import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
-import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
@@ -199,7 +200,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	public abstract void renderHBox(String borderTitle, HBox hbox);
-
+	
 	@Override
 	public final void visitedHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		renderedHBox(renderAttributes.pop(), hbox);
@@ -207,7 +208,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	}
 
 	public abstract void renderedHBox(String title, HBox hbox);
-
+	
 	private Form currentForm;
 	public Form getCurrentForm() {
 		return currentForm;

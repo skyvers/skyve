@@ -1788,6 +1788,27 @@ isc.BizHBox.addMethods({
 	}
 });
 
+// Collapsible
+isc.ClassFactory.defineClass("BizCollapsible", "Window");
+isc.BizCollapsible.addMethods({
+    initWidget: function () {
+        var me = this;
+        this.contained = [];
+        this.canDragReposition = false;
+        this.canDragResize = false;
+        this.showCloseButton = false;
+        this.animateMinimize = true;
+        this.autoSize = true;
+        this.headerLabelProperties = {width:'100%', click: function() {me.minimized ? me.restore() : me.minimize()}};
+        this.Super("initWidget", arguments);
+    },
+	
+	addContained: function(contained) {
+		this.contained.add(contained);
+		this.addMember(contained);
+	}
+});
+
 // TabPane/Tab - use the default TabSet/Tab
 isc.ClassFactory.defineClass("BizTabPane", "TabSet");
 // name,

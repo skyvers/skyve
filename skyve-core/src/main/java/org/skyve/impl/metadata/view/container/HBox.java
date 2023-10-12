@@ -48,6 +48,8 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	
 	private VerticalAlignment verticalAlignment;
 	private HorizontalAlignment horizontalAlignment;
+
+	private Collapsible collapsible;
 	
 	private Integer pixelPadding;
 	private Integer pixelMemberPadding;
@@ -272,6 +274,16 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	@XmlAttribute(required = false)
 	public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
 		this.horizontalAlignment = horizontalAlignment;
+	}
+
+	
+	public Collapsible getCollapsible() {
+		return collapsible;
+	}
+
+	@XmlAttribute(required = false)
+	public void setCollapsible(Collapsible collapsible) {
+		this.collapsible = collapsible;
 	}
 
 	@Override

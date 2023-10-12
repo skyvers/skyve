@@ -27,6 +27,8 @@ import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.ShrinkWrapper;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Box;
+import org.skyve.impl.metadata.view.container.Collapsible;
+
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -125,19 +127,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private boolean noCreateView;
 	private int variableCounter = 0;
 
-	// This is used to assign names to boilerplate values which have binding expressions in them, such as links.
-	// These values are evaluated server side and stashed in the JSON response under a bogus binding.
+	// This is used to assign names to boilerplate values which have binding
+	// expressions in them, such as links.
+	// These values are evaluated server side and stashed in the JSON response under
+	// a bogus binding.
 	private int formatCounter = 0;
-	
+
 	private StringBuilder code = new StringBuilder(2048);
 	private Stack<String> containerVariables = new Stack<>();
 
-	protected SmartClientViewRenderer(User user,
-										Module module,
-										Document document,
-										View view,
-										String uxui,
-										boolean noCreateView) {
+	protected SmartClientViewRenderer(User user, Module module, Document document, View view, String uxui,
+			boolean noCreateView) {
 		super(user, module, document, view, uxui, false);
 		this.noCreateView = noCreateView;
 	}
@@ -151,14 +151,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		UtilImpl.LOGGER.info("VIEW = " + view.getTitle() + " for " + document.getName());
 		if (noCreateView) {
 			containerVariables.push("view");
-		}
-		else if (ViewType.edit.toString().equals(view.getName())) {
+		} else if (ViewType.edit.toString().equals(view.getName())) {
 			code.append("var edit = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 			code.append(Bean.NOT_CREATED_KEY);
 			code.append("'});");
 			containerVariables.push("edit");
-		}
-		else if (ViewType.create.toString().equals(view.getName())) {
+		} else if (ViewType.create.toString().equals(view.getName())) {
 			code.append("var create = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 			code.append(Bean.CREATED_KEY);
 			code.append("'});");
@@ -169,15 +167,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderedView(String icon16x16Url, String icon32x32Url) {
 		containerVariables.pop();
-		if (! noCreateView) {
+		if (!noCreateView) {
 			if (ViewType.edit.toString().equals(view.getName())) {
 				code.append("view.addContained(edit);");
-			}
-			else if (ViewType.create.toString().equals(view.getName())) {
+			} else if (ViewType.create.toString().equals(view.getName())) {
 				code.append("view.addContained(create);");
 			}
 		}
-		if (! viewHasAtLeastOneForm) {
+		if (!viewHasAtLeastOneForm) {
 			String var = "v" + variableCounter++;
 			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
 			code.append("view._vm.addMember(").append(var).append(");");
@@ -187,7 +184,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	// This is a stack in case we have a tab pane inside a tab pane
 	private Stack<Integer> tabNumbers = new Stack<>();
-	
+
 	@Override
 	public void renderTabPane(TabPane tabPane) {
 		tabNumbers.push(Integer.valueOf(0));
@@ -228,13 +225,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber);
 		String iconStyleClass = tab.getIconStyleClass();
 		if (iconStyleClass != null) {
-			code.append("',title:'").append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i><span> &nbsp;</span>");
-		}
-		else if (icon16x16Url != null) {
+			code.append("',title:'").append("<i class=\"bizhubFontIcon ").append(iconStyleClass)
+					.append("\"></i><span> &nbsp;</span>");
+		} else if (icon16x16Url != null) {
 			code.append("',icon:'../").append(icon16x16Url);
 			code.append("',title:'");
-		}
-		else {
+		} else {
 			code.append("',title:'");
 		}
 
@@ -248,11 +244,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderVBox(String borderTitle, VBox vbox) {
+	public void renderVBox(String borderTitle, VBox vbox) 
+	{
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
-		size(vbox, null, code);
-		bordered(borderTitle, vbox, vbox.getPixelPadding(), code);
+
+		// if collapsible, then make the inner vbox 100% width and height and do not put the border/title
+		if(vbox.getCollapsible()!=null)
+		{
+			code.append("width:'100%',height:'100%',");
+		}
+		// otherwise,
+		else 
+		{
+			size(vbox, null, code);
+			bordered(borderTitle, vbox, vbox.getPixelPadding(), code);
+		}
+		
+		
 		box(vbox);
 		VerticalAlignment v = vbox.getVerticalAlignment();
 		if (v != null) {
@@ -289,8 +298,38 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(vbox.getInvisibleConditionName(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 
+		String collapsibleVar = "";
+		if (vbox.getCollapsible() != null) 
+		{
+			collapsibleVar = "v" + variableCounter++;
+			// append the script for a collapsible object
+			code.append("var ").append(collapsibleVar).append("=isc.BizCollapsible.create({title:'")
+					.append(vbox.getBorderTitle() == null ? "" : vbox.getBorderTitle())
+					.append("',minimized:")
+					.append(vbox.getCollapsible().equals(Collapsible.closed) ? "true" : "false")
+					.append(",");
+			// set the size, visibility of the collapsible area to the size and visibility of the vbox
+			size(vbox, null, code);
+			invisible(vbox.getInvisibleConditionName(), code);
+			
+			// append the inner vbox to the collapsible area
+			code.append("items: [")
+				.append(variable).append("]});");
+		}
+
+		if (!collapsibleVar.equals("")) {
+			code.append(containerVariables.peek())
+				.append(".addContained(")
+				.append(collapsibleVar)
+				.append(");\n");
+			
+		} else {
+			code.append(containerVariables.peek())
+				.append(".addContained(")
+				.append(variable)
+				.append(");\n");
+		}
 		containerVariables.push(variable);
 	}
 
@@ -300,10 +339,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderHBox(String borderTitle, HBox hbox) {
+	public void renderHBox(String borderTitle, HBox hbox) 
+	{
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizHBox.create({");
-		size(hbox, null, code);
+		
+		// if collapsible, then make the inner hbox 100% width and height and do not put the border/title
+		if(hbox.getCollapsible()!=null)
+		{
+			code.append("width:'100%',height:'100%',");
+		}
+		// otherwise
+		else 
+		{
+			size(hbox, null, code);
+		}
+
 		HorizontalAlignment h = hbox.getHorizontalAlignment();
 		if (h != null) {
 			switch (h) {
@@ -336,16 +387,47 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				throw new MetaDataException("HBox HoriaontalAlignment of " + h + " is not supported");
 			}
 		}
-		bordered(borderTitle, hbox, hbox.getPixelPadding(), code);
+		if(hbox.getCollapsible()==null)
+		{
+			bordered(borderTitle, hbox, hbox.getPixelPadding(), code);
+		}
 		box(hbox);
 		invisible(hbox.getInvisibleConditionName(), code);
 		removeTrailingComma(code);
+		
 		code.append("});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 
+		String collapsibleVar = "";
+		if (hbox.getCollapsible() != null) 
+		{
+			// append the script for a collapsible object
+			collapsibleVar = "v" + variableCounter++;
+			code.append("var ")
+				.append(collapsibleVar)
+				.append("=isc.BizCollapsible.create({title:'")
+				.append(hbox.getBorderTitle())
+				.append("',minimized:")
+				.append(hbox.getCollapsible().equals(Collapsible.closed) ? "true" : "false")
+				.append(",");
+				
+				size(hbox, null, code);
+				invisible(hbox.getInvisibleConditionName(), code);
+				// append the inner hbox to the collapsible area
+				code.append("items: [")
+					.append(variable)
+					.append("]});");
+		}
+
+		if (!collapsibleVar.equals("")) {
+			code.append(containerVariables.peek()).append(".addContained(").append(collapsibleVar).append(");\n");
+
+		} else {
+			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+		}
 		containerVariables.push(variable);
 	}
 
+	
 	@Override
 	public void renderedHBox(String title, HBox bbox) {
 		containerVariables.pop();
@@ -359,22 +441,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Integer memberPadding = box.getPixelMemberPadding();
 		if (memberPadding != null) {
 			code.append("membersMargin:").append(memberPadding).append(',');
-		}
-		else {
+		} else {
 			code.append("membersMargin:10,");
 		}
 	}
-
+	
 	private boolean viewHasAtLeastOneForm = false;
 	private String formVariable = null;
 	private VBox borderBox = null;
-	
+
 	@Override
 	public void renderForm(String borderTitle, Form form) {
 		viewHasAtLeastOneForm = true;
-		
+
 		// If a form is defined with a border, then wrap the form definition in a vbox.
-		// SC 8.2 couldn't cope with chrome and would draw the fieldset/border too small 
+		// SC 8.2 couldn't cope with chrome and would draw the fieldset/border too small
 		// for its content.
 		Boolean border = form.getBorder();
 		if (Boolean.TRUE.equals(border)) {
@@ -387,7 +468,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			borderBox.setPercentageWidth(form.getPercentageWidth());
 			borderBox.setPixelPadding(Integer.valueOf(10));
 
-			// If no height is specified, use a height of 1 pixel 
+			// If no height is specified, use a height of 1 pixel
 			// which makes the bordered vbox expand to fit its contents
 			Integer percentageHeight = form.getPercentageHeight();
 			Integer pixelHeight = form.getPixelHeight();
@@ -399,11 +480,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 			renderVBox(borderTitle, borderBox);
 		}
-		
+
 		formVariable = "v" + variableCounter++;
 		code.append("var ").append(formVariable);
 		code.append("=isc.DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
-		// Render form with top labels if required (increase cell padding somewhat to accommodate
+		// Render form with top labels if required (increase cell padding somewhat to
+		// accommodate
 		if (isCurrentFormRenderTopLabels()) {
 			code.append("titleOrientation:'top',cellPadding:5,");
 		}
@@ -415,13 +497,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("ID:").append(IDExpression()).append(',');
 		disabled(form.getDisabledConditionName(), code);
 //code.append("cellBorder:1,");
-		
+
 		// only size the form if its not in a border VBox
-		if (! Boolean.TRUE.equals(border)) { // false or null
+		if (!Boolean.TRUE.equals(border)) { // false or null
 			size(form, null, code);
 			invisible(form.getInvisibleConditionName(), code);
 		}
-		
+
 		HorizontalAlignment alignment = form.getLabelDefaultHorizontalAlignment();
 		if (alignment != null) {
 			code.append("titleAlign:'").append(alignment).append("',");
@@ -438,7 +520,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(containerVariables.peek()).append(".addContained(").append(formVariable).append(");\n");
 		formVariable = null;
 		renderedFormRow = false;
-		
+
 		if (Boolean.TRUE.equals(form.getBorder())) {
 			renderedVBox(borderTitle, borderBox);
 			borderBox = null;
@@ -452,16 +534,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Integer responsive = column.getResponsiveWidth();
 		if (pixel != null) {
 			code.append(pixel).append(',');
-		}
-		else if (percentage != null) {
+		} else if (percentage != null) {
 			code.append('\'').append(percentage).append("%',");
-		}
-		else if (responsive != null) {
+		} else if (responsive != null) {
 			code.append('\'');
 			code.append(LayoutUtil.responsiveWidthToPercentageWidth(responsive.doubleValue()));
-			code.append("%',"); 
-		}
-		else {
+			code.append("%',");
+		} else {
 			code.append("'*',");
 		}
 	}
@@ -474,7 +553,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderFormRow(FormRow row) {
 		startedNewFormRow = true;
-		if (! renderedFormRow) {
+		if (!renderedFormRow) {
 			code.setLength(code.length() - 1); // remove last column comma
 			code.append("]});");
 			code.append("view._vm.addMember(").append(formVariable).append(");\n");
@@ -485,12 +564,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormItem(String label,
-								boolean required,
-								String help,
-								boolean showLabel,
-								int colspan,
-								FormItem item) {
+	public void renderFormItem(String label, boolean required, String help, boolean showLabel, int colspan,
+			FormItem item) {
 		code.append("{showTitle:").append(showLabel).append(',');
 		// label handled in preProcessFormItem()
 		if (colspan >= 1) {
@@ -514,22 +589,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderedFormItem(String label,
-									boolean required,
-									String help,
-									boolean showLabel,
-									int colspan,
-									FormItem item) {
+	public void renderedFormItem(String label, boolean required, String help, boolean showLabel, int colspan,
+			FormItem item) {
 		if (startedNewFormRow) {
 			code.append("startRow:true},");
 			startedNewFormRow = false;
-		}
-		else {
+		} else {
 			code.append("startRow:false},");
 		}
-		
+
 		// Move along the requisite amount of form columns
-		if (showLabel && (! isCurrentFormRenderTopLabels())) {
+		if (showLabel && (!isCurrentFormRenderTopLabels())) {
 			incrementFormColumn();
 		}
 		for (int i = 0, l = colspan; i < l; i++) {
@@ -544,28 +614,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormButton(Action action,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									Button button) {
-		String buttonCode = generateButton(action.getResourceName(),
-											action.getImplicitName(),
-											label,
-											action.getClientValidation(),
-											iconUrl,
-											iconStyleClass,
-											toolTip,
-											confirmationText,
-											type,
-											action.getParameters(),
-											action.getDisabledConditionName(),
-											action.getInvisibleConditionName(),
-											button,
-											null);
+	public void renderFormButton(Action action, String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, Button button) {
+		String buttonCode = generateButton(action.getResourceName(), action.getImplicitName(), label,
+				action.getClientValidation(), iconUrl, iconStyleClass, toolTip, confirmationText, type,
+				action.getParameters(), action.getDisabledConditionName(), action.getInvisibleConditionName(), button,
+				null);
 		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
 		code.append(buttonCode).append("]}),");
 		disabled(action.getDisabledConditionName(), code);
@@ -573,52 +627,28 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderButton(Action action,
-								String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								char type,
-								Button button) {
-		String buttonCode = generateButton(action.getResourceName(),
-											action.getImplicitName(),
-											label,
-											action.getClientValidation(),
-											iconUrl,
-											iconStyleClass,
-											toolTip,
-											confirmationText,
-											type,
-											action.getParameters(),
-											action.getDisabledConditionName(),
-											action.getInvisibleConditionName(),
-											button,
-											null);
+	public void renderButton(Action action, String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, Button button) {
+		String buttonCode = generateButton(action.getResourceName(), action.getImplicitName(), label,
+				action.getClientValidation(), iconUrl, iconStyleClass, toolTip, confirmationText, type,
+				action.getParameters(), action.getDisabledConditionName(), action.getInvisibleConditionName(), button,
+				null);
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=').append(buttonCode).append(";\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
 	@Override
-	public void renderFormZoomIn(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									ZoomIn zoomIn) {
+	public void renderFormZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
 		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		code.append("type:'canvas',showTitle:false,width:1,canvas:");
 		code.append(zoomInCode).append(',');
 		disabled(zoomIn.getDisabledConditionName(), code);
 		invisible(zoomIn.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
-	public void renderZoomIn(String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								ZoomIn zoomIn) {
+	public void renderZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
 		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=').append(zoomInCode).append(";\n");
@@ -657,27 +687,27 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderBoundColumnGeometry(Geometry geometry) {
 		dataWidgetColumnInputWidget = geometry;
 	}
-	
+
 	@Override
 	public void renderedBoundColumnGeometry(Geometry geometry) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderFormGeometry(Geometry geometry) {
 		preProcessFormItem(geometry, "geometry");
 		size(geometry, null, code);
 		disabled(geometry.getDisabledConditionName(), code);
 		invisible(geometry.getInvisibleConditionName(), code);
-		
+
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
-		
+
 		GeometryInputType type = geometry.getType();
 		if (type != null) {
 			code.append("drawingTools:'").append(type).append("',");
 		}
-		
+
 		// TODO add in the filter operators allowed
 	}
 
@@ -685,13 +715,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormGeometry(Geometry geometry) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderFormGeometryMap(GeometryMap geometry) {
 		preProcessFormItem(geometry, "geometryMap");
 
-		// If no height, make the map at least 150px high so that all the map controls fit
-		boolean noHeight = (geometry.getPixelHeight() == null) && (geometry.getPercentageHeight() == null) && (geometry.getMinPixelHeight() == null);
+		// If no height, make the map at least 150px high so that all the map controls
+		// fit
+		boolean noHeight = (geometry.getPixelHeight() == null) && (geometry.getPercentageHeight() == null)
+				&& (geometry.getMinPixelHeight() == null);
 		if (noHeight) {
 			geometry.setPercentageHeight(Integer.valueOf(100));
 			geometry.setMinPixelHeight(Integer.valueOf(170));
@@ -701,7 +733,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			geometry.setPercentageHeight(null);
 			geometry.setMinPixelHeight(null);
 		}
-		
+
 		disabled(geometry.getDisabledConditionName(), code);
 		invisible(geometry.getInvisibleConditionName(), code);
 
@@ -710,12 +742,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("drawingTools:'").append(type).append("',");
 		}
 	}
-	
+
 	@Override
 	public void renderedFormGeometryMap(GeometryMap geometry) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderFormDialogButton(String label, DialogButton button) {
 		code.append("type:'blurb',defaultValue:'dialog button ");
@@ -723,8 +755,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(button.getDisabledConditionName(), code);
 		invisible(button.getInvisibleConditionName(), code);
 	}
-	
-		@Override
+
+	@Override
 	public void renderDialogButton(String label, DialogButton button) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
@@ -737,22 +769,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormSpacer(Spacer spacer) {
 		code.append("type:'spacer',");
 		size(spacer, null, code);
-        invisible(spacer.getInvisibleConditionName(), code);
+		invisible(spacer.getInvisibleConditionName(), code);
 	}
 
 	@Override
 	public void renderSpacer(Spacer spacer) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
-        if ((spacer.getPixelWidth() != null) || 
-        		(spacer.getPixelHeight() != null) ||
-        		(spacer.getInvisibleConditionName() != null)) {
-        	code.append('{');
-        	size(spacer, null, code);
-	        invisible(spacer.getInvisibleConditionName(), code);
-        	code.setLength(code.length() - 1); // remove trailing comma
-        	code.append('}');
-        }
+		if ((spacer.getPixelWidth() != null) || (spacer.getPixelHeight() != null)
+				|| (spacer.getInvisibleConditionName() != null)) {
+			code.append('{');
+			size(spacer, null, code);
+			invisible(spacer.getInvisibleConditionName(), code);
+			code.setLength(code.length() - 1); // remove trailing comma
+			code.append('}');
+		}
 		code.append(");\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
@@ -767,7 +798,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
-		// markup is generated in the JSON data for a data grid container column static image
+		// markup is generated in the JSON data for a data grid container column static
+		// image
 	}
 
 	// TODO size, invisibility and binding
@@ -779,7 +811,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(";\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
-	
+
 	private void addStaticImage(StaticImage image) {
 		code.append("isc.BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
 		code.append("',file:'").append(image.getRelativeFile()).append("',");
@@ -790,7 +822,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderContainerColumnDynamicImage(DynamicImage image) {
-		// markup is generated in the JSON data for a data grid container column dynamic image
+		// markup is generated in the JSON data for a data grid container column dynamic
+		// image
 	}
 
 	@Override
@@ -801,7 +834,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(";\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
-	
+
 	private void addImage(DynamicImage image) {
 		code.append("isc.BizDynamicImage.create({name:'");
 		code.append(image.getName());
@@ -823,7 +856,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append("_view:view})");
 	}
-	
+
 	@Override
 	public void renderFormLink(String value, Link link) {
 		// Take care of the title, as we're not calling preProcessFormItem
@@ -847,7 +880,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderLink(String value, Link link) {
 		// TODO Implement later
 	}
-	
+
 	private static Label makeNewLabelFromBlurb(Blurb blurb) {
 		Label result = new Label();
 		result.setValue(blurb.getMarkup());
@@ -857,7 +890,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		result.setInvisibleConditionName(blurb.getInvisibleConditionName());
 		return result;
 	}
-	
+
 	@Override
 	public void renderFormBlurb(String markup, Blurb blurb) {
 		renderFormLabel(markup, makeNewLabelFromBlurb(blurb));
@@ -872,11 +905,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderBlurb(String markup, Blurb blurb) {
 		renderLabel(markup, makeNewLabelFromBlurb(blurb));
 	}
-	
+
 	@Override
 	public void renderFormLabel(String value, Label label) {
 		FormItem currentFormItem = getCurrentFormItem();
-		
+
 		// Set colSpan 1 if not set otherwise all formatting hell breaks loose
 		if (currentFormItem.getColspan() == null) { // not set
 			code.append("colSpan:1,");
@@ -898,7 +931,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String binding = label.getBinding();
 
 		// does the value have binding expressions in them? - (?s) means multiline match
-		boolean dynamic = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value); 
+		boolean dynamic = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value);
 		if (dynamic) {
 			binding = "_" + formatCounter++; // _1, _2 and so on
 		}
@@ -906,12 +939,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (binding == null) {
 			String defaultValue = (label.getFor() == null) ? value : value + " :";
 			code.append("defaultValue:'").append(OWASP.escapeJsString(defaultValue, false, false));
-		}
-		else {
+		} else {
 			code.append("name:'").append(BindUtil.sanitiseBinding(binding));
 		}
 		code.append("',");
-		
+
 		HorizontalAlignment alignment = label.getTextAlignment();
 		if (alignment != null) {
 			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
@@ -922,16 +954,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderContainerColumnLabel(String value, Label label) {
-		// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
+		// markup is generated in the JSON data for a data grid container column label
+		// or a dynamic form-based value
 	}
 
 	@Override
 	public void renderLabel(String value, Label label) {
-		// does the value have binding expressions in them? - (?s) means multi-line match
-		boolean boundValue = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value); 
+		// does the value have binding expressions in them? - (?s) means multi-line
+		// match
+		boolean boundValue = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value);
 		if (boundValue) {
-			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
-											"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
+			throw new MetaDataException("Label or blurb with a value of [" + label.getValue()
+					+ "] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
 		}
 
 		String variable = "v" + variableCounter++;
@@ -946,21 +980,20 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (alignment != null) {
 			code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
 		}
-		
+
 		invisible(label.getInvisibleConditionName(), code);
 
 		String binding = label.getBinding();
 		if (binding == null) {
 			String defaultValue = (label.getFor() == null) ? value : value + " :";
 			code.append("value:'").append(OWASP.escapeJsString(defaultValue, false, false));
-		}
-		else {
+		} else {
 			code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
 		}
 		code.append("'});\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
-	
+
 	@Override
 	public void renderFormProgressBar(ProgressBar progressBar) {
 		// TODO Make a value from CanvasItem.
@@ -982,15 +1015,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
@@ -1008,15 +1041,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void renderedListRepeater(String title, ListRepeater repeater) {
 		renderedListWidget();
@@ -1036,15 +1069,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	@Override
 	public void renderedTreeGrid(String title, TreeGrid grid) {
 		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
@@ -1058,31 +1091,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (queryName != null) { // its a query
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
-			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, null);
+			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null,
+					currentUxUi, false, ds, null);
 			code.insert(0, ds);
-		}
-		else {
+		} else {
 			if (modelName != null) { // its a model
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, 
-																					customer, 
-																					module, 
-																					document,
-																					modelName,
-																					currentUxUi,
-																					false,
-																					ds, 
-																					null);
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, document,
+						modelName, currentUxUi, false, ds, null);
 				code.insert(0, ds);
-			}
-			else {
+			} else {
 				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, null);
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null,
+						currentUxUi, false, ds, null);
 				code.insert(0, ds);
 			}
 		}
-		
+
 		listWidgetVariable = "v" + variableCounter++;
 		code.append("var ").append(listWidgetVariable).append("=isc.BizListGrid.create({");
 		code.append("ID:").append(IDExpression()).append(',');
@@ -1100,7 +1126,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		invisible(widget.getInvisibleConditionName(), code);
 	}
-	
+
 	private void renderGrid(ListGrid grid) {
 		code.append("contConv:").append(grid.getContinueConversation()).append(",");
 		String selectedIdBinding = grid.getSelectedIdBinding();
@@ -1158,10 +1184,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private String dataWidgetVariable = null;
 	private Document dataWidgetDocument = null;
 	private String dataWidgetBinding = null;
-	// Indicates whether the field definition array has been completed and closed off
-	// Its used to ensure the last ']' is appended before adding events or closing the grid definition
+	// Indicates whether the field definition array has been completed and closed
+	// off
+	// Its used to ensure the last ']' is appended before adding events or closing
+	// the grid definition
 	private boolean dataWidgetFieldsIncomplete = false;
-	
+
 	@Override
 	public void renderDataGrid(String title, DataGrid grid) {
 		renderDataWidget(grid);
@@ -1238,8 +1266,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("title:'");
 			code.append(OWASP.escapeJsString(title)).append("',");
 		}
-		if ((relation instanceof Collection) && 
-				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
+		if ((relation instanceof Collection) && Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
 			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
 		}
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
@@ -1259,9 +1286,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		dataWidgetBinding = null;
 		dataWidgetFieldsIncomplete = false;
 	}
-	
+
 	private InputWidget dataWidgetColumnInputWidget;
-	
+
 	@Override
 	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
 		// do nothing
@@ -1280,16 +1307,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			boolean hasFormatter = (column.getFormatterName() != null) || (column.getCustomFormatterName() != null);
 			if (binding == null) { // column bound to collection for the grid
 				def = getDataGridField(document, dataWidgetColumnInputWidget, dataWidgetBinding, hasFormatter, true);
-			} 
-			else {
+			} else {
 				def = getDataGridField(dataWidgetDocument, dataWidgetColumnInputWidget, null, hasFormatter, true);
 			}
 
 			def.setTitle(title);
-			def.setEditable(! Boolean.FALSE.equals(column.getEditable()));
-			def.setEscape(! Boolean.FALSE.equals(column.getEscape()));
+			def.setEditable(!Boolean.FALSE.equals(column.getEditable()));
+			def.setEscape(!Boolean.FALSE.equals(column.getEscape()));
 
-			// NB - Text alignment and pixel width defaults are set in SmartClientDataGridFieldDefinition constructor
+			// NB - Text alignment and pixel width defaults are set in
+			// SmartClientDataGridFieldDefinition constructor
 			HorizontalAlignment columnAlignment = column.getAlignment();
 			if (columnAlignment != null) {
 				def.setAlign(columnAlignment);
@@ -1298,22 +1325,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			if (pixelWidth != null) {
 				def.setPixelWidth(pixelWidth);
 			}
-			
+
 			code.append('{').append(def.toJavascript()).append("},");
 
 			SmartClientLookupDefinition lookup = def.getLookup();
 			if (lookup != null) {
 				StringBuilder ds = new StringBuilder(64);
 				String optionDataSource = lookup.getOptionDataSource();
-				SmartClientViewRenderer.appendDataSourceDefinition(user,
-																	customer, 
-																	lookup.getQuery(),
-																	optionDataSource,
-																	(LookupDescription) dataWidgetColumnInputWidget, 
-																	currentUxUi,
-																	false,
-																	ds,
-																	null);
+				SmartClientViewRenderer.appendDataSourceDefinition(user, customer, lookup.getQuery(), optionDataSource,
+						(LookupDescription) dataWidgetColumnInputWidget, currentUxUi, false, ds, null);
 				code.insert(0, ds);
 			}
 			dataWidgetColumnInputWidget = null;
@@ -1329,7 +1349,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		code.append("{name:'_").append(formatCounter++);
 		code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
-		
+
 		code.append((title == null) ? " " : OWASP.escapeJsString(title)).append('\'');
 		HorizontalAlignment alignment = column.getAlignment();
 		if (alignment != null) {
@@ -1361,19 +1381,19 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderBoundColumnCheckBox(CheckBox checkBox) {
 		dataWidgetColumnInputWidget = checkBox;
 	}
-	
+
 	@Override
 	public void renderFormCheckBox(CheckBox checkBox) {
 		preProcessFormItem(checkBox, "checkbox");
 		size(checkBox, null, code);
-		if (! Boolean.FALSE.equals(checkBox.getTriState())) {
+		if (!Boolean.FALSE.equals(checkBox.getTriState())) {
 			code.append("allowEmptyValue:true,");
 		}
 		code.append("labelAsTitle:true,");
 		disabled(checkBox.getDisabledConditionName(), code);
 		invisible(checkBox.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnCheckBox(CheckBox checkBox) {
 		// do nothing
@@ -1383,7 +1403,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormCheckBox(CheckBox checkBox) {
 		// do nothing
 	}
-	
+
 	// TODO implement this - does this need size? probably
 	@Override
 	public void renderCheckMembership(CheckMembership membership) {
@@ -1411,7 +1431,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(colour.getDisabledConditionName(), code);
 		invisible(colour.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnColourPicker(ColourPicker colour) {
 		// do nothing
@@ -1421,7 +1441,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormColourPicker(ColourPicker colour) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnCombo(Combo combo) {
 		dataWidgetColumnInputWidget = combo;
@@ -1434,7 +1454,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(combo.getDisabledConditionName(), code);
 		invisible(combo.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnCombo(Combo combo) {
 		// do nothing
@@ -1444,7 +1464,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormCombo(Combo combo) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnContentImage(ContentImage image) {
 		dataWidgetColumnInputWidget = image;
@@ -1452,9 +1472,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderContainerColumnContentImage(ContentImage image) {
-		// markup is generated in the JSON data for a data grid container column content image
+		// markup is generated in the JSON data for a data grid container column content
+		// image
 	}
-	
+
 	@Override
 	public void renderFormContentImage(ContentImage image) {
 		preProcessFormItem(image, "bizContentImage");
@@ -1463,7 +1484,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(image.getInvisibleConditionName(), code);
 		editable(image.getEditable(), code);
 	}
-	
+
 	@Override
 	public void renderBoundColumnContentLink(String value, ContentLink link) {
 		dataWidgetColumnInputWidget = link;
@@ -1479,7 +1500,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(link.getInvisibleConditionName(), code);
 		editable(link.getEditable(), code);
 	}
-	
+
 	@Override
 	public void renderFormContentSignature(ContentSignature signature) {
 		// TODO not implemented for SC yet - use a ContentImage for now
@@ -1506,7 +1527,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(html.getDisabledConditionName(), code);
 		invisible(html.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		Relation relation = (Relation) getCurrentTarget().getAttribute();
@@ -1523,15 +1544,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append(",membersHeading:'");
 			code.append(OWASP.escapeJsString(membersHeading)).append('\'');
 		}
-		if ((relation instanceof Collection) && 
-				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
+		if ((relation instanceof Collection) && Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
 			code.append(",_ordinal:'").append(Bean.ORDINAL_NAME).append('\'');
 		}
 		code.append(",_view:view,");
 		size(membership, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		disabled(membership.getDisabledConditionName(), code);
 		invisible(membership.getInvisibleConditionName(), code);
-		
+
 		containerVariables.push(variable);
 	}
 
@@ -1560,64 +1580,45 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
-													boolean canCreate,
-													boolean canUpdate,
-													String descriptionBinding,
-													LookupDescription lookup) {
+	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query, boolean canCreate, boolean canUpdate,
+			String descriptionBinding, LookupDescription lookup) {
 		dataWidgetColumnInputWidget = lookup;
 	}
 
 	@Override
-	public void renderFormLookupDescription(MetaDataQueryDefinition query,
-												boolean canCreate,
-												boolean canUpdate,
-												String descriptionBinding,
-												LookupDescription lookup) {
+	public void renderFormLookupDescription(MetaDataQueryDefinition query, boolean canCreate, boolean canUpdate,
+			String descriptionBinding, LookupDescription lookup) {
 		SmartClientFieldDefinition def = preProcessFormItem(lookup, "bizLookupDescription");
 		size(lookup, null, code);
 		disabled(lookup.getDisabledConditionName(), code);
 		invisible(lookup.getInvisibleConditionName(), code);
 		editable(lookup.getEditable(), code);
 		disableLookupComponents(lookup, code);
-    	code.append("canCreate:").append(def.getLookup().getCanCreate());
-    	code.append(",canUpdate:").append(def.getLookup().getCanUpdate());
+		code.append("canCreate:").append(def.getLookup().getCanCreate());
+		code.append(",canUpdate:").append(def.getLookup().getCanUpdate());
 
 		code.append(",_view:view,");
 		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
 
 		StringBuilder ds = new StringBuilder(256);
 		String optionDataSource = def.getLookup().getOptionDataSource();
-		SmartClientViewRenderer.appendDataSourceDefinition(user,
-															customer,
-															query,
-															optionDataSource,
-															lookup,
-															currentUxUi,
-															false,
-															ds,
-															null);
+		SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, optionDataSource, lookup, currentUxUi,
+				false, ds, null);
 		code.insert(0, ds);
 	}
-	
+
 	@Override
-	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
-														boolean canCreate,
-														boolean canUpdate,
-														String descriptionBinding,
-														LookupDescription lookup) {
+	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query, boolean canCreate,
+			boolean canUpdate, String descriptionBinding, LookupDescription lookup) {
 		// do nothing
 	}
 
 	@Override
-	public void renderedFormLookupDescription(MetaDataQueryDefinition query,
-												boolean canCreate,
-												boolean canUpdate,
-												String descriptionBinding,
-												LookupDescription lookup) {
+	public void renderedFormLookupDescription(MetaDataQueryDefinition query, boolean canCreate, boolean canUpdate,
+			String descriptionBinding, LookupDescription lookup) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnPassword(Password password) {
 		dataWidgetColumnInputWidget = password;
@@ -1628,11 +1629,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		preProcessFormItem(password, "password");
 		size(password, null, code);
 		// Security settings
-		code.append("autoComplete:'none',browserAutoCapitalize:false,browserAutoCorrect:false,browserSpellCheck:false,");
+		code.append(
+				"autoComplete:'none',browserAutoCapitalize:false,browserAutoCorrect:false,browserSpellCheck:false,");
 		disabled(password.getDisabledConditionName(), code);
 		invisible(password.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnPassword(Password password) {
 		// do nothing
@@ -1642,7 +1644,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormPassword(Password password) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnRadio(Radio radio) {
 		dataWidgetColumnInputWidget = radio;
@@ -1658,7 +1660,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(radio.getDisabledConditionName(), code);
 		invisible(radio.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnRadio(Radio radio) {
 		// do nothing
@@ -1668,7 +1670,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormRadio(Radio radio) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnRichText(RichText text) {
 		dataWidgetColumnInputWidget = text;
@@ -1681,7 +1683,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(text.getDisabledConditionName(), code);
 		invisible(text.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnRichText(RichText richText) {
 		// do nothing
@@ -1691,7 +1693,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormRichText(RichText richText) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnSlider(Slider slider) {
 		dataWidgetColumnInputWidget = slider;
@@ -1723,7 +1725,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(slider.getDisabledConditionName(), code);
 		invisible(slider.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnSlider(Slider slider) {
 		// do nothing
@@ -1733,7 +1735,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormSlider(Slider slider) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnSpinner(Spinner spinner) {
 		dataWidgetColumnInputWidget = spinner;
@@ -1758,7 +1760,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(spinner.getDisabledConditionName(), code);
 		invisible(spinner.getInvisibleConditionName(), code);
 	}
-	
+
 	@Override
 	public void renderedBoundColumnSpinner(Spinner spinner) {
 		// do nothing
@@ -1768,7 +1770,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormSpinner(Spinner spinner) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnTextArea(TextArea text) {
 		dataWidgetColumnInputWidget = text;
@@ -1788,7 +1790,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
 	}
-	
+
 	@Override
 	public void renderedBoundColumnTextArea(TextArea text) {
 		// do nothing
@@ -1798,7 +1800,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormTextArea(TextArea text) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderBoundColumnTextField(TextField text) {
 		dataWidgetColumnInputWidget = text;
@@ -1808,26 +1810,26 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormTextField(TextField text) {
 		CompleteType complete = text.getComplete();
 		if (complete != null) {
-		    preProcessFormItem(text, "bizComplete");
+			preProcessFormItem(text, "bizComplete");
 			code.append(AbstractWebContext.ACTION_NAME).append(":'").append(complete).append("',");
-			code.append(AbstractWebContext.BINDING_NAME).append(":'").append(BindUtil.sanitiseBinding(text.getBinding())).append("',");
-		}
-		else {
+			code.append(AbstractWebContext.BINDING_NAME).append(":'")
+					.append(BindUtil.sanitiseBinding(text.getBinding())).append("',");
+		} else {
 			preProcessFormItem(text, null);
 		}
 
 		size(text, null, code);
 		disabled(text.getDisabledConditionName(), code);
 		invisible(text.getInvisibleConditionName(), code);
-		
+
 		if (Boolean.FALSE.equals(text.getEditable())) {
 			code.append("canEdit:false,");
 		}
-		
+
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
 	}
-	
+
 	@Override
 	public void renderedBoundColumnTextField(TextField text) {
 		// do nothing
@@ -1837,7 +1839,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderedFormTextField(TextField text) {
 		// do nothing
 	}
-	
+
 	@Override
 	public void renderFormInject(Inject inject) {
 		FormItem currentFormItem = getCurrentFormItem();
@@ -1859,414 +1861,141 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderCustomAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(action.getResourceName(), 
-					null, 
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderCustomAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(action.getResourceName(), null, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderAddAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Add,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderAddAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Add, label, action.getInActionPanel(), action.getClientValidation(), iconUrl,
+				iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderRemoveAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action,
-									boolean canDelete) {
-		addAction(null,
-					ImplicitActionName.Remove,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					Boolean.valueOf(canDelete));
+	public void renderRemoveAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action, boolean canDelete) {
+		addAction(null, ImplicitActionName.Remove, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), Boolean.valueOf(canDelete));
 	}
 
 	@Override
-	public void renderZoomOutAction(String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										char type,
-										ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.ZoomOut,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderZoomOutAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.ZoomOut, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderNavigateAction(String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										char type,
-										ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Navigate,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderNavigateAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Navigate, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderOKAction(String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								char type,
-								ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.OK,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderOKAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.OK, label, action.getInActionPanel(), action.getClientValidation(), iconUrl,
+				iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderSaveAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Save,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderSaveAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Save, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderCancelAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Cancel,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderCancelAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Cancel, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderDeleteAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Delete,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderDeleteAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Delete, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderReportAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Report,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderReportAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Report, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderBizExportAction(String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										char type,
-										ActionImpl action) {
-		addAction(action.getResourceName(),
-					ImplicitActionName.BizExport,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderBizExportAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(action.getResourceName(), ImplicitActionName.BizExport, label, action.getInActionPanel(),
+				action.getClientValidation(), iconUrl, iconStyleClass, toolTip, confirmationText, type,
+				action.getParameters(), action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderBizImportAction(String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										char type,
-										ActionImpl action) {
-		addAction(action.getResourceName(),
-					ImplicitActionName.BizImport,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderBizImportAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(action.getResourceName(), ImplicitActionName.BizImport, label, action.getInActionPanel(),
+				action.getClientValidation(), iconUrl, iconStyleClass, toolTip, confirmationText, type,
+				action.getParameters(), action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderDownloadAction(String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										char type,
-										ActionImpl action) {
-		addAction(action.getResourceName(),
-					ImplicitActionName.Download,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderDownloadAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(action.getResourceName(), ImplicitActionName.Download, label, action.getInActionPanel(),
+				action.getClientValidation(), iconUrl, iconStyleClass, toolTip, confirmationText, type,
+				action.getParameters(), action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderUploadAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(action.getResourceName(),
-					ImplicitActionName.Upload,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderUploadAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(action.getResourceName(), ImplicitActionName.Upload, label, action.getInActionPanel(),
+				action.getClientValidation(), iconUrl, iconStyleClass, toolTip, confirmationText, type,
+				action.getParameters(), action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderNewAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.New,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderNewAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.New, label, action.getInActionPanel(), action.getClientValidation(), iconUrl,
+				iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderEditAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Edit,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderEditAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Edit, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
 
 	@Override
-	public void renderPrintAction(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									ActionImpl action) {
-		addAction(null,
-					ImplicitActionName.Print,
-					label,
-					action.getInActionPanel(),
-					action.getClientValidation(),
-					iconUrl,
-					iconStyleClass,
-					toolTip,
-					confirmationText,
-					type,
-					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
-					null);
+	public void renderPrintAction(String label, String iconUrl, String iconStyleClass, String toolTip,
+			String confirmationText, char type, ActionImpl action) {
+		addAction(null, ImplicitActionName.Print, label, action.getInActionPanel(), action.getClientValidation(),
+				iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getParameters(),
+				action.getDisabledConditionName(), action.getInvisibleConditionName(), null);
 	}
-	
+
 	private void writeOutServerSideCallbackMethodIfNecessary() {
 		if (inOnAddedEventHandler) {
 			code.append("},bizAddedForServer:function(form,item,value){var view=form._view;");
@@ -2278,7 +2007,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("},bizRemovedForServer:function(form,item,value){var view=form._view;");
 		}
 	}
-	
+
 	@Override
 	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
 		if (getCurrentForm() != null) {
@@ -2291,15 +2020,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			name = implicitName.toString();
 		}
 		code.append(name).append("',");
-		code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
+		code.append(!Boolean.FALSE.equals(action.getClientValidation())).append(");");
 	}
 
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		if (getCurrentForm() == null) {
 			code.append("changed:function(){var view=this._view;");
-		}
-		else {
+		} else {
 			code.append("changed:function(form,item,value){var view=form._view;");
 		}
 	}
@@ -2311,8 +2039,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
-		// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
+		// Note the test to short circuit focus event processing whilst requests are
+		// pending to stop loops with multiple fields.
+		code.append(
+				"editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
 	}
 
 	@Override
@@ -2320,20 +2050,25 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("}},");
 	}
 
-	// indicates that we are blurring or selecting and we need to call special methods
+	// indicates that we are blurring or selecting and we need to call special
+	// methods
 	// to potentially serialize calls to button actions after editorExit.
 	private boolean visitingAsync = false;
-	
+
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		visitingAsync = true;
-		
+
 		// This fires before the BizButton action() method if a button was clicked
-		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{form._view._blurry=item;}},");
+		// Note the test to short circuit blur event processing whilst requests are
+		// pending to stop loops with multiple fields.
+		code.append(
+				"blur:function(form,item){if(isc.RPCManager.requestsArePending()){form._view._blurry=null;}else{form._view._blurry=item;}},");
 		// This is called before or after the BizButton action depending on the browser.
-		// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
-		code.append("editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()||(!item.validate())){form._view._blurry=null;}else{var view=form._view;");
+		// Note the test to short circuit blur event processing whilst requests are
+		// pending to stop loops with multiple fields.
+		code.append(
+				"editorExit:function(form,item,value){if(isc.RPCManager.requestsArePending()||(!item.validate())){form._view._blurry=null;}else{var view=form._view;");
 	}
 
 	@Override
@@ -2355,8 +2090,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		inOnAddedEventHandler = true;
 		if (getCurrentForm() == null) {
 			code.append("bizAdded:function(){var view=this._view;");
-		}
-		else {
+		} else {
 			code.append("bizAdded:function(form,item,value){var view=form._view;");
 		}
 	}
@@ -2380,8 +2114,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		inOnEditedEventHandler = true;
 		if (getCurrentForm() == null) {
 			code.append("bizEdited:function(){var view=this._view;");
-		}
-		else {
+		} else {
 			code.append("bizEdited:function(form,item,value){var view=form._view;");
 		}
 	}
@@ -2405,8 +2138,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		inOnRemovedEventHandler = true;
 		if (getCurrentForm() == null) {
 			code.append("bizRemoved:function(){var view=this._view;");
-		}
-		else {
+		} else {
 			code.append("bizRemoved:function(form,item,value){var view=form._view;");
 		}
 	}
@@ -2457,10 +2189,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void visitRerenderEventAction(RerenderEventAction rerender,
-											EventSource source,
-											boolean parentVisible,
-											boolean parentEnabled) {
+	public void visitRerenderEventAction(RerenderEventAction rerender, EventSource source, boolean parentVisible,
+			boolean parentEnabled) {
 		if (getCurrentForm() != null) {
 			writeOutServerSideCallbackMethodIfNecessary();
 		}
@@ -2470,33 +2200,29 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
-												boolean parentVisible,
-												boolean parentEnabled) {
+	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled, boolean parentVisible,
+			boolean parentEnabled) {
 		code.append("view.setDisabled('").append(BindUtil.sanitiseBinding(setDisabled.getBinding()));
 		code.append("','").append(setDisabled.getDisabledConditionName()).append("');");
 	}
 
 	@Override
-	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
-												boolean parentVisible,
-												boolean parentEnabled) {
+	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible, boolean parentVisible,
+			boolean parentEnabled) {
 		code.append("view.setInvisible('").append(BindUtil.sanitiseBinding(setInvisible.getBinding()));
 		code.append("','").append(setInvisible.getInvisibleConditionName()).append("');");
 	}
 
 	@Override
-	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
-												boolean parentVisible,
-												boolean parentEnabled) {
+	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled, boolean parentVisible,
+			boolean parentEnabled) {
 		code.append("view.toggleDisabled('").append(BindUtil.sanitiseBinding(toggleDisabled.getBinding()));
 		code.append("');");
 	}
 
 	@Override
-	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
-													boolean parentVisible,
-													boolean parentEnabled) {
+	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility, boolean parentVisible,
+			boolean parentEnabled) {
 		code.append("view.toggleVisibility('").append(BindUtil.sanitiseBinding(toggleVisibility.getBinding()));
 		code.append("');");
 	}
@@ -2512,7 +2238,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * This generates an ID based on the module name and document name and an incrementing number.
+	 * This generates an ID based on the module name and document name and an
+	 * incrementing number.
+	 * 
 	 * @return
 	 */
 	private String IDExpression() {
@@ -2523,43 +2251,35 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		result.append("'+").append(module.getName()).append('.').append(document.getName());
 		if (ViewType.edit.toString().equals(view.getName())) {
 			result.append(SmartClientWebContext.EDIT_ID_COUNTER).append("++");
-		}
-		else if (ViewType.create.toString().equals(view.getName())) {
+		} else if (ViewType.create.toString().equals(view.getName())) {
 			result.append(SmartClientWebContext.CREATE_ID_COUNTER).append("++");
 		}
-		
+
 		return result.toString();
 	}
-	
-	private void size(AbsoluteWidth sizable, 
-						Integer defaultMinHeightInPixels,
-						StringBuilder builder) {
-		ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper) ? 
-									((ShrinkWrapper) sizable).getShrinkWrap() :
-									null;
+
+	private void size(AbsoluteWidth sizable, Integer defaultMinHeightInPixels, StringBuilder builder) {
+		ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper) ? ((ShrinkWrapper) sizable).getShrinkWrap() : null;
 		boolean widthShrinkWrapped = false;
 		boolean heightShrinkWrapped = false;
-									
+
 		if (ShrinkWrap.width.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
 			builder.append("width:1,");
 			widthShrinkWrapped = true;
-		}
-		else {
+		} else {
 			Integer width = sizable.getPixelWidth();
 			boolean specifiedWidth = false;
 			if (width != null) {
 				builder.append("width:").append(width).append(',');
 				specifiedWidth = true;
-			}
-			else {
+			} else {
 				if (sizable instanceof RelativeSize) {
 					RelativeSize relative = (RelativeSize) sizable;
 					width = relative.getPercentageWidth();
 					if (width != null) {
 						builder.append("width:'").append(width).append("%',");
 						specifiedWidth = true;
-					}
-					else {
+					} else {
 						width = relative.getResponsiveWidth();
 						if (width != null) {
 							builder.append("width:'");
@@ -2570,27 +2290,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					}
 				}
 			}
-			if ((! specifiedWidth) && 
-					(getCurrentFormItem() != null) && 
-					(! (sizable instanceof ContentSpecifiedWidth))) {
+			if ((!specifiedWidth) && (getCurrentFormItem() != null) && (!(sizable instanceof ContentSpecifiedWidth))) {
 				builder.append("width:'*',");
 			}
 		}
-		
+
 		if (sizable instanceof AbsoluteSize) {
 			if (ShrinkWrap.height.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
 				builder.append("height:1,");
 				heightShrinkWrapped = true;
-			}
-			else {
-				// NB Don't use height:'*' if there is no specified height because blurbs won't 
+			} else {
+				// NB Don't use height:'*' if there is no specified height because blurbs won't
 				// layout correctly based on their content.
 				// Also, it doesn't help contentImages either to put in a '*'.
 				Integer height = ((AbsoluteSize) sizable).getPixelHeight();
 				if (height != null) {
 					builder.append("height:").append(height).append(',');
-				}
-				else {
+				} else {
 					if (sizable instanceof RelativeSize) {
 						height = ((RelativeSize) sizable).getPercentageHeight();
 						if (height != null) {
@@ -2600,10 +2316,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				}
 			}
 		}
-		
+
 		// process size constraints
 		if (sizable instanceof MinimumHeight) {
-			if (! heightShrinkWrapped) {
+			if (!heightShrinkWrapped) {
 				Integer minHeight = ((MinimumHeight) sizable).getMinPixelHeight();
 				if (minHeight == null) {
 					minHeight = defaultMinHeightInPixels;
@@ -2613,13 +2329,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				}
 			}
 			if (sizable instanceof ConstrainableHeight) {
-				if (! heightShrinkWrapped) {
+				if (!heightShrinkWrapped) {
 					Integer maxHeight = ((ConstrainableHeight) sizable).getMaxPixelHeight();
 					if (maxHeight != null) {
 						builder.append("maxHeight:").append(maxHeight).append(',');
 					}
 				}
-				if (! widthShrinkWrapped) {
+				if (!widthShrinkWrapped) {
 					if (sizable instanceof ConstrainableSize) {
 						ConstrainableSize constrainable = (ConstrainableSize) sizable;
 						Integer minWidth = constrainable.getMinPixelWidth();
@@ -2635,7 +2351,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 		}
 	}
-	
+
 	private static void disableCRUD(DisableableCRUDGrid grid, StringBuilder builder) {
 		String disabledCRUDCondition = grid.getDisableAddConditionName();
 		if (disabledCRUDCondition != null) {
@@ -2673,10 +2389,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			builder.append("disableClearConditionName:'").append(disabledCondition).append("',");
 		}
 	}
-
 	private static void bordered(String title, Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
+
 		if (Boolean.TRUE.equals(bordered.getBorder())) {
-			builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
+			builder.append(
+					"styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 			if (title != null) {
 				builder.append("groupTitle:'&nbsp;&nbsp;").append(OWASP.escapeJsString(title));
 				builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
@@ -2700,7 +2417,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	private static void editable(Boolean editable, StringBuilder builder) {
-		builder.append("editable:").append((! Boolean.FALSE.equals(editable)) ? "true," : "false,");
+		builder.append("editable:").append((!Boolean.FALSE.equals(editable)) ? "true," : "false,");
 	}
 
 	private static void removeTrailingComma(StringBuilder builder) {
@@ -2710,40 +2427,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private void addAction(String resourceName,
-							ImplicitActionName implicitName,
-							String displayName,
-							Boolean inActionPanel,
-							Boolean clientValidation,
-							String iconUrl,
-							String iconStyleClass,
-							String tooltip,
-							String confirmationText,
-							char type,
-							List<Parameter> parameters,
-							String disabledConditionName,
-							String invisibleConditionName,
-							Boolean canDelete) { // null unless its a remove button
-		if (! Boolean.FALSE.equals(inActionPanel) && 
-				(! ImplicitActionName.Add.equals(implicitName)) &&
-				(! ImplicitActionName.Edit.equals(implicitName))) {
-			String buttonCode = generateButton(resourceName,
-												implicitName,
-												displayName,
-												clientValidation,
-												iconUrl,
-												iconStyleClass,
-												tooltip,
-												confirmationText,
-												type,
-												parameters,
-												disabledConditionName,
-												invisibleConditionName,
-												null,
-												canDelete);
+	private void addAction(String resourceName, ImplicitActionName implicitName, String displayName,
+			Boolean inActionPanel, Boolean clientValidation, String iconUrl, String iconStyleClass, String tooltip,
+			String confirmationText, char type, List<Parameter> parameters, String disabledConditionName,
+			String invisibleConditionName, Boolean canDelete) { // null unless its a remove button
+		if (!Boolean.FALSE.equals(inActionPanel) && (!ImplicitActionName.Add.equals(implicitName))
+				&& (!ImplicitActionName.Edit.equals(implicitName))) {
+			String buttonCode = generateButton(resourceName, implicitName, displayName, clientValidation, iconUrl,
+					iconStyleClass, tooltip, confirmationText, type, parameters, disabledConditionName,
+					invisibleConditionName, null, canDelete);
 			// use double quote string delimiter to allow &quot; HTML character entity
 			code.append("view.add");
-			if (! noCreateView) {
+			if (!noCreateView) {
 				code.append(ViewType.edit.toString().equals(view.getName()) ? "Edit" : "Create");
 			}
 			code.append("Action(");
@@ -2751,11 +2446,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private String generateZoomIn(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									ZoomIn zoomIn) {
+	private String generateZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizZoomIn.create({binding:'");
 		result.append(BindUtil.sanitiseBinding(zoomIn.getBinding()));
@@ -2779,40 +2470,28 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			result.append("tooltip:'").append(OWASP.escapeJsString(toolTip)).append("',");
 		}
 		result.append("_view:view})");
-		
+
 		return result.toString();
 	}
 
-	private String generateButton(String resourceName,
-									ImplicitActionName implicitName,
-									String label,
-									Boolean clientValidation,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									char type,
-									List<Parameter> parameters,
-									String disabledConditionName,
-									String invisibleConditionName,
-									Button button, // null if called from an action defn
-									Boolean canDelete) { // null for anything but remove button
+	private String generateButton(String resourceName, ImplicitActionName implicitName, String label,
+			Boolean clientValidation, String iconUrl, String iconStyleClass, String toolTip, String confirmationText,
+			char type, List<Parameter> parameters, String disabledConditionName, String invisibleConditionName,
+			Button button, // null if called from an action defn
+			Boolean canDelete) { // null for anything but remove button
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizButton.create({validate:");
-		result.append(! Boolean.FALSE.equals(clientValidation));
+		result.append(!Boolean.FALSE.equals(clientValidation));
 
 		if (implicitName == null) {
 			result.append(",actionName:'").append(resourceName);
-		}
-		else {
+		} else {
 			result.append(",actionName:'");
-			if (ImplicitActionName.BizExport.equals(implicitName) ||
-					ImplicitActionName.BizImport.equals(implicitName) ||
-					ImplicitActionName.Download.equals(implicitName) ||
-					ImplicitActionName.Upload.equals(implicitName)) {
+			if (ImplicitActionName.BizExport.equals(implicitName) || ImplicitActionName.BizImport.equals(implicitName)
+					|| ImplicitActionName.Download.equals(implicitName)
+					|| ImplicitActionName.Upload.equals(implicitName)) {
 				result.append(resourceName);
-			}
-			else {
+			} else {
 				result.append(implicitName);
 			}
 		}
@@ -2847,25 +2526,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			result.append("_canDelete:").append(canDelete).append(',');
 		}
 		result.append("_view:view})");
-		
+
 		return result.toString();
 	}
-	
+
 	private static void appendParameters(List<Parameter> parameters, StringBuilder builder) {
-		if ((parameters != null) && (! parameters.isEmpty())) {
+		if ((parameters != null) && (!parameters.isEmpty())) {
 			builder.append("params:{");
 			for (Parameter parameter : parameters) {
 				builder.append("'").append(BindUtil.sanitiseBinding(parameter.getName())).append("':");
 				String binding = parameter.getValueBinding();
 				if (binding != null) {
 					builder.append("'{").append(binding).append("}',");
-				}
-				else {
+				} else {
 					String value = parameter.getValue();
 					if (value == null) {
 						builder.append("null,");
-					}
-					else {
+					} else {
 						builder.append("'").append(value).append("',");
 					}
 				}
@@ -2875,26 +2552,25 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 	}
 
-	private static void appendFilterParameters(List<FilterParameter> filterParameters,
-												List<Parameter> parameters,
-												StringBuilder builder) {
-		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
-				((parameters != null) && (! parameters.isEmpty()))) {
+	private static void appendFilterParameters(List<FilterParameter> filterParameters, List<Parameter> parameters,
+			StringBuilder builder) {
+		if (((filterParameters != null) && (!filterParameters.isEmpty()))
+				|| ((parameters != null) && (!parameters.isEmpty()))) {
 			builder.append("params:[");
 			if (filterParameters != null) {
 				for (FilterParameter parameter : filterParameters) {
-					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getFilterBinding())).append("',operator:'");
-					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:");
+					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getFilterBinding()))
+							.append("',operator:'");
+					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator()))
+							.append("',value:");
 					String binding = parameter.getValueBinding();
 					if (binding != null) {
 						builder.append("'{").append(binding).append("}'},");
-					}
-					else {
+					} else {
 						String value = parameter.getValue();
 						if (value == null) {
 							builder.append("null},");
-						}
-						else {
+						} else {
 							builder.append("'").append(value).append("'},");
 						}
 					}
@@ -2907,25 +2583,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					String binding = parameter.getValueBinding();
 					if (binding != null) {
 						builder.append("'{").append(binding).append("}'},");
-					}
-					else {
+					} else {
 						String value = parameter.getValue();
 						if (value == null) {
 							builder.append("null},");
-						}
-						else {
+						} else {
 							builder.append("'").append(value).append("'},");
 						}
 					}
 				}
-			}			
+			}
 			builder.setLength(builder.length() - 1); // remove comma
 			builder.append("],");
 		}
 	}
-	
-	private SmartClientFieldDefinition preProcessFormItem(InputWidget widget,
-															String typeOverride) {
+
+	private SmartClientFieldDefinition preProcessFormItem(InputWidget widget, String typeOverride) {
 		SmartClientFieldDefinition def = getField(document, widget, true);
 		if (typeOverride != null) {
 			def.setType(typeOverride);
@@ -2939,186 +2612,134 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (help != null) {
 			def.setHelpText(help);
 		}
-		
+
 		code.append(def.toJavascript());
 		code.append(',');
 
 		return def;
 	}
-	
-	public static SmartClientQueryColumnDefinition getQueryColumn(User user,
-																	Customer customer,
-																	Module module,
-																	Document document,
-																	MetaDataQueryColumn column,
-																	boolean runtime,
-																	String uxui) {
+
+	public static SmartClientQueryColumnDefinition getQueryColumn(User user, Customer customer, Module module,
+			Document document, MetaDataQueryColumn column, boolean runtime, String uxui) {
 		return new SmartClientQueryColumnDefinition(user, customer, module, document, column, runtime, uxui);
 	}
 
 	/**
-	 * Get the smart client field definition given the widget/binding.
-	 * If bindingOverride is defined, it will be used to determine the field to use.
-	 * bindingOverride is used when a Datagrid has a lookupDescription which has no binding.
-	 * That is, the lookupDescription is for the entire dataGrid entity.
+	 * Get the smart client field definition given the widget/binding. If
+	 * bindingOverride is defined, it will be used to determine the field to use.
+	 * bindingOverride is used when a Datagrid has a lookupDescription which has no
+	 * binding. That is, the lookupDescription is for the entire dataGrid entity.
 	 * 
 	 * @param document
-	 * @param widget	The widget metadata to use to define the smart client form field
-	 * @param bindingOverride	If defined, specifies a different binding to use.
+	 * @param widget          The widget metadata to use to define the smart client
+	 *                        form field
+	 * @param bindingOverride If defined, specifies a different binding to use.
 	 * @return
 	 */
-	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document, 
-												InputWidget widget,
-												boolean runtime) {
+	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document, InputWidget widget,
+			boolean runtime) {
 		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime, currentUxUi);
 	}
-	
-	public SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") Document document,
-    															InputWidget widget,
-    															String dataGridBinding,
-    															boolean hasFormatter,
-    															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, currentUxUi);
-    }
 
-    /**
-     * Appends a data source definition from a document list model.
-     * @param user
-     * @param customer
-     * @param owningModule
-     * @param owningDocument
-     * @param modelName
-     * @param config	Whether to create a partial config data source defn for the menu items
-     * @param toAppendTo	definition is appended to this
-     * @param visitedQueryNames
-     * @return	The ID for the query definition generated.
-     */
-	public static String appendDataSourceDefinition(User user,
-														Customer customer,
-														Module owningModule,
-														Document owningDocument,
-														String modelName,
-														String uxui,
-														boolean config,
-														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) {
+	public SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") Document document,
+			InputWidget widget, String dataGridBinding, boolean hasFormatter, boolean runtime) {
+		return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding,
+				hasFormatter, runtime, currentUxUi);
+	}
+
+	/**
+	 * Appends a data source definition from a document list model.
+	 * 
+	 * @param user
+	 * @param customer
+	 * @param owningModule
+	 * @param owningDocument
+	 * @param modelName
+	 * @param config            Whether to create a partial config data source defn
+	 *                          for the menu items
+	 * @param toAppendTo        definition is appended to this
+	 * @param visitedQueryNames
+	 * @return The ID for the query definition generated.
+	 */
+	public static String appendDataSourceDefinition(User user, Customer customer, Module owningModule,
+			Document owningDocument, String modelName, String uxui, boolean config, StringBuilder toAppendTo,
+			Set<String> visitedQueryNames) {
 		ListModel<Bean> model = owningDocument.getListModel(customer, modelName, true);
-		// Note we cannot set the bean on the model here as we are only generating out the UI.
+		// Note we cannot set the bean on the model here as we are only generating out
+		// the UI.
 		Document drivingDocument = model.getDrivingDocument();
 		if (drivingDocument == null) {
-			throw new MetaDataException("List Model" + model + " has no driving document defined and smart client does not support dynamic/late list grid generation");
+			throw new MetaDataException("List Model" + model
+					+ " has no driving document defined and smart client does not support dynamic/late list grid generation");
 		}
 		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
 
-		return appendDataSourceDefinition(user, 
-											customer,
-											owningModule.getName(),
-											owningDocument,
-											drivingDocumentModule,
-											drivingDocument,
-											null,
-											false,
-											modelName,
-											model.getLocalisedDescription(),
-											model.getColumns(),
-											null, 
-											null, 
-											uxui,
-											config, 
-											toAppendTo, 
-											visitedQueryNames);
+		return appendDataSourceDefinition(user, customer, owningModule.getName(), owningDocument, drivingDocumentModule,
+				drivingDocument, null, false, modelName, model.getLocalisedDescription(), model.getColumns(), null,
+				null, uxui, config, toAppendTo, visitedQueryNames);
 	}
-	
+
 	/**
-     * Appends a data source definition from a module query.
-     * @param customer
-     * @param query
-     * @param dataSourceIDOverride	ID of created data source if mandated
-     * @param hiddenBindings	Extra bindings to include in the data source - not mandatory
-     * @param config	Whether to create a partial config data source defn for the menu items
-     * @param toAppendTo	definition is appended to this
-     * @param visitedQueryNames
-     * @return	The ID for the query definition generated.
-     */
-	public static String appendDataSourceDefinition(User user,
-														Customer customer,
-														MetaDataQueryDefinition query,
-														String dataSourceIDOverride,
-														LookupDescription forLookup,
-														String uxui,
-														boolean config,
-														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) {
+	 * Appends a data source definition from a module query.
+	 * 
+	 * @param customer
+	 * @param query
+	 * @param dataSourceIDOverride ID of created data source if mandated
+	 * @param hiddenBindings       Extra bindings to include in the data source -
+	 *                             not mandatory
+	 * @param config               Whether to create a partial config data source
+	 *                             defn for the menu items
+	 * @param toAppendTo           definition is appended to this
+	 * @param visitedQueryNames
+	 * @return The ID for the query definition generated.
+	 */
+	public static String appendDataSourceDefinition(User user, Customer customer, MetaDataQueryDefinition query,
+			String dataSourceIDOverride, LookupDescription forLookup, String uxui, boolean config,
+			StringBuilder toAppendTo, Set<String> visitedQueryNames) {
 		String documentName = query.getDocumentName();
 		Module documentModule = query.getDocumentModule(customer);
 		Module owningModule = query.getOwningModule();
 		Document drivingDocument = documentModule.getDocument(customer, documentName);
-		return appendDataSourceDefinition(user, 
-											customer, 
-											owningModule.getName(), 
-											drivingDocument,
-											documentModule, 
-											drivingDocument, 
-											query.getName(), 
-											query.isAggregate(),
-											null, 
-											query.getLocalisedDescription(),
-											query.getColumns(),
-											dataSourceIDOverride, 
-											forLookup, 
-											uxui,
-											config, 
-											toAppendTo, 
-											visitedQueryNames);
+		return appendDataSourceDefinition(user, customer, owningModule.getName(), drivingDocument, documentModule,
+				drivingDocument, query.getName(), query.isAggregate(), null, query.getLocalisedDescription(),
+				query.getColumns(), dataSourceIDOverride, forLookup, uxui, config, toAppendTo, visitedQueryNames);
 	}
-	
+
 	@SuppressWarnings("null")
-	private static String appendDataSourceDefinition(User user,
-														Customer customer,
-														String owningModuleName,
-														Document owningDocument,
-														Module drivingDocumentModule,
-														Document drivingDocument,
-														String queryName,
-														boolean aggregateQuery,
-														String modelName,
-														String description,
-														List<MetaDataQueryColumn> columns,
-														String dataSourceIDOverride,
-														LookupDescription forLookup,
-														String uxui,
-														// indicates that this is for configuration in the harness page
-														boolean config,
-														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) {
+	private static String appendDataSourceDefinition(User user, Customer customer, String owningModuleName,
+			Document owningDocument, Module drivingDocumentModule, Document drivingDocument, String queryName,
+			boolean aggregateQuery, String modelName, String description, List<MetaDataQueryColumn> columns,
+			String dataSourceIDOverride, LookupDescription forLookup, String uxui,
+			// indicates that this is for configuration in the harness page
+			boolean config, StringBuilder toAppendTo, Set<String> visitedQueryNames) {
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
-		
+
 		String drivingDocumentName = drivingDocument.getName();
 		String dataSourceId = null;
 		if (dataSourceIDOverride != null) {
 			dataSourceId = dataSourceIDOverride;
-		}
-		else if (queryName != null) {
+		} else if (queryName != null) {
 			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(queryName).toString();
-		}
-		else if (modelName != null) {
+		} else if (modelName != null) {
 			// NB 4 tokens, not 3
-			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(owningDocument.getName()).append("__").append(modelName).toString();
+			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(owningDocument.getName())
+					.append("__").append(modelName).toString();
 		}
 		if (visitedQueryNames == null) {
 			toAppendTo.append("if(window.").append(dataSourceId);
-			toAppendTo.append("){}else{isc.RestDataSource.create({dataFormat:'json',jsonPrefix:'',jsonSuffix:'',dataURL:'smartlist',");
+			toAppendTo.append(
+					"){}else{isc.RestDataSource.create({dataFormat:'json',jsonPrefix:'',jsonSuffix:'',dataURL:'smartlist',");
 			toAppendTo.append("operationBindings:[{operationType:'fetch',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'update',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'add',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'remove',dataProtocol:'postParams'}],");
-		}
-		else {
+		} else {
 			if (visitedQueryNames.contains(dataSourceId)) {
 				return dataSourceId;
 			}
-			// NB Add the visited query name here before processing the query columns in case 1 of the query columns is a reference using the same query/datasource
+			// NB Add the visited query name here before processing the query columns in
+			// case 1 of the query columns is a reference using the same query/datasource
 			visitedQueryNames.add(dataSourceId);
 			toAppendTo.append('{');
 		}
@@ -3131,22 +2752,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String icon = drivingDocument.getIconStyleClass();
 		if (icon != null) {
 			toAppendTo.append("',fontIcon:'").append(icon);
-		}
-		else {
+		} else {
 			String icon32 = drivingDocument.getIcon32x32RelativeFileName();
 			if (icon32 != null) {
 				toAppendTo.append("',icon:'").append(icon32);
 			}
 		}
 
-		if (! config) {
+		if (!config) {
 			// ensure all filtering is server-side
 			// this enables the summary row to always stay in sync and
 			// lookups to drop down with the same criteria but load from the server
 			// NB _drop is set to true in bizLookupDescription.showPicker() JS.
-			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){return -1;}else{return this.Super('compareCriteria',arguments)}}");
+			toAppendTo.append(
+					"',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){return -1;}else{return this.Super('compareCriteria',arguments)}}");
 			toAppendTo.append(",_drop:false");
-			toAppendTo.append(",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
+			toAppendTo.append(
+					",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
 			toAppendTo.append(",criteriaPolicy:'dropOnChange");
 		}
 		toAppendTo.append("',aggregate:").append(aggregateQuery);
@@ -3157,20 +2779,20 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		toAppendTo.append(OWASP.escapeJsString(description));
 		toAppendTo.append("',fields:[");
 
-		if (! config) {
+		if (!config) {
 			toAppendTo.append("{name:'bizTagged',title:'");
 			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.tag"), false, true));
 			toAppendTo.append("',type:'boolean',validOperators:['equals']},");
 			toAppendTo.append("{name:'bizFlagComment',title:'");
 			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.flag"), false, true));
-			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
+			toAppendTo.append("'},"); // ,length:1024} long length makes filter builder use a text area
 		}
-		
+
 		if (drivingDocumentName.equals(drivingDocument.getParentDocumentName())) { // hierarchical
 			toAppendTo.append("{name:'bizParentId',title:'Parent ID',type:'text',hidden:true,foreignKey:'");
 			toAppendTo.append(dataSourceId).append(".bizId'},");
 		}
-		
+
 		List<String> hiddenBindingsList = new ArrayList<>();
 		if (forLookup != null) {
 			hiddenBindingsList.add(forLookup.getDescriptionBinding());
@@ -3187,22 +2809,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				}
 			}
 		}
-		
+
 		int cellHeight = 0; // fixed cell height of list grid (defined in data source)
-		
+
 		for (MetaDataQueryColumn column : columns) {
-			if ((column instanceof MetaDataQueryProjectedColumn) && 
-					(! ((MetaDataQueryProjectedColumn) column).isProjected())) {
+			if ((column instanceof MetaDataQueryProjectedColumn)
+					&& (!((MetaDataQueryProjectedColumn) column).isProjected())) {
 				continue;
 			}
 
-			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column, true, uxui);
+			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule,
+					drivingDocument, column, true, uxui);
 			if (def.isHasDisplayField()) {
 				hiddenBindingsList.add("_display_" + def.getName());
 			}
 			toAppendTo.append('{').append(def.toJavascript()).append("},");
 
-			// define the minimum fixed cell height for the grid (dataSource) based on any content image columns
+			// define the minimum fixed cell height for the grid (dataSource) based on any
+			// content image columns
 			Integer pixelHeight = def.getPixelHeight();
 			if (pixelHeight != null) {
 				int h = pixelHeight.intValue();
@@ -3216,30 +2840,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				// Add lookup description data source field
 				toAppendTo.append("{name:'");
 				boolean bindingToDataGrid = lookup.isBindingToDataGrid();
-	        	if (! bindingToDataGrid) {
-	        		toAppendTo.append(def.getName()).append('_');
-	        	}
-	        	toAppendTo.append(lookup.getDisplayField()).append("',type:'text',hidden:'true'},");
+				if (!bindingToDataGrid) {
+					toAppendTo.append(def.getName()).append('_');
+				}
+				toAppendTo.append(lookup.getDisplayField()).append("',type:'text',hidden:'true'},");
 
 				StringBuilder childDataSourceDefinition = new StringBuilder(512);
-				String childDataSourceId = appendDataSourceDefinition(user,
-																		customer,
-																		lookup.getQuery(),
-																		lookup.getOptionDataSource(),
-																		null,
-																		uxui,
-																		config,
-																		childDataSourceDefinition,
-																		visitedQueryNames);
+				String childDataSourceId = appendDataSourceDefinition(user, customer, lookup.getQuery(),
+						lookup.getOptionDataSource(), null, uxui, config, childDataSourceDefinition, visitedQueryNames);
 				childDataSources.put(childDataSourceId, childDataSourceDefinition.toString());
 			}
-			
+
 			if (hiddenBindingsList != null) {
 				hiddenBindingsList.remove(column.getBinding());
 			}
 		}
-		
-		if (! config) {
+
+		if (!config) {
 			// for filtering
 			toAppendTo.append("{name: 'operator', type: 'text', hidden: true},");
 			toAppendTo.append("{name: 'criteria', type: 'text', hidden: true},");
@@ -3248,34 +2865,34 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			toAppendTo.append("{name: 'bizId', primaryKey: true, hidden: true},");
 			toAppendTo.append("{name:'bizLock', hidden: true},");
 		}
-		
+
 		for (String hiddenBinding : hiddenBindingsList) {
 			toAppendTo.append("{name:'").append(BindUtil.sanitiseBinding(hiddenBinding));
 			toAppendTo.append("',type:'text',hidden:true},");
 		}
 
-		if (toAppendTo.charAt(toAppendTo.length() - 1) == ',') { // if we have a comma then we at least have a field in the data source
+		if (toAppendTo.charAt(toAppendTo.length() - 1) == ',') { // if we have a comma then we at least have a field in
+																	// the data source
 			toAppendTo.setLength(toAppendTo.length() - 1); // remove the last field comma
 		}
 		toAppendTo.append("]");
-		
+
 		// Add cellHeight if applicable
 		if (cellHeight > 0) {
 			toAppendTo.append(",cellHeight:").append(cellHeight);
 		}
-		
+
 		if (visitedQueryNames == null) {
 			toAppendTo.append("});}\n");
-		}
-		else {
+		} else {
 			toAppendTo.append("},\n");
 		}
-		
+
 		// Add any child datasources found
 		for (String childDataSourceDefinition : childDataSources.values()) {
 			toAppendTo.append(childDataSourceDefinition).append('\n');
 		}
-		
+
 		return dataSourceId;
 	}
 }

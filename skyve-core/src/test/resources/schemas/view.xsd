@@ -1044,6 +1044,7 @@
         </xs:sequence>
         <xs:attribute name="border" type="xs:boolean"/>
         <xs:attribute name="borderTitle" type="xs:string"/>
+        <xs:attribute name="collapsible" type="tns:collapsible"/>
         <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="lg" type="xs:int"/>
@@ -1077,6 +1078,7 @@
         </xs:sequence>
         <xs:attribute name="border" type="xs:boolean"/>
         <xs:attribute name="borderTitle" type="xs:string"/>
+        <xs:attribute name="collapsible" type="tns:collapsible"/>
         <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="lg" type="xs:int"/>
@@ -1130,6 +1132,7 @@
     <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
     <xs:attribute name="visible" type="xs:string"/>
+    <xs:attribute name="collapsible" type="tns:collapsible"/>
   </xs:complexType>
 
   <xs:complexType name="formColumn">
@@ -2123,6 +2126,13 @@
       <xs:enumeration value="icon"/>
       <xs:enumeration value="text"/>
       <xs:enumeration value="both"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="collapsible">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="open"/>
+      <xs:enumeration value="closed"/>
     </xs:restriction>
   </xs:simpleType>
 

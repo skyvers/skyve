@@ -51,6 +51,10 @@ public class VBox extends Container implements Box, Identifiable, Invisible, Bor
 	
 	private HorizontalAlignment horizontalAlignment;
 	private VerticalAlignment verticalAlignment;
+	
+	private Collapsible collapsible;
+
+	
 	private ShrinkWrap shrinkWrap;
 
 	private String invisibleConditionName;
@@ -263,6 +267,15 @@ public class VBox extends Container implements Box, Identifiable, Invisible, Bor
 	@XmlAttribute(required = false)
 	public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
 		this.horizontalAlignment = horizontalAlignment;
+	}
+	
+	public Collapsible getCollapsible() {
+		return collapsible;
+	}
+
+	@XmlAttribute(required = false)
+	public void setCollapsible(Collapsible collapsible) {
+		this.collapsible = collapsible;
 	}
 
 	public VerticalAlignment getVerticalAlignment() {

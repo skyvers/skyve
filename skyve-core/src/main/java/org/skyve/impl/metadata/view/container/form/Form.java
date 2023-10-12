@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.view.Bordered;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
@@ -74,6 +75,8 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	private Integer maxPixelHeight;
 	
 	private HorizontalAlignment labelDefaultHorizontalAlignment;
+	
+	private Collapsible collapsible;
 	
 	private FormLabelLayout labelLayout;
 
@@ -280,6 +283,15 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	@XmlAttribute(name = "defaultLabelAlign", required = false)
 	public void setLabelDefaultHorizontalAlignment(HorizontalAlignment labelDefaultHorizontalAlignment) {
 		this.labelDefaultHorizontalAlignment = labelDefaultHorizontalAlignment;
+	}
+	
+	public Collapsible getCollapsible() {
+		return collapsible;
+	}
+
+	@XmlAttribute(required = false)
+	public void setCollapsible(Collapsible collapsible) {
+		this.collapsible = collapsible;
 	}
 
 	public FormLabelLayout getLabelLayout() {

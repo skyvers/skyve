@@ -4,8 +4,9 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 		xmlns="http://www.skyve.org/xml/view" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<hbox>
-		<vbox border="true" borderTitle="Office Details" >
+	<hbox border="true" borderTitle="Details" collapsible="open" responsiveWidth="12">
+	
+		<vbox border="true" borderTitle="Office Details" collapsible="open" responsiveWidth="6">
 		    <form >
 		        <column responsiveWidth="3"/>
 		        <column/>
@@ -47,13 +48,13 @@
 		            </item>
 		        </row>
 		    </form>
-		    <vbox border="true" borderTitle="Staff based at this office">
-			    <listGrid continueConversation="true" query="qStaffForOffice">
+		    <vbox border="true" borderTitle="Staff based at this office" responsiveWidth="12" collapsible="open" minPixelHeight="400">
+			    <listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
 			    	<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId"/>
 			    </listGrid>
 		    </vbox>
 		</vbox>
-	    <vbox border="true" borderTitle="Map">
+	    <vbox border="true" borderTitle="Map" responsiveWidth="6" minPixelHeight="500">
 			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" loading="eager" showRefreshControls="true"/>
 	    </vbox>
 	</hbox>
