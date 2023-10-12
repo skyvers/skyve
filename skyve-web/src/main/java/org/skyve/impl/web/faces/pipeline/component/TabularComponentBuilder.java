@@ -34,6 +34,7 @@ import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
+
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datepicker.DatePicker;
@@ -44,6 +45,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.linechart.LineChart;
+import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.overlaypanel.OverlayPanel;
@@ -1341,15 +1343,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
         result.setVar("row");
-
         result.setLazy(true);
     	result.setRows(50);
+    	
 
 		UIOutput emptyMessage = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
         emptyMessage.setValue((canCreateDocument && createRendered) ? EMPTY_DATA_TABLE_CAN_ADD_MESSAGE : EMPTY_DATA_TABLE_MESSAGE);
         result.getFacets().put("emptyMessage", emptyMessage);
-
-		result.setSortMode("multiple");
+        result.setSortMode("multiple");
 
         setId(result, null);
     	result.setWidgetVar(result.getId());
@@ -1508,7 +1509,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 																			grid.getProperties());
 			children.add(actionColumn);
         }
-
+        
     	return result;
 	}
 
