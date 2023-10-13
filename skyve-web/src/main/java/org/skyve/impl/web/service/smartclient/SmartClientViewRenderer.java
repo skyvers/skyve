@@ -458,7 +458,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// SC 8.2 couldn't cope with chrome and would draw the fieldset/border too small
 		// for its content.
 		Boolean border = form.getBorder();
-		if (Boolean.TRUE.equals(border)) {
+		if (Boolean.TRUE.equals(border)||form.getCollapsible()!=null) {
 			borderBox = new VBox();
 			borderBox.setBorder(Boolean.TRUE);
 			borderBox.setBorderTitle(form.getLocalisedBorderTitle());
@@ -477,10 +477,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 			borderBox.setPercentageHeight(percentageHeight);
 			borderBox.setPixelHeight(pixelHeight);
-
+			
+			
+			borderBox.setCollapsible(form.getCollapsible());
+			
 			renderVBox(borderTitle, borderBox);
 		}
-
+		
 		formVariable = "v" + variableCounter++;
 		code.append("var ").append(formVariable);
 		code.append("=isc.DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
@@ -496,7 +499,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("_view:view,");
 		code.append("ID:").append(IDExpression()).append(',');
 		disabled(form.getDisabledConditionName(), code);
-//code.append("cellBorder:1,");
 
 		// only size the form if its not in a border VBox
 		if (!Boolean.TRUE.equals(border)) { // false or null

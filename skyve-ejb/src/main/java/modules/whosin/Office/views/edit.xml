@@ -6,8 +6,8 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<hbox border="true" borderTitle="Details" collapsible="open" responsiveWidth="12">
 	
-		<vbox border="true" borderTitle="Office Details" collapsible="open" responsiveWidth="6">
-		    <form >
+		<vbox border="true" borderTitle="Office Details" >
+		    <form border="true" borderTitle="Building Details" collapsible="open" responsiveWidth="12">
 		        <column responsiveWidth="3"/>
 		        <column/>
 		        <row>
