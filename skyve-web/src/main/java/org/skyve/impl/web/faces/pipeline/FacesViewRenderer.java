@@ -1220,7 +1220,9 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
-		UIComponent l = cb.listGrid(null,
+		UIComponent listGridParent = current;
+
+		UIComponent c = cb.listGrid(null,
 										module.getName(),
 										getCurrentListWidgetModelDocumentName(),
 										getCurrentListWidgetModelName(),
@@ -1230,7 +1232,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										title,
 										grid,
 										aggregateQuery);
-		addToContainer(l,
+		addToContainer(c,
 						grid.getPixelWidth(),
 						grid.getResponsiveWidth(),
 						grid.getPercentageWidth(),
@@ -1239,6 +1241,10 @@ public class FacesViewRenderer extends ViewRenderer {
 						grid.getLg(),
 						grid.getXl(),
 						grid.getInvisibleConditionName());
+
+		if ((! aggregateQuery) && (! grid.getContinueConversation()) && (! Boolean.FALSE.equals(grid.getShowZoom()))) {
+			listGridParent.getChildren().add(cb.listGridContextMenu(null, c.getId(), grid));
+		}
 	}
 
 	@Override

@@ -168,6 +168,7 @@ isc.BizListGrid.addProperties({
 	// Buttons that are enabled disabled on grid row selection
 	_newButton: null,
 	_zoomButton: null,
+	_popoutButton: null,
 	_editButton: null,
 	_pickButton: null,
 	
@@ -334,6 +335,19 @@ isc.BizListGrid.addMethods({
 				}
 			}
 		};
+		var popoutItem = {
+			title: "Popout", 
+			icon: "../images/icons/popout.png",
+			enableIf: function(target, menu, item) {
+				return (me.canZoom && (! me.aggregate) && (! (config && config.contConv)) && me.grid.anySelected());
+			},
+			click: function() {
+				var url = "?a=e&m=" + me._eventRecord.bizModule + 
+							"&d=" + me._eventRecord.bizDocument + 
+							"&i=" + me._eventRecord.bizId;
+				window.open(url, '_blank').focus();
+			}
+		};
 		var editItem = {
 			title: "Edit", 
 			icon: "../images/icons/edit.png", 
@@ -397,6 +411,11 @@ isc.BizListGrid.addMethods({
 														"<b>Zoom</b> into record.",
 														me._zoomItem.click);
 		me._zoomButton.setDisabled(true);
+		me._popoutButton = isc.BizUtil.createImageButton(popoutItem.icon, 
+														true, 
+														"<b>Popout</b> record.",
+														popoutItem.click);
+		me._popoutButton.setDisabled(true);
 		me._editButton = isc.BizUtil.createImageButton(editItem.icon, 
 														true,
 														"<b>Edit</b> a record inline.",
@@ -546,31 +565,15 @@ isc.BizListGrid.addMethods({
 															"<b>Chart</b> this data.",
 															chartItem.click);
 		me._chartButton.setDisabled(true);
-
-		var zoomInNewTab = {
-			title: "Zoom In New Tab", 
-			icon: "../images/icons/fa-share-square-o.png",
-			click: function() {
-				var url = "?a=e&m=" 
-						  + me._eventRecord.bizModule 
-						  +"&d=" 
-						  + me._eventRecord.bizDocument 
-						  + "&i=" 
-						  + me._eventRecord.bizId;
-				window.open(url, '_blank').focus();
-			}
-        };
         
 		var contextMenuData = (config && config.isPickList) ? [pickItem] : [];
 		if (me.showAdd) {
 			contextMenuData.add(newItem);
 		}
 		
-		// add the new context menu Open New Tab
-		contextMenuData.add(zoomInNewTab);
-		
 		if (me.showZoom) {
 			contextMenuData.add(me._zoomItem);
+			contextMenuData.add(popoutItem);
 		}
 		if (me.showEdit) {
 			contextMenuData.add(editItem);
@@ -952,6 +955,7 @@ isc.BizListGrid.addMethods({
 		}
 		if (me.showZoom) {
 			toolStripMembers.add(me._zoomButton);
+			toolStripMembers.add(me._popoutButton);
 		}
 		if (me.showEdit) {
 			toolStripMembers.add(me._editButton);
@@ -1189,13 +1193,16 @@ isc.BizListGrid.addMethods({
 			},
 			selectionChanged: function(record, state) { // state is true for selected or false for deselected
 				if (this.anySelected()) {
-					me._zoomButton.setDisabled(me.aggregate || (! me.canZoom));
+					var zoomDisabled = me.aggregate || (! me.canZoom);
+					me._zoomButton.setDisabled(zoomDisabled);
+					me._popoutButton.setDisabled(zoomDisabled || (config && config.contConv));
 					me._editButton.setDisabled(me._disabled || (! me.canUpdate) || (! me.canEdit));
 					me._pickButton.setDisabled(me._disabled);
 					me.deleteSelectionButton.setDisabled(me._disabled || (! me.canDelete) || (! me.canRemove));
 				}
 				else {
 					me._zoomButton.setDisabled(true);
+					me._popoutButton.setDisabled(true);
 					me._editButton.setDisabled(true);
 					me._pickButton.setDisabled(true);
 					me.deleteSelectionButton.setDisabled(true);
@@ -1943,6 +1950,7 @@ isc.BizDataGrid.addProperties({
 	// Buttons that are enabled disabled on grid row selection
 	_newButton: null,
 	_zoomButton: null,
+	_popoutButton: null,
 	_editButton: null,
 	
 	// Switches to turn off tool buttons / menu items

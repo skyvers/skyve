@@ -290,6 +290,11 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									boolean aggregateQuery) {
 		return component;
 	}
+	
+	@Override
+	public UIComponent listGridContextMenu(UIComponent component, String listGridId, ListGrid listGrid) {
+		return component;
+	}
 
 	@Override
 	public UIComponent listRepeater(UIComponent component,
