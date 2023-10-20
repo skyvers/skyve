@@ -244,6 +244,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											ListGrid listGrid,
 											boolean aggregateQuery);
 
+	public abstract UIComponent listGridContextMenu(UIComponent component,
+														String listGridId,
+														ListGrid listGrid);
+
 	/*
 	 * List Repeater is just like a list grid but...
 	 * The grid column headers can be turned off.

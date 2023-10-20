@@ -34,7 +34,7 @@ import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
-
+import org.primefaces.component.contextmenu.ContextMenu;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datepicker.DatePicker;
@@ -1371,7 +1371,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 	        StringBuilder start = new StringBuilder(64);
-	        start.append("var s=PF('").append(result.getId()).append("').selection[0];console.log(s);SKYVE.PF.pushHistory('");
+	        start.append("var s=PF('").append(result.getId()).append("').selection[0];SKYVE.PF.pushHistory('");
 			start.append("?a=").append(WebAction.e.toString()).append("&m='+s.substring(s.indexOf('.') + 1)+");
 			start.append("'&d='+s.substring(s.indexOf('#') + 1, s.indexOf('.'))+");
 			start.append("'&i='+s.substring(0, s.indexOf('#')));return false;");
@@ -1893,6 +1893,61 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
+	@Override
+	public UIComponent listGridContextMenu(UIComponent component,
+												String listGridId,
+												ListGrid grid) {
+		if (component != null) {
+			return component;
+		}
+
+		StringBuilder script = new StringBuilder();
+		
+		// create context menu
+		ContextMenu result = (ContextMenu) a.createComponent(ContextMenu.COMPONENT_TYPE);
+		result.setFor(listGridId); // Set the target DataTable
+		List<UIComponent> items = result.getChildren();
+
+		ValueExpression disableZoom = null;
+		String disableZoomConditionName = grid.getDisableZoomConditionName();
+		if (disableZoomConditionName != null) {
+			disableZoom = createValueExpressionFromCondition(disableZoomConditionName, null);
+		}
+
+		// Add Zoom In menu item
+		UIMenuItem item = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
+		item.setValue("View Detail");
+		item.setIcon("fa fa-chevron-right");
+		item.setUrl("#");
+		script.append("var s=PF('").append(listGridId).append("').selection[0];SKYVE.PF.pushHistory('");
+		script.append("?a=").append(WebAction.e.toString()).append("&m='+s.substring(s.indexOf('.') + 1)+");
+		script.append("'&d='+s.substring(s.indexOf('#') + 1, s.indexOf('.'))+");
+		script.append("'&i='+s.substring(0, s.indexOf('#')));return false;");
+		item.setOnclick(script.toString());
+		if (disableZoom != null) {
+			item.setValueExpression("disabled", disableZoom);
+		}
+		items.add(item);
+		
+		// Add zoom In New Tab menu item
+		item = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
+		item.setValue("Popout Detail");
+		item.setIcon("fa fa-share-square-o");
+		item.setUrl("#");
+		script.setLength(0);
+		script.append("var s=PF('").append(listGridId).append("').selection[0];window.open('");
+		script.append("?a=").append(WebAction.e.toString()).append("&m='+s.substring(s.indexOf('.') + 1)+");
+		script.append("'&d='+s.substring(s.indexOf('#') + 1, s.indexOf('.'))+");
+		script.append("'&i='+s.substring(0, s.indexOf('#')),'_blank');return false;");
+		item.setOnclick(script.toString());
+		if (disableZoom != null) {
+			item.setValueExpression("disabled", disableZoom);
+		}
+		items.add(item);
+
+		return result;
+	}
+	
 	/*
 	 * List Repeater is just like a list grid - a data table but...
 	 * The grid column headers can be turned off (uses prime.css)

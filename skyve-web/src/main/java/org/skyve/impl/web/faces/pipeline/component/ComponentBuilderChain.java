@@ -536,6 +536,17 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent listGridContextMenu(UIComponent component,
+												String listGridId,
+												ListGrid listGrid) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.listGridContextMenu(result, listGridId, listGrid);
+		}
+		return result;
+	}
+	
+	@Override
 	public UIComponent listRepeater(UIComponent component,
 										String modelDocumentName,
 										String modelName,
