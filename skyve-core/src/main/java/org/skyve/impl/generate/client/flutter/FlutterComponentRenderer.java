@@ -53,7 +53,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
     /**
      * Template for a SkyveButton; params are actionType, actionName & label
      */
-    private final String btnTemplate = "SkyveButton( actionType: '%s', actionName: '%s', label: '%s', state: this),";
+    private final String btnTemplate = "SkyveButton( actionType: '%s', actionName: '%s', label: '%s'),";
     
 	public static final String BORDER_IMPORT = "widgets/skyve_border";
 	public static final String BUTTON_IMPORT = "widgets/skyve_button";
@@ -573,7 +573,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
         imports.add(TEXTFIELD_IMPORT);
         RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 
-        final String stfTemplate = "SkyveTextField(label: '%s', beanValues: _bean, propertyKey: '%s'),";
+        final String stfTemplate = "SkyveTextField(label: '%s', propertyKey: '%s'),";
         String stfCode = String.format(stfTemplate, title, BindUtil.sanitiseBinding(text.getBinding()));
 
         result.getOutput()

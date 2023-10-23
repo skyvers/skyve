@@ -34,8 +34,8 @@ public class FlutterRouting {
 	private Set<String> routes = new TreeSet<>();
 	private StringBuilder menu = new StringBuilder(1024);
 	private int indentationLevel = 0;
-	private Customer customer; 
-
+	private Customer customer;
+	
 	public FlutterRouting(FlutterGenerator generator) {
 		this.generator = generator;
 		this.customer = generator.getConfig().getCustomer();
@@ -43,8 +43,21 @@ public class FlutterRouting {
 	}
 
 	void create() throws IOException {
-		menuImportsAndRoutes();
-		viewImportsAndRoutes();
+	    
+	    BiPredicate<Module, Document> whiteListPredicate = (m, d) -> {
+            String moduleName = m.getName();
+            String docName = d.getName();
+            if (generator.getConfig().allowsMoDoc(moduleName, docName)) {
+                log.debug("Generating " + moduleName + "-" + docName);
+                return true;
+            } else {
+                log.debug("Filtered out " + moduleName + "-" + docName);
+                return false;
+            }
+        };
+	    
+		menuImportsAndRoutes(whiteListPredicate);
+		viewImportsAndRoutes(whiteListPredicate);
 		
         Map<String, String> substitutions = new TreeMap<>();
         StringBuilder sb = new StringBuilder(1024);
@@ -70,37 +83,37 @@ public class FlutterRouting {
 		generator.refreshFile("lib/main.dart", "lib/main.dart", substitutions);
 	}
 	
-	private void viewImportsAndRoutes() {
-		for (Module m : customer.getModules()) {
-			String moduleName = m.getName();
-			Map<String, DocumentRef> refs = m.getDocumentRefs();
-			for (String documentName : refs.keySet()) {
-				DocumentRef ref = refs.get(documentName);
-				if (ref.getOwningModuleName().equals(moduleName)) {
-					Document d = m.getDocument(customer, documentName);
-					FlutterEditView view = new FlutterEditView(generator, moduleName, documentName);
-					view.setViews(m, d);
-					processItem(view, null);
-				}
-			}
-		}
-	}
-	
-	private void menuImportsAndRoutes() {
+    private void viewImportsAndRoutes(BiPredicate<Module, Document> whiteListPredicate) {
+        log.debug("Rendering view items");
+
+        for (Module module : customer.getModules()) {
+
+            String moduleName = module.getName();
+            Map<String, DocumentRef> refs = module.getDocumentRefs();
+            for (String documentName : refs.keySet()) {
+
+                DocumentRef ref = refs.get(documentName);
+                if (ref.getOwningModuleName()
+                       .equals(moduleName)) {
+                    Document document = module.getDocument(customer, documentName);
+
+                    if (!whiteListPredicate.test(module, document)) {
+                        continue;
+                    }
+
+                    FlutterEditView view = new FlutterEditView(generator, moduleName, documentName);
+                    view.setViews(module, document);
+                    processItem(view, null);
+                }
+            }
+        }
+    }
+
+    private void menuImportsAndRoutes(BiPredicate<Module, Document> whiteListPredicate) {
+        log.debug("Rendering menu items");
+
         final GeneratorConfig config = generator.getConfig();
         String uxui = config.getUxui();
-
-        final BiPredicate<Module, Document> configAllows = (m, d) -> {
-            String moduleName = m.getName();
-            String docName = d.getName();
-            if (config.allowsMoDoc(moduleName, docName)) {
-                log.debug("Generating " + moduleName + "-" + docName);
-                return true;
-            } else {
-                log.debug("Filtered out " + moduleName + "-" + docName);
-                return false;
-            }
-        };
 
         new MenuRenderer(uxui, null) {
 			@Override
@@ -112,7 +125,7 @@ public class FlutterRouting {
 											String icon16,
 											String iconStyleClass) {
 
-                if (!configAllows.test(itemModule, itemDocument)) {
+                if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
                 }
 
@@ -151,7 +164,7 @@ public class FlutterRouting {
 										String icon16,
 										String iconStyleClass) {
 			    
-                if (!configAllows.test(itemModule, itemDocument)) {
+                if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
                 }
 			    
@@ -171,7 +184,7 @@ public class FlutterRouting {
 										String icon16,
 										String iconStyleClass) {
 			    
-                if (!configAllows.test(itemModule, itemDocument)) {
+                if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
                 }
 			    
@@ -207,7 +220,7 @@ public class FlutterRouting {
 										String icon16,
 										String iconStyleClass) {
 			    
-                if (!configAllows.test(itemModule, itemDocument)) {
+                if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
                 }
 			    
@@ -226,7 +239,7 @@ public class FlutterRouting {
 										String icon16,
 										String iconStyleClass) {
 			    
-                if (!configAllows.test(itemModule, itemDocument)) {
+                if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
                 }
 

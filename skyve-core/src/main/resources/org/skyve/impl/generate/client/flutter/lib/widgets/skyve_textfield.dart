@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:##PROJECT##/util/skyve_form.dart';
 
 class SkyveTextField extends StatefulWidget {
   final String label;
-  final Map beanValues;
   final String propertyKey;
-  final int? maxlines;
+
+  final FormFieldValidator<String>? validator;
 
   const SkyveTextField(
-      {Key? key,
+      {super.key,
       required this.label,
-      required this.beanValues,
       required this.propertyKey,
-      this.maxlines})
-      : super(key: key);
+      this.validator});
 
   @override
   State<StatefulWidget> createState() => SkyveTextFieldState();
 }
 
 class SkyveTextFieldState extends State<SkyveTextField> {
+
   @override
   Widget build(BuildContext context) {
+    var initialVal = SkyveForm.of(context).beanValues[widget.propertyKey] ?? '';
+
     return TextFormField(
+      key: Key('${widget.propertyKey}_$initialVal'),
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
-          border: const OutlineInputBorder(), labelText: widget.label),
-      controller: _createController(widget.beanValues, widget.propertyKey),
-      maxLines: widget.maxlines,
+          border: const OutlineInputBorder(),
+          labelText: widget.label,
+          errorText: SkyveForm.of(context).serverErrors[widget.propertyKey]),
+      initialValue: initialVal,
+      onSaved: (newValue) {
+        SkyveForm.of(context).beanValues[widget.propertyKey] = newValue ?? '';
+      },
+      onChanged: (value) {
+        setState(() {
+          SkyveForm.of(context).removeError(widget.propertyKey);
+        });
+      },
+      validator: widget.validator,
     );
-  }
-
-  TextEditingController _createController(Map beanValues, String key) {
-    var tec = TextEditingController(text: (beanValues[key] ?? '').toString());
-    tec.addListener(() {
-      beanValues[key] = tec.text;
-    });
-
-    return tec;
   }
 }

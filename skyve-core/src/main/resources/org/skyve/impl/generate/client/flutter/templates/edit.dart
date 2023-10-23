@@ -2,6 +2,7 @@ import 'package:##PROJECT##/util/skyve_rest_client.dart';
 import 'package:##PROJECT##/widgets/skyve_view.dart';
 import 'package:##PROJECT##/widgets/skyve_button.dart';
 import 'package:##PROJECT##/models/bean_container.dart';
+import 'package:##PROJECT##/util/skyve_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bootstrap/flutter_bootstrap.dart';
 ##IMPORTS##
@@ -23,22 +24,10 @@ class ##CLASS## extends StatefulWidget {
   }
 }
 
-class _##CLASS##State extends State<##CLASS##>
-    implements BeanContainerState {
-  BeanContainer _container = BeanContainer.loading();
+class _##CLASS##State extends State<##CLASS##> {
 
-  @override
-  set container(BeanContainer container) {
-    setState(() {
-      _container = container;
-    });
-  }
-
-  @override
-  BeanContainer get container => _container;
-
-  Map<String, dynamic> get _bean => _container.values;
   
+
   void _load(String? bizId) async {
     if (_bean['bizId'] == null) {
       container =

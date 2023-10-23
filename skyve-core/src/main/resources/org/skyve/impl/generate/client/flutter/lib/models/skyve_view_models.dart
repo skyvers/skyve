@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen_test/models/bean_container.dart';
 import '../widgets/skyve_blurb.dart';
 import '../widgets/skyve_button.dart';
 import '../widgets/skyve_contentimage.dart';
@@ -24,7 +23,7 @@ class SkyveViewModel implements SkyveView {
       required this.jsonMetaData});
 
   @override
-  List<Widget> actions(BuildContext context, BeanContainerState state) {
+  List<Widget> actions(BuildContext context) {
     List<dynamic>? actions = jsonMetaData['actions'];
     final List<Widget> result = [];
     if (actions != null) {
@@ -42,10 +41,10 @@ class SkyveViewModel implements SkyveView {
           // final String show = action['show'];
           // final String? resourceName = action['resourceName'];
           result.add(SkyveButton(
-              actionType: actionType,
-              actionName: actionName,
-              label: label,
-              state: state));
+            actionType: actionType,
+            actionName: actionName,
+            label: label,
+          ));
         }
       }
     }
@@ -53,21 +52,20 @@ class SkyveViewModel implements SkyveView {
   }
 
   @override
-  List<Widget> contained(BuildContext context, BeanContainerState state) {
-    return _many(context, jsonMetaData['contained'], state.container.values);
+  List<Widget> contained(BuildContext context) {
+    return _many(context, jsonMetaData['contained']);
   }
 
-  static List<Widget> _many(BuildContext context, List<dynamic> contained,
-      Map<String, dynamic> bean) {
+  static List<Widget> _many(BuildContext context, List<dynamic> contained) {
     final List<Widget> result = List.generate(contained.length, (index) {
       Map<String, dynamic> model = contained[index];
-      return _one(context, model, bean, null);
+      return _one(context, model, null);
     }, growable: false);
     return result;
   }
 
-  static Widget _one(BuildContext context, Map<String, dynamic> model,
-      Map<String, dynamic> bean, String? formLabel) {
+  static Widget _one(
+      BuildContext context, Map<String, dynamic> model, String? formLabel) {
     final String type = model['type'];
     switch (type) {
       case 'actionLink':
@@ -136,7 +134,7 @@ class SkyveViewModel implements SkyveView {
         return const Text('externalRef');
       case 'form':
         return SkyveForm(
-            formCols: [], formRows: _formRows(context, model['rows'], bean));
+            formCols: [], formRows: _formRows(context, model['rows']));
       case 'implicitActionRef':
         return const Text('implicitActionRef');
       case 'importAction':
@@ -148,7 +146,11 @@ class SkyveViewModel implements SkyveView {
       case 'geometryMap':
         return const Text('geometryMap');
       case 'hbox':
-        return SkyveHBox(children: _many(context, model['contained'], bean));
+        return SkyveHBox(
+            children: _many(
+          context,
+          model['contained'],
+        ));
       case 'html':
         return const Text('html');
       case 'inject':
@@ -227,9 +229,9 @@ class SkyveViewModel implements SkyveView {
         return const Text('textArea');
       case 'textField':
         return SkyveTextField(
-            beanValues: bean,
-            propertyKey: model['binding'],
-            label: formLabel ?? '');
+          propertyKey: model['binding'],
+          label: formLabel ?? '',
+        );
       case 'toggleDisabled':
         return const Text('toggleDisabled');
       case 'toggleVisibility':
@@ -241,7 +243,11 @@ class SkyveViewModel implements SkyveView {
       case 'uploadAction':
         return const Text('uploadAction');
       case 'vbox':
-        return SkyveVBox(children: _many(context, model['contained'], bean));
+        return SkyveVBox(
+            children: _many(
+          context,
+          model['contained'],
+        ));
       case 'zoomIn':
         return const Text('zoomIn');
       case 'zoomOutAction':
@@ -252,16 +258,16 @@ class SkyveViewModel implements SkyveView {
   }
 
   static List<SkyveFormRow> _formRows(
-      BuildContext context, List<dynamic> rows, Map<String, dynamic> bean) {
+      BuildContext context, List<dynamic> rows) {
     List<SkyveFormRow> result = List.generate(rows.length, (index) {
       Map<String, dynamic> row = rows[index];
-      return SkyveFormRow(formItems: _formItems(context, row['items'], bean));
+      return SkyveFormRow(formItems: _formItems(context, row['items']));
     }, growable: false);
     return result;
   }
 
   static List<SkyveFormItem> _formItems(
-      BuildContext context, List<dynamic> items, Map<String, dynamic> bean) {
+      BuildContext context, List<dynamic> items) {
     List<SkyveFormItem> result = [];
     for (Map<String, dynamic> item in items) {
       final String? label = item['label'];
@@ -271,7 +277,7 @@ class SkyveViewModel implements SkyveView {
         result.add(SkyveFormItem(SkyveLabel(label)));
       }
       result.add(SkyveFormItem(
-          _one(context, item['widget'], bean, (showsLabel ? label : null))));
+          _one(context, item['widget'], (showsLabel ? label : null))));
     }
     return result;
   }

@@ -124,7 +124,8 @@ final containerRouterProvider = Provider((ref) {
   return GoRouter(initialLocation: '/', redirect: redirect, routes: allRoutes);
 });
 
-final containerViewProvider =
+/// Provider which maps from a Modoc to a view definition
+final FutureProviderFamily<SkyveView, String> containerViewProvider =
     FutureProvider.family<SkyveView, String>((ref, modoc) async {
   // Look for the view in the global variable above
   if (views[modoc] != null) {
