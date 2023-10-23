@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
-import org.skyve.impl.metadata.view.container.CollapsibleHBox;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;

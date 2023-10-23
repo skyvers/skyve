@@ -1,64 +1,65 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="edit" 
-		title="Office" 
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
-		xmlns="http://www.skyve.org/xml/view" 
+<view name="edit"
+		title="Office"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<hbox border="true" borderTitle="Details" collapsible="open" responsiveWidth="12">
-	
-		<vbox border="true" borderTitle="Office Details" >
-		    <form border="true" borderTitle="Building Details" collapsible="open" responsiveWidth="12">
-		        <column responsiveWidth="3"/>
-		        <column/>
-		        <row>
-		            <item>
-		                <textField binding="levelUnit" disabled="notManager"/>
-		            </item>
-		        </row>
-		        <row>
-		            <item>
-		                <textField binding="buildingName" disabled="notManager"/>
-		            </item>
-		        </row>
-		        <row>
-		            <item>
-		                <textField binding="streetAddress" disabled="notManager"/>
-		            </item>
-		        </row>
-		        <row>
-		            <item>
-		                <textField binding="suburb" disabled="notManager"/>
-		            </item>
-		        </row>
-		        <row>
-		            <item>
-		                <textField binding="postCode" disabled="notManager"/>
-		            </item>
-		        </row>
-		        <row>
-		            <item>
-		                <textField binding="phone" disabled="notManager"/>
-		            </item>
-		        </row>
-		        <row>
-		            <item>
-		                <geometry binding="boundary" disabled="notManager" type="polygon" >
-							<onChangedHandlers><rerender/></onChangedHandlers>
-						</geometry>		                
-		            </item>
-		        </row>
-		    </form>
-		    <vbox border="true" borderTitle="Staff based at this office" responsiveWidth="12" collapsible="open" minPixelHeight="400">
-			    <listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
-			    	<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId"/>
-			    </listGrid>
-		    </vbox>
+		<vbox border="true" borderTitle="Office Details">
+			<form border="true" borderTitle="Building Details" collapsible="open" responsiveWidth="12">
+				<column responsiveWidth="3" />
+				<column />
+				<row>
+					<item>
+						<textField binding="levelUnit" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="buildingName" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="streetAddress" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="suburb" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="postCode" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="phone" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometry binding="boundary" disabled="notManager" type="polygon">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</geometry>
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="Staff based at this office" responsiveWidth="12" collapsible="open" minPixelHeight="400">
+				<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
+					<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId" />
+				</listGrid>
+			</vbox>
 		</vbox>
-	    <vbox border="true" borderTitle="Map" responsiveWidth="6" minPixelHeight="500">
-			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" loading="eager" showRefreshControls="true"/>
-	    </vbox>
+		<vbox border="true" borderTitle="Map" responsiveWidth="6" minPixelHeight="500">
+			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" loading="eager" showRefreshControls="true" />
+		</vbox>
 	</hbox>
-    <actions>
-        <defaults/>
-    </actions>
+	<actions>
+		<defaults />
+	</actions>
 </view>

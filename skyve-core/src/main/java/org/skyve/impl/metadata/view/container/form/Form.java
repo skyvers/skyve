@@ -42,6 +42,7 @@ import org.skyve.metadata.view.Invisible;
 							"maxPixelHeight", 
 							"border",
 							"borderTitle",
+							"collapsible",
 							"labelDefaultHorizontalAlignment",
 							"labelLayout",
 							"disabledConditionName",

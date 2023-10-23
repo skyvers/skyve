@@ -3,11 +3,4 @@
 	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
-	<render-kit>
-		<renderer>
-			<component-family>org.primefaces.component</component-family>
-			<renderer-type>org.primefaces.component.PanelRenderer</renderer-type>
-			<renderer-class>org.skyve.impl.web.faces.pipeline.SkyvePanelRenderer</renderer-class>
-		</renderer>
-	</render-kit>
 </faces-config>
