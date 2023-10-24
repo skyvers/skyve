@@ -9,7 +9,6 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 
 import org.primefaces.component.datepicker.DatePicker;
-import org.primefaces.component.panel.Panel;
 import org.primefaces.component.picklist.PickList;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -329,7 +328,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {
-			border = cb.border(null, borderTitle, vbox.getInvisibleConditionName(), vbox.getPixelWidth());
+			border = cb.border(null, borderTitle, vbox.getInvisibleConditionName(), vbox.getPixelWidth(), collapsible);
 			addToContainer(border,
 							vbox.getPixelWidth(),
 							vbox.getResponsiveWidth(),
@@ -339,18 +338,12 @@ public class FacesViewRenderer extends ViewRenderer {
 							vbox.getLg(),
 							vbox.getXl(),
 							vbox.getInvisibleConditionName());
-			
-			if ((collapsible != null) && (border instanceof Panel)) {
-				Panel borderPanel = (Panel) border;
-				borderPanel.setToggleable(true);
-				borderPanel.setCollapsed(Collapsible.closed.equals(collapsible));
-			}
 		}
 		
 		UIComponent layout = lb.vboxLayout(null, vbox);
 		
 		// Cater for border if defined
-		if (border != null) {
+		if (bordered) {
 			lb.addBorderLayout(border, layout);
 
 			// start rendering if appropriate
@@ -403,7 +396,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {
-			border = cb.border(null, borderTitle, hbox.getInvisibleConditionName(), hbox.getPixelWidth());
+			border = cb.border(null, borderTitle, hbox.getInvisibleConditionName(), hbox.getPixelWidth(), collapsible);
 			addToContainer(border,
 							hbox.getPixelWidth(),
 							hbox.getResponsiveWidth(),
@@ -413,17 +406,12 @@ public class FacesViewRenderer extends ViewRenderer {
 							hbox.getLg(),
 							hbox.getXl(),
 							hbox.getInvisibleConditionName());
-			if ((collapsible != null) && (border instanceof Panel)) {
-				Panel borderedPanel = (Panel) border;
-				borderedPanel.setToggleable(true);
-				borderedPanel.setCollapsed(Collapsible.closed.equals(collapsible));
-			}
 		}
 
 		UIComponent layout = lb.hboxLayout(null, hbox);
 
 		// Cater for border if defined
-		if (border != null) {
+		if (bordered) {
 			lb.addBorderLayout(border, layout);
 
 			// start rendering if appropriate
@@ -476,7 +464,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {
-			border = cb.border(null, borderTitle, form.getInvisibleConditionName(), form.getPixelWidth());
+			border = cb.border(null, borderTitle, form.getInvisibleConditionName(), form.getPixelWidth(), collapsible);
 			addToContainer(border,
 							form.getPixelWidth(),
 							form.getResponsiveWidth(),
@@ -486,18 +474,12 @@ public class FacesViewRenderer extends ViewRenderer {
 							form.getLg(),
 							form.getXl(),
 							form.getInvisibleConditionName());
-			
-			if ((collapsible != null) && (border instanceof Panel)) {
-				Panel borderPanel = (Panel) border;
-				borderPanel.setToggleable(true);
-				borderPanel.setCollapsed(Collapsible.closed.equals(collapsible));
-			}
 		}
 
 		UIComponent layout = lb.formLayout(null, form);
 
 		// Cater for border if defined
-		if (border != null) {
+		if (bordered) {
 			lb.addBorderLayout(border, layout);
 
 			// start rendering if appropriate

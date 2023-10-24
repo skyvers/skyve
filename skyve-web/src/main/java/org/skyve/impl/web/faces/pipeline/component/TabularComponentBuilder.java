@@ -109,6 +109,7 @@ import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaD
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
@@ -311,12 +312,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent border(UIComponent component, String borderTitle, String invisibleConditionName, Integer pixelWidth) {
+	public UIComponent border(UIComponent component,
+								String borderTitle,
+								String invisibleConditionName,
+								Integer pixelWidth,
+								Collapsible collapsible) {
 		if (component != null) {
 			return component;
 		}
 
-		return panel(borderTitle, invisibleConditionName, pixelWidth, null);
+		return panel(borderTitle, invisibleConditionName, pixelWidth, collapsible, null);
 	}
 
 	@Override
@@ -3017,16 +3022,28 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								false);
 	}
 
-	protected Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
+	protected Panel panel(String title, String invisible, Integer pixelWidth, Collapsible collapsible, String widgetId) {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		setValueOrValueExpression(title, result::setHeader, "header", result);
 		setInvisible(result, invisible, null);
 		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, NINETY_EIGHT, null);
 		setId(result, widgetId);
 		
+		if (collapsible != null) {
+			result.setToggleable(true);
+			result.setCollapsed(Collapsible.closed.equals(collapsible));
+
+			AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+			ajax.setProcess("@this");
+			ajax.setUpdate("@none");
+			MethodExpression me = ef.createMethodExpression(elc, "#{" + managedBeanName + ".toggleCollapsible}", null, new Class[0]);
+			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+			result.addClientBehavior("toggle", ajax);
+		}
+		
 		return result;
 	}
-
+	
 	protected Password password(String dataWidgetVar,
 									String binding,
 									String title,

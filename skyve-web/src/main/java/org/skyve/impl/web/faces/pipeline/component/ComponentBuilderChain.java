@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -166,10 +167,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent border(UIComponent component, String title, String invisibileConditionName, Integer pixelWidth) {
+	public UIComponent border(UIComponent component,
+								String title,
+								String invisibileConditionName,
+								Integer pixelWidth,
+								Collapsible collapsible) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.border(result, title, invisibileConditionName, pixelWidth);
+			result = builder.border(result, title, invisibileConditionName, pixelWidth, collapsible);
 		}
 		return result;
 	}
