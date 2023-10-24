@@ -3024,13 +3024,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, NINETY_EIGHT, null);
 		setId(result, widgetId);
 		
-		AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
-        StringBuilder start = new StringBuilder(64);
-        start.append("alert('amr');return false;");
-		ajax.setOnstart(start.toString());
-		ajax.setUpdate("#");
-        result.addClientBehavior("toggle", ajax);
-		
 		return result;
 	}
 

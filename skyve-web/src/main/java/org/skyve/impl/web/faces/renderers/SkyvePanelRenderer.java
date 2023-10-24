@@ -5,11 +5,14 @@ import java.util.Map;
 
 import javax.faces.application.Application;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panel.PanelRenderer;
+import org.skyve.impl.web.faces.FacesUtil;
+import org.skyve.impl.web.faces.beans.FacesView;
 
 public class SkyvePanelRenderer extends PanelRenderer {
 	@Override
@@ -41,26 +44,25 @@ public class SkyvePanelRenderer extends PanelRenderer {
 
 	@Override
 	public void decode(FacesContext context, UIComponent component) {
-		Panel panel = (Panel) component;
-		String clientId = panel.getClientId(context);
-		Map<String, String> params = context.getExternalContext().getRequestParameterMap();
-		String referer = context.getExternalContext().getRequestHeaderMap().get("Referer");
-		referer = referer.substring(referer.indexOf("?") + 1);
-		String[] urlParams = referer.split("&");
-		String moduleName = "";
-		String documentName = "";
-		for (String param : urlParams) {
-			String paramName = param.split("=")[0];
-			String paramValue = param.split("=")[1];
-			if (paramName.equals("m")) {
-				moduleName = paramValue;
-			} else if (paramName.equals("d")) {
-				documentName = paramValue;
+		
+		String moduleName 			= "";
+		String documentName 		= "";		
+		UIViewRoot uiViewRoot 		= context.getViewRoot();
+		
+		if (uiViewRoot != null) {
+			String managedBeanName = (String) uiViewRoot.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
+			if (managedBeanName != null) {
+				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
+				moduleName   = view.getBizModuleParameter();
+				documentName = view.getBizDocumentParameter();
 			}
 		}
-		String panelUniqueName = moduleName + "_" + documentName + "_" + clientId;
-		// Store toggle state
-		String collapsedParam = params.get(clientId + "_collapsed");
+		Panel panel 				= (Panel) component;
+		String clientId 			= panel.getClientId(context);
+		
+		Map<String, String> params 	= context.getExternalContext().getRequestParameterMap();
+		String panelUniqueName 		= moduleName + "_" + documentName + "_" + clientId;
+		String collapsedParam 		= params.get(clientId + "_collapsed");
 
 		if ("true".equals(collapsedParam) || "false".equals(collapsedParam)) {
 			context.getExternalContext().getSessionMap().put(panelUniqueName, Boolean.valueOf(collapsedParam));
