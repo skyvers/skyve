@@ -36,7 +36,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	private Timestamp endTime;
 	private int percentComplete = 0;
 	private JobStatus status = null;
-	private List<String> log = Collections.synchronizedList(new ArrayList<String>());
+	private List<String> log = Collections.synchronizedList(new ArrayList<>());
 	private Bean bean;
 
 	public String getDisplayName() {

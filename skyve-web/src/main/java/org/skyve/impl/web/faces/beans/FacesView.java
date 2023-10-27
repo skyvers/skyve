@@ -19,8 +19,11 @@ import javax.faces.model.SelectItem;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.panel.Panel;
 import org.primefaces.event.ReorderEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.event.ToggleEvent;
+import org.primefaces.model.Visibility;
 import org.primefaces.model.charts.ChartModel;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -795,7 +798,41 @@ public class FacesView<T extends Bean> extends Harness {
 		Object model = attributes.get("skyveModel");
 		return new ChartAction<>(this, model, type).execute();
 	}
- 	
+
+	/**
+	 * Store the collapsible state on toggle event in the session.
+	 * NB Called from an expression applied to the panel in TabularComponentBuilder.panel().
+	 * @param event	The Panel toggle event.
+	 */
+	public void toggleCollapsible(ToggleEvent event) {
+		String bizModule = getBizModuleParameter();
+		String bizDocument	= getBizDocumentParameter();
+		if ((bizModule != null) && (bizDocument != null)) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ExternalContext ec = ctx.getExternalContext();
+			String clientIdCollapsed = event.getComponent().getClientId(ctx) + "_collapsed";
+			String panelUniqueName = bizModule + "_" + bizDocument + "_" + clientIdCollapsed;
+			ec.getSessionMap().put(panelUniqueName, event.getVisibility());
+		}
+	}
+	
+	/**
+	 * Restore the collapsible state from the session.
+	 * NB Called from SkyvePanelRenderer.
+	 * @param panel	The Panel to set collapsed on.
+	 */
+	public void setCollapsedFromSession(Panel panel) {
+		String bizModule = getBizModuleParameter();
+		String bizDocument = getBizDocumentParameter();
+		if ((bizModule != null) && (bizDocument != null)) {
+			String panelUniqueName = bizModule + "_" + bizDocument + "_" + panel.getClientId() + "_collapsed";
+			Visibility visibility = (Visibility) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get(panelUniqueName);
+			if (visibility != null) {
+				panel.setCollapsed(Visibility.HIDDEN.equals(visibility));
+			}
+		}
+	}
+	
 	/**
 	 * Capture a signature from its json payloads
 	 */

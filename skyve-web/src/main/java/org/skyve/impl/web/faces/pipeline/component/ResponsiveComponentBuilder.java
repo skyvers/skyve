@@ -9,6 +9,7 @@ import javax.faces.component.html.HtmlPanelGroup;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.util.UtilImpl;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
@@ -49,15 +50,11 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public UIComponent border(UIComponent component, 
 								String borderTitle,
 								String invisibleConditionName,
-								Integer pixelWidth) {
-		if (component != null) {
-			return component;
-		}
-		
-		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-		setValueOrValueExpression(borderTitle, result::setHeader, "header", result);
-		setInvisible(result, invisibleConditionName, null);
-		setId(result, null);
+								Integer pixelWidth,
+								Collapsible collapsible) {
+		Panel result = (Panel) super.border(component, borderTitle, invisibleConditionName, pixelWidth, collapsible);
+		// reset percentage width styles
+		result.setStyle(null);
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-col-12" : "ui-g-12");
 		return result;
 	}
