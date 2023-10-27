@@ -324,8 +324,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderVBox(String borderTitle, VBox vbox) {
 		Collapsible collapsible = vbox.getCollapsible();
-		boolean bordered = (collapsible != null) || Boolean.TRUE.equals(vbox.getBorder());
-
+		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(vbox.getBorder());
+		borderTitle 			= (collapsible != null && borderTitle == null)? "" : borderTitle;
+		
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {
@@ -398,7 +399,8 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderHBox(String borderTitle, HBox hbox) {
 		Collapsible collapsible = hbox.getCollapsible();
-		boolean bordered = (collapsible != null) || Boolean.TRUE.equals(hbox.getBorder());
+		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(hbox.getBorder());
+		borderTitle 			= (collapsible != null && borderTitle == null)? "" : borderTitle;
 		
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
@@ -471,8 +473,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderForm(String borderTitle, Form form) {
 		Collapsible collapsible = form.getCollapsible();
-		boolean bordered = (collapsible != null) || Boolean.TRUE.equals(form.getBorder());
-
+		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(form.getBorder());
+		borderTitle 			= (collapsible != null && borderTitle == null)? "" : borderTitle;
+		
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {

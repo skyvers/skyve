@@ -258,6 +258,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Collapsible collapsible = vbox.getCollapsible();
 		if (collapsible != null) {
 			code.append("width:'100%',height:'100%',");
+			borderTitle = (borderTitle == null)? "" : borderTitle;
 		}
 		else {
 			size(vbox, null, code);
@@ -306,7 +307,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			collapsibleVar = "v" + variableCounter++;
 			// append the script for a collapsible object
 			code.append("var ").append(collapsibleVar).append("=isc.BizCollapsible.create({title:'")
-					.append(vbox.getBorderTitle() == null ? "" : vbox.getBorderTitle())
+					.append(borderTitle)
 					.append("',minimized:")
 					.append(collapsible.equals(Collapsible.closed) ? "true" : "false")
 					.append(",");
@@ -337,6 +338,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Collapsible collapsible = hbox.getCollapsible();
 		if (collapsible != null) {
 			code.append("width:'100%',height:'100%',");
+			borderTitle = (borderTitle == null)? "" : borderTitle;
 		}
 		else {
 			size(hbox, null, code);
@@ -388,9 +390,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("var ")
 				.append(collapsibleVar)
 				.append("=isc.BizCollapsible.create({title:'")
-				.append(hbox.getBorderTitle())
+				.append(borderTitle)
 				.append("',minimized:")
-				.append(hbox.getCollapsible().equals(Collapsible.closed) ? "true" : "false")
+				.append(collapsible.equals(Collapsible.closed) ? "true" : "false")
 				.append(",");
 				
 				size(hbox, null, code);
@@ -435,6 +437,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// for its content.
 		Boolean border = form.getBorder();
 		Collapsible collapsible = form.getCollapsible();
+		
+		borderTitle = (collapsible != null && borderTitle == null)? "" : borderTitle;
+		
 		if ((collapsible != null) || Boolean.TRUE.equals(border)) {
 			borderBox = new VBox();
 			borderBox.setBorder(Boolean.TRUE);
