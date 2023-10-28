@@ -30,7 +30,6 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.job.Job;
@@ -80,7 +79,7 @@ public class QuartzJobScheduler implements JobScheduler {
 
 			// Add triggers if this Skyve instance is able to schedule jobs
 			if (UtilImpl.JOB_SCHEDULER) {
-				List<Bean> jobSchedules = SQLMetaDataUtil.retrieveAllJobSchedulesForAllCustomers().stream()
+				List<Bean> jobSchedules = repository.retrieveAllJobSchedulesForAllCustomers().stream()
 						.filter(js -> ! Boolean.TRUE.equals(BindUtil.get(js, "disabled")))
 						.collect(Collectors.toList());
 				for (Bean jobSchedule : jobSchedules) {
@@ -88,7 +87,7 @@ public class QuartzJobScheduler implements JobScheduler {
 				}
 
 				// Add report triggers
-				final List<Bean> reportSchedules = SQLMetaDataUtil.retrieveAllReportSchedulesForAllCustomers();
+				final List<Bean> reportSchedules = repository.retrieveAllReportSchedulesForAllCustomers();
 				for (Bean reportSchedule : reportSchedules) {
 					addReportJob((String) BindUtil.get(reportSchedule, "name"));
 					if (Boolean.TRUE.equals(BindUtil.get(reportSchedule, "scheduled"))) {

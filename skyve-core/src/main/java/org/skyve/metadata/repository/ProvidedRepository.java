@@ -1,5 +1,6 @@
 package org.skyve.metadata.repository;
 
+import java.sql.Connection;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -202,6 +203,34 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param user the user to reset user permissions for
 	 */
 	void resetUserPermissions(User user);
+	
+	/**
+	 * Populate user data from a data store using the given connection.
+	 * @param user User to populate.
+	 * @param connection	The connection to use.
+	 */
+	void populateUser(User user, Connection connection);
+	
+	/**
+	 * Return a list of admin.JobSchedule projections with at least the following document attributes populated
+	 * "jobName", startTime", endTime", "cronExpression", "disabled", "user"
+	 * @return	The Job Schedules
+	 */
+	List<Bean> retrieveAllJobSchedulesForAllCustomers();
+	
+	/**
+	 * Return a list of admin.ReportTemplate projections with at least the following document attributes populated
+	 * "name", startTime", endTime", "cronExpression", "scheduled", "user"
+	 * @return	The Report Templates.
+	 */
+	List<Bean> retrieveAllReportSchedulesForAllCustomers();
+	
+	/**
+	 * Return the name of the public user for a customer set on the Configuration document.
+	 * @param customerName	The customer to get the public user for.
+	 * @return	Return the public user name (without the customer name)
+	 */
+	public String retrievePublicUserName(String customerName);
 	
 	default Document findNearestPersistentUnmappedSuperDocument(Customer customer, Module module, Document document) {
 		Document result = null;

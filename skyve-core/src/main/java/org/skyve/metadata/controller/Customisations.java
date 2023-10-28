@@ -10,7 +10,7 @@ import org.skyve.report.ReportFormat;
 /**
  * Enables the customisation of certain Skyve functions.
  * A class implementing this interface can be set in factories.customisationsClass of the JSON configuration.
- * The NoCustomisations class represents the Skyve defaults and can be extended for you own implementations.
+ * The NoCustomisations class represents the Skyve defaults and can be extended for your own implementations.
  */
 public interface Customisations {
 	/**

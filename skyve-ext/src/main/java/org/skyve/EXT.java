@@ -39,6 +39,7 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.job.QuartzJobScheduler;
+import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -46,7 +47,6 @@ import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.tag.DefaultTagManager;
 import org.skyve.impl.util.MailUtil;
-import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
@@ -421,12 +421,12 @@ public class EXT {
 	public static void bootstrap(Persistence p) throws Exception {
 		User u = p.getUser();
 		Customer c = u.getCustomer();
-		Module adminMod = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
-		Document contactDoc = adminMod.getDocument(c, SQLMetaDataUtil.CONTACT_DOCUMENT_NAME);
-		Document userDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_DOCUMENT_NAME);
-		Document userRoleDoc = adminMod.getDocument(c, SQLMetaDataUtil.USER_ROLE_DOCUMENT_NAME);
+		Module adminMod = c.getModule(LocalDataStoreRepository.ADMIN_MODULE_NAME);
+		Document contactDoc = adminMod.getDocument(c, LocalDataStoreRepository.CONTACT_DOCUMENT_NAME);
+		Document userDoc = adminMod.getDocument(c, LocalDataStoreRepository.USER_DOCUMENT_NAME);
+		Document userRoleDoc = adminMod.getDocument(c, LocalDataStoreRepository.USER_ROLE_DOCUMENT_NAME);
 		DocumentQuery q = p.newDocumentQuery(userDoc);
-		q.getFilter().addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
+		q.getFilter().addEquals(LocalDataStoreRepository.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
 		PersistentBean user = q.beanResult();
 		if (user == null) {
 			UtilImpl.LOGGER.info(String.format("CREATING BOOTSTRAP USER %s/%s (%s)",
@@ -438,27 +438,27 @@ public class EXT {
 			user = userDoc.newInstance(u);
 			u.setId(user.getBizId());
 			user.setBizUserId(u.getId());
-			BindUtil.set(user, SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-			BindUtil.set(user, SQLMetaDataUtil.PASSWORD_PROPERTY_NAME, u.getPasswordHash());
-			BindUtil.set(user, SQLMetaDataUtil.PASSWORD_LAST_CHANGED_PROPERTY_NAME, new DateTime());
+			BindUtil.set(user, LocalDataStoreRepository.USER_NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
+			BindUtil.set(user, LocalDataStoreRepository.PASSWORD_PROPERTY_NAME, u.getPasswordHash());
+			BindUtil.set(user, LocalDataStoreRepository.PASSWORD_LAST_CHANGED_PROPERTY_NAME, new DateTime());
 
 			// Create contact
 			Bean contact = contactDoc.newInstance(u);
-			BindUtil.set(contact, SQLMetaDataUtil.NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
-			BindUtil.convertAndSet(contact, SQLMetaDataUtil.CONTACT_TYPE_PROPERTY_NAME, "Person");
-			BindUtil.set(contact, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME, UtilImpl.BOOTSTRAP_EMAIL);
+			BindUtil.set(contact, LocalDataStoreRepository.NAME_PROPERTY_NAME, UtilImpl.BOOTSTRAP_USER);
+			BindUtil.convertAndSet(contact, LocalDataStoreRepository.CONTACT_TYPE_PROPERTY_NAME, "Person");
+			BindUtil.set(contact, LocalDataStoreRepository.EMAIL1_PROPERTY_NAME, UtilImpl.BOOTSTRAP_EMAIL);
 
-			BindUtil.set(user, SQLMetaDataUtil.CONTACT_PROPERTY_NAME, contact);
+			BindUtil.set(user, LocalDataStoreRepository.CONTACT_PROPERTY_NAME, contact);
 
 			// Add roles
 			@SuppressWarnings("unchecked")
-			List<Bean> roles = (List<Bean>) BindUtil.get(user, SQLMetaDataUtil.ROLES_PROPERTY_NAME);
+			List<Bean> roles = (List<Bean>) BindUtil.get(user, LocalDataStoreRepository.ROLES_PROPERTY_NAME);
 			for (Module m : c.getModules()) {
 				String moduleName = m.getName();
 				for (Role r : m.getRoles()) {
 					Bean role = userRoleDoc.newInstance(u);
 					BindUtil.set(role, ChildBean.PARENT_NAME, user);
-					BindUtil.set(role, SQLMetaDataUtil.ROLE_NAME_PROPERTY_NAME, String.format("%s.%s", moduleName, r.getName()));
+					BindUtil.set(role, LocalDataStoreRepository.ROLE_NAME_PROPERTY_NAME, String.format("%s.%s", moduleName, r.getName()));
 					roles.add(role);
 				}
 			}

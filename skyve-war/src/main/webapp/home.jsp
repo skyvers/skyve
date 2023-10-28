@@ -2,16 +2,16 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Enumeration"%>
 <%@ page import="javax.servlet.http.Cookie"%>
-<%@ page import="org.skyve.CORE"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
 <%@ page import="org.skyve.metadata.user.User"%>
-<%@ page import="org.skyve.metadata.repository.Repository"%>
+<%@ page import="org.skyve.metadata.repository.ProvidedRepository"%>
 <%@ page import="org.skyve.metadata.router.UxUi"%>
 <%@ page import="org.skyve.metadata.router.UxUiSelector"%>
 <%@ page import="org.skyve.metadata.view.View.ViewType"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebAction"%>
 <%@ page import="org.skyve.web.WebContext"%>
+<%@ page import="org.skyve.impl.metadata.repository.ProvidedRepositoryFactory"%>
 <%@ page import="org.skyve.impl.metadata.repository.router.Router"%>
 <%@ page import="org.skyve.impl.metadata.repository.router.RouteCriteria"%>
 <%@ page import="org.skyve.impl.persistence.AbstractPersistence"%>
@@ -19,12 +19,11 @@
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
-<%@ page import="org.skyve.impl.util.SQLMetaDataUtil"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 
 <%
 	// Stop cookie/request header injection by checking the valid customer name
-	Repository repository = CORE.getRepository();
+	ProvidedRepository repository = ProvidedRepositoryFactory.get();
 	String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
 	if (customerName != null) {
 		// This will throw or return null if the customerName value ain't a customer name
@@ -114,7 +113,7 @@
 					throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter with a valid customer", e);
 				}
 			}
-			userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
+			userName = repository.retrievePublicUserName(customerName);
 			if (userName == null) {
 				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/noPublicUser.jsp"));
 				return;

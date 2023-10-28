@@ -1,6 +1,7 @@
 package org.skyve.metadata.repository;
 
 import java.io.File;
+import java.sql.Connection;
 import java.util.List;
 
 import org.skyve.domain.Bean;
@@ -130,6 +131,26 @@ public class NoOpProvidedRepository extends ProvidedRepositoryDelegate {
 	@Override
 	public void resetUserPermissions(User user) {
 		// do nothing
+	}
+
+	@Override
+	public void populateUser(User user, Connection connection) {
+		// nothing to do
+	}
+
+	@Override
+	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+		return null;
+	}
+
+	@Override
+	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+		return null;
+	}
+
+	@Override
+	public String retrievePublicUserName(String customerName) {
+		return null;
 	}
 
 	@Override
