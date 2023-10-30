@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.container.Box;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -580,6 +581,20 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
+	private void validateCollapsible(Collapsible collapsible, String borderTitle, String widgetIdentifier) {
+		if (collapsible != null &&
+				!Collapsible.open.equals(collapsible) &&
+				!Collapsible.closed.equals(collapsible)) {
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier
+					+ " can only have a value of 'open' or 'closed' for the collapsible attribute");
+		}
+		else if (collapsible != null && borderTitle == null) {
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier
+					+ " cannot have border title equal to null if the collapsible attribute is present");
+		}
+
+	}
+
 	@Override
 	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
 		String actionName = button.getActionName();
@@ -945,6 +960,7 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(form.getInvisibleConditionName(), formIdentifier);
 		validateSize(form, formIdentifier);
 		validateMessageExpressions(form.getLocalisedBorderTitle(), formIdentifier, "borderTitle");
+		validateCollapsible(form.getCollapsible(), form.getBorderTitle(), formIdentifier);
 	}
 
 	@Override
@@ -1158,6 +1174,7 @@ class ViewValidator extends ViewVisitor {
 		validateSize(hbox, boxIdentifier);
 		validateConditionName(hbox.getInvisibleConditionName(), boxIdentifier);
 		validateMessageExpressions(hbox.getLocalisedBorderTitle(), boxIdentifier, "borderTitle");
+		validateCollapsible(hbox.getCollapsible(), hbox.getBorderTitle(), boxIdentifier);
 	}
 
 	@Override
@@ -1941,6 +1958,7 @@ class ViewValidator extends ViewVisitor {
 		validateSize(vbox, boxIdentifier);
 		validateConditionName(vbox.getInvisibleConditionName(), boxIdentifier);
 		validateMessageExpressions(vbox.getLocalisedBorderTitle(), boxIdentifier, "borderTitle");
+		validateCollapsible(vbox.getCollapsible(), vbox.getBorderTitle(), boxIdentifier);
 	}
 
 	@Override

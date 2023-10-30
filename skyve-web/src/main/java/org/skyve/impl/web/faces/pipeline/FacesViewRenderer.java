@@ -152,6 +152,7 @@ import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
@@ -324,8 +325,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderVBox(String borderTitle, VBox vbox) {
 		Collapsible collapsible = vbox.getCollapsible();
 		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(vbox.getBorder());
-		borderTitle 			= (collapsible != null && borderTitle == null)? "" : borderTitle;
 		
+		validateCollapsible(collapsible, borderTitle);
+
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {
@@ -393,8 +395,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderHBox(String borderTitle, HBox hbox) {
 		Collapsible collapsible = hbox.getCollapsible();
 		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(hbox.getBorder());
-		borderTitle 			= (collapsible != null && borderTitle == null)? "" : borderTitle;
 		
+		validateCollapsible(collapsible, borderTitle);
+
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {
@@ -462,8 +465,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderForm(String borderTitle, Form form) {
 		Collapsible collapsible = form.getCollapsible();
 		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(form.getBorder());
-		borderTitle 			= (collapsible != null && borderTitle == null)? "" : borderTitle;
 		
+		validateCollapsible(collapsible, borderTitle);
+
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (bordered) {
@@ -3012,5 +3016,12 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
+	}
+
+	private static void validateCollapsible(Collapsible collapsible, String borderTitle) {
+		if (collapsible != null && borderTitle == null) {
+			throw new MetaDataException("Border title cannot be null if the collapsible attribute is present");
+		}
+
 	}
 }

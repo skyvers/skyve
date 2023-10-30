@@ -28,7 +28,6 @@ import org.skyve.impl.metadata.view.ShrinkWrapper;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Box;
 import org.skyve.impl.metadata.view.container.Collapsible;
-
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -133,7 +132,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	private StringBuilder code = new StringBuilder(2048);
 	private Stack<String> containerVariables = new Stack<>();
-
+	
 	protected SmartClientViewRenderer(User user,
 										Module module,
 										Document document,
@@ -258,7 +257,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Collapsible collapsible = vbox.getCollapsible();
 		if (collapsible != null) {
 			code.append("width:'100%',height:'100%',");
-			borderTitle = (borderTitle == null)? "" : borderTitle;
+			validateCollapsible(collapsible, borderTitle);
 		}
 		else {
 			size(vbox, null, code);
@@ -338,7 +337,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Collapsible collapsible = hbox.getCollapsible();
 		if (collapsible != null) {
 			code.append("width:'100%',height:'100%',");
-			borderTitle = (borderTitle == null)? "" : borderTitle;
+			validateCollapsible(collapsible,borderTitle);
 		}
 		else {
 			size(hbox, null, code);
@@ -438,7 +437,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		Boolean border = form.getBorder();
 		Collapsible collapsible = form.getCollapsible();
 		
-		borderTitle = (collapsible != null && borderTitle == null)? "" : borderTitle;
+		validateCollapsible(collapsible,borderTitle);
 		
 		if ((collapsible != null) || Boolean.TRUE.equals(border)) {
 			borderBox = new VBox();
@@ -3339,5 +3338,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		
 		return dataSourceId;
+	}
+	private static void validateCollapsible(Collapsible collapsible,String borderTitle)
+	{
+		if (collapsible != null && borderTitle == null) {
+			throw new MetaDataException("Border title cannot be null if the collapsible attribute is present");
+		}
+		
 	}
 }
