@@ -582,13 +582,8 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	private void validateCollapsible(Collapsible collapsible, String borderTitle, String widgetIdentifier) {
-		if (collapsible != null &&
-				!Collapsible.open.equals(collapsible) &&
-				!Collapsible.closed.equals(collapsible)) {
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier
-					+ " can only have a value of 'open' or 'closed' for the collapsible attribute");
-		}
-		else if (collapsible != null && borderTitle == null) {
+
+		if (collapsible != null && borderTitle == null) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier
 					+ " cannot have border title equal to null if the collapsible attribute is present");
 		}
