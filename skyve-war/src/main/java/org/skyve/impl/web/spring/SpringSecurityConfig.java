@@ -35,73 +35,73 @@ public class SpringSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.authorizeRequests()
+			.authorizeHttpRequests()
 				// Permit H2 servlet if enabled
-				.antMatchers("/h2/**").permitAll()
+				.requestMatchers("/h2/**").permitAll()
 				// Enable access to all rest endpoints as these will have Servlet Filters to secure.
-				.antMatchers("/rest/**").permitAll()
+				.requestMatchers("/rest/**").permitAll()
 				// Permit the login servlet resource
-				.antMatchers(HttpMethod.GET, "/login", "/loggedOut").permitAll()
+				.requestMatchers(HttpMethod.GET, "/login", "/loggedOut").permitAll()
 				// Permit the spring login mechanism and the SC JS login mechanism
-				.antMatchers(HttpMethod.POST, "/loginAttempt", "/smartClientJavascriptLogin").permitAll()
+				.requestMatchers(HttpMethod.POST, "/loginAttempt", "/smartClientJavascriptLogin").permitAll()
 				// Permit the reset resources
-				.antMatchers("/pages/requestPasswordReset.jsp", "/pages/resetPassword.jsp").permitAll()
+				.requestMatchers("/pages/requestPasswordReset.jsp", "/pages/resetPassword.jsp").permitAll()
 				// Permit home.jsp as it controls access to public and private pages itself
-				.antMatchers("/home.jsp").permitAll()
+				.requestMatchers("/home.jsp").permitAll()
 				// Permit device.jsp as it forwards to home.jsp
-				.antMatchers("/device.jsp").permitAll()
+				.requestMatchers("/device.jsp").permitAll()
 				// Permit the health servlet resource
-				.antMatchers("/health").permitAll()
+				.requestMatchers("/health").permitAll()
 				// Secure the loggedIn.jsp so that redirect occurs after login
-				.antMatchers("/loggedIn.jsp").authenticated()
+				.requestMatchers("/loggedIn.jsp").authenticated()
 				// Secure the system JSPs and HTMLs
-				.antMatchers("/pages/changePassword.jsp", "/pages/htmlEdit/browseImages.jsp", "/pages/map/geolocate.jsp").authenticated()
+				.requestMatchers("/pages/changePassword.jsp", "/pages/htmlEdit/browseImages.jsp", "/pages/map/geolocate.jsp").authenticated()
 				// Do not secure the home servlet as this ensures the right login page is displayed
-				.antMatchers("/home").permitAll()
+				.requestMatchers("/home").permitAll()
 				// Do not secure faces pages as they are secured by a FacesSecurityFilter
-				.antMatchers("/**/*.xhtml").permitAll()
+				.requestMatchers("/**/*.xhtml").permitAll()
 				// Secure dynamic image URLs
-				.antMatchers("/images/dynamic.*").authenticated()
+				.requestMatchers("/images/dynamic.*").authenticated()
 				// Secure all report URLs
-				.antMatchers("/report", "/export").authenticated()
+				.requestMatchers("/report", "/export").authenticated()
 				// Secure chart servlet
-				.antMatchers("/chart").authenticated()
+				.requestMatchers("/chart").authenticated()
 				// Secure Image Servlet for HTML reporting through Jasper
-				.antMatchers("/image").authenticated()
+				.requestMatchers("/image").authenticated()
 				// Secure customer resource servlet
-				.antMatchers("/resource", "/content").authenticated()
+				.requestMatchers("/resource", "/content").authenticated()
 				// Secure meta data servlet
-				.antMatchers("/meta").authenticated()
+				.requestMatchers("/meta").authenticated()
 				// Secure SC edit view servlet
-				.antMatchers("/smartedit").authenticated()
+				.requestMatchers("/smartedit").authenticated()
 				// Secure SC list view servlet
-				.antMatchers("/smartlist").authenticated()
+				.requestMatchers("/smartlist").authenticated()
 				// Secure SC view generation servlet
-				.antMatchers("/smartgen").authenticated()
+				.requestMatchers("/smartgen").authenticated()
 				// Secure SC snap servlet
-				.antMatchers("/smartsnap").authenticated()
+				.requestMatchers("/smartsnap").authenticated()
 				// Secure SC tag servlet
-				.antMatchers("/smarttag").authenticated()
+				.requestMatchers("/smarttag").authenticated()
 				// Secure SC complete servlet
-				.antMatchers("/smartcomplete").authenticated()
+				.requestMatchers("/smartcomplete").authenticated()
 				// Secure SC text search servlet
-				.antMatchers("/smartsearch").authenticated()
+				.requestMatchers("/smartsearch").authenticated()
 				// Secure Prime initialisation servlet
-				.antMatchers("/primeinit").authenticated()
+				.requestMatchers("/primeinit").authenticated()
 				// Secure map servlet
-				.antMatchers("/map").authenticated()
+				.requestMatchers("/map").authenticated()
 				// Secure the Bizport Export Servlet
-				.antMatchers("/bizexport.*").authenticated()
+				.requestMatchers("/bizexport.*").authenticated()
 				// Secure the Download Servlet
-				.antMatchers("/download").authenticated()
+				.requestMatchers("/download").authenticated()
 				// Secure the Push endpoint
-				.antMatchers("/omnifaces.push/**").authenticated()
+				.requestMatchers("/omnifaces.push/**").authenticated()
 				// Do not Secure trackmate servlet - it handles authentication itself
-				.antMatchers("/tracks").permitAll()
+				.requestMatchers("/tracks").permitAll()
 				// Permit all GET requests by default
-				.antMatchers(HttpMethod.GET, "/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/**").permitAll()
 				//  Secure all POST requests by default
-				.antMatchers(HttpMethod.POST, "/**").authenticated()
+				.requestMatchers(HttpMethod.POST, "/**").authenticated()
 				// Only allow get and post methods by default
 				.anyRequest().denyAll()
 				.and()

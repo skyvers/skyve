@@ -146,6 +146,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -1570,18 +1571,23 @@ public class MetaDataServlet extends HttpServlet {
 			}
 			
 			@Override
-			public void renderFormButton(Action action,
+			public void renderFormButton(String name,
 											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
+											Action action,
 											Button button) {
-				result.append("{\"type\":\"button\",\"actionType\":\"").append(type).append('"');
-				if (action != null) {
-					result.append(",\"actionName\":\"").append(action.getName()).append('"');
+				result.append("{\"type\":\"button\",\"actionType\":");
+				ImplicitActionName type = action.getImplicitName();
+				if (type == null) {
+					result.append("null");
 				}
+				else {
+					result.append('"').append(type.name()).append('"');
+				}
+				result.append(",\"actionName\":\"").append(name).append('"');
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
 				}
@@ -2413,15 +2419,15 @@ public class MetaDataServlet extends HttpServlet {
 			}
 			
 			@Override
-			public void renderButton(Action action,
+			public void renderButton(String name,
 										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
+										Action action,
 										Button button) {
-				renderFormButton(action, label, iconUrl, iconStyleClass, toolTip, confirmationText, type, button);
+				renderFormButton(name, label, iconUrl, iconStyleClass, toolTip, confirmationText, action, button);
 				result.append(',');
 			}
 			
@@ -2432,224 +2438,224 @@ public class MetaDataServlet extends HttpServlet {
 			}
 			
 			@Override
-			public void renderZoomOutAction(String label,
+			public void renderZoomOutAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action) {
 				actionsJSON.append("{\"type\":\"zoomOutAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.ZoomOut, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderUploadAction(String label,
+			public void renderUploadAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"uploadAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Upload, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderSaveAction(String label,
+			public void renderSaveAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"saveAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Save, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderReportAction(String label,
+			public void renderReportAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"reportAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Report, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderRemoveAction(String label,
+			public void renderRemoveAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action,
 											boolean canDelete) {
 				actionsJSON.append("{\"type\":\"removeAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Remove, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderPrintAction(String label,
+			public void renderPrintAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"printAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Print, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderOKAction(String label,
+			public void renderOKAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 				actionsJSON.append("{\"type\":\"okAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.OK, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderNewAction(String label,
+			public void renderNewAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"newAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.New, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderNavigateAction(String label,
+			public void renderNavigateAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action) {
 				actionsJSON.append("{\"type\":\"navigateAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Navigate, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderEditAction(String label,
+			public void renderEditAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"editAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Edit, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderDownloadAction(String label,
+			public void renderDownloadAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action) {
 				actionsJSON.append("{\"type\":\"downloadAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Download, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderDeleteAction(String label,
+			public void renderDeleteAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"deleteAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Delete, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderCustomAction(String label,
+			public void renderCustomAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"serverAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, action.getResourceName(), action);
+				processAction(name, null, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderCancelAction(String label,
+			public void renderCancelAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"cancelAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Cancel, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderBizImportAction(String label,
+			public void renderBizImportAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action) {
 				actionsJSON.append("{\"type\":\"importAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.BizImport, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderBizExportAction(String label,
+			public void renderBizExportAction(String name,
+												String label,
 												String iconUrl,
 												String iconStyleClass,
 												String toolTip,
 												String confirmationText,
-												char type,
 												ActionImpl action) {
 				actionsJSON.append("{\"type\":\"exportAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.BizExport, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
 			@Override
-			public void renderAddAction(String label,
+			public void renderAddAction(String name,
+											String label,
 											String iconUrl,
 											String iconStyleClass,
 											String toolTip,
 											String confirmationText,
-											char type,
 											ActionImpl action) {
 				actionsJSON.append("{\"type\":\"addAction\"");
-				processAction(label, iconUrl, iconStyleClass, toolTip, confirmationText, type, null, action);
+				processAction(name, ImplicitActionName.Add, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
 			}
 			
@@ -3129,26 +3135,22 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"sort\":\"").append(order.getSort()).append('"');
 			}
 			
-			private void processAction(String label,
+			private void processAction(String name,
+										ImplicitActionName type,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
-										String className,
 										ActionImpl action) {
-				actionsJSON.append(",\"actionType\":\"").append(type).append('"');
-				String string = action.getName();
-				if (string != null) {
-					actionsJSON.append(",\"name\":\"").append(string).append('"');
+				actionsJSON.append(",\"actionType\":");
+				if (type == null) {
+					actionsJSON.append("null");
 				}
-				if (className != null) {
-					actionsJSON.append(",\"className\":\"").append(className).append('"');
+				else {
+					actionsJSON.append('"').append(type.name()).append('"');
 				}
-				string = action.getResourceName();
-				if (string != null) {
-					actionsJSON.append(",\"resourceName\":\"").append(string).append('"');
-				}
+				actionsJSON.append(",\"actionName\":\"").append(name).append('"');
 				if (label != null) {
 					actionsJSON.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
 				}
