@@ -29,6 +29,7 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.WeldMarker;
+import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 
@@ -109,8 +110,10 @@ public abstract class AbstractH2Test {
 		persistence.begin();
 
 		// create admin user
-		User adminUser = createAdminUser(user);
-		persistence.save(adminUser);
+		if (ModulesUtil.currentAdminUser() == null) {
+			User adminUser = createAdminUser(user);
+			persistence.save(adminUser);
+		}
 	}
 
 	@After

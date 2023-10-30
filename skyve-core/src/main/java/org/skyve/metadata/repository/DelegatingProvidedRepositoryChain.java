@@ -1,6 +1,7 @@
 package org.skyve.metadata.repository;
 
 import java.io.File;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -255,7 +256,40 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 		}
 		return null;
 	}
+	
+	@Override
+	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+		for (ProvidedRepository delegate : delegates) {
+			List<Bean> result = delegate.retrieveAllJobSchedulesForAllCustomers();
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
 
+	@Override
+	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+		for (ProvidedRepository delegate : delegates) {
+			List<Bean> result = delegate.retrieveAllReportSchedulesForAllCustomers();
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public String retrievePublicUserName(String customerName) {
+		for (ProvidedRepository delegate : delegates) {
+			String result = delegate.retrievePublicUserName(customerName);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+	
 	@Override
 	public void resetMenus(User user) {
 		for (ProvidedRepository delegate : delegates) {
@@ -277,6 +311,13 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 		}
 	}
 
+	@Override
+	public void populateUser(User user, Connection connection) {
+		for (ProvidedRepository delegate : delegates) {
+			delegate.populateUser(user, connection);
+		}
+	}
+	
 	@Override
 	public List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>(10);

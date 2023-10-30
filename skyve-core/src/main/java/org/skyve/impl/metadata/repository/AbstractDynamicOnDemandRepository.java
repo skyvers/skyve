@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.repository;
 
 import java.io.File;
+import java.sql.Connection;
 import java.util.List;
 
 import org.skyve.domain.Bean;
@@ -150,7 +151,27 @@ public abstract class AbstractDynamicOnDemandRepository extends MutableCachedRep
 	public void resetUserPermissions(User user) {
 		// nothing to do
 	}
+	
+	@Override
+	public void populateUser(User user, Connection connection) {
+		// nothing to do
+	}
 
+	@Override
+	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+		return null;
+	}
+
+	@Override
+	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+		return null;
+	}
+
+	@Override
+	public String retrievePublicUserName(String customerName) {
+		return null;
+	}
+	
 	@Override
 	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
 		return null;

@@ -968,12 +968,12 @@ isc.EditView.addMethods({
 					this._showHide(tool, 
 									this._actionPanel, 
 									values,
-									(tool.type == 'O') || // OK
-										(tool.type == 'S') || // Save
-										(tool.type == 'C') || // Cancel
-										(tool.type == 'D') || // Delete
+									(tool.type == 'OK') || // OK
+										(tool.type == 'Save') || // Save
+										(tool.type == 'Cancel') || // Cancel
+										(tool.type == 'Delete') || // Delete
 										// Conditionally show the remove button
-										((tool.type == 'R') && // Remove
+										((tool.type == 'Remove') && // Remove
 											// only allow the remove button if we came from a list
 											((this._openedFromDataGrid === undefined) || (! this._openedFromDataGrid) || 
 												// if no delete privilege, show remove button if its a non-persisted record
@@ -983,16 +983,16 @@ isc.EditView.addMethods({
 					this._showHide(tool, 
 									this._actionPanel, 
 									values,
-									(tool.type == 'Z') || // ZoomOut
-									(tool.type == 'R') || // Remove
+									(tool.type == 'ZoomOut') || // ZoomOut
+									(tool.type == 'Remove') || // Remove
 									// only allow delete button if the instance is persisted
-									((! values['persisted']) && (tool.type == 'D')) ||
+									((! values['persisted']) && (tool.type == 'Delete')) ||
 									// only allow delete button if not the only view
-									(onlyView && (tool.type == 'D')) ||
+									(onlyView && (tool.type == 'Delete')) ||
 									// only allow OK button if not the only view
-									(onlyView && (tool.type == 'O')) ||
+									(onlyView && (tool.type == 'OK')) ||
 									// only allow Cancel button if not the only view
-									(onlyView && (tool.type == 'C')));
+									(onlyView && (tool.type == 'Cancel')));
 				}
 			}
 		}
@@ -1515,17 +1515,17 @@ isc.BizButton.addMethods({
 			}
 
 			// New and Edit are list view actions
-			if (this.type == "O") { // OK on edit view
+			if (this.type == "OK") { // OK on edit view
 				this._view.saveInstance(validate, this.actionName);
 			}
-			else if (this.type == "S") { // Save on edit view
+			else if (this.type == "Save") { // Save on edit view
 				this._view.saveInstance(validate, this.actionName, function() {
 					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}], 3000);
 				});
 			}
-			else if (this.type == "A") { // Add on child edit view
+			else if (this.type == "Add") { // Add on child edit view
 			}
-			else if (this.type == "Z") { // Change on child edit view
+			else if (this.type == "ZoomOut") { // Change on child edit view
 				// So we check whether the form is dirty and whether it needs applying,
 				// but also whether the child bean has changes - this is because
 				// Bizlet.preExecute(ImplicitActionName.ZoomOut) needs to be called if there
@@ -1542,7 +1542,7 @@ isc.BizButton.addMethods({
 					opener._source = null;
 				}
 			}
-			else if (this.type == "C") { // Cancel on edit view and child edit view
+			else if (this.type == "Cancel") { // Cancel on edit view and child edit view
 				var me = this;
 				var changedOnServer = this._view.gather(false)._changed;
 				var opener = isc.WindowStack.getOpener();
@@ -1562,10 +1562,10 @@ isc.BizButton.addMethods({
 					opener._source = null;
 				}
 			}
-			else if (this.type == "D") { // Delete on edit view
+			else if (this.type == "Delete") { // Delete on edit view
 				this._view.deleteInstance(validate);
 			}
-			else if (this.type == "R") { // Remove on child edit view
+			else if (this.type == "Remove") { // Remove on child edit view
 				var bizId = this._view.gather(false).bizId;
 
 				// remove anything before and including the last dot (if present)
@@ -1593,10 +1593,10 @@ isc.BizButton.addMethods({
 				}
 				isc.WindowStack.popoff(false); // don't rerender
 			}
-			else if (this.type == "P") { // Invoke a report
+			else if (this.type == "Report") { // Invoke a report
 				isc.ReportDialog.popupReport(this._view, this.params);
 			}
-			else if (this.type == "X") { // BizExport
+			else if (this.type == "BizExport") { // BizExport
 				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
 				if (instance) {
 					var me = this;
@@ -1609,7 +1609,7 @@ isc.BizButton.addMethods({
 					});
 				}
 			}
-			else if (this.type == "I") { // BizImport
+			else if (this.type == "BizImport") { // BizImport
 				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
 				if (instance) {
 					var me = this;
@@ -1631,10 +1631,10 @@ isc.BizButton.addMethods({
 					});
 				}
 			}
-			else if (this.type == "L") { // Download Action
+			else if (this.type == "Download") { // Download Action
 				this._view.doAction(this.actionName, validate);
 			}
-			else if (this.type == "U") { // Upload Action
+			else if (this.type == "Upload") { // Upload Action
 				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
 				if (instance) {
 					var me = this;
@@ -1656,9 +1656,9 @@ isc.BizButton.addMethods({
 					});
 				}
 			}
-			else if (this.type == "M") { // Navigate to a binding within a conversation
+			else if (this.type == "Navigate") { // Navigate to a binding within a conversation
 			}
-            else if (this.type == "V") { // Print this edit view
+            else if (this.type == "Print") { // Print this edit view
                 var params = {_mod: this._view._mod,
                 				_doc: this._view._doc}
                 isc.ReportDialog.popupReport(this._view, params);

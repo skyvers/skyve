@@ -10,7 +10,6 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -103,7 +102,7 @@ public class UserExtension extends User {
 			// Use the current persistence connection, so do not close
 			@SuppressWarnings("resource")
 			Connection c = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
-			SQLMetaDataUtil.populateUser(result, c);
+			ProvidedRepositoryFactory.get().populateUser(result, c);
 		}
 
 		return result;

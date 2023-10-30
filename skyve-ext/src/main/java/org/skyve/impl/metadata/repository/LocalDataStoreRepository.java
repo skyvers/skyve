@@ -1,4 +1,4 @@
-package org.skyve.impl.util;
+package org.skyve.impl.metadata.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,27 +14,25 @@ import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 
-public class SQLMetaDataUtil {
-	/**
-	 * Prevent construction.
-	 */
-	private SQLMetaDataUtil() {
-		// no implementation
-	}
-
+/**
+ * Adds security integration to LocalDesignRepository.
+ * 
+ * @author Mike
+ */
+public class LocalDataStoreRepository extends LocalDesignRepository {
 	public static final String ADMIN_MODULE_NAME = "admin";
 	public static final String CHANGE_PASSWORD_DOCUMENT_NAME = "ChangePassword";
 	public static final String CONTACT_DOCUMENT_NAME = "Contact";
@@ -66,7 +64,25 @@ public class SQLMetaDataUtil {
 	public static final String SELF_REGISTRATION_DOCUMENT_NAME = "SelfRegistration";
 	public static final String USER_PROPERTY_NAME = "user";
 
-	public static void populateUser(User user) {
+	@Override
+	public UserImpl retrieveUser(String userPrincipal) {
+		if (userPrincipal == null) {
+			throw new IllegalStateException("No-one is logged in - cannot retrieve the skyve user.");
+		}
+
+		UserImpl result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
+
+		resetUserPermissions(result);
+		
+		if (result.getLanguageTag() == null) {
+			result.setLanguageTag(result.getCustomer().getLanguageTag());
+		}
+		
+		return result;
+	}
+	
+	@Override
+	public void populatePermissions(User user) {
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			populateUser(user, connection);
 		}
@@ -75,12 +91,20 @@ public class SQLMetaDataUtil {
 		}
 	}
 	
-	public static void populateUser(User user, Connection connection) {
+	@Override
+	public void resetUserPermissions(User user) {
+		UserImpl impl = (UserImpl) user;
+		impl.clearAllPermissionsAndMenus();
+		populatePermissions(user);
+		resetMenus(user);
+	}
+	
+	@Override
+	public void populateUser(User user, Connection connection) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
-			ProvidedRepository repository = ProvidedRepositoryFactory.get();
-			Module admin = repository.getModule(customer, ADMIN_MODULE_NAME);
+			Module admin = getModule(customer, ADMIN_MODULE_NAME);
 			@SuppressWarnings("null")
 			String ADM_SecurityUser = admin.getDocument(customer, USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			@SuppressWarnings("null")
@@ -231,15 +255,15 @@ public class SQLMetaDataUtil {
 			throw new MetaDataException(e);
 		}
 	}
-
-	public static List<Bean> retrieveAllJobSchedulesForAllCustomers() throws Exception {
+	
+	@Override
+	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
 		List<Bean> result = new ArrayList<>();
 		
 		// Principal -> User
 		Map<String, User> users = new TreeMap<>();
 		
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
-		Module admin = repository.getModule(null, "admin");
+		Module admin = getModule(null, "admin");
 		@SuppressWarnings("null")
 		String ADM_JobSchedule = admin.getDocument(null, "JobSchedule").getPersistent().getPersistentIdentifier();
 		@SuppressWarnings("null")
@@ -258,7 +282,7 @@ public class SQLMetaDataUtil {
 				String userPrincipal = userPrincipalBuilder.toString();
 				User user = users.get(userPrincipal);
 				if (user == null) {
-					user = repository.retrieveUser(userPrincipal);
+					user = retrieveUser(userPrincipal);
 					users.put(userPrincipal, user);
 				}
 
@@ -275,18 +299,24 @@ public class SQLMetaDataUtil {
 				result.add(jobSchedule);
 			}
 		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException("Problem occurred retrieving job schedules", e);
+		}
 		
 		return result;
 	}
 	
-	public static List<Bean> retrieveAllReportSchedulesForAllCustomers() throws Exception {
+	@Override
+	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
 		List<Bean> result = new ArrayList<>();
 
 		// Principal -> User
 		Map<String, User> users = new TreeMap<>();
 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
-		Module admin = repository.getModule(null, "admin");
+		Module admin = getModule(null, "admin");
 		@SuppressWarnings("null")
 		String ADM_ReportTemplate = admin.getDocument(null, "ReportTemplate").getPersistent().getPersistentIdentifier();
 		@SuppressWarnings("null")
@@ -307,7 +337,7 @@ public class SQLMetaDataUtil {
 					String userPrincipal = userPrincipalBuilder.toString();
 					user = users.get(userPrincipal);
 					if (user == null) {
-						user = repository.retrieveUser(userPrincipal);
+						user = retrieveUser(userPrincipal);
 						users.put(userPrincipal, user);
 					}
 				}
@@ -325,11 +355,18 @@ public class SQLMetaDataUtil {
 				result.add(reportSchedule);
 			}
 		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException("Problem occurred retrieving report schedules", e);
+		}
 
 		return result;
 	}
 
-	public static String retrievePublicUserName(String customerName) {
+	@Override
+	public String retrievePublicUserName(String customerName) {
 		String result = null;
 		
 		String sql = "select u.userName from ADM_Configuration c " +

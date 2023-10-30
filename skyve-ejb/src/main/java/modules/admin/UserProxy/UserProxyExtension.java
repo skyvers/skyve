@@ -6,7 +6,6 @@ import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.User.UserExtension;
@@ -31,7 +30,7 @@ public class UserProxyExtension extends UserProxy {
 			metaDataUser.clearAllPermissionsAndMenus();
 			@SuppressWarnings("resource")
 			Connection connection = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
-			SQLMetaDataUtil.populateUser(metaDataUser, connection);
+			ProvidedRepositoryFactory.get().populateUser(metaDataUser, connection);
 		}
 
 		return metaDataUser;

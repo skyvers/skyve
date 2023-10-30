@@ -1,10 +1,12 @@
 package org.skyve.impl.metadata.repository;
 
+import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.domain.types.formatters.Formatters;
 import org.skyve.impl.bind.BindUtil;
@@ -95,6 +97,26 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 	@Override
 	public void resetUserPermissions(User user) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void populateUser(User user, Connection connection) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String retrievePublicUserName(String customerName) {
 		throw new UnsupportedOperationException();
 	}
 

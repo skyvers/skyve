@@ -426,52 +426,52 @@ public class ClientViewRenderer extends ViewRenderer {
 	}
 	
 	@Override
-	public void renderFormButton(Action action,
+	public void renderFormButton(String name,
 									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
+									Action action,
 									Button button) {
-		renderButton(action,
+		renderButton(name,
 						label,
 						getCurrentWidgetColspan(),
 						iconUrl,
 						iconStyleClass,
 						toolTip,
 						confirmationText,
-						type,
+						action,
 						button);
 	}
 	
 	@Override
-	public void renderButton(Action action,
+	public void renderButton(String name,
 								String label,
 								String iconUrl,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
-								char type,
+								Action action,
 								Button button) {
-		renderButton(action, label, 0, iconUrl, iconStyleClass, toolTip, confirmationText, type, button);
+		renderButton(name, label, 0, iconUrl, iconStyleClass, toolTip, confirmationText, action, button);
 	}
 	
-	private void renderButton(Action action,
+	private void renderButton(String name,
 								String label,
 								int formColspan,
 								String iconUrl,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
-								char type,
+								Action action,
 								Button button) {
-		ImplicitActionName name = action.getImplicitName();
+		ImplicitActionName type = action.getImplicitName();
 		RenderedComponent c = null;
-		if (ImplicitActionName.Report.equals(name)) {
+		if (ImplicitActionName.Report.equals(type)) {
 			c = cr.reportButton(null, button, action);
 		}
-		else if (ImplicitActionName.Download.equals(name)) {
+		else if (ImplicitActionName.Download.equals(type)) {
 			c = cr.downloadButton(null, button, action, module.getName(), document.getName());
 		}
 		else {
@@ -1927,12 +1927,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderCustomAction(String label,
+	public void renderCustomAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
@@ -1982,90 +1982,90 @@ public class ClientViewRenderer extends ViewRenderer {
 	}
 	
 	@Override
-	public void renderAddAction(String label,
+	public void renderAddAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Add);
 	}
 
 	@Override
-	public void renderRemoveAction(String label,
+	public void renderRemoveAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type, 
 									ActionImpl action,
 									boolean canDelete) {
 		processImplicitAction(action, ImplicitActionName.Remove);
 	}
 
 	@Override
-	public void renderZoomOutAction(String label,
+	public void renderZoomOutAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.ZoomOut);
 	}
 
 	@Override
-	public void renderNavigateAction(String label,
+	public void renderNavigateAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Navigate);
 	}
 
 	@Override
-	public void renderOKAction(String label,
+	public void renderOKAction(String name,
+								String label,
 								String iconUrl,
 								String iconStyleClass,
 								String toolTip,
 								String confirmationText,
-								char type,
 								ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.OK);
 	}
 
 	@Override
-	public void renderSaveAction(String label,
+	public void renderSaveAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Save);
 	}
 
 	@Override
-	public void renderCancelAction(String label,
+	public void renderCancelAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Cancel);
 	}
 
 	@Override
-	public void renderDeleteAction(String label,
+	public void renderDeleteAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Delete);
 	}
@@ -2077,89 +2077,89 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param action
 	 */
 	@Override
-	public void renderReportAction(String label,
+	public void renderReportAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Report);
 	}
 
 	@Override
-	public void renderBizExportAction(String label,
+	public void renderBizExportAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.BizExport);
 	}
 
 	@Override
-	public void renderBizImportAction(String label,
+	public void renderBizImportAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.BizImport);
 	}
 
 	@Override
-	public void renderDownloadAction(String label,
+	public void renderDownloadAction(String name,
+										String label,
 										String iconUrl,
 										String iconStyleClass,
 										String toolTip,
 										String confirmationText,
-										char type,
 										ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Download);
 	}
 
 	@Override
-	public void renderUploadAction(String label,
+	public void renderUploadAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Upload);
 	}
 
 	@Override
-	public void renderNewAction(String label,
+	public void renderNewAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.New);
 	}
 
 	@Override
-	public void renderEditAction(String label,
+	public void renderEditAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Edit);
 	}
 
 	@Override
-	public void renderPrintAction(String label,
+	public void renderPrintAction(String name,
+									String label,
 									String iconUrl,
 									String iconStyleClass,
 									String toolTip,
 									String confirmationText,
-									char type,
 									ActionImpl action) {
 		// TODO implement
 	}

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.util.SQLMetaDataUtil;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
@@ -54,7 +54,7 @@ public class PublicFacesView <T extends Bean> extends FacesView<T> {
 						throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter with a valid customer");
 					}
 					
-					String userName = SQLMetaDataUtil.retrievePublicUserName(customerName);
+					String userName = ProvidedRepositoryFactory.get().retrievePublicUserName(customerName);
 					if (userName == null) {
 						HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 						try {
