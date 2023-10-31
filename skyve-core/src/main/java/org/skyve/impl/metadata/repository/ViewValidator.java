@@ -585,7 +585,7 @@ class ViewValidator extends ViewVisitor {
 
 		if (collapsible != null && borderTitle == null) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier
-					+ " cannot have border title equal to null if the collapsible attribute is present");
+					+ " must have a border title if the collapsible attribute is present");
 		}
 
 	}

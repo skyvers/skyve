@@ -3020,8 +3020,7 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	private static void validateCollapsible(Collapsible collapsible, String borderTitle) {
 		if (collapsible != null && borderTitle == null) {
-			throw new MetaDataException("Border title cannot be null if the collapsible attribute is present");
+			throw new MetaDataException("Border title must be defined if the collapsible attribute is present");
 		}
-
 	}
 }
