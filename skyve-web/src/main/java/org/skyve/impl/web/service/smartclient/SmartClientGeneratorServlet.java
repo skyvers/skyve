@@ -62,7 +62,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		}
 		
 		try {
-			return (SmartClientViewRenderer) RENDERER_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, Boolean.valueOf(noCreateView));
+			return (SmartClientViewRenderer) RENDERER_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, uxui, Boolean.valueOf(noCreateView));
 		}
 		catch (Exception e) {
 			throw new DomainException("Cannot instantiate SmartClient renderer " + RENDERER_CLASS, e);
