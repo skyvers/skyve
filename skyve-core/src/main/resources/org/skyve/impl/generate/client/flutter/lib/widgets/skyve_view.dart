@@ -38,9 +38,14 @@ abstract class SkyveView {
       }
 
       return Scaffold(
-          appBar: AppBar(title: Text(viewTitle)),
-          drawer: drawer,
-          body: SkyveForm(child: body));
+        appBar: AppBar(title: Text(viewTitle)),
+        drawer: drawer,
+        body: SkyveForm(
+          child: Form(
+            child: body,
+          ),
+        ),
+      );
     });
   }
 }

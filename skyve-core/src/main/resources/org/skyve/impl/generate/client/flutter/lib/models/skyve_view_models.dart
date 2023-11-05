@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/skyve_blurb.dart';
 import '../widgets/skyve_button.dart';
 import '../widgets/skyve_contentimage.dart';
-import '../widgets/skyve_form.dart';
+import '../widgets/responsive_layout.dart';
 import '../widgets/skyve_formitem.dart';
 import '../widgets/skyve_formrow.dart';
 import '../widgets/skyve_hbox.dart';
@@ -133,7 +133,7 @@ class SkyveViewModel implements SkyveView {
       case 'externalRef':
         return const Text('externalRef');
       case 'form':
-        return SkyveForm(
+        return ResponsiveLayout(
             formCols: [], formRows: _formRows(context, model['rows']));
       case 'implicitActionRef':
         return const Text('implicitActionRef');

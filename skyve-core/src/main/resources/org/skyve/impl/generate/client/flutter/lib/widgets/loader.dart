@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../models/bean_container.dart';
+import '../models/payload.dart';
 import '../util/skyve_form.dart';
 import '../util/skyve_rest_client.dart';
 
@@ -45,24 +45,24 @@ class LoaderWidgetState extends State<LoaderWidget> {
     // error handling & display, and retries
 
     return Visibility(
-        visible: (_ready),
+        visible: _ready,
         replacement: const Center(child: CircularProgressIndicator()),
         child: widget.child);
   }
 
   void _loadData() async {
-    BeanContainer container = await SkyveRestClient()
+    Payload payload = await SkyveRestClient()
         .edit(widget.module, widget.document, widget.bizId);
 
-    // TODO error handling
-
-    setState(() {
-      // FIXME need to parse/handle the results BeanContainer<->SkyveFormState
-      debugPrint(
-          'FIXME need to parse/handle the results BeanContainer<->SkyveFormState');
-      SkyveForm.of(context).replaceBeanValues(container.values);
-      _ready = true;
-    });
+    if (payload.successful) {
+      setState(() {
+        SkyveForm.of(context).applyPayload(payload);
+        _ready = true;
+      });
+    } else {
+      // TODO error handling
+      debugPrint('TODO Something went wrong while loading');
+    }
   }
 
   @override

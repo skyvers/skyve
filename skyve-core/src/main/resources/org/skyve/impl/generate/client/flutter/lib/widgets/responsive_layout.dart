@@ -4,11 +4,12 @@ import 'skyve_formcolumn.dart';
 import 'skyve_formitem.dart';
 import 'skyve_formrow.dart';
 
-class SkyveForm extends StatelessWidget {
+class ResponsiveLayout extends StatelessWidget {
   final List<SkyveFormColumn> formCols;
   final List<SkyveFormRow> formRows;
 
-  const SkyveForm({super.key, required this.formCols, required this.formRows});
+  const ResponsiveLayout(
+      {super.key, required this.formCols, required this.formRows});
 
   @override
   Widget build(BuildContext context) {

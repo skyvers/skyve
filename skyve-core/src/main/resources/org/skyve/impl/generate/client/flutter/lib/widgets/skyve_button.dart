@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../models/bean_container.dart';
+import '../models/payload.dart';
 import '../util/skyve_rest_client.dart';
 import '../util/skyve_form.dart';
 
-typedef BeanSupplier = BeanContainer Function();
+typedef BeanSupplier = Payload Function();
 
 class SkyveButton extends StatelessWidget {
   static const List<String> _poppingActions = ['OK', 'Remove'];
@@ -41,20 +41,22 @@ class SkyveButton extends StatelessWidget {
   }
 
   void _onPressed(BuildContext context) async {
+// FIXME this should be conditional
+    Form.of(context).save();
+
     SkyveFormState formState = SkyveForm.of(context);
     debugPrint('Action $actionType pressed for $formState');
 
-    // FIXME need to convert from formState to a BeanContainer
-    BeanContainer bc = BeanContainer.loading();
+    Payload requestPayload = formState.asPayload();
 
     // Call rest client to peform the update
-    BeanContainer result = await SkyveRestClient().addOrUpdate(actionName, bc);
-
-    // FIXME and convert back...
+    Payload responsePayload =
+        await SkyveRestClient().addOrUpdate(actionName, requestPayload);
 
     // If server result was successful, and this is an
     // action we should pop from we might pop here
-    bool shouldPop = result.successful && _poppingActions.contains(actionName);
+    bool shouldPop =
+        responsePayload.successful && _poppingActions.contains(actionName);
     if (shouldPop) {
       if (context.mounted) {
         _pop(context);
@@ -63,10 +65,7 @@ class SkyveButton extends StatelessWidget {
         // raise error?
       }
     } else {
-      // view.accept(result)
-      // SkyveForm.of(context);
-      // state.container = result;
-      debugPrint('TODO do something with the result: $result');
+      formState.applyPayload(responsePayload);
     }
   }
 }

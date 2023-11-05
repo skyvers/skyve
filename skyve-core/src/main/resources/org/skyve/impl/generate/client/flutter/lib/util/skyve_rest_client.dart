@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
 
-import '../models/bean_container.dart';
+import '../models/payload.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class SkyveRestClient {
@@ -17,7 +17,7 @@ class SkyveRestClient {
   //             ? '/'
   //             : '/${Uri.base.pathSegments[0]}/'))
   //     : 'http://localhost:8080/skyve/');
-  static const _baseUri = 'http://10.0.2.2:8080/skyve/';
+  static const _baseUri = 'http://localhost:8080/skyve/';
 
   static const csrfHeader = 'x-csrf-token';
   static const conversationIdKey = '_c';
@@ -165,7 +165,7 @@ class SkyveRestClient {
     });
   }
 
-  Future<BeanContainer> edit(
+  Future<Payload> edit(
       String moduleName, String documentName, String? bizId) async {
     debugPrint('Edit bean $moduleName.$documentName#$bizId');
 
@@ -188,7 +188,7 @@ class SkyveRestClient {
         jsonDecode(response.data!)['response']['data'][0];
 
     String csrfToken = response.headers[csrfHeader]![0];
-    BeanContainer bc = BeanContainer(
+    Payload bc = Payload(
         bizId: jsonData['bizId'],
         moduleName: moduleName,
         documentName: documentName,
@@ -199,8 +199,8 @@ class SkyveRestClient {
     return bc;
   }
 
-  Future<BeanContainer> addOrUpdate(
-      String actionName, BeanContainer requestBean) async {
+  Future<Payload> addOrUpdate(String actionName, Payload requestBean) async {
+
     String url = 'smartedit';
 
     // Assemble the form data
@@ -231,8 +231,8 @@ class SkyveRestClient {
     return _fromSkyveResponse(response, requestBean);
   }
 
-  BeanContainer _fromSkyveResponse(
-      Response<String> response, BeanContainer requestBean) {
+  Payload _fromSkyveResponse(Response<String> response, Payload requestBean) {
+
     String csrfToken = response.headers.value(csrfHeader) ?? '-6666';
 
     if (response.data == null) {
@@ -247,8 +247,7 @@ class SkyveRestClient {
       // success response
       Map<String, dynamic> responseData = jsonResponseObj['data'];
 
-
-      return BeanContainer(
+      return Payload(
           moduleName: requestBean.moduleName,
           documentName: requestBean.documentName,
           bizId: responseData['bizId'],
@@ -261,7 +260,7 @@ class SkyveRestClient {
       _logWarn(
           'Got error response $status for $requestBean: ${jsonResponseObj['data']}');
 
-      var bc = BeanContainer(
+      var bc = Payload(
           moduleName: requestBean.moduleName,
           documentName: requestBean.documentName,
           bizId: requestBean.bizId,

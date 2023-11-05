@@ -123,12 +123,12 @@ public class FlutterGenerator {
 
         // lib models folder
         refreshAll("lib/models", List.of("skyve_datasource_models.dart", "skyve_menu_models.dart",
-                "skyve_view_models.dart", "bean_container.dart"), substitutions);
+                "skyve_view_models.dart", "payload.dart"), substitutions);
 
         // lib widgets folder
         refreshAll("lib/widgets",
                 List.of("skyve_border.dart", "skyve_button.dart", "skyve_checkbox.dart", "skyve_colourpicker.dart",
-                        "skyve_combo.dart", "skyve_contentimage.dart", "skyve_datagrid.dart", "skyve_form.dart",
+                        "skyve_combo.dart", "skyve_contentimage.dart", "skyve_datagrid.dart", "responsive_layout.dart",
                         "skyve_hbox.dart", "skyve_label.dart", "skyve_menu.dart", "skyve_network_image.dart",
                         "skyve_spacer.dart", "skyve_tab.dart", "skyve_tabpane.dart", "skyve_textfield.dart",
                         "skyve_toolbar.dart", "skyve_vbox.dart", "skyve_view.dart", "skyve_contentlink.dart",

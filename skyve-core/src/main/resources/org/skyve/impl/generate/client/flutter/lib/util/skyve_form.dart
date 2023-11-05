@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen_test/models/payload.dart';
 
 class SkyveForm extends StatefulWidget {
   const SkyveForm({super.key, required this.child});
@@ -13,7 +14,7 @@ class SkyveForm extends StatefulWidget {
 
   static SkyveFormState of(BuildContext context) {
     final SkyveFormState? result = maybeOf(context);
-    assert(result != null, 'No BeanContainer found in context');
+    assert(result != null, 'No SkyveFormState found in context');
     return result!;
   }
 
@@ -24,6 +25,11 @@ class SkyveForm extends StatefulWidget {
 }
 
 class SkyveFormState extends State<SkyveForm> {
+  /// Keep track of applied payloads, mostly for debugging
+  /// though we will need the last CSRF and conversation ID
+  /// later, so this might come in handy
+  final _payloadHistory = <Payload>[];
+
   Map<String, String> metadata = {};
   Map<String, dynamic> beanValues = {};
   Map<String, String> serverErrors = {};
@@ -60,6 +66,32 @@ class SkyveFormState extends State<SkyveForm> {
       _generation++;
     });
   }
+
+  /// Apply the contents of the given Payload into this
+  /// SkyveFormState instance
+  void applyPayload(Payload payload) {
+    _payloadHistory.add(payload);
+
+    if (payload.errors.isNotEmpty) {
+      replaceErrors(payload.errors);
+    }
+
+    if (payload.values.isNotEmpty) {
+      replaceBeanValues(payload.values);
+    }
+  }
+
+  Payload asPayload() {
+    Payload lastPayload = _payloadHistory.last;
+
+    return Payload(
+        moduleName: lastPayload.moduleName,
+        documentName: lastPayload.documentName,
+        bizId: lastPayload.bizId,
+        values: Map.of(beanValues),
+        csrfToken: lastPayload.csrfToken,
+        conversationId: lastPayload.conversationId);
+  }
 }
 
 class _SkyveFormScope extends InheritedWidget {
@@ -67,7 +99,6 @@ class _SkyveFormScope extends InheritedWidget {
   final SkyveFormState _formState;
 
   const _SkyveFormScope({
-    super.key,
     required super.child,
     required generation,
     required formState,
