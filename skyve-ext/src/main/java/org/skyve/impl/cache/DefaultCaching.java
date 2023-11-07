@@ -61,7 +61,9 @@ public class DefaultCaching implements Caching {
 			finally {
 				ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
 									.using(statisticsService)
-									.with(CacheManagerBuilder.persistence(UtilImpl.CONTENT_DIRECTORY + "SKYVE_CACHE/"))
+									.with(CacheManagerBuilder.persistence((UtilImpl.CACHE_DIRECTORY == null) ? 
+																			UtilImpl.CONTENT_DIRECTORY + "SKYVE_CACHE/" :
+																			UtilImpl.CACHE_DIRECTORY))
 									.build(true);
 				jCacheManager = javax.cache.Caching.getCachingProvider().getCacheManager();
 				

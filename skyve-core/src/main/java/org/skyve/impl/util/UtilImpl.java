@@ -201,6 +201,9 @@ public class UtilImpl {
 	public static boolean USING_JPA = false;
 
 	// For caches
+	// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
+	// Skyve will create this folder at startup but if defined it must exist at startup.
+	public static String CACHE_DIRECTORY = null;
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();

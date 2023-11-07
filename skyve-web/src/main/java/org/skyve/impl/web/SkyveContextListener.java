@@ -341,6 +341,12 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HOME_URI = getString("url", "home", url, true);
 		
 		Map<String, Object> state = getObject(null, "state", properties, true);
+		UtilImpl.CACHE_DIRECTORY = getString("state", "directory", state, false);
+		if (UtilImpl.CACHE_DIRECTORY != null) {
+			// clean up the cache directory path
+			UtilImpl.CACHE_DIRECTORY = cleanupDirectory(UtilImpl.CACHE_DIRECTORY);
+			testWritableDirectory("state.directory", UtilImpl.CACHE_DIRECTORY);
+		}
 		Map<String, Object> conversations = getObject("state", "conversations", state, true);
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("state.conversations", "heapSizeEntries", conversations),
 																	getInt("state.conversations", "offHeapSizeMB", conversations),
