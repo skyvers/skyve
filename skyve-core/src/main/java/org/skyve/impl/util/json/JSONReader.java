@@ -52,14 +52,22 @@ public class JSONReader {
 	private User user;
 	private Customer customer;
 	private JSONMode mode = JSONMode.bean;
+	private int stringLength;
 	private CharacterIterator it;
 	private char c;
 	private Object token;
-	private StringBuffer buf = new StringBuffer();
+	private StringBuilder sb = new StringBuilder();
 
 	public JSONReader(User user) {
 		this.user = user;
 		this.customer = (user == null) ? null : user.getCustomer();
+	}
+
+	public Object read(String string) throws Exception {
+		stringLength = string.length();
+		it = new StringCharacterIterator(string);
+		c = it.first();
+		return read();
 	}
 
 	private char next() {
@@ -71,12 +79,6 @@ public class JSONReader {
 		while (Character.isWhitespace(c)) {
 			next();
 		}
-	}
-
-	public Object read(String string) throws Exception {
-		it = new StringCharacterIterator(string);
-		c = it.first();
-		return read();
 	}
 
 	private Object read() throws Exception {
@@ -207,6 +209,7 @@ public class JSONReader {
 			Bean result = ((DocumentImpl) document).newInstance(customer);
 
 			String propertyName = (String) read();
+			int i = 0;
 			while (token != OBJECT_END) {
 				read(); // should be a colon
 				if (token != OBJECT_END) {
@@ -271,6 +274,10 @@ public class JSONReader {
 						propertyName = (String) read();
 					}
 				}
+				// Defend infinite loop
+				if (i++ > stringLength) {
+					throw new IllegalStateException("Malformed JSON - unterminated object " + propertyName);
+				}
 			}
 
 			// Set the bizCustomer, bizDataGroup and bizUser now that the bean is populated from JSON data
@@ -285,6 +292,7 @@ public class JSONReader {
 		else if (mode == JSONMode.dynamic) {
 			// Order can be important - like in constant range map expression
 			Map<Object, Object> result = new LinkedHashMap<>();
+			int i = 0;
 			while (token != OBJECT_END) {
 				read(); // should be a colon
 				if (token != OBJECT_END) {
@@ -292,6 +300,10 @@ public class JSONReader {
 					if (read() == COMMA) {
 						key = read();
 					}
+				}
+				// Defend infinite loop
+				if (i++ > stringLength) {
+					throw new IllegalStateException("Malformed JSON - unterminated object " + key);
 				}
 			}
 
@@ -307,6 +319,7 @@ public class JSONReader {
 			Object result = type.getDeclaredConstructor().newInstance();
 
 			String propertyName = (String) read();
+			int i = 0;
 			while (token != OBJECT_END) {
 				read(); // should be a colon
 				if (token != OBJECT_END) {
@@ -330,6 +343,10 @@ public class JSONReader {
 				if (read() == COMMA) {
 					propertyName = (String) read();
 				}
+				// Defend infinite loop
+				if (i++ > stringLength) {
+					throw new IllegalStateException("Malformed JSON - unterminate object " + propertyName);
+				}
 			}
 
 			return result;
@@ -340,21 +357,26 @@ public class JSONReader {
 	}
 
 	private Object array() throws Exception {
-		List<Object> ret = new ArrayList<>();
+		List<Object> result = new ArrayList<>();
 		Object value = read();
+		int i = 0;
 		while (token != ARRAY_END) {
-			ret.add(value);
+			result.add(value);
 			if (read() == COMMA) {
 				value = read();
 			}
+			// Defend infinite loop
+			if (i++ > stringLength) {
+				throw new IllegalStateException("Malformed JSON - unterminated array");
+			}
 		}
 
-		return ret;
+		return result;
 	}
 
 	private Object number() {
 		boolean isFloatingPoint = false;
-		buf.setLength(0);
+		sb.setLength(0);
 
 		if (c == '-') {
 			add();
@@ -374,22 +396,23 @@ public class JSONReader {
 			isFloatingPoint = true;
 		}
 
-		String s = buf.toString();
+		String s = sb.toString();
 		return isFloatingPoint ? new BigDecimal(s) : Long.valueOf(s);
 		// ? (length < 17) ? (Object)Double.valueOf(s) : new BigDecimal(s)
 		// : (length < 19) ? (Object)Long.valueOf(s) : new BigInteger(s);
 	}
 
 	private int addDigits() {
-		int ret;
-		for (ret = 0; Character.isDigit(c); ++ret) {
+		int result;
+		for (result = 0; Character.isDigit(c); ++result) {
 			add();
 		}
-		return ret;
+		return result;
 	}
 
 	private Object string(char delimiter) {
-		buf.setLength(0);
+		sb.setLength(0);
+		int i = 0;
 		while (((delimiter == '\0') && (c != ':')) || 
 				((delimiter == '"') && (c != '"')) || 
 				((delimiter == '\'') && (c != '\''))) {
@@ -408,16 +431,20 @@ public class JSONReader {
 			else {
 				add();
 			}
+			// Defend infinite loop
+			if (i++ > stringLength) {
+				throw new IllegalStateException("Malformed JSON - unterminated string " + sb);
+			}
 		}
 		if (c != ':') {
 			next(); // cleanup the ' or "
 		}
 
-		return buf.toString();
+		return sb.toString();
 	}
 
 	private void add(char cc) {
-		buf.append(cc);
+		sb.append(cc);
 		next();
 	}
 
