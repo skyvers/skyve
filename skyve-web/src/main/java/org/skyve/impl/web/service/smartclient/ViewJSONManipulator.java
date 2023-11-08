@@ -137,7 +137,7 @@ import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
-public class  extends ViewVisitor {
+public class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
