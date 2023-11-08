@@ -24,7 +24,7 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 			backupExists = ExternalBackup.getInstance().exists(selectedBackupName);
 		} else {
 			File backup = new File(String.format("%sbackup_%s%s%s",
-					Util.getContentDirectory(),
+					Util.getBackupDirectory(),
 					CORE.getUser().getCustomerName(),
 					File.separator,
 					selectedBackupName));
@@ -44,7 +44,7 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 	throws Exception {
 		String selectedBackupName = bean.getSelectedBackupName();
 		final File backup = new File(String.format("%sbackup_%s%s%s",
-				Util.getContentDirectory(),
+				Util.getBackupDirectory(),
 				CORE.getUser().getCustomerName(),
 				File.separator,
 				selectedBackupName));

@@ -8,6 +8,7 @@ import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.skyve.addin.AddInManager;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.Util;
 
 public class PF4JAddInManager implements AddInManager {
 	private static final PF4JAddInManager INSTANCE = new PF4JAddInManager();
@@ -24,14 +25,9 @@ public class PF4JAddInManager implements AddInManager {
 	
 	@Override
 	public void startup() {
-		if (UtilImpl.ADDINS_DIRECTORY == null) {
-			UtilImpl.LOGGER.info("Add-Ins directory = " + UtilImpl.CONTENT_DIRECTORY + "addins/");
-			plugInManager = new DefaultPluginManager(Paths.get(UtilImpl.CONTENT_DIRECTORY, "addins"));
-		}
-		else {
-			UtilImpl.LOGGER.info("Add-Ins directory = " + UtilImpl.ADDINS_DIRECTORY);
-			plugInManager = new DefaultPluginManager(Paths.get(UtilImpl.ADDINS_DIRECTORY));
-		}
+		String addinsDirectory = Util.getAddinsDirectory();
+		UtilImpl.LOGGER.info("Add-Ins directory = " + addinsDirectory);
+		plugInManager = new DefaultPluginManager(Paths.get(Util.getAddinsDirectory()));
 		plugInManager.loadPlugins();
 		plugInManager.startPlugins();
 		

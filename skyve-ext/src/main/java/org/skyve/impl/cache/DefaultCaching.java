@@ -35,6 +35,7 @@ import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.Util;
 
 public class DefaultCaching implements Caching {
 	private static final DefaultCaching INSTANCE = new DefaultCaching();
@@ -61,9 +62,7 @@ public class DefaultCaching implements Caching {
 			finally {
 				ehCacheManager = CacheManagerBuilder.newCacheManagerBuilder()
 									.using(statisticsService)
-									.with(CacheManagerBuilder.persistence((UtilImpl.CACHE_DIRECTORY == null) ? 
-																			UtilImpl.CONTENT_DIRECTORY + "SKYVE_CACHE/" :
-																			UtilImpl.CACHE_DIRECTORY))
+									.with(CacheManagerBuilder.persistence(Util.getCacheDirectory()))
 									.build(true);
 				jCacheManager = javax.cache.Caching.getCachingProvider().getCacheManager();
 				

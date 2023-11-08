@@ -36,7 +36,7 @@ public class DataMaintenanceExtension extends DataMaintenance implements Restore
 	
 	public static String backupDirectoryPrefix() {
 		String customerName = CORE.getUser().getCustomerName();
-		String backupDirPrefix = Util.getContentDirectory() + "backup_" + customerName;
+		String backupDirPrefix = Util.getBackupDirectory() + "backup_" + customerName;
 		return backupDirPrefix;
 	}
 	

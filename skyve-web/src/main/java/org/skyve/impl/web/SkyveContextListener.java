@@ -224,6 +224,12 @@ public class SkyveContextListener implements ServletContextListener {
 		// Backup settings
 		Map<String, Object> backup = getObject(null, "backup", properties, false);
 		if (backup != null) {
+			UtilImpl.BACKUP_DIRECTORY = getString("backup", "directory", backup, false);
+			if (UtilImpl.BACKUP_DIRECTORY != null) {
+				// clean up the backup directory path
+				UtilImpl.BACKUP_DIRECTORY = cleanupDirectory(UtilImpl.BACKUP_DIRECTORY);
+				testWritableDirectory("backup.directory", UtilImpl.BACKUP_DIRECTORY);
+			}
 			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = getString("backup", "externalBackupClass", backup, false);
 			UtilImpl.BACKUP_PROPERTIES = getObject("backup", "properties", backup, false);
 		}
