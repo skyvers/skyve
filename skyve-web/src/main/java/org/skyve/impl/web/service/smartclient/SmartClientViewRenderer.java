@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -3313,4 +3314,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			throw new MetaDataException("Border title must be defined if the collapsible attribute is present");
 		}
 	}
+
+	@Override
+	public void renderSidebar(String title, Sidebar sidebar) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderedSidebar(String title, Sidebar sidebar) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

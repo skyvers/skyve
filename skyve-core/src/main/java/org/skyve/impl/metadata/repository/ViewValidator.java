@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -2434,5 +2435,38 @@ class ViewValidator extends ViewVisitor {
 											" requires an [invisible] or [visible] condition name.");
 		}
 		validateConditionName(invisibleConditionName, widgetIdentifier);
+	}
+
+	@Override
+	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		String title = sidebar.getTitle();
+		String id = sidebar.getWidgetId();
+		String boxIdentifier = ((id == null) ? "A sidebar" : "Sidebar " + id) + ((title == null) ? "" : " titled " + title);
+		validateConditionName(sidebar.getInvisibleConditionName(), boxIdentifier);
+		validateSidebar(sidebar,boxIdentifier);
+		validateMessageExpressions(sidebar.getTitle(), boxIdentifier, "title");
+	}
+
+	private void validateSidebar(Sidebar sidebar,String widgetIdentifier) {
+		if(sidebar.getFloatingPercentageWidth() == null &&
+		   sidebar.getFloatingPixelWidth() 		== null &&
+		   sidebar.getFloatingResponsiveWidth() == null)
+		{
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+					" requires at least one of [floatingPercentageWidth, floatingPixelWidth,floatingResponsiveWidth]");
+		}
+		else if(sidebar.getPercentageWidth() == null &&
+				   sidebar.getPixelWidth() 		== null &&
+				   sidebar.getResponsiveWidth() == null)
+				{
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+							" requires at least one of [percentageWidth, pixelWidth,responsiveWidth]");
+				}
+	}
+
+	@Override
+	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -10,6 +10,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
@@ -190,6 +191,25 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	public abstract void renderedVBox(String borderTitle, VBox vbox);
 
+	@Override
+	public final void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		String title = sidebar.getTitle();
+		renderAttributes.push(title);
+		renderSidebar(title, sidebar);
+		currentContainers.push(sidebar);
+	}
+
+	public abstract void renderSidebar(String title, Sidebar sidebar);
+	
+	@Override
+	public final void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		renderedSidebar(renderAttributes.pop(), sidebar);
+		currentContainers.pop();
+	}
+
+	public abstract void renderedSidebar(String title, Sidebar sidebar);
+
+	
 	@Override
 	public final void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		String borderTitle = hbox.getLocalisedBorderTitle();

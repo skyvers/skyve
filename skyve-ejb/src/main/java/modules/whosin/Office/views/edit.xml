@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="edit"
+<view name="edit" 
 		title="Office"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns="http://www.skyve.org/xml/view"
@@ -59,7 +59,11 @@
 			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" loading="eager" showRefreshControls="true" />
 		</vbox>
 	</hbox>
+	
+	<sidebar widgetId="sidebarWidget" floatingPixelWidthBreakpoint="100" floatingPercentageWidth="100" percentageWidth="100" title="Side content" />
+	
 	<actions>
 		<defaults />
 	</actions>
+	
 </view>

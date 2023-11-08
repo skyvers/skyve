@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -2176,5 +2177,17 @@ public class ClientViewRenderer extends ViewRenderer {
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// TODO Auto-generated method stub
+	}
+	
+	@Override
+	public void renderSidebar(String title, Sidebar sidebar) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderedSidebar(String title, Sidebar sidebar) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -33,6 +33,7 @@ import org.skyve.metadata.view.View.ViewParameter;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
 			name = "view",
 			propOrder = {"documentation",
+							"sidebar",
 							"actions", 
 							"name", 
 							"title",
@@ -55,6 +56,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 	private String icon32x32RelativeFileName;
 	private String helpRelativeFileName;
 	private String helpURL;
+	private Sidebar sidebar = null;
 	private Actions actions = null;
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
@@ -121,6 +123,15 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 	@XmlAttribute(name = "helpURL")
 	public void setHelpURL(String helpURL) {
 		this.helpURL = UtilImpl.processStringValue(helpURL);
+	}
+
+	public Sidebar getSidebar() {
+		return sidebar;
+	}
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = false, nillable = false)
+	public void setSidebar(Sidebar sidebar) {
+		this.sidebar = sidebar;
 	}
 
 	public Actions getActions() {
@@ -224,7 +235,9 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 		result.setName(theName);
 
 		result.getContained().addAll(getContained());
-
+		if (sidebar != null) {
+			result.setSidebar(sidebar);
+		}
 		if (actions != null) {
 			result.setActionsWidgetId(actions.getWidgetId());
 			for (ActionMetaData actionMetaData : actions.getActions()) {

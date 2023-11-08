@@ -28,6 +28,7 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -3178,7 +3179,20 @@ public class MetaDataServlet extends HttpServlet {
 				MetaDataServlet.processParameterizable(action, actionsJSON);
 				MetaDataServlet.processDecorated(action, actionsJSON);
 			}
-		}.visit();
+
+			@Override
+			public void renderSidebar(String title, Sidebar sidebar) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void renderedSidebar(String title, Sidebar sidebar) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			}.visit();
 		
 		return result;
 	}

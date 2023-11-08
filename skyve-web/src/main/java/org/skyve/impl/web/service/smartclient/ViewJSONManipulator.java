@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -120,8 +121,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
@@ -136,7 +137,7 @@ import org.skyve.web.WebContext;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
-public class ViewJSONManipulator extends ViewVisitor {
+public class  extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
@@ -2424,5 +2425,17 @@ public class ViewJSONManipulator extends ViewVisitor {
 		// we add this binding as the widget could be visible client-side and we'd need to let the value through
 		// NB escape and sanitisation already set from visiting the widget
 		addBinding(setInvisible.getBinding(), true, false, Sanitisation.none);
+	}
+
+	@Override
+	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		addCondition(sidebar.getInvisibleConditionName());
+
+	}
+
+	@Override
+	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -9,6 +9,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.Inject;
@@ -933,5 +934,22 @@ public class ComponentViewVisitor extends ViewVisitor {
 			return binding;
 		}
 		return bindingPrefix + '.' + binding;
+	}
+
+	@Override
+	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		invisible(sidebar);
+
+		// capture the targeted widget, if applicable
+		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
+			identifiable = sidebar;
+		}
+
+	}
+
+	@Override
+	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		// TODO Auto-generated method stub
+
 	}
 }

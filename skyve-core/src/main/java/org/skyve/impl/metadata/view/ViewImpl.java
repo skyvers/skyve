@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
@@ -59,6 +60,7 @@ public class ViewImpl extends Container implements View {
 	private String helpURL;
 	private String title;
 	private String actionsWidgetId;
+	private Sidebar sidebar;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
@@ -182,6 +184,14 @@ public class ViewImpl extends Container implements View {
 	@Override
 	public Collection<Action> getActions() {
 		return actions.values();
+	}
+
+	public Sidebar getSidebar() {
+		return sidebar;
+	}
+
+	public void setSidebar(Sidebar sidebar) {
+		this.sidebar = sidebar;
 	}
 
 	/**

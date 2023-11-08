@@ -11,6 +11,7 @@ import org.skyve.impl.generate.jasperreports.ReportElement.ElementType;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
@@ -1640,6 +1641,18 @@ public class ReportViewVisitor extends ViewVisitor {
 	@Override
 	public void visitZoomOutAction(ActionImpl arg0) {
 		// No action required
+
+	}
+
+	@Override
+	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		// TODO Auto-generated method stub
 
 	}
 

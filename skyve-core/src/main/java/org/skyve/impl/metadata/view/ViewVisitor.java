@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
@@ -123,9 +124,19 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitVBox(VBox vbox,
 									boolean parentVisible,
 									boolean parentEnabled);
+
 	public abstract void visitedVBox(VBox vbox,
+			boolean parentVisible,
+			boolean parentEnabled);
+
+	public abstract void visitSidebar(Sidebar sidebar,
 										boolean parentVisible,
 										boolean parentEnabled);
+
+	public abstract void visitedSidebar(Sidebar sidebar,
+			boolean parentVisible,
+			boolean parentEnabled);
+
 	public abstract void visitHBox(HBox hbox,
 									boolean parentVisible,
 									boolean parentEnabled);
@@ -771,11 +782,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 	private void visitContainer(Container container, 
 									boolean parentVisible,
 									boolean parentEnabled) {
+		System.out.println("container: ");
+		System.out.println(container);
 		if (container == view) {
 			visitView();
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget, parentVisible, parentEnabled);
 			}
+			visitViewSidebar(parentVisible, parentEnabled);
 			visitActions(view);
 			visitedView();
 		}
@@ -812,6 +826,20 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
+	private void visitViewSidebar(boolean parentVisible,boolean parentEnabled) {
+		Sidebar sidebar = view.getSidebar();
+		if(sidebar != null) 
+		{
+			visitSidebar(sidebar, parentVisible, parentEnabled);
+			boolean sidebarVisible = parentVisible && visible(sidebar);
+			for (MetaData widget : sidebar.getContained()) {
+				visitWidget(widget, sidebarVisible, parentEnabled);
+			}
+			visitedSidebar(sidebar, parentVisible, parentEnabled);
+		}
+		
+	}
+
 	private void visitDataWidgetColumns(AbstractDataWidget widget,
 											String widgetBindingPrefix,
 											boolean widgetVisible,
