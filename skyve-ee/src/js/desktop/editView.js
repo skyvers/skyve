@@ -1791,17 +1791,20 @@ isc.BizHBox.addMethods({
 // Collapsible
 isc.ClassFactory.defineClass("BizCollapsible", "Window");
 isc.BizCollapsible.addMethods({
-    initWidget: function () {
-        var me = this;
-        this.contained = [];
-        this.canDragReposition = false;
-        this.canDragResize = false;
-        this.showCloseButton = false;
-        this.animateMinimize = true;
-        this.autoSize = true;
-        this.headerLabelProperties = {width:'100%', click: function() {me.minimized ? me.restore() : me.minimize()}};
-        this.Super("initWidget", arguments);
-    },
+	initWidget: function () {
+		var me = this;
+		this.contained = [];
+		this.canDragReposition = false;
+		this.canDragResize = false;
+		this.showCloseButton = false;
+		this.animateMinimize = true;
+		this.autoSize = true;
+		this.headerLabelProperties = {width:'100%', click: function() {me.minimized ? me.restore() : me.minimize()}};
+// Minimize and Restore icons revert to default SC icons when Window is collapsed and expanded in UI - it must be set programmatically and these AutoChilds are not respected
+//		this.restoreButtonProperties = {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false};
+//		this.minimizeButtonProperties = {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false};
+		this.Super("initWidget", arguments);
+	},
 	
 	addContained: function(contained) {
 		this.contained.add(contained);
