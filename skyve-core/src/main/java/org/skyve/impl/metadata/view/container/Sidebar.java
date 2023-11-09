@@ -1,4 +1,4 @@
-package org.skyve.impl.metadata.repository.view;
+package org.skyve.impl.metadata.view.container;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.util.Util;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "sidebar")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, name = "sidebar", propOrder = { "widgetId",
@@ -48,7 +49,7 @@ public class Sidebar extends Container implements Identifiable, Invisible {
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = invisibleConditionName;
+		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
 	// to enable JAXB XML marshaling
@@ -97,7 +98,11 @@ public class Sidebar extends Container implements Identifiable, Invisible {
 
 	@XmlAttribute(required = false)
 	public void setTitle(String title) {
-		this.title = title;
+		this.title = UtilImpl.processStringValue(title);
+	}
+	
+	public String getLocalisedTitle() {
+		return Util.i18n(title);
 	}
 
 	public Integer getFloatingPixelWidth() {
@@ -161,5 +166,4 @@ public class Sidebar extends Container implements Identifiable, Invisible {
 	public void setResponsiveWidth(Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
-
 }

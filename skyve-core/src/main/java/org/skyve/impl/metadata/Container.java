@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;

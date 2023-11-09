@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -23,6 +22,7 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -2430,12 +2430,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		addCondition(sidebar.getInvisibleConditionName());
-
 	}
 
 	@Override
 	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
-
+		// do nothing
 	}
 }

@@ -3,8 +3,8 @@ package org.skyve.impl.metadata.view;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -683,13 +683,11 @@ public class NoOpViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
-
+		// no-op
 	}
 
 	@Override
 	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
-
+		// no-op
 	}
 }

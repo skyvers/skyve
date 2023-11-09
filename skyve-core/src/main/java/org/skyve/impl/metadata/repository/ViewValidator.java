@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
-import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -25,6 +24,7 @@ import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.container.Box;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -2439,12 +2439,10 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		String title = sidebar.getTitle();
-		String id = sidebar.getWidgetId();
-		String boxIdentifier = ((id == null) ? "A sidebar" : "Sidebar " + id) + ((title == null) ? "" : " titled " + title);
-		validateConditionName(sidebar.getInvisibleConditionName(), boxIdentifier);
-		validateSidebar(sidebar,boxIdentifier);
-		validateMessageExpressions(sidebar.getTitle(), boxIdentifier, "title");
+		String sidebarIdentifier = "The sidebar";
+		validateConditionName(sidebar.getInvisibleConditionName(), sidebarIdentifier);
+		validateSidebar(sidebar, sidebarIdentifier);
+		validateMessageExpressions(sidebar.getLocalisedTitle(), sidebarIdentifier, "title");
 	}
 
 	private void validateSidebar(Sidebar sidebar,String widgetIdentifier) {
@@ -2458,15 +2456,14 @@ class ViewValidator extends ViewVisitor {
 		else if(sidebar.getPercentageWidth() == null &&
 				   sidebar.getPixelWidth() 		== null &&
 				   sidebar.getResponsiveWidth() == null)
-				{
-					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-							" requires at least one of [percentageWidth, pixelWidth,responsiveWidth]");
-				}
+		{
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+					" requires at least one of [percentageWidth, pixelWidth,responsiveWidth]");
+		}
 	}
 
 	@Override
 	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
-
+		// nothing to see here
 	}
 }

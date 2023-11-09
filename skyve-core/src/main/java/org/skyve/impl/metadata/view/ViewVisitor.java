@@ -8,9 +8,9 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.view.Sidebar;
 import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -126,8 +126,8 @@ public abstract class ViewVisitor extends ActionVisitor {
 									boolean parentEnabled);
 
 	public abstract void visitedVBox(VBox vbox,
-			boolean parentVisible,
-			boolean parentEnabled);
+										boolean parentVisible,
+										boolean parentEnabled);
 
 	public abstract void visitSidebar(Sidebar sidebar,
 										boolean parentVisible,
@@ -782,8 +782,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 	private void visitContainer(Container container, 
 									boolean parentVisible,
 									boolean parentEnabled) {
-		System.out.println("container: ");
-		System.out.println(container);
 		if (container == view) {
 			visitView();
 			for (MetaData widget : container.getContained()) {

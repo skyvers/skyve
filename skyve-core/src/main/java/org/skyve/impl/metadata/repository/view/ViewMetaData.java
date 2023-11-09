@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
@@ -235,9 +236,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertabl
 		result.setName(theName);
 
 		result.getContained().addAll(getContained());
-		if (sidebar != null) {
-			result.setSidebar(sidebar);
-		}
+		result.setSidebar(sidebar);
 		if (actions != null) {
 			result.setActionsWidgetId(actions.getWidgetId());
 			for (ActionMetaData actionMetaData : actions.getActions()) {
