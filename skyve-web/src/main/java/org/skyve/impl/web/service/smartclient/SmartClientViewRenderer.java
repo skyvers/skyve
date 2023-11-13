@@ -922,7 +922,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderFormBlurb(String markup, Blurb blurb) {
-		renderFormLabel(markup, makeNewLabelFromBlurb(blurb));
+		renderFormLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
 	@Override
@@ -932,11 +932,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderBlurb(String markup, Blurb blurb) {
-		renderLabel(markup, makeNewLabelFromBlurb(blurb));
+		renderLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
 	@Override
-	public void renderFormLabel(String value, Label label) {
+	public void renderFormLabel(String value, boolean boundValue, Label label) {
 		FormItem currentFormItem = getCurrentFormItem();
 
 		// Set colSpan 1 if not set otherwise all formatting hell breaks loose
@@ -959,15 +959,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		String binding = label.getBinding();
 
-		// does the value have binding expressions in them? - (?s) means multiline match
-		boolean dynamic = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value);
-		if (dynamic) {
+		// does the value have binding expressions in them?
+		if (boundValue) {
 			binding = "_" + formatCounter++; // _1, _2 and so on
 		}
 
 		if (binding == null) {
-			String defaultValue = (label.getFor() == null) ? value : value + " :";
-			code.append("defaultValue:'").append(OWASP.escapeJsString(defaultValue, false, false));
+			code.append("defaultValue:'").append(OWASP.escapeJsString(value, false, false));
 		}
 		else {
 			code.append("name:'").append(BindUtil.sanitiseBinding(binding));
@@ -988,9 +986,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderLabel(String value, Label label) {
-		// does the value have binding expressions in them? - (?s) means multi-line match
-		boolean boundValue = (label.getValue() != null) && BindUtil.containsSkyveExpressions(value); 
+	public void renderLabel(String value, boolean boundValue, Label label) {
+		// Throw if the value has binding expressions in them
 		if (boundValue) {
 			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() + 
 											"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
@@ -1013,8 +1010,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		String binding = label.getBinding();
 		if (binding == null) {
-			String defaultValue = (label.getFor() == null) ? value : value + " :";
-			code.append("value:'").append(OWASP.escapeJsString(defaultValue, false, false));
+			code.append("value:'").append(OWASP.escapeJsString(value, false, false));
 		}
 		else {
 			code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
@@ -2962,6 +2958,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		String title = getCurrentWidgetLabel();
 		if (title != null) {
+			
 			def.setTitle(title);
 		}
 		def.setRequired(isCurrentWidgetRequired());

@@ -1384,7 +1384,7 @@ public class MetaDataServlet extends HttpServlet {
 			}
 			
 			@Override
-			public void renderFormLabel(String value, Label label) {
+			public void renderFormLabel(String value, boolean boundValue, Label label) {
 				result.append("{\"type\":\"label\"");
 				processBound(label);
 				if (value != null) {
@@ -1702,7 +1702,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			@Override
 			public void renderContainerColumnLabel(String value, Label label) {
-				renderLabel(value, label);
+				renderLabel(value, false, label);
 			}
 			
 			@Override
@@ -2259,8 +2259,8 @@ public class MetaDataServlet extends HttpServlet {
 			}
 			
 			@Override
-			public void renderLabel(String value, Label label) {
-				renderFormLabel(value, label);
+			public void renderLabel(String value, boolean boundValue, Label label) {
+				renderFormLabel(value, boundValue, label);
 				result.append(',');
 			}
 			
