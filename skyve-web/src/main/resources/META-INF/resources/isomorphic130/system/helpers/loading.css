@@ -1,0 +1,18 @@
+/*
+    Sample styling for the loading indicator shown via FileLoader.showLoadingIndicator()
+*/
+.loadingIndicator {
+    background-color:#e2e2e2;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+.loadingIndicatorImage {
+    padding:8px;
+}
+.loadingIndicatorText {
+  color: #282828;
+  font-family: calibri, Sans-Serif;
+  font-size: 12px;
+  padding: 8px;
+}

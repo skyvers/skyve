@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+
+<SCRIPT>
+
+
+
+if (!window.isc && (window.opener != null || window.parent != window) 
+    && document.domain && document.domain.indexOf(".") != -1 
+	&& !(new RegExp("^(\\d{1,3}\\.){3}\\d{1,3}$").test(document.domain))) 
+{
+    
+    var set = false;
+    while (document.domain.indexOf(".") != -1) {
+        try {
+             
+            if (window.parent && window.parent.isc) break;
+            if (window.opener && window.opener.isc) break;
+            if (window.top.isc) break;
+            
+            if (!set) { document.domain = document.domain; set = true; }
+            else { document.domain = document.domain.replace(/.*?\./, ''); }
+        } catch (e) {
+            try {
+                if (!set) { document.domain = document.domain; set = true }
+                else { document.domain = document.domain.replace(/.*?\./, ''); }
+            } catch (ee) {
+                break;
+            }
+        }
+    } 
+}
+
+// document.write out our title and skin styles file
+if (window.parent && window.parent.isc) {
+
+    // Page title, and print target ID are driven by parameters to this page.
+    // We may not have a java server, so use the client-side getParams method to pick these up
+    window.params = window.parent.isc.getParams(window);
+
+    // Write out the title so we print with the appropriate title
+    if (params.title) document.write("<TITLE>" + params.title + "</TITLE>");
+
+    // Calendars pass this - it makes the printPreview have the same density as the calling window
+    if (params.applyDensity == "1") params.applyDensity = true;
+    else params.applyDensity = false;
+
+    var doc = window.parent.document;
+    // check if there are any inlined CSS styles declared in <STYLE> tags
+    var ss = doc && doc.styleSheets;
+    if (ss) {
+        // open a style tag - this will contain any styles specified inline in the calling page
+        document.write("<STYLE>");
+        for (var i=0; i<ss.length; i++) {
+            var styleSheet = ss[i];
+            var href = styleSheet.href + ""; // just in case it's not a real String
+            if (href == "null") {
+                
+                var rules = null;
+                if (typeof styleSheet.cssRules != "undefined") { // "cssRules" is the standard
+                    rules = styleSheet.cssRules;
+                } else if (typeof styleSheet.rules != "undefined") { // but IE6 had "rules"
+                    rules = styleSheet.rules;
+                }
+                if (rules) {
+                    for (var j=0; j<rules.length; j++) {
+                        document.write(rules[j].cssText);
+                    }
+                }
+            }
+        }
+
+        // make sure the printPreview always shows scrollbars as required
+        document.write("html,body {overflow:visible;}"); 
+        document.write("</STYLE>");
+    }
+
+}
+</SCRIPT>
+</HEAD>
+<BODY STYLE="overflow:visible;" onload="pageLoaded()" onafterprint="printed()">
+<SCRIPT>
+if (window.parent && window.parent.isc) {
+
+    var ss = window.parent.document && window.parent.document.styleSheets;
+    if (ss) {
+        
+        for (var i=0; i<ss.length; i++) {
+            var styleSheet = ss[i];
+            // if there's no href, this is a styleSheet representing a bunch of styles defined
+            // in a <style> tag somewhere - ignore these here - they've already been written
+            // out into a <style> tag in the <head> element
+            var href = styleSheet.href + ""; // just in case it's not a real String
+            if (href == "null") continue;
+
+            // make the load unique via an id, so we don't affect the cached version in the parent page
+            if (!href.includes("?")) href += "?";
+            else href += "&";
+            href += "id=" + new Date().toString().replaceAll(" ", "");
+
+            // if loading skin_styles.css, add an onload to run applyDensity() - see comments there
+            var linkOnload = "";
+            if (params.applyDensity) { 
+                if (href.includes("skin_styles.css")) linkOnload = 'onload="window.applyDensity(\'skin_styles.css\')"';
+            }
+            var tag = '<LINK REL="STYLESHEET" TYPE="text/css" HREF="' + href + '" ' + linkOnload + '>';
+            document.write(tag);
+        }
+    } else {
+
+        // note that we need the parent.isc object to resolve the skinImgDir
+        document.write('<LINK REL="STYLESHEET" TYPE="text/css" HREF=' + 
+                       window.parent.isc.Page.getURL("[SKIN]/skin_styles.css")+
+                       ">");
+    }
+}
+
+function applyDensity (hrefLoaded) {
+    if (hrefLoaded != "skin_styles.css") return;
+
+    // skin_styles.css has just been loaded, which is necessary to pick up the skin's fonts 
+    // from the right URLs - but the styles have not had Density-changes applied for fonts - do 
+    // that now by just copying the appropriate rules from the parent window to this one
+
+    var ss = window.parent.document && window.parent.document.styleSheets;
+    var sheet = null;
+    var ssLocal = window.document && window.document.styleSheets;
+    var sheetLocal = null;
+    
+    if (ss && ssLocal) {
+        for (var i=0; i<ss.length; i++) {
+            if ((ss[i].href + "").includes("skin_styles.css")) {
+                sheet = ss[i];
+                break;
+            }
+        }
+        
+        for (var i=0; i<ssLocal.length; i++) {
+            if ((ssLocal[i].href + "").includes("skin_styles.css")) {
+                sheetLocal = ssLocal[i];
+                break;
+            }
+        }
+        
+    }
+
+    if (sheet && sheetLocal) {
+        var rules = null,
+            localRules = null
+        ;
+        if (typeof sheet.cssRules != "undefined") { // "cssRules" is the standard
+            rules = sheet.cssRules;
+            localRules = sheetLocal.cssRules;
+        } else if (typeof sheet.rules != "undefined") { // but IE6 had "rules"
+            rules = sheet.rules;
+            localRules = sheetLocal.rules;
+        }
+        if (rules) {
+            for (var j=0; j<rules.length; j++) {
+                //console.log("updating rule --- " + rules[j]
+                var cssText = rules[j].cssText + "";
+                // append the parent window's rules to the end of the local stylesheet, so
+                // they act as overrides
+                sheetLocal.insertRule(new String("" + cssText), localRules.length);
+            }
+        }
+    }
+}
+
+</SCRIPT>
+
+<SCRIPT>
+function pageLoaded() {
+    window.controllerCanvas = params.id;
+    // Sanity check: Unclear why we should get into this state but if we can't
+    // find the print canvas for this iframe, log a warning and avoid the JS error
+    if (controllerCanvas == null || parent[controllerCanvas] == null) {
+        parent.isc.logWarn("Print canvas with ID:" + controllerCanvas + 
+            " failed to render correctly.", "printing");
+    } else {
+        parent[controllerCanvas].iframeLoad();
+    }
+}
+
+function printed() {
+    parent[window.controllerCanvas].printComplete();
+}
+
+function assignHTML(HTML) {
+    getPrintElement().innerHTML = HTML;
+}
+
+function getPrintElement() {
+    return document.getElementById('printElement');
+}
+
+function doPrint(callback) {
+    // focus() required for IE - otherwise it prints the top-level window
+    focus();
+    print();
+    
+}
+
+</SCRIPT>
+
+<span id='printElement'></span>
+
+</BODY>
+</HTML>
