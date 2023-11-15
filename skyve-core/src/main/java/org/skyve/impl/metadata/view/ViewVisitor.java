@@ -787,7 +787,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget, parentVisible, parentEnabled);
 			}
-			visitViewSidebar(parentVisible, parentEnabled);
+			if(view.getSidebar() != null) 
+			{
+				visitSidebar(view.getSidebar(),parentVisible, parentEnabled);
+				for (MetaData widget : view.getSidebar().getContained()) {
+					visitWidget(widget, parentVisible, parentEnabled);
+				}
+				visitedSidebar(view.getSidebar(), parentVisible, parentEnabled);
+			}
 			visitActions(view);
 			visitedView();
 		}
