@@ -455,7 +455,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetColspan++;
 			}
 			renderFormItem(currentWidgetLabel,
-							Boolean.TRUE.equals(currentWidgetRequired),
+							isCurrentWidgetRequired(),
 							currentWidgetHelp,
 							currentWidgetShowLabel,
 							currentWidgetColspan,
@@ -466,7 +466,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
 		renderedFormItem(currentWidgetLabel,
-							Boolean.TRUE.equals(currentWidgetRequired),
+							isCurrentWidgetRequired(),
 							currentWidgetHelp,
 							currentWidgetShowLabel,
 							currentWidgetColspan,
@@ -968,11 +968,17 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitLabel(Label label, boolean parentVisible, boolean parentEnabled) {
 		String value = null;
+		boolean boundValue = false; 
+
 		String binding = label.getBinding();
 		String faw = label.getFor();
 		if (faw != null) {
 			preProcessWidget(faw, label.showsLabelByDefault());
 			value = currentWidgetLabel;
+			if (value == null) {
+				value = "Label";
+			}
+			value += (isCurrentWidgetRequired() ? " *:" : " :");
 		}
 		else if (binding != null) {
 			preProcessWidget(binding, label.showsLabelByDefault());
@@ -980,22 +986,23 @@ public abstract class ViewRenderer extends ViewVisitor {
 		else {
 			preProcessWidget(true, label.showsLabelByDefault());
 			value = label.getLocalisedValue();
+			boundValue = (value != null) && BindUtil.containsSkyveExpressions(value);
 			currentTarget = null;
 		}
 		if (currentFormItem != null) {
-			renderFormLabel(value, label);
+			renderFormLabel(value, boundValue, label);
 		}
 		else if (currentContainerColumn != null) {
 			renderContainerColumnLabel(value, label);
 		}
 		else {
-			renderLabel(value, label);
+			renderLabel(value, boundValue, label);
 		}
 	}
 
-	public abstract void renderFormLabel(String value, Label label);
+	public abstract void renderFormLabel(String value, boolean boundValue, Label label);
 	public abstract void renderContainerColumnLabel(String value, Label label);
-	public abstract void renderLabel(String value, Label label);
+	public abstract void renderLabel(String value, boolean boundValue, Label label);
 
 	@Override
 	public final void visitProgressBar(ProgressBar progressBar, boolean parentVisible, boolean parentEnabled) {

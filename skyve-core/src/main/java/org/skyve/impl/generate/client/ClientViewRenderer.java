@@ -832,39 +832,26 @@ public class ClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderFormLabel(String value, Label label) {
-		renderLabel(value, getCurrentWidgetColspan(), label);
+	public void renderFormLabel(String value, boolean boundValue, Label label) {
+		renderLabel(value, getCurrentWidgetColspan(), boundValue, label);
 	}
 	
 	@Override
 	public void renderContainerColumnLabel(String value, Label label) {
-		renderLabel(value, 0, label);
+		renderLabel(value, 0, false, label);
 	}
 	
 	@Override
-	public void renderLabel(String value, Label label) {
-		renderLabel(value, 0, label);
+	public void renderLabel(String value, boolean boundValue, Label label) {
+		renderLabel(value, 0, boundValue, label);
 	}
 	
-	private void renderLabel(String value, int formColspan, Label label) {
-		String ultimateValue = label.getLocalisedValue();
+	private void renderLabel(String value, int formColspan, boolean boundValue, Label label) {
+		String ultimateValue = value;
 		String binding = label.getBinding();
-		if ((ultimateValue == null) && (binding == null)) { // using the Label.for attribute
-			ultimateValue = "Label";
-			TargetMetaData target = getCurrentTarget();
-			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					ultimateValue = String.format("%s %s:", value, attribute.isRequired() ? "*" : ""); 
-				}
-			}
-		}
-		else if ((value != null) && value.indexOf('{') > -1) { // label value with binding expression
+		if (boundValue) {
 			binding = value;
 			ultimateValue = null;
-		}
-		else { // boilerplate value or a binding
-			ultimateValue = value;
 		}
 		RenderedComponent c = cr.label(null, dataWidgetVar, ultimateValue, binding, label);
 	    addComponent(null, 

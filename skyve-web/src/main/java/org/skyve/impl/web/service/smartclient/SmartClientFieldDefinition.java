@@ -63,7 +63,11 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
         result.append("name:'");
         result.append(name);
         result.append("',title:'");
-        result.append(OWASP.escapeJsString(title));
+        String ultimateTitle = OWASP.escapeJsString(title);
+        if (required) {
+        	ultimateTitle += " *";
+        }
+        result.append(ultimateTitle);
         result.append("',type:'");
         result.append(type);
         if (editorType != null) {
