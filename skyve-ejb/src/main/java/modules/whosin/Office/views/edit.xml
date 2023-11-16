@@ -61,15 +61,15 @@
 	</hbox>
 	
 	<sidebar widgetId="sidebarWidget" floatingPixelWidthBreakpoint="100" floatingPercentageWidth="100" percentageWidth="100" title="Side content" >
-	<vbox border="true" borderTitle="Sidebar content" collapsible="open">
-	<chart type="pie">
+	<vbox border="true" borderTitle="Sidebar content" collapsible="open" responsiveWidth="12">
+	<chart type="pie" responsiveWidth="12">
 			<model title="All Offices" moduleName="whosin"
 				documentName="Office" label="count" valueBinding="suburb"
 				valueFunction="Count" categoryBinding="suburb">
 				<noBucket />
 			</model>
 		</chart>
-		<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
+		<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300" responsiveWidth="12">
 					<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId" />
 				</listGrid>
 	</vbox>
