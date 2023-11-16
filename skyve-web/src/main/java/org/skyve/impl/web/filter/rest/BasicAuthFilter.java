@@ -125,6 +125,9 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				q.putParameter(Bean.CUSTOMER_NAME, customerAndUser[0], false);
 			}
+			else {
+				throw new SecurityException("Invalid username/password");
+			}
 			q.putParameter(LocalDataStoreRepository.USER_NAME_PROPERTY_NAME, customerAndUser[1], false);
 		}
 
