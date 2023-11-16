@@ -166,6 +166,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("'});");
 			containerVariables.push("create");
 		}
+		
+		// if the sidebar is present then create split pane
+		if(view.getSidebar() != null)
+		{
+			code.append("var rightPane = isc.BizContainer.create({width:'30%',height:'100%',shadowSoftness:10,shadowOffset: 0,showShadow: true");
+			code.append("});");
+			containerVariables.push("rightPane");
+			
+			code.append("var editPane = isc.BizContainer.create({width:'100%',height:'100%',shadowSoftness:10,shadowOffset: 0,showShadow: true,showResizeBar:true, resizeBarTarget:'next'");
+			code.append("});");
+			containerVariables.push("editPane");			
+			
+			code.append("var mainLayout = isc.HLayout.create({autoDraw: true,width:'100%',height:'100%',padding:10,");
+			code.append("members:[editPane,rightPane]");
+			code.append("});");
+			
+		}
 	}
 
 	@Override
@@ -184,6 +201,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
 			code.append("view._vm.addMember(").append(var).append(");");
 			code.append("view.addContained(").append(var).append(");\n");
+		}
+		if(view.getSidebar()!=null)
+		{
+			code.append("view.addContained(mainLayout);");
 		}
 	}
 
@@ -3314,13 +3335,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderSidebar(String title, Sidebar sidebar) {
-		// TODO Auto-generated method stub
+		String variable = "v" + variableCounter++;
+		code.append("var ").append(variable).append("=isc.BizVBox.create({");
+		code.append("width:'100%',height:'100%'");
+		code.append("});");
 		
+		code.append("rightPane.addContained("+variable+");");
+		containerVariables.push(variable);
 	}
-
+	
 	@Override
 	public void renderedSidebar(String title, Sidebar sidebar) {
-		// TODO Auto-generated method stub
+		containerVariables.pop();
 		
 	}
 

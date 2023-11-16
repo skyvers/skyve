@@ -4,9 +4,9 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns="http://www.skyve.org/xml/view"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<hbox border="true" borderTitle="Office Details"  collapsible="open" responsiveWidth="12">
+	<hbox border="true" borderTitle="Office Details"  responsiveWidth="12">
 		<vbox border="true" >
-			<form border="true" borderTitle="Building Details" collapsible="open" responsiveWidth="12">
+			<form border="true" borderTitle="Building Details" responsiveWidth="12" collapsible="open">
 				<column responsiveWidth="3" />
 				<column />
 				<row>
@@ -60,7 +60,20 @@
 		</vbox>
 	</hbox>
 	
-	<sidebar widgetId="sidebarWidget" floatingPixelWidthBreakpoint="100" floatingPercentageWidth="100" percentageWidth="100" title="Side content" />
+	<sidebar widgetId="sidebarWidget" floatingPixelWidthBreakpoint="100" floatingPercentageWidth="100" percentageWidth="100" title="Side content" >
+	<vbox border="true" borderTitle="Sidebar content" collapsible="open">
+	<chart type="pie">
+			<model title="All Offices" moduleName="whosin"
+				documentName="Office" label="count" valueBinding="suburb"
+				valueFunction="Count" categoryBinding="suburb">
+				<noBucket />
+			</model>
+		</chart>
+		<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
+					<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId" />
+				</listGrid>
+	</vbox>
+	</sidebar>
 	
 	<actions>
 		<defaults />
