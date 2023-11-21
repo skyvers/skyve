@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link href="https://unpkg.com/primevue/resources/themes/saga-blue/theme.css" rel="stylesheet">
+    <link href="https://unpkg.com/primevue/resources/primevue.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/primeflex/primeflex.css" rel="stylesheet">
+    <link href="https://unpkg.com/primeicons/primeicons.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ListGrid</title>
+  </head>
+  <body>
+    <div id="grid"></div>
+    <div id="grid1"></div>
+    <script type="module" src="/src/main.js"></script>
+
+    <script>
+      window.onload = function() {
+        SKYVE.listgrid({e: '#grid',
+                         m:'admin',
+                         q:'qContacts',
+                         t:'All Contacts',
+                         c:[{field: 'name', header: 'Name', sortable: true, filterable: true}]});
+        SKYVE.listgrid({e: '#grid1',
+                         m:'admin',
+                         q:'qUsers',
+                         c:[{field: 'name', header: 'Name', sortable: false, filterable: false}]});
+      }
+    </script>
+  </body>
+</html>
