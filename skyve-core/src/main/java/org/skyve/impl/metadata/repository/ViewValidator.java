@@ -19,6 +19,8 @@ import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.RelativeWidth;
+import org.skyve.impl.metadata.view.ResponsiveWidth;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.container.Box;
@@ -536,23 +538,29 @@ class ViewValidator extends ViewVisitor {
 		validatePositive(sizable.getPixelWidth(), widgetIdentifier, "pixelWidth");
 		if (sizable instanceof AbsoluteSize) {
 			validatePositive(((AbsoluteSize) sizable).getPixelHeight(), widgetIdentifier, "pixelHeight");
-			if (sizable instanceof RelativeSize) {
-				RelativeSize relative = (RelativeSize) sizable;
-				validatePositive(relative.getMinPixelWidth(), widgetIdentifier, "minPixelWidth");
-				validatePositive(relative.getMaxPixelWidth(), widgetIdentifier, "maxPixelWidth");
-				validatePositive(relative.getMinPixelHeight(), widgetIdentifier, "minPixelHeight");
-				validatePositive(relative.getMaxPixelHeight(), widgetIdentifier, "maxPixelHeight");
-				validatePercentage(relative.getPercentageWidth(), widgetIdentifier, "percentageWidth");
-				validatePercentage(relative.getPercentageHeight(), widgetIdentifier, "percentageHeight");
-				validateResponsive(relative.getResponsiveWidth(), widgetIdentifier, "responsiveWidth");
-				validateResponsive(relative.getSm(), widgetIdentifier, "sm");
-				validateResponsive(relative.getMd(), widgetIdentifier, "md");
-				validateResponsive(relative.getLg(), widgetIdentifier, "lg");
-				validateResponsive(relative.getXl(), widgetIdentifier, "xl");
-				if (sizable instanceof Box) {
-					Box box = (Box) relative;
-					validatePositive(box.getPixelPadding(), widgetIdentifier, "pixelPadding");
-					validatePositive(box.getPixelMemberPadding(), widgetIdentifier, "pixelPadding");
+			if (sizable instanceof RelativeWidth) {
+				RelativeWidth width = (RelativeWidth) sizable;
+				validatePercentage(width.getPercentageWidth(), widgetIdentifier, "percentageWidth");
+				validateResponsive(width.getResponsiveWidth(), widgetIdentifier, "responsiveWidth");
+				if (sizable instanceof ResponsiveWidth) {
+					ResponsiveWidth responsive = (ResponsiveWidth) sizable;
+					validateResponsive(responsive.getSm(), widgetIdentifier, "sm");
+					validateResponsive(responsive.getMd(), widgetIdentifier, "md");
+					validateResponsive(responsive.getLg(), widgetIdentifier, "lg");
+					validateResponsive(responsive.getXl(), widgetIdentifier, "xl");
+					if (sizable instanceof RelativeSize) {
+						RelativeSize relative = (RelativeSize) sizable;
+						validatePositive(relative.getMinPixelWidth(), widgetIdentifier, "minPixelWidth");
+						validatePositive(relative.getMaxPixelWidth(), widgetIdentifier, "maxPixelWidth");
+						validatePositive(relative.getMinPixelHeight(), widgetIdentifier, "minPixelHeight");
+						validatePositive(relative.getMaxPixelHeight(), widgetIdentifier, "maxPixelHeight");
+						validatePercentage(relative.getPercentageHeight(), widgetIdentifier, "percentageHeight");
+						if (sizable instanceof Box) {
+							Box box = (Box) relative;
+							validatePositive(box.getPixelPadding(), widgetIdentifier, "pixelPadding");
+							validatePositive(box.getPixelMemberPadding(), widgetIdentifier, "pixelPadding");
+						}
+					}
 				}
 			}
 		}

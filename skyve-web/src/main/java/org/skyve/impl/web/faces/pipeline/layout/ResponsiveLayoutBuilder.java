@@ -16,7 +16,7 @@ import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.LayoutUtil;
-import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.RelativeWidth;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -141,8 +141,8 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 					if (containedPixelWidth != null) {
 						mediumColsRemaining -= LayoutUtil.pixelWidthToMediumResponsiveWidth(containedPixelWidth.doubleValue());
 					}
-					else if (contained instanceof RelativeSize) {
-						Integer containedPercentageWidth = ((RelativeSize) contained).getPercentageWidth();
+					else if (contained instanceof RelativeWidth) {
+						Integer containedPercentageWidth = ((RelativeWidth) contained).getPercentageWidth();
 						if (containedPercentageWidth != null) {
 							mediumColsRemaining -= LayoutUtil.percentageWidthToResponsiveWidth(containedPercentageWidth.doubleValue());
 						}

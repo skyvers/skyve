@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.RelativeWidth;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.ShrinkWrapper;
 import org.skyve.impl.metadata.view.VerticalAlignment;
@@ -155,33 +156,30 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			containerVariables.push("view");
 		}
 		else if (ViewType.edit.toString().equals(view.getName())) {
-			code.append("var edit = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+			code.append("var edit=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 			code.append(Bean.NOT_CREATED_KEY);
 			code.append("'});");
 			containerVariables.push("edit");
 		}
 		else if (ViewType.create.toString().equals(view.getName())) {
-			code.append("var create = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+			code.append("var create=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 			code.append(Bean.CREATED_KEY);
 			code.append("'});");
 			containerVariables.push("create");
 		}
 		
 		// if the sidebar is present then create split pane
-		if(view.getSidebar() != null)
-		{
-			code.append("var rightPane = isc.BizContainer.create({width:'30%',height:'100%',shadowSoftness:10,shadowOffset: 0,showShadow: true");
-			code.append("});");
-			containerVariables.push("rightPane");
+		Sidebar sidebar = view.getSidebar();
+		if (sidebar != null) {
+			code.append("var sidebarPane=isc.BizContainer.create({");
+			size(sidebar, null, code);
+			invisible(sidebar.getInvisibleConditionName(), code);
+			code.append("height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true});");
 			
-			code.append("var editPane = isc.BizContainer.create({width:'100%',height:'100%',shadowSoftness:10,shadowOffset: 0,showShadow: true,showResizeBar:true, resizeBarTarget:'next'");
-			code.append("});");
+			code.append("var editPane=isc.BizContainer.create({width:'*',height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true,showResizeBar:true,resizeBarTarget:'next'});");
 			containerVariables.push("editPane");			
 			
-			code.append("var mainLayout = isc.HLayout.create({autoDraw: true,width:'100%',height:'100%',padding:10,");
-			code.append("members:[editPane,rightPane]");
-			code.append("});");
-			
+			code.append("var mainLayout=isc.HLayout.create({width:'100%',height:'100%',padding:10,members:[editPane,sidebarPane]});");
 		}
 	}
 
@@ -202,8 +200,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("view._vm.addMember(").append(var).append(");");
 			code.append("view.addContained(").append(var).append(");\n");
 		}
-		if(view.getSidebar()!=null)
-		{
+		if (view.getSidebar() != null) {
 			code.append("view.addContained(mainLayout);");
 		}
 	}
@@ -272,14 +269,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderVBox(String borderTitle, VBox vbox) {
+		vbox(borderTitle, vbox, false);
+	}
+
+	private void vbox(String borderTitle, VBox vbox, boolean forFormBorder) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
 
 		// if collapsible, then make the inner vbox 100% width and height and do not put the border/title
 		Collapsible collapsible = vbox.getCollapsible();
 		if (collapsible != null) {
-			code.append("width:'100%',height:'100%',");
 			validateCollapsible(collapsible, borderTitle);
+			code.append("width:'100%',height:'100%',");
 		}
 		else {
 			size(vbox, null, code);
@@ -323,28 +324,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		removeTrailingComma(code);
 		code.append("});\n");
 
-		String collapsibleVar = null;
-		if (collapsible != null) {
-			collapsibleVar = "v" + variableCounter++;
-			// append the script for a collapsible object
-			code.append("var ").append(collapsibleVar).append("=isc.BizCollapsible.create({title:'")
-					.append(borderTitle)
-					.append("',minimized:")
-					.append(collapsible.equals(Collapsible.closed) ? "true" : "false")
-					.append(",");
-			// set the size, visibility of the collapsible area to the size and visibility of the vbox
-			size(vbox, null, code);
-			invisible(vbox.getInvisibleConditionName(), code);
-			
-			// append the inner vbox to the collapsible area
-			code.append("items:[").append(variable).append("]});");
-		}
-
-		code.append(containerVariables.peek()).append(".addContained(");
-		code.append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
+		String collapsibleVar = collapsible(borderTitle, vbox, variable, forFormBorder);
+		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
-
+	
 	@Override
 	public void renderedVBox(String borderTitle, VBox vbox) {
 		containerVariables.pop();
@@ -404,24 +388,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		
 		code.append("});\n");
 
-		String collapsibleVar = null;
-		if (collapsible != null) {
-			// append the script for a collapsible object
-			collapsibleVar = "v" + variableCounter++;
-			code.append("var ")
-				.append(collapsibleVar)
-				.append("=isc.BizCollapsible.create({title:'")
-				.append(borderTitle)
-				.append("',minimized:")
-				.append(collapsible.equals(Collapsible.closed) ? "true" : "false")
-				.append(",");
-				
-				size(hbox, null, code);
-				invisible(hbox.getInvisibleConditionName(), code);
-				// append the inner hbox to the collapsible area
-				code.append("items:[").append(variable).append("]});");
-		}
-
+		String collapsibleVar = collapsible(borderTitle, hbox, variable, false);
 		code.append(containerVariables.peek()).append(".addContained(").append((collapsibleVar == null) ? variable : collapsibleVar).append(");\n");
 		containerVariables.push(variable);
 	}
@@ -443,6 +410,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		else {
 			code.append("membersMargin:10,");
 		}
+	}
+	
+	private String collapsible(String borderTitle, Box box, String itemVariable, boolean autoSize) {
+		String result = null;
+		Collapsible collapsible = box.getCollapsible();
+		if (collapsible != null) {
+			result = "v" + variableCounter++;
+			code.append("var ").append(result).append("=isc.BizCollapsible.create({title:'").append(OWASP.escapeJsonString(borderTitle));
+			code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true" : "false");
+			code.append(",autoSize:").append(autoSize).append(',');
+				
+			size(box, null, code);
+			invisible(box.getInvisibleConditionName(), code);
+			code.append("items:[").append(itemVariable).append("]});");
+		}
+		return result;
 	}
 	
 	private boolean viewHasAtLeastOneForm = false;
@@ -482,7 +465,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			borderBox.setPercentageHeight(percentageHeight);
 			borderBox.setPixelHeight(pixelHeight);
 			
-			renderVBox(borderTitle, borderBox);
+			vbox(borderTitle, borderBox, true);
 		}
 		
 		formVariable = "v" + variableCounter++;
@@ -2612,8 +2595,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				specifiedWidth = true;
 			}
 			else {
-				if (sizable instanceof RelativeSize) {
-					RelativeSize relative = (RelativeSize) sizable;
+				if (sizable instanceof RelativeWidth) {
+					RelativeWidth relative = (RelativeWidth) sizable;
 					width = relative.getPercentageWidth();
 					if (width != null) {
 						builder.append("width:'").append(width).append("%',");
@@ -3340,7 +3323,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("width:'100%',height:'100%'");
 		code.append("});");
 		
-		code.append("rightPane.addContained("+variable+");");
+		code.append("sidebarPane.addContained("+variable+");");
 		containerVariables.push(variable);
 	}
 	

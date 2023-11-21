@@ -8,6 +8,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Identifiable;
+import org.skyve.impl.metadata.view.RelativeWidth;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -24,7 +25,7 @@ import org.skyve.util.Util;
 		"pixelWidth",
 		"percentageWidth",
 		"responsiveWidth" })
-public class Sidebar extends Container implements Identifiable, Invisible {
+public class Sidebar extends Container implements Identifiable, Invisible, RelativeWidth {
 	private static final long serialVersionUID = 7637506523705376564L;
 
 	private String widgetId;
@@ -141,28 +142,34 @@ public class Sidebar extends Container implements Identifiable, Invisible {
 		this.floatingPixelWidthBreakpoint = floatingPixelWidthBreakpoint;
 	}
 
+	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
+	@Override
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
+	@Override
 	public Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
+	@Override
 	@XmlAttribute(required = false)
 	public void setPercentageWidth(Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
+	@Override
 	public Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
+	@Override
 	public void setResponsiveWidth(Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}

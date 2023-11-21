@@ -1790,6 +1790,9 @@ isc.BizHBox.addMethods({
 
 // Collapsible
 isc.ClassFactory.defineClass("BizCollapsible", "Window");
+// title - the collapsible title
+// minimized - whether its collapsed to start with or not
+// autoSize - whether to grow shrink with the size of the contents or layout according to the parent
 isc.BizCollapsible.addMethods({
     initWidget: function () {
         var me = this;
@@ -1797,8 +1800,7 @@ isc.BizCollapsible.addMethods({
         this.canDragReposition = false;
         this.canDragResize = false;
         this.showCloseButton = false;
-        this.animateMinimize = true;
-        this.autoSize = true;
+        this.animateMinimize = false;
         this.headerLabelProperties = {width:'100%', click: function() {me.minimized ? me.restore() : me.minimize()}};
         this.Super("initWidget", arguments);
     },

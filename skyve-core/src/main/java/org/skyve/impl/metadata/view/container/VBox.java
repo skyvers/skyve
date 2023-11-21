@@ -19,11 +19,10 @@ import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.view.Invisible;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, name = "VBox")
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "vbox")
-public class VBox extends Container implements Box, Identifiable, Invisible, Bordered {
+public class VBox extends Container implements Box, Identifiable, Bordered {
 	private static final long serialVersionUID = 739457315616228698L;
 
 	private String widgetId;
@@ -269,6 +268,7 @@ public class VBox extends Container implements Box, Identifiable, Invisible, Bor
 		this.horizontalAlignment = horizontalAlignment;
 	}
 	
+	@Override
 	public Collapsible getCollapsible() {
 		return collapsible;
 	}

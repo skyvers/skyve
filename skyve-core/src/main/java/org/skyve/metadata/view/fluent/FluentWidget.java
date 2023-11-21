@@ -6,6 +6,8 @@ import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.ConstrainableSize;
 import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.RelativeWidth;
+import org.skyve.impl.metadata.view.ResponsiveWidth;
 import org.skyve.impl.metadata.view.container.Box;
 import org.skyve.metadata.MetaData;
 
@@ -58,9 +60,8 @@ abstract class FluentWidget {
 		}
 	}
 
-	protected static void relativeSize(RelativeSize from, FluentRelativeSize<?> to) {
-		absoluteSize(from, to);
-		constrainableSize(from, to);
+	protected static void relativeWidth(RelativeWidth from, FluentRelativeWidth<?> to) {
+		absoluteWidth(from, to);
 		
 		Integer i = from.getPercentageWidth();
 		if (i != null) {
@@ -70,7 +71,12 @@ abstract class FluentWidget {
 		if (i != null) {
 			to.responsiveWidth(i.intValue());
 		}
-		i = from.getSm();
+	}
+
+	protected static void responsiveWidth(ResponsiveWidth from, FluentRelativeSize<?> to) {
+		relativeWidth(from, to);
+		
+		Integer i = from.getSm();
 		if (i != null) {
 			to.sm(i.intValue());
 		}
@@ -85,6 +91,17 @@ abstract class FluentWidget {
 		i = from.getXl();
 		if (i != null) {
 			to.xl(i.intValue());
+		}
+
+	}
+
+	protected static void relativeSize(RelativeSize from, FluentRelativeSize<?> to) {
+		responsiveWidth(from, to);
+		constrainableSize(from, to);
+
+		Integer i = from.getPixelHeight();
+		if (i != null) {
+			to.pixelHeight(i.intValue());
 		}
 		i = from.getPercentageHeight();
 		if (i != null) {

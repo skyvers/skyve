@@ -6,6 +6,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -118,6 +119,8 @@ public interface View extends NamedMetaData, PersistentMetaData, DecoratedMetaDa
 
 	public String getHelpURL();
 
+	public Sidebar getSidebar();
+	
 	/**
 	 * The widgetId of the actions panel for the renderer to point at if needed in isolation.
 	 * 

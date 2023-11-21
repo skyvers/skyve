@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.repository.view.access.ViewQueryAggregateUserAcce
 import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 
@@ -37,6 +38,10 @@ public class FluentView extends FluentContainer<FluentView> {
 		refreshConditionName(view.getRefreshConditionName());
 		refreshActionName(view.getRefreshActionName());
 
+		Sidebar sidebar = view.getSidebar();
+		if (sidebar != null) {
+			sidebar(new FluentSidebar().from(sidebar));
+		}
 		actions(new FluentActions().from(view.getActionsWidgetId(), view.getActions()));
 
 		view.getParameters().forEach(p -> addParameter(new FluentViewParameter().from(p)));
@@ -249,6 +254,11 @@ public class FluentView extends FluentContainer<FluentView> {
 
 	public FluentView refreshActionName(String refreshActionName) {
 		view.setRefreshActionName(refreshActionName);
+		return this;
+	}
+
+	public FluentView sidebar(FluentSidebar sidebar) {
+		view.setSidebar(sidebar.get());
 		return this;
 	}
 

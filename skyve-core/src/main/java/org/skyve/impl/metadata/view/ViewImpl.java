@@ -186,6 +186,7 @@ public class ViewImpl extends Container implements View {
 		return actions.values();
 	}
 
+	@Override
 	public Sidebar getSidebar() {
 		return sidebar;
 	}

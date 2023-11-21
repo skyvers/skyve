@@ -40,6 +40,8 @@ import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.metadata.view.RelativeSize;
+import org.skyve.impl.metadata.view.RelativeWidth;
+import org.skyve.impl.metadata.view.ResponsiveWidth;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.ShrinkWrapper;
 import org.skyve.impl.metadata.view.VerticalAlignment;
@@ -2895,50 +2897,60 @@ public class MetaDataServlet extends HttpServlet {
 				if (value != null) {
 					result.append(",\"pixelWidth\":").append(value);
 				}
+				if (size instanceof RelativeWidth) {
+					RelativeWidth width = (RelativeWidth) size;
+					value = width.getPercentageWidth();
+					if (value != null) {
+						result.append(",\"percentageWidth\":").append(value);
+					}
+					value = width.getResponsiveWidth();
+					if (value != null) {
+						result.append(",\"responsiveWidth\":").append(value);
+					}
+					
+					if (size instanceof ResponsiveWidth) {
+						ResponsiveWidth responsive = (ResponsiveWidth) size;
+						value = responsive.getSm();
+						if (value != null) {
+							result.append(",\"sm\":").append(value);
+						}
+						value = responsive.getMd();
+						if (value != null) {
+							result.append(",\"md\":").append(value);
+						}
+						value = responsive.getLg();
+						if (value != null) {
+							result.append(",\"lg\":").append(value);
+						}
+						value = responsive.getXl();
+						if (value != null) {
+							result.append(",\"xl\":").append(value);
+						}
+						
+						if (size instanceof RelativeSize) {
+							RelativeSize relative = (RelativeSize) size;
+							value = relative.getPercentageHeight();
+							if (value != null) {
+								result.append(",\"percentageHeight\":").append(value);
+							}
+							
+							if (size instanceof ShrinkWrapper) {
+								ShrinkWrap wrap = ((ShrinkWrapper) size).getShrinkWrap();
+								if (wrap != null) {
+									result.append(",\"shrinkWrap\":\"").append(wrap).append('"');
+								}
+							}
+						}
+					}
+				}
+				
 				if (size instanceof AbsoluteSize) {
 					value = ((AbsoluteSize) size).getPixelHeight();
 					if (value != null) {
 						result.append(",\"pixelHeight\":").append(value);
 					}
-					if (size instanceof RelativeSize) {
-						RelativeSize relative = (RelativeSize) size;
-						value = relative.getPercentageWidth();
-						if (value != null) {
-							result.append(",\"percentageWidth\":").append(value);
-						}
-						value = relative.getResponsiveWidth();
-						if (value != null) {
-							result.append(",\"responsiveWidth\":").append(value);
-						}
-						value = relative.getSm();
-						if (value != null) {
-							result.append(",\"sm\":").append(value);
-						}
-						value = relative.getMd();
-						if (value != null) {
-							result.append(",\"md\":").append(value);
-						}
-						value = relative.getLg();
-						if (value != null) {
-							result.append(",\"lg\":").append(value);
-						}
-						value = relative.getXl();
-						if (value != null) {
-							result.append(",\"xl\":").append(value);
-						}
-						value = relative.getPercentageHeight();
-						if (value != null) {
-							result.append(",\"percentageHeight\":").append(value);
-						}
-						
-						if (size instanceof ShrinkWrapper) {
-							ShrinkWrap wrap = ((ShrinkWrapper) size).getShrinkWrap();
-							if (wrap != null) {
-								result.append(",\"shrinkWrap\":\"").append(wrap).append('"');
-							}
-						}
-					}
 				}
+
 				if (size instanceof MinimumHeight) {
 					value = ((MinimumHeight) size).getMinPixelHeight();
 					if (value != null) {
