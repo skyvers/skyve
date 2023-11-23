@@ -1109,6 +1109,8 @@ isc.BizListGrid.addMethods({
 			showHeader: true,
 			headerHeight: 30,
 			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me.aggregate) && (! me._advancedFilter.toggleButton.selected)),
+			canShowFilterEditor: false, // remove hedader context menu to show/hide filter row
+			filterByCell: false, // ensure return/enter key or filter button click required to filter
 			selectionType: "single",
 			alternateRecordStyles:true,
 			canEdit: true,

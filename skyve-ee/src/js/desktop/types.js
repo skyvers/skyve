@@ -1617,7 +1617,12 @@ isc.BizContentImageItem.addMethods({
 			groupBorderCSS: '1px solid #bfbfbf',
 			margin: 1,
 			groupLabelBackgroundColor:'transparent',
-			showDisabled: false,
+		    showDisabled: false,
+		    showDown: false,
+		    showFocus: false,
+		    showFocused: false,
+		    showFocusedAsOver: false,
+		    showRollOver: false,
 		    src: "[SKIN]blank.gif"
 		});
 
@@ -2272,7 +2277,7 @@ isc.BizHTMLItem.addMethods({
 				this._pane.setContents(newValue);
 			}
 			else {
-				this._pane.setContents('');
+				this._pane.setContents(' '); // NB can't be an empty string
 			}
 	   }
 	   return this.Super("setValue", [newValue]);

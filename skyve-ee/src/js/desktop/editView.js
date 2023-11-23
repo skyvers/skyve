@@ -1903,7 +1903,6 @@ isc.ClassFactory.defineClass("BizListMembership", "HLayout");
 isc.BizListMembership.addMethods({
 	initWidget : function (config) {
 		this.membersMargin = 10;
-		this.height = "100%"; // need height to vertically centre the arrows
 		
 		var me = this;
 		

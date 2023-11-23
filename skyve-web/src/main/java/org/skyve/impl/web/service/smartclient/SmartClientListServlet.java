@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -247,18 +248,31 @@ public class SmartClientListServlet extends HttpServlet {
 								name.equals("criteria")) {
 							continue;
 						}
-						String value = request.getParameter(name);
+						String[] values = request.getParameterValues(name);
 						if ((! name.isEmpty()) && name.charAt(0) != '_') {
 							// no '.' allowed in smart client field names
 							name = BindUtil.unsanitiseBinding(name);
 							
-							// "null" can be sent by Smart Client
-							if (value != null) {
-								if ((value.length() == 0) || "null".equals(value)) {
-									value = null;
-								}
+							if (values == null) {
+								parameters.put(name, null);
 							}
-							parameters.put(name, OWASP.unescapeHtmlChars(value));
+							else {
+								for (int i = 0, l = values.length; i < l; i++) {
+									String value = values[i];
+									if (value != null) {
+										// "null" can be sent by Smart Client
+										if (value.isBlank() || "null".equals(value)) {
+											values[i] = null;
+										}
+										else {
+											values[i] = OWASP.unescapeHtmlChars(value);
+										}
+									}
+								}
+								
+								Object value = (values.length == 1) ? values[0] : Arrays.copyOf(values, values.length, Object[].class);
+								parameters.put(name, value);
+							}
 						}
 					}
 					for (String name : parameters.keySet()) {
@@ -658,8 +672,8 @@ public class SmartClientListServlet extends HttpServlet {
     		// Must be a valid property if we are adding a filter criteria
     		// Not necessarily a valid property binding if processing a query parameter
     		TargetMetaData target = null;
-    		// set to true if equals should be used instead of substring
-    		boolean equalsOperatorRequired = false;
+    		// set to true if equivalence (equals/in) should be used instead of substring/like
+    		boolean noLikey = false;
     		try {
 				target = BindUtil.getMetaDataForBinding(customer, 
 															module, 
@@ -684,14 +698,14 @@ public class SmartClientListServlet extends HttpServlet {
 						else {
 							type = e.getEnum();
 						}
-						equalsOperatorRequired = true;
+						noLikey = true;
 					}
 					else {
 						type = attribute.getAttributeType().getImplementingType();
 					}
 					DomainType domainType = attribute.getDomainType();
 					if (domainType == DomainType.constant) {
-						equalsOperatorRequired = true;
+						noLikey = true;
 					}
 					else if (domainType == DomainType.variant) {
 						if (value != null) {
@@ -705,7 +719,7 @@ public class SmartClientListServlet extends HttpServlet {
 						converter = field.getConverterForCustomer(customer);
 					}
 					else if (attribute instanceof Association) {
-						equalsOperatorRequired = true;
+						noLikey = true;
 						if (! parameter) {
 							type = String.class;
 							binding = String.format("%s.%s", binding, Bean.DOCUMENT_ID);
@@ -714,34 +728,46 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 
-			if (value != null) {
+			// What filter operator should I use for this parameter?
+			SmartClientFilterOperator fo = filterOperator;
+
+			if (value instanceof Object[]) {
+				Object[] values = (Object[]) value;
+				for (int i = 0, l = values.length; i < l; i++) {
+					Object v = values[i];
+					if (v != null) {
+						v = fromString(binding, 
+										"value", 
+										v.toString(),
+										customer, 
+										converter, 
+										type);
+						values[i] = v;
+					}
+				}
+				fo = SmartClientFilterOperator.inSet;
+			}
+			else if (value != null) {
 				value = fromString(binding, 
 									"value", 
 									value.toString(),
 									customer, 
 									converter, 
 									type);
+				if (noLikey || (value instanceof Date) || (value instanceof Number) || (value instanceof Boolean)) {
+					fo = SmartClientFilterOperator.equals;
+				}
 			}
 
 			if (parameter) {
 				model.putParameter(binding, value);
 			}
 			else {
-				equalsOperatorRequired = equalsOperatorRequired || 
-											(value instanceof Date) ||
-											(value instanceof Number) ||
-											(value instanceof Boolean);
-				addCriteriumToFilter(binding, 
-										equalsOperatorRequired ? SmartClientFilterOperator.equals : filterOperator, 
-										value, 
-										null, 
-										null,
-										tagId,
-										filter);
+				addCriteriumToFilter(binding, fo, value, null, null, tagId, filter);
 			}
 		}
 	}
-
+    
     /**
      * Add advanced filter criteria to a query.
      * @param module
@@ -897,7 +923,26 @@ public class SmartClientListServlet extends HttpServlet {
 		    			}
 	    			}
 	    			
-	    			value = fromString(binding, "value", valueString, customer, converter, type);
+		    		if (value instanceof List<?>) {
+						@SuppressWarnings("unchecked")
+						List<Object> values = (List<Object>) value;
+						for (int i = 0, l = values.size(); i < l; i++) {
+							Object v = values.get(i);
+							if (v != null) {
+								v = fromString(binding, 
+												"value", 
+												v.toString(),
+												customer, 
+												converter, 
+												type);
+								values.set(i, v);
+							}
+						}
+						filterOperator = SmartClientFilterOperator.inSet;
+		    		}
+		    		else {
+		    			value = fromString(binding, "value", valueString, customer, converter, type);
+		    		}
 	
 	    			if (parameter) {
 	    				model.putParameter(binding, value);
@@ -1398,6 +1443,12 @@ public class SmartClientListServlet extends HttpServlet {
 	    		case iregexp: // Regular expression match (case insensitive)
 	    			break;
 	    		case inSet: // value is in a set of values. Specify criterion.value as an Array
+	    			if (value instanceof Object[]) {
+	    				filter.addIn(binding, (Object[]) value);
+	    			}
+	    			else if (value instanceof List<?>) {
+	    				filter.addIn(binding, ((List<?>) value).toArray());
+	    			}
 	    			break;
 	    		case notInSet: // value is not in a set of values. Specify criterion.value as an Array
 	    			break;

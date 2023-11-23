@@ -23,6 +23,7 @@ html, body, input, select, textArea, button, a, fieldset, legend, pre, table {
 .bizhubRoundedBorder {
 	border-radius: 5px;
 	box-shadow: 3px 3px 2px #dddddd;
+	border: 1px solid rgb(191, 191, 191)
 }
 
 .bizhubBorderLabel {
