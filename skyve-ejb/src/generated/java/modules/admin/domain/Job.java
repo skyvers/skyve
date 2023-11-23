@@ -359,4 +359,23 @@ public class Job extends AbstractPersistentBean {
 	public boolean isNotCancellable() {
 		return (! isCancellable());
 	}
+
+	/**
+	 * rerunnabble
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isRerunnabble() {
+		return (getStatus() != null);
+	}
+
+	/**
+	 * {@link #isRerunnabble} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotRerunnabble() {
+		return (! isRerunnabble());
+	}
 }

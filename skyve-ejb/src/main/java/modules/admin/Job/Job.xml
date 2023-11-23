@@ -55,5 +55,8 @@
 		<condition name="cancellable">
 			<expression>getStatus() == null</expression>
 		</condition>
+		<condition name="rerunnabble">
+			<expression>getStatus() != null</expression>
+		</condition>
 	</conditions>
 </document>
