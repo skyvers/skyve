@@ -136,9 +136,9 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>
+							<target>
 								<delete dir="${basedir}/deployments/skyve.war" />
-							</tasks>
+							</target>
 						</configuration>
 					</execution>
 					<!-- touch: mvn package or mvn antrun:run@touch -->
@@ -149,10 +149,10 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>
+							<target>
 								<delete file="${basedir}/deployments/skyve.war.failed" />
 								<touch file="${basedir}/deployments/skyve.war.dodeploy" />
-							</tasks>
+							</target>
 						</configuration>
 					</execution>
 				</executions>
