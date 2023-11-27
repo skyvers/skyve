@@ -4,6 +4,7 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns="http://www.skyve.org/xml/view"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
 	<hbox border="true" borderTitle="Office Details"  responsiveWidth="12">
 		<vbox border="true" >
 			<form border="true" borderTitle="Building Details" responsiveWidth="12" collapsible="open">

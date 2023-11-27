@@ -6,6 +6,7 @@ import javax.faces.component.UIComponent;
 
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
@@ -113,6 +114,15 @@ public class LayoutBuilderChain extends LayoutBuilder {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.hboxLayout(result, hbox);
+		}
+		return result;
+	}
+	
+	@Override
+	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar) {
+		UIComponent result = component;
+		for (LayoutBuilder builder : builders) {
+			result = builder.sidebarLayout(result, sidebar);
 		}
 		return result;
 	}

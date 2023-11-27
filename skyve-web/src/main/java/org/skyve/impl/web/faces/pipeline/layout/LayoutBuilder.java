@@ -6,6 +6,7 @@ import javax.faces.component.UIComponent;
 
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
@@ -51,6 +52,8 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 
 	public abstract UIComponent vboxLayout(UIComponent component, VBox vbox);
 	public abstract UIComponent hboxLayout(UIComponent component, HBox hbox);
+	public abstract UIComponent sidebarLayout(UIComponent component, Sidebar sidebar);
+	
 
 	public abstract UIComponent formLayout(UIComponent component, Form form);
 	public abstract UIComponent formRowLayout(UIComponent component, FormRow row);

@@ -6,6 +6,7 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{skyve.dir}">
+		
 	<f:view contentType="text/html" encoding="UTF-8">
 		<f:metadata>
 			<f:viewParam name="a" value="#{skyve.webActionParameter}" />
@@ -30,12 +31,15 @@
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>
+					<div id="bodyWrapper">
 					<s:view module="#{skyve.bizModuleParameter}"
-								document="#{skyve.bizDocumentParameter}"
-								managedBean="skyve"
-								update="@form" />
+						document="#{skyve.bizDocumentParameter}" managedBean="skyve"
+						update="@form" />
+
+				</div>
+												
 				</s:csrfForm>
 			</ui:define>
-		</ui:composition>
+		</ui:composition>		
 	</f:view>
 </html>

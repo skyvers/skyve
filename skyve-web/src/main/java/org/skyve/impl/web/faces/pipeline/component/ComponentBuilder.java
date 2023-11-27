@@ -17,6 +17,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -119,6 +120,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String moduleName,
 												String documentName,
 												String tabPaneComponentId);
+	public abstract UIComponent sidebarScript(UIComponent component,
+												Sidebar sidebar,
+												String moduleName,
+												String documentName,
+												String sidebarComponentId);
 	
 	public abstract UIComponent border(UIComponent component,
 										String title,

@@ -32,7 +32,8 @@
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="editorial/assets/css/main.css" library="skyve" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />  
-			
+			<script type="text/javascript" src="prime/browser.min.js"></script>
+			<script type="text/javascript" src="prime/breakpoints.min.js"></script>
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
 				<!-- PF8 doesnt work with touch on - a.swipe is not a function when registering swipeLeft and swipeRight -->
@@ -137,8 +138,8 @@
 				</c:if>
 			</div>
 			<!-- Scripts -->
-			<h:outputScript name="editorial/assets/js/browser.min.js" library="skyve" />
-			<h:outputScript name="editorial/assets/js/breakpoints.min.js" library="skyve" />
+			<!-- <h:outputScript name="editorial/assets/js/browser.min.js" library="skyve" />
+			<h:outputScript name="editorial/assets/js/breakpoints.min.js" library="skyve" /> -->
 			<h:outputScript name="editorial/assets/js/util.js" library="skyve" />
 			<h:outputScript name="editorial/assets/js/main.js" library="skyve" />
 		</h:body>

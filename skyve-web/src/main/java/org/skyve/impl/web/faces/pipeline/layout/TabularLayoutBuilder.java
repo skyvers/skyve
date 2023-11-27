@@ -10,11 +10,13 @@ import javax.faces.component.html.HtmlPanelGroup;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
+import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.row.Row;
 import org.primefaces.component.toolbar.ToolbarGroup;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
@@ -154,6 +156,24 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							hbox.getWidgetId());
 	}
 
+	@Override
+	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar) {
+		if (component != null) {
+			return component;
+		}
+
+		Panel rSidebar = panel(sidebar.getPixelWidth(),
+										null,
+										null, // the parent container sets the percentage width
+										null,
+										Integer.valueOf(100),
+										sidebar.getInvisibleConditionName(),
+										sidebar.getWidgetId());
+		rSidebar.setStyleClass("rSidebar");
+		return rSidebar;
+	}
+
+	
 	@Override
 	public UIComponent formLayout(UIComponent component, Form form) {
 		if (component != null) {
@@ -360,6 +380,29 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		result.setStyleClass("ui-panelgrid-blank");
 		return result;
 	}
+	protected Panel panel(Integer pixelWidth, 
+			Integer responsiveWidth,
+			Integer percentageWidth, 
+			Integer pixelHeight,
+			Integer percentageHeight,
+			String invisibleConditionName,
+			String widgetId) 
+	{
+			Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
+			setInvisible(result, invisibleConditionName, null);
+			setSizeAndTextAlignStyle(result, 
+						null,
+						null, 
+						pixelWidth, 
+						responsiveWidth, 
+						percentageWidth, 
+						pixelHeight, 
+						percentageHeight, 
+						NINETY_EIGHT,
+						null);
+			setId(result, widgetId);			
+			return result;
+}
 
 	private Row row() {
 		Row result = (Row) a.createComponent(Row.COMPONENT_TYPE);

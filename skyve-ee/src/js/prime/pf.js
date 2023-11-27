@@ -1,3 +1,4 @@
+
 SKYVE.PF = function() {
 	// block multiple load attempts of google/leaflet maps JS libs.
 	var loadingMap = false;
@@ -367,12 +368,125 @@ SKYVE.PF = function() {
 		},
 
 		// This is called by PF charts to lose the 2:1 aspect ratio.
-		chartExtender: function() {
+		chartExtender: function() {		
 			if (! this.cfg.config.options) {
 				this.cfg.config.options = {};
 			}
 			this.cfg.config.options.responsive = true;
 			this.cfg.config.options.maintainAspectRatio = false;
+			},
+					
+		renderRSidebar: function(widgetId) {
+			$(function() 
+			{   
+				var	$window = $(window),
+				$head = $('head'),
+				$body = $('body');
+				// Breakpoints.
+				breakpoints({
+				xlarge:   [ '1281px',  '1680px' ],
+				large:    [ '981px',   '1280px' ],
+				medium:   [ '737px',   '980px'  ],
+				small:    [ '481px',   '736px'  ],
+				xsmall:   [ '361px',   '480px'  ],
+				xxsmall:  [ null,      '360px'  ],
+				'xlarge-to-max':    '(min-width: 1681px)',
+				'small-to-xlarge':  '(min-width: 481px) and (max-width: 1680px)'
+				});
+
+				// rSidebar.
+				var $rSidebar = $('#'+widgetId),
+				$rSidebar_inner = $rSidebar.children('.inner');
+		
+				// Inactive by default on <= large.
+				breakpoints.on('<=large', function() {
+				$rSidebar.addClass('inactive');
+				});
+
+				breakpoints.on('>large', function() {
+					$rSidebar.removeClass('inactive');
+				});
+
+				// Hack: Workaround for Chrome/Android scrollbar position bug.
+				if (browser.os == 'android'
+				&&	browser.name == 'chrome')
+					$('<style>#'+widgetId+' .inner::-webkit-scrollbar { display: none; }</style>')
+						.appendTo($head);
+
+				// Toggle.
+				$('<a href="#' + widgetId + '" class="toggle"> </a>')
+					.appendTo($rSidebar)
+					.on('click', function(event) {
+
+					// Prevent default.
+					event.preventDefault();
+					event.stopPropagation();
+
+					// Toggle.
+					$rSidebar.toggleClass('inactive');
+
+					});
+
+				// Events.
+				// Link clicks.
+				$rSidebar.on('click', 'a', function(event) {
+
+					// >large? Bail.
+					if (breakpoints.active('>large'))
+						return;
+	
+					// Vars.
+					var $a = $(this),
+					href = $a.attr('href'),
+					target = $a.attr('target');
+	
+					// Prevent default.
+					event.preventDefault();
+					event.stopPropagation();
+	
+					// Check URL.
+					if (!href || href == '#' || href == '')
+						return;
+	
+					// Hide rSidebar.
+					$rSidebar.addClass('inactive');
+	
+					// Redirect to href.
+					setTimeout(function() {
+	
+					if (target == '_blank')
+						window.open(href);
+					else
+						window.location.href = href;
+	
+					}, 500);
+				});
+
+				// Prevent certain events inside the panel from bubbling.
+				$rSidebar.on('click touchend touchstart touchmove', function(event) {
+
+					// >large? Bail.
+					if (breakpoints.active('>large'))
+						return;
+	
+					// Prevent propagation.
+					event.stopPropagation();
+
+				});
+
+				// Hide panel on body click/tap.
+				$body.on('click touchend', function(event) {
+
+				// >large? Bail.
+				if (breakpoints.active('>large'))
+					return;
+
+				// Deactivate.
+				$rSidebar.addClass('inactive');
+
+				});
+			});
 		}
+
 	};
 }();

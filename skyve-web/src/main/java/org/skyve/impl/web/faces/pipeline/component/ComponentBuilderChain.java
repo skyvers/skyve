@@ -9,6 +9,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -162,6 +163,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.tabPaneScript(result, tabPane, moduleName, documentName, tabPaneComponentId);
+		}
+		return result;
+	}
+	
+	@Override
+	public UIComponent sidebarScript(UIComponent component,
+										Sidebar sidebar,
+										String moduleName,
+										String documentName,
+										String sidebarComponentId) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.sidebarScript(result, sidebar, moduleName, documentName, sidebarComponentId);
 		}
 		return result;
 	}

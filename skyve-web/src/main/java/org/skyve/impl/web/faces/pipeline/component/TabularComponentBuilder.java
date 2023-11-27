@@ -110,6 +110,7 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.container.Collapsible;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
@@ -307,6 +308,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			expr.append("#{empty ").append(managedBeanName).append(".currentBean['").append(selectedTabIndexBinding).append("']}");
 			result.setValueExpression("rendered", ef.createValueExpression(elc, expr.toString(), Boolean.class));
 		}
+		
+		return result;
+	}
+	
+	@Override
+	public UIComponent sidebarScript(UIComponent component, Sidebar sidebar, String moduleName, String documentName, String sidebarComponentId) {
+		UIOutput result = new UIOutput();
+
+		StringBuilder expr = new StringBuilder(128);
+		expr.append("<script type=\"text/javascript\">SKYVE.PF.renderRSidebar('");
+		expr.append(sidebarComponentId).append("');</script>");
+		result.setValue(expr.toString());
 		
 		return result;
 	}
@@ -3032,7 +3045,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (collapsible != null) {
 			result.setToggleable(true);
 			result.setCollapsed(Collapsible.closed.equals(collapsible));
-
 			AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 			ajax.setProcess("@this");
 			ajax.setUpdate("@none");

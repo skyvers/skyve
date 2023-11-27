@@ -6,6 +6,7 @@ import javax.faces.component.UIComponent;
 
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
@@ -36,6 +37,11 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 
 	@Override
 	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
+		return component;
+	}
+	
+	@Override
+	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar) {
 		return component;
 	}
 

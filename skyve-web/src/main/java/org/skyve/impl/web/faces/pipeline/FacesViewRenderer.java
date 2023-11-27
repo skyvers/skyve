@@ -185,6 +185,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	private UIComponent fragment; // if we have a widgetId to render, this holds a reference to that component
 
 	private UIComponent current; // current component being constructed
+	private UIComponent sidebarView; // current component being constructed
 	private UIComponent facesView; // the result of construction
 	private List<UIComponent> toolbarLayouts; // the toolbar layouts
 
@@ -209,6 +210,9 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	public UIComponent getFacesView() {
 		return facesView;
+	}
+	public UIComponent getSidebar() {
+		return sidebarView;
 	}
 
 	@Override
@@ -3015,14 +3019,48 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderSidebar(String title, Sidebar sidebar) {
-		// TODO Auto-generated method stub
+
+	
+		// Cater for a border if this thing has a border
+		UIComponent border = null;
+		UIComponent layout = lb.sidebarLayout(null, sidebar);
 		
+			
+			addToContainer(layout,
+							sidebar.getPixelWidth(),
+							sidebar.getResponsiveWidth(),
+							sidebar.getPercentageWidth(),
+							null,
+							null,
+							null,
+							null,
+							sidebar.getInvisibleConditionName());
+
+			// start rendering if appropriate
+			if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
+				fragment = layout;
+			}
+		
+		sidebarView = layout;
+		
+		if ((widgetId == null) || ((widgetId != null) && (fragment != null))) {
+			scripts.add(cb.sidebarScript(null, sidebar, module.getName(), document.getName(), sidebarView.getId()));
+		}
+	
 	}
 
 	@Override
 	public void renderedSidebar(String title, Sidebar sidebar) {
-		// TODO Auto-generated method stub
+
+		addedToContainer();
 		
+		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) 
+		{
+			current.getChildren().remove(fragment);
+			fragment.setParent(null);
+			facesView.getChildren().add(fragment);
+			fragment = null;
+		}				
 	}
 
 }

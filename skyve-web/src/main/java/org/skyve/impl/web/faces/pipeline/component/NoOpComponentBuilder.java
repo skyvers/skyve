@@ -9,6 +9,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -82,6 +83,14 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String moduleName,
 										String documentName,
 										String tabPaneComponentId) {
+		return component;
+	}
+	@Override
+	public UIComponent sidebarScript(UIComponent component,
+										Sidebar sidebar,
+										String moduleName,
+										String documentName,
+										String sidebarComponentId) {
 		return component;
 	}
 	
