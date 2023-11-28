@@ -734,16 +734,11 @@
           <xs:element name="responsiveWidth" type="xs:int" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="widgetId" type="xs:string"/>
-        <xs:attribute name="title" type="xs:string"/>
         <xs:attribute name="floatingPixelWidth" type="xs:int"/>
-        <xs:attribute name="floatingPercentageWidth" type="xs:int"/>
-        <xs:attribute name="floatingResponsiveWidth" type="xs:int"/>
         <xs:attribute name="floatingPixelWidthBreakpoint" type="xs:int" use="required"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
-        <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
-        <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
         <xs:attribute name="visible" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -2146,14 +2141,6 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="verticalAlignment">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="middle"/>
-      <xs:enumeration value="top"/>
-      <xs:enumeration value="bottom"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:simpleType name="collapsible">
     <xs:restriction base="xs:string">
       <xs:enumeration value="open"/>
@@ -2166,6 +2153,14 @@
       <xs:enumeration value="width"/>
       <xs:enumeration value="height"/>
       <xs:enumeration value="both"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="verticalAlignment">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="middle"/>
+      <xs:enumeration value="top"/>
+      <xs:enumeration value="bottom"/>
     </xs:restriction>
   </xs:simpleType>
 

@@ -107,6 +107,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.container.Collapsible;
@@ -192,19 +193,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public static final String DOUBLE_ACTION_COLUMN_WIDTH = "95";
 
 	@Override
-	public UIComponent view(UIComponent component, String invisibleConditionName) {
+	public UIComponent view(UIComponent component, boolean createView) {
 		if (component != null) {
 			return component;
 		}
 
 		HtmlPanelGroup result = panelGroup(true, false, false, null, null);
 
-		// Don't render the view if there is not bean selected as 
+		// Don't render the view if there is no bean selected as 
 		// it'll cause a cascade of stack traces as the EL is evaluated
 		StringBuilder rendered = new StringBuilder(64);
 		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
 		rendered.append(managedBeanName).append(".currentBean.getBean() ne null) and (not ");
-		rendered.append(managedBeanName).append(".currentBean['").append(invisibleConditionName).append("'])");
+		rendered.append(managedBeanName).append(".currentBean['").append(createView  ? "created" : "notCreated").append("'])");
 		result.setValueExpression("rendered",
 									createValueExpressionFromFragment(null,
 																		false,
@@ -313,12 +314,40 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent sidebarScript(UIComponent component, Sidebar sidebar, String moduleName, String documentName, String sidebarComponentId) {
-		UIOutput result = new UIOutput();
-
+	public UIComponent sidebarScript(UIComponent component,
+										Sidebar sidebar,
+										boolean createView,
+										String sidebarComponentId) {
+		String width = "360px";
+		
+		Integer pixel = sidebar.getPixelWidth();
+		Integer responsive = sidebar.getResponsiveWidth();
+		Integer percentage = sidebar.getPercentageWidth();
+		if (pixel != null) {
+			width = pixel.toString() + "px";
+		} 
+		else if (responsive != null) {
+			width = LayoutUtil.responsiveWidthToPercentageWidth(responsive.doubleValue()) + "%";
+		}
+		else if (percentage != null) {
+			width = percentage.toString() + "%";
+		}
+		
 		StringBuilder expr = new StringBuilder(128);
-		expr.append("<script type=\"text/javascript\">SKYVE.PF.renderRSidebar('");
-		expr.append(sidebarComponentId).append("');</script>");
+		expr.append("<script type=\"text/javascript\">SKYVE.PF.sidebar('");
+		expr.append(sidebarComponentId).append("','").append(width).append("',");
+		// Get the breakpoint - default to 1280
+		Integer breakpoint = sidebar.getFloatingPixelWidthBreakpoint();
+		expr.append((breakpoint == null) ? "1280" : breakpoint.toString()).append(',');
+		// Get the floating pixel width - default to pixel width or 360.
+		Integer floating = sidebar.getFloatingPixelWidth();
+		if ((floating == null) && (pixel != null)) {
+			floating = pixel;
+		}
+		expr.append((floating == null) ? "360" : floating.toString()).append(",'");
+		expr.append(createView ? "Create" : "Edit").append("');</script>");
+
+		UIOutput result = new UIOutput();
 		result.setValue(expr.toString());
 		
 		return result;

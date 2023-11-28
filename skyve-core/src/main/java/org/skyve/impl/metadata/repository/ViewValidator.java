@@ -2448,26 +2448,12 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		String sidebarIdentifier = "The sidebar";
+		if ((sidebar.getPercentageWidth() == null) &&
+				(sidebar.getPixelWidth() == null) &&
+				(sidebar.getResponsiveWidth() == null)) {
+			throw new MetaDataException(sidebarIdentifier + " in " + viewIdentifier + " requires at least one of [percentageWidth, pixelWidth, responsiveWidth]");
+		}
 		validateConditionName(sidebar.getInvisibleConditionName(), sidebarIdentifier);
-		validateSidebar(sidebar, sidebarIdentifier);
-		validateMessageExpressions(sidebar.getLocalisedTitle(), sidebarIdentifier, "title");
-	}
-
-	private void validateSidebar(Sidebar sidebar,String widgetIdentifier) {
-		if(sidebar.getFloatingPercentageWidth() == null &&
-		   sidebar.getFloatingPixelWidth() 		== null &&
-		   sidebar.getFloatingResponsiveWidth() == null)
-		{
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-					" requires at least one of [floatingPercentageWidth, floatingPixelWidth,floatingResponsiveWidth]");
-		}
-		else if(sidebar.getPercentageWidth() == null &&
-				   sidebar.getPixelWidth() 		== null &&
-				   sidebar.getResponsiveWidth() == null)
-		{
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
-					" requires at least one of [percentageWidth, pixelWidth,responsiveWidth]");
-		}
 	}
 
 	@Override

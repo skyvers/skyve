@@ -193,21 +193,19 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 	@Override
 	public final void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		String title = sidebar.getLocalisedTitle();
-		renderAttributes.push(title);
-		renderSidebar(title, sidebar);
+		renderSidebar(sidebar);
 		currentContainers.push(sidebar);
 	}
 
-	public abstract void renderSidebar(String title, Sidebar sidebar);
+	public abstract void renderSidebar(Sidebar sidebar);
 	
 	@Override
 	public final void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		renderedSidebar(renderAttributes.pop(), sidebar);
+		renderedSidebar(sidebar);
 		currentContainers.pop();
 	}
 
-	public abstract void renderedSidebar(String title, Sidebar sidebar);
+	public abstract void renderedSidebar(Sidebar sidebar);
 
 	
 	@Override

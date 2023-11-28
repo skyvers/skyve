@@ -116,10 +116,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent view(UIComponent component, String invisibleConditionName) {
+	public UIComponent view(UIComponent component, boolean createView) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.view(result, invisibleConditionName);
+			result = builder.view(result, createView);
 		}
 		return result;
 	}
@@ -170,12 +170,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	@Override
 	public UIComponent sidebarScript(UIComponent component,
 										Sidebar sidebar,
-										String moduleName,
-										String documentName,
+										boolean createView,
 										String sidebarComponentId) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.sidebarScript(result, sidebar, moduleName, documentName, sidebarComponentId);
+			result = builder.sidebarScript(result, sidebar, createView, sidebarComponentId);
 		}
 		return result;
 	}

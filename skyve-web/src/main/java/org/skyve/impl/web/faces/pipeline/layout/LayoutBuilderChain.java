@@ -119,10 +119,10 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar) {
+	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
-			result = builder.sidebarLayout(result, sidebar);
+			result = builder.sidebarLayout(result, sidebar, createView);
 		}
 		return result;
 	}

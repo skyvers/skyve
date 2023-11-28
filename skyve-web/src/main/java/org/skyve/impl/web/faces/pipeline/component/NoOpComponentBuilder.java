@@ -55,7 +55,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class NoOpComponentBuilder extends ComponentBuilder {
 	@Override
-	public UIComponent view(UIComponent component, String invisibleConditionName) {
+	public UIComponent view(UIComponent component, boolean createView) {
 		return component;
 	}
 
@@ -85,11 +85,11 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String tabPaneComponentId) {
 		return component;
 	}
+
 	@Override
 	public UIComponent sidebarScript(UIComponent component,
 										Sidebar sidebar,
-										String moduleName,
-										String documentName,
+										boolean createView,
 										String sidebarComponentId) {
 		return component;
 	}

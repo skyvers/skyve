@@ -95,7 +95,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param invisibleConditionName
 	 * @return
 	 */
-	public abstract UIComponent view(UIComponent component, String invisibleConditionName);
+	public abstract UIComponent view(UIComponent component, boolean createView);
 
 	/**
 	 * 
@@ -122,8 +122,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String tabPaneComponentId);
 	public abstract UIComponent sidebarScript(UIComponent component,
 												Sidebar sidebar,
-												String moduleName,
-												String documentName,
+												boolean createView,
 												String sidebarComponentId);
 	
 	public abstract UIComponent border(UIComponent component,

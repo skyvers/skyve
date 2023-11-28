@@ -228,3 +228,10 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	align-content: center;
 	align-items: center;
 }
+
+/* Used to put the sidebar on the RHS */
+#sidebarWrapper {
+	display: flex;
+	flex-direction: row;
+	min-height: 100vh;
+}

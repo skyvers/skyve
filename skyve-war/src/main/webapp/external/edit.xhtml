@@ -31,13 +31,11 @@
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
 					</ui:include>
-					<div id="bodyWrapper">
-					<s:view module="#{skyve.bizModuleParameter}"
-						document="#{skyve.bizDocumentParameter}" managedBean="skyve"
-						update="@form" />
-
-				</div>
-												
+					<div id="sidebarWrapper">
+						<s:view module="#{skyve.bizModuleParameter}"
+							document="#{skyve.bizDocumentParameter}" managedBean="skyve"
+							update="@form" />
+					</div>						
 				</s:csrfForm>
 			</ui:define>
 		</ui:composition>		

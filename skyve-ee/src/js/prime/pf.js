@@ -374,119 +374,48 @@ SKYVE.PF = function() {
 			}
 			this.cfg.config.options.responsive = true;
 			this.cfg.config.options.maintainAspectRatio = false;
-			},
+		},
 					
-		renderRSidebar: function(widgetId) {
-			$(function() 
-			{   
-				var	$window = $(window),
-				$head = $('head'),
-				$body = $('body');
-				// Breakpoints.
-				breakpoints({
-				xlarge:   [ '1281px',  '1680px' ],
-				large:    [ '981px',   '1280px' ],
-				medium:   [ '737px',   '980px'  ],
-				small:    [ '481px',   '736px'  ],
-				xsmall:   [ '361px',   '480px'  ],
-				xxsmall:  [ null,      '360px'  ],
-				'xlarge-to-max':    '(min-width: 1681px)',
-				'small-to-xlarge':  '(min-width: 481px) and (max-width: 1680px)'
+		sidebar: function(widgetId, width, breakpoint, floatingWidth, viewSuffix) {
+			$(function() {
+				var	win = $(window);
+				var head = $('head');
+				var body = $('body');
+				var sidebar = $('#'+widgetId);
+				var sidebarInner = sidebar.children('.inner');
+
+				if ($('#sidebarStyle' + viewSuffix).length == 0) { // DNE
+					$('<style id="sidebarStyle' + viewSuffix + '">.sidebar' + viewSuffix + '{background-color:white;font-size:0.9em;position:relative;width:' + width + ';flex-grow:0;flex-shrink:0;transition:margin-right 0.5s ease,box-shadow 0.5s ease;}' +
+						'.sidebar' + viewSuffix + ' .toggle{text-decoration:none;transition:right 0.5s ease;-webkit-tap-highlight-color:rgba(255,255,255,0);border:0;display:none;position:absolute;top:calc(50% - 3.75em);right:calc(' + floatingWidth + 'px - 3em);width:4em;height:7.5em;line-height:6.25em;text-align:center;z-index:10000;}' + 
+						'.sidebar' + viewSuffix + ' .toggle:before{font-family:FontAwesome;font-size:1.1rem;font-style:normal;font-weight:normal;text-transform:none !important;content:\'>\';height:inherit;right:0;line-height:inherit;position:absolute;text-indent:0;top:0;width:inherit;color:#7f888f;margin-right:1.5em;margin-top:-0.5em;z-index:1;}' + 
+						'.sidebar' + viewSuffix + ' .toggle:after{background:rgba(222,225,226,0.75);border-radius:0.375em;content:\'\';height:3em;right:2em;position:absolute;top:1em;width:3em;}' +
+						'.sidebar' + viewSuffix + '.inactive{margin-right:-' + floatingWidth + 'px;}.sidebar' + viewSuffix + '.inactive .toggle:before{content:\'<\';}' +
+						'@media screen and (max-width:' + breakpoint + 'px){' +
+							'.sidebar' + viewSuffix + '{box-shadow:0 0 5em 0 rgba(0,0,0,0.175);position:fixed;top:0;right:0;width:' + floatingWidth + 'px;height:100%;z-index:10000;}' +
+							'.sidebar' + viewSuffix + '.inactive{box-shadow:none;}' +
+							'.sidebar' + viewSuffix + '>.inner{position:absolute;top:0;right:0;width:100%;height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;}' +
+							'.sidebar' + viewSuffix + ' .toggle{display:flex;};body.is-preload.sidebar' + viewSuffix + '{display:none;}' +
+						'}</style>').appendTo(head);
+				}
+				win.on('resize', function() {
+					if (win.width() <= breakpoint) {
+						sidebar.addClass('inactive');
+					}
+					else {
+						sidebar.removeClass('inactive');
+					}
 				});
-
-				// rSidebar.
-				var $rSidebar = $('#'+widgetId),
-				$rSidebar_inner = $rSidebar.children('.inner');
-		
-				// Inactive by default on <= large.
-				breakpoints.on('<=large', function() {
-				$rSidebar.addClass('inactive');
-				});
-
-				breakpoints.on('>large', function() {
-					$rSidebar.removeClass('inactive');
-				});
-
-				// Hack: Workaround for Chrome/Android scrollbar position bug.
-				if (browser.os == 'android'
-				&&	browser.name == 'chrome')
-					$('<style>#'+widgetId+' .inner::-webkit-scrollbar { display: none; }</style>')
-						.appendTo($head);
-
+				win.trigger('resize'); // initial setting
+				
 				// Toggle.
-				$('<a href="#' + widgetId + '" class="toggle"> </a>')
-					.appendTo($rSidebar)
+				$('<a href="#' + widgetId + '" class="toggle"></a>')
+					.appendTo(sidebar)
 					.on('click', function(event) {
-
-					// Prevent default.
-					event.preventDefault();
-					event.stopPropagation();
-
-					// Toggle.
-					$rSidebar.toggleClass('inactive');
-
+						event.preventDefault();
+						event.stopPropagation();
+						sidebar.toggleClass('inactive');
 					});
-
-				// Events.
-				// Link clicks.
-				$rSidebar.on('click', 'a', function(event) {
-
-					// >large? Bail.
-					if (breakpoints.active('>large'))
-						return;
-	
-					// Vars.
-					var $a = $(this),
-					href = $a.attr('href'),
-					target = $a.attr('target');
-	
-					// Prevent default.
-					event.preventDefault();
-					event.stopPropagation();
-	
-					// Check URL.
-					if (!href || href == '#' || href == '')
-						return;
-	
-					// Hide rSidebar.
-					$rSidebar.addClass('inactive');
-	
-					// Redirect to href.
-					setTimeout(function() {
-	
-					if (target == '_blank')
-						window.open(href);
-					else
-						window.location.href = href;
-	
-					}, 500);
-				});
-
-				// Prevent certain events inside the panel from bubbling.
-				$rSidebar.on('click touchend touchstart touchmove', function(event) {
-
-					// >large? Bail.
-					if (breakpoints.active('>large'))
-						return;
-	
-					// Prevent propagation.
-					event.stopPropagation();
-
-				});
-
-				// Hide panel on body click/tap.
-				$body.on('click touchend', function(event) {
-
-				// >large? Bail.
-				if (breakpoints.active('>large'))
-					return;
-
-				// Deactivate.
-				$rSidebar.addClass('inactive');
-
-				});
 			});
 		}
-
 	};
 }();

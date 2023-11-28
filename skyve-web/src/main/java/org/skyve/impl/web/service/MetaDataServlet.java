@@ -3193,13 +3193,13 @@ public class MetaDataServlet extends HttpServlet {
 			}
 
 			@Override
-			public void renderSidebar(String title, Sidebar sidebar) {
+			public void renderSidebar(Sidebar sidebar) {
 				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
-			public void renderedSidebar(String title, Sidebar sidebar) {
+			public void renderedSidebar(Sidebar sidebar) {
 				// TODO Auto-generated method stub
 				
 			}

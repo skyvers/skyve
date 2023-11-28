@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class TabularLayoutBuilder extends LayoutBuilder {
 	@Override
@@ -157,20 +158,39 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	}
 
 	@Override
-	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar) {
+	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
 		if (component != null) {
 			return component;
 		}
 
-		Panel rSidebar = panel(sidebar.getPixelWidth(),
-										null,
-										null, // the parent container sets the percentage width
-										null,
-										Integer.valueOf(100),
-										sidebar.getInvisibleConditionName(),
-										sidebar.getWidgetId());
-		rSidebar.setStyleClass("rSidebar");
-		return rSidebar;
+		HtmlPanelGroup result = panelGroup(false, false, true, sidebar.getInvisibleConditionName(), sidebar.getWidgetId());
+		result.setStyleClass("sidebar" + (createView ? "Create" : "Edit"));
+		HtmlPanelGroup inner = panelGroup(false, false, true, null, null);
+		inner.setStyleClass("inner");
+		result.getChildren().add(inner);
+
+		// Don't render the sidebar if there is no bean selected as 
+		// it'll cause a cascade of stack traces as the EL is evaluated
+		StringBuilder rendered = new StringBuilder(64);
+		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
+		rendered.append(managedBeanName).append(".currentBean.getBean() ne null) and (not ");
+		rendered.append(managedBeanName).append(".currentBean['").append(createView  ? "created" : "notCreated").append("'])");
+		String invisibleConditionName = sidebar.getInvisibleConditionName();
+		if (invisibleConditionName != null) {
+			rendered.append(" and (not ").append(managedBeanName).append(".currentBean['");
+			rendered.append(invisibleConditionName).append("'])");
+		}
+		result.setValueExpression("rendered",
+									createValueExpressionFromFragment(null,
+																		false,
+																		rendered.toString(),
+																		false,
+																		null,
+																		Boolean.class,
+																		false,
+																		Sanitisation.none));
+
+		return result;
 	}
 
 	
@@ -380,29 +400,29 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		result.setStyleClass("ui-panelgrid-blank");
 		return result;
 	}
+
 	protected Panel panel(Integer pixelWidth, 
-			Integer responsiveWidth,
-			Integer percentageWidth, 
-			Integer pixelHeight,
-			Integer percentageHeight,
-			String invisibleConditionName,
-			String widgetId) 
-	{
-			Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-			setInvisible(result, invisibleConditionName, null);
-			setSizeAndTextAlignStyle(result, 
-						null,
-						null, 
-						pixelWidth, 
-						responsiveWidth, 
-						percentageWidth, 
-						pixelHeight, 
-						percentageHeight, 
-						NINETY_EIGHT,
-						null);
-			setId(result, widgetId);			
-			return result;
-}
+							Integer responsiveWidth,
+							Integer percentageWidth, 
+							Integer pixelHeight,
+							Integer percentageHeight,
+							String invisibleConditionName,
+							String widgetId) {
+		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
+		setInvisible(result, invisibleConditionName, null);
+		setSizeAndTextAlignStyle(result, 
+									null,
+									null, 
+									pixelWidth, 
+									responsiveWidth, 
+									percentageWidth, 
+									pixelHeight, 
+									percentageHeight, 
+									NINETY_EIGHT,
+									null);
+		setId(result, widgetId);			
+		return result;
+	}
 
 	private Row row() {
 		Row result = (Row) a.createComponent(Row.COMPONENT_TYPE);

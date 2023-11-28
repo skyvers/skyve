@@ -198,9 +198,9 @@ public class View extends HtmlPanelGroup {
 										widgetId,
 										componentBuilder,
 										layoutBuilder);
-        	fvr.visit();
-            result.add(fvr.getFacesView());
-            result.add(fvr.getSidebar());
+			fvr.visit();
+			result.add(fvr.getFacesView());
+			result.add(fvr.getSidebar());
         }
         // Get the create view and add (so long as we didn't get the edit view back)
         view = document.getView(uxui, customer, ViewType.create.toString());
@@ -213,8 +213,9 @@ public class View extends HtmlPanelGroup {
                                           widgetId,
                                           componentBuilder,
                                           layoutBuilder);
-        	fvr.visit();
-            result.add(fvr.getFacesView());
+			fvr.visit();
+			result.add(fvr.getFacesView());
+			result.add(fvr.getSidebar());
         }
         
         return result;

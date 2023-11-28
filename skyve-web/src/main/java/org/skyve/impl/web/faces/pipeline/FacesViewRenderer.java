@@ -185,8 +185,8 @@ public class FacesViewRenderer extends ViewRenderer {
 	private UIComponent fragment; // if we have a widgetId to render, this holds a reference to that component
 
 	private UIComponent current; // current component being constructed
-	private UIComponent sidebarView; // current component being constructed
-	private UIComponent facesView; // the result of construction
+	private UIComponent facesSidebar; // the result of sidebar construction
+	private UIComponent facesView; // the result of view construction
 	private List<UIComponent> toolbarLayouts; // the toolbar layouts
 
 	// A reference to the current widget that is the source of events
@@ -211,14 +211,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	public UIComponent getFacesView() {
 		return facesView;
 	}
+	
 	public UIComponent getSidebar() {
-		return sidebarView;
+		return facesSidebar;
 	}
 
 	@Override
 	public void renderView(String icon16x16Url, String icon32x32Url) {
 		// Ensure visibility is set for both create and edit views
-		current = cb.view(null, createView ? "created" : "notCreated");
+		current = cb.view(null, createView);
 		facesView = current;
 
 		// Create the toolbar(s)
@@ -3018,49 +3019,42 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderSidebar(String title, Sidebar sidebar) {
-
-	
-		// Cater for a border if this thing has a border
-		UIComponent border = null;
-		UIComponent layout = lb.sidebarLayout(null, sidebar);
+	public void renderSidebar(Sidebar sidebar) {
+		UIComponent layout = lb.sidebarLayout(null, sidebar, createView);
 		
-			
-			addToContainer(layout,
-							sidebar.getPixelWidth(),
-							sidebar.getResponsiveWidth(),
-							sidebar.getPercentageWidth(),
-							null,
-							null,
-							null,
-							null,
-							sidebar.getInvisibleConditionName());
+		addToContainer(layout,
+						sidebar.getPixelWidth(),
+						sidebar.getResponsiveWidth(),
+						sidebar.getPercentageWidth(),
+						null,
+						null,
+						null,
+						null,
+						sidebar.getInvisibleConditionName());
 
-			// start rendering if appropriate
-			if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
-				fragment = layout;
-			}
+		// start rendering if appropriate
+		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
+			fragment = layout;
+		}
 		
-		sidebarView = layout;
+		facesSidebar = layout;
+		
+		current = layout.getChildren().get(0);
 		
 		if ((widgetId == null) || ((widgetId != null) && (fragment != null))) {
-			scripts.add(cb.sidebarScript(null, sidebar, module.getName(), document.getName(), sidebarView.getId()));
+			scripts.add(cb.sidebarScript(null, sidebar, createView, facesSidebar.getId()));
 		}
-	
 	}
 
 	@Override
-	public void renderedSidebar(String title, Sidebar sidebar) {
-
+	public void renderedSidebar(Sidebar sidebar) {
 		addedToContainer();
 		
-		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) 
-		{
+		if ((widgetId != null) && (widgetId.equals(sidebar.getWidgetId()))) {
 			current.getChildren().remove(fragment);
 			fragment.setParent(null);
 			facesView.getChildren().add(fragment);
 			fragment = null;
 		}				
 	}
-
 }

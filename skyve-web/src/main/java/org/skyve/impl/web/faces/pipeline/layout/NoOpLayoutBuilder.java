@@ -41,7 +41,7 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar) {
+	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
 		return component;
 	}
 

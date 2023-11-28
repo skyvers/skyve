@@ -3317,7 +3317,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	@Override
-	public void renderSidebar(String title, Sidebar sidebar) {
+	public void renderSidebar(Sidebar sidebar) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
 		code.append("width:'100%',height:'100%'");
@@ -3328,7 +3328,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 	
 	@Override
-	public void renderedSidebar(String title, Sidebar sidebar) {
+	public void renderedSidebar(Sidebar sidebar) {
 		containerVariables.pop();
 		
 	}
