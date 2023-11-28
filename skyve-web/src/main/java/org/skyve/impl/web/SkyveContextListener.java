@@ -119,10 +119,18 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new FacesException(e);
 			}
 
+			// Trigger the startup of any observers
 			ProvidedRepository repository = ProvidedRepositoryFactory.get();
-			for (String customerName : repository.getAllCustomerNames()) {
-				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+			if (UtilImpl.CUSTOMER != null) {
+				// if a default customer is specified, only trigger that one
+				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 				internalCustomer.notifyStartup();
+			} else {
+				// notify all customers
+				for (String customerName : repository.getAllCustomerNames()) {
+					CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+					internalCustomer.notifyStartup();
+				}
 			}
 		}
 		// in case of error, close the caches to relinquish resources and file locks
