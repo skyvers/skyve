@@ -98,6 +98,9 @@
 	},
 	// State settings
 	"state": {
+		// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
+		// Skyve will create this folder at startup but if defined it must exist at startup.
+		"directory": null,
 		// Conversation cache settings
 		"conversations": {
 			// Max conversations allowed in heap memory before being moved off-heap or to disk

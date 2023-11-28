@@ -245,12 +245,28 @@ public class Util {
 	 * @throws Exception
 	 */
 	public static <T extends Bean> T constructRandomInstance(User user, Module module, Document document, int depth)
-			throws Exception {
+	throws Exception {
 		return TestUtil.constructRandomInstance(user, module, document, depth);
 	}
 
 	public static String getContentDirectory() {
 		return UtilImpl.CONTENT_DIRECTORY;
+	}
+
+	public static String getAddinsDirectory() {
+		return (UtilImpl.ADDINS_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "addins/") : UtilImpl.ADDINS_DIRECTORY;
+	}
+	
+	public static String getBackupDirectory() {
+		return (UtilImpl.BACKUP_DIRECTORY == null) ? UtilImpl.CONTENT_DIRECTORY : UtilImpl.BACKUP_DIRECTORY;
+	}
+
+	public static String getCacheDirectory() {
+		return (UtilImpl.CACHE_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_CACHE/") : UtilImpl.CACHE_DIRECTORY;
+	}
+
+	public static String getThumbnnailDirectory() {
+		return (UtilImpl.THUMBNAIL_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_THUMBNAILS/") : UtilImpl.THUMBNAIL_DIRECTORY;
 	}
 
 	public static String getModuleDirectory() {

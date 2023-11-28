@@ -183,9 +183,7 @@ public class Thumbnail {
 		File pngFile = null;
 		// Look for the thumb nail file if we are using file storage
 		if (UtilImpl.THUMBNAIL_FILE_STORAGE) {
-			StringBuilder path = (UtilImpl.THUMBNAIL_DIRECTORY == null) ?
-									new StringBuilder(128).append(UtilImpl.CONTENT_DIRECTORY).append("SKYVE_THUMBNAILS/") :
-									new StringBuilder(128).append(UtilImpl.THUMBNAIL_DIRECTORY);
+			StringBuilder path = new StringBuilder(128).append(Util.getThumbnnailDirectory());
 			AbstractContentManager.appendBalancedFolderPathFromContentId(cacheKey, path, false);
 			folder = new File(path.toString());
 			folder.mkdirs();

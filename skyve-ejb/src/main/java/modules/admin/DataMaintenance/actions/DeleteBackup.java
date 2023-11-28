@@ -31,7 +31,7 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 		}
 		// delete from local content
 		File backup = new File(String.format("%sbackup_%s%s%s",
-				Util.getContentDirectory(),
+				Util.getBackupDirectory(),
 				customerName,
 				File.separator,
 				bean.getSelectedBackupName()));

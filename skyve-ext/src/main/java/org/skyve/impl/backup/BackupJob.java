@@ -76,11 +76,11 @@ public class BackupJob extends CancellableJob {
 		String customerName = p.getUser().getCustomerName();
 
 		String backupDir = String.format("%sbackup_%s%s%s%s",
-				UtilImpl.CONTENT_DIRECTORY,
-				customerName,
-				File.separator,
-				CORE.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()),
-				File.separator);
+											Util.getBackupDirectory(),
+											customerName,
+											File.separator,
+											CORE.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()),
+											File.separator);
 		File directory = new File(backupDir);
 		directory.mkdirs();
 		String trace = "Backup to " + directory.getAbsolutePath();

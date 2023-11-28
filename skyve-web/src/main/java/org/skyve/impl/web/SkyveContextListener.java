@@ -119,10 +119,18 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new FacesException(e);
 			}
 
+			// Trigger the startup of any observers
 			ProvidedRepository repository = ProvidedRepositoryFactory.get();
-			for (String customerName : repository.getAllCustomerNames()) {
-				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+			if (UtilImpl.CUSTOMER != null) {
+				// if a default customer is specified, only trigger that one
+				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 				internalCustomer.notifyStartup();
+			} else {
+				// notify all customers
+				for (String customerName : repository.getAllCustomerNames()) {
+					CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+					internalCustomer.notifyStartup();
+				}
 			}
 		}
 		// in case of error, close the caches to relinquish resources and file locks
@@ -224,6 +232,12 @@ public class SkyveContextListener implements ServletContextListener {
 		// Backup settings
 		Map<String, Object> backup = getObject(null, "backup", properties, false);
 		if (backup != null) {
+			UtilImpl.BACKUP_DIRECTORY = getString("backup", "directory", backup, false);
+			if (UtilImpl.BACKUP_DIRECTORY != null) {
+				// clean up the backup directory path
+				UtilImpl.BACKUP_DIRECTORY = cleanupDirectory(UtilImpl.BACKUP_DIRECTORY);
+				testWritableDirectory("backup.directory", UtilImpl.BACKUP_DIRECTORY);
+			}
 			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = getString("backup", "externalBackupClass", backup, false);
 			UtilImpl.BACKUP_PROPERTIES = getObject("backup", "properties", backup, false);
 		}
@@ -341,6 +355,12 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HOME_URI = getString("url", "home", url, true);
 		
 		Map<String, Object> state = getObject(null, "state", properties, true);
+		UtilImpl.CACHE_DIRECTORY = getString("state", "directory", state, false);
+		if (UtilImpl.CACHE_DIRECTORY != null) {
+			// clean up the cache directory path
+			UtilImpl.CACHE_DIRECTORY = cleanupDirectory(UtilImpl.CACHE_DIRECTORY);
+			testWritableDirectory("state.directory", UtilImpl.CACHE_DIRECTORY);
+		}
 		Map<String, Object> conversations = getObject("state", "conversations", state, true);
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt("state.conversations", "heapSizeEntries", conversations),
 																	getInt("state.conversations", "offHeapSizeMB", conversations),

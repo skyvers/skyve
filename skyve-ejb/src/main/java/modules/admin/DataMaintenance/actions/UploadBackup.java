@@ -24,7 +24,7 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 
 		// create the backup upload file
 		File backup = new File(String.format("%sbackup_%s%s%s",
-				Util.getContentDirectory(),
+				Util.getBackupDirectory(),
 				CORE.getUser().getCustomerName(),
 				File.separator,
 				upload.getFileName()));

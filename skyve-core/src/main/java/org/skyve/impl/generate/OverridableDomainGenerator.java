@@ -418,7 +418,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				// if this is not an excluded module, generate tests
 				if ((excludedModules == null) || 
-						(! Arrays.asList(excludedModules).contains(moduleName.toLowerCase()))) {
+						(!Arrays.asList(excludedModules).contains(moduleName))) {
 					// check if this document is annotated to skip domain tests
 					File factoryFile = new File(new StringBuilder(256).append(srcPath)
 																		.append(modulePath)

@@ -66,7 +66,7 @@ public class RestoreJob extends CancellableJob {
 		String trace;
 
 		String selectedBackupName = options.getSelectedBackupName();
-		Path backupDir = Paths.get(Util.getContentDirectory(), "backup_" + customerName);
+		Path backupDir = Paths.get(Util.getBackupDirectory(), "backup_" + customerName);
 		File backup = backupDir.resolve(selectedBackupName).toFile();
 		boolean deleteLocalBackup = false;
 
@@ -204,7 +204,7 @@ public class RestoreJob extends CancellableJob {
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 
-		String backupDirectoryPath = UtilImpl.CONTENT_DIRECTORY +
+		String backupDirectoryPath = Util.getBackupDirectory() +
 										"backup_" + customerName +
 										File.separator + extractDirName;
 		File backupDirectory = new File(backupDirectoryPath);

@@ -106,11 +106,16 @@ public class UtilImpl {
 	// The URL to connect to the REST server when running the content management in server mode.
 	public static String CONTENT_REST_SERVER_URL = null;
 
+	// Backup folder - defaults to <content.directory>
+	// If defined it must exist at startup.
+	public static String BACKUP_DIRECTORY = null;
+	
 	// A class to load to provide external cloud backups.
 	public static String BACKUP_EXTERNAL_BACKUP_CLASS = null;
 	
 	// Properties required to connect to a cloud provider for backup storage
 	public static Map<String, Object> BACKUP_PROPERTIES = null;
+	
 	
 	// Allowed file upload file names - default is a blacklist of harmful "executable" files
 	public static String UPLOADS_FILE_WHITELIST_REGEX = "^.+\\.(?!(ADE|ADP|APP|ASA|ASP|BAS|BAT|CAB|CER|CHM|CMD|COM|CPL|CRT|CSH|DLL|DOCM|DOTM|EXE|FXP|HLP|HTA|HTR|INF|INS|ISP|ITS|JS|JSE|KSH|LNK|MAD|MAF|MAG|MAM|MAQ|MAR|MAS|MAT|MAU|MAV|MAW|MDA|MDB|MDE|MDT|MDW|MDZ|MSC|MSI|MSP|MST|OCX|OPS|PCD|PIF|POTM|PPAM|PPSM|PPTM|PRF|PRG|REG|SCF|SO|SCR|SCT|SHB|SHS|TMP|URL|VB|VBE|VBS|VBX|VSMACROS|VSS|VST|VSW|WS|WSC|WSF|WSH|XLAM|XLSB|XLSM|XSTM|XSL)$)([^.]+$)";
@@ -201,6 +206,9 @@ public class UtilImpl {
 	public static boolean USING_JPA = false;
 
 	// For caches
+	// Cache folder - defaults to <content.directory>/SKYVE_CACHE/
+	// Skyve will create this folder at startup but if defined it must exist at startup.
+	public static String CACHE_DIRECTORY = null;
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();
