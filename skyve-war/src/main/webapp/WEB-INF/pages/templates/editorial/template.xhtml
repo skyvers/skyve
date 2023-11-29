@@ -64,16 +64,14 @@
 											<h:inputHidden value="#{bean.csrfToken}">
 												<p:autoUpdate />
 											</h:inputHidden>
-						            		<p:commandLink class="icon fa fa-retweet" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
-												<span class="label">Switch Mode</span>
-											</p:commandLink>
+						            		<p:commandLink class="icon fa fa-retweet" style="text-decoration:none" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true" />
 										</h:form>
 									</li>
 								</c:if>
 								<c:if test="#{showLogout}">
 									<li>
-										<a class="icon fa fa-power-off" href="javascript:void(0)" onclick="window.location = 'loggedOut'">
-											<span class="label">Logout</span>
+										<a href="loggedOut" title="Logout">
+											<i class="icon fa fa-power-off" />
 										</a>
 									</li>
 								</c:if>

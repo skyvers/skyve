@@ -50,30 +50,18 @@
 					</item>
 				</row>
 			</form>
-			<vbox border="true" borderTitle="Staff based at this office" responsiveWidth="12" collapsible="open" minPixelHeight="400">
-				<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
-					<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId" />
-				</listGrid>
-			</vbox>
 		</vbox>
 		<vbox border="true" borderTitle="Map" responsiveWidth="6" minPixelHeight="500">
 			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" loading="eager" showRefreshControls="true" />
 		</vbox>
 	</hbox>
 	
-	<sidebar widgetId="sidebarWidget" floatingPixelWidthBreakpoint="100" floatingPercentageWidth="100" percentageWidth="100" title="Side content" >
-	<vbox border="true" borderTitle="Sidebar content" collapsible="open" responsiveWidth="12">
-	<chart type="pie" responsiveWidth="12">
-			<model title="All Offices" moduleName="whosin"
-				documentName="Office" label="count" valueBinding="suburb"
-				valueFunction="Count" categoryBinding="suburb">
-				<noBucket />
-			</model>
-		</chart>
-		<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300" responsiveWidth="12">
-					<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId" />
-				</listGrid>
-	</vbox>
+	<sidebar widgetId="sidebarWidget" floatingPixelWidthBreakpoint="1024" floatingPixelWidth="300" percentageWidth="40">
+		<vbox border="true" borderTitle="Staff based at this office" responsiveWidth="12" collapsible="open" minPixelHeight="400">
+			<listGrid continueConversation="true" query="qStaffForOffice" minPixelHeight="300">
+				<filterParameter operator="equal" filterBinding="baseOffice" valueBinding="bizId" />
+			</listGrid>
+		</vbox>
 	</sidebar>
 	
 	<actions>

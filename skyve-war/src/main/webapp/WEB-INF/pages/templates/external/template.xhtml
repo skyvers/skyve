@@ -71,9 +71,7 @@
 									<h:inputHidden value="#{bean.csrfToken}">
 										<p:autoUpdate />
 									</h:inputHidden>
-				            		<p:commandLink class="icon fa fa-retweet fa-2x" style="color:whitesmoke" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true">
-										<span class="label">Switch Mode</span>
-									</p:commandLink>
+				            		<p:commandLink class="icon fa fa-retweet fa-2x" style="color:whitesmoke;text-decoration:none" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true" />
 								</h:form>
 							</td>
 						</c:if>
