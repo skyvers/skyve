@@ -119,13 +119,14 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new FacesException(e);
 			}
 
-			// Trigger the startup of any observers
+			// Notify any observers of the startup.
 			ProvidedRepository repository = ProvidedRepositoryFactory.get();
 			if (UtilImpl.CUSTOMER != null) {
-				// if a default customer is specified, only trigger that one
+				// if a default customer is specified, only notify that one
 				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 				internalCustomer.notifyStartup();
-			} else {
+			}
+			else {
 				// notify all customers
 				for (String customerName : repository.getAllCustomerNames()) {
 					CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
@@ -798,10 +799,19 @@ public class SkyveContextListener implements ServletContextListener {
 					try {
 						try {
 							try {
+								// Notify any observers of the shutdown.
 								ProvidedRepository repository = ProvidedRepositoryFactory.get();
-								for (String customerName : repository.getAllCustomerNames()) {
-									CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+								if (UtilImpl.CUSTOMER != null) {
+									// if a default customer is specified, only notify that one
+									CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 									internalCustomer.notifyShutdown();
+								}
+								else {
+									// notify all customers
+									for (String customerName : repository.getAllCustomerNames()) {
+										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+										internalCustomer.notifyShutdown();
+									}
 								}
 							}
 							finally {
