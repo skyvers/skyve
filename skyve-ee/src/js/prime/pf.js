@@ -394,7 +394,7 @@ SKYVE.PF = function() {
 							'.sidebar' + viewSuffix + '{box-shadow:0 0 5em 0 rgba(0,0,0,0.175);position:fixed;top:0;right:0;width:' + floatingWidth + 'px;height:100%;z-index:10000;}' +
 							'.sidebar' + viewSuffix + '.inactive{box-shadow:none;}' +
 							'.sidebar' + viewSuffix + '>.inner{position:absolute;top:0;right:0;width:100%;height:100%;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;}' +
-							'.sidebar' + viewSuffix + ' .toggle{display:flex;};body.is-preload.sidebar' + viewSuffix + '{display:none;}' +
+							'.sidebar' + viewSuffix + ' .toggle{display:flex;}' +
 						'}</style>').appendTo(head);
 				}
 				win.on('resize', function() {
@@ -415,6 +415,11 @@ SKYVE.PF = function() {
 						event.stopPropagation();
 						sidebar.toggleClass('inactive');
 					});
+					
+				// Show the hidden sidebar once the transition is mostly over
+				window.setTimeout(function() {
+					sidebar.show();
+				}, 100);
 			});
 		}
 	};

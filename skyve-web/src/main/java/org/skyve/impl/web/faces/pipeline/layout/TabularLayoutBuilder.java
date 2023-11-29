@@ -165,6 +165,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 
 		HtmlPanelGroup result = panelGroup(false, false, true, sidebar.getInvisibleConditionName(), sidebar.getWidgetId());
 		result.setStyleClass("sidebar" + (createView ? "Create" : "Edit"));
+		result.setStyle("display:none"); // shown by JS in SKYVE.PF.sidebar()
 		HtmlPanelGroup inner = panelGroup(false, false, true, null, null);
 		inner.setStyleClass("inner");
 		result.getChildren().add(inner);
