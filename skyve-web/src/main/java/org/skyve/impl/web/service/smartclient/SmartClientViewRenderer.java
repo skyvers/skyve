@@ -152,41 +152,67 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderView(String icon16x16Url, String icon32x32Url) {
 		UtilImpl.LOGGER.info("VIEW = " + view.getTitle() + " for " + document.getName());
+		Sidebar sidebar = view.getSidebar();
 		if (noCreateView) {
-			containerVariables.push("view");
+			if (sidebar == null) {
+				containerVariables.push("view");
+			}
+			else {
+				rearrangeForSidebar(sidebar, null, "edit");
+			}
 		}
 		else if (ViewType.edit.toString().equals(view.getName())) {
-			code.append("var edit=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
-			code.append(Bean.NOT_CREATED_KEY);
-			code.append("'});");
-			containerVariables.push("edit");
+			if (sidebar == null) {
+				code.append("var edit=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append(Bean.NOT_CREATED_KEY);
+				code.append("'});");
+				containerVariables.push("edit");
+			}
+			else {
+				rearrangeForSidebar(sidebar, Bean.NOT_CREATED_KEY, "edit");
+			}
 		}
 		else if (ViewType.create.toString().equals(view.getName())) {
-			code.append("var create=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
-			code.append(Bean.CREATED_KEY);
-			code.append("'});");
-			containerVariables.push("create");
-		}
-		
-		// if the sidebar is present then create split pane
-		Sidebar sidebar = view.getSidebar();
-		if (sidebar != null) {
-			code.append("var sidebarPane=isc.BizContainer.create({");
-			size(sidebar, null, code);
-			invisible(sidebar.getInvisibleConditionName(), code);
-			code.append("height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true});");
-			
-			code.append("var editPane=isc.BizContainer.create({width:'*',height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true,showResizeBar:true,resizeBarTarget:'next'});");
-			containerVariables.push("editPane");			
-			
-			code.append("var mainLayout=isc.HLayout.create({width:'100%',height:'100%',padding:10,members:[editPane,sidebarPane]});");
+			if (sidebar == null) {
+				code.append("var create=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append(Bean.CREATED_KEY);
+				code.append("'});");
+				containerVariables.push("create");
+			}
+			else {
+				rearrangeForSidebar(sidebar, Bean.CREATED_KEY, "create");
+			}
 		}
 	}
 
+	private void rearrangeForSidebar(Sidebar sidebar, String invisibleConditionName, String variableName) {
+		code.append("var sidebarPane=isc.BizContainer.create({");
+		size(sidebar, null, code);
+		invisible(sidebar.getInvisibleConditionName(), code);
+		code.append("height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true});");
+		
+		code.append("var viewPane=isc.BizContainer.create({width:'*',height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true,showResizeBar:true,resizeBarTarget:'next'});");
+		containerVariables.push("viewPane");
+		
+		code.append("var ").append(variableName).append("=isc.HLayout.create({width:'100%',height:'100%',padding:10,members:[viewPane,sidebarPane]");
+		if (invisibleConditionName != null) {
+			code.append(",invisibleConditionName:'").append(invisibleConditionName).append('\'');
+		}
+		code.append("});");
+		
+		containerVariables.push("viewPane");
+
+	}
+	
 	@Override
 	public void renderedView(String icon16x16Url, String icon32x32Url) {
 		containerVariables.pop();
-		if (! noCreateView) {
+		if (noCreateView) {
+			if (view.getSidebar() != null) {
+				code.append("view.addContained(edit);");
+			}
+		}
+		else {
 			if (ViewType.edit.toString().equals(view.getName())) {
 				code.append("view.addContained(edit);");
 			}
@@ -199,9 +225,6 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
 			code.append("view._vm.addMember(").append(var).append(");");
 			code.append("view.addContained(").append(var).append(");\n");
-		}
-		if (view.getSidebar() != null) {
-			code.append("view.addContained(mainLayout);");
 		}
 	}
 

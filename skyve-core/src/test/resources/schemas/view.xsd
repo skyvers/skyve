@@ -730,14 +730,13 @@
   <xs:complexType name="sidebar">
     <xs:complexContent>
       <xs:extension base="tns:container">
-        <xs:sequence>
-          <xs:element name="responsiveWidth" type="xs:int" minOccurs="0"/>
-        </xs:sequence>
+        <xs:sequence/>
         <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="floatingPixelWidth" type="xs:int"/>
         <xs:attribute name="floatingPixelWidthBreakpoint" type="xs:int" use="required"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>
       </xs:extension>

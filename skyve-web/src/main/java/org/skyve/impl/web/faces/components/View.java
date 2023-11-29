@@ -200,7 +200,10 @@ public class View extends HtmlPanelGroup {
 										layoutBuilder);
 			fvr.visit();
 			result.add(fvr.getFacesView());
-			result.add(fvr.getSidebar());
+			UIComponent sidebar = fvr.getSidebar();
+			if (sidebar != null) {
+				result.add(sidebar);
+			}
         }
         // Get the create view and add (so long as we didn't get the edit view back)
         view = document.getView(uxui, customer, ViewType.create.toString());
@@ -215,7 +218,10 @@ public class View extends HtmlPanelGroup {
                                           layoutBuilder);
 			fvr.visit();
 			result.add(fvr.getFacesView());
-			result.add(fvr.getSidebar());
+			UIComponent sidebar = fvr.getSidebar();
+			if (sidebar != null) {
+				result.add(sidebar);
+			}
         }
         
         return result;

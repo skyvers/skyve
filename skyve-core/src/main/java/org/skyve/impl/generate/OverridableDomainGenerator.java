@@ -418,7 +418,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				// if this is not an excluded module, generate tests
 				if ((excludedModules == null) || 
-						(!Arrays.asList(excludedModules).contains(moduleName))) {
+						(! Arrays.asList(excludedModules).contains(moduleName))) {
 					// check if this document is annotated to skip domain tests
 					File factoryFile = new File(new StringBuilder(256).append(srcPath)
 																		.append(modulePath)
@@ -892,7 +892,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 
-			generateAttributeMappings(contents, customer, module, document, persistent, null, new TreeSet<String>(), null, forExt, indent);
+			generateAttributeMappings(contents, customer, module, document, persistent, null, new TreeSet<>(), null, forExt, indent);
 		}
 
 		TreeMap<String, Document> derivations = modocDerivations.get(moduleName + '.' + documentName);

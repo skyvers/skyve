@@ -1802,7 +1802,10 @@ isc.BizCollapsible.addMethods({
         this.showCloseButton = false;
         this.animateMinimize = false;
         this.headerLabelProperties = {width:'100%', click: function() {me.minimized ? me.restore() : me.minimize()}};
-        this.Super("initWidget", arguments);
+// Minimize and Restore icons revert to default SC icons when Window is collapsed and expanded in UI - it must be set inside SC guts programmatically and these AutoChilds are not respected
+//		this.restoreButtonProperties = {src: '[SKIN]/SectionHeader/opener_opened.png', showRollOver: false};
+//		this.minimizeButtonProperties = {src: '[SKIN]/SectionHeader/opener_closed.png', showRollOver: false};
+       this.Super("initWidget", arguments);
     },
 	
 	addContained: function(contained) {

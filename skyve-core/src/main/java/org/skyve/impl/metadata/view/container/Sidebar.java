@@ -112,6 +112,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	}
 
 	@Override
+	@XmlAttribute(required = false)
 	public void setResponsiveWidth(Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
