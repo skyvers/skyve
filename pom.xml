@@ -10,7 +10,6 @@
 	<modules>
 		<module>skyve-core</module>
 		<module>skyve-ext</module>
-		<module>skyve-ear</module>
 		<module>skyve-ee</module>
 		<module>skyve-war</module>
 		<module>skyve-web</module>

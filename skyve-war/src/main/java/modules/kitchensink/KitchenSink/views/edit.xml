@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit"
+		title="Kitchen Sink"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<tabPane>
+		<tab title="Widgets">
+			<form responsiveWidth="12" percentageWidth="60" border="true">
+				<column percentageWidth="30" responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<blurb>
+							A Blurb
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item>
+						<label value="A Label" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<link value="A Link">
+							<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+						</link>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="booleanFlag" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="colour" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="date" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="dateTime" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="decimal10" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="decimal2" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="decimal5" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="combo" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<radio binding="radio" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="geometry" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="id" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="normalInteger" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spinner binding="spinner" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<slider binding="slider" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="longInteger" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<html binding="html" pixelWidth="400" pixelHeight="400" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="markup" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="memo" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="text" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="time" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="lookupDescription" descriptionBinding="description" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="timestamp" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="contentLink" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<contentImage binding="contentImage" pixelWidth="50" pixelHeight="50" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<contentSignature binding="contentSignature" pixelWidth="400" pixelHeight="200" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="Data Grids">
+			<dataGrid binding="containerGrid" title="Container Grid">
+				<containerColumn title="Container Blurb">
+					<blurb>
+						<![CDATA[
+							A container Blurb
+						]]>
+					</blurb>
+				</containerColumn>
+				<containerColumn title="Container Static Image">
+					<staticImage relativeFile="shared/images/UnknownContact.jpg" />
+				</containerColumn>
+			</dataGrid>
+			<dataGrid binding="inlineGrid" inline="true" title="Inline Grid">
+				<boundColumn binding="constantEnum" />
+				<boundColumn binding="constantDomain" />
+				<boundColumn binding="variantDomain" />
+				<boundColumn binding="dynamicDomain" />
+				<boundColumn binding="booleanFlag" />
+				<boundColumn binding="date" />
+<!-- dont work in SC - gives smartgen error
+				<boundColumn binding="colour" />
+				<boundColumn binding="decimal5" />
+-->
+			</dataGrid>
+			<dataGrid binding="orderedGrid" title="Ordered Grid">
+				<boundColumn binding="booleanFlag" />
+				<boundColumn binding="colour" />
+				<boundColumn binding="date" />
+			</dataGrid>
+			<dataRepeater binding="dataRepeater" title="Data Repeater">
+				<boundColumn binding="blurb" />
+			</dataRepeater>
+		</tab>
+		<tab title="List/Check Membership">
+			<blurb>
+				List Membership
+			</blurb>
+			<blurb>
+				Check Membership
+			</blurb>
+		</tab>
+		<tab title="Charts">
+			<blurb>
+				Various charts
+			</blurb>
+		</tab>
+		<tab title="Comparison">
+			<blurb>
+				Comparison Widget
+			</blurb>
+		</tab>
+		<tab title="ListGrid">
+			<blurb>
+				List Grid
+			</blurb>
+		</tab>
+		<tab title="Map">
+			<blurb>
+				Map
+			</blurb>
+		</tab>
+		<tab title="Tree Grid">
+			<blurb>
+				Tree Grid
+			</blurb>
+		</tab>
+	</tabPane>
+	
+	<actions>
+		<defaults />
+	</actions>
+</view>

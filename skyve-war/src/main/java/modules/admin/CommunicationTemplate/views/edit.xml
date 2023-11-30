@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="admin.communicationTemplate.edit.title" iconStyleClass="fa fa-envelope-o" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+    <form responsiveWidth="12" border="true" borderTitle="Template Details">
+        <column responsiveWidth="3"/>
+        <column/>
+        <column responsiveWidth="1"/>
+        <row>
+            <item>
+                <default binding="name"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="description"/>
+            </item>
+        </row>
+        <row>
+            <item showLabel="true">
+            	<!-- using a textarea in responsive because the quill editor does not allow html source to be edited -->
+				<textArea binding="template" />
+			</item>
+		</row>
+	</form>
+	<vbox border="true" borderTitle="Communications using this template">
+		<listGrid query="qCommunicationsForTemplate" continueConversation="true">
+			<filterParameter operator="equal" filterBinding="template" valueBinding="bizId" />
+		</listGrid>
+	</vbox>
+	<actions>
+		<defaults />
+	</actions>
+</view>

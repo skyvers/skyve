@@ -21,14 +21,14 @@ import org.skyve.impl.script.SkyveScriptInterpreter;
 import org.skyve.impl.util.UtilImpl;
 
 public class MavenSkyveProject {
-	public static final Path SKYVE_EJB_PATH = Paths.get("skyve-ejb");
-	public static final Path SKYVE_SRC_PATH = SKYVE_EJB_PATH.resolve("src").resolve("main").resolve("java");
-	public static final Path SKYVE_SRC_RESOURCES_PATH = SKYVE_EJB_PATH.resolve("src").resolve("main").resolve("resources");
+	private static final Path SKYVE_WAR_PATH = Paths.get("skyve-war");
+	public static final Path SKYVE_SRC_PATH = SKYVE_WAR_PATH.resolve("src").resolve("main").resolve("java");
+	public static final Path SKYVE_SRC_RESOURCES_PATH = SKYVE_WAR_PATH.resolve("src").resolve("main").resolve("resources");
 	public static final Path SKYVE_WEB_PATH = Paths.get("skyve-war").resolve("src").resolve("main").resolve("java");
-	public static final Path SKYVE_GENERATED_PATH = SKYVE_EJB_PATH.resolve("src").resolve("generated").resolve("java");
-	public static final Path SKYVE_TEST_PATH = SKYVE_EJB_PATH.resolve("src").resolve("test").resolve("java");
-	public static final Path SKYVE_GENERATED_TEST_PATH = SKYVE_EJB_PATH.resolve("src").resolve("generatedTest").resolve("java");
-	public static final Path SKYVE_WAR_PATH = Paths.get("skyve-war").resolve("src").resolve("main").resolve("webapp");
+	public static final Path SKYVE_GENERATED_PATH = SKYVE_WAR_PATH.resolve("src").resolve("generated").resolve("java");
+	public static final Path SKYVE_TEST_PATH = SKYVE_WAR_PATH.resolve("src").resolve("test").resolve("java");
+	public static final Path SKYVE_GENERATED_TEST_PATH = SKYVE_WAR_PATH.resolve("src").resolve("generatedTest").resolve("java");
+	public static final Path SKYVE_WEBAPP_PATH = Paths.get("skyve-war").resolve("src").resolve("main").resolve("webapp");
 
 	private final String projectName;
 	private final String projectDescription;
@@ -150,7 +150,7 @@ public class MavenSkyveProject {
 	}
 
 	public Path getSkyveAbsoluteWarPath() {
-		return skyveDirectory.resolve(SKYVE_WAR_PATH);
+		return skyveDirectory.resolve(SKYVE_WEBAPP_PATH);
 	}
 
 	public String getSkyveScript() {
@@ -298,7 +298,7 @@ public class MavenSkyveProject {
 	}
 
 	private void copySkyveWebAppFiles() throws IOException {
-		final Path relativeWarPath = copyFromProject ? Paths.get("src").resolve("main").resolve("webapp") : SKYVE_WAR_PATH;
+		final Path relativeWarPath = copyFromProject ? Paths.get("src").resolve("main").resolve("webapp") : SKYVE_WEBAPP_PATH;
 		final Path absoluteWarPath = skyveDirectory.resolve(relativeWarPath);
 		final File targetDir = projectDirectory.resolve(webDirectory).toFile();
 

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		name="edit" title="Report Parameter - {name}" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+    <form responsiveWidth="12" percentageWidth="60" border="true">
+        <column percentageWidth="30" responsiveWidth="4"/>
+        <column/>
+        <row>
+            <item>
+                <default binding="name"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="description"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <radio binding="type">
+                    <onChangedHandlers>
+                    	<rerender />
+                    </onChangedHandlers>
+                </radio>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="required"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="textDefaultValue" visible="textValue"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <spinner binding="numericalDefaultValue" visible="numericalValue"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="dateDefaultValue" visible="dateValue"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="textTestValue" visible="textValue"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <spinner binding="numericalTestValue" visible="numericalValue"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="dateTestValue" visible="dateValue"/>
+            </item>
+        </row>
+    </form>
+    <actions>
+        <defaults/>
+    </actions>
+    <newParameters/>
+</view>

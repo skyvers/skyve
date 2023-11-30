@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DocumentCreator"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Document Creator</singularAlias>
+	<pluralAlias>Document Creator</pluralAlias>
+	<iconStyleClass>fa fa-pencil-square-o</iconStyleClass>
+	<bizKey expression="Document Creator"/>
+	<attributes>
+		<text name="outputLocation">
+			<displayName>admin.documentCreator.outputLocation.displayName</displayName>
+			<description>
+				<![CDATA[admin.documentCreator.outputLocation.description]]>
+			</description>
+			<length>255</length>
+		</text>
+		<memo name="script">
+			<displayName>admin.documentCreator.script.displayName</displayName>
+		</memo>
+		<markup name="documentPreview">
+			<displayName>admin.documentCreator.documentPreview.displayName</displayName>
+		</markup>
+		<markup name="markdownPreview">
+			<displayName>admin.documentCreator.markdownPreview.displayName</displayName>
+		</markup>
+		<markup name="errors">
+			<displayName>admin.documentCreator.errors.displayName</displayName>
+		</markup>
+		<text name="defaultModule">
+			<displayName>admin.documentCreator.defaultModule.displayName</displayName>
+			<description>
+				<![CDATA[admin.documentCreator.defaultModule.description]]>
+			</description>
+			<domain>variant</domain>
+			<length>255</length>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="hasErrors">
+			<expression>
+				<![CDATA[
+					getErrors() != null && getErrors().length() > 0
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

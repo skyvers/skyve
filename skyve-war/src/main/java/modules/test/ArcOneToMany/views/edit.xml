@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Many To Many Arc"
+		name="edit"
+		xmlns="http://www.skyve.org/xml/view" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<dataGrid binding="arcs">
+		<boundColumn binding="bizKey" title="Description" />
+	</dataGrid>
+</view>

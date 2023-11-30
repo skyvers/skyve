@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Job"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Job" />
+	<singularAlias>Job</singularAlias>
+	<pluralAlias>Jobs</pluralAlias>
+	<audited>false</audited>
+	<iconStyleClass>fa fa-cogs</iconStyleClass>
+	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
+	<bizKey expression="Job {displayName}"/>
+	<attributes>
+		<timestamp name="startTime">
+			<displayName>Start Time</displayName>
+		</timestamp>
+		<timestamp name="endTime">
+			<displayName>End Time</displayName>
+		</timestamp>
+		<text name="displayName">
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+		<integer name="percentComplete">
+			<displayName>Percent Complete</displayName>
+		</integer>
+		<text name="status" >
+			<displayName>Status</displayName>
+			<length>9</length>
+		</text>
+		<memo name="log">
+			<displayName>Log</displayName>
+			<index>none</index>
+		</memo>
+		<id name="beanBizId">
+			<displayName>Bean Biz Id</displayName>
+		</id>
+		<text name="beanModuleName">
+			<displayName>Bean Module Name</displayName>
+			<description>The name of the module for the bean.</description>
+			<length>500</length>
+		</text>
+		<text name="beanDocumentName">
+			<displayName>Bean Document Name</displayName>
+			<description>The name of the document for the bean.</description>
+			<length>500</length>
+		</text>
+		<text name="instanceId" persistent="false">
+			<displayName>Instance ID</displayName>
+			<length>1024</length>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="cancellable">
+			<expression>getStatus() == null</expression>
+		</condition>
+	</conditions>
+</document>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserDashboard"
+				xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>User Dashboard</singularAlias>
+	<pluralAlias>User Dashboards</pluralAlias>
+	<iconStyleClass>fa fa-area-chart</iconStyleClass>
+	<bizKey expression="User Dashboard"/>
+	<attributes>
+		<association type="aggregation" name="currentUser" >
+			<displayName>admin.userDashboard.association.user.displayName</displayName>
+			<documentName>User</documentName>
+		</association>
+		<collection name="favourites" type="composition">
+			<displayName>Favourites</displayName>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+	<conditions>
+		<condition name="canReadJobs" usage="view">
+			<description>True if the logged in user has permission to read jobs</description>
+			<expression>
+				<![CDATA[
+					((UserDashboardExtension)this).canReadJobs()
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.controlPanel.edit.title"
+		name="edit"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane selectedTabIndexBinding="tabIndex">
+		<tab title="admin.controlPanel.edit.design.tabTitle">
+			<component name="_generateTestData" />
+		</tab>
+		<tab title="admin.controlPanel.edit.sail.tabTitle">
+			<form border="true">
+				<column responsiveWidth="3" />
+				<column />
+				<column responsiveWidth="2" />
+				<row>
+					<item required="true">
+						<textField binding="sailLoginCustomer" invisible="fixedCustomer" />
+					</item>
+				</row>
+				<row>
+					<item required="true">
+						<lookupDescription binding="sailUser" descriptionBinding="bizKey" />
+					</item>
+				</row>
+				<row>
+					<item required="true">
+						<password binding="sailLoginPassword" />
+					</item>
+				</row>
+				<row>
+					<item required="true">
+						<combo binding="sailModuleName" />
+					</item>
+				</row>
+				<row>
+					<item required="true">
+						<radio binding="sailTestStrategy" vertical="false" />
+					</item>
+					<item align="right">
+						<button action="DownloadClientSAIL" />
+					</item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	
+	<actions>
+		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downloadClientSail.toolTip" />
+		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
+		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false"/>
+	</actions>
+</view>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="{displayName} - {status}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" borderTitle="Job Details">
+		<column percentageWidth="20" />
+		<column />
+		<column percentageWidth="20" />
+		<column />
+		<column />
+		<row>
+			<item colspan="3">
+				<textField binding="displayName" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item colspan="3">
+				<textField binding="startTime" />
+			</item>
+		</row>
+		<row>
+			<item colspan="3">
+				<textField binding="endTime" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="percentComplete" disabled="true" />
+			</item>
+			<item>
+				<textField binding="status" disabled="true" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Log">
+		<column />
+		<row>
+			<item showLabel="false">
+				<!-- Log binding must NOT be indented as it is inside a pre tag -->
+				<blurb escape="false">
+					<![CDATA[
+						<pre>
+{log}
+						</pre>
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<actions>
+		<cancel />
+		<zoomOut />
+		<action className="CancelJob" displayName="Cancel Job" iconStyleClass="fa fa-ban" confirm="Are you sure you want to cancel this job?" visible="cancellable"/>
+	</actions>
+</view>

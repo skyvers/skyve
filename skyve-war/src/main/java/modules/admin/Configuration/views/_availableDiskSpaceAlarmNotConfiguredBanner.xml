@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_availableDiskSpaceAlarmNotConfiguredBanner" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox visible="notAvailableDiskSpaceAlarmConfigured" shrinkWrap="height">
+		<form>
+			<column />
+			<row>
+				<item align="centre">
+					<blurb>
+						<![CDATA[
+							<div style="margin: 0;" class="ui-messages ui-widget" aria-live="polite">
+								<div style="margin: 0;" class="ui-messages-info ui-corner-all">
+									<span class="ui-messages-warn-icon"></span>
+									<ul>
+										<li role="alert" aria-atomic="true">
+											<span class="ui-messages-warn-detail">
+												{i18n:admin.configuration.availableDiskSpaceAlarmLevel.notConfiguredWarning}
+											</span>
+										</li>
+									</ul>
+								</div>
+							</div>				
+						]]>
+					</blurb>
+				</item>
+			</row>
+		</form>		
+	</vbox>
+</view>

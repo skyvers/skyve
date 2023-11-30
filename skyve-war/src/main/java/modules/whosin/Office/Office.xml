@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Office" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			An official location where staff operate.
+		]]>
+	</documentation>
+	<persistent name="WHO_Office" />
+	<singularAlias>Office</singularAlias>
+	<pluralAlias>Offices</pluralAlias>
+	<iconStyleClass>fa fa-building</iconStyleClass>
+	<bizKey expression="{buildingName} {streetAddress} {suburb}"/>
+	<attributes>
+		<text name="levelUnit">
+			<displayName>Level/Unit</displayName>
+			<length>200</length>
+		</text>
+		<text name="buildingName">
+			<displayName>Building Name</displayName>
+			<length>200</length>
+		</text>
+		<text name="streetAddress">
+			<displayName>Street Address</displayName>
+			<length>200</length>
+		</text>
+		<text name="suburb">
+			<displayName>Suburb</displayName>
+			<length>200</length>
+		</text>
+		<text name="postCode">
+			<displayName>Post Code</displayName>
+			<length>4</length>
+			<format mask="####" />
+		</text>
+		<text name="phone">
+			<displayName>Phone</displayName>
+			<length>14</length>
+		</text>
+		<memo name="description">
+			<displayName>Description</displayName>
+		</memo>
+		<geometry name="boundary">
+			<displayName>Boundary</displayName>
+			<description>The boundary around the office.</description>
+		</geometry>
+		<boolean name="demoData">
+			<displayName>Demonstration Data</displayName>
+			<description><![CDATA[
+			If this is set, the data was created by the <em>demo data job</em> and can safely be deleted.
+			]]></description>
+		</boolean>
+	</attributes>
+	<conditions>
+		<condition name="manager">
+			<description>Does the user have the manager role?</description>
+			<expression>
+				<![CDATA[
+					isUserInRole("whosin","Manager")
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

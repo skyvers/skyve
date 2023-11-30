@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserList"
+				xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Users</singularAlias>
+	<pluralAlias>Users</pluralAlias>
+	<iconStyleClass>fa fa-user</iconStyleClass>
+	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
+	<bizKey expression="User List"/>
+	<attributes>
+		<collection name="userInvitationGroups" type="aggregation">
+			<displayName>User Invitation Groups</displayName>
+			<description>The collection of groups that invited users are assigned.</description>
+			<domain>variant</domain>
+			<documentName>Group</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="name" sort="ascending" />
+			</ordering>
+			<unique name="UniqueGroupName">
+				<message>Membership of group {name} has already been assigned to this user.</message>
+				<fieldReferences>
+					<ref>bizId</ref>
+				</fieldReferences>
+			</unique>
+		</collection>
+		<memo name="userInvitiationEmailList">
+			<displayName>admin.userList.userInvitationEmailList.displayName</displayName>
+			<description><![CDATA[admin.userList.userInvitationEmailList.description]]></description>
+		</memo>	
+		<boolean name="bulkCreateWithEmail">
+			<displayName>admin.userList.bulkCreateWithEmail.displayName</displayName>
+		</boolean>
+		<text name="defaultModuleName">
+			<displayName>admin.userList.defaultModuleName.displayName</displayName>
+			<domain>variant</domain>
+			<length>100</length>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="emailConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validSMTPHost()
+				]]>
+			</expression>
+		</condition>
+</conditions>	
+</document>

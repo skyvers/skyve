@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="User"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_SecurityUser" />
+	<singularAlias>User</singularAlias>
+	<pluralAlias>Users</pluralAlias>
+	<iconStyleClass>fa fa-user</iconStyleClass>
+	<bizKey >
+		<![CDATA[return modules.admin.User.UserBizlet.bizKey(this);]]>
+	</bizKey>
+	<implements>
+		<interface>org.skyve.domain.app.admin.User</interface>
+	</implements>
+	<attributes>
+		<text name="userName" required="true">
+			<documentation>
+				<![CDATA[
+					Length is derived from the maximum email address length from RFC 5321
+				]]>
+			</documentation>
+			<displayName>admin.user.userName.displayName</displayName>
+			<length>254</length>
+		</text>
+		<text name="password" audited="false">
+			<displayName>admin.user.password.displayName</displayName>
+			<description>admin.user.password.description</description>
+			<!--  The password is checked and populated in the Bizlet -->
+			<length>100</length>
+		</text>
+		<text name="generatedPassword" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>admin.user.generatedPassword.displayName</displayName>
+			<description>admin.user.generatedPassword.description</description>
+			<length>255</length>
+		</text>
+		<dateTime name="createdDateTime">
+			<displayName>admin.user.createdDateTime.displayName</displayName>
+			<description>admin.user.createdDateTime.description</description>
+		</dateTime>
+		<text name="homeModule" >
+			<displayName>admin.user.homeModule.displayName</displayName>
+			<description>admin.user.homeModule.description</description>
+			<domain>variant</domain>
+			<length>30</length>
+		</text>
+		<text name="newPassword" audited="false" persistent="false" usage="both">
+			<displayName>admin.user.newPassword.displayName</displayName>
+			<description>admin.user.newPassword.description</description>
+			<length>255</length>
+		</text>
+		<text name="confirmPassword" audited="false" persistent="false" usage="both">
+			<displayName>admin.user.confirmPassword.displayName</displayName>
+			<description>admin.user.confirmPassword.description</description>
+			<length>255</length>
+		</text>
+		<text name="legacyId" >
+			<displayName>admin.user.legacyId.displayName</displayName>
+			<description>admin.user.legacyId.description</description>
+			<length>100</length>
+		</text>
+		<boolean name="passwordExpired">
+			<displayName>admin.user.passwordExpired.displayName</displayName>
+			<description>admin.user.passwordExpired.description</description>
+		</boolean >
+		<dateTime name="passwordLastChanged">
+			<displayName>admin.user.passwordLastChanged.displayName</displayName>
+			<description>admin.user.passwordLastChanged.description</description>
+		</dateTime>
+		<text name="passwordResetToken">
+			<documentation>This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.</documentation>
+			<displayName>admin.user.passwordResetToken.displayName</displayName>
+			<description>admin.user.passwordResetToken.description</description>
+			<length>56</length>
+		</text>
+		<memo name="passwordHistory" audited="false" trackChanges="false">
+			<documentation>
+				A tab separated list of previous password hashes used
+			</documentation>
+			<displayName>admin.user.passwordHistory.displayName</displayName>
+			<index>none</index>
+		</memo>
+		<integer name="authenticationFailures">
+			<documentation>
+				This value is zeroed on successful authentication.
+			</documentation>
+			<displayName>admin.user.authenticationFailures.displayName</displayName>
+			<description>admin.user.authenticationFailures.description</description>
+		</integer>
+		<timestamp name="lastAuthenticationFailure">
+			<displayName>admin.user.lastAuthenticationFailure.displayName</displayName>
+			<description>admin.user.lastAuthenticationFailure.description</description>
+		</timestamp>
+		<!-- If you change this association to be composed, change it in admin.UserProxy document also -->
+		<association name="contact" type="aggregation" required="true">
+			<displayName>admin.user.association.contact.displayName</displayName>
+			<description>admin.user.association.contact.description</description>
+			<documentName>Contact</documentName>
+			<queryName>qContacts</queryName>
+		</association>
+		<association name="dataGroup" type="aggregation">
+			<displayName>admin.user.association.dataGroup.displayName</displayName>
+			<description>admin.user.association.dataGroup.description</description>
+			<domain>variant</domain>
+			<documentName>DataGroup</documentName>
+		</association>
+		<collection name="groups" type="aggregation">
+			<displayName>admin.user.collection.groups.displayName</displayName>
+			<description>admin.user.collection.groups.description</description>
+			<domain>variant</domain>
+			<documentName>Group</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="name" sort="ascending" />
+			</ordering>
+			<unique name="UniqueGroupName">
+				<message>Membership of group {name} has already been assigned to this user.</message>
+				<fieldReferences>
+					<ref>bizId</ref>
+				</fieldReferences>
+			</unique>
+		</collection>
+		<collection name="roles" type="child">
+			<displayName>admin.user.collection.roles.displayName</displayName>
+			<description>admin.user.collection.roles.description</description>
+			<documentName>UserRole</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="roleName" sort="ascending" />
+			</ordering>
+			<unique name="UniqueUserRole">
+				<message>The role {roleName} already exists for this user.</message>
+				<fieldReferences>
+					<ref>roleName</ref>
+				</fieldReferences>
+			</unique>
+		</collection>
+		
+		<!-- New user wizard state properties -->
+		<enum name="wizardState" audited="false" persistent="false" usage="view">
+			<displayName>Wizard State</displayName>
+			<description>
+			The create user wizard is staged into the following states which roughly follow in order.
+			Either an existing contact is confirmed as that of the new user,
+			OR
+			A new contact is created for the new user.
+			Once the identity of the new user is established, the wizard moves on
+			to confirm the new user name and password and membership of groups.
+			</description>
+			<values>
+				<value code="confirmContact"/>
+				<value code="createContact"/>
+				<value code="confirmUserNameAndPassword"/>
+				<value code="confirmGroupMemberships"/>
+			</values>
+		</enum>
+		<text name="searchContactName" audited="false" persistent="false" usage="view">
+			<displayName>admin.user.searchContactName.displayName</displayName>
+			<description>admin.user.searchContactName.description</description>
+			<length>1024</length>
+		</text>
+		<text name="searchEmail" audited="false" persistent="false" usage="view">
+			<displayName>admin.user.searchEmail.displayName</displayName>
+			<description>admin.user.searchEmail.description</description>
+			<length>512</length>
+		</text>
+		<collection name="candidateContacts" type="child" audited="false" persistent="false" usage="view">
+			<displayName>admin.user.collection.candidateContacts.displayName</displayName>
+			<description>admin.user.collection.candidateContacts.description</description>
+			<documentName>UserCandidateContact</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="contactSelected" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>admin.user.contactSelected.displayName</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="inactive">
+			<displayName>admin.user.inactive.displayName</displayName>
+			<description>admin.user.inactive.description</description>
+		</boolean>
+		<enum name="groupSelection" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>admin.user.groupSelection.displayName</displayName>
+			<values>
+				<value code="existingGroups" description="Existing groups"/>
+				<value code="newGroup" description="New group"/>
+			</values>
+		</enum>
+		<boolean name="groupsExist" audited="false" persistent="false"  trackChanges="false" usage="view">
+			<displayName>admin.user.groupsExist.displayName</displayName>
+		</boolean>
+		<association type="aggregation" name="newGroup"  persistent="false" audited="false" trackChanges="false">
+			<displayName>admin.user.association.newGroup.displayName</displayName>
+			<documentName>Group</documentName>
+		</association>
+		<collection name="assignedRoles" type="aggregation" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>admin.user.collection.assignedRoles.displayName</displayName>
+			<description>admin.user.collection.assignedRoles.description</description>
+			<documentName>UserRole</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		
+		<!-- Self registration activation status and code -->
+		<boolean name="activated">
+			<documentation><![CDATA[
+			By default the account will be activated.
+			For public users, we want them to activate the account manually so this will be set to false and the activationCode field will be populated.
+			]]></documentation>
+			<displayName>admin.user.activated.displayName</displayName>
+			<description>admin.user.activated.description</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<text name="activationCode">
+			<documentation>This contains a code which when submitted by the user will activate their account.</documentation>
+			<displayName>admin.user.activationCode.displayName</displayName>
+			<description>admin.user.activationCode.description</description>
+			<length>36</length>
+		</text>
+		<dateTime name="activationCodeCreationDateTime">
+			<displayName>admin.user.activationCodeCreationDateTime.displayName</displayName>
+			<description>admin.user.activationCodeCreationDateTime.description</description>
+		</dateTime>
+		<text name="activateUrl" audited="false" persistent="false" trackChanges="false" usage="both">
+			<displayName>Activation Url</displayName>
+			<length>2083</length>
+		</text>	
+		
+		<!-- 2FA -->
+		<text name="twoFactorCode" audited="false">
+			<documentation>this is hashed</documentation>
+			<displayName>Two Factor Code</displayName>
+			<length>100</length>
+		</text>
+		<timestamp name="twoFactorCodeGeneratedTimestamp" audited="false">
+			<documentation>used to invalidate the 2fa code when X amount of time has passed. Not displayed to the user</documentation>
+			<displayName>2FA Code DateTime</displayName>
+		</timestamp>
+		<text name="twoFactorToken" audited="false">
+			<documentation>Used to identify the user is in the same session for 2FA code entry, this is for the system</documentation>
+			<displayName>Two Factor Token</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+	<conditions>
+		<!-- Evaluation of Wizard State -->
+		<condition name="confirmContact">
+			<description>Confirm Contact step</description>
+			<expression>
+				<![CDATA[WizardState.confirmContact.equals(getWizardState())]]>
+			</expression>
+		</condition>
+		<condition name="createContact">
+		<description>Create Contact step</description>
+			<expression>
+				<![CDATA[WizardState.createContact.equals(getWizardState())]]>
+			</expression>
+		</condition>
+		<condition name="confirmUserNameAndPassword">
+			<description>Confirm User Name and Password step</description>
+			<expression>
+				<![CDATA[WizardState.confirmUserNameAndPassword.equals(getWizardState())]]>
+			</expression>
+		</condition>
+		<condition name="confirmGroupMemberships">
+			<description>Confirm Group Memberships step</description>
+			<expression>
+				<![CDATA[WizardState.confirmGroupMemberships.equals(getWizardState())]]>
+			</expression>
+		</condition>
+		<condition name="showNextButton">
+			<description>Show Next Button</description>
+			<expression>
+				<![CDATA[isCreateContact() || isConfirmUserNameAndPassword() ]]>
+			</expression>
+		</condition>
+		<condition name="created">
+			<description>Created</description>
+			<expression>
+				<![CDATA[isPersisted()]]>
+			</expression>
+		</condition>
+		<condition name="inDataGroup">
+			<description>In Data Group</description>
+			<expression>
+				<![CDATA[! isUserInDataGroup(null)]]>
+			</expression>
+		</condition>
+		<condition name="securityAdministrator">
+			<description>Security Administrator</description>
+			<expression>
+				<![CDATA[isUserInRole("admin","SecurityAdministrator")]]>
+			</expression>
+		</condition>
+		<condition name="owningUser">
+			<description>Whether the current user is this user</description>
+			<expression>
+				<![CDATA[((UserExtension) this).owningUser()]]>
+			</expression>
+		</condition>
+		<condition name="accessDenied">
+			<description>Whether the current user is allowed to manage this user's details</description>
+			<expression>
+				<![CDATA[!isOwningUser() && !isSecurityAdministrator()]]>
+			</expression>
+		</condition>
+		<condition name="designer">
+			<description>Designer</description>
+			<expression>
+				<![CDATA[isUserInRole("design", "BizHubDesigner")]]>
+			</expression>
+		</condition>
+		<condition name="candidateContactsEmpty">
+			<description>Candidate Contacts is empty</description>
+			<expression>
+				<![CDATA[candidateContacts.isEmpty()]]>
+			</expression>
+		</condition>
+		<condition name="showExistingGroups">
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(groupsExist)]]>
+			</expression>
+		</condition>
+		<condition name="showGroupCreator">
+			<expression>
+				<![CDATA[GroupSelection.newGroup.equals(groupSelection)]]>
+			</expression>
+		</condition>
+		<condition name="selfRegistrationEnabled" usage="view">
+			<description>True when User Self-Registration is enabled.</description>
+			<expression>
+				<![CDATA[org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION]]>
+			</expression>
+		</condition>
+		<condition name="selfRegistrationEnabledAndUserNotActivated" usage="view">
+			<description>True when User Self-Registration is enabled and the User has not been activated.</description>
+			<expression>
+				<![CDATA[isSelfRegistrationEnabled() && Boolean.FALSE.equals(getActivated()) && isSecurityAdministrator()]]>
+			</expression>
+		</condition>
+		<condition name="canActivateUser" usage="view">
+			<description>Allows administrators to manually activate users when User Self-Registration is enabled.</description>
+			<expression>
+				<![CDATA[isSecurityAdministrator() && isSelfRegistrationEnabled()]]>
+			</expression>
+		</condition>
+	</conditions>
+	<uniqueConstraints>
+		<constraint name="UniqueUserName" scope="customer">
+			<message>The user {userName} already exists.</message>
+			<fieldReferences>
+				<ref>userName</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

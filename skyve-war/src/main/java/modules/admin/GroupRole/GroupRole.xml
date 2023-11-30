@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="GroupRole"
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_SecurityGroupRole">
+		<cache>reference</cache>
+	</persistent>
+	<singularAlias>Group Role</singularAlias>
+	<pluralAlias>Group Roles</pluralAlias>
+	<parentDocument>Group</parentDocument>
+	<bizKey expression="{roleName}"/>
+	<attributes>
+		<text name="roleName" required="true">
+			<displayName>admin.groupRole.roleName.displayName</displayName>
+			<domain>variant</domain>
+			<length>60</length>
+		</text>
+	</attributes>
+</document>

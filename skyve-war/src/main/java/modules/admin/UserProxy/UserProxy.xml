@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserProxy"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			A proxy version of the admin.User (without roles and groups etc) used for referencing.
+		]]>
+	</documentation>
+	<persistent name="ADM_SecurityUser">
+		<cache>reference</cache>
+	</persistent>
+	<singularAlias>User</singularAlias>
+	<pluralAlias>Users</pluralAlias>
+	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
+	<bizKey expression="{userName} - {contact.bizKey}" />
+	<attributes>
+		<text name="userName" required="true">
+			<documentation>
+				<![CDATA[
+					Length is derived from the maximum email address length from RFC 5321
+				]]>
+			</documentation>
+			<displayName>admin.userProxy.userName.displayName</displayName>
+			<length>254</length>
+		</text>
+		<dateTime name="createdDateTime">
+			<displayName>admin.userProxy.createdDateTime.displayName</displayName>
+			<description>admin.userProxy.createdDateTime.description</description>
+		</dateTime>
+		<!-- If you change this association to be composed or optional, change it in admin.User document also -->
+		<association name="contact" type="aggregation" required="true">
+			<displayName>admin.userProxy.association.contact.displayName</displayName>
+			<description>admin.userProxy.association.contact.description</description>
+			<documentName>Contact</documentName>
+		</association>
+		<boolean name="inactive">
+			<displayName>admin.userProxy.inactive.displayName</displayName>
+			<description>admin.userProxy.inactive.description</description>
+		</boolean>
+	</attributes>
+</document>

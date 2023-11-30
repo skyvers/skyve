@@ -1,0 +1,1091 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<typedef name="OptimisticLock" class="org.skyve.impl.domain.types.OptimisticLockUserType" />
+	<typedef name="Decimal2" class="org.skyve.impl.domain.types.Decimal2UserType" />
+	<typedef name="Decimal5" class="org.skyve.impl.domain.types.Decimal5UserType" />
+	<typedef name="Decimal10" class="org.skyve.impl.domain.types.Decimal10UserType" />
+	<typedef name="DateOnly" class="org.skyve.impl.domain.types.DateOnlyUserType" />
+	<typedef name="DateTime" class="org.skyve.impl.domain.types.DateTimeUserType" />
+	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
+	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
+	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
+	<class name="modules.admin.domain.Audit" table="ADM_Audit" entity-name="adminAudit">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="auditModuleName" length="128" />
+		<property name="auditDocumentName" length="128" />
+		<property name="auditBizId" length="36" index="IDX_auditBizId" />
+		<property name="auditBizKey" length="1024" />
+		<property name="operation" length="1">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Audit$Operation</param>
+			</type>
+		</property>
+		<property name="timestamp" type="Timestamp" />
+		<property name="millis" index="IDX_millis" />
+		<property name="userName" length="254" />
+		<property name="auditDetail" type="text" />
+		<filter name="adminAuditNoneFilter" condition="1=0"/>
+		<filter name="adminAuditCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminAuditDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminAuditUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.Communication.CommunicationExtension" table="ADM_Communication" entity-name="adminCommunication">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="description" length="250" />
+		<property name="moduleName" length="500" />
+		<property name="documentName" length="500" />
+		<property name="toBinding" length="500" />
+		<property name="sendTo" length="250" />
+		<property name="ccTo" length="250" />
+		<property name="sendFrom" length="250" />
+		<property name="monitorBcc" />
+		<property name="subject" length="250" />
+		<property name="body" type="text" />
+		<property name="attachment1" length="36" />
+		<property name="attachmentFileName1" length="250" />
+		<property name="attachment2" length="36" />
+		<property name="attachmentFileName2" length="250" />
+		<property name="attachment3" length="36" />
+		<property name="attachmentFileName3" length="250" />
+		<property name="formatType" length="5">
+			<type name="Enum">
+				<param name="enumClass">org.skyve.domain.app.admin.Communication$FormatType</param>
+			</type>
+		</property>
+		<property name="systemUse" />
+		<property name="unsubscribeUrl" length="500" />
+		<property name="includeCalendar" />
+		<property name="calendarTitleExpression" length="200" />
+		<property name="calendarStartTime" type="DateTime" />
+		<property name="calendarEndTime" type="DateTime" />
+		<property name="calendarDescriptionExpression" length="500" />
+		<many-to-one name="template" entity-name="adminCommunicationTemplate" column="template_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Communication_template"/>
+		<filter name="adminCommunicationNoneFilter" condition="1=0"/>
+		<filter name="adminCommunicationCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminCommunicationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminCommunicationUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.CommunicationTemplate" table="ADM_CommunicationTemplate" entity-name="adminCommunicationTemplate">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="50" />
+		<property name="description" length="255" />
+		<property name="template" type="text" />
+		<filter name="adminCommunicationTemplateNoneFilter" condition="1=0"/>
+		<filter name="adminCommunicationTemplateCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminCommunicationTemplateDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminCommunicationTemplateUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.Configuration.ConfigurationExtension" table="ADM_Configuration" entity-name="adminConfiguration">
+		<cache usage="read-write" region="eternal" />
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="passwordMinLength" />
+		<property name="passwordRequireLowercase" />
+		<property name="passwordRequireUppercase" />
+		<property name="passwordRequireNumeric" />
+		<property name="passwordRequireSpecial" />
+		<property name="fromEmail" length="254" />
+		<property name="passwordResetEmailSubject" length="250" />
+		<property name="passwordResetEmailBody" type="text" />
+		<many-to-one name="userSelfRegistrationGroup" entity-name="adminGroup" column="userSelfRegistrationGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_userSelfRegistrationGroup"/>
+		<property name="selfRegistrationActivationExpiryHours" />
+		<property name="allowUserSelfRegistration" />
+		<property name="passwordComplexityModel" length="7">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Configuration$PasswordComplexityModel</param>
+			</type>
+		</property>
+		<property name="twoFactorType" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Configuration$TwoFactorType</param>
+			</type>
+		</property>
+		<property name="twofactorPushCodeTimeOutSeconds" />
+		<property name="twoFactorEmailSubject" length="128" />
+		<property name="twoFactorEmailBody" type="text" />
+		<many-to-one name="publicUser" entity-name="adminUserProxy" column="publicUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Configuration_publicUser"/>
+		<property name="availableDiskSpaceAlarmLevelPercentage" />
+		<property name="availableDiskSpaceAlarmLevelMB" />
+		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
+		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminConfigurationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminConfigurationUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.Contact" table="ADM_Contact" entity-name="adminContact">
+		<cache usage="read-write" region="reference" />
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="200" />
+		<property name="contactType" length="12">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Contact$ContactType</param>
+			</type>
+		</property>
+		<property name="email1" length="500" />
+		<property name="mobile" length="20" />
+		<property name="image" length="36" />
+		<filter name="adminContactNoneFilter" condition="1=0"/>
+		<filter name="adminContactCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminContactDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminContactUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.DataGroup" table="ADM_DataGroup" entity-name="adminDataGroup">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="30" />
+		<property name="description" type="text" />
+		<filter name="adminDataGroupNoneFilter" condition="1=0"/>
+		<filter name="adminDataGroupCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDataGroupDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDataGroupUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.DataMaintenance.DataMaintenanceExtension" table="ADM_DataMaintenance" entity-name="adminDataMaintenance">
+		<cache usage="read-write" region="eternal" />
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="modDocName" length="100" />
+		<property name="injectBootstrapUser" />
+		<property name="schemaName" length="1024" />
+		<property name="notification" />
+		<property name="dailyBackupRetention" />
+		<property name="weeklyBackupRetention" />
+		<property name="monthlyBackupRetention" />
+		<property name="yearlyBackupRetention" />
+		<property name="restorePreProcess" length="39">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DataMaintenance$RestorePreProcess</param>
+			</type>
+		</property>
+		<property name="contentRestoreOption" length="23">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DataMaintenance$ContentRestoreOption</param>
+			</type>
+		</property>
+		<property name="restoreIndexingOption" length="7">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DataMaintenance$RestoreIndexingOption</param>
+			</type>
+		</property>
+		<property name="auditModuleName" length="128" />
+		<property name="auditDocumentName" length="128" />
+		<property name="auditOperation" length="1">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Audit$Operation</param>
+			</type>
+		</property>
+		<property name="auditTimestampStart" type="Timestamp" />
+		<property name="auditTimestampEnd" type="Timestamp" />
+		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser"/>
+		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
+		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDataMaintenanceUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.DocumentNumber" table="ADM_DocumentNumber" entity-name="adminDocumentNumber">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="moduleName" length="500" />
+		<property name="documentName" length="500" />
+		<property name="sequenceName" length="500" />
+		<property name="documentNumber" length="500" />
+		<filter name="adminDocumentNumberNoneFilter" condition="1=0"/>
+		<filter name="adminDocumentNumberCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDocumentNumberDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDocumentNumberUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.DynamicEntity" table="ADM_DynamicEntity" entity-name="adminDynamicEntity">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="moduleName" length="128" />
+		<property name="documentName" length="128" />
+		<property name="fields" type="text" />
+		<bag name="relations" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminDynamicRelation" />
+		</bag>
+		<filter name="adminDynamicEntityNoneFilter" condition="1=0"/>
+		<filter name="adminDynamicEntityCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDynamicEntityDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDynamicEntityUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.DynamicRelation" table="ADM_DynamicRelation" entity-name="adminDynamicRelation">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="adminDynamicEntity" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_DynamicRelation_parent" />
+		<property name="relatedModuleName" length="128" />
+		<property name="relatedDocumentName" length="128" />
+		<property name="relatedId" length="36" index="IDX_relatedId" />
+		<property name="attributeName" length="500" />
+		<property name="ordinal" />
+		<filter name="adminDynamicRelationNoneFilter" condition="1=0"/>
+		<filter name="adminDynamicRelationCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminDynamicRelationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminDynamicRelationUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.Group.GroupExtension" table="ADM_SecurityGroup" entity-name="adminGroup">
+		<cache usage="read-write" region="reference" />
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="30" />
+		<property name="description" length="255" />
+		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminGroupRole" />
+		</bag>
+		<filter name="adminGroupNoneFilter" condition="1=0"/>
+		<filter name="adminGroupCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminGroupDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminGroupUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.GroupRole" table="ADM_SecurityGroupRole" entity-name="adminGroupRole">
+		<cache usage="read-write" region="reference" />
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="adminGroup" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_SecurityGroupRole_parent" />
+		<property name="roleName" length="60" />
+		<filter name="adminGroupRoleNoneFilter" condition="1=0"/>
+		<filter name="adminGroupRoleCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminGroupRoleDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminGroupRoleUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.ImportExport.ImportExportExtension" table="ADM_ImportExport" entity-name="adminImportExport">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="mode" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExport$Mode</param>
+			</type>
+		</property>
+		<property name="moduleName" length="100" />
+		<property name="documentName" length="500" />
+		<property name="importFileAbsolutePath" length="500" />
+		<property name="importFileName" length="200" />
+		<property name="exportFileAbsolutePath" length="500" />
+		<property name="advancedMode" />
+		<property name="columnTitlesOnly" />
+		<property name="fileContainsHeaders" />
+		<property name="detailedLogging" />
+		<bag name="importExportColumns" order-by="bizOrdinal" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminImportExportColumn" />
+		</bag>
+		<property name="rollbackErrors" length="16">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExport$RollbackErrors</param>
+			</type>
+		</property>
+		<property name="loadType" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExport$LoadType</param>
+			</type>
+		</property>
+		<filter name="adminImportExportNoneFilter" condition="1=0"/>
+		<filter name="adminImportExportCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminImportExportDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminImportExportUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.ImportExportColumn" table="ADM_ImportExportColumn" entity-name="adminImportExportColumn">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="bizOrdinal" />
+		<many-to-one name="parent" entity-name="adminImportExport" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ImportExportColumn_parent" />
+		<property name="columnName" length="500" />
+		<property name="bindingName" length="200" />
+		<property name="bindingExpression" length="500" />
+		<property name="loadAction" length="8">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ImportExportColumn$LoadAction</param>
+			</type>
+		</property>
+		<filter name="adminImportExportColumnNoneFilter" condition="1=0"/>
+		<filter name="adminImportExportColumnCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminImportExportColumnDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminImportExportColumnUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.Job" table="ADM_Job" entity-name="adminJob">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="startTime" type="Timestamp" />
+		<property name="endTime" type="Timestamp" />
+		<property name="displayName" length="100" />
+		<property name="percentComplete" />
+		<property name="status" length="9" />
+		<property name="log" type="text" />
+		<property name="beanBizId" length="36" />
+		<property name="beanModuleName" length="500" />
+		<property name="beanDocumentName" length="500" />
+		<filter name="adminJobNoneFilter" condition="1=0"/>
+		<filter name="adminJobCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminJobDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminJobUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.JobSchedule.JobScheduleExtension" table="ADM_JobSchedule" entity-name="adminJobSchedule">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="jobName" length="100" />
+		<property name="cronExpression" length="128" />
+		<property name="startTime" type="DateTime" />
+		<property name="endTime" type="DateTime" />
+		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs"/>
+		<property name="disabled" />
+		<filter name="adminJobScheduleNoneFilter" condition="1=0"/>
+		<filter name="adminJobScheduleCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminJobScheduleDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminJobScheduleUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.ReportDataset.ReportDatasetExtension" table="ADM_ReportDataset" entity-name="adminReportDataset">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="adminReportTemplate" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ReportDataset_parent" />
+		<property name="datasetName" length="50" />
+		<property name="datasetType" length="8">
+			<type name="Enum">
+				<param name="enumClass">org.skyve.domain.app.admin.ReportDataset$DatasetType</param>
+			</type>
+		</property>
+		<property name="query" type="text" />
+		<filter name="adminReportDatasetNoneFilter" condition="1=0"/>
+		<filter name="adminReportDatasetCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminReportDatasetDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminReportDatasetUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.ReportParameter.ReportParameterExtension" table="ADM_ReportParameter" entity-name="adminReportParameter">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="bizOrdinal" />
+		<many-to-one name="parent" entity-name="adminReportTemplate" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_ReportParameter_parent" />
+		<property name="name" length="50" />
+		<property name="description" length="100" />
+		<property name="type" length="7">
+			<type name="Enum">
+				<param name="enumClass">org.skyve.domain.app.admin.ReportParameter$Type</param>
+			</type>
+		</property>
+		<property name="required" />
+		<property name="dateDefaultValue" type="DateOnly" />
+		<property name="numericalDefaultValue" />
+		<property name="textDefaultValue" length="100" />
+		<property name="dateTestValue" type="DateOnly" />
+		<property name="numericalTestValue" />
+		<property name="textTestValue" length="100" />
+		<filter name="adminReportParameterNoneFilter" condition="1=0"/>
+		<filter name="adminReportParameterCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminReportParameterDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminReportParameterUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.ReportTemplate.ReportTemplateExtension" table="ADM_ReportTemplate" entity-name="adminReportTemplate">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="50" />
+		<property name="templateName" length="55" />
+		<property name="description" type="text" />
+		<property name="enabled" />
+		<property name="includeFragment" />
+		<property name="reportType" length="10">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportTemplate$ReportType</param>
+			</type>
+		</property>
+		<property name="outputFormat" length="3">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportTemplate$OutputFormat</param>
+			</type>
+		</property>
+		<property name="template" type="text" />
+		<property name="moduleName" length="100" />
+		<property name="documentName" length="255" />
+		<property name="reportName" length="255" />
+		<property name="mode" length="4">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.ReportTemplate$Mode</param>
+			</type>
+		</property>
+		<property name="restrictToRole" length="60" />
+		<bag name="datasets" order-by="datasetName asc" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminReportDataset" />
+		</bag>
+		<bag name="parameters" order-by="bizOrdinal" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminReportParameter" />
+		</bag>
+		<property name="scheduled" />
+		<property name="cronExpression" length="128" />
+		<property name="startTime" type="DateTime" />
+		<property name="endTime" type="DateTime" />
+		<many-to-one name="runAs" entity-name="adminUserProxy" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_ReportTemplate_runAs"/>
+		<bag name="usersToEmail" table="ADM_ReportTemplate_usersToEmail" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_ADM_ReportTemplate_usersToEmail_owner_id" />
+			<many-to-many entity-name="adminUserProxy" foreign-key="FK_ADM_ReportTemplate_usersToEmail_element_id" column="element_id" />
+		</bag>
+		<filter name="adminReportTemplateNoneFilter" condition="1=0"/>
+		<filter name="adminReportTemplateCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminReportTemplateDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminReportTemplateUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.Snapshot" table="ADM_Snapshot" entity-name="adminSnapshot">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="moduleName" length="100" />
+		<property name="queryName" length="100" />
+		<property name="name" length="256" />
+		<property name="snapshot" type="text" />
+		<filter name="adminSnapshotNoneFilter" condition="1=0"/>
+		<filter name="adminSnapshotCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminSnapshotDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminSnapshotUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.Subscription" table="ADM_Subscription" entity-name="adminSubscription">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="communication" entity-name="adminCommunication" column="communication_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Subscription_communication"/>
+		<property name="receiverIdentifier" length="254" />
+		<property name="declined" />
+		<property name="preferredReceiverIdentifier" length="254" />
+		<filter name="adminSubscriptionNoneFilter" condition="1=0"/>
+		<filter name="adminSubscriptionCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminSubscriptionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminSubscriptionUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.Tag.TagExtension" table="ADM_Tag" entity-name="adminTag">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="256" />
+		<property name="visible" />
+		<property name="uploadModuleName" length="500" />
+		<property name="uploadDocumentName" length="500" />
+		<property name="attributeName" length="500" />
+		<property name="fileHasHeaders" />
+		<property name="filterOperator" length="8">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Tag$FilterOperator</param>
+			</type>
+		</property>
+		<property name="filterAction" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Tag$FilterAction</param>
+			</type>
+		</property>
+		<property name="actionModuleName" length="500" />
+		<property name="actionDocumentName" length="500" />
+		<property name="unTagSuccessful" />
+		<property name="notification" />
+		<property name="filterColumn" />
+		<property name="documentCondition" length="1000" />
+		<property name="documentAction" length="1000" />
+		<filter name="adminTagNoneFilter" condition="1=0"/>
+		<filter name="adminTagCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminTagDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminTagUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.Tagged" table="ADM_Tagged" entity-name="adminTagged">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="taggedModule" length="30" />
+		<property name="taggedDocument" length="30" />
+		<property name="taggedBizId" length="36" index="IDX_taggedBizId" />
+		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_Tagged_tag"/>
+		<filter name="adminTaggedNoneFilter" condition="1=0"/>
+		<filter name="adminTaggedCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminTaggedDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminTaggedUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.User.UserExtension" table="ADM_SecurityUser" entity-name="adminUser">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="254" />
+		<property name="password" length="100" />
+		<property name="createdDateTime" type="DateTime" />
+		<property name="homeModule" length="30" />
+		<property name="legacyId" length="100" />
+		<property name="passwordExpired" />
+		<property name="passwordLastChanged" type="DateTime" />
+		<property name="passwordResetToken" length="56" />
+		<property name="passwordHistory" type="text" />
+		<property name="authenticationFailures" />
+		<property name="lastAuthenticationFailure" type="Timestamp" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact"/>
+		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_dataGroup"/>
+		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_ADM_SecurityUser_groups_owner_id" />
+			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_SecurityUser_groups_element_id" column="element_id" />
+		</bag>
+		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="adminUserRole" />
+		</bag>
+		<property name="inactive" />
+		<property name="activated" />
+		<property name="activationCode" length="36" />
+		<property name="activationCodeCreationDateTime" type="DateTime" />
+		<property name="twoFactorCode" length="100" />
+		<property name="twoFactorCodeGeneratedTimestamp" type="Timestamp" />
+		<property name="twoFactorToken" length="100" />
+		<filter name="adminUserNoneFilter" condition="1=0"/>
+		<filter name="adminUserCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.UserLoginRecord.UserLoginRecordExtension" table="ADM_UserLoginRecord" entity-name="adminUserLoginRecord">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="254" />
+		<property name="loginDateTime" type="DateTime" />
+		<property name="failed" />
+		<filter name="adminUserLoginRecordNoneFilter" condition="1=0"/>
+		<filter name="adminUserLoginRecordCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserLoginRecordDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserLoginRecordUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.UserMonthlyHits" table="ADM_UserMonthlyHits" entity-name="adminUserMonthlyHits">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="254" />
+		<property name="year" />
+		<property name="month" />
+		<property name="userAgentHeader" length="400" />
+		<property name="device" length="1">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.UserMonthlyHits$Device</param>
+			</type>
+		</property>
+		<property name="numberOfHits" />
+		<filter name="adminUserMonthlyHitsNoneFilter" condition="1=0"/>
+		<filter name="adminUserMonthlyHitsCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserMonthlyHitsDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserMonthlyHitsUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.UserProxy.UserProxyExtension" table="ADM_SecurityUser" entity-name="adminUserProxy">
+		<cache usage="read-write" region="reference" />
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="254" />
+		<property name="createdDateTime" type="DateTime" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_contact"/>
+		<property name="inactive" />
+		<filter name="adminUserProxyNoneFilter" condition="1=0"/>
+		<filter name="adminUserProxyCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserProxyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserProxyUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.UserRole" table="ADM_SecurityUserRole" entity-name="adminUserRole">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="adminUser" column="parent_id" insert="false" update="false" foreign-key="FK_ADM_SecurityUserRole_parent" />
+		<property name="roleName" length="60" />
+		<filter name="adminUserRoleNoneFilter" condition="1=0"/>
+		<filter name="adminUserRoleCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserRoleDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserRoleUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.UserToken" table="ADM_UserToken" entity-name="adminUserToken">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="305" />
+		<property name="series" length="64" />
+		<property name="token" length="64" />
+		<property name="lastUsed" type="Timestamp" />
+		<filter name="adminUserTokenNoneFilter" condition="1=0"/>
+		<filter name="adminUserTokenCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserTokenDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserTokenUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<filter-def name="adminAuditNoneFilter" />
+	<filter-def name="adminAuditCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminAuditDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminAuditUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationNoneFilter" />
+	<filter-def name="adminCommunicationCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationTemplateNoneFilter" />
+	<filter-def name="adminCommunicationTemplateCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationTemplateDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationTemplateUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminConfigurationNoneFilter" />
+	<filter-def name="adminConfigurationCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminConfigurationDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminConfigurationUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminContactNoneFilter" />
+	<filter-def name="adminContactCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminContactDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminContactUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDataGroupNoneFilter" />
+	<filter-def name="adminDataGroupCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDataGroupDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDataGroupUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDataMaintenanceNoneFilter" />
+	<filter-def name="adminDataMaintenanceCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDataMaintenanceDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDataMaintenanceUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDocumentNumberNoneFilter" />
+	<filter-def name="adminDocumentNumberCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDocumentNumberDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDocumentNumberUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicEntityNoneFilter" />
+	<filter-def name="adminDynamicEntityCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicEntityDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicEntityUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicRelationNoneFilter" />
+	<filter-def name="adminDynamicRelationCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicRelationDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminDynamicRelationUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminGroupNoneFilter" />
+	<filter-def name="adminGroupCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminGroupDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminGroupUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminGroupRoleNoneFilter" />
+	<filter-def name="adminGroupRoleCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminGroupRoleDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminGroupRoleUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminImportExportNoneFilter" />
+	<filter-def name="adminImportExportCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminImportExportDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminImportExportUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminImportExportColumnNoneFilter" />
+	<filter-def name="adminImportExportColumnCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminImportExportColumnDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminImportExportColumnUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminJobNoneFilter" />
+	<filter-def name="adminJobCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminJobDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminJobUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminJobScheduleNoneFilter" />
+	<filter-def name="adminJobScheduleCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminJobScheduleDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminJobScheduleUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportDatasetNoneFilter" />
+	<filter-def name="adminReportDatasetCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportDatasetDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportDatasetUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportParameterNoneFilter" />
+	<filter-def name="adminReportParameterCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportParameterDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportParameterUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportTemplateNoneFilter" />
+	<filter-def name="adminReportTemplateCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportTemplateDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminReportTemplateUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSnapshotNoneFilter" />
+	<filter-def name="adminSnapshotCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSnapshotDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSnapshotUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSubscriptionNoneFilter" />
+	<filter-def name="adminSubscriptionCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSubscriptionDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSubscriptionUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTagNoneFilter" />
+	<filter-def name="adminTagCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTagDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTagUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTaggedNoneFilter" />
+	<filter-def name="adminTaggedCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTaggedDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTaggedUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserNoneFilter" />
+	<filter-def name="adminUserCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserLoginRecordNoneFilter" />
+	<filter-def name="adminUserLoginRecordCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserLoginRecordDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserLoginRecordUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserMonthlyHitsNoneFilter" />
+	<filter-def name="adminUserMonthlyHitsCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserMonthlyHitsDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserMonthlyHitsUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserProxyNoneFilter" />
+	<filter-def name="adminUserProxyCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserProxyDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserProxyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserRoleNoneFilter" />
+	<filter-def name="adminUserRoleCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserRoleDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserRoleUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserTokenNoneFilter" />
+	<filter-def name="adminUserTokenCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserTokenDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserTokenUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+</hibernate-mapping>

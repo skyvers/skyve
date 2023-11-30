@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OrderedGrid" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Ordered Grid</singularAlias>
+	<pluralAlias>Ordered Grids</pluralAlias>
+	<parentDocument>KitchenSink</parentDocument>
+	<bizKey expression="Ordered Grid" />
+	<attributes>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+		</date>
+		<enum name="enum3">
+			<displayName>Enum 3</displayName>
+			<defaultValue>one</defaultValue>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+	</attributes>
+</document>

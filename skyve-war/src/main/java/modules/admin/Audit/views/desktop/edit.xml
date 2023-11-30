@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit" 
+		title="admin.audit.edit.title" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+		xmlns="http://www.skyve.org/xml/view" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" borderTitle="admin.audit.edit.comparison.borderTitle">
+        <column pixelWidth="160" responsiveWidth="12" />
+        <column />
+        <column pixelWidth="160" responsiveWidth="12" />
+        <column />
+        <row>
+        	<item>
+        		<combo binding="sourceVersion">
+					<onChangedHandlers>
+						<server action="SourceVersionChanged" />
+					</onChangedHandlers>
+        		</combo>
+        	</item>
+        	<item>
+        		<combo binding="comparisonVersion">
+					<onChangedHandlers>
+						<rerender />
+					</onChangedHandlers>
+				</combo>
+        	</item>
+        </row>
+	</form>
+    <form border="true" borderTitle="admin.audit.edit.sourceVersionDetails.borderTitle">
+        <column pixelWidth="160" responsiveWidth="12" />
+        <column />
+        <column pixelWidth="160" responsiveWidth="12" />
+        <column />
+        <row>
+            <item>
+                <textField binding="sourceVersion.timestamp" disabled="true" />
+            </item>
+            <item>
+                <combo binding="sourceVersion.operation" disabled="true" />
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="sourceVersion.auditModuleName" disabled="true" />
+            </item>
+            <item>
+                <textField binding="sourceVersion.auditDocumentName" disabled="true" />
+            </item>
+        </row>
+        <row>
+            <item colspan="3">
+                <textField binding="sourceVersion.auditBizKey" disabled="true" />
+            </item>
+        </row>
+    </form>
+    <comparison binding="me" modelName="AuditComparisonModel" editable="false" />
+    <actions>
+		<cancel />
+    	<action className="SourceVersionChanged" displayName="admin.audit.actions.sourceVersionChanged.displayName" clientValidation="false" inActionPanel="false" />
+    </actions>
+</view>

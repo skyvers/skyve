@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="AllAttributesDynamicPersistent"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			All persistent attributes in a dynamic document.
+		]]>
+	</documentation>
+	<persistent name="TEST_AllAttributesDynamicPersistent" />
+	<dynamic bizletClassName="modules.test.AllAttributesDynamicPersistent.Bizlet" dataFactoryClassName="modules.test.AllAttributesDynamicPersistent.DataFactory">
+		<actions>
+			<class name="ServerSideAction" className="modules.test.AllAttributesDynamicPersistent.ServerSideAction" />
+		</actions>
+		<images>
+			<class name="DynamicImage" className="modules.test.AllAttributesDynamicPersistent.DynamicImage" />
+		</images>
+		<models>
+			<class name="ListModel" className="modules.test.AllAttributesDynamicPersistent.ListModel" />
+		</models>
+	</dynamic>
+	<singularAlias>All Attributes Dynamic Persistent</singularAlias>
+	<pluralAlias>All Attributes Dynamic Persistent</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<association name="aggregatedAssociation" type="aggregation">
+			<displayName>Aggregated Association</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+		</association>
+		<association name="composedAssociation" type="composition">
+			<displayName>Composed Association</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+		</association>
+		<association name="dynamicAggregatedAssociation" type="aggregation">
+			<displayName>Dynamic Aggregated Association</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+		</association>
+		<association name="dynamicComposedAssociation" type="composition">
+			<displayName>Dynamic Composed Association</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+		</association>
+		<association name="dynamicEmbeddedAssociation" type="embedded" embeddedColumnsPrefix="dynamicEmbedded">
+			<displayName>Dynamic Embedded Association</displayName>
+			<documentName>AllAttributesDynamicEmbedded</documentName>
+		</association>
+		<collection name="aggregatedCollection" type="aggregation">
+			<displayName>Aggregated Collection</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="composedCollection" type="composition">
+			<displayName>Composed Collection</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicAggregatedCollection" type="aggregation">
+			<displayName>Dynamic Aggregated Collection</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicComposedCollection" type="composition">
+			<displayName>Dynamic Composed Collection</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicChildCollection" type="child">
+			<displayName>Dynamic Child Collection</displayName>
+			<documentName>AllAttributesDynamicPersistentDynamicChild</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+			<defaultValue>#000000</defaultValue>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+			<defaultValue>2021-10-21</defaultValue>
+		</date>
+		<dateTime name="dateTime">
+			<displayName>Date Time</displayName>
+			<defaultValue>2021-10-21T07:48:29Z</defaultValue>
+		</dateTime>
+		<decimal10 name="decimal10">
+			<displayName>Decimal 10</displayName>
+			<defaultValue>100.1234567899</defaultValue>
+		</decimal10>
+		<decimal2 name="decimal2">
+			<displayName>Decimal 2</displayName>
+			<defaultValue>100.12</defaultValue>
+		</decimal2>
+		<decimal5 name="decimal5">
+			<displayName>Decimal 5</displayName>
+			<defaultValue>100.12345</defaultValue>
+		</decimal5>
+		<enum name="enum3">
+			<displayName>Enum 3</displayName>
+			<defaultValue>one</defaultValue>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+		<enum name="enum3Reference" documentRef="AllAttributesPersistent" attributeRef="enum3">
+			<displayName>Enum 3 Reference</displayName>
+			<defaultValue>one</defaultValue>
+		</enum>
+		<geometry name="geometry">
+			<displayName>Geometry</displayName>
+			<defaultValue>POINT(0 0)</defaultValue>
+		</geometry>
+		<id name="id">
+			<displayName>Id</displayName>
+			<defaultValue>1234567890</defaultValue>
+		</id>
+		<integer name="normalInteger">
+			<displayName>Integer</displayName>
+			<defaultValue>123</defaultValue>
+		</integer>
+		<inverseMany name="inverseAggregatedAssociation">
+			<displayName>Inverse</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+			<referenceName>aggregatedAssociation</referenceName>
+		</inverseMany>
+		<inverseMany name="dynamicInverseAggregatedAssociation">
+			<displayName>Inverse</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<referenceName>dynamicAggregatedAssociation</referenceName>
+		</inverseMany>
+		<longInteger name="longInteger">
+			<displayName>Long Integer</displayName>
+			<defaultValue>123</defaultValue>
+		</longInteger>
+		<markup name="markup">
+			<displayName>Markup</displayName>
+			<defaultValue>
+				<![CDATA[
+					<h1>Markup</h1>
+				]]>
+			</defaultValue>
+		</markup>
+		<memo name="memo">
+			<displayName>Memo</displayName>
+			<defaultValue>Memo</defaultValue>
+		</memo>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<defaultValue>Text</defaultValue>
+			<length>255</length>
+		</text>
+		<time name="time">
+			<displayName>Time</displayName>
+			<defaultValue>07:51:26</defaultValue>
+		</time>
+		<timestamp name="timestamp">
+			<displayName>Timestamp</displayName>
+			<defaultValue>2021-10-21T07:48:29Z</defaultValue>
+		</timestamp>
+	</attributes>
+	<conditions>
+		<condition name="condition" usage="domain">
+			<expression>
+				<![CDATA[
+					{el:not empty bean.text and bean.longInteger < 0}
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

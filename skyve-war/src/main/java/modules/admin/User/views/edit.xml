@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="{bizKey}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<vbox visible="accessDenied">
+		<component name="_validationAccessDeniedWarning" document="Configuration"/>
+	</vbox>	
+
+	<tabPane visible="notAccessDenied">
+		<tab title="admin.user.profile.tabTitle">
+			<form border="true" percentageWidth="70" responsiveWidth="12">
+				<column percentageWidth="20" responsiveWidth="3" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="inactive" triState="false"/>
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="userName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="contact" descriptionBinding="name" />
+					</item>
+				</row>
+				<row>
+					<item label="admin.user.profile.dataGroup.label">
+						<textField binding="dataGroup.name" disabled="true" invisible="notInDataGroup" />
+					</item>
+					<item>
+						<combo binding="dataGroup" invisible="inDataGroup" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="homeModule" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="activated" triState="false" enabled="canActivateUser" visible="selfRegistrationEnabled">
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer visible="selfRegistrationEnabledAndUserNotActivated"/>
+					</item>
+					<item>
+						<button action="ResendActivation" pixelWidth="170"/>
+					</item>
+				</row>
+			</form>
+		</tab>
+
+		<tab title="admin.user.groups.tabTitle">
+			<vbox border="true" percentageHeight="50">
+				<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" />
+			</vbox>
+			<vbox />
+		</tab>
+		<tab title="admin.user.roles.tabTitle">
+			<hbox>
+				<vbox border="true" borderTitle="admin.user.roles.userRoles.title" percentageHeight="50">
+					<dataGrid binding="roles">
+						<boundColumn binding="roleName" />
+					</dataGrid>
+				</vbox>
+				<vbox border="true" borderTitle="admin.user.roles.assignedRoles.title" percentageHeight="50">
+					<dataRepeater binding="assignedRoles">
+						<boundColumn binding="roleName" editable="false" />
+					</dataRepeater>
+				</vbox>
+			</hbox>
+		</tab>
+		<tab title="admin.user.password.tabTitle">
+			<form border="true" percentageWidth="70" responsiveWidth="12">
+				<column percentageWidth="30" responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<password binding="newPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="confirmPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="passwordExpired" triState="false" invisible="notSecurityAdministrator" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="generatedPassword"  disabled="true"/>
+					</item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<action className="GenerateUniqueUserName" displayName="admin.user.actions.generateUserName.actionName" visible="securityAdministrator" 
+		relativeIconFileName="shared/icons/Job.gif"/>
+		<action className="GeneratePassword" displayName="admin.user.actions.generatePassword.actionName" visible="securityAdministrator" 
+		relativeIconFileName="shared/icons/Job.gif"/>
+		<action className="ResendActivation" inActionPanel="false" visible="selfRegistrationEnabledAndUserNotActivated" displayName="Resend Activation" iconStyleClass="fa fa-envelope-o"
+			confirm="Are you sure you wish to resend the activation email to this user? Their previous activation link will no longer work." />
+	</actions>
+</view>

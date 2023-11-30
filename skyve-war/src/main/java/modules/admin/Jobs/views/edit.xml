@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.jobs.edit.title"
+		name="edit"
+		refreshTimeInSeconds="30"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="admin.jobs.edit.actual.tabTitle">
+			<dataGrid binding="runningJobs" title="admin.jobs.edit.dataGrid.runningJobs.title" showAdd="false" showEdit="false" showRemove="false">
+				<boundColumn binding="startTime" title="admin.jobs.edit.dataGrid.runningJobs.startTime.title" />
+				<boundColumn binding="displayName" title="admin.jobs.edit.dataGrid.runningJobs.displayName.title" />
+				<boundColumn binding="percentComplete" title="admin.jobs.edit.dataGrid.runningJobs.percentComplete.title" />
+			</dataGrid>
+			<listGrid query="qCompletedJobs" title="admin.jobs.edit.listGrid.qCompletedJobs.title" continueConversation="false" showAdd="false" />
+		</tab>
+		<tab title="admin.jobs.edit.schedule.tabTitle">
+			<listGrid query="qAllSchedules" title="admin.jobs.edit.listGrid.qAllSchedules.title" continueConversation="false" enabled="jobScheduler" />
+		</tab>
+	</tabPane>
+	<actions>
+		<action className="Refresh" displayName="admin.jobs.actions.refresh.displayName" iconStyleClass="fa fa-refresh" />
+		<action className="DeleteCompletedJobs" displayName="admin.jobs.actions.deleteCompletedJobs.displayName" confirm="This will delete all completed jobs. Are you sure?" iconStyleClass="fa fa-trash-o" />
+	</actions>
+</view>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/customer" xmlns:tns="http://www.skyve.org/xml/customer" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
+
+  <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
+
+  <xs:element name="customer" type="tns:customer"/>
+
+  <xs:complexType name="customer">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="uiResources" type="tns:uiResources" form="qualified" minOccurs="0"/>
+          <xs:element name="htmlResources" type="tns:htmlResourcesMetaData" form="qualified" minOccurs="0"/>
+          <xs:element name="loginResources" type="tns:LoginResources" form="qualified" minOccurs="0"/>
+          <xs:element name="defaultDateConverter" type="ns1:converterName" form="qualified"/>
+          <xs:element name="defaultTimeConverter" type="ns1:converterName" form="qualified"/>
+          <xs:element name="defaultDateTimeConverter" type="ns1:converterName" form="qualified"/>
+          <xs:element name="defaultTimestampConverter" type="ns1:converterName" form="qualified"/>
+          <xs:element name="modules" type="tns:modules" form="qualified"/>
+          <xs:element name="roles" type="tns:roles" form="qualified" minOccurs="0"/>
+          <xs:element name="interceptors" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="interceptor" type="tns:interceptor" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="observers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="observer" type="tns:observer" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="JFreeChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="primeFacesChartPostProcessorClassName" type="xs:string" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="language" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="uiResources">
+    <xs:sequence/>
+    <xs:attribute name="logo" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="htmlResourcesMetaData">
+    <xs:sequence/>
+    <xs:attribute name="css" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="LoginResources">
+    <xs:sequence/>
+    <xs:attribute name="loggedOutPage" type="xs:string"/>
+    <xs:attribute name="loginPage" type="xs:string"/>
+    <xs:attribute name="smartClientJavascript" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="modules">
+    <xs:sequence>
+      <xs:element name="module" type="tns:module" form="qualified" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="homeModule" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="module">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence/>
+        <xs:attribute name="formLabelLayout" type="ns1:formLabelLayout"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="roles">
+    <xs:sequence>
+      <xs:element name="role" type="tns:role" form="qualified" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="allowModuleRoles" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="role">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified"/>
+          <xs:element name="roles" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="role" type="tns:moduleRole" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRole">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence/>
+        <xs:attribute name="module" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="interceptor">
+    <xs:sequence/>
+    <xs:attribute name="className" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="observer">
+    <xs:sequence/>
+    <xs:attribute name="className" type="xs:string" use="required"/>
+  </xs:complexType>
+</xs:schema>
+
