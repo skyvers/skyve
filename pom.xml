@@ -15,13 +15,11 @@
 		<module>skyve-web</module>
 		<module>skyve-content</module>
 		<module>skyve-tools</module>
-		<module>skyve-ejb</module>
 		<module>skyve-maven-plugin</module>
 	</modules>
 
 	<properties>
 		<skyve.version>${project.version}</skyve.version>
-		<asm.version>5.0.4</asm.version>
 		<browscap.version>1.3.1</browscap.version>
 		<!-- Keep this in lock step with hibernate (mockito and selenium aren't critical) -->
 		<byte-buddy.version>1.11.12</byte-buddy.version>
@@ -295,22 +293,6 @@
 				<artifactId>hibernate-jcache</artifactId>
 				<version>${hibernate.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ow2.asm</groupId>
-				<artifactId>asm</artifactId>
-				<version>${asm.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.ow2.asm</groupId>
-				<artifactId>asm-commons</artifactId>
-				<version>${asm.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm-tree</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 			<!-- Set for hibernate use here to stop conflicts in mockito and selenium etc -->
 			<dependency>
 				<groupId>net.bytebuddy</groupId>
@@ -471,6 +453,12 @@
 				<groupId>com.cronutils</groupId>
 				<artifactId>cron-utils</artifactId>
 				<version>${cronutils.version}</version>
+			</dependency>
+			<!-- Keep this in lock step with guava lib used in foundry -->
+			<dependency>
+				<groupId>com.google.code.findbugs</groupId>
+				<artifactId>jsr305</artifactId>
+				<version>3.0.2</version>
 			</dependency>
 
 			<!-- Test dependencies -->

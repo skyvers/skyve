@@ -111,12 +111,6 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-			<version>3.0.2</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-tools</artifactId>
 			<version>${skyve.version}</version>
@@ -141,6 +135,11 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
