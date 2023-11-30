@@ -320,6 +320,7 @@
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="CRUDC">
 					<action name="CancelJob" />
+					<action name="RerunJob" />
 				</document>
 				<document name="Jobs" permission="_____">
 					<action name="DeleteCompletedJobs" />
