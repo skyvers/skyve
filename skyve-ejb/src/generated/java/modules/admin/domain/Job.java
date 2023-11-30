@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.admin.Job.JobExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
@@ -19,7 +20,7 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
  */
 @XmlType
 @XmlRootElement
-public class Job extends AbstractPersistentBean {
+public abstract class Job extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -128,7 +129,7 @@ public class Job extends AbstractPersistentBean {
 		return Job.DOCUMENT_NAME;
 	}
 
-	public static Job newInstance() {
+	public static JobExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -342,7 +343,8 @@ public class Job extends AbstractPersistentBean {
 	}
 
 	/**
-	 * cancellable
+	 * True when this job can be cancelled - it is still running and does not have a 
+				status. This depends on the job implementing the ability to be cancelled.
 	 *
 	 * @return The condition
 	 */
@@ -358,5 +360,24 @@ public class Job extends AbstractPersistentBean {
 	 */
 	public boolean isNotCancellable() {
 		return (! isCancellable());
+	}
+
+	/**
+	 * True when this job can be re-run - it has a status, and a unique job name.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isRerunnabble() {
+		return (((JobExtension)this).rerunnable());
+	}
+
+	/**
+	 * {@link #isRerunnabble} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotRerunnabble() {
+		return (! isRerunnabble());
 	}
 }

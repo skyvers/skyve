@@ -52,8 +52,14 @@
 		</text>
 	</attributes>
 	<conditions>
-		<condition name="cancellable">
+		<condition name="cancellable" usage="view">
+			<description>True when this job can be cancelled - it is still running and does not have a 
+				status. This depends on the job implementing the ability to be cancelled.</description>
 			<expression>getStatus() == null</expression>
+		</condition>
+		<condition name="rerunnabble" usage="view">
+			<description>True when this job can be re-run - it has a status, and a unique job name.</description>
+			<expression>((JobExtension)this).rerunnable()</expression>
 		</condition>
 	</conditions>
 </document>
