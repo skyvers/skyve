@@ -455,10 +455,10 @@ public final class BindUtil {
 					}
 				}
 				else if (value instanceof Enumeration) {
-					convert(type, ((Enumeration) value).toCode());
+					result = convert(type, ((Enumeration) value).toCode());
 				}
 				else { // hopefully value is an enum
-					convert(type, value.toString());
+					result = convert(type, value.toString());
 				}
 			}
 		}

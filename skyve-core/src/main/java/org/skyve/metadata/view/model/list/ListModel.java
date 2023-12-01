@@ -312,7 +312,19 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 			}
 
 			if (type != null) {
-				newValue = BindUtil.fromString(c, converter, type, newValue.toString());
+				// Check if newValue is already the required type, if not...
+				Class<?> valueType = newValue.getClass();
+				if (! type.isAssignableFrom(valueType)) {
+					// try converting it
+					Object convertedNewValue = BindUtil.convert(type, newValue);
+					// if the conversion did not produce a new value - try a String conversion
+					if (convertedNewValue == newValue) {
+						newValue = BindUtil.fromString(c, converter, type, newValue.toString());
+					}
+					else {
+						newValue = convertedNewValue;
+					}
+				}
 			}
 		}
 		
