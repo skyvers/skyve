@@ -234,5 +234,4 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
-	min-height: 100vh;
 }
