@@ -10,7 +10,7 @@ import modules.admin.domain.Snapshot;
 
 public class CopySnapshotToUser implements ServerSideAction<Snapshot> {
 	/**
-	 * Update the payment batch details.
+	 * Copy a snapshot to a user - ie donate a snapshot.
 	 */
 	@Override
 	public ServerSideActionResult<Snapshot> execute(Snapshot bean, WebContext webContext) throws Exception {

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="admin.snapshots.edit.title"
+		icon32x32RelativeFileName="icons/document/snapshot32.png"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="admin.snapshots.edit.all.tabTitle">
+			<listGrid continueConversation="false" query="qSnapshots" />
+		</tab>
+		<tab title="admin.snapshots.edit.reorder.tabTitle">
+			<form border="true" borderTitle="admin.snapshots.edit.select.borderTitle">
+				<column percentageWidth="10" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="moduleName">
+							<onChangedHandlers>
+								<rerender clientValidation="false" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="queryName">
+							<onChangedHandlers>
+								<rerender clientValidation="false" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="admin.snapshots.edit.reorder.borderTitle">
+				<dataGrid binding="snapshotsToReorder" showAdd="false" showEdit="false" showRemove="false" showZoom="false" showDeselect="false">
+					<boundColumn binding="name" title="admin.snapshots.edit.datagrid.columnTitle" />
+				</dataGrid>
+				<button action="Reorder" />
+			</vbox>
+		</tab>
+	</tabPane>
+	<actions>
+		<action className="Reorder"
+					displayName="admin.snapshots.actions.reorder.displayName"
+					inActionPanel="false"
+					clientValidation="false"
+					toolTip="admin.snapshots.actions.reorder.toolTip"
+					iconStyleClass="fa fa-sort" />
+	</actions>
+</view>
+

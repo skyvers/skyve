@@ -40,6 +40,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 	private static final String SNAPSHOT_DOCUMENT_NAME = "Snapshot";
 	private static final String SNAPSHOT_MODULE_NAME_PROPERTY_NAME = "moduleName";
 	private static final String SNAPSHOT_QUERY_NAME_PROPERTY_NAME = "queryName";
+	private static final String SNAPSHOT_ORDINAL_PROPERTY_NAME = "ordinal";
 	private static final String SNAPSHOT_NAME_PROPERTY_NAME = "name";
 	private static final String SNAPSHOT_SNAPSHOT_PROPERTY_NAME = "snapshot";
     
@@ -187,6 +188,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 	    DocumentFilter f = q.getFilter();
 	    f.addEquals(SNAPSHOT_MODULE_NAME_PROPERTY_NAME, moduleName);
 	    f.addEquals(SNAPSHOT_QUERY_NAME_PROPERTY_NAME, queryName);
+	    q.addBoundOrdering(SNAPSHOT_ORDINAL_PROPERTY_NAME);
 	    q.addBoundOrdering(SNAPSHOT_NAME_PROPERTY_NAME);
 
 	    for (Bean bean : q.projectedResults()) {
@@ -236,6 +238,8 @@ public class SmartClientSnapServlet extends HttpServlet {
 	    BindUtil.set(snap, SNAPSHOT_QUERY_NAME_PROPERTY_NAME, snapQueryName);
 	    BindUtil.set(snap, SNAPSHOT_NAME_PROPERTY_NAME, snapName);
 	    BindUtil.set(snap, SNAPSHOT_SNAPSHOT_PROPERTY_NAME, snapshot);
+	    // Put the new snapshot at the bottom of the list
+	    BindUtil.set(snap, SNAPSHOT_ORDINAL_PROPERTY_NAME, Integer.valueOf(1000));
 	    
 	    snap = p.save(document, snap);
 	    

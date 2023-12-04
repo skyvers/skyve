@@ -574,6 +574,7 @@
 		<property name="queryName" length="100" />
 		<property name="name" length="256" />
 		<property name="snapshot" type="text" />
+		<property name="ordinal" />
 		<filter name="adminSnapshotNoneFilter" condition="1=0"/>
 		<filter name="adminSnapshotCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminSnapshotDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

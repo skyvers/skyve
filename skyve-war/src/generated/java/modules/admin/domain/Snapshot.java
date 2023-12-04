@@ -43,6 +43,9 @@ public class Snapshot extends AbstractPersistentBean {
 	public static final String snapshotPropertyName = "snapshot";
 
 	/** @hidden */
+	public static final String ordinalPropertyName = "ordinal";
+
+	/** @hidden */
 	public static final String copyToUserPropertyName = "copyToUser";
 
 	/** @hidden */
@@ -67,6 +70,11 @@ public class Snapshot extends AbstractPersistentBean {
 	 * Snapshot Code
 	 **/
 	private String snapshot;
+
+	/**
+	 * Ordinal
+	 **/
+	private Integer ordinal;
 
 	/**
 	 * Copy to user
@@ -189,6 +197,24 @@ public class Snapshot extends AbstractPersistentBean {
 	public void setSnapshot(String snapshot) {
 		preset(snapshotPropertyName, snapshot);
 		this.snapshot = snapshot;
+	}
+
+	/**
+	 * {@link #ordinal} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getOrdinal() {
+		return ordinal;
+	}
+
+	/**
+	 * {@link #ordinal} mutator.
+	 * @param ordinal	The new value.
+	 **/
+	@XmlElement
+	public void setOrdinal(Integer ordinal) {
+		preset(ordinalPropertyName, ordinal);
+		this.ordinal = ordinal;
 	}
 
 	/**

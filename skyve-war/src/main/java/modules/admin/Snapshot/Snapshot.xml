@@ -27,6 +27,9 @@
 			<displayName>admin.snapshot.snapshot.displayName</displayName>
 			<index>none</index>
 		</memo>
+		<integer name="ordinal">
+			<displayName>admin.snapshot.ordinal.displayName</displayName>
+		</integer>
 		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
 			<displayName>admin.snapshot.association.copyToUser.displayName</displayName>
 			<documentName>UserProxy</documentName>
