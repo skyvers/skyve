@@ -172,7 +172,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					imageWidth = Integer.parseInt(imageWidthParam);
 				}
 				String imageHeightParam = UtilImpl.processStringValue(request.getParameter(DynamicImageServlet.IMAGE_HEIGHT_NAME));
-				if (imageWidthParam != null) {
+				if (imageHeightParam != null) {
 					imageHeight = Integer.parseInt(imageHeightParam);
 				}
 			}
