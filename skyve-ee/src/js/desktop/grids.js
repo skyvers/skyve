@@ -616,20 +616,20 @@ isc.BizListGrid.addMethods({
 		};
 
 		// the snap menu in the BizListGrid
-		var snapMenu = isc.Menu.create({
+		me._snapMenu = isc.Menu.create({
 		    showShadow: true,
 		    shadowDepth: 10,
 		    canSelectParentItems: true,
 		    data: []
 		});
 
-		var snapMenuButton = isc.ToolStripMenuButton.create({
+		me._snapMenuButton = isc.ToolStripMenuButton.create({
 			autoFit: true,
 			padding: 3,
 		    title: "No Snapshot",
-		    menu: snapMenu,
+		    menu: me._snapMenu,
 		    click: function() {
-		    	var params = {a: 'L', ID: snapMenuButton.ID, d: me._dataSource.ID, _csrf: me._csrf};
+		    	var params = {a: 'L', ID: me._snapMenuButton.ID, d: me._dataSource.ID, _csrf: me._csrf};
 		    	if (me.snapId) {
 		    		params.i = me.snapId;
 		    	} 
@@ -645,7 +645,7 @@ isc.BizListGrid.addMethods({
 							// Assign the CSRF Token from the response header
 							me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
-							snapMenu.setData(data);
+							me._snapMenu.setData(data);
 						}
 					}
 				});
@@ -654,7 +654,7 @@ isc.BizListGrid.addMethods({
 		    }
 		});
 
-		snapMenuButton.newSnap = function() {
+		me._snapMenuButton.newSnap = function() {
 			isc.askForValue(
 				'Enter the new Snapshot name', 
 				function(value) {
@@ -683,7 +683,7 @@ isc.BizListGrid.addMethods({
 									me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
 									me.snapId = data.bizId;
-									snapMenuButton.setTitle(value);
+									me._snapMenuButton.setTitle(value);
 								}
 							}
 						});
@@ -693,9 +693,9 @@ isc.BizListGrid.addMethods({
 		};
 
 		// called from server
-		snapMenuButton.setSnap = function(snapId, title, snapshot) {
+		me._snapMenuButton.setSnap = function(snapId, title, snapshot) {
 			me.snapId = snapId;
-			snapMenuButton.setTitle(title);
+			me._snapMenuButton.setTitle(title);
 
 			if (snapshot) {
 				if (snapshot.criteria) {
@@ -733,7 +733,7 @@ isc.BizListGrid.addMethods({
 		};
 		
 		// called from server
-		snapMenuButton.updateSnap = function(snapId) {
+		me._snapMenuButton.updateSnap = function(snapId) {
 			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
@@ -761,7 +761,7 @@ isc.BizListGrid.addMethods({
 		};
 
 		// called from server
-		snapMenuButton.deleteSnap = function(snapId) {
+		me._snapMenuButton.deleteSnap = function(snapId) {
 			isc.ask('Do you want to delete this Snapshot?',
 						function(value) {
 							if (value) {
@@ -777,7 +777,7 @@ isc.BizListGrid.addMethods({
 											// Assign the CSRF Token from the response header
 											me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
-											snapMenuButton.setSnap(null, 'No Snapshot', null);
+											me._snapMenuButton.setSnap(null, 'No Snapshot', null);
 										}
 									}
 								});
@@ -787,24 +787,24 @@ isc.BizListGrid.addMethods({
 
 		me._clearSnap = function() {
 			me.snapId = null;
-			snapMenuButton.setTitle('No Snapshot');
+			me._snapMenuButton.setTitle('No Snapshot');
 		};
 
 		// the tags menu in the BizListGrid
-		var tagsMenu = isc.Menu.create({
+		me._tagsMenu = isc.Menu.create({
 		    showShadow: true,
 		    shadowDepth: 10,
 		    canSelectParentItems: true,
 		    data: []
 		});
 
-		var tagsMenuButton = isc.ToolStripMenuButton.create({
+		me._tagsMenuButton = isc.ToolStripMenuButton.create({
 			autoFit: true,
 			padding: 3,
 		    title: "No Tag",
-		    menu: tagsMenu,
+		    menu: me._tagsMenu,
 		    click: function() {
-		    	var params = {a: 'L', ID: tagsMenuButton.ID, _csrf: me._csrf};
+		    	var params = {a: 'L', ID: me._tagsMenuButton.ID, _csrf: me._csrf};
 		    	if (me.tagId) {
 		    		params.t = me.tagId;
 		    	} 
@@ -820,7 +820,7 @@ isc.BizListGrid.addMethods({
 							// Assign the CSRF Token from the response header
 							me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
-							tagsMenu.setData(data);
+							me._tagsMenu.setData(data);
 						}
 					}
 				});
@@ -828,7 +828,7 @@ isc.BizListGrid.addMethods({
 		    }
 		});
 
-		tagsMenuButton.newTag = function() {
+		me._tagsMenuButton.newTag = function() {
 			isc.askForValue(
 				'Enter the new tag name', 
 				function(value) {
@@ -838,7 +838,7 @@ isc.BizListGrid.addMethods({
 							evalResult: true,
 							useSimpleHttp: true,
 							httpMethod: 'POST',
-							params: {a: 'N', n: value, ID: tagsMenuButton.ID, _csrf: me._csrf},
+							params: {a: 'N', n: value, ID: me._tagsMenuButton.ID, _csrf: me._csrf},
 							actionURL: SKYVE.Util.CONTEXT_URL + 'smarttag',
 							callback: function(rpcResponse, data, rpcRequest) {
 								if (rpcResponse.status >= 0) { // success
@@ -846,7 +846,7 @@ isc.BizListGrid.addMethods({
 									me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
 									me.tagId = data.bizId;
-									tagsMenuButton.setTitle(value);
+									me._tagsMenuButton.setTitle(value);
 									me.refresh();
 								}
 							}
@@ -856,9 +856,9 @@ isc.BizListGrid.addMethods({
 				{width: 300});
 		};
 
-		tagsMenuButton.setTag = function(tagId, title) {
+		me._tagsMenuButton.setTag = function(tagId, title) {
 			me.tagId = tagId;
-			tagsMenuButton.setTitle(title);
+			me._tagsMenuButton.setTitle(title);
 			me.refresh();
 		};
 		
@@ -869,7 +869,7 @@ isc.BizListGrid.addMethods({
 		// C - clear all tagged in this tag (not just in the grid) - tagId is the tag to work with
 		// N - Create a new tag
 		// D - Delete an existing tag
-		tagsMenuButton.tagOp = function(tagId, action) {
+		me._tagsMenuButton.tagOp = function(tagId, action) {
 			if (action == 'C') { // clear
 				isc.ask('Do you want to clear all tagged data from this tag?',
 							function(value) {
@@ -941,7 +941,7 @@ isc.BizListGrid.addMethods({
 						me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
 						if (action == 'D') {
-							tagsMenuButton.setTag(null, 'No Tag');
+							me._tagsMenuButton.setTag(null, 'No Tag');
 						}
 						me.refresh();
 					}
@@ -1012,7 +1012,7 @@ isc.BizListGrid.addMethods({
 						width: 60,
 					    contents: "Snapshot:"
 					}),
-					snapMenuButton
+					me._snapMenuButton
 				]);
 			}
 			if (me.showTag) {
@@ -1022,7 +1022,7 @@ isc.BizListGrid.addMethods({
 						width: 30,
 					    contents: "Tag:"
 					}),
-					tagsMenuButton
+					me._tagsMenuButton
 				]);
 			}
 		}
