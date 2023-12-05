@@ -526,6 +526,10 @@
 	<servlet>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientGeneratorServlet</servlet-class>
+		<init-param>
+			<param-name>renderer</param-name>
+			<param-value>com.drekitek.DrekitekSmartClientViewRenderer</param-value>
+		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>

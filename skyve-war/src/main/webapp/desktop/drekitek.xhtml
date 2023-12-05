@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:o="http://omnifaces.org/ui"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
+		dir="#{drektop.dir}">
+    <f:view contentType="text/html" encoding="#{drektop.encoding}">
+		<f:metadata>
+			<f:viewParam name="a" value="#{drektop.webActionParameter}" />
+			<f:viewParam name="m" value="#{drektop.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{drektop.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{drektop.queryNameParameter}" />
+			<f:viewParam name="i" value="#{drektop.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{drektop.preRender}"/>
+		</f:metadata>
+		<h:head>
+	        <f:facet name="first">
+	            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	        </f:facet>
+		
+			<base href="#{drektop.baseHref}" />
+			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
+
+			<title>${project.description}</title>
+			<!-- normally commented out for security reasons
+			<h:outputText value="#{drektop.skyveVersionComment}" escape="false" />			
+			-->
+			<link rel="stylesheet" type="text/css" href="#{drektop.cssRelativeFileNameUrl}" />
+		</h:head>
+		<h:body bgcolor="#e0e0e0" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+			<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { isc.BizUtil.onPushMessage(message) }" />
+			<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false" />
+			<h:form prependId="false">
+				<p:remoteCommand name="setUxUi" actionListener="#{drektop.setUxUi('external')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
+			</h:form>
+			<table class="logo" align="center">
+				<tbody>
+					<tr height="200px">
+						<td><img src="images/skyve-thick-grey.png" alt="Skyve" style="max-width: 300px;" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="logo" align="center">
+				<tbody>
+					<tr height="50px">
+						<td><img src="images/loading.gif" /></td>
+						<td>Loading Skyve Application</td>
+					</tr>
+				</tbody>
+			</table>
+			<script type="text/javascript">
+				var isomorphicDir='#{drektop.smartClientDir}/';
+				var isc_useHighPerformanceGridTimings=false;
+				var isc_useSimpleNames=false;
+			</script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_Core.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_Foundation.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_Containers.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_Grids.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_Forms.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_DataBinding.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_Calendar.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/system/modules/ISC_RichTextEditor.js"></script>
+			<script type="text/javascript" src="#{drektop.smartClientDir}/skins/#{drektop.skin}/load_skin.js"></script>
+			<h:outputText value="#{drektop.localeScript}" escape="false" />
+			<script type="text/javascript" src="desktop/skyve-min.js?v=#{drektop.webResourceFileVersion}"></script>
+			<c:if test="#{drektop.mapType eq 'gmap'}">
+				<script type="text/javascript" src="desktop/skyve-gmap-min.js?v=#{drektop.webResourceFileVersion}"></script>
+			</c:if>
+			<c:if test="#{drektop.mapType eq 'leaflet'}">
+				<script type="text/javascript" src="desktop/skyve-leaflet-min.js?v=#{drektop.webResourceFileVersion}"></script>
+			</c:if>
+			<script type="text/javascript">
+				SKYVE.Util.setTouchCookie();
+				isc.Canvas.resizeControls(4);
+				isc.Canvas.resizeFonts(2);
+				#{drektop.menuScript} #{drektop.dataSourceScript}
+				#{drektop.apiScript}
+				#{drektop.snapshotScript}
+
+				isc.ClassFactory.defineClass('DrekListGrid', 'BizListGrid');
+				isc.DrekListGrid.addMethods({
+					initWidget: function(config) { // has 4 properties - see above
+						this.Super('initWidget', arguments);
+
+						this._snapbar = isc.FlowLayout.create({height: 1, overflow: 'visible'});
+						this.addMember(this._snapbar, 1); // insert after toolbar
+
+						var me = this;
+						this._snapMenuButton.click = function() {
+							var data = [
+									{title: 'New Snapshot', icon: 'icons/snap_add.png', click: function() {me._snapMenuButton.newSnap()}},
+									{isSeparator: true},
+									{title: 'No Snapshot', click: function() {me._snapMenuButton.setSnap(null)}}
+							];
+							
+							var snaps = isc.BizUtil.snapshots.findAll('ds', me._dataSource.ID);
+							if (snaps) {
+								for (var i = 0, l = snaps.length; i &lt; l; i++) {
+									data.add({isSeparator: true});
+									var snap = snaps[i];
+									var enabled = (me.snapId == snap.bizId);
+									var entry = {
+											title: snap.name,
+											icon: 'icons/snap.png',
+											click: me._snapMenuButton.ID + '.setSnap(\'' + snap.bizId + '\')',
+											submenu: [
+												{title: 'Update Snapshot' + (enabled ? '' : ' (Select the Snapshot first)'),
+													icon: 'icons/snap_edit.png',
+													click: me._snapMenuButton.ID + '.updateSnap(\'' + snap.bizId + '\')',
+													enabled: enabled
+												},
+												{title: 'Delete Snapshot',
+													icon: 'icons/snap_delete.png',
+													click: me._snapMenuButton.ID + '.deleteSnap(\'' + snap.bizId + '\')'
+												},
+											]
+									};
+									data.add(entry);
+								}
+							}
+							me._snapMenu.setData(data);
+
+							this.Super('click', arguments);
+						};
+						
+						this._snapMenuButton.newSnap = function() {
+							isc.askForValue(
+								'Enter the new Snapshot name', 
+								function(value) {
+									if (value) {
+										var s = {criteria: me._advancedFilter.toggleButton.selected ?
+																me._advancedFilter.getCriteria() :
+																me.grid.getFilterEditorCriteria(true),
+													advancedCriteriaStyle: me._advancedFilter.getStyle(),
+													fieldState: me.grid.getFieldState(),
+													sortState: me.grid.getSortState(),
+													groupState: me.grid.getGroupState(),
+													summaryType: me.summaryType};
+										isc.RPCManager.sendRequest({
+											showPrompt: true,
+											evalResult: true,
+											useSimpleHttp: true,
+											httpMethod: 'POST',
+											params: {a: 'N', n: value, d: me._dataSource.ID, s: s, _csrf: me._csrf},
+											actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
+											callback: function(rpcResponse, data, rpcRequest) {
+												if (rpcResponse.status >= 0) { // success
+													// Assign the CSRF Token from the response header
+													me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+													me.snapId = data.bizId;
+													me._snapMenuButton.setTitle(value);
+													isc.BizUtil.snapshots.add({bizId: me.snapId, name: value, ds: me._dataSource.ID, snapshot: s});
+													me._createSnapshotButtons();
+												}
+											}
+										});
+									}
+								},
+								{width: 300});
+						};
+
+						this._snapMenuButton.setSnap = function(snapId) {
+							me.snapId = snapId;
+							var snap = isc.BizUtil.snapshots.find('bizId', snapId);
+							if (snap) {
+								me._snapMenuButton.setTitle(snap.name);
+	
+								if (snap.snapshot) {
+									if (snap.snapshot.criteria) {
+										if (snap.snapshot.criteria.operator) { // advanced criteria
+											me._advancedFilter.toggleButton.select();
+											me._advancedFilter.toggleButtonClick();
+											me._advancedFilter.setStyle(snap.snapshot.advancedCriteriaStyle);
+											
+											me.grid.setFilterEditorCriteria({});
+											me._advancedFilter.setCriteria(snap.snapshot.criteria);
+										}
+										else {
+											me._advancedFilter.toggleButton.deselect();
+											me._advancedFilter.toggleButtonClick();
+							
+											me.grid.setFilterEditorCriteria(snap.snapshot.criteria);
+											me._advancedFilter.clearCriteria();
+										}
+									}
+									if (snap.snapshot.fieldState) {
+										me.grid.setFieldState(snap.snapshot.fieldState);
+									}
+									if (snap.snapshot.sortState) {
+										me.grid.setSortState(snap.snapshot.sortState);
+									}
+									if (snap.snapshot.groupState) {
+										me.grid.setGroupState(snap.snapshot.groupState);
+									}
+									if (snap.snapshot.summaryType) {
+										me.summaryType = snap.snapshot.summaryType;
+										me._summaryGrid.data[0].bizFlagComment = snap.snapshot.summaryType;
+									}
+								}
+							}
+							else {
+								me._snapMenuButton.setTitle('No snapshot');
+								me.grid.setFieldState(null);
+								me.grid.setSortState(null);
+								me.grid.setGroupState(null);
+								me.summaryType = '';;
+								me._summaryGrid.data[0].bizFlagComment = '';
+								me.grid.setFilterEditorCriteria({});
+								me._advancedFilter.clearCriteria();
+							}
+							me.refresh();
+						};
+						
+						this._snapMenuButton.updateSnap = function(snapId) {
+							var s = {criteria: me._advancedFilter.toggleButton.selected ?
+											me._advancedFilter.getCriteria() :
+											me.grid.getFilterEditorCriteria(true),
+										advancedCriteriaStyle: me._advancedFilter.getStyle(),
+										fieldState: me.grid.getFieldState(),
+										sortState: me.grid.getSortState(),
+										groupState: me.grid.getGroupState(),
+										summaryType: me.summaryType};
+
+							isc.RPCManager.sendRequest({
+								showPrompt: true,
+								evalResult: true,
+								useSimpleHttp: true,
+								httpMethod: 'POST',
+								params: {a: 'U', i: snapId, _csrf: me._csrf, s: s},
+								actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
+								callback: function(rpcResponse, data, rpcRequest) {
+									if (rpcResponse.status >= 0) { // success
+										// Assign the CSRF Token from the response header
+										me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+									
+										// put s into the snapshot state
+										var snap = isc.BizUtil.snapshots.find('bizId', snapId);
+										if (snap) {
+											snap.snapshot = s;
+										}
+									}
+								}
+							});
+						}
+
+						this._snapMenuButton.deleteSnap = function(snapId) {
+							isc.ask('Do you want to delete this Snapshot?',
+									function(value) {
+										if (value) {
+											isc.RPCManager.sendRequest({
+												showPrompt: true,
+												evalResult: true,
+												useSimpleHttp: true,
+												httpMethod: 'POST',
+												params: {a: 'D', i: snapId, _csrf: me._csrf},
+												actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
+												callback: function(rpcResponse, data, rpcRequest) {
+													if (rpcResponse.status >= 0) { // success
+														// Assign the CSRF Token from the response header
+														me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
+
+														me._snapMenuButton.setSnap(null, 'No Snapshot', null);
+
+														// remove snapId from the snapshot
+														var index = isc.BizUtil.snapshots.findIndex('bizId', snapId);
+														if (index >= 0) {
+															isc.BizUtil.snapshots.removeAt(index);
+														}
+														me._createSnapshotButtons();
+													}
+												}
+											});
+										}
+									});
+						}
+					},
+					
+					_createGrid: function(config, fields) {
+						this._createSnapshotButtons();
+						this.Super('_createGrid', arguments);
+					},
+					
+					_createSnapshotButtons: function() {
+						if (this.showSnap) {
+							while (this._snapbar.tiles.length > 0) {
+								this._snapbar.removeTile(0);
+							}
+							var snaps = isc.BizUtil.snapshots.findAll('ds', this._dataSource.ID);
+							if (snaps) {
+								for (var i = 0, l = snaps.length; i &lt; l; i++) {
+									var snap = snaps[i];
+									this._snapbar.addTile(isc.ToolStripButton.create({
+										title: snap.name,
+										click: this._snapMenuButton.ID + '.setSnap(\'' + snap.bizId + '\')'
+									}));
+								}
+								this.showMember(this._snapbar);
+							}
+							else {
+								this.hideMember(this._snapbar);
+							}
+						}
+					}
+				});
+				isc.BizUtil.addClassMethods({
+					createListGrid: function() {
+						return isc.DrekListGrid.create({margin: 2});
+					}
+				});
+				
+				#{drektop.uiScript}
+				#{drektop.bannerScript}
+			</script>
+		</h:body>
+	</f:view>
+</html>

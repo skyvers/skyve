@@ -4,7 +4,7 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/router ../schemas/router.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<uxui name="desktop">
-		<route outcome="/desktop/home.xhtml" />
+		<route outcome="/desktop/drekitek.xhtml" />
 	</uxui>
 	<uxui name="startup">
 		<route outcome="/external/startup.xhtml" />
