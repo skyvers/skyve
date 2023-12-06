@@ -28,11 +28,11 @@
 			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
 			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
-			<h:outputStylesheet name="css/ultima.css" library="skyve" />
-			<link type="text/css" rel="stylesheet" href="pages/css/admin.css" />
+			<h:outputStylesheet name="css/ultima.css?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />
 			
-			<h:outputScript name="ripple/ripple.js" library="ultima-layout" />
-			<h:outputScript name="js/layout.js" library="ultima-layout" />
+			<h:outputScript name="ripple/ripple.js?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
+			<h:outputScript name="js/layout.js?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
 			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
 				<!-- PF8 doesnt work with touch on - a.swipe is not a function when registering swipeLeft and swipeRight -->
@@ -124,9 +124,9 @@
 				</f:facet>
 			</p:ajaxStatus>
 	
-			<h:outputStylesheet name="styles/layout-light.css" library="ultima-layout" />
-			<h:outputStylesheet name="primeflex/primeflex.min.css" library="ultima-layout"/>
-			<h:outputStylesheet name="ripple/ripple.css" library="ultima-layout" />
+			<h:outputStylesheet name="styles/layout-light.css?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
+			<h:outputStylesheet name="primeflex/primeflex.min.css?v=#{bean.webResourceFileVersion}" library="ultima-layout"/>
+			<h:outputStylesheet name="ripple/ripple.css?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
 		</h:body>
 	</f:view>
 </html>

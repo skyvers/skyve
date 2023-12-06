@@ -139,4 +139,9 @@ public abstract class Localisable implements Serializable {
 	public final String getEnvironmentIdentifier() {
 		return UtilImpl.ENVIRONMENT_IDENTIFIER;
 	}
+	
+	@SuppressWarnings("static-method")
+	public final String getWebResourceFileVersion() {
+		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
+	}
 }
