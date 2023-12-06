@@ -189,17 +189,26 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("var sidebarPane=isc.BizContainer.create({");
 		size(sidebar, null, code);
 		invisible(sidebar.getInvisibleConditionName(), code);
+		// Override hide/show to switch on and off the resize bar in the viewPane.
+		// Skyve calls Canvas.hide()/Canvas.show() directly when processing the widget tree on scatter, whereas the Snapbar collapse function calls BizHBox.hideMember()
+		// We set the _hiding variable so we know when we are collapsing in the UI versus programmatically hiding on invisible condition
+		code.append("hide:function(){this.getParentCanvas().getMember(0).setShowResizeBar(this._hiding||false);this._hiding=false;this.Super('hide',arguments);},");
+		code.append("show:function(){this.getParentCanvas().getMember(0).setShowResizeBar(this._hiding||true);this.Super('show',arguments);},");
 		code.append("height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true});");
 		
 		code.append("var viewPane=isc.BizContainer.create({width:'*',height:'100%',padding:5,shadowSoftness:10,shadowOffset:0,showShadow:true,showResizeBar:true,resizeBarTarget:'next'});");
 		containerVariables.push("viewPane");
 		
-		code.append("var ").append(variableName).append("=isc.HLayout.create({width:'100%',height:'100%',padding:10,members:[viewPane,sidebarPane]");
-		if (invisibleConditionName != null) {
-			code.append(",invisibleConditionName:'").append(invisibleConditionName).append('\'');
-		}
-		code.append("});");
-		
+		code.append("var ").append(variableName).append("=isc.BizHBox.create({width:'100%',height:'100%',padding:10,");
+		invisible(invisibleConditionName, code);
+		// Override hideMember to indicate that we are using the Snapbar collapse function
+		// Skyve calls Canvas.hide()/Canvas.show() directly when processing the widget tree on scatter, whereas the Snapbar collapse function calls BizHBox.hideMember()
+		// We set the _hiding variable so we know when we are collapsing in the UI versus programmatically hiding on invisible condition
+		code.append("hideMember: function(member, callback) {member._hiding = true;this.Super('hideMember', arguments);}");
+		code.append("});\n");
+		code.append(variableName).append(".addContained(viewPane);\n");
+		code.append(variableName).append(".addContained(sidebarPane);\n");
+				
 		containerVariables.push("viewPane");
 
 	}
@@ -443,10 +452,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("var ").append(result).append("=isc.BizCollapsible.create({title:'").append(OWASP.escapeJsonString(borderTitle));
 			code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true" : "false");
 			code.append(",autoSize:").append(autoSize).append(',');
-				
 			size(box, null, code);
 			invisible(box.getInvisibleConditionName(), code);
-			code.append("items:[").append(itemVariable).append("]});");
+			removeTrailingComma(code);
+			code.append("});\n");
+			code.append(result).append(".addContained(").append(itemVariable).append(");\n");
 		}
 		return result;
 	}
@@ -3342,18 +3352,17 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderSidebar(Sidebar sidebar) {
 		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizVBox.create({");
-		code.append("width:'100%',height:'100%'");
-		code.append("});");
+		code.append("var ").append(variable).append("=isc.BizVBox.create({width:'100%',height:'100%',");
+		invisible(sidebar.getInvisibleConditionName(), code);
+		removeTrailingComma(code);
+		code.append("});\n");
 		
-		code.append("sidebarPane.addContained("+variable+");");
+		code.append("sidebarPane.addContained(").append(variable).append(");\n");
 		containerVariables.push(variable);
 	}
 	
 	@Override
 	public void renderedSidebar(Sidebar sidebar) {
 		containerVariables.pop();
-		
 	}
-
 }

@@ -787,13 +787,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget, parentVisible, parentEnabled);
 			}
-			if(view.getSidebar() != null) 
-			{
-				visitSidebar(view.getSidebar(),parentVisible, parentEnabled);
-				for (MetaData widget : view.getSidebar().getContained()) {
-					visitWidget(widget, parentVisible, parentEnabled);
+			Sidebar sidebar = view.getSidebar();
+			if (sidebar != null) {
+				visitSidebar(sidebar, parentVisible, parentEnabled);
+				boolean sidebarVisible = parentVisible && visible(sidebar);
+				for (MetaData widget : sidebar.getContained()) {
+					visitWidget(widget, sidebarVisible, parentEnabled);
 				}
-				visitedSidebar(view.getSidebar(), parentVisible, parentEnabled);
+				visitedSidebar(sidebar, parentVisible, parentEnabled);
 			}
 			visitActions(view);
 			visitedView();
@@ -831,20 +832,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 	
-	private void visitViewSidebar(boolean parentVisible,boolean parentEnabled) {
-		Sidebar sidebar = view.getSidebar();
-		if(sidebar != null) 
-		{
-			visitSidebar(sidebar, parentVisible, parentEnabled);
-			boolean sidebarVisible = parentVisible && visible(sidebar);
-			for (MetaData widget : sidebar.getContained()) {
-				visitWidget(widget, sidebarVisible, parentEnabled);
-			}
-			visitedSidebar(sidebar, parentVisible, parentEnabled);
-		}
-		
-	}
-
 	private void visitDataWidgetColumns(AbstractDataWidget widget,
 											String widgetBindingPrefix,
 											boolean widgetVisible,
