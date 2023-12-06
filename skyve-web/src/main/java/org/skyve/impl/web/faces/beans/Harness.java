@@ -90,11 +90,6 @@ public abstract class Harness extends Localisable {
 		return result.toString();
 	}
 	
-	@SuppressWarnings("static-method")
-	public final String getWebResourceFileVersion() {
-		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
-	}
-	
 	private String apiScript;
 	public final String getApiScript() {
 		return apiScript;

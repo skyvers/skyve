@@ -1810,7 +1810,7 @@ isc.BizCollapsible.addMethods({
 	
 	addContained: function(contained) {
 		this.contained.add(contained);
-		this.addMember(contained);
+		this.addItem(contained);
 	}
 });
 
