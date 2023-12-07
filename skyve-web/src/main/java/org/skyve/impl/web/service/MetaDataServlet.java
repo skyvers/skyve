@@ -764,7 +764,10 @@ public class MetaDataServlet extends HttpServlet {
 
 			@Override
 			public void renderedView(String icon16x16Url, String icon32x32Url) {
-				processedContainer(view);
+				if (view.getSidebar() == null) {
+					processedContainer(view);
+				}
+
 				result.setLength(result.length() - 1); // remove last comma
 
 				if (actionsJSON.length() > 0) {
@@ -3194,14 +3197,20 @@ public class MetaDataServlet extends HttpServlet {
 
 			@Override
 			public void renderSidebar(Sidebar sidebar) {
-				// TODO Auto-generated method stub
-				
+				result.setLength(result.length() - 1); // remove last comma from view.getContained() processing
+				result.append("],{\"type\":\"sidebar\"");
+				processIdentifiable(sidebar);
+				processSize(sidebar);
+				processInvisible(sidebar);
+				processDecorated(sidebar);
+				processContainer();
 			}
 
 			@Override
 			public void renderedSidebar(Sidebar sidebar) {
-				// TODO Auto-generated method stub
-				
+				processedContainer(sidebar);
+				result.setLength(result.length() - 1); // remove last comma
+				result.append("},");
 			}
 
 			}.visit();

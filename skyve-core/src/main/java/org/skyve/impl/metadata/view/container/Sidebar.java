@@ -1,15 +1,22 @@
 package org.skyve.impl.metadata.view.container;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.RelativeWidth;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Invisible;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "sidebar")
@@ -20,8 +27,9 @@ import org.skyve.metadata.view.Invisible;
 							"floatingPixelWidthBreakpoint",
 							"pixelWidth",
 							"percentageWidth",
-							"responsiveWidth"})
-public class Sidebar extends Container implements Identifiable, Invisible, RelativeWidth {
+							"responsiveWidth",
+							"properties"})
+public class Sidebar extends Container implements Identifiable, Invisible, RelativeWidth, DecoratedMetaData {
 	private static final long serialVersionUID = 7637506523705376564L;
 
 	private String widgetId;
@@ -32,6 +40,10 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	private Integer responsiveWidth;
 
 	private String invisibleConditionName;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public String getInvisibleConditionName() {
@@ -115,5 +127,10 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	@XmlAttribute(required = false)
 	public void setResponsiveWidth(Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }
