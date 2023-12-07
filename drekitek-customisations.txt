@@ -1,0 +1,32 @@
+The drekitek branch is a customisation of skyve master branch to add client-side snapshot definitions.
+It should not be merged back into the master branch.
+
+drekitek.xhtml
+	A DrekListGrid extension was inlined in drekitek.xhtml (a copy of desktop/home.xhtml).
+	This enables the snapshots to be kept in a variable in BizUtil and the snapshot menu of BizListGrid is overridden to run off of the snapshot list.
+	The following was also added so that admin.Snapshots Reorder action can refresh the browser to reload the snapshot ordering.
+				window.refreshPageAfterSnapshotReorder = function() {
+					location.reload();
+				};
+DrekitekDesktop.java
+	The backing bean for drekitek.xhtml and generates out the snapshots to be stored client side.
+router.xml contains the routing to drekitek.xhtml
+	<uxui name="desktop">
+		<route outcome="/desktop/drekitek.xhtml" />
+	</uxui>
+DrekitekSmartClientViewRenderer.java
+	Is plumbed in in web.xml.
+	Updates the standard output from BizListGrid to DrekListGrid
+web.xml
+	Adds the to SmartClientGeneratorServlet via
+		<init-param>
+			<param-name>renderer</param-name>
+			<param-value>com.drekitek.DrekitekSmartClientViewRenderer</param-value>
+		</init-param>
+Reorder.java
+	admin.Snapshots action
+	Added a push to execute refreshPageAfterSnapshotReorder function in browser
+edit.xml
+	admin.Snapshots view
+	Added confirm to let the user know about the impending browser page refresh.
+	
