@@ -136,7 +136,7 @@
 									if (value) {
 										var s = {criteria: me._advancedFilter.toggleButton.selected ?
 																me._advancedFilter.getCriteria(true) : // include empty values
-																me.grid.getFilterEditorCriteria(),
+																me.grid.getFilterEditorCriteria(true),
 													advancedCriteriaStyle: me._advancedFilter.getStyle(),
 													fieldState: me.grid.getFieldState(),
 													sortState: me.grid.getSortState(),
@@ -181,7 +181,7 @@
 						this._snapMenuButton.updateSnap = function(snapId) {
 							var s = {criteria: me._advancedFilter.toggleButton.selected ?
 												me._advancedFilter.getCriteria(true) : // include empty values
-												me.grid.getFilterEditorCriteria(),
+												me.grid.getFilterEditorCriteria(true),
 										advancedCriteriaStyle: me._advancedFilter.getStyle(),
 										fieldState: me.grid.getFieldState(),
 										sortState: me.grid.getSortState(),
