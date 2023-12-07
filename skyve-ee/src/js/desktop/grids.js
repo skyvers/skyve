@@ -708,11 +708,15 @@ isc.BizListGrid.addMethods({
 						me._advancedFilter.setCriteria(snapshot.criteria);
 					}
 					else {
+						me._advancedFilter.clearCriteria();
 						me._advancedFilter.toggleButton.deselect();
 						me._advancedFilter.toggleButtonClick();
-		
+
+						// Switching advanced to header filtering would set random fields to 'equals' operator, so I added the below to lines to work around it
+						me.grid.setFilterEditorCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
 						me.grid.setFilterEditorCriteria(snapshot.criteria);
-						me._advancedFilter.clearCriteria();
+						me.grid.setCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
+						me.grid.setFilterEditorCriteria(snapshot.criteria);
 					}
 				}
 				if (snapshot.fieldState) {
@@ -777,7 +781,11 @@ isc.BizListGrid.addMethods({
 											// Assign the CSRF Token from the response header
 											me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
-											me._snapMenuButton.setSnap(null, 'No Snapshot', null);
+
+											// Reset selected snapshot (if it was selected before deletion)
+											if (me.snapId == snapId) {
+												me._snapMenuButton.setSnap(null, 'No Snapshot', null);
+											}
 										}
 									}
 								});
@@ -1267,6 +1275,9 @@ isc.BizListGrid.addMethods({
 			// as the argument is polluted with the extra criteria from the Super call below on subsequent calls.
 			filterData: function(criteria, callback, requestProperties) {
 				var result = criteria;
+				if (result) {} else {
+					result = {};
+				}
 				
 				// ensure summaryType & tagId are sent down in the requestProperties
 				if (requestProperties) {
@@ -1822,7 +1833,9 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		if (me.autoPopulate) {
-			me.grid.filterData();
+			me.grid.filterData(me._advancedFilter.toggleButton.selected ?
+									me._advancedFilter.getCriteria() :
+									me.grid.getFilterEditorCriteria());
 		}
 		me.grid.selectionChanged(null, false); // ensure that buttons are disabled
 
@@ -2122,6 +2135,7 @@ isc.BizDataGrid.addMethods({
 			showHeader: showHeader,
 			headerHeight: 30,
 			showFilterEditor: false,
+			defaultFilterOperator: 'iContains',
 			showRollOver: (! me.isRepeater),
 			showSelectedStyle: (! me.isRepeater),
 			showEmptyMessage: (! me.isRepeater),

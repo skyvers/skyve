@@ -76,7 +76,7 @@ public class TextValidator extends FieldValidator<String> {
 				regularExpression = PATTERN_EMAIL;
 			}
 			else if (ValidatorType.creditCard.equals(type)) {
-				regularExpression = "^\\d{16}$";
+				regularExpression = "^\\d{15,16}$";
 			}
 			else if (ValidatorType.ipv4Address.equals(type)) {
 				regularExpression = "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$";

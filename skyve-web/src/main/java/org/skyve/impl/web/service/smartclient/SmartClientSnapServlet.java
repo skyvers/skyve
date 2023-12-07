@@ -227,23 +227,21 @@ public class SmartClientSnapServlet extends HttpServlet {
 									String snapName,
 									String snapshot)
 	throws Exception {
-	    Persistence p = CORE.getPersistence();
-	    User user = p.getUser();
-	    Customer customer = user.getCustomer();
-	    Module module = customer.getModule(SNAPSHOT_MODULE_NAME);
-	    Document document = module.getDocument(customer, SNAPSHOT_DOCUMENT_NAME);
-	    
-	    PersistentBean snap = document.newInstance(user);
-	    BindUtil.set(snap, SNAPSHOT_MODULE_NAME_PROPERTY_NAME, snapModuleName);
-	    BindUtil.set(snap, SNAPSHOT_QUERY_NAME_PROPERTY_NAME, snapQueryName);
-	    BindUtil.set(snap, SNAPSHOT_NAME_PROPERTY_NAME, snapName);
-	    BindUtil.set(snap, SNAPSHOT_SNAPSHOT_PROPERTY_NAME, snapshot);
-	    // Put the new snapshot at the bottom of the list
-	    BindUtil.set(snap, SNAPSHOT_ORDINAL_PROPERTY_NAME, Integer.valueOf(1000));
-	    
-	    snap = p.save(document, snap);
-	    
-	    return snap.getBizId();
+		Persistence p = CORE.getPersistence();
+		User user = p.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(SNAPSHOT_MODULE_NAME);
+		Document document = module.getDocument(customer, SNAPSHOT_DOCUMENT_NAME);
+
+		PersistentBean snap = document.newInstance(user);
+		BindUtil.set(snap, SNAPSHOT_MODULE_NAME_PROPERTY_NAME, snapModuleName);
+		BindUtil.set(snap, SNAPSHOT_QUERY_NAME_PROPERTY_NAME, snapQueryName);
+		BindUtil.set(snap, SNAPSHOT_NAME_PROPERTY_NAME, snapName);
+		BindUtil.set(snap, SNAPSHOT_SNAPSHOT_PROPERTY_NAME, snapshot);
+		// NB SnapshotBizlet puts the new snapshot at the bottom of the list with max(ordinal) + 1
+		snap = p.save(document, snap);
+
+		return snap.getBizId();
 	}
 
 	private static void update(String snapId, String snapshot) 

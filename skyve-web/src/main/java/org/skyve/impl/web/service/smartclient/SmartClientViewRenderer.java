@@ -3172,7 +3172,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		if (visitedQueryNames == null) {
 			toAppendTo.append("if(window.").append(dataSourceId);
-			toAppendTo.append("){}else{isc.RestDataSource.create({dataFormat:'json',jsonPrefix:'',jsonSuffix:'',dataURL:'smartlist',");
+			toAppendTo.append("){}else{isc.RestDataSource.create({dataFormat:'json',jsonPrefix:'',jsonSuffix:'',dataURL:'smartlist',defaultTextMatchStyle:'substring',");
 			toAppendTo.append("operationBindings:[{operationType:'fetch',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'update',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'add',dataProtocol:'postParams'},");

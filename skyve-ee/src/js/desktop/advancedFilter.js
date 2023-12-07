@@ -146,9 +146,9 @@ isc.AdvancedFilter.addMethods({
 		}
 	},
 	
-	getCriteria: function() {
+	getCriteria: function(includeEmptyValues) {
 		if (this._filterBuilder) {
-			return this._filterBuilder.getCriteria();
+			return this._filterBuilder.getCriteria(includeEmptyValues);
 		}
 		else {
 			return null;
