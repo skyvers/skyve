@@ -42,7 +42,7 @@ public class Formatters {
 	 * CORE.format() methods should be preferred over using the formatter directly.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> @Nullable Formatter<T> get(@Nonnull String name) {
+	public static @Nullable <T> Formatter<T> get(@Nonnull String name) {
 		return (Formatter<T>) FORMATTERS.get(name);
 	}
 	

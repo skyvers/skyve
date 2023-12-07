@@ -20,6 +20,52 @@ public class TextValidatorTest {
 	}
 
 	@Test
+	public void testValidateCreditCardInvalid() throws Exception {
+		// setup the test data
+		validator.setType(ValidatorType.creditCard);
+
+		String[] testCardNumbers = new String[] {
+				"123456789012345", // 15 digis
+				"#@%^%#$@#$@#", // Garbage
+		};
+
+		// call the method under test
+		for (String cardNumber : testCardNumbers) {
+			ValidationException e = new ValidationException();
+			validator.validate(user, cardNumber, "binding", "Binding", null, e);
+
+			// verify the result
+			if (e.getMessages().isEmpty()) {
+				fail("Card number " + cardNumber + " should not have passed validation.");
+			}
+		}
+	}
+
+	@Test
+	public void testValidateCreditCardValid() throws Exception {
+		// setup the test data
+		validator.setType(ValidatorType.creditCard);
+
+		String[] testCardNumbers = new String[] {
+				"4111111111111111", // visa
+				"5431111111111111", // mastercard
+				"378734493671000", // amex
+				"6011111111111117", // discover
+		};
+
+		// call the method under test
+		for (String cardNumber : testCardNumbers) {
+			ValidationException e = new ValidationException();
+			validator.validate(user, cardNumber, "binding", "Binding", null, e);
+
+			// verify the result
+			if (!e.getMessages().isEmpty()) {
+				fail("Card number " + cardNumber + " should have passed validation.");
+			}
+		}
+	}
+
+	@Test
 	public void testValidateEmailInvalid() throws Exception {
 		// setup the test data
 		validator.setType(ValidatorType.email);

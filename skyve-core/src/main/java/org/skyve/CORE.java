@@ -121,7 +121,7 @@ public class CORE {
 	 * @return	The formatted value.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> @Nonnull String format(@Nonnull FormatterName name, @Nullable T valueToFormat) {
+	public static @Nonnull <T> String format(@Nonnull FormatterName name, @Nullable T valueToFormat) {
 		if (valueToFormat == null) {
 			return "";
 		}
@@ -134,7 +134,7 @@ public class CORE {
 	 * @param valueToFormat The value to format
 	 * @return	The formatted value.
 	 */
-	public static <T> @Nonnull String format(@Nonnull String name, @Nullable T valueToFormat) {
+	public static @Nonnull <T> String format(@Nonnull String name, @Nullable T valueToFormat) {
 		if (valueToFormat == null) {
 			return "";
 		}

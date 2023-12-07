@@ -33,7 +33,7 @@ public interface Document extends Model, PersistentMetaData {
 	 * @return
 	 * @throws Exception
 	 */
-	public <T extends Bean> @Nonnull T newInstance(@Nonnull User user) throws Exception;
+	public @Nonnull <T extends Bean> T newInstance(@Nonnull User user) throws Exception;
 	
 	public @Nullable String getBizKeyExpression();
 	
@@ -158,7 +158,7 @@ public interface Document extends Model, PersistentMetaData {
 	 */
 	public @Nullable String getDocumentation();
 	
-	public <T extends Bean> @Nullable Bizlet<T> getBizlet(@Nullable Customer customer);
+	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer);
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime);
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime);
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime);
