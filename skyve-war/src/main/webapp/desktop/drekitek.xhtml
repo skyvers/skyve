@@ -83,6 +83,10 @@
 				#{drektop.apiScript}
 				#{drektop.snapshotScript}
 
+				window.refreshPageAfterSnapshotReorder = function() {
+					location.reload();
+				};
+				
 				isc.ClassFactory.defineClass('DrekListGrid', 'BizListGrid');
 				isc.DrekListGrid.addMethods({
 					initWidget: function(config) { // has 4 properties - see above

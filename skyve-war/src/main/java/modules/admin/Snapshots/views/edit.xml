@@ -42,11 +42,14 @@
 		</tab>
 	</tabPane>
 	<actions>
+		<!-- customised, do not overwrite -->
 		<action className="Reorder"
 					displayName="admin.snapshots.actions.reorder.displayName"
 					inActionPanel="false"
 					clientValidation="false"
 					toolTip="admin.snapshots.actions.reorder.toolTip"
-					iconStyleClass="fa fa-sort" />
+					iconStyleClass="fa fa-sort"
+					confirm="The page will refresh after the reorder has occurred" />
+        <!-- ./ customised -->
 	</actions>
 </view>

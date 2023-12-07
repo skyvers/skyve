@@ -1,12 +1,15 @@
 package modules.admin.Snapshots.actions;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.PushMessage;
 import org.skyve.web.WebContext;
 
 import modules.admin.domain.Snapshot;
@@ -26,6 +29,9 @@ public class Reorder implements ServerSideAction<Snapshots> {
 			p.newSQL(update).putParameter(Snapshot.ordinalPropertyName, Integer.valueOf(i)).putParameter(Bean.DOCUMENT_ID, snapshot.getBizId(), false).execute();
 		}
 		
+		// customised
+		EXT.push(new PushMessage().user().execute("refreshPageAfterSnapshotReorder", Collections.emptyMap()));
+		// ./ customised
 		return new ServerSideActionResult<>(bean);
 	}
 }
