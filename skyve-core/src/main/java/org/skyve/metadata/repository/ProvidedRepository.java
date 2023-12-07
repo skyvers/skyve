@@ -105,8 +105,7 @@ public interface ProvidedRepository extends CachedRepository {
 
 	@Nullable String vtable(@Nonnull String customerName, @Nonnull String key);
 
-	@Nullable
-	<T extends Bean> Bizlet<T> getBizlet(@Nonnull Customer customer, @Nonnull Document document, boolean runtime);
+	@Nullable <T extends Bean> Bizlet<T> getBizlet(@Nonnull Customer customer, @Nonnull Document document, boolean runtime);
 
 	/**
 	 * 
