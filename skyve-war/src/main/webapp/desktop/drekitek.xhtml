@@ -135,8 +135,8 @@
 								function(value) {
 									if (value) {
 										var s = {criteria: me._advancedFilter.toggleButton.selected ?
-																me._advancedFilter.getCriteria() :
-																me.grid.getFilterEditorCriteria(true),
+																me._advancedFilter.getCriteria(true) : // include empty values
+																me.grid.getFilterEditorCriteria(),
 													advancedCriteriaStyle: me._advancedFilter.getStyle(),
 													fieldState: me.grid.getFieldState(),
 													sortState: me.grid.getSortState(),
@@ -157,6 +157,7 @@
 													me.snapId = data.bizId;
 													me._snapMenuButton.setTitle(value);
 													isc.BizUtil.snapshots.add({bizId: me.snapId, name: value, ds: me._dataSource.ID, snapshot: s});
+													localStorage.setItem(me._dataSource.ID, me.snapId);
 													me._createSnapshotButtons();
 												}
 											}
@@ -167,61 +168,20 @@
 						};
 
 						this._snapMenuButton.setSnap = function(snapId) {
-							me.snapId = snapId;
-							var snap = isc.BizUtil.snapshots.find('bizId', snapId);
-							if (snap) {
-								me._snapMenuButton.setTitle(snap.name);
-	
-								if (snap.snapshot) {
-									if (snap.snapshot.criteria) {
-										if (snap.snapshot.criteria.operator) { // advanced criteria
-											me._advancedFilter.toggleButton.select();
-											me._advancedFilter.toggleButtonClick();
-											me._advancedFilter.setStyle(snap.snapshot.advancedCriteriaStyle);
-											
-											me.grid.setFilterEditorCriteria({});
-											me._advancedFilter.setCriteria(snap.snapshot.criteria);
-										}
-										else {
-											me._advancedFilter.toggleButton.deselect();
-											me._advancedFilter.toggleButtonClick();
-							
-											me.grid.setFilterEditorCriteria(snap.snapshot.criteria);
-											me._advancedFilter.clearCriteria();
-										}
-									}
-									if (snap.snapshot.fieldState) {
-										me.grid.setFieldState(snap.snapshot.fieldState);
-									}
-									if (snap.snapshot.sortState) {
-										me.grid.setSortState(snap.snapshot.sortState);
-									}
-									if (snap.snapshot.groupState) {
-										me.grid.setGroupState(snap.snapshot.groupState);
-									}
-									if (snap.snapshot.summaryType) {
-										me.summaryType = snap.snapshot.summaryType;
-										me._summaryGrid.data[0].bizFlagComment = snap.snapshot.summaryType;
-									}
-								}
+							me._setSnap(snapId);
+							if (snapId) {
+								localStorage.setItem(me._dataSource.ID, snapId);
 							}
 							else {
-								me._snapMenuButton.setTitle('No snapshot');
-								me.grid.setFieldState(null);
-								me.grid.setSortState(null);
-								me.grid.setGroupState(null);
-								me.summaryType = '';;
-								me._summaryGrid.data[0].bizFlagComment = '';
-								me.grid.setFilterEditorCriteria({});
-								me._advancedFilter.clearCriteria();
+								localStorage.removeItem(me._dataSource.ID);
 							}
 							me.refresh();
 						};
 						
 						this._snapMenuButton.updateSnap = function(snapId) {
 							var s = {criteria: me._advancedFilter.toggleButton.selected ?
-											me._advancedFilter.getCriteria() :
-											me.grid.getFilterEditorCriteria(true),
+												me._advancedFilter.getCriteria(true) : // include empty values
+												me.grid.getFilterEditorCriteria(),
 										advancedCriteriaStyle: me._advancedFilter.getStyle(),
 										fieldState: me.grid.getFieldState(),
 										sortState: me.grid.getSortState(),
@@ -248,7 +208,7 @@
 									}
 								}
 							});
-						}
+						};
 
 						this._snapMenuButton.deleteSnap = function(snapId) {
 							isc.ask('Do you want to delete this Snapshot?',
@@ -266,25 +226,38 @@
 														// Assign the CSRF Token from the response header
 														me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
-														me._snapMenuButton.setSnap(null, 'No Snapshot', null);
+														// Reset selected snapshot (if it was selected before deletion)
+														if (me.snapId == snapId) {
+															me._snapMenuButton.setSnap(null);
+														}
 
-														// remove snapId from the snapshot
-														var index = isc.BizUtil.snapshots.findIndex('bizId', snapId);
+														// remove snapId from the snapshots
+														const index = isc.BizUtil.snapshots.findIndex('bizId', snapId);
 														if (index >= 0) {
 															isc.BizUtil.snapshots.removeAt(index);
 														}
+														// remove snapId from localStorage (if set)
+														const storedSnapId = localStorage.getItem(me._dataSource.ID);
+														if (storedSnapId == snapId) {
+															localStorage.removeItem(me._dataSource.ID);
+														}
+
 														me._createSnapshotButtons();
 													}
 												}
 											});
 										}
 									});
-						}
+						};
 					},
 					
 					_createGrid: function(config, fields) {
 						this._createSnapshotButtons();
 						this.Super('_createGrid', arguments);
+						const snapId = localStorage.getItem(this._dataSource.ID);
+						if (snapId) {
+							this._setSnap(snapId);
+						}
 					},
 					
 					_createSnapshotButtons: function() {
@@ -298,6 +271,12 @@
 									var snap = snaps[i];
 									this._snapbar.addTile(isc.ToolStripButton.create({
 										title: snap.name,
+										icon: 'icons/snap.png',
+										showDisabledIcon: false,
+										showDownIcon: false,
+										showFocusedIcon: false,
+										showRollOverIcon: false,
+										showSelectedIcon: false,
 										click: this._snapMenuButton.ID + '.setSnap(\'' + snap.bizId + '\')'
 									}));
 								}
@@ -307,8 +286,60 @@
 								this.hideMember(this._snapbar);
 							}
 						}
+					},
+					
+					_setSnap: function(snapId) {
+						this.snapId = snapId;
+						var snap = isc.BizUtil.snapshots.find('bizId', snapId);
+						if (snap) {
+							this._snapMenuButton.setTitle(snap.name);
+
+							if (snap.snapshot) {
+								if (snap.snapshot.criteria) {
+									if (snap.snapshot.criteria.operator) { // advanced criteria
+										this._advancedFilter.toggleButton.select();
+										this._advancedFilter.toggleButtonClick();
+										this._advancedFilter.setStyle(snap.snapshot.advancedCriteriaStyle);
+										
+										this.grid.setFilterEditorCriteria({});
+										this._advancedFilter.setCriteria(snap.snapshot.criteria);
+									}
+									else {
+										this._advancedFilter.toggleButton.deselect();
+										this._advancedFilter.toggleButtonClick();
+
+										this.grid.setFilterEditorCriteria(snap.snapshot.criteria);
+										this._advancedFilter.clearCriteria();
+									}
+								}
+								if (snap.snapshot.fieldState) {
+									this.grid.setFieldState(snap.snapshot.fieldState);
+								}
+								if (snap.snapshot.sortState) {
+									this.grid.setSortState(snap.snapshot.sortState);
+								}
+								if (snap.snapshot.groupState) {
+									this.grid.setGroupState(snap.snapshot.groupState);
+								}
+								if (snap.snapshot.summaryType) {
+									this.summaryType = snap.snapshot.summaryType;
+									this._summaryGrid.data[0].bizFlagComment = snap.snapshot.summaryType;
+								}
+							}
+						}
+						else {
+							this._snapMenuButton.setTitle('No snapshot');
+							this.grid.setFieldState(null);
+							this.grid.setSortState(null);
+							this.grid.setGroupState(null);
+							this.summaryType = '';;
+							this._summaryGrid.data[0].bizFlagComment = '';
+							this.grid.setFilterEditorCriteria({});
+							this._advancedFilter.clearCriteria();
+						}
 					}
 				});
+				
 				isc.BizUtil.addClassMethods({
 					createListGrid: function() {
 						return isc.DrekListGrid.create({margin: 2});
