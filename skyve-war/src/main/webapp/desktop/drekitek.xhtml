@@ -305,11 +305,15 @@
 										this._advancedFilter.setCriteria(snap.snapshot.criteria);
 									}
 									else {
+										this._advancedFilter.clearCriteria();
 										this._advancedFilter.toggleButton.deselect();
 										this._advancedFilter.toggleButtonClick();
 
+										// Switching advanced to header filtering would set random fields to 'equals' operator, so I added the below to lines to work around it
+										this.grid.setFilterEditorCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
 										this.grid.setFilterEditorCriteria(snap.snapshot.criteria);
-										this._advancedFilter.clearCriteria();
+										this.grid.setCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
+										this.grid.setFilterEditorCriteria(snap.snapshot.criteria);
 									}
 								}
 								if (snap.snapshot.fieldState) {
