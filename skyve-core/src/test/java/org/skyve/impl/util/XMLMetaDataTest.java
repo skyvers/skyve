@@ -267,7 +267,7 @@ public class XMLMetaDataTest {
 
 		assertThat(result.contains("name=\"TestDocument\""), is(true));
 		assertThat(result.contains("<displayName>Attribute 1</displayName>"), is(true));
-		assertThat(result.contains("<validator regularExpression=\"^\\d{16}$\" type=\"creditCard\"/>"), is(true));
+		assertThat(result.contains("<validator regularExpression=\"^\\d{15,16}$\" type=\"creditCard\"/>"), is(true));
 	}
 
 	@Test

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+	<datasource jndi-name="java:/SkyveDB" pool-name="Skyve DB" enabled="true" jta="false" use-ccm="true">
+		<connection-url>jdbc:postgresql://localhost:5432/postgres?currentSchema=skyve</connection-url>
+		<driver>postgresql</driver>
+		<transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+		<pool>
+			<min-pool-size>5</min-pool-size>
+			<max-pool-size>10</max-pool-size>
+		</pool>
+		<security>
+			<user-name>postgres</user-name>
+			<password>mysecretpassword</password>
+		</security>
+	</datasource>
+</datasources>

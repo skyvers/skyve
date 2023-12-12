@@ -166,7 +166,7 @@
 		// Skyve data store
 		"skyve": {
 			// JNDI name
-			"jndi": "java:/H2Demo", 
+			"jndi": "java:/SkyveDB", 
 			// Dialect
 			"dialect": "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect",
 			// Timeout for data store connections employed in general UI/forms processing - 0 indicates no timeout

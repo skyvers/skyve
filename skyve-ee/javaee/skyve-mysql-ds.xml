@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+	<datasource jndi-name="java:/SkyveDB" pool-name="Skyve DB" enabled="true" jta="false" use-ccm="true">
+		<connection-url>jdbc:mysql://localhost:3306/skyve?useCursorFetch=true&amp;defaultFetchSize=100</connection-url>
+		<driver>mysql</driver>
+		<transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+		<pool>
+			<min-pool-size>5</min-pool-size>
+			<max-pool-size>10</max-pool-size>
+		</pool>
+		<security>
+			<user-name>root</user-name>
+			<password>someThingComplicated1234</password>
+		</security>
+		<validation>
+			<check-valid-connection-sql>select 1</check-valid-connection-sql>
+		</validation>
+		<statement>
+			<prepared-statement-cache-size>100</prepared-statement-cache-size>
+			<share-prepared-statements>true</share-prepared-statements>
+		</statement>
+	</datasource>
+</datasources>
