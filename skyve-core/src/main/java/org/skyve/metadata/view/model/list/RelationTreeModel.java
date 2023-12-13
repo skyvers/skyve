@@ -6,6 +6,7 @@ import java.util.SortedMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -33,8 +34,8 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	public RelationTreeModel(String... stopDocuments) throws Exception {
 		this.stopDocuments = stopDocuments;
 		Customer c = CORE.getUser().getCustomer();
-		Module m = c.getModule(ListModel.ADMIN_MODULE_NAME);
-		Document d = m.getDocument(c, ListModel.GENERIC_DOCUMENT_NAME);
+		Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document d = m.getDocument(c, AppConstants.GENERIC_DOCUMENT_NAME);
 		setDrivingDocument(m, d);
 	}
 	
@@ -58,7 +59,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 			columns = new ArrayList<>(1);
 
 			MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
-	        column.setBinding(ListModel.MEMO_1_PROPERTY_NAME);
+	        column.setBinding(AppConstants.MEMO_1_ATTRIBUTE_NAME);
 	        column.setDisplayName("Related");
 	        column.setSortable(false);
 	        columns.add(column);

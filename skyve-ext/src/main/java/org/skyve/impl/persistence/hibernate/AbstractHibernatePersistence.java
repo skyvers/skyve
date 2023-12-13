@@ -70,7 +70,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.app.admin.Contact;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
@@ -360,7 +360,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		metadata = sources.getMetadataBuilder().build();
 		SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
 
-		bizKeyLength = ((Column) metadata.getEntityBinding(Contact.MODULE_NAME + Contact.DOCUMENT_NAME).getProperty(Bean.BIZ_KEY).getValue().getColumnIterator().next()).getLength();
+		bizKeyLength = ((Column) metadata.getEntityBinding(AppConstants.ADMIN_MODULE_NAME + AppConstants.CONTACT_DOCUMENT_NAME).getProperty(Bean.BIZ_KEY).getValue().getColumnIterator().next()).getLength();
 		
 		try {
 			sf = sessionFactoryBuilder.build();
@@ -717,8 +717,14 @@ t.printStackTrace();
 						try {
 							// remove all inserted unique hashes (can only do if we have an em)
 							try {
+								final Persistent persistent = new Persistent();
+								persistent.setName(UniquenessEntity.TABLE_NAME);
+								final String persistentIdentifier = persistent.getPersistentIdentifier();
 								for (String hash : uniqueHashes) {
-									newSQL("delete from ADM_Uniqueness where hash = :hash").putParameter("hash", hash, false).execute();
+									StringBuilder query = new StringBuilder(64);
+									query.append("delete from ").append(persistentIdentifier).append(" where ");
+									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 								}
 							}
 							finally {
@@ -1595,7 +1601,13 @@ if (document.isDynamic()) return;
 					}
 					else {
 						try {
-							newSQL("insert into ADM_Uniqueness (hash) values (:hash)").putParameter("hash", hash, false).execute();
+							final Persistent persistent = new Persistent();
+							persistent.setName(UniquenessEntity.TABLE_NAME);
+							String persistentIdentifier = persistent.getPersistentIdentifier();
+							StringBuilder sql = new StringBuilder(64);
+							sql.append("insert into ").append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
+							sql.append(") values (:").append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
+							newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 						}
 						catch (@SuppressWarnings("unused") DomainException e) {
 							// Unique constraint violation caught here - within the same transaction

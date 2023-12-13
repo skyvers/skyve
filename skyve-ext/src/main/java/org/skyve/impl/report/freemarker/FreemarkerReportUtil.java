@@ -21,6 +21,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.ReportDataset;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.app.admin.ReportParameter;
@@ -543,8 +544,8 @@ public final class FreemarkerReportUtil {
 	 */
 	private static ReportTemplate retrieveReportTemplate(final String templateName) {
 		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
-		q.getFilter().addEquals(ReportTemplate.templateNamePropertyName, templateName);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
+		q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, templateName);
 		ReportTemplate template = q.beanResult();
 		CORE.getPersistence().resetDocumentPermissionScopes();
 

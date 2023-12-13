@@ -7,6 +7,7 @@ import java.io.StringReader;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.customer.Customer;
@@ -38,9 +39,9 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	@Override
 	public Object findTemplateSource(String name) throws IOException {
 		// find the template with the specified name
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
-		q.getFilter().addEquals(ReportTemplate.templateNamePropertyName, name);
-		q.getFilter().addEquals(ReportTemplate.enabledPropertyName, Boolean.TRUE);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
+		q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, name);
+		q.getFilter().addEquals(AppConstants.ENABLED_ATTRIBUTE_NAME, Boolean.TRUE);
 		return q.beanResult();
 	}
 
@@ -52,7 +53,7 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	@Override
 	public long getLastModified(Object templateSource) {
 		// retrieve the bizlock
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
 		q.getFilter().addEquals(Bean.DOCUMENT_ID, ((Bean) templateSource).getBizId());
 		q.addBoundProjection(PersistentBean.LOCK_NAME);
 		OptimisticLock bizLock = q.scalarResult(OptimisticLock.class);
@@ -83,8 +84,8 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	public String toString() {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
-		Module m = c.getModule(ReportTemplate.MODULE_NAME);
-		Document d = m.getDocument(c, ReportTemplate.DOCUMENT_NAME);
+		Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document d = m.getDocument(c, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
 		Persistent p = d.getPersistent();
 		String pid = (p == null) ? null : p.getPersistentIdentifier();
 

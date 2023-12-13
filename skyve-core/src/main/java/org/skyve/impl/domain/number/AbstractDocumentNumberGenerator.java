@@ -4,6 +4,7 @@ import java.util.Formatter;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.DocumentNumber;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.number.NumberGenerator;
@@ -28,17 +29,17 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 									int numberLength) {
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(DocumentNumber.MODULE_NAME);
-		Document document = module.getDocument(customer, DocumentNumber.DOCUMENT_NAME);
+		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document document = module.getDocument(customer, AppConstants.DOCUMENT_NUMBER_DOCUMENT_NAME);
 		String nextNumber = "0";
 		String lastNumber = "0";
 
 		DocumentNumber dN = null;
 		try {
-			DocumentQuery qN = pers.newDocumentQuery(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME);
-			qN.getFilter().addEquals(DocumentNumber.moduleNamePropertyName, moduleName);
-			qN.getFilter().addEquals(DocumentNumber.documentNamePropertyName, documentName);
-			qN.getFilter().addEquals(DocumentNumber.sequenceNamePropertyName, fieldName);
+			DocumentQuery qN = pers.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.DOCUMENT_NUMBER_DOCUMENT_NAME);
+			qN.getFilter().addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
+			qN.getFilter().addEquals(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, documentName);
+			qN.getFilter().addEquals(AppConstants.SEQUENCE_NAME_ATTRIBUTE_NAME, fieldName);
 
 			// temporarily escalate access to the Document Number sequences
 			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);

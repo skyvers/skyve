@@ -657,7 +657,7 @@ public class Renderer {
 					// nothing
 				}
 
-				sb.append("select ").append(sql).append(" from ").append(getPersistentFromDocument(document)).append(" a");
+				sb.append("select ").append(sql).append(" from ").append(getPersistentIdentifierForDocument(document)).append(" a");
 
 				// joins
 				if (design.getJoins() != null) {
@@ -791,18 +791,13 @@ public class Renderer {
 		return sPath.toString();
 	}
 
-	public static String getPersistentFromDocument(Document document) {
-
-		StringBuilder sb = new StringBuilder();
-
+	public static String getPersistentIdentifierForDocument(Document document) {
+		String result = "UnknownTable";
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
-			sb.append(persistent.getCatalog() == null ? "" : persistent.getCatalog() + ".");
-			sb.append(persistent.getSchema() == null ? "" : persistent.getSchema() + ".");
-			sb.append(persistent.getName());
+			result = persistent.getPersistentIdentifier();
 		}
-
-		return sb.toString();
+		return result;
 	}
 
 	public static String getSqlEquivalentClass(AttributeType aType) {

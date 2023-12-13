@@ -14,6 +14,7 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.CommunicationTemplate;
 import org.skyve.domain.app.admin.Subscription;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Communication;
 import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.domain.messages.Message;
@@ -118,13 +119,13 @@ public class CommunicationUtil {
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Communication.MODULE_NAME);
-		Document communicationDocument = module.getDocument(customer, Communication.DOCUMENT_NAME);
-		Document subscriptionDocument = module.getDocument(customer, Subscription.DOCUMENT_NAME);
+		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document communicationDocument = module.getDocument(customer, AppConstants.COMMUNICATION_DOCUMENT_NAME);
+		Document subscriptionDocument = module.getDocument(customer, AppConstants.SUBSCRIPTION_DOCUMENT_NAME);
 
 		// augment communication specific beans to always include the
 		// communication itself, and the current admin user
-		org.skyve.domain.app.admin.User adminUser = pers.retrieve(org.skyve.domain.app.admin.User.MODULE_NAME, org.skyve.domain.app.admin.User.DOCUMENT_NAME, user.getId());
+		org.skyve.domain.app.admin.User adminUser = pers.retrieve(AppConstants.ADMIN_MODULE_NAME, AppConstants.USER_DOCUMENT_NAME, user.getId());
 		List<Bean> beanList = new ArrayList<>();
 		if (specificBeans != null && specificBeans.length > 0) {
 			Collections.addAll(beanList, specificBeans);
@@ -292,8 +293,8 @@ public class CommunicationUtil {
 				try {
 					// handle Subscription redirect for messages of the same format
 					CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-					DocumentQuery q = CORE.getPersistence().newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
-					q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, address);
+					DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME);
+					q.getFilter().addEquals(AppConstants.RECEIVER_IDENTIFIER_ATTRIBUTE_NAME, address);
 					Subscription subscription = q.beanResult();
 
 					if (subscription != null) {
@@ -302,7 +303,7 @@ public class CommunicationUtil {
 							StringBuilder msg = new StringBuilder(128);
 							msg.append(communicationDoc.getLocalisedSingularAlias()).append(" prevented because the recipient ");
 							msg.append(address).append(" has a ").append(subscriptionDoc.getLocalisedSingularAlias());
-							msg.append(" set ").append(Subscription.declinedPropertyName);
+							msg.append(" set ").append(AppConstants.DECLINED_ATTRIBUTE_NAME);
 
 							// block the communication if explicit mode
 							if (ResponseMode.EXPLICIT.equals(responseMode)) {
@@ -407,8 +408,8 @@ public class CommunicationUtil {
 		Communication result = null;
 		try {
 			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			DocumentQuery query = pers.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-			query.getFilter().addEquals(Communication.descriptionPropertyName, description);
+			DocumentQuery query = pers.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME);
+			query.getFilter().addEquals(AppConstants.DESCRIPTION_ATTRIBUTE_NAME, description);
 
 			result = query.beanResult();
 		} finally {
@@ -436,8 +437,8 @@ public class CommunicationUtil {
 	public static void sendSimpleBeanCommunication(String sendTo, String subject, String body, ResponseMode responseMode, FormatType formatType, Bean... beans) throws Exception {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
-		Module m = c.getModule(Communication.MODULE_NAME);
-		Document d = m.getDocument(c, Communication.DOCUMENT_NAME);
+		Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document d = m.getDocument(c, AppConstants.COMMUNICATION_DOCUMENT_NAME);
 		Communication bean = d.newInstance(u);
 
 		bean.setDescription("Simple Bean Communication");
@@ -464,8 +465,8 @@ public class CommunicationUtil {
 			// create a basic default system email
 			User u = CORE.getUser();
 			Customer c = u.getCustomer();
-			Module m = c.getModule(Communication.MODULE_NAME);
-			Document d = m.getDocument(c, Communication.DOCUMENT_NAME);
+			Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
+			Document d = m.getDocument(c, AppConstants.COMMUNICATION_DOCUMENT_NAME);
 			result = d.newInstance(u);
 
 			result.setDescription(description);
@@ -561,8 +562,8 @@ public class CommunicationUtil {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Communication.MODULE_NAME);
-		JobMetaData job = module.getJob("jProcessCommunicationsForTag");
+		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+		JobMetaData job = module.getJob(AppConstants.PROCESS_COMMUNICATIONS_FOR_TAG_JOB_NAME);
 
 		EXT.getJobScheduler().runOneShotJob(job, communication, user);
 
@@ -570,7 +571,7 @@ public class CommunicationUtil {
 		sb.append("\nThe job has been commenced - check Admin->Jobs for the log.");
 		communication.setResults(sb.toString());
 
-		communication.originalValues().remove(Communication.resultsPropertyName);
+		communication.originalValues().remove(AppConstants.RESULTS_ATTRIBUTE_NAME);
 
 		return communication;
 	}
@@ -580,14 +581,14 @@ public class CommunicationUtil {
 		// validate required fields
 		if (bean.getModuleName() == null) {
 			throw new ValidationException(
-					new Message(Communication.moduleNamePropertyName, "A module must be selected for results."));
+					new Message(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, "A module must be selected for results."));
 		}
 		if (bean.getDocumentName() == null) {
 			throw new ValidationException(
-					new Message(Communication.documentNamePropertyName, "A document must be selected for results."));
+					new Message(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, "A document must be selected for results."));
 		}
 		if (bean.getTag() == null) {
-			throw new ValidationException(new Message(Communication.tagPropertyName, "A tag must be selected for results."));
+			throw new ValidationException(new Message(AppConstants.TAG_ATTRIBUTE_NAME, "A tag must be selected for results."));
 		}
 
 		long count = bean.getTag().countDocument(bean.getModuleName(), bean.getDocumentName());

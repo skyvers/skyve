@@ -751,7 +751,7 @@ public class JasperReportRenderer {
 				// nothing
 			}
 
-			query.addTextChunk("select " + sql.toString() + " from " + getPersistentFromDocument(document) + " a");
+			query.addTextChunk("select " + sql.toString() + " from " + Renderer.getPersistentIdentifierForDocument(document) + " a");
 
 			// joins
 			if (designSpecification.getJoins() != null) {
@@ -1218,20 +1218,6 @@ public class JasperReportRenderer {
 
 		jrExpression.setText(expression);
 		return jrExpression;
-	}
-
-	// TODO: Move to interface
-	public static String getPersistentFromDocument(Document document) {
-		StringBuilder sb = new StringBuilder();
-
-		Persistent persistent = document.getPersistent();
-		if (persistent != null) {
-			sb.append(persistent.getCatalog() == null ? "" : persistent.getCatalog() + ".");
-			sb.append(persistent.getSchema() == null ? "" : persistent.getSchema() + ".");
-			sb.append(persistent.getName());
-		}
-
-		return sb.toString();
 	}
 
 	public static String flipCondition(String conditionName) {

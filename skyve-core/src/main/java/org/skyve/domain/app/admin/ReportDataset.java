@@ -13,9 +13,6 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
 public interface ReportDataset extends PersistentBean {
-	public static final String MODULE_NAME = Contact.MODULE_NAME;
-	public static final String DOCUMENT_NAME = "ReportDataset";
-
 	/**
 	 * Dataset Type
 	 * <br/>

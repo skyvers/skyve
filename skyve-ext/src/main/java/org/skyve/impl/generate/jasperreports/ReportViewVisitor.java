@@ -958,7 +958,7 @@ public class ReportViewVisitor extends ViewVisitor {
 
 		sub.setMode(design.getMode()); // default to same mode as containing report
 		sub.setField(fld);
-		sub.setParentReportPersistentName(Renderer.getPersistentFromDocument(document));
+		sub.setParentReportPersistentName(Renderer.getPersistentIdentifierForDocument(document));
 		sub.setRepositoryPath(design.getRepositoryPath());
 		sub.setSaveToDocumentPackage(design.getSaveToDocumentPackage());
 

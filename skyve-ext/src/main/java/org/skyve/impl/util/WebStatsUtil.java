@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
@@ -22,8 +23,6 @@ import org.skyve.web.UserAgentType;
 public class WebStatsUtil {
 	private static final String YEAR_FORMAT = "yyyy";
 	private static final String MONTH_FORMAT = "M";
-
-	private static final String WEB_STATS_MODULE_NAME = "admin";
 	
 	private WebStatsUtil() {
 		// do nothing
@@ -32,7 +31,7 @@ public class WebStatsUtil {
 	public static void recordLogin(User user)
 	throws Exception {
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(WEB_STATS_MODULE_NAME);
+		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 		Document loginRecordDocument = module.getDocument(customer, "UserLoginRecord");
 		AbstractPersistentBean loginRecord = loginRecordDocument.newInstance(user);
 		BindUtil.set(loginRecord, "userName", user.getName());
@@ -55,7 +54,7 @@ public class WebStatsUtil {
 
 		try {
 			Customer customer = user.getCustomer();
-			Module admin = customer.getModule(WEB_STATS_MODULE_NAME);
+			Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 			@SuppressWarnings("null")
 			String ADM_UserMonthlyHits = admin.getDocument(customer, "UserMonthlyHits").getPersistent().getPersistentIdentifier();
 

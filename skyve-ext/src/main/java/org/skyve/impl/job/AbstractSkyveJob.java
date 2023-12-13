@@ -11,6 +11,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.UnableToInterruptJobException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.types.Timestamp;
@@ -189,20 +190,20 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 				}
 
 				try {
-					Module module = customer.getModule("admin");
-					Document document = module.getDocument(customer, "Job");
+					Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+					Document document = module.getDocument(customer, AppConstants.JOB_DOCUMENT_NAME);
 					PersistentBean job = document.newInstance(user);
 
-					BindUtil.set(job, "startTime", getStartTime());
-					BindUtil.set(job, "displayName", getDisplayName());
-					BindUtil.set(job, "status", status.toString());
-					BindUtil.set(job, "endTime", getEndTime());
-					BindUtil.set(job, "percentComplete", Integer.valueOf(getPercentComplete()));
-					BindUtil.set(job, "log", createLogDescriptionString());
+					BindUtil.set(job, AppConstants.START_TIME_ATTRIBUTE_NAME, getStartTime());
+					BindUtil.set(job, AppConstants.DISPLAY_NAME_ATTRIBUTE_NAME, getDisplayName());
+					BindUtil.set(job, AppConstants.STATUS_ATTRIBUTE_NAME, status.toString());
+					BindUtil.set(job, AppConstants.END_TIME_ATTRIBUTE_NAME, getEndTime());
+					BindUtil.set(job, AppConstants.PERCENTAGE_COMPLETE_ATTRIBUTE_NAME, Integer.valueOf(getPercentComplete()));
+					BindUtil.set(job, AppConstants.LOG_ATTRIBUTE_NAME, createLogDescriptionString());
 					if (bean != null) {
-						BindUtil.set(job, "beanBizId", bean.getBizId());
-						BindUtil.set(job, "beanModuleName", bean.getBizModule());
-						BindUtil.set(job, "beanDocumentName", bean.getBizDocument());
+						BindUtil.set(job, AppConstants.BEAN_BIZID_ATTRIBUTE_NAME, bean.getBizId());
+						BindUtil.set(job, AppConstants.BEAN_MODULE_NAME_ATTRIBUTE_NAME, bean.getBizModule());
+						BindUtil.set(job, AppConstants.BEAN_DOCUMENT_NAME_ATTRIBUTE_NAME, bean.getBizDocument());
 					}
 
 					persistence.save(document, job);

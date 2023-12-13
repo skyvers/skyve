@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.script.SkyveScriptInterpreter;
@@ -258,7 +259,7 @@ public class MavenSkyveProject {
 		final List<File> historicFiles = new ArrayList<>();
 		final List<File> historicFolders = new ArrayList<>();
 
-		historicFolders.add(basePath.resolve(webDirectory).resolve("admin").toFile());
+		historicFolders.add(basePath.resolve(webDirectory).resolve(AppConstants.ADMIN_MODULE_NAME).toFile());
 		historicFolders.add(basePath.resolve(webDirectory).resolve("ecuador").toFile());
 		historicFolders.add(basePath.resolve(webDirectory).resolve("editorial").toFile());
 		historicFolders.add(basePath.resolve(webDirectory).resolve("ultima").toFile());
@@ -316,7 +317,7 @@ public class MavenSkyveProject {
 		}
 		else {
 			skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), new String[] {"java"}, false));
-			skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").resolve("admin").toFile(), null, true));
+			skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").resolve(AppConstants.ADMIN_MODULE_NAME).toFile(), null, true));
 		}
 		skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("resources").toFile(), null, true));
 		skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("schemas").toFile(), null, true));
@@ -362,7 +363,7 @@ public class MavenSkyveProject {
 			skyveGeneratedFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}
 		else {
-			skyveGeneratedFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").resolve("admin").toFile(), null, true));
+			skyveGeneratedFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").resolve(AppConstants.ADMIN_MODULE_NAME).toFile(), null, true));
 		}
 
 		return skyveGeneratedFiles;
@@ -419,7 +420,7 @@ public class MavenSkyveProject {
 			skyveGeneratedTestFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}
 		else {
-			skyveGeneratedTestFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").resolve("admin").toFile(), null, true));
+			skyveGeneratedTestFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").resolve(AppConstants.ADMIN_MODULE_NAME).toFile(), null, true));
 		}
 
 		return skyveGeneratedTestFiles;
