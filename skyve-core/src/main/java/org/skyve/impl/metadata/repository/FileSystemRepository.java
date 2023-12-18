@@ -224,9 +224,18 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 									String reportName = reportFileName.substring(0, reportFileName.length() - 7);
 									sb.setLength(0);
 									sb.append(key).append(moduleFileName).append('/');
-									sb.append(REPORTS_NAMESPACE).append(reportName);
+									sb.append(REPORTS_NAMESPACE).append(reportName).append(JASPER_SUFFIX);
 									String reportLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+									addKey(reportLocation);
+								}
+								else if (reportFileName.endsWith(".ftlh")) {
+									String reportName = reportFileName.substring(0, reportFileName.length() - 5);
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(REPORTS_NAMESPACE).append(reportName).append(FREEMARKER_SUFFIX);
+									String reportLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
 									addKey(reportLocation);
 								}
 							}
@@ -1017,15 +1026,27 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		path.append(MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		path.append(document.getName()).append('/');
 		path.append(REPORTS_NAMESPACE).append(reportName);
-		String key = path.toString();
+		String key = path.toString() + JASPER_SUFFIX;
 		String result = vtable(customer.getName(), key);
 		if (result == null) {
-			throw new IllegalArgumentException("Report " + reportName + " for document " + 
-												document.getOwningModuleName() + '.' + document.getName() + " is not defined.");
+			key = path.toString() + FREEMARKER_SUFFIX;
+			result = vtable(customer.getName(), key);
+			if (result == null) {
+				throw new IllegalArgumentException("Report " + reportName + " for document " + 
+													document.getOwningModuleName() + '.' + document.getName() + " is not defined.");
+			}
+			path.setLength(0);
+			path.append(absolutePath).append(result);
+			path.setLength(path.length() - FREEMARKER_SUFFIX.length()); // remove the suffix
+			path.append(".flth");
+		}
+		else {
+			path.setLength(0);
+			path.append(absolutePath).append(result);
+			path.setLength(path.length() - JASPER_SUFFIX.length()); // remove the suffix
+			path.append(".jasper");
 		}
 
-		path.setLength(0);
-		path.append(absolutePath).append(result).append(".jasper");
 		return path.toString();
 	}
 

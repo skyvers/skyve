@@ -289,7 +289,7 @@ public abstract class DomainGenerator {
 		System.out.println("DIALECT OPTIONS=" + dialectOptions.toString());
 		System.out.println("MULTI-TENANT=" + multiTenant);
 		System.out.println("DEBUG=" + debug);
-		System.out.println("EXCLUDED MODULES=" + ((excludedModules.length > 0) ? StringUtils.join(excludedModules, ", ") : ""));
+		System.out.println("EXCLUDED MODULES=" + (((excludedModules == null) || (excludedModules.length == 0)) ? "" : StringUtils.join(excludedModules, ", ")));
 
 		// Set access control false so that view loading doesn't resolve all the ACLs
 		// as this requires instantiation of model classes to get the driving document.
