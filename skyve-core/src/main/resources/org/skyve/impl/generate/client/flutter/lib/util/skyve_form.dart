@@ -37,6 +37,10 @@ class SkyveFormState extends State<SkyveForm> {
 
   bool get actionInProgres => false;
 
+  String get documentName => _payloadHistory.last.documentName;
+
+  String get moduleName => _payloadHistory.last.moduleName;
+
   @override
   Widget build(BuildContext context) {
     return _SkyveFormScope(

@@ -291,6 +291,22 @@ class SkyveRestClient {
     Options options = Options(contentType: Headers.formUrlEncodedContentType);
     return _dio.post(_baseUri + url, data: formDataMap, options: options);
   }
+
+  String contentUrl(
+      {required String module,
+      required String document,
+      required String binding,
+      required String contentId}) {
+    Map<String, String> params = {
+      '_doc': '$module.$document',
+      '_b': binding,
+      '_n': contentId,
+    };
+
+    String paramString = Uri(queryParameters: params).query;
+
+    return '${_baseUri}content?$paramString';
+  }
 }
 
 class RestClientException implements Exception {

@@ -103,7 +103,10 @@ class SkyveViewModel implements SkyveView {
       case 'contentColumn':
         return const Text('contentColumn');
       case 'contentImage':
-        return SkyveContentImage(label: formLabel ?? '');
+        return SkyveContentImage(
+          propertyKey: model['binding'],
+          label: formLabel ?? '',
+        );
       case 'contentLink':
         return const Text('contentLink');
       case 'contentRef':
