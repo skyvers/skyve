@@ -31,9 +31,12 @@ final containerMetaDataProvider =
 });
 
 final containerMenuProvider = FutureProvider((ref) async {
+  // Remove empty menu groups etc
+  List<SkyveModuleMenuModel> menuCopy = _removeEmptyItems(menu);
+
   // Prefer global menu variable (if defined)
-  if (menu != []) {
-    return menu;
+  if (menuCopy.isNotEmpty) {
+    return menuCopy;
   }
 
   return Future<List<SkyveModuleMenuModel>>(() async {
@@ -45,6 +48,13 @@ final containerMenuProvider = FutureProvider((ref) async {
         growable: false);
   });
 });
+
+/// Remove empty entries from the menu
+List<SkyveModuleMenuModel> _removeEmptyItems(menuIn) {
+  List<SkyveModuleMenuModel> menuCopy = List.from(menuIn);
+  menuCopy.removeWhere((moduleMenu) => moduleMenu.isEmpty);
+  return menuCopy;
+}
 
 final containerDataSourceProvider =
     FutureProvider<Map<String, SkyveDataSourceModel>>((ref) async {

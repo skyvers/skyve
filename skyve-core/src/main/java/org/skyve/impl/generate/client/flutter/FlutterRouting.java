@@ -25,6 +25,10 @@ import org.skyve.metadata.module.menu.MenuRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*
+ * TODO convert this away from string concatenation so
+ * we can prune emtpy items etc.
+ */
 public class FlutterRouting {
     
     private final Logger log = LoggerFactory.getLogger(getClass());
