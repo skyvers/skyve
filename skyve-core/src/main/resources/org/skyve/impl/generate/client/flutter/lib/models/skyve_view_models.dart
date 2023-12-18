@@ -30,25 +30,23 @@ class SkyveViewModel implements SkyveView {
       for (Map<String, dynamic> action in actions) {
         final bool inActionPanel = action['inActionPanel'];
         if (inActionPanel) {
-          // final String type = action['type'];
-          final String actionType = action['actionType'];
-          final String actionName = action['actionName'];
-          // final bool clientValidation = action['clientValidation'];
-          // final String? fontIcon = action['fontIcon'];
-          // final String? iconUrl = action['iconUrl'];
-          final String label = action['label'];
-          // final String name = action['name'];
-          // final String show = action['show'];
-          // final String? resourceName = action['resourceName'];
-          result.add(SkyveButton(
-            actionType: actionType,
-            actionName: actionName,
-            label: label,
-          ));
+          result.add(_createButton(action));
         }
       }
     }
     return result;
+  }
+
+  static SkyveButton _createButton(Map<String, dynamic> actionJson) {
+    final String actionType = actionJson['actionType'] ?? actionJson['type'];
+    final String actionName = actionJson['actionName'];
+    final String label = actionJson['label'];
+
+    return SkyveButton(
+      actionType: actionType,
+      actionName: actionName,
+      label: label,
+    );
   }
 
   @override
@@ -81,7 +79,7 @@ class SkyveViewModel implements SkyveView {
       case 'border':
         return const Text('border');
       case 'button':
-        return const Text('border');
+        return _createButton(model);
       case 'cancelAction':
         return const Text('cancelAction');
       case 'chart':
@@ -181,7 +179,10 @@ class SkyveViewModel implements SkyveView {
       case 'okAction':
         return const Text('okAction');
       case 'password':
-        return SkyvePassword(label: formLabel ?? '');
+        return SkyvePassword(
+          propertyKey: model['binding'],
+          label: formLabel ?? '',
+        );
       case 'printAction':
         return const Text('printAction');
       case 'progressBar':
