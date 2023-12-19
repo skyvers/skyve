@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'skyve_textfield.dart';
 
 class SkyveColourPicker extends StatelessWidget {
   final String label;
@@ -8,7 +7,9 @@ class SkyveColourPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement widget
-    return SkyveTextField(label: label);
+    return const Placeholder(
+      fallbackHeight: 50,
+      color: Colors.orange,
+    );
   }
 }
