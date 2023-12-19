@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen_test/widgets/loader.dart';
+import '../widgets/loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../util/skyve_providers.dart';
 import '../widgets/skyve_view.dart';

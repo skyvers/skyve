@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_gen_test/models/payload.dart';
+import '../models/payload.dart';
 
 class SkyveForm extends StatefulWidget {
   const SkyveForm({super.key, required this.child});

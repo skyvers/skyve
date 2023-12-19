@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen_test/util/skyve_form.dart';
-import 'package:flutter_gen_test/util/skyve_rest_client.dart';
+import '../util/skyve_form.dart';
+import '../util/skyve_rest_client.dart';
 
 class SkyveContentImage extends StatelessWidget {
   final String label;
