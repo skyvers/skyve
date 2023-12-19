@@ -18,8 +18,28 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
+import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.Date;
+import org.skyve.impl.metadata.model.document.field.DateTime;
+import org.skyve.impl.metadata.model.document.field.Decimal10;
+import org.skyve.impl.metadata.model.document.field.Decimal2;
+import org.skyve.impl.metadata.model.document.field.Decimal5;
+import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.LongInteger;
+import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.model.document.field.TextFormat;
+import org.skyve.impl.metadata.model.document.field.Time;
+import org.skyve.impl.metadata.model.document.field.Timestamp;
+import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
+import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
+import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
+import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
+import org.skyve.impl.metadata.model.document.field.validator.RangeValidator;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
@@ -88,7 +108,6 @@ import org.skyve.impl.metadata.view.reference.EditViewReference;
 import org.skyve.impl.metadata.view.reference.ExternalReference;
 import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
 import org.skyve.impl.metadata.view.reference.QueryListViewReference;
-import org.skyve.impl.metadata.view.reference.Reference;
 import org.skyve.impl.metadata.view.reference.ReferenceProcessor;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget;
 import org.skyve.impl.metadata.view.reference.ReportReference;
@@ -145,13 +164,21 @@ import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
+import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Inverse;
+import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
@@ -179,6 +206,7 @@ import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
@@ -194,6 +222,7 @@ public class MetaDataServlet extends HttpServlet {
 		
 		try (PrintWriter pw = response.getWriter()) {
 			AbstractPersistence persistence = AbstractPersistence.get();
+			String documentName = null;
 			try {
 				try {
 					persistence.begin();
@@ -206,7 +235,7 @@ public class MetaDataServlet extends HttpServlet {
 
 					String uxui = UserAgent.getUxUi(request).getName();
 					String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
-					String documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
+					documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 					if (documentName != null) {
 						pw.append(view(user, uxui, moduleName, documentName));
 					}
@@ -221,7 +250,7 @@ public class MetaDataServlet extends HttpServlet {
 			catch (Throwable t) {
 				t.printStackTrace();
 				persistence.rollback();
-				pw.print(emptyResponse());
+				pw.print(emptyResponse(documentName));
 			}
 			finally {
 				if (persistence != null) {
@@ -1290,7 +1319,7 @@ public class MetaDataServlet extends HttpServlet {
 				if (value != null) {
 					result.append(",\"value\":\"").append(OWASP.escapeJsonString(value)).append('"');
 				}
-				Reference linkReference = link.getReference();
+				org.skyve.impl.metadata.view.reference.Reference linkReference = link.getReference();
 				if (linkReference != null) {
 					result.append(",\"reference\":{");
 					new ReferenceProcessor() {
@@ -3025,7 +3054,195 @@ public class MetaDataServlet extends HttpServlet {
 			}
 
 			private void processBound(Bound bound) {
-				result.append(",\"binding\":\"").append(bound.getBinding()).append('"');
+				String binding = bound.getBinding();
+				if (binding != null) {
+					result.append(",\"binding\":\"").append(binding).append("\",\"target\":{");
+					processTarget();
+					result.append('}');
+				}
+			}
+
+			private void processTarget() {
+				TargetMetaData target = getCurrentTarget();
+				if (target != null) {
+					Attribute attribute = target.getAttribute();
+					if (attribute != null) {
+						result.append("\"attributeType\":\"").append(attribute.getAttributeType()).append("\",");
+						DomainType domainType = attribute.getDomainType();
+						if (domainType != null) {
+							result.append("\"domainType\":\"").append(domainType).append("\",");
+							// NB this handles enumerations too.
+							if (DomainType.constant.equals(domainType)) {
+								List<DomainValue> values = document.getDomainValues(customer, domainType, attribute, null, true);
+								if (values != null) {
+									result.append("\"values\":{");
+									for (DomainValue value : values) {
+										String code = value.getCode();
+										result.append('"').append(OWASP.escapeJsonString(code)).append("\":\"");
+										String description = value.getLocalisedDescription();
+										result.append(OWASP.escapeJsonString((description == null) ? code : description)).append("\",");
+									}
+									result.setLength(result.length() - 1); // remove last comma
+									result.append("},");
+								}
+							}
+						}
+						if (attribute instanceof Relation) {
+							Relation relation = (Relation) attribute;
+							result.append("\"documentName\":\"").append(relation.getDocumentName()).append("\",");
+							if (relation instanceof Inverse) {
+								Inverse inverse = (Inverse) relation;
+								result.append("\"referenceName\":\"").append(inverse.getReferenceName()).append("\",");
+								result.append("\"cardinality\":\"").append(inverse.getCardinality()).append("\",");
+								result.append("\"cascade\":\"").append(inverse.getCascade()).append("\",");
+							}
+							else if (attribute instanceof Reference) {
+								Reference reference = (Reference) relation;
+								// NB query name not required in views here
+								// NB reference type not required either
+								
+								if (reference instanceof Collection) {
+									Collection collection = (Collection) reference;
+									Integer cardinality = collection.getMinCardinality();
+									if (cardinality != null) {
+										result.append("\"minCardinality\":").append(cardinality).append(',');
+									}
+									cardinality = collection.getMaxCardinality();
+									if (cardinality != null) {
+										result.append("\"maxCardinality\":").append(cardinality).append(',');
+									}
+								}
+							}
+						}
+						else {
+							Field field = (Field) attribute;
+							String defaultValue = field.getDefaultValue();
+							if (defaultValue != null) {
+								result.append("\"defaultValue\":\"").append(OWASP.escapeJsonString(defaultValue)).append("\",");
+							}
+
+							if (field instanceof ConvertableField) {
+								ConverterName converterName = ((ConvertableField) field).getConverterName();
+								if (converterName != null) {
+									result.append("\"converterName\":\"").append(converterName).append("\",");
+								}
+								if (field instanceof Date) {
+									processDateValidator(((Date) field).getValidator());
+								}
+								else if (field instanceof DateTime) {
+									processDateValidator(((DateTime) field).getValidator());
+								}
+								else if (field instanceof Time) {
+									processDateValidator(((Time) field).getValidator());
+								}
+								else if (field instanceof Timestamp) {
+									processDateValidator(((Timestamp) field).getValidator());
+								}
+								else if (field instanceof Decimal10) {
+									processDecimalValidator(((Decimal10) field).getValidator());
+								}
+								else if (field instanceof Decimal2) {
+									processDecimalValidator(((Decimal2) field).getValidator());
+								}
+								else if (field instanceof Decimal5) {
+									processDecimalValidator(((Decimal5) field).getValidator());
+								}
+								else if (field instanceof org.skyve.impl.metadata.model.document.field.Integer) {
+									IntegerValidator validator = ((org.skyve.impl.metadata.model.document.field.Integer) field).getValidator();
+									if (validator != null) {
+										processRangeValidator(validator);
+										result.setLength(result.length() - 1); // remove last comma
+										result.append("},");
+									}
+								}
+								else if (field instanceof LongInteger) {
+									LongValidator validator = ((LongInteger) field).getValidator();
+									if (validator != null) {
+										processRangeValidator(validator);
+										result.setLength(result.length() - 1); // remove last comma
+										result.append("},");
+									}
+								}
+								else if (field instanceof Text) {
+									Text text = (Text) field;
+									result.append("\"length\":").append(text.getLength()).append(",");
+									
+									TextFormat format = text.getFormat();
+									if (format != null) {
+										result.append("\"format\":{");
+										String mask = format.getMask();
+										if (mask != null) {
+											result.append("\"mask\":\"").append(OWASP.escapeJsonString(mask)).append("\",");
+										}
+										TextCase textCase = format.getCase();
+										if (textCase != null) {
+											result.append("\"case\":\"").append(textCase).append("\",");
+										}
+										result.setLength(result.length() - 1); // remove last comma
+										result.append("},");
+									}
+									
+									TextValidator validator = text.getValidator();
+									if (validator != null) {
+										result.append("\"validator\":{");
+										String message = validator.getLocalisedValidationMessage();
+										if (message != null) {
+											result.append("\"message\":\"").append(OWASP.escapeJsonString(message)).append("\",");
+										}
+										ValidatorType type = validator.getType();
+										if (type != null) {
+											result.append("\"type\":\"").append(type).append("\",");
+										}
+										String regex = validator.getRegularExpression();
+										if (regex != null) {
+											result.append("\"regex\":\"").append(OWASP.escapeJsonString(regex)).append("\",");
+										}
+										result.setLength(result.length() - 1); // remove last comma
+										result.append("},");
+									}
+								}
+							}
+						}
+						
+						result.setLength(result.length() - 1); // remove last comma
+					}
+				}
+			}
+			
+			private void processDateValidator(DateValidator validator) {
+				if (validator != null) {
+					processRangeValidator(validator);
+					result.setLength(result.length() - 1); // remove last comma
+					result.append("},");
+				}
+			}
+
+			private void processDecimalValidator(DecimalValidator validator) {
+				if (validator != null) {
+					processRangeValidator(validator);
+					Integer precision = validator.getPrecision();
+					if (precision != null) {
+						result.append("\"precision\":").append(precision).append(",");
+					}
+					result.setLength(result.length() - 1); // remove last comma
+					result.append("},");
+				}
+			}
+
+			private void processRangeValidator(RangeValidator<?> validator) {
+				result.append("\"validator\":{");
+				String message = validator.getLocalisedValidationMessage();
+				if (message != null) {
+					result.append("\"message\":\"").append(OWASP.escapeJsonString(message)).append("\",");
+				}
+				String min = validator.getXmlMin();
+				if (min != null) {
+					result.append("\"min\":\"").append(OWASP.escapeJsonString(min)).append("\",");
+				}
+				String max = validator.getXmlMax();
+				if (max != null) {
+					result.append("\"max\":\"").append(OWASP.escapeJsonString(max)).append("\",");
+				}
 			}
 
 			private void processEditable(org.skyve.metadata.view.Editable editable) {
@@ -3265,7 +3482,10 @@ public class MetaDataServlet extends HttpServlet {
 		}
 	}
 	
-	private static String emptyResponse() {
+	private static String emptyResponse(String documentName) {
+		if (documentName != null) { // request was for a view
+			return "{\"type\":\"view\",\"name\":\"edit\",\"contained\":[],\"title\":\"" + documentName + "\"}";
+		}
 		return "{\"menus\":[],\"dataSources\":[]}";
 	}
 }
