@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skyve_flutter/util/validators.dart';
+import 'package:skyve_flutter/widgets/skyve_tab.dart';
+import 'package:skyve_flutter/widgets/skyve_tabpane.dart';
 import '../widgets/skyve_blurb.dart';
 import '../widgets/skyve_button.dart';
 import '../widgets/skyve_contentimage.dart';
@@ -229,9 +231,12 @@ class SkyveViewModel implements SkyveView {
       case 'staticImage':
         return const Text('staticImage');
       case 'tab':
-        return const Text('tab');
+        return SkyveTab(
+            title: model['title'],
+            icon: model['icon'],
+            children: _many(model['contained']));
       case 'tabPane':
-        return const Text('tabPane');
+        return SkyveTabPane(tabs: _tabs(model['tabs']));
       case 'textArea':
         return const Text('textArea');
       case 'textField':
@@ -287,6 +292,17 @@ class SkyveViewModel implements SkyveView {
         formLabel: (showsLabel ? label : null),
         required: required,
       )));
+    }
+    return result;
+  }
+
+  static List<SkyveTab> _tabs(List<dynamic> tabs) {
+    List<SkyveTab> result = [];
+    for (Map<String, dynamic> tab in tabs) {
+      result.add(SkyveTab(
+          title: tab['title'],
+          icon: tab['icon'],
+          children: _many(tab['contained'])));
     }
     return result;
   }
