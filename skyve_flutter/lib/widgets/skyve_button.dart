@@ -13,12 +13,16 @@ class SkyveButton extends StatelessWidget {
   final String actionType;
   final String actionName;
   final String label;
+  final bool clientValidation;
+  final bool inActionPanel;
 
   const SkyveButton(
       {Key? key,
       required this.actionType,
       required this.actionName,
-      required this.label})
+      required this.label,
+      this.clientValidation = false,
+      this.inActionPanel = false})
       : super(key: key);
 
   @override
@@ -41,8 +45,19 @@ class SkyveButton extends StatelessWidget {
   }
 
   void _onPressed(BuildContext context) async {
-// FIXME this should be conditional
-    Form.of(context).save();
+    // Validate the form, saving an continuing with the
+    // action if there were no errors
+    var form = Form.of(context);
+
+    if (clientValidation) {
+      if (!form.validate()) {
+        debugPrint('Validation failure, aborting button action');
+        return;
+      }
+    }
+
+    debugPrint('Saving form');
+    form.save();
 
     SkyveFormState formState = SkyveForm.of(context);
     debugPrint('Action $actionType pressed for $formState');

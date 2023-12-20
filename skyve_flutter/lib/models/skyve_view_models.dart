@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skyve_flutter/util/validators.dart';
 import '../widgets/skyve_blurb.dart';
 import '../widgets/skyve_button.dart';
 import '../widgets/skyve_contentimage.dart';
@@ -41,30 +42,33 @@ class SkyveViewModel implements SkyveView {
     final String actionType = actionJson['actionType'] ?? actionJson['type'];
     final String actionName = actionJson['actionName'];
     final String label = actionJson['label'];
+    final bool clientValidation = actionJson['clientValidation'] ?? false;
 
     return SkyveButton(
       actionType: actionType,
       actionName: actionName,
       label: label,
+      clientValidation: clientValidation,
     );
   }
 
   @override
   List<Widget> contained(BuildContext context) {
-    return _many(context, jsonMetaData['contained']);
+    return _many(jsonMetaData['contained']);
   }
 
-  static List<Widget> _many(BuildContext context, List<dynamic> contained) {
-    final List<Widget> result = List.generate(contained.length, (index) {
-      Map<String, dynamic> model = contained[index];
-      return _one(context, model, null);
-    }, growable: false);
-    return result;
+  static List<Widget> _many(List<dynamic> contained) {
+    return contained.map((elem) => _one(model: elem)).toList();
   }
 
   static Widget _one(
-      BuildContext context, Map<String, dynamic> model, String? formLabel) {
+      {required Map<String, dynamic> model,
+      String? formLabel,
+      bool required = false}) {
     final String type = model['type'];
+
+    final Validator validator = _createValidators(model, formLabel, required);
+
     switch (type) {
       case 'actionLink':
         return const Text('actionLink');
@@ -134,8 +138,10 @@ class SkyveViewModel implements SkyveView {
       case 'externalRef':
         return const Text('externalRef');
       case 'form':
-        return ResponsiveLayout(
-            formCols: [], formRows: _formRows(context, model['rows']));
+        {
+          List<SkyveFormRow> formRows = _formRows(model['rows']);
+          return ResponsiveLayout(formCols: const [], formRows: formRows);
+        }
       case 'implicitActionRef':
         return const Text('implicitActionRef');
       case 'importAction':
@@ -147,11 +153,7 @@ class SkyveViewModel implements SkyveView {
       case 'geometryMap':
         return const Text('geometryMap');
       case 'hbox':
-        return SkyveHBox(
-            children: _many(
-          context,
-          model['contained'],
-        ));
+        return SkyveHBox(children: _many(model['contained']));
       case 'html':
         return const Text('html');
       case 'inject':
@@ -182,6 +184,7 @@ class SkyveViewModel implements SkyveView {
         return SkyvePassword(
           propertyKey: model['binding'],
           label: formLabel ?? '',
+          validator: validator.validate,
         );
       case 'printAction':
         return const Text('printAction');
@@ -235,6 +238,7 @@ class SkyveViewModel implements SkyveView {
         return SkyveTextField(
           propertyKey: model['binding'],
           label: formLabel ?? '',
+          validator: validator.validate,
         );
       case 'toggleDisabled':
         return const Text('toggleDisabled');
@@ -249,7 +253,6 @@ class SkyveViewModel implements SkyveView {
       case 'vbox':
         return SkyveVBox(
             children: _many(
-          context,
           model['contained'],
         ));
       case 'zoomIn':
@@ -261,28 +264,50 @@ class SkyveViewModel implements SkyveView {
     }
   }
 
-  static List<SkyveFormRow> _formRows(
-      BuildContext context, List<dynamic> rows) {
-    List<SkyveFormRow> result = List.generate(rows.length, (index) {
-      Map<String, dynamic> row = rows[index];
-      return SkyveFormRow(formItems: _formItems(context, row['items']));
-    }, growable: false);
-    return result;
+  static List<SkyveFormRow> _formRows(List<dynamic> rows) {
+    return rows
+        .map((row) => SkyveFormRow(formItems: _formItems(row['items'])))
+        .toList();
   }
 
-  static List<SkyveFormItem> _formItems(
-      BuildContext context, List<dynamic> items) {
+  static List<SkyveFormItem> _formItems(List<dynamic> items) {
     List<SkyveFormItem> result = [];
     for (Map<String, dynamic> item in items) {
       final String? label = item['label'];
       final bool showsLabel = item['showsLabel'];
       final bool required = item['required'];
       if ((showsLabel) && (label != null)) {
-        result.add(SkyveFormItem(SkyveLabel(label)));
+        result.add(SkyveFormItem(SkyveLabel(
+          label,
+          required: required,
+        )));
       }
-      result.add(SkyveFormItem(
-          _one(context, item['widget'], (showsLabel ? label : null))));
+      result.add(SkyveFormItem(_one(
+        model: item['widget'],
+        formLabel: (showsLabel ? label : null),
+        required: required,
+      )));
     }
     return result;
+  }
+
+  static Validator _createValidators(
+      Map<String, dynamic> model, String? formLabel, bool? required) {
+    List<Validator> validators = List.empty(growable: true);
+
+    if (required == true) {
+      validators.add(RequiredValidator(formLabel));
+    }
+
+    if (validators.isEmpty) {
+      // No (client-side) validation
+      return NoOpValidator();
+    } else if (validators.length == 1) {
+      // Just the one validator, so we'll return than
+      return validators.first;
+    } else {
+      // Jam all the validators together
+      return DelegatingValidator(validators);
+    }
   }
 }

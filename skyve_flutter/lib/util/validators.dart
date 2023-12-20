@@ -1,8 +1,9 @@
-class DelegatingValidator {
+class DelegatingValidator extends Validator {
   final List<Validator> _delegates;
 
-  const DelegatingValidator(this._delegates);
+  DelegatingValidator(this._delegates);
 
+  @override
   String? validate(String? value) {
     List<String> msgs = [];
 
@@ -33,4 +34,32 @@ class DelegatingValidator {
 abstract class Validator {
   String? validate(String? value);
   bool get continueOnFail => true;
+}
+
+class NoOpValidator extends Validator {
+  @override
+  String? validate(String? value) => null;
+}
+
+class RequiredValidator extends Validator {
+  String? formLabel;
+
+  RequiredValidator(this.formLabel);
+
+  @override
+  bool get continueOnFail => false;
+
+  @override
+  String? validate(String? value) {
+    if ((value ?? '').isEmpty) {
+      if (formLabel == null) {
+        return 'An answer is required';
+      } else {
+        return '$formLabel is required';
+      }
+    } else {
+      // No issue
+      return null;
+    }
+  }
 }
