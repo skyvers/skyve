@@ -3379,9 +3379,13 @@ public class MetaDataServlet extends HttpServlet {
 				actionsJSON.append(",\"actionType\":");
 				if (type == null) {
 					actionsJSON.append("null");
+					actionsJSON.append(",\"clientValidation\":").append(! Boolean.FALSE.equals(action.getClientValidation()));
 				}
 				else {
 					actionsJSON.append('"').append(type.name()).append('"');
+					if (type.isValidatable()) {
+						actionsJSON.append(",\"clientValidation\":").append(! Boolean.FALSE.equals(action.getClientValidation()));
+					}
 				}
 				actionsJSON.append(",\"actionName\":\"").append(name).append('"');
 				if (label != null) {
@@ -3393,7 +3397,6 @@ public class MetaDataServlet extends HttpServlet {
 				if (iconUrl != null) {
 					actionsJSON.append(",\"iconUrl\":\"").append(OWASP.escapeJsonString(iconUrl)).append('"');
 				}
-				actionsJSON.append(",\"clientValidation\":").append(! Boolean.FALSE.equals(action.getClientValidation()));
 				actionsJSON.append(",\"inActionPanel\":").append(! Boolean.FALSE.equals(action.getInActionPanel()));
 				ActionShow show = action.getShow();
 				if (show == null) {
