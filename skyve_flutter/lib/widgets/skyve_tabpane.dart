@@ -3,8 +3,9 @@ import 'package:skyve_flutter/widgets/skyve_tab.dart';
 
 class SkyveTabPane extends StatefulWidget {
   final List<SkyveTab> tabs;
+  final double height;
 
-  const SkyveTabPane({super.key, required this.tabs});
+  const SkyveTabPane({super.key, required this.tabs, this.height = 0});
 
   @override
   SkyveTabPaneState createState() => SkyveTabPaneState();
@@ -28,14 +29,11 @@ class SkyveTabPaneState extends State<SkyveTabPane>
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-
     List<Tab> tabButtons = List.generate(widget.tabs.length, (index) {
       return Tab(text: widget.tabs[index].title);
     }, growable: false);
 
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         TabBar(
             controller: _tabController,
@@ -45,8 +43,10 @@ class SkyveTabPaneState extends State<SkyveTabPane>
             isScrollable: true,
             tabs: tabButtons),
         Container(
-          height: screenHeight * 0.8, // TODO handle this later
-          margin: EdgeInsets.only(left: 16.0, right: 16.0),
+          height: (widget.height > 0)
+              ? widget.height
+              : MediaQuery.of(context).size.height * 0.8,
+          margin: const EdgeInsets.only(left: 16.0, right: 16.0),
           child: TabBarView(controller: _tabController, children: widget.tabs),
         )
       ],

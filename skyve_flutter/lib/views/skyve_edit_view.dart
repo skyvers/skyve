@@ -52,11 +52,15 @@ class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
         context,
         'FIXME title',
         LoaderWidget(
-          key: _stateKey,
-          module: widget.m,
-          document: widget.d,
-          bizId: widget.i,
-          child: SingleChildScrollView(child: Column(children: widgets)),
-        ));
+            key: _stateKey,
+            module: widget.m,
+            document: widget.d,
+            bizId: widget.i,
+            child: SingleChildScrollView(
+              child: Container(
+                  alignment: Alignment.topCenter,
+                  height: MediaQuery.of(context).size.height,
+                  child: Column(children: widgets)),
+            )));
   }
 }
