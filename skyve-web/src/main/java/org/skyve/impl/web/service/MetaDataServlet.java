@@ -3420,7 +3420,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void renderSidebar(Sidebar sidebar) {
 				result.setLength(result.length() - 1); // remove last comma from view.getContained() processing
-				result.append("],{\"type\":\"sidebar\"");
+				result.append("],\"sidebar\":{\"type\":\"sidebar\"");
 				processIdentifiable(sidebar);
 				processSize(sidebar);
 				processInvisible(sidebar);
