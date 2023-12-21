@@ -103,7 +103,6 @@ import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -1632,42 +1631,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			String name = queryColumn.getName();
 			String binding = queryColumn.getBinding();
 			// Sort out a display name and filter facet
-			String displayName = queryColumn.getLocalisedDisplayName();
+			String displayName = model.determineColumnTitle(queryColumn);
 			UIComponent specialFilterComponent = null;
 			AttributeType attributeType = null;
 			DomainType domainType = null;
 			if (binding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				Document bindingDocument = target.getDocument();
-				Attribute bindingAttribute = target.getAttribute();
-				if (binding.endsWith(Bean.BIZ_KEY)) {
-					if (displayName == null) {
-						if (bindingDocument != null) {
-							displayName = bindingDocument.getLocalisedSingularAlias();
-						}
-						else {
-							displayName = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
-						}
-					}
-				}
-				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
-					if (displayName == null) {
-						displayName = DocumentImpl.getBizOrdinalAttribute().getLocalisedDisplayName();
-					}
-				}
-				else if (bindingAttribute != null) {
-					attributeType = bindingAttribute.getAttributeType();
-					domainType = bindingAttribute.getDomainType();
-					if (displayName == null) {
-						displayName = bindingAttribute.getLocalisedDisplayName();
-					}
+				Attribute targetAttribute = target.getAttribute();
+				if (targetAttribute != null) {
+					attributeType = targetAttribute.getAttributeType();
+					domainType = targetAttribute.getDomainType();
 					if (showFilter &&
 							(projectedQueryColumn != null) &&
 							projectedQueryColumn.isFilterable() &&
 							(domainType != DomainType.dynamic)) {
 						specialFilterComponent = createSpecialColumnFilterFacetComponent(document,
 																							binding,
-																							bindingAttribute,
+																							targetAttribute,
 																							tableVar);
 					}
 				}

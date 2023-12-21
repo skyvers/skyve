@@ -15,6 +15,12 @@ class SkyveModuleMenuModel {
         title = json['title'],
         open = json['open'],
         items = SkyveMenuItemModel.fromJsonList(json['module'], json['menu']);
+
+  bool get isEmpty {
+    return items.every((element) => element.isEmpty);
+  }
+
+  bool get isNotEmpty => !isEmpty;
 }
 
 abstract class SkyveMenuItemModel {
@@ -57,12 +63,21 @@ abstract class SkyveMenuItemModel {
       return const SkyveNavigationMenuItemModel(title: 'Unknown', path: '/');
     }, growable: false);
   }
+
+  bool get isEmpty;
+
+  bool get isNotEmpty => !isEmpty;
 }
 
 class SkyveMenuGroupModel extends SkyveMenuItemModel {
   final List<SkyveMenuItemModel> items;
 
   const SkyveMenuGroupModel({required super.title, required this.items});
+
+  @override
+  bool get isEmpty {
+    return items.isEmpty || items.every((element) => element.isEmpty);
+  }
 }
 
 class SkyveNavigationMenuItemModel extends SkyveMenuItemModel {
@@ -72,4 +87,8 @@ class SkyveNavigationMenuItemModel extends SkyveMenuItemModel {
 
   const SkyveNavigationMenuItemModel(
       {required super.title, this.icon, required this.path, this.params});
+
+  @override
+  // A nav item is never empty
+  bool get isEmpty => false;
 }

@@ -1,5 +1,0 @@
-- android/app/
-	build.gradle - Sets minSdkVersion to 21 // should set compileSdkVersion to 32, 
-// doesnt set these as yet
-//	- src/main/
-//		AndroidManifest.xml - changes app name, adds phone permissions, adds google geo key

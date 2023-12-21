@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class FlutterGenerator {
     public static final String INDENT = "  ";
-    
+
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private GeneratorConfig config;
@@ -117,55 +117,27 @@ public class FlutterGenerator {
         refreshAll("lib/views", viewFiles, substitutions);
 
         // lib util folder
-        refreshAll("lib/util", List.of("skyve_rest_client.dart", "skyve_providers.dart"), substitutions);
+        refreshAll("lib/util",
+                List.of("skyve_rest_client.dart", "skyve_providers.dart", "skyve_form.dart", "validators.dart"),
+                substitutions);
 
         // lib models folder
-        refreshAll("lib/models",
-                List.of("skyve_datasource_models.dart", "skyve_menu_models.dart", "skyve_view_models.dart"),
-                substitutions);
+        refreshAll("lib/models", List.of("skyve_datasource_models.dart", "skyve_menu_models.dart",
+                "skyve_view_models.dart", "payload.dart"), substitutions);
 
         // lib widgets folder
-        new File(projectPath, "lib/widgets/").mkdir();
-        refreshFile("lib/widgets/skyve_border.dart", "lib/widgets/skyve_border.dart", substitutions);
-        refreshFile("lib/widgets/skyve_button.dart", "lib/widgets/skyve_button.dart", substitutions);
-        refreshFile("lib/widgets/skyve_checkbox.dart", "lib/widgets/skyve_checkbox.dart", substitutions);
-        refreshFile("lib/widgets/skyve_colourpicker.dart", "lib/widgets/skyve_colourpicker.dart", substitutions);
-        refreshFile("lib/widgets/skyve_combo.dart", "lib/widgets/skyve_combo.dart", substitutions);
-        refreshFile("lib/widgets/skyve_contentimage.dart", "lib/widgets/skyve_contentimage.dart", substitutions);
-        refreshFile("lib/widgets/skyve_datagrid.dart", "lib/widgets/skyve_datagrid.dart", substitutions);
-        refreshFile("lib/widgets/skyve_form.dart", "lib/widgets/skyve_form.dart", substitutions);
-        refreshFile("lib/widgets/skyve_hbox.dart", "lib/widgets/skyve_hbox.dart", substitutions);
-        refreshFile("lib/widgets/skyve_label.dart", "lib/widgets/skyve_label.dart", substitutions);
-        refreshFile("lib/widgets/skyve_menu.dart", "lib/widgets/skyve_menu.dart", substitutions);
-        refreshFile("lib/widgets/skyve_network_image.dart", "lib/widgets/skyve_network_image.dart", substitutions);
-        refreshFile("lib/widgets/skyve_spacer.dart", "lib/widgets/skyve_spacer.dart", substitutions);
-        refreshFile("lib/widgets/skyve_tab.dart", "lib/widgets/skyve_tab.dart", substitutions);
-        refreshFile("lib/widgets/skyve_tabpane.dart", "lib/widgets/skyve_tabpane.dart", substitutions);
-        refreshFile("lib/widgets/skyve_textfield.dart", "lib/widgets/skyve_textfield.dart", substitutions);
-        refreshFile("lib/widgets/skyve_toolbar.dart", "lib/widgets/skyve_toolbar.dart", substitutions);
-        refreshFile("lib/widgets/skyve_vbox.dart", "lib/widgets/skyve_vbox.dart", substitutions);
-        refreshFile("lib/widgets/skyve_view.dart", "lib/widgets/skyve_view.dart", substitutions);
-        refreshFile("lib/widgets/skyve_contentlink.dart", "lib/widgets/skyve_contentlink.dart", substitutions);
-        refreshFile("lib/widgets/skyve_contentsignature.dart", "lib/widgets/skyve_contentsignature.dart",
+        refreshAll("lib/widgets",
+                List.of("skyve_border.dart", "skyve_button.dart", "skyve_checkbox.dart", "skyve_colourpicker.dart",
+                        "skyve_combo.dart", "skyve_contentimage.dart", "skyve_datagrid.dart", "responsive_layout.dart",
+                        "skyve_hbox.dart", "skyve_label.dart", "skyve_menu.dart", "skyve_network_image.dart",
+                        "skyve_spacer.dart", "skyve_tab.dart", "skyve_tabpane.dart", "skyve_textfield.dart",
+                        "skyve_toolbar.dart", "skyve_vbox.dart", "skyve_view.dart", "skyve_contentlink.dart",
+                        "skyve_contentsignature.dart", "skyve_html.dart", "skyve_lookupdescription.dart",
+                        "skyve_password.dart", "skyve_radio.dart", "skyve_richtext.dart", "skyve_spinner.dart",
+                        "skyve_textarea.dart", "skyve_actionlink.dart", "skyve_report.dart", "skyve_download.dart",
+                        "skyve_upload.dart", "skyve_staticimage.dart", "skyve_dynamicimage.dart", "skyve_blurb.dart",
+                        "skyve_formitem.dart", "skyve_formrow.dart", "skyve_formcolumn.dart", "loader.dart"),
                 substitutions);
-        refreshFile("lib/widgets/skyve_html.dart", "lib/widgets/skyve_html.dart", substitutions);
-        refreshFile("lib/widgets/skyve_lookupdescription.dart", "lib/widgets/skyve_lookupdescription.dart",
-                substitutions);
-        refreshFile("lib/widgets/skyve_password.dart", "lib/widgets/skyve_password.dart", substitutions);
-        refreshFile("lib/widgets/skyve_radio.dart", "lib/widgets/skyve_radio.dart", substitutions);
-        refreshFile("lib/widgets/skyve_richtext.dart", "lib/widgets/skyve_richtext.dart", substitutions);
-        refreshFile("lib/widgets/skyve_spinner.dart", "lib/widgets/skyve_spinner.dart", substitutions);
-        refreshFile("lib/widgets/skyve_textarea.dart", "lib/widgets/skyve_textarea.dart", substitutions);
-        refreshFile("lib/widgets/skyve_actionlink.dart", "lib/widgets/skyve_actionlink.dart", substitutions);
-        refreshFile("lib/widgets/skyve_report.dart", "lib/widgets/skyve_report.dart", substitutions);
-        refreshFile("lib/widgets/skyve_download.dart", "lib/widgets/skyve_download.dart", substitutions);
-        refreshFile("lib/widgets/skyve_upload.dart", "lib/widgets/skyve_upload.dart", substitutions);
-        refreshFile("lib/widgets/skyve_staticimage.dart", "lib/widgets/skyve_staticimage.dart", substitutions);
-        refreshFile("lib/widgets/skyve_dynamicimage.dart", "lib/widgets/skyve_dynamicimage.dart", substitutions);
-        refreshFile("lib/widgets/skyve_blurb.dart", "lib/widgets/skyve_blurb.dart", substitutions);
-        refreshFile("lib/widgets/skyve_formitem.dart", "lib/widgets/skyve_formitem.dart", substitutions);
-        refreshFile("lib/widgets/skyve_formrow.dart", "lib/widgets/skyve_formrow.dart", substitutions);
-        refreshFile("lib/widgets/skyve_formcolumn.dart", "lib/widgets/skyve_formcolumn.dart", substitutions);
 
         new FlutterRouting(this).create();
 
@@ -228,7 +200,7 @@ public class FlutterGenerator {
             return modocWhitelist;
         }
 
-        public void addModocWhitelistEnty(String modocEntry) {
+        public void addModocWhitelistEntry(String modocEntry) {
             modocWhitelist.add(MoDoc.fromString(modocEntry));
         }
 

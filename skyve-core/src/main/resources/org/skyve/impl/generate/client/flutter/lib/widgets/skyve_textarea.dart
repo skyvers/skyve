@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'skyve_textField.dart';
 
 class SkyveTextArea extends StatelessWidget {
   final String label;
@@ -9,6 +8,9 @@ class SkyveTextArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement widget
-    return SkyveTextField(label: label, maxlines: null);
+    return const Placeholder(
+      fallbackHeight: 50,
+      color: Colors.orange,
+    );
   }
 }

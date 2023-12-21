@@ -1,5 +1,8 @@
 import 'package:##PROJECT##/util/skyve_rest_client.dart';
 import 'package:##PROJECT##/widgets/skyve_view.dart';
+import 'package:##PROJECT##/widgets/skyve_button.dart';
+import 'package:##PROJECT##/models/bean_container.dart';
+import 'package:##PROJECT##/util/skyve_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bootstrap/flutter_bootstrap.dart';
 ##IMPORTS##
@@ -22,7 +25,15 @@ class ##CLASS## extends StatefulWidget {
 }
 
 class _##CLASS##State extends State<##CLASS##> {
-  Map<String, dynamic> _bean = {'_title': 'Loading'};
+
+  
+
+  void _load(String? bizId) async {
+    if (_bean['bizId'] == null) {
+      container =
+          await SkyveRestClient().edit('##MODULE##', '##DOCUMENT##', bizId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +52,6 @@ class _##CLASS##State extends State<##CLASS##> {
     );
   }
 
-  void _load(String? bizId) async {
-    if (_bean['bizId'] == null) {
-      final bean = await SkyveRestClient().edit('##MODULE##', '##DOCUMENT##', bizId);
-      setState(() {
-        _bean = bean;
-      });
-    }
-  }
+
+
 }
