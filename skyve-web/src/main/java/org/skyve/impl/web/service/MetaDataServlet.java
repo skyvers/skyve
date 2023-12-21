@@ -3076,13 +3076,15 @@ public class MetaDataServlet extends HttpServlet {
 								List<DomainValue> values = document.getDomainValues(customer, domainType, attribute, null, true);
 								if (values != null) {
 									result.append("\"values\":{");
-									for (DomainValue value : values) {
-										String code = value.getCode();
-										result.append('"').append(OWASP.escapeJsonString(code)).append("\":\"");
-										String description = value.getLocalisedDescription();
-										result.append(OWASP.escapeJsonString((description == null) ? code : description)).append("\",");
+									if (! values.isEmpty()) {
+										for (DomainValue value : values) {
+											String code = value.getCode();
+											result.append('"').append(OWASP.escapeJsonString(code)).append("\":\"");
+											String description = value.getLocalisedDescription();
+											result.append(OWASP.escapeJsonString((description == null) ? code : description)).append("\",");
+										}
+										result.setLength(result.length() - 1); // remove last comma
 									}
-									result.setLength(result.length() - 1); // remove last comma
 									result.append("},");
 								}
 							}
