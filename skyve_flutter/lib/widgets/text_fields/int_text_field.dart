@@ -33,17 +33,26 @@ class IntTextField extends StatelessWidget {
 }
 
 class IntFieldValidator extends Validator {
+  static const errorMSg = 'Must be a whole number.';
+  static const int _MAX_VALUE = 2147483647;
+  static const int _MIN_VALUE = -2147483648;
+
   @override
   String? validate(String? value) {
     if ((value ?? '') == '') {
       return null;
     }
 
-    // FIXME limit to Java's MAX_INT?
-    if (int.tryParse(value!) == null) {
-      return 'Must be a whole number.';
+    int? parseResult = int.tryParse(value!);
+    if (parseResult == null) {
+      // Couldn't parse as an int
+      return errorMSg;
+    } else if (parseResult > _MAX_VALUE || parseResult < _MIN_VALUE) {
+      // Out of (Java's) range
+      return errorMSg;
     }
 
+    // All good!
     return null;
   }
 }
