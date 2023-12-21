@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skyve_flutter/util/skyve_form.dart';
+import 'package:skyve_flutter/util/validators.dart';
 
 class SkyveTextField extends StatefulWidget {
   final String? label;
   final String propertyKey;
   final bool obscureText;
-  final FormFieldValidator<String>? validator;
+  final List<Validator>? validators;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
 
   const SkyveTextField({
     super.key,
-    this.label,
     required this.propertyKey,
-    this.validator,
+    this.label,
+    this.validators = const [],
     this.obscureText = false,
     this.inputFormatters,
     this.keyboardType,
@@ -29,6 +30,9 @@ class SkyveTextFieldState extends State<SkyveTextField> {
   Widget build(BuildContext context) {
     String initialVal =
         '${SkyveForm.of(context).beanValues[widget.propertyKey] ?? ''}';
+
+    FormFieldValidator<String>? validatorFn =
+        _createValidator(widget.validators);
 
     return TextFormField(
       key: Key('${widget.propertyKey}_$initialVal'),
@@ -46,10 +50,20 @@ class SkyveTextFieldState extends State<SkyveTextField> {
           SkyveForm.of(context).removeError(widget.propertyKey);
         });
       },
-      validator: widget.validator,
+      validator: validatorFn,
       obscureText: widget.obscureText,
       inputFormatters: widget.inputFormatters,
       keyboardType: widget.keyboardType,
     );
+  }
+
+  FormFieldValidator<String>? _createValidator(List<Validator>? validators) {
+    if (validators == null || validators.isEmpty) {
+      return null;
+    } else if (validators.length == 1) {
+      return validators.first.validate;
+    } else {
+      return DelegatingValidator(validators).validate;
+    }
   }
 }

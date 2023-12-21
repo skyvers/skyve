@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:skyve_flutter/widgets/skyve_textfield.dart';
+import '../skyve_textfield.dart';
+import '../../util/validators.dart';
 
 class IntTextField extends StatelessWidget {
   static final TextInputFormatter integerFormatter =
@@ -8,23 +9,41 @@ class IntTextField extends StatelessWidget {
 
   final String? label;
   final String propertyKey;
-  final FormFieldValidator<String>? validator;
+  late final List<Validator> validators;
 
-  const IntTextField({
+  IntTextField({
     super.key,
     this.label,
     required this.propertyKey,
-    this.validator,
-  });
+    List<Validator> validators = const [],
+  }) {
+    this.validators = List.from(validators)..add(IntFieldValidator());
+  }
 
   @override
   Widget build(BuildContext context) {
     return SkyveTextField(
       propertyKey: propertyKey,
       label: label,
-      validator: validator,
+      validators: validators,
       keyboardType: const TextInputType.numberWithOptions(signed: true),
       inputFormatters: [integerFormatter],
     );
+  }
+}
+
+class IntFieldValidator extends Validator {
+  @override
+  String? validate(String? value) {
+    if ((value ?? '') == '') {
+      return null;
+    }
+
+    // FIXME limit to Java's MAX_INT?
+    if (int.tryParse(value!) == null) {
+      return 'Must be a whole number.';
+    }
+
+    return null;
   }
 }

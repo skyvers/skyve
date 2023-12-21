@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:skyve_flutter/util/validators.dart';
-import 'package:skyve_flutter/widgets/text_fields/int_text_field.dart';
-import 'package:skyve_flutter/widgets/skyve_tab.dart';
-import 'package:skyve_flutter/widgets/skyve_tabpane.dart';
+import '../util/validators.dart';
+import '../widgets/text_fields/int_text_field.dart';
+import '../widgets/skyve_tab.dart';
+import '../widgets/skyve_tabpane.dart';
 import '../widgets/skyve_blurb.dart';
 import '../widgets/skyve_button.dart';
 import '../widgets/skyve_contentimage.dart';
@@ -69,8 +68,6 @@ class SkyveViewModel implements SkyveView {
       String? formLabel,
       bool required = false}) {
     final String type = model['type'];
-
-    final Validator validator = _createValidators(model, formLabel, required);
 
     switch (type) {
       case 'actionLink':
@@ -184,12 +181,16 @@ class SkyveViewModel implements SkyveView {
       case 'okAction':
         return const Text('okAction');
       case 'password':
-        return SkyveTextField(
-          propertyKey: model['binding'],
-          label: formLabel,
-          validator: validator.validate,
-          obscureText: true,
-        );
+        {
+          List<Validator> validators =
+              _createValidators(model, formLabel, required);
+          return SkyveTextField(
+            propertyKey: model['binding'],
+            label: formLabel,
+            validators: validators,
+            obscureText: true,
+          );
+        }
       case 'printAction':
         return const Text('printAction');
       case 'progressBar':
@@ -242,7 +243,11 @@ class SkyveViewModel implements SkyveView {
       case 'textArea':
         return const Text('textArea');
       case 'textField':
-        return _createTextField(model, formLabel, validator);
+        {
+          List<Validator> validators =
+              _createValidators(model, formLabel, required);
+          return _createTextField(model, formLabel, validators);
+        }
       case 'toggleDisabled':
         return const Text('toggleDisabled');
       case 'toggleVisibility':
@@ -267,14 +272,14 @@ class SkyveViewModel implements SkyveView {
     }
   }
 
-  static Widget _createTextField(
-      Map<String, dynamic> model, String? formLabel, Validator validator) {
+  static Widget _createTextField(Map<String, dynamic> model, String? formLabel,
+      List<Validator> validators) {
     // {
     //    "type": "item",
     //    "label": "Decimal 10",
     //    "showsLabel": true,
     //    "required": false,
-    //    "widget": { // <- model should be this element
+    //    "widget": {                // <- model should be this element
     //        "type": "textField",
     //        "binding": "decimal10",
     //        "target": {
@@ -289,20 +294,26 @@ class SkyveViewModel implements SkyveView {
     String propertyKey = model['binding'];
 
     switch (attributeType) {
+      case 'text':
+        return SkyveTextField(
+          propertyKey: propertyKey,
+          label: formLabel,
+          validators: validators,
+        );
       case 'integer':
       case 'longInteger':
         return IntTextField(
           propertyKey: propertyKey,
           label: formLabel,
-          validator: validator.validate,
+          validators: validators,
         );
       default:
         {
-          debugPrint('Unhandled text field attributeType=$attributeType');
+          debugPrint('TODO Unhandled text field attributeType=$attributeType');
           return SkyveTextField(
-            propertyKey: model['binding'],
+            propertyKey: propertyKey,
             label: formLabel,
-            validator: validator.validate,
+            validators: validators,
           );
         }
     }
@@ -346,23 +357,17 @@ class SkyveViewModel implements SkyveView {
     return result;
   }
 
-  static Validator _createValidators(
+  /// Setup the initial set of validators for a field
+  /// This method might not make much sense anymore
+  static List<Validator> _createValidators(
       Map<String, dynamic> model, String? formLabel, bool? required) {
     List<Validator> validators = List.empty(growable: true);
 
+    // Is required the only one that works here?
     if (required == true) {
       validators.add(RequiredValidator(formLabel));
     }
 
-    if (validators.isEmpty) {
-      // No (client-side) validation
-      return NoOpValidator();
-    } else if (validators.length == 1) {
-      // Just the one validator, so we'll return than
-      return validators.first;
-    } else {
-      // Jam all the validators together
-      return DelegatingValidator(validators);
-    }
+    return validators;
   }
 }
