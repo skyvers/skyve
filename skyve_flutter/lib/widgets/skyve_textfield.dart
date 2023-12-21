@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:skyve_flutter/util/skyve_form.dart';
 
 class SkyveTextField extends StatefulWidget {
-  final String label;
+  final String? label;
   final String propertyKey;
-
+  final bool obscureText;
   final FormFieldValidator<String>? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
 
-  const SkyveTextField(
-      {super.key,
-      required this.label,
-      required this.propertyKey,
-      this.validator});
+  const SkyveTextField({
+    super.key,
+    this.label,
+    required this.propertyKey,
+    this.validator,
+    this.obscureText = false,
+    this.inputFormatters,
+    this.keyboardType,
+  });
 
   @override
   State<StatefulWidget> createState() => SkyveTextFieldState();
 }
 
 class SkyveTextFieldState extends State<SkyveTextField> {
-
   @override
   Widget build(BuildContext context) {
-    var initialVal = SkyveForm.of(context).beanValues[widget.propertyKey] ?? '';
+    String initialVal =
+        '${SkyveForm.of(context).beanValues[widget.propertyKey] ?? ''}';
 
     return TextFormField(
       key: Key('${widget.propertyKey}_$initialVal'),
@@ -40,6 +47,9 @@ class SkyveTextFieldState extends State<SkyveTextField> {
         });
       },
       validator: widget.validator,
+      obscureText: widget.obscureText,
+      inputFormatters: widget.inputFormatters,
+      keyboardType: widget.keyboardType,
     );
   }
 }

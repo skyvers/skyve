@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:skyve_flutter/util/validators.dart';
+import 'package:skyve_flutter/widgets/text_fields/int_text_field.dart';
 import 'package:skyve_flutter/widgets/skyve_tab.dart';
 import 'package:skyve_flutter/widgets/skyve_tabpane.dart';
 import '../widgets/skyve_blurb.dart';
@@ -10,7 +12,6 @@ import '../widgets/skyve_formitem.dart';
 import '../widgets/skyve_formrow.dart';
 import '../widgets/skyve_hbox.dart';
 import '../widgets/skyve_label.dart';
-import '../widgets/skyve_password.dart';
 import '../widgets/skyve_textfield.dart';
 import '../widgets/skyve_vbox.dart';
 import '../widgets/skyve_view.dart';
@@ -183,10 +184,11 @@ class SkyveViewModel implements SkyveView {
       case 'okAction':
         return const Text('okAction');
       case 'password':
-        return SkyvePassword(
+        return SkyveTextField(
           propertyKey: model['binding'],
-          label: formLabel ?? '',
+          label: formLabel,
           validator: validator.validate,
+          obscureText: true,
         );
       case 'printAction':
         return const Text('printAction');
@@ -240,11 +242,7 @@ class SkyveViewModel implements SkyveView {
       case 'textArea':
         return const Text('textArea');
       case 'textField':
-        return SkyveTextField(
-          propertyKey: model['binding'],
-          label: formLabel ?? '',
-          validator: validator.validate,
-        );
+        return _createTextField(model, formLabel, validator);
       case 'toggleDisabled':
         return const Text('toggleDisabled');
       case 'toggleVisibility':
@@ -266,6 +264,47 @@ class SkyveViewModel implements SkyveView {
         return const Text('zoomOutAction');
       default:
         return Text('unsupported $type');
+    }
+  }
+
+  static Widget _createTextField(
+      Map<String, dynamic> model, String? formLabel, Validator validator) {
+    // {
+    //    "type": "item",
+    //    "label": "Decimal 10",
+    //    "showsLabel": true,
+    //    "required": false,
+    //    "widget": { // <- model should be this element
+    //        "type": "textField",
+    //        "binding": "decimal10",
+    //        "target": {
+    //            "attributeType": "decimal10"
+    //        }
+    //    }
+    // }
+
+    Map<String, dynamic> target = model['target'];
+    String attributeType = target['attributeType'];
+
+    String propertyKey = model['binding'];
+
+    switch (attributeType) {
+      case 'integer':
+      case 'longInteger':
+        return IntTextField(
+          propertyKey: propertyKey,
+          label: formLabel,
+          validator: validator.validate,
+        );
+      default:
+        {
+          debugPrint('Unhandled text field attributeType=$attributeType');
+          return SkyveTextField(
+            propertyKey: model['binding'],
+            label: formLabel,
+            validator: validator.validate,
+          );
+        }
     }
   }
 
