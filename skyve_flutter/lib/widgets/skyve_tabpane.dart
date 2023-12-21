@@ -33,6 +33,10 @@ class SkyveTabPaneState extends State<SkyveTabPane>
       return Tab(text: widget.tabs[index].title);
     }, growable: false);
 
+    List<SingleChildScrollView> tabPanes =
+        List.generate(widget.tabs.length, (index) {
+      return SingleChildScrollView(child: widget.tabs[index]);
+    }, growable: false);
     return Column(
       children: [
         TabBar(
@@ -47,7 +51,7 @@ class SkyveTabPaneState extends State<SkyveTabPane>
               ? widget.height
               : MediaQuery.of(context).size.height * 0.8,
           margin: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: TabBarView(controller: _tabController, children: widget.tabs),
+          child: TabBarView(controller: _tabController, children: tabPanes),
         )
       ],
     );
