@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skyve_flutter/widgets/text_fields/decimal2_field.dart';
 import '../util/validators.dart';
 import '../widgets/text_fields/int_text_field.dart';
 import '../widgets/skyve_tab.dart';
@@ -303,6 +304,12 @@ class SkyveViewModel implements SkyveView {
       case 'integer':
       case 'longInteger':
         return IntTextField(
+          propertyKey: propertyKey,
+          label: formLabel,
+          validators: validators,
+        );
+      case 'decimal2':
+        return Decimal2Field(
           propertyKey: propertyKey,
           label: formLabel,
           validators: validators,
