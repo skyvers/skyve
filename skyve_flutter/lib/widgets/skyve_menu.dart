@@ -19,11 +19,12 @@ class SkyveMenu extends ConsumerWidget {
         data: (model) {
           ThemeData theme = Theme.of(context);
           WidgetsFlutterBinding.ensureInitialized();
+
           final DrawerHeader header = DrawerHeader(
             decoration: BoxDecoration(
               color: theme.primaryColor,
             ),
-            child: const SkvyeNetworkImage(),
+            child: const SkvyeNetworkImage('skyve-logo-black.png'),
           );
 
           final List<Widget> list = List.empty(growable: true);
@@ -46,7 +47,7 @@ class SkyveMenu extends ConsumerWidget {
 
           return Drawer(
               child: Column(children: [
-            SizedBox(height: 180, child: header),
+            SizedBox(height: (inDrawer ? 180.0 : 0.0), child: header),
             Expanded(
                 child: ListView(padding: EdgeInsets.zero, children: moduleList))
           ]));

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nested_scroll_view_plus/nested_scroll_view_plus.dart';
 import '../util/skyve_form.dart';
 import 'skyve_menu.dart';
 
@@ -36,16 +37,58 @@ abstract class SkyveView {
           Expanded(child: view)
         ]);
       }
+      ThemeData theme = Theme.of(context);
 
       return Scaffold(
-        appBar: AppBar(title: Text(viewTitle)),
-        drawer: drawer,
-        body: SkyveForm(
-          child: Form(
-            child: body,
-          ),
-        ),
-      );
+          drawer: drawer,
+          // NB Use NestedScrollViewPlus to allow over-stretch of SliverAppBar
+          body: NestedScrollViewPlus(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverAppBar(
+                    pinned: true,
+                    snap: true,
+                    floating: true,
+                    stretch: true,
+                    expandedHeight: mobile ? 120.0 : 160.0,
+                    flexibleSpace: FlexibleSpaceBar(
+                        title: Text(viewTitle),
+                        stretchModes: const [
+                          StretchMode.zoomBackground,
+                          StretchMode.blurBackground,
+                        ],
+                        background: Stack(fit: StackFit.expand, children: [
+                          DecoratedBox(
+                            position: DecorationPosition.foreground,
+                            decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                    colors: [
+                                  theme.primaryColor,
+                                  Colors.transparent
+                                ],
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter)),
+                            child: const Image(
+                              image: AssetImage('assets/AppBarBackground.jpg'),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Container(
+                              padding: const EdgeInsets.all(32.0),
+                              child: const Image(
+                                image: AssetImage('assets/skyve_inv_logo.png'),
+                                fit: BoxFit.contain,
+                                opacity: AlwaysStoppedAnimation(0.3),
+                              ))
+                        ])),
+                  )
+                ];
+              },
+              body: SkyveForm(
+                child: Form(
+                  child: body,
+                ),
+              )));
     });
   }
 }

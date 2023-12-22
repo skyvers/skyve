@@ -320,6 +320,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  nested_scroll_view_plus:
+    dependency: "direct main"
+    description:
+      name: nested_scroll_view_plus
+      sha256: "0ea1f0d1c43adc5ba769891eb4bacef6878053c2d383503f6365f29ec5b2d3cf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   octo_image:
     dependency: transitive
     description:

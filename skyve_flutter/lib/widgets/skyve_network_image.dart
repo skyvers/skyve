@@ -4,22 +4,28 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../util/skyve_rest_client.dart';
 
 class SkvyeNetworkImage extends StatelessWidget {
-  const SkvyeNetworkImage({super.key});
+  final String resourceName;
+  final BoxFit? fit;
+  final double? width;
+  final double? height;
 
-  final String _logoString = 'skyve-logo-black.png';
+  const SkvyeNetworkImage(this.resourceName,
+      {Key? key, this.fit, this.width, this.height})
+      : super(key: key);
 
-  ///  Builds the DrawerHeader image with a default cache time of 7 days
+  //  Builds an Image with a default cache time of 7 days
   @override
   Widget build(BuildContext context) {
     return CachedNetworkImage(
-      imageUrl: logoUri,
-      alignment: Alignment.center,
-      fadeInDuration: const Duration(seconds: 1),
-      fit: BoxFit.contain,
-    );
+        imageUrl: logoUri,
+        alignment: Alignment.center,
+        fadeInDuration: const Duration(seconds: 1),
+        fit: fit ?? BoxFit.contain,
+        width: width,
+        height: height);
   }
 
   String get logoUri {
-    return '${SkyveRestClient().getBaseUri()}resources?_n=$_logoString';
+    return '${SkyveRestClient().getBaseUri()}resources?_n=$resourceName';
   }
 }
