@@ -12,19 +12,15 @@ void main() {
 }
 
 // Allow metadata to drive the menu structure
-const List<SkyveModuleMenuModel> menu = [ 
+List<SkyveModuleMenuModel> menu = [
   SkyveModuleMenuModel(module: 'admin', title: 'Admin', open: false, items: [
-    SkyveMenuGroupModel(title: 'Communication', items: [
-    ]),
-    SkyveMenuGroupModel(title: 'Security Admin', items: [
-    ]),
-    SkyveMenuGroupModel(title: 'DevOps', items: [
-    ]),
-    SkyveMenuGroupModel(title: 'Reports', items: [
-    ]),
+    SkyveMenuGroupModel(title: 'Communication', items: []),
+    SkyveMenuGroupModel(title: 'Security Admin', items: []),
+    SkyveMenuGroupModel(title: 'DevOps', items: []),
+    SkyveMenuGroupModel(title: 'Reports', items: []),
   ]),
-  SkyveModuleMenuModel(module: 'kitchensink', title: 'Kitchen Sink', open: false, items: [
-  ])
+  SkyveModuleMenuModel(
+      module: 'kitchensink', title: 'Kitchen Sink', open: false, items: [])
 ];
 
 // Allow metadata to drive the datasource definitions
@@ -34,9 +30,8 @@ const Map<String, SkyveDataSourceModel>? dataSources = null;
 final Map<String, SkyveView> views = {};
 
 final List<GoRoute> goRoutes = [];
-  
-class App extends ConsumerWidget {
 
+class App extends ConsumerWidget {
   const App({Key? key}) : super(key: key);
 
   // This widget is the root of your application.

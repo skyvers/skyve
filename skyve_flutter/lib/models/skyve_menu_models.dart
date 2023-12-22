@@ -1,10 +1,10 @@
 class SkyveModuleMenuModel {
   final String module;
   final String title;
-  final bool open;
+  bool open;
   final List<SkyveMenuItemModel> items;
 
-  const SkyveModuleMenuModel(
+  SkyveModuleMenuModel(
       {required this.module,
       required this.title,
       required this.open,
@@ -70,9 +70,10 @@ abstract class SkyveMenuItemModel {
 }
 
 class SkyveMenuGroupModel extends SkyveMenuItemModel {
+  bool open = false;
   final List<SkyveMenuItemModel> items;
 
-  const SkyveMenuGroupModel({required super.title, required this.items});
+  SkyveMenuGroupModel({required super.title, required this.items});
 
   @override
   bool get isEmpty {
