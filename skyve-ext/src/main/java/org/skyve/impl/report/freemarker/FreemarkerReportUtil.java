@@ -30,9 +30,18 @@ import org.skyve.domain.app.admin.ReportTemplate;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.DocumentPermissionScope;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
@@ -566,5 +575,147 @@ public final class FreemarkerReportUtil {
 			InputStream is = super.resolveAndOpenStream(uri);
 			return is;
 		}
+	}
+
+	/**
+	 * Generate a default freemarker pdf report layout for a bean
+	 * 
+	 * @param bean
+	 * @return String of pdf freemarker template
+	 */
+	public static String generateDefaultFreemarkerPdfReport(String moduleName, String documentName, ViewType viewType) {
+		String html = "";
+		FreemarkerPdfReportViewVisitor visitor = null;
+		org.skyve.metadata.module.Module m = CORE.getCustomer().getModule(moduleName);
+		Document d = m.getDocument(CORE.getCustomer(), documentName);
+		View view = d.getView("", CORE.getCustomer(), viewType.toString());
+
+		CustomerImpl customerImpl = (CustomerImpl) CORE.getCustomer();
+		ModuleImpl moduleImpl = (ModuleImpl) m;
+		DocumentImpl documentImpl = (DocumentImpl) d;
+		ViewImpl viewImpl = (ViewImpl) view;
+
+		visitor = new FreemarkerPdfReportViewVisitor(customerImpl, moduleImpl, documentImpl, viewImpl);
+		visitor.visit();
+		String body = visitor.getHtml();
+
+		String header = "<#include \"/headerPortrait.ftlh\">";
+
+		html = String.format("<!-- report header and styles -->\n" +
+				"%s\n\n" +
+				"<!-- report body -->\n" +
+				"%s" +
+				"\n</body>\n" +
+				"</html>",
+				header,
+				body);
+
+		return html;
+	}
+
+	/**
+	 * Generate a default freemarker csv report layout for a bean
+	 * 
+	 * @param bean
+	 * @return String of csv freemarker report template
+	 */
+	public static String generateDefaultFreemarkerCsvReport(String moduleName, String documentName, ViewType viewType) {
+		FreemarkerCsvReportViewVisitor visitor = null;
+		org.skyve.metadata.module.Module m = CORE.getCustomer().getModule(moduleName);
+		Document d = m.getDocument(CORE.getCustomer(), documentName);
+		View view = d.getView("", CORE.getCustomer(), viewType.toString());
+
+		CustomerImpl customerImpl = (CustomerImpl) CORE.getCustomer();
+		ModuleImpl moduleImpl = (ModuleImpl) m;
+		DocumentImpl documentImpl = (DocumentImpl) d;
+		ViewImpl viewImpl = (ViewImpl) view;
+
+		visitor = new FreemarkerCsvReportViewVisitor(customerImpl, moduleImpl, documentImpl, viewImpl);
+		visitor.visit();
+
+		return visitor.getCsv();
+	}
+
+	/**
+	 * Generate a default freemarker pdf report layout for a list report
+	 * The template created includes a header with title and app logo, then a table with headers for the columns in the list grid,
+	 * followed by rows of data
+	 * 
+	 * @param bean
+	 * @return String of pdf freemarker template for a list
+	 */
+	public static String generateDefaultFreemarkerPdfReport(ListModel<Bean> listModel) {
+		String html = "";
+
+		String header = "<#include \"/headerLandscape.ftlh\">";
+
+		String body = generateHtmlListFromModel(listModel);
+
+		html = String.format("<!-- report header and styles -->\n" +
+				"%s\n\n" +
+				"<!-- report body -->\n" +
+				"%s" +
+				"\n</body>\n" +
+				"</html>",
+				header,
+				body);
+
+		return html;
+	}
+
+	/**
+	 * Generate a html freemarker table for the list model provided.
+	 * The template created includes headers for the columns in the list model, then the rows of data
+	 * 
+	 * @param listModel
+	 * @return String of the body for a pdf freemarker template for a list
+	 */
+	private static String generateHtmlListFromModel(ListModel<Bean> listModel) {
+		StringBuilder sb = new StringBuilder(200);
+		
+		List<MetaDataQueryColumn> columns = listModel.getColumns();
+		final int columnCount = columns.size();
+		final int widthPercentage = 100 / columnCount;
+		sb.append("<table>\n<thead>\n<tr>\n");
+		for (MetaDataQueryColumn column : columns) {
+			// TODO get title
+			sb.append("<th style=\"width:").append(widthPercentage).append("%;\">").append(column.getDisplayName())
+					.append("</th>");
+		}
+		sb.append("</tr>\n</thead>\n<tbody>\n<#list rows as row>\n<tr>\n");
+		for (MetaDataQueryColumn column : columns) {
+			sb.append("<td>\n${(row.").append(column.getBinding()).append(")!}\n</td>\n");
+		}
+		sb.append("</tr>\n</#list>\n</tbody>\n</table>\n");
+		
+
+		return sb.toString();
+	}
+
+	/**
+	 * Generate a csv freemarker table for the list model provided.
+	 * The template created includes a table with headers for the columns, then the
+	 * rows of data
+	 * 
+	 * @param listModel
+	 * @return String of csv freemarker template for a list
+	 */
+	public static String generateDefaultFreemarkerCsvReport(ListModel<Bean> listModel) {
+		StringBuilder sb = new StringBuilder(200);
+
+		List<MetaDataQueryColumn> columns = listModel.getColumns();
+		for (MetaDataQueryColumn column : columns) {
+			// TODO get title
+			sb.append(column.getDisplayName()).append(",");
+		}
+		sb.append("${'\n'}");
+		sb.append("<#list rows as row>");
+		for (MetaDataQueryColumn column : columns) {
+			sb.append("\"${(row.").append(column.getBinding()).append(")!}\",");
+		}
+		sb.append("${'\n'}");
+		sb.append("</#list>");
+
+		return sb.toString();
 	}
 }

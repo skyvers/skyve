@@ -730,7 +730,6 @@ public class DesignSpecification {
 	 * 
 	 */
 	public DesignSpecification(){
-		
 		fields = new ArrayList<>();
 		bands = new ArrayList<>();
 		
@@ -773,6 +772,18 @@ public class DesignSpecification {
 		setCheckBoxFontName(null);
 		
 		resetDesign();
+	}
+
+	/**
+	 * Constructor for when name, module and document are known
+	 * 
+	 * Calls the default constructor then sets the variables passed in
+	 */
+	public DesignSpecification(String name, String module, String document) {
+		this();
+		setName(name);
+		setModuleName(module);
+		setDocumentName(document);
 	}
 	
 	public void resetDesign() {

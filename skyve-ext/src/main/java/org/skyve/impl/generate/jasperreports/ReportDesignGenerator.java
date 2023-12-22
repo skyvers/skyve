@@ -2,6 +2,9 @@ package org.skyve.impl.generate.jasperreports;
 
 import java.util.HashMap;
 
+import org.skyve.impl.generate.jasperreports.DesignSpecification.DefinitionSource;
+import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
+import org.skyve.impl.generate.jasperreports.DesignSpecification.ReportType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -26,6 +29,7 @@ public abstract class ReportDesignGenerator {
         design.setJoinAlias(new HashMap<>());
         design.setAlias('a');
 
+
         clearDesign(design);
 
         addParameters(design);
@@ -36,6 +40,16 @@ public abstract class ReportDesignGenerator {
 
         return design;
     }
+
+	public DesignSpecification populateDesign(DesignSpecification design, Mode mode, DefinitionSource definitionSource,
+			ReportType reportType) {
+		DesignSpecification populatedDesign = populateDesign(design);
+		populatedDesign.setMode(mode);
+		populatedDesign.setDefinitionSource(definitionSource);
+		populatedDesign.setReportType(reportType);
+
+		return populatedDesign;
+	}
 
     protected abstract ReportDesignGenerator getSubreportGenerator();
 

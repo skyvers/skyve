@@ -1,9 +1,13 @@
 package org.skyve.impl.web;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -15,6 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.LazyDynaBean;
+import org.apache.commons.lang3.EnumUtils;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -30,6 +37,7 @@ import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.report.freemarker.FreemarkerReportUtil;
 import org.skyve.impl.report.jasperreports.JasperReportUtil;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ColumnAlignment;
@@ -51,12 +59,14 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import freemarker.template.Template;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -65,10 +75,14 @@ import net.sf.jasperreports.engine.design.JRValidationException;
 import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
+	private static final String FREEMARKER_TEMPLATE_SUFFIX = ".ftlh";
+
 	private static final long serialVersionUID = 1L;
 
 	public static final String REPORT_PATH = "/report";
 	public static final String EXPORT_PATH = "/export";
+	public static final String JASPER_REPORT_ENGINE = "Jasper";
+	public static final String FREEMARKER_REPORT_ENGINE = "Freemarker";
 
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -113,6 +127,7 @@ public class ReportServlet extends HttpServlet {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
 		try (OutputStream out = response.getOutputStream()) {
 			String moduleName = request.getParameter(AbstractWebContext.MODULE_NAME);
@@ -129,10 +144,17 @@ public class ReportServlet extends HttpServlet {
 			if (reportName == null) {
 				generatedReport = true;
 			}
-			String formatString = request.getParameter(AbstractWebContext.REPORT_FORMAT);
-			if (formatString == null) {
-				throw new ServletException("No report format in the URL");
+			String reportEngine = request.getParameter(AbstractWebContext.REPORT_ENGINE);
+			if (reportEngine == null) {
+				throw new ServletException("No report engine in the URL");
 			}
+			String formatString = request.getParameter(AbstractWebContext.REPORT_FORMAT);
+			if (!EnumUtils.isValidEnum(ReportFormat.class, formatString)) {
+				throw new ServletException("Invalid report format in the URL");
+			}
+			// TOOD
+			// SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user, customer, drivingDocumentModule,
+			// drivingDocument, column, true, uxui);
 			ReportFormat format = ReportFormat.valueOf(formatString);
 
 			User user = AbstractPersistence.get().getUser();
@@ -145,50 +167,119 @@ public class ReportServlet extends HttpServlet {
 			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+			final boolean isList = Boolean.parseBoolean(request.getParameter(AbstractWebContext.IS_LIST));
 
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			final JasperPrint jasperPrint;
-			if (generatedReport) {
-				reportName = String.format("%s - %s", moduleName, documentName);
+			if (reportEngine.equals(JASPER_REPORT_ENGINE)) {
+				final JasperPrint jasperPrint;
+				if (generatedReport) {
+					reportName = String.format("%s - %s", moduleName, documentName);
 
-				final DesignSpecification designSpecification = new DesignSpecification();
-				designSpecification.setName("EditView");
-				designSpecification.setModuleName(moduleName);
-				designSpecification.setDocumentName(documentName);
+					final DesignSpecification designSpecification = createAndPopulateDesignSpecification("EditView", moduleName,
+							documentName);
+					final JasperReportRenderer reportRenderer = new JasperReportRenderer(designSpecification);
+					final Map<String, Object> parameters = getParameters(request);
+					parameters.put(JasperReportRenderer.DESIGN_SPEC_PARAMETER_NAME, designSpecification);
 
-				final ReportDesignGenerator generator = new ReportDesignGeneratorFactory().getGeneratorForDesign(designSpecification);
-				generator.populateDesign(designSpecification);
-				designSpecification.setMode(DesignSpecification.Mode.bean);
-				designSpecification.setDefinitionSource(DesignSpecification.DefinitionSource.view);
-				designSpecification.setReportType(DesignSpecification.ReportType.report);
-
-				final JasperReportRenderer reportRenderer = new JasperReportRenderer(designSpecification);
-
-				final Map<String, Object> parameters = getParameters(request);
-				parameters.put(JasperReportRenderer.DESIGN_SPEC_PARAMETER_NAME, designSpecification);
-				jasperPrint = JasperReportUtil.runReport(reportRenderer.getReport(), user, document, parameters, bean, format, baos);
-			}
-			else {
-				final String isList = request.getParameter(AbstractWebContext.IS_LIST);
-				if (isList != null && Boolean.parseBoolean(isList)) {
-					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
-					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
-					final String documentOrQueryOrModelName = (modelName != null) ? modelName : ((queryName != null) ? queryName : documentName);
-					final ListModel<Bean> listModel = JasperReportUtil.getQueryListModel(module, documentOrQueryOrModelName);
-					jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), listModel, format, baos);
+					jasperPrint = JasperReportUtil.runReport(reportRenderer.getReport(), user, document, parameters, bean, format,
+							baos);
 				}
 				else {
-					// Manually load the bean if an id is specified but there is no appropriate bean to load from the conversation.
+					if (isList) {
+						final ListModel<Bean> listModel = getListModel(request, module, documentName);
+						jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), listModel,
+								format, baos);
+					}
+					else {
+						// Manually load the bean if an id is specified but there is no appropriate bean to load from the
+						// conversation.
+						final String id = request.getParameter(AbstractWebContext.ID_NAME);
+						if ((id != null) && ((bean == null) || ((contextKey != null) && (!contextKey.endsWith(id))))) {
+							bean = AbstractPersistence.get().retrieve(document, id);
+						}
+
+						jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), bean, format,
+								baos);
+					}
+				}
+				pumpOutReportFormat(baos.toByteArray(), jasperPrint, format, reportName, request.getSession(), response);
+			} else if (reportEngine.equals(FREEMARKER_REPORT_ENGINE)) {
+				if (!format.equals(ReportFormat.pdf) && !format.equals(ReportFormat.csv)) {
+					throw new ServletException("Report Format for " + formatString + " has not been catered for.");
+				}
+
+				// data structures to hold report parameters, name and template
+				String freemarkerReportName = reportName + FREEMARKER_TEMPLATE_SUFFIX;
+				final File file;
+				Template template = null;
+				Map<String, Object> parameters = new HashMap<>();
+				parameters.put("title", reportName != null ? reportName : documentName);
+				ListModel<Bean> listModel = null;
+
+				// pass bean or list into the report dataset
+				if (isList) {
+					listModel = getListModel(request, module, documentName);
+					listModel.setEndRow(Integer.MAX_VALUE);
+					List<MetaDataQueryColumn> columns = listModel.getColumns();
+					List<DynaBean> results = new ArrayList<>();
+					try (AutoClosingIterable<Bean> i = listModel.iterate()) {
+						for (Bean b : i) {
+							DynaBean result = new LazyDynaBean();
+							for (MetaDataQueryColumn c : columns) {
+								result.set(c.getBinding(), b.getDynamic(c.getBinding()));
+							}
+							results.add(result);
+						}
+					}
+					
+					parameters.put("rows", results);
+				} else {
+					// Manually load the bean if an id is specified but there is no appropriate bean to load from the
+					// conversation.
 					final String id = request.getParameter(AbstractWebContext.ID_NAME);
-					if ((id != null) && ((bean == null) || ((contextKey != null) && (! contextKey.endsWith(id))))) {
+					if ((id != null) && ((bean == null) || ((contextKey != null) && (!contextKey.endsWith(id))))) {
 						bean = AbstractPersistence.get().retrieve(document, id);
 					}
-
-					jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), bean, format, baos);
+					
+					parameters.put("bean", bean);
 				}
-			}
+				
+				// create a default path for reports based on the parameters in the request
+				String reportTemplatePath = String.format("%s/%s/%s/%s%s", moduleName,
+						documentName, "reports", "Report", FREEMARKER_TEMPLATE_SUFFIX);
 
-			pumpOutReportFormat(baos.toByteArray(), jasperPrint, format, reportName, request.getSession(), response);
+				// create freemarker template based on report format, list or bean, generated or existing and put it in memory
+				if (generatedReport) {
+					String reportTemplate = getReportTemplate(listModel, moduleName, documentName, format, isList);
+
+					EXT.getReporting().addTemplate(freemarkerReportName, reportTemplate);
+					template = FreemarkerReportUtil.getTemplate(freemarkerReportName);
+				} else {
+					if (bean != null) {
+						template = FreemarkerReportUtil.getBeanReport(bean, freemarkerReportName);
+					} else {
+						reportTemplatePath = String.format("%s/%s/%s/%s", moduleName,
+								documentName, "reports", freemarkerReportName);
+						template = FreemarkerReportUtil.getTemplate(reportTemplatePath);
+					}
+				}
+				if (template == null) {
+					throw new ServletException("Template for report " + reportName + " could not be found or created.");
+				}
+
+				// write the file using byte array output stream
+				if (format.equals(ReportFormat.pdf)) {
+					file = FreemarkerReportUtil.createReportPDF(freemarkerReportName, parameters, "Report");
+					baos.write(Files.readAllBytes(file.toPath()));
+				} else if (format.equals(ReportFormat.csv)) {
+					String csvFile = FreemarkerReportUtil.createReport(freemarkerReportName, parameters);
+					baos.write(csvFile.getBytes());
+				}
+
+				pumpOutReportFormat(baos.toByteArray(), format, documentName, request.getSession(), response);
+			} else {
+				throw new ServletException("Report Engine for " + reportEngine + " has not been catered for.");
+			}
 		}
 		catch (Exception e) {
 			System.err.println("Problem generating the report - " + e.toString());
@@ -217,6 +308,15 @@ public class ReportServlet extends HttpServlet {
 	}
 
 	private static void pumpOutReportFormat(byte[] bytes,
+			ReportFormat format,
+			String fileNameNoSuffix,
+			HttpSession session,
+			HttpServletResponse response)
+			throws IOException {
+		pumpOutReportFormat(bytes, null, format, fileNameNoSuffix, session, response);
+	}
+
+	private static void pumpOutReportFormat(byte[] bytes,
 												JasperPrint jasperPrint,
 												ReportFormat format,
 												String fileNameNoSuffix,
@@ -239,8 +339,10 @@ public class ReportServlet extends HttpServlet {
 			response.setContentType(MimeType.html.toString());
 			sb.append("inline; filename=\"").append(fileNameNoSuffix).append(".html\"");
 			response.setHeader("Content-Disposition", sb.toString());
-// TODO maybe I should UUEncode this thing to the client
-			session.setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
+			// TODO maybe I should UUEncode this thing to the client
+			if (jasperPrint != null) {
+				session.setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
+			}
 			break;
 		case pdf:
 			response.setContentType(MimeType.pdf.toString());
@@ -527,5 +629,78 @@ public class ReportServlet extends HttpServlet {
 				persistence.commit(true);
 			}
 		}
+	}
+
+	/**
+	 * Construct a DesignSpecification with defaults and the params provided
+	 * Then populate from a ReportDesignGenerator
+	 * 
+	 * @param name
+	 * @param moduleName
+	 * @param documentName
+	 * @return populated DesignSpecification designSpecification
+	 */
+	private static DesignSpecification createAndPopulateDesignSpecification(String name, String moduleName, String documentName) {
+		final DesignSpecification designSpecification = new DesignSpecification(name, moduleName, documentName);
+
+		final ReportDesignGenerator generator = new ReportDesignGeneratorFactory()
+				.getGeneratorForDesign(designSpecification);
+		generator.populateDesign(designSpecification, DesignSpecification.Mode.bean,
+				DesignSpecification.DefinitionSource.view, DesignSpecification.ReportType.report);
+
+		return designSpecification;
+	}
+	
+	/**
+	 * TODO
+	 * 
+	 * @param request
+	 * @param documentName
+	 * @return
+	 */
+	private static ListModel<Bean> getListModel(HttpServletRequest request, Module module, String documentName) {
+		final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
+		final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
+		final String documentOrQueryOrModelName = (modelName != null) ? modelName
+				: ((queryName != null) ? queryName : documentName);
+		final ListModel<Bean> listModel = JasperReportUtil.getQueryListModel(module, documentOrQueryOrModelName);
+		
+		return listModel;
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @param listModel
+	 * @param moduleName
+	 * @param documentName
+	 * @param format
+	 * @param isList
+	 * @return
+	 * @throws ServletException
+	 */
+	private static String getReportTemplate(ListModel<Bean> listModel, String moduleName, String documentName,
+			ReportFormat format, boolean isList) throws ServletException {
+		String reportTemplate = null;
+		if (format.equals(ReportFormat.pdf)) {
+			if (isList && listModel != null) {
+				reportTemplate = FreemarkerReportUtil.generateDefaultFreemarkerPdfReport(listModel);
+			} else {
+				reportTemplate = FreemarkerReportUtil.generateDefaultFreemarkerPdfReport(moduleName, documentName,
+						ViewType.edit);
+			}
+		} else if (format.equals(ReportFormat.csv)) {
+			if (isList && listModel != null) {
+				reportTemplate = FreemarkerReportUtil.generateDefaultFreemarkerCsvReport(listModel);
+			} else {
+				reportTemplate = FreemarkerReportUtil.generateDefaultFreemarkerCsvReport(moduleName, documentName,
+						ViewType.edit);
+			}
+		}
+
+		if (reportTemplate == null || reportTemplate.isBlank() || reportTemplate.isEmpty()) {
+			throw new ServletException("Report template could not be created.");
+		}
+		return reportTemplate;
 	}
 }
