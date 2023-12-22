@@ -48,7 +48,7 @@ class _SkyveListViewState extends ConsumerState<SkyveListView> {
 
     return SkyveView.responsiveView(
         context,
-        'Cant get title here', // TODO _dataSource['title']!,
+        _dataSource.title,
         Visibility(
             visible: _loaded,
             replacement: const Center(child: CircularProgressIndicator()),

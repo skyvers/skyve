@@ -5,7 +5,6 @@ import 'widgets/skyve_view.dart';
 import 'models/skyve_datasource_models.dart';
 import 'models/skyve_menu_models.dart';
 import 'util/skyve_providers.dart';
-import 'package:skyve_flutter/widgets/skyve_menu.dart';
 
 void main() {
   runApp(const ProviderScope(child: App()));

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skyve_flutter/util/skyve_providers.dart';
 
 import '../models/payload.dart';
 import '../util/skyve_form.dart';
@@ -11,7 +13,7 @@ import '../util/skyve_rest_client.dart';
 ///
 /// You'll likely need to provide a GlobalKey when
 /// constructing an instance of this widget
-class LoaderWidget extends StatefulWidget {
+class LoaderWidget extends ConsumerStatefulWidget {
   final Widget child;
   final String module;
   final String document;
@@ -29,10 +31,10 @@ class LoaderWidget extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => LoaderWidgetState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _LoaderWidgetState();
 }
 
-class LoaderWidgetState extends State<LoaderWidget> {
+class _LoaderWidgetState extends ConsumerState<LoaderWidget> {
   // Once _ready has been set to true this widget should
   // just passthrough to the supplied widget.child
   // It shouldn't be possible for this widget to reset
@@ -57,6 +59,7 @@ class LoaderWidgetState extends State<LoaderWidget> {
     if (payload.successful) {
       setState(() {
         SkyveForm.of(context).applyPayload(payload);
+        ref.read(viewStateProvider.notifier).title(payload.title);
         _ready = true;
       });
     } else {

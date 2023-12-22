@@ -12,10 +12,10 @@ abstract class SkyveView {
   static const int lg = 992;
   static const int xl = 1200;
 
-  /// Produces the widgets for the action bar.
+  // Produces the widgets for the action bar.
   List<Widget> actions(BuildContext context);
 
-  /// Produces the widgets for the view.
+  // Produces the widgets for the view.
   List<Widget> contained(BuildContext context);
 
   static Widget responsiveView(

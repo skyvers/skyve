@@ -50,7 +50,7 @@ class _SkyveEditViewState extends ConsumerState<SkyveEditView> {
 
     return SkyveView.responsiveView(
         context,
-        'FIXME title',
+        ref.watch(viewStateProvider).title,
         LoaderWidget(
             key: _stateKey,
             module: widget.m,

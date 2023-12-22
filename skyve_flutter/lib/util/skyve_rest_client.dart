@@ -188,7 +188,7 @@ class SkyveRestClient {
         jsonDecode(response.data!)['response']['data'][0];
 
     String csrfToken = response.headers[csrfHeader]![0];
-    Payload bc = Payload(
+    Payload result = Payload(
         bizId: jsonData['bizId'],
         moduleName: moduleName,
         documentName: documentName,
@@ -196,11 +196,10 @@ class SkyveRestClient {
         csrfToken: csrfToken,
         conversationId: jsonData[conversationIdKey]);
 
-    return bc;
+    return result;
   }
 
   Future<Payload> addOrUpdate(String actionName, Payload requestBean) async {
-
     String url = 'smartedit';
 
     // Assemble the form data
@@ -232,7 +231,6 @@ class SkyveRestClient {
   }
 
   Payload _fromSkyveResponse(Response<String> response, Payload requestBean) {
-
     String csrfToken = response.headers.value(csrfHeader) ?? '-6666';
 
     if (response.data == null) {

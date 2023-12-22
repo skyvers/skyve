@@ -1,13 +1,13 @@
 class Payload {
-  Map<String, dynamic> values;
-  String csrfToken;
-  String bizId;
-  String moduleName;
-  String documentName;
-  String conversationId;
+  final Map<String, dynamic> values;
+  final String csrfToken;
+  final String bizId;
+  final String moduleName;
+  final String documentName;
+  final String conversationId;
   Map<String, String> errors = {};
   int status = 0;
-
+  late final String title;
   // title?
   // value maps
 
@@ -17,12 +17,14 @@ class Payload {
       required this.bizId,
       required this.values,
       required this.csrfToken,
-      required this.conversationId});
+      required this.conversationId}) {
+    title = values['_title'];
+  }
 
   bool get successful => status == 0;
 
   @override
   String toString() {
-    return "BeanContainer($moduleName/$documentName#$bizId)";
+    return "Payload($moduleName.$documentName#$bizId)";
   }
 }

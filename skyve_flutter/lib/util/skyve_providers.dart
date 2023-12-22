@@ -49,7 +49,7 @@ final containerMenuProvider = FutureProvider((ref) async {
   });
 });
 
-/// Remove empty entries from the menu
+// Remove empty entries from the menu
 List<SkyveModuleMenuModel> _removeEmptyItems(menuIn) {
   List<SkyveModuleMenuModel> menuCopy = List.from(menuIn);
   menuCopy.removeWhere((moduleMenu) => moduleMenu.isEmpty);
@@ -134,7 +134,7 @@ final containerRouterProvider = Provider((ref) {
   return GoRouter(initialLocation: '/', redirect: redirect, routes: allRoutes);
 });
 
-/// Provider which maps from a Modoc to a view definition
+// Provider which maps from a Modoc to a view definition
 final FutureProviderFamily<SkyveView, String> containerViewProvider =
     FutureProvider.family<SkyveView, String>((ref, modoc) async {
   // Look for the view in the global variable above
@@ -162,3 +162,26 @@ final FutureProviderFamily<SkyveView, String> containerViewProvider =
     return SkyveViewModel(module: m, document: d, jsonMetaData: {});
   });
 });
+
+// Provider which indicates if we are on a mobile device and what the current edit view title is
+// This is mutated by SkyveView.responsiveLayout()
+final viewStateProvider =
+    NotifierProvider<ViewStateNotifier, ViewState>(ViewStateNotifier.new);
+
+class ViewStateNotifier extends Notifier<ViewState> {
+  final _viewState = ViewState();
+
+  @override
+  ViewState build() {
+    return _viewState;
+  }
+
+  void title(String title) {
+    _viewState.title = title;
+    ref.notifyListeners();
+  }
+}
+
+class ViewState {
+  String title = '';
+}
