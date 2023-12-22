@@ -674,17 +674,32 @@ public final class FreemarkerReportUtil {
 		StringBuilder sb = new StringBuilder(200);
 		
 		List<MetaDataQueryColumn> columns = listModel.getColumns();
-		final int columnCount = columns.size();
+		int columnCount = 0;
+		for (MetaDataQueryColumn column : columns) {
+			String binding = column.getBinding();
+			// TODO handle associations
+			if (!binding.contains(".")) {
+				columnCount++;
+			}
+		}
 		final int widthPercentage = 100 / columnCount;
 		sb.append("<table>\n<thead>\n<tr>\n");
 		for (MetaDataQueryColumn column : columns) {
-			// TODO get title
-			sb.append("<th style=\"width:").append(widthPercentage).append("%;\">").append(column.getDisplayName())
-					.append("</th>");
+			String binding = column.getBinding();
+			// TODO handle associations
+			if (!binding.contains(".")) {
+				sb.append("<th style=\"width:").append(widthPercentage).append("%;\">")
+						.append(listModel.determineColumnTitle(column))
+						.append("</th>");
+			}
 		}
 		sb.append("</tr>\n</thead>\n<tbody>\n<#list rows as row>\n<tr>\n");
 		for (MetaDataQueryColumn column : columns) {
-			sb.append("<td>\n${(row.").append(column.getBinding()).append(")!}\n</td>\n");
+			String binding = column.getBinding();
+			// TODO handle associations
+			if (!binding.contains(".")) {
+				sb.append("<td>\n${(row.").append(column.getBinding()).append(")!}\n</td>\n");
+			}
 		}
 		sb.append("</tr>\n</#list>\n</tbody>\n</table>\n");
 		
@@ -705,13 +720,20 @@ public final class FreemarkerReportUtil {
 
 		List<MetaDataQueryColumn> columns = listModel.getColumns();
 		for (MetaDataQueryColumn column : columns) {
-			// TODO get title
-			sb.append(column.getDisplayName()).append(",");
+			String binding = column.getBinding();
+			// TODO handle associations
+			if (!binding.contains(".")) {
+				sb.append(listModel.determineColumnTitle(column)).append(",");
+			}
 		}
 		sb.append("${'\n'}");
 		sb.append("<#list rows as row>");
 		for (MetaDataQueryColumn column : columns) {
-			sb.append("\"${(row.").append(column.getBinding()).append(")!}\",");
+			String binding = column.getBinding();
+			// TODO handle associations
+			if (!binding.contains(".")) {
+				sb.append("\"${(row.").append(column.getBinding()).append(")!}\",");
+			}
 		}
 		sb.append("${'\n'}");
 		sb.append("</#list>");

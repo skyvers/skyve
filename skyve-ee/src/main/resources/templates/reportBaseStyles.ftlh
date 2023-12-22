@@ -49,18 +49,22 @@
     /* table reset */
 	table, thead, tfoot, tr, th, td {
 		margin: 0px; 
-		padding: 0px; 
+		padding: 0px;
+		padding-top: 5px;
 		box-sizing: border-box;
+		border: 1px black;
 	}
 	
 	table {
 		width: 100%;
+		border: 1px black;
+		border-collapse: collapse;
 	}
 	table.table {
 		margin-top: 20px;
 		font-size: 13px;
 		background:none;
-		border:none;
+		border: none;
 		border-collapse:collapse;
 		border-spacing:0;
 		background-image:none;
@@ -72,8 +76,10 @@
 		font-weight: unset;
 		padding-right: 10px;
 		line-height: 1.4;
+		padding-left: 5px;
 		padding-top: 5px;
 		padding-bottom: 5px;
+		border: 1px black;
 	}
 	tbody tr:nth-child(even) {
 		background-color: #f6f6f6;

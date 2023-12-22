@@ -14,3 +14,4 @@
 			<h2 class="name">${title}</h2>
 		</div>
 	</header>
+<#setting boolean_format = "False,True"/>
