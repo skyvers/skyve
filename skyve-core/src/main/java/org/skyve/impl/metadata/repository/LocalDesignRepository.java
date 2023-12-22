@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository;
 
+import java.beans.Introspector;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
@@ -518,14 +519,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// Check conditions
 		for (String conditionName : document.getConditionNames()) {
-			// Check that conditions do not start with is or not
+			// Check that conditions do not start with is or not and are a valid java bean property
 			if (conditionName.startsWith("is")) {
 				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'is' - the 'is' prefix is generated in the bean method.");
 			}
 			else if (conditionName.startsWith("not")) {
 				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'not' - not conditions are automatically generated.  Switch the sense of the condition.");
 			}
-			
+			if (! conditionName.equals(Introspector.decapitalize(conditionName))) {
+				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " is not a valid property name - should be camel capitalized unless it's an initialism/acronym.");
+			}
+
 			// Check expression conditions
 			Condition condition = document.getCondition(conditionName);
 			String expression = condition.getExpression();
@@ -578,6 +582,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 			// TODO for all composition collections (ie reference a document that has a parentDocument = to this one) - no queryName is defined on the collection.
 			// TODO for all aggregation collections (ie reference a document that has does not have a parentDocument = to this one {or parentDocument is not defined}) - a queryName must be defined on the collection.
 
+			String name = attribute.getName();
+			if (! name.equals(Introspector.decapitalize(name))) {
+				throw new MetaDataException("Attribute " + name + " in document " + documentIdentifier + " is not a valid property name - should be camel capitalized unless it's an initialism/acronym.");
+			}
+			
 			if (attribute instanceof Field) {
 				// Check the default value expressions, if defined
 				String defaultValue = ((Field) attribute).getDefaultValue();

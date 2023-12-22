@@ -31,9 +31,12 @@ final containerMetaDataProvider =
 });
 
 final containerMenuProvider = FutureProvider((ref) async {
+  // Remove empty menu groups etc
+  List<SkyveModuleMenuModel> menuCopy = _removeEmptyItems(menu);
+
   // Prefer global menu variable (if defined)
-  if (menu != null) {
-    return menu!;
+  if (menuCopy.isNotEmpty) {
+    return menuCopy;
   }
 
   return Future<List<SkyveModuleMenuModel>>(() async {
@@ -45,6 +48,13 @@ final containerMenuProvider = FutureProvider((ref) async {
         growable: false);
   });
 });
+
+/// Remove empty entries from the menu
+List<SkyveModuleMenuModel> _removeEmptyItems(menuIn) {
+  List<SkyveModuleMenuModel> menuCopy = List.from(menuIn);
+  menuCopy.removeWhere((moduleMenu) => moduleMenu.isEmpty);
+  return menuCopy;
+}
 
 final containerDataSourceProvider =
     FutureProvider<Map<String, SkyveDataSourceModel>>((ref) async {
@@ -89,7 +99,9 @@ final containerRouterProvider = Provider((ref) {
     }
   }
 
-  return GoRouter(initialLocation: '/', redirect: redirect, routes: [
+  List<GoRoute> allRoutes = [];
+  allRoutes.addAll(goRoutes);
+  allRoutes.addAll([
     GoRoute(
       name: 'Login',
       path: AutoLogIn.routeName,
@@ -118,9 +130,12 @@ final containerRouterProvider = Provider((ref) {
           return SkyveEditView(m: m, d: d, i: i);
         }),
   ]);
+
+  return GoRouter(initialLocation: '/', redirect: redirect, routes: allRoutes);
 });
 
-final containerViewProvider =
+/// Provider which maps from a Modoc to a view definition
+final FutureProviderFamily<SkyveView, String> containerViewProvider =
     FutureProvider.family<SkyveView, String>((ref, modoc) async {
   // Look for the view in the global variable above
   if (views[modoc] != null) {
@@ -140,10 +155,10 @@ final containerViewProvider =
     if (client.loggedIn) {
       final Map<String, dynamic> json = await client.view(m, d);
       final SkyveViewModel view =
-          SkyveViewModel(module: m, document: d, json: json);
+          SkyveViewModel(module: m, document: d, jsonMetaData: json);
       views[modoc] = view;
       return view;
     }
-    return SkyveViewModel(module: m, document: d, json: {});
+    return SkyveViewModel(module: m, document: d, jsonMetaData: {});
   });
 });

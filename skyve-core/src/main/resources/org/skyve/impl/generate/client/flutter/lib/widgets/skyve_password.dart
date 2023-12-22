@@ -1,14 +1,45 @@
 import 'package:flutter/material.dart';
-import 'skyve_textField.dart';
+import 'package:##PROJECT##/util/skyve_form.dart';
 
-class SkyvePassword extends StatelessWidget {
+class SkyvePassword extends StatefulWidget {
   final String label;
+  final String propertyKey;
 
-  const SkyvePassword({super.key, required this.label});
+  final FormFieldValidator<String>? validator;
+
+  const SkyvePassword(
+      {super.key,
+      required this.label,
+      required this.propertyKey,
+      this.validator});
 
   @override
+  State<StatefulWidget> createState() => SkyvePasswordState();
+}
+
+class SkyvePasswordState extends State<SkyvePassword> {
+  @override
   Widget build(BuildContext context) {
-    // TODO: implement widget
-    return SkyveTextField(label: label);
+    var initialVal = SkyveForm.of(context).beanValues[widget.propertyKey] ?? '';
+
+    return TextFormField(
+      key: Key('${widget.propertyKey}_$initialVal'),
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      decoration: InputDecoration(
+          border: const OutlineInputBorder(),
+          labelText: widget.label,
+          errorText: SkyveForm.of(context).serverErrors[widget.propertyKey]),
+      initialValue: initialVal,
+      onSaved: (newValue) {
+        SkyveForm.of(context).beanValues[widget.propertyKey] = newValue ?? '';
+      },
+      onChanged: (value) {
+        setState(() {
+          SkyveForm.of(context).removeError(widget.propertyKey);
+        });
+      },
+      validator: widget.validator,
+      obscureText: true,
+    );
   }
 }

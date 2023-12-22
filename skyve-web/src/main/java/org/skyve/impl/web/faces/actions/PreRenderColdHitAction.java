@@ -40,11 +40,13 @@ public class PreRenderColdHitAction<T extends Bean> extends FacesAction<Void> {
 		facesView.initialise();
 		WebAction webAction = facesView.getWebActionParameter();
 
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderColdHitAction - GO a=" + webAction + 
-													" : m=" + facesView.getBizModuleParameter() + 
-													" : d=" + facesView.getBizDocumentParameter() + 
-													" : q=" + facesView.getQueryNameParameter() + 
-													" : i=" + facesView.getBizIdParameter());
+		StringBuilder log = new StringBuilder(128);
+		log.append("ColdHit - a=").append(webAction);
+		log.append(" : m=").append(facesView.getBizModuleParameter());
+		log.append(" : d=").append(facesView.getBizDocumentParameter());
+		log.append(" : q=").append(facesView.getQueryNameParameter());
+		log.append(" : i=").append(facesView.getBizIdParameter());
+		Util.LOGGER.info(log.toString());
 		switch (webAction) {
 		case e:
 			new EditAction<>(facesView).callback(); // execute without error trapping

@@ -60,10 +60,10 @@ class _SkyveListViewState extends ConsumerState<SkyveListView> {
                         key: Key(_rows[index]['bizId']),
                         background: Container(
                             color: Colors.red,
-                            child: Wrap(
+                            child: const Wrap(
                                 alignment: WrapAlignment.spaceBetween,
                                 crossAxisAlignment: WrapCrossAlignment.center,
-                                children: const [delete, delete])),
+                                children: [delete, delete])),
                         onDismissed: (direction) {
                           ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
