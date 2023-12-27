@@ -8,10 +8,10 @@ class SkyveTabPane extends StatefulWidget {
   const SkyveTabPane({super.key, required this.tabs, this.height = 0});
 
   @override
-  SkyveTabPaneState createState() => SkyveTabPaneState();
+  State<SkyveTabPane> createState() => _SkyveTabPaneState();
 }
 
-class SkyveTabPaneState extends State<SkyveTabPane>
+class _SkyveTabPaneState extends State<SkyveTabPane>
     with TickerProviderStateMixin {
   late TabController _tabController;
 

@@ -22,10 +22,10 @@ class SkyveTextField extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => SkyveTextFieldState();
+  State<StatefulWidget> createState() => _SkyveTextFieldState();
 }
 
-class SkyveTextFieldState extends State<SkyveTextField> {
+class _SkyveTextFieldState extends State<SkyveTextField> {
   @override
   Widget build(BuildContext context) {
     String initialVal =

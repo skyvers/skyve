@@ -10,10 +10,10 @@ class SkyveCheckBox extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => SkyveCheckBoxState();
+  State<StatefulWidget> createState() => _SkyveCheckBoxState();
 }
 
-class SkyveCheckBoxState extends State<SkyveCheckBox> {
+class _SkyveCheckBoxState extends State<SkyveCheckBox> {
   late bool? checked;
 
   @override
