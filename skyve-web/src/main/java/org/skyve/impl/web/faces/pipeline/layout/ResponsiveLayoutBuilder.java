@@ -303,24 +303,55 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
-										String widgetHelpText) {
-		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
-		div.setStyle("display:flex;align-items:center;flex-wrap:nowrap;");
-		setInvisible(div, widgetInvisible, null);
+										String widgetHelpText,
+										boolean showLabel,
+										boolean topLabel) {
+		HtmlPanelGroup flex = panelGroup(false, false, true, null, null);
+		if (showLabel && topLabel) {
+			flex.setStyle("display:flex;align-items:center;flex-wrap:nowrap;padding-top:16px");
+		}
+		else {
+			flex.setStyle("display:flex;align-items:center;flex-wrap:nowrap");
+		}
+		setInvisible(flex, widgetInvisible, null);
+		List<UIComponent> flexChildren = flex.getChildren();
 		
-		// Create a grid
-		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
+		// Add message, component and help to flex box as required
+		
 		Message m = message(formItemComponent.getId());
 		m.setStyleClass("formMessageStyle");
-		div.getChildren().add(m);
+		flexChildren.add(m);
 
-		div.getChildren().add(formItemComponent);
+		if (showLabel && topLabel) {
+			HtmlPanelGroup fieldDiv = panelGroup(false, false, true, null, null);
+			fieldDiv.setStyleClass("field");
+			fieldDiv.setStyle("width:100%");
+			HtmlPanelGroup floatSpan = panelGroup(false, false, false, null, null);
+			floatSpan.setStyleClass("ui-float-label");
+			fieldDiv.getChildren().add(floatSpan);
+			List<UIComponent> floatSpanChildren = floatSpan.getChildren();
+			floatSpanChildren.add(formItemComponent);
+
+			String label = currentFormItem.getLocalisedLabel();
+			if (label == null) {
+				label = widgetLabel;
+			}
+
+			floatSpanChildren.add(label(label, formItemComponent.getId(), widgetRequired));
+
+			flexChildren.add(fieldDiv);
+		}
+		else {
+			flexChildren.add(formItemComponent);
+		}
+
+		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
 		if (helpText != null) {
 			HtmlOutputText output = new HtmlOutputText();
 			output.setEscape(false);
 			output.setValue(String.format("<i class=\"fa fa-info-circle help\" data-tooltip=\"%s\"></i>",
 											helpText));
-			div.getChildren().add(output);
+			flexChildren.add(output);
 		}
 		
 		// Update div's style
@@ -331,7 +362,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 												managedBeanName, 
 												Integer.toString(formIndex),
 												alignment(currentFormItem.getHorizontalAlignment(), false));
-			div.setValueExpression("styleClass", 
+			flex.setValueExpression("styleClass", 
 									ef.createValueExpression(elc, expression, String.class));
 		}
 		else { // colspan > 1
@@ -341,10 +372,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 												Integer.toString(formIndex),
 												alignment(currentFormItem.getHorizontalAlignment(), false),
 												Integer.toString(widgetColspan));
-			div.setValueExpression("styleClass", 
+			flex.setValueExpression("styleClass", 
 									ef.createValueExpression(elc, expression, String.class));
 		}
-		formOrRowLayout.getChildren().add(div);
+		formOrRowLayout.getChildren().add(flex);
 	}
 	
 	private static String alignment(HorizontalAlignment alignment, boolean forFormLabel) {

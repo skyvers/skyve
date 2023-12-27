@@ -621,7 +621,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			else { // a form item
 				FormItem formItem = getCurrentFormItem();
 				FormColumn formColumn = getCurrentFormColumn();
-				if (isCurrentWidgetShowLabel()) {
+				if (isCurrentWidgetShowLabel() && (! isCurrentFormRenderTopLabels())) {
 					lb.layoutFormItemLabel(current,
 											component,
 											currentForm,
@@ -643,7 +643,9 @@ public class FacesViewRenderer extends ViewRenderer {
 											formColspan,
 											widgetRequired,
 											widgetInvisible,
-											helpText);
+											helpText,
+											isCurrentWidgetShowLabel(),
+											isCurrentFormRenderTopLabels());
 				for (int i = 0, l = formColspan; i < l; i++) {
 					incrementFormColumn();
 				}

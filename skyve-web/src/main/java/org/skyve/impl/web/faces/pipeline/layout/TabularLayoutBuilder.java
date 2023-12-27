@@ -280,7 +280,9 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
-										String widgetHelpText) {
+										String widgetHelpText,
+										boolean showLabel,
+										boolean topLabel) {
 		Integer rowspan = currentFormItem.getRowspan();
 		Column col = column(widgetInvisible,
 								true,
