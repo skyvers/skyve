@@ -233,11 +233,15 @@ public class MetaDataServlet extends HttpServlet {
 					}
 					persistence.setUser(user);
 
-					String uxui = UserAgent.getUxUi(request).getName();
+					String uxui = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.UXUI)));
+					if (uxui == null) {
+						uxui = UserAgent.getUxUi(request).getName();
+					}
 					String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 					documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 					if (documentName != null) {
-						pw.append(view(user, uxui, moduleName, documentName));
+						String top = Util.processStringValue(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME));
+						pw.append(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)));
 					}
 					else {
 						metadata(user, uxui, moduleName, pw);
@@ -732,7 +736,8 @@ public class MetaDataServlet extends HttpServlet {
 	private static StringBuilder view(User user,
 										String uxui,
 										String moduleName,
-										String documentName) {
+										String documentName,
+										boolean topFormLabelAlignemnt) {
 		final StringBuilder result = new StringBuilder(5120);
 		final StringBuilder actionsJSON = new StringBuilder(2048);
 		Customer c = user.getCustomer();
@@ -740,7 +745,7 @@ public class MetaDataServlet extends HttpServlet {
 		Document document = module.getDocument(c, documentName);
 		View editView = document.getView(uxui, c, ViewType.edit.toString());
 		
-		new ViewRenderer(user, module, document, editView, uxui) {
+		ViewRenderer vr = new ViewRenderer(user, module, document, editView, uxui) {
 			@Override
 			public void renderView(String icon16x16Url, String icon32x32Url) {
 				result.append("{\"type\":\"view\",\"name\":\"");
@@ -3434,8 +3439,11 @@ public class MetaDataServlet extends HttpServlet {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("},");
 			}
-
-			}.visit();
+		};
+		if (topFormLabelAlignemnt) {
+			vr.forceTopFormLabelAlignment();
+		}
+		vr.visit();	
 		
 		return result;
 	}

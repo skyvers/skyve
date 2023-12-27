@@ -37,6 +37,7 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 	public static final String CURRENT_TIME_IN_MILLIS = "_ctim";
 	public static final String IS_LIST = "_list";
 	public static final String CSRF_TOKEN_NAME = "_csrf";
+	public static final String TOP_FORM_LABELS_NAME = "_t";
 
 	/**
 	 *  Used to place the uxui (renderer) at play during the request as a request attribute

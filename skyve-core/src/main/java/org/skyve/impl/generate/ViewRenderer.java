@@ -89,6 +89,8 @@ import org.skyve.util.Util;
 public abstract class ViewRenderer extends ViewVisitor {
 	// The user to render for
 	protected User user;
+	
+	protected boolean forceTopFormLabelAlignment = false;
 
 	// Stack of containers sent in to render methods
 	private Stack<Container> currentContainers = new Stack<>();
@@ -102,6 +104,11 @@ public abstract class ViewRenderer extends ViewVisitor {
 	protected ViewRenderer(User user, Module module, Document document, View view, String uxui) {
 		super((CustomerImpl) user.getCustomer(), (ModuleImpl) module, (DocumentImpl) document, (ViewImpl) view, uxui);
 		this.user = user;
+	}
+
+	public ViewRenderer forceTopFormLabelAlignment() {
+		this.forceTopFormLabelAlignment = true;
+		return this;
 	}
 
 	private String viewIcon16x16Url;
@@ -237,7 +244,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	// Should this form be rendered with top labels or side labels
 	private boolean currentFormRenderTopLabels = false;
 	public boolean isCurrentFormRenderTopLabels() {
-		return currentFormRenderTopLabels;
+		return forceTopFormLabelAlignment || currentFormRenderTopLabels;
 	}
 
 	@Override
@@ -438,7 +445,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 
 			// If showing label and we're rendering top for a side authored form,
 			// increment the colspan so we assume the size of the side label column too.
-			if (currentWidgetShowLabel && currentFormRenderTopLabels && (! currentFormAuthoredTopLabels)) {
+			if (currentWidgetShowLabel && isCurrentFormRenderTopLabels() && (! currentFormAuthoredTopLabels)) {
 				currentWidgetColspan++;
 			}
 			renderFormItem(currentWidgetLabel,
