@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputText;
-import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
 
 import org.primefaces.component.message.Message;
@@ -306,34 +305,28 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										String widgetInvisible,
 										String widgetHelpText) {
 		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
+		div.setStyle("display:flex;align-items:center;flex-wrap:nowrap;");
 		setInvisible(div, widgetInvisible, null);
 		
 		// Create a grid
 		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
-		HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
-		setId(pg, null);
-		pg.setCellpadding("0"); //Don't pad cells
-		pg.setStyleClass("inputComponent");
-		pg.setColumns((helpText != null) ? 3 : 2);
-		// First (and possibly 3rd if there is help defined) column(s) should shrink
-		pg.setColumnClasses((helpText != null) ? "shrink,,shrink" : "shrink");
-		div.getChildren().add(pg);
 		Message m = message(formItemComponent.getId());
 		m.setStyleClass("formMessageStyle");
-		pg.getChildren().add(m);
-		pg.getChildren().add(formItemComponent);
+		div.getChildren().add(m);
+
+		div.getChildren().add(formItemComponent);
 		if (helpText != null) {
 			HtmlOutputText output = new HtmlOutputText();
 			output.setEscape(false);
 			output.setValue(String.format("<i class=\"fa fa-info-circle help\" data-tooltip=\"%s\"></i>",
 											helpText));
-			pg.getChildren().add(output);
+			div.getChildren().add(output);
 		}
 		
 		// Update div's style
 		// colspan should be 1.
 		if (widgetColspan <= 1) {
-			// style="<repsonsive column calc method call>"
+			// styleClass="<repsonsive column calc method call>"
 			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', 1)}", 
 												managedBeanName, 
 												Integer.toString(formIndex),
@@ -342,7 +335,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 									ef.createValueExpression(elc, expression, String.class));
 		}
 		else { // colspan > 1
-			// style="<repsonsive column calc method call>"
+			// styleClass="<repsonsive column calc method call>"
 			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', %s)}", 
 												managedBeanName, 
 												Integer.toString(formIndex),

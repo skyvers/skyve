@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
@@ -10,6 +11,7 @@ import org.primefaces.component.panel.Panel;
 import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.util.UtilImpl;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
@@ -58,7 +60,24 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-col-12" : "ui-g-12");
 		return result;
 	}
-
+	
+	@Override
+	public EventSourceComponent geometryMap(EventSourceComponent component,
+												GeometryMap geometry,
+												String formDisabledConditionName,
+												String title,
+												boolean required) {
+		EventSourceComponent result = super.geometryMap(component, geometry, formDisabledConditionName, title, required);
+		
+		// Grow the map form item in its flex grid, if it has no width defined
+		if ((geometry.getPixelWidth() == null) && (geometry.getPercentageWidth() == null) && (geometry.getResponsiveWidth() == null)) {
+			Map<String, Object> resultAttributes = result.getComponent().getAttributes();
+			String style = (String) resultAttributes.get("style");
+			resultAttributes.put("style", ((style == null) || style.isBlank()) ? "flex-grow:1" : style + ";flex-grow:1");
+		}
+		return result;
+	}
+	
 	@Override
 	protected void setSizeAndTextAlignStyle(UIComponent component, 
 												String styleAttributeNameOverride,

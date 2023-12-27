@@ -200,7 +200,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								String widgetId,
 								ComponentBuilder cb,
 								LayoutBuilder lb) {
-		super(user, module, document, view, uxui, true);
+		super(user, module, document, view, uxui);
 		String viewName = view.getName();
 		createView = ViewType.create.toString().equals(viewName);
 		this.widgetId = widgetId;
@@ -470,7 +470,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderForm(String borderTitle, Form form) {
 		Collapsible collapsible = form.getCollapsible();
-		boolean bordered 		= (collapsible != null) || Boolean.TRUE.equals(form.getBorder());
+		boolean bordered = (collapsible != null) || Boolean.TRUE.equals(form.getBorder());
 		
 		validateCollapsible(collapsible, borderTitle);
 
@@ -788,13 +788,13 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderMap(MapDisplay map) {
-		UIComponent l = cb.map(null, map, map.getModelName());
+		UIComponent m = cb.map(null, map, map.getModelName());
 		addComponent(null,
 						0,
 						false,
 						map.getInvisibleConditionName(),
 						null,
-						l,
+						m,
 						map.getPixelWidth(),
 						map.getResponsiveWidth(),
 						map.getPercentageWidth(),
@@ -806,13 +806,13 @@ public class FacesViewRenderer extends ViewRenderer {
 
 	@Override
 	public void renderChart(Chart chart) {
-		UIComponent l = cb.chart(null, chart);
+		UIComponent c = cb.chart(null, chart);
 		addComponent(null,
 						0,
 						false,
 						chart.getInvisibleConditionName(),
 						null,
-						l,
+						c,
 						chart.getPixelWidth(),
 						chart.getResponsiveWidth(),
 						chart.getPercentageWidth(),

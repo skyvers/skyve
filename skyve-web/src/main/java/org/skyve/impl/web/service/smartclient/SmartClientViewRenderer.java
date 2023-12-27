@@ -141,7 +141,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 										View view,
 										String uxui,
 										boolean noCreateView) {
-		super(user, module, document, view, uxui, false);
+		super(user, module, document, view, uxui);
 		this.noCreateView = noCreateView;
 	}
 

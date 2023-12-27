@@ -740,7 +740,7 @@ public class MetaDataServlet extends HttpServlet {
 		Document document = module.getDocument(c, documentName);
 		View editView = document.getView(uxui, c, ViewType.edit.toString());
 		
-		new ViewRenderer(user, module, document, editView, uxui, false) {
+		new ViewRenderer(user, module, document, editView, uxui) {
 			@Override
 			public void renderView(String icon16x16Url, String icon32x32Url) {
 				result.append("{\"type\":\"view\",\"name\":\"");
