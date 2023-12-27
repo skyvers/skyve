@@ -7,7 +7,7 @@ import '../widgets/skyve_tabpane.dart';
 import '../widgets/skyve_blurb.dart';
 import '../widgets/skyve_button.dart';
 import '../widgets/skyve_contentimage.dart';
-import '../widgets/responsive_layout.dart';
+import '../widgets/skyve_form.dart';
 import '../widgets/skyve_formitem.dart';
 import '../widgets/skyve_formrow.dart';
 import '../widgets/skyve_hbox.dart';
@@ -141,7 +141,7 @@ class SkyveViewModel implements SkyveView {
       case 'form':
         {
           List<SkyveFormRow> formRows = _formRows(model['rows']);
-          return ResponsiveLayout(formCols: const [], formRows: formRows);
+          return SkyveForm(formCols: const [], formRows: formRows);
         }
       case 'implicitActionRef':
         return const Text('implicitActionRef');

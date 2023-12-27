@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skyve_flutter/util/skyve_providers.dart';
 
 import '../models/payload.dart';
-import '../util/skyve_form.dart';
+import '../util/skyve_flutter_form.dart';
 import '../util/skyve_rest_client.dart';
 
 /// A simple proxy widget, will initiate a load for the
@@ -58,7 +58,7 @@ class _LoaderWidgetState extends ConsumerState<LoaderWidget> {
 
     if (payload.successful) {
       setState(() {
-        SkyveForm.of(context).applyPayload(payload);
+        SkyveFlutterForm.of(context).applyPayload(payload);
         ref.read(viewStateProvider.notifier).title(payload.title);
         _ready = true;
       });

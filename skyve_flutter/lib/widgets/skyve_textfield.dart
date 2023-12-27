@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:skyve_flutter/util/skyve_form.dart';
+import 'package:skyve_flutter/util/skyve_flutter_form.dart';
 import 'package:skyve_flutter/util/validators.dart';
 
 class SkyveTextField extends StatefulWidget {
@@ -29,7 +29,7 @@ class SkyveTextFieldState extends State<SkyveTextField> {
   @override
   Widget build(BuildContext context) {
     String initialVal =
-        '${SkyveForm.of(context).beanValues[widget.propertyKey] ?? ''}';
+        '${SkyveFlutterForm.of(context).beanValues[widget.propertyKey] ?? ''}';
 
     FormFieldValidator<String>? validatorFn =
         _createValidator(widget.validators);
@@ -40,14 +40,16 @@ class SkyveTextFieldState extends State<SkyveTextField> {
       decoration: InputDecoration(
           border: const OutlineInputBorder(),
           labelText: widget.label,
-          errorText: SkyveForm.of(context).serverErrors[widget.propertyKey]),
+          errorText:
+              SkyveFlutterForm.of(context).serverErrors[widget.propertyKey]),
       initialValue: initialVal,
       onSaved: (newValue) {
-        SkyveForm.of(context).beanValues[widget.propertyKey] = newValue ?? '';
+        SkyveFlutterForm.of(context).beanValues[widget.propertyKey] =
+            newValue ?? '';
       },
       onChanged: (value) {
         setState(() {
-          SkyveForm.of(context).removeError(widget.propertyKey);
+          SkyveFlutterForm.of(context).removeError(widget.propertyKey);
         });
       },
       validator: validatorFn,

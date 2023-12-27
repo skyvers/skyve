@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/payload.dart';
 import '../util/skyve_rest_client.dart';
-import '../util/skyve_form.dart';
+import '../util/skyve_flutter_form.dart';
 
 typedef BeanSupplier = Payload Function();
 
@@ -58,8 +58,7 @@ class SkyveButton extends StatelessWidget {
 
     debugPrint('Saving form');
     form.save();
-
-    SkyveFormState formState = SkyveForm.of(context);
+    SkyveFlutterFormState formState = SkyveFlutterForm.of(context);
     debugPrint('Action $actionType pressed for $formState');
 
     Payload requestPayload = formState.asPayload();

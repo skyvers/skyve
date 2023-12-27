@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../util/skyve_form.dart';
+import '../util/skyve_flutter_form.dart';
 import '../util/skyve_rest_client.dart';
 
 class SkyveContentImage extends StatelessWidget {
@@ -14,7 +14,7 @@ class SkyveContentImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var formState = SkyveForm.of(context);
+    var formState = SkyveFlutterForm.of(context);
     String? contentId = formState.beanValues[propertyKey];
 
     if (contentId != null) {

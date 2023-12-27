@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nested_scroll_view_plus/nested_scroll_view_plus.dart';
-import '../util/skyve_form.dart';
+import '../util/skyve_flutter_form.dart';
 import 'skyve_menu.dart';
 
 String nvl(dynamic value) {
@@ -84,7 +84,7 @@ abstract class SkyveView {
                   )
                 ];
               },
-              body: SkyveForm(
+              body: SkyveFlutterForm(
                 child: Form(
                   child: body,
                 ),

@@ -159,7 +159,7 @@ class SkyveRestClient {
   Future<Map<String, dynamic>> view(String m, String d) async {
     debugPrint('Fetch view');
 
-    return await _fetch('meta?_mod=$m&_doc=$d').then((jsonString) {
+    return await _fetch('meta?_mod=$m&_doc=$d&_t=true').then((jsonString) {
       debugPrint(jsonString);
       return jsonDecode(jsonString);
     });
