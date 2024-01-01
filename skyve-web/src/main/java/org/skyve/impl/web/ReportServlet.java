@@ -127,7 +127,6 @@ public class ReportServlet extends HttpServlet {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
 		try (OutputStream out = response.getOutputStream()) {
 			String moduleName = request.getParameter(AbstractWebContext.MODULE_NAME);
@@ -152,9 +151,6 @@ public class ReportServlet extends HttpServlet {
 			if (!EnumUtils.isValidEnum(ReportFormat.class, formatString)) {
 				throw new ServletException("Invalid report format in the URL");
 			}
-			// TOOD
-			// SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user, customer, drivingDocumentModule,
-			// drivingDocument, column, true, uxui);
 			ReportFormat format = ReportFormat.valueOf(formatString);
 
 			User user = AbstractPersistence.get().getUser();
@@ -216,21 +212,11 @@ public class ReportServlet extends HttpServlet {
 				parameters.put("title", reportName != null ? reportName : documentName);
 				ListModel<Bean> listModel = null;
 
-				// pass bean or list into the report dataset
+				// pass bean or list into the report parameters
 				if (isList) {
 					listModel = getListModel(request, module, documentName);
 					listModel.setEndRow(Integer.MAX_VALUE);
-					List<MetaDataQueryColumn> columns = listModel.getColumns();
-					List<DynaBean> results = new ArrayList<>();
-					try (AutoClosingIterable<Bean> i = listModel.iterate()) {
-						for (Bean b : i) {
-							DynaBean result = new LazyDynaBean();
-							for (MetaDataQueryColumn c : columns) {
-								result.set(c.getBinding(), b.getDynamic(c.getBinding()));
-							}
-							results.add(result);
-						}
-					}
+					List<DynaBean> results = createRowsFromListModel(listModel);
 					
 					parameters.put("rows", results);
 				} else {
@@ -652,11 +638,11 @@ public class ReportServlet extends HttpServlet {
 	}
 	
 	/**
-	 * TODO
+	 * Return the list model from the request, moduleName and documentName
 	 * 
 	 * @param request
 	 * @param documentName
-	 * @return
+	 * @return list model for the provided
 	 */
 	private static ListModel<Bean> getListModel(HttpServletRequest request, Module module, String documentName) {
 		final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
@@ -669,14 +655,14 @@ public class ReportServlet extends HttpServlet {
 	}
 
 	/**
-	 * TODO
+	 * Creates a report template string
 	 * 
 	 * @param listModel
 	 * @param moduleName
 	 * @param documentName
 	 * @param format
 	 * @param isList
-	 * @return
+	 * @return report template String if it exists
 	 * @throws ServletException
 	 */
 	private static String getReportTemplate(ListModel<Bean> listModel, String moduleName, String documentName,
@@ -702,5 +688,32 @@ public class ReportServlet extends HttpServlet {
 			throw new ServletException("Report template could not be created.");
 		}
 		return reportTemplate;
+	}
+
+	/**
+	 * Create results rows to be passed into a Freemarker report
+	 * 
+	 * @param listModel
+	 * @return rows of DynaBean for a Freemarker report
+	 * @throws Exception
+	 */
+	private static List<DynaBean> createRowsFromListModel(ListModel<Bean> listModel) throws Exception {
+		List<DynaBean> results = new ArrayList<>();
+		List<MetaDataQueryColumn> columns = listModel.getColumns();
+		try (AutoClosingIterable<Bean> i = listModel.iterate()) {
+			for (Bean b : i) {
+				DynaBean result = new LazyDynaBean();
+				for (MetaDataQueryColumn c : columns) {
+					String binding = c.getBinding();
+					// TODO handle associations
+					if (!binding.contains(".")) {
+						result.set(c.getBinding(), b.getDynamic(c.getBinding()));
+					}
+				}
+				results.add(result);
+			}
+		}
+
+		return results;
 	}
 }
