@@ -56,8 +56,9 @@
 	}
 	
 	table {
+		margin-top: 20px;
 		width: 100%;
-		border: 1px black;
+		border: 1px solid black;
 		border-collapse: collapse;
 	}
 	table.table {
@@ -79,7 +80,7 @@
 		padding-left: 5px;
 		padding-top: 5px;
 		padding-bottom: 5px;
-		border: 1px black;
+		border: 1px solid black;
 	}
 	tbody tr:nth-child(even) {
 		background-color: #f6f6f6;

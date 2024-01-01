@@ -158,6 +158,11 @@ public class ReportServlet extends HttpServlet {
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
 
+			// Don't want to expose any information that the user doesn't have (i.e. the fields in the Document)
+			if (!user.canReadDocument(document)) {
+				throw new IllegalAccessException("User does not have access to the " + documentName + " Document.");
+			}
+
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
 			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
