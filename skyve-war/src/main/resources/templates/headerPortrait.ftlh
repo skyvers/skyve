@@ -15,3 +15,4 @@
 		</div>
 	</header>
 <#setting boolean_format = "True,False"/>
+<#setting number_format = "###,###,###.##"/>

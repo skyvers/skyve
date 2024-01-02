@@ -22,6 +22,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.LazyDynaBean;
 import org.apache.commons.lang3.EnumUtils;
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -57,11 +58,13 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
@@ -75,6 +78,8 @@ import net.sf.jasperreports.engine.design.JRValidationException;
 import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
+	private static final String BIZ_KEY_ATTRIBUTE_NAME = "bizKey";
+
 	private static final String FREEMARKER_TEMPLATE_SUFFIX = ".ftlh";
 
 	private static final long serialVersionUID = 1L;
@@ -159,7 +164,7 @@ public class ReportServlet extends HttpServlet {
 			Document document = module.getDocument(customer, documentName);
 
 			// Don't want to expose any information that the user doesn't have (i.e. the fields in the Document)
-			if (!user.canReadDocument(document)) {
+			if (!user.canAccessDocument(document)) {
 				throw new IllegalAccessException("User does not have access to the " + documentName + " Document.");
 			}
 
@@ -217,22 +222,30 @@ public class ReportServlet extends HttpServlet {
 				parameters.put("title", reportName != null ? reportName : documentName);
 				ListModel<Bean> listModel = null;
 
-				// pass bean or list into the report parameters
-				if (isList) {
-					listModel = getListModel(request, module, documentName);
-					listModel.setEndRow(Integer.MAX_VALUE);
-					List<DynaBean> results = createRowsFromListModel(listModel);
-					
-					parameters.put("rows", results);
-				} else {
-					// Manually load the bean if an id is specified but there is no appropriate bean to load from the
-					// conversation.
-					final String id = request.getParameter(AbstractWebContext.ID_NAME);
-					if ((id != null) && ((bean == null) || ((contextKey != null) && (!contextKey.endsWith(id))))) {
-						bean = AbstractPersistence.get().retrieve(document, id);
+				Persistence pers = CORE.getPersistence();
+				try {
+					DocumentPermissionScope dps = user.getScope(moduleName, documentName);
+					pers.setDocumentPermissionScopes(dps);
+
+					// pass bean or list into the report parameters
+					if (isList) {
+						listModel = getListModel(request, module, documentName);
+						listModel.setEndRow(Integer.MAX_VALUE);
+						List<DynaBean> results = createRowsFromListModel(listModel);
+
+						parameters.put("rows", results);
+					} else {
+						// Manually load the bean if an id is specified but there is no appropriate bean to load from the
+						// conversation.
+						final String id = request.getParameter(AbstractWebContext.ID_NAME);
+						if ((id != null) && ((bean == null) || ((contextKey != null) && (!contextKey.endsWith(id))))) {
+							bean = AbstractPersistence.get().retrieve(document, id);
+						}
+
+						parameters.put("bean", bean);
 					}
-					
-					parameters.put("bean", bean);
+				} finally {
+					pers.resetDocumentPermissionScopes();
 				}
 				
 				// create a default path for reports based on the parameters in the request
@@ -705,14 +718,25 @@ public class ReportServlet extends HttpServlet {
 	private static List<DynaBean> createRowsFromListModel(ListModel<Bean> listModel) throws Exception {
 		List<DynaBean> results = new ArrayList<>();
 		List<MetaDataQueryColumn> columns = listModel.getColumns();
+
+		// Create list of non-persisted attributes to check against here, rather than in the iterator
+		List<String> nonPersistentAttributes = new ArrayList<>();
+		for (MetaDataQueryColumn c : columns) {
+			String binding = c.getBinding();
+			Attribute a = listModel.getDrivingDocument().getAttribute(binding);
+			if (binding == BIZ_KEY_ATTRIBUTE_NAME || a != null && !a.isPersistent()) {
+				nonPersistentAttributes.add(binding);
+			}
+		}
+
 		try (AutoClosingIterable<Bean> i = listModel.iterate()) {
 			for (Bean b : i) {
 				DynaBean result = new LazyDynaBean();
 				for (MetaDataQueryColumn c : columns) {
 					String binding = c.getBinding();
 					// TODO handle associations
-					if (!binding.contains(".")) {
-						result.set(c.getBinding(), b.getDynamic(c.getBinding()));
+					if (!binding.contains(".") && !nonPersistentAttributes.contains(binding)) {
+						result.set(binding, b.getDynamic(binding));
 					}
 				}
 				results.add(result);

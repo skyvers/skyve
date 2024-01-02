@@ -12,6 +12,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -70,6 +72,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 
 public final class FreemarkerReportUtil {
+	private static final String BIZ_KEY_ATTRIBUTE_NAME = "bizKey";
 	private static Configuration cfg;
 	private static PathMatchingResourcePatternResolver resolver;
 	private static StringTemplateLoader strl;
@@ -675,30 +678,35 @@ public final class FreemarkerReportUtil {
 		
 		List<MetaDataQueryColumn> columns = listModel.getColumns();
 		int columnCount = 0;
-		for (MetaDataQueryColumn column : columns) {
-			String binding = column.getBinding();
+
+		// Only add the heading if the field is non-persistent and the binding is not an association
+		List<MetaDataQueryColumn> persistedColumns = new ArrayList<>();
+		for (MetaDataQueryColumn c : columns) {
+			String binding = c.getBinding();
+			Attribute a = listModel.getDrivingDocument().getAttribute(binding);
 			// TODO handle associations
-			if (!binding.contains(".")) {
+			if (binding.equals(BIZ_KEY_ATTRIBUTE_NAME) || (!binding.contains(".") && a != null && a.isPersistent())) {
+				persistedColumns.add(c);
 				columnCount++;
 			}
 		}
 		final int widthPercentage = 100 / columnCount;
 		sb.append("<table>\n<thead>\n<tr>\n");
-		for (MetaDataQueryColumn column : columns) {
-			String binding = column.getBinding();
+		for (MetaDataQueryColumn c : persistedColumns) {
+			String binding = c.getBinding();
 			// TODO handle associations
 			if (!binding.contains(".")) {
 				sb.append("<th style=\"width:").append(widthPercentage).append("%;\">")
-						.append(listModel.determineColumnTitle(column))
+						.append(listModel.determineColumnTitle(c))
 						.append("</th>");
 			}
 		}
 		sb.append("</tr>\n</thead>\n<tbody>\n<#list rows as row>\n<tr>\n");
-		for (MetaDataQueryColumn column : columns) {
-			String binding = column.getBinding();
+		for (MetaDataQueryColumn c : persistedColumns) {
+			String binding = c.getBinding();
 			// TODO handle associations
 			if (!binding.contains(".")) {
-				sb.append("<td>\n${(row.").append(column.getBinding()).append(")!}\n</td>\n");
+				sb.append("<td>\n${(row.").append(c.getBinding()).append(")!}\n</td>\n");
 			}
 		}
 		sb.append("</tr>\n</#list>\n</tbody>\n</table>\n");
