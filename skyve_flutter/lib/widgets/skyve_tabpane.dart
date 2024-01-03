@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:skyve_flutter/util/responsive_grid.dart';
 import 'package:skyve_flutter/widgets/skyve_tab.dart';
+import 'package:skyve_flutter/widgets/skyve_vbox.dart';
+import 'package:skyve_flutter/widgets/skyve_view.dart';
 
 class SkyveTabPane extends StatefulWidget {
   final List<SkyveTab> tabs;
@@ -35,7 +38,10 @@ class _SkyveTabPaneState extends State<SkyveTabPane>
 
     List<SingleChildScrollView> tabPanes =
         List.generate(widget.tabs.length, (index) {
-      return SingleChildScrollView(child: widget.tabs[index]);
+      return SingleChildScrollView(
+          child: Padding(
+              padding: const EdgeInsets.all(ResponsiveWidth.defaultPadding),
+              child: SkyveVBox(children: [widget.tabs[index]])));
     }, growable: false);
     return Column(
       children: [
@@ -49,7 +55,7 @@ class _SkyveTabPaneState extends State<SkyveTabPane>
         Container(
           height: (widget.height > 0)
               ? widget.height
-              : MediaQuery.of(context).size.height * 0.8,
+              : SkyveView.screenSize.height * (SkyveView.small ? 0.5 : 0.6),
           margin: const EdgeInsets.only(left: 16.0, right: 16.0),
           child: TabBarView(controller: _tabController, children: tabPanes),
         )

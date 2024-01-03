@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveStaticImage extends StatelessWidget with Sizable {
-  SkyveStaticImage(
+class SkyveListRepeater extends StatelessWidget with Sizable {
+  SkyveListRepeater(
       {Key? key,
       int? pixelWidth,
       int? responsiveWidth,
@@ -40,7 +40,7 @@ class SkyveStaticImage extends StatelessWidget with Sizable {
     // TODO: implement widget
     return const Stack(alignment: Alignment.center, children: [
       Placeholder(fallbackHeight: 200, color: Colors.orange),
-      Text('StaticImage')
+      Text('ListRepeater')
     ]);
   }
 }

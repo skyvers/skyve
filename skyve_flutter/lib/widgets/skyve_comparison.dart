@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveStaticImage extends StatelessWidget with Sizable {
-  SkyveStaticImage(
-      {Key? key,
+class SkyveComparison extends StatelessWidget with Sizable {
+  SkyveComparison(
+      {super.key,
       int? pixelWidth,
       int? responsiveWidth,
       int? percentageWidth,
@@ -16,8 +16,7 @@ class SkyveStaticImage extends StatelessWidget with Sizable {
       int? pixelHeight,
       int? percentageHeight,
       int? minPixelHeight,
-      int? maxPixelHeight})
-      : super(key: key) {
+      int? maxPixelHeight}) {
     // Sizable
     this.pixelWidth = pixelWidth;
     this.responsiveWidth = responsiveWidth;
@@ -40,7 +39,7 @@ class SkyveStaticImage extends StatelessWidget with Sizable {
     // TODO: implement widget
     return const Stack(alignment: Alignment.center, children: [
       Placeholder(fallbackHeight: 200, color: Colors.orange),
-      Text('StaticImage')
+      Text('Comparison')
     ]);
   }
 }

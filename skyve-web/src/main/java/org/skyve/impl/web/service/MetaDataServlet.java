@@ -1007,15 +1007,15 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				HorizontalAlignment align = item.getHorizontalAlignment();
 				if (align != null) {
-					result.append(",\"horizontalAlignment\":\"").append(align).append('"');
+					result.append(",\"align\":\"").append(align).append('"');
 				}
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
 				}
-				result.append(",\"showsLabel\":").append(showsLabel);
+				result.append(",\"showLabel\":").append(showsLabel);
 				align = item.getLabelHorizontalAlignment();
 				if (align != null) {
-					result.append(",\"labelHorizontalAlignment\":\"").append(align).append('"');
+					result.append(",\"labelAlign\":\"").append(align).append('"');
 				}
 				Boolean bool = item.getShowHelp();
 				if (bool != null) {
@@ -1470,7 +1470,7 @@ public class MetaDataServlet extends HttpServlet {
 				processSize(geometry);
 				GeometryInputType type = geometry.getType();
 				if (type != null) {
-					result.append(",\"type\":\"").append(type).append('"');
+					result.append(",\"inputType\":\"").append(type).append('"');
 				}
 				processDecorated(geometry);
 				result.append('}');
@@ -1488,7 +1488,7 @@ public class MetaDataServlet extends HttpServlet {
 				processSize(geometry);
 				GeometryInputType type = geometry.getType();
 				if (type != null) {
-					result.append(",\"type\":\"").append(type).append('"');
+					result.append(",\"inputType\":\"").append(type).append('"');
 				}
 				processDecorated(geometry);
 				result.append('}');
@@ -2219,12 +2219,8 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 				result.append("{\"type\":\"listMembership\"");
 				processInputWidget(membership);
-				if (candidatesHeading != null) {
-					result.append(",\"candidatesHeading\":\"").append(OWASP.escapeJsonString(candidatesHeading)).append('"');
-				}
-				if (membersHeading != null) {
-					result.append(",\"membersHeading\":\"").append(OWASP.escapeJsonString(membersHeading)).append('"');
-				}
+				result.append(",\"candidatesHeading\":\"").append(OWASP.escapeJsonString(candidatesHeading)).append('"');
+				result.append(",\"membersHeading\":\"").append(OWASP.escapeJsonString(membersHeading)).append('"');
 				processSize(membership);
 				processDecorated(membership);
 				result.append("},");

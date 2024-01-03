@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:skyve_flutter/util/skyve_mixins.dart';
-import '../util/skyve_flutter_form.dart';
-import '../util/skyve_rest_client.dart';
 
-class SkyveContentImage extends StatelessWidget with Sizable {
+class SkyveGeometryMap extends StatelessWidget with Sizable {
   final String label;
-  final String propertyKey;
 
-  SkyveContentImage(
+  SkyveGeometryMap(
       {super.key,
       required this.label,
-      required this.propertyKey,
       int? pixelWidth,
       int? responsiveWidth,
       int? percentageWidth,
@@ -43,25 +39,10 @@ class SkyveContentImage extends StatelessWidget with Sizable {
 
   @override
   Widget build(BuildContext context) {
-    var formState = SkyveFlutterForm.of(context);
-    String? contentId = formState.beanValues[propertyKey];
-
-    if (contentId != null) {
-      var imageUrl = SkyveRestClient().contentUrl(
-          module: formState.moduleName,
-          document: formState.documentName,
-          binding: propertyKey,
-          contentId: contentId);
-
-      return Image.network(imageUrl,
-          // TODO size to pixles based on responsive etc
-          width: pixelWidth?.toDouble(),
-          height: pixelHeight?.toDouble());
-    } else {
-      return Container(
-          decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-          width: pixelWidth?.toDouble(),
-          height: pixelHeight?.toDouble());
-    }
+    // TODO: implement widget
+    return Stack(alignment: Alignment.center, children: [
+      const Placeholder(fallbackHeight: 200, color: Colors.orange),
+      Text('GeometryMap: $label')
+    ]);
   }
 }

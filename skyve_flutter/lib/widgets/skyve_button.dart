@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 
 import '../models/payload.dart';
 import '../util/skyve_rest_client.dart';
@@ -7,7 +8,7 @@ import '../util/skyve_flutter_form.dart';
 
 typedef BeanSupplier = Payload Function();
 
-class SkyveButton extends StatelessWidget {
+class SkyveButton extends StatelessWidget with Sizable {
   static const List<String> _poppingActions = ['OK', 'Remove'];
 
   final String actionType;
@@ -16,23 +17,41 @@ class SkyveButton extends StatelessWidget {
   final bool clientValidation;
   final bool inActionPanel;
 
-  const SkyveButton(
+  SkyveButton(
       {Key? key,
+      int? pixelWidth,
+      int? pixelHeight,
+      int? minPixelHeight,
+      int? maxPixelHeight,
       required this.actionType,
       required this.actionName,
       required this.label,
       this.clientValidation = false,
       this.inActionPanel = false})
-      : super(key: key);
+      : super(key: key) {
+    this.pixelWidth = pixelWidth;
+    this.pixelHeight = pixelHeight;
+    this.minPixelHeight = minPixelHeight;
+    this.maxPixelHeight = maxPixelHeight;
+  }
 
   @override
   Widget build(BuildContext context) {
+    Widget result;
     if (actionType == 'Cancel') {
-      return ElevatedButton(onPressed: () => _pop(context), child: Text(label));
+      result =
+          ElevatedButton(onPressed: () => _pop(context), child: Text(label));
     } else {
-      return ElevatedButton(
+      result = ElevatedButton(
           onPressed: () => _onPressed(context), child: Text(label));
     }
+    if ((pixelWidth != null) || (pixelHeight != null)) {
+      result = SizedBox(
+          width: pixelWidth?.toDouble(),
+          height: pixelHeight?.toDouble(),
+          child: result);
+    }
+    return result;
   }
 
   void _pop(BuildContext context) {

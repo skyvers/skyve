@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveStaticImage extends StatelessWidget with Sizable {
-  SkyveStaticImage(
+class SkyveTreeGrid extends StatelessWidget with Sizable {
+  final String? title;
+
+  SkyveTreeGrid(
       {Key? key,
+      this.title,
       int? pixelWidth,
       int? responsiveWidth,
       int? percentageWidth,
@@ -38,9 +41,9 @@ class SkyveStaticImage extends StatelessWidget with Sizable {
   @override
   Widget build(BuildContext context) {
     // TODO: implement widget
-    return const Stack(alignment: Alignment.center, children: [
-      Placeholder(fallbackHeight: 200, color: Colors.orange),
-      Text('StaticImage')
+    return Stack(alignment: Alignment.center, children: [
+      const Placeholder(fallbackHeight: 200, color: Colors.orange),
+      Text('TreeGrid: $title')
     ]);
   }
 }

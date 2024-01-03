@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nested_scroll_view_plus/nested_scroll_view_plus.dart';
+import 'package:skyve_flutter/util/responsive_grid.dart';
 import '../util/skyve_flutter_form.dart';
 import 'skyve_menu.dart';
 
@@ -8,25 +9,28 @@ String nvl(dynamic value) {
 }
 
 abstract class SkyveView {
-  static const int sm = 576;
-  static const int md = 768;
-  static const int lg = 992;
-  static const int xl = 1200;
-
   // Produces the widgets for the action bar.
   List<Widget> actions(BuildContext context);
 
   // Produces the widgets for the view.
   List<Widget> contained(BuildContext context);
 
-  static Widget responsiveView(
-      BuildContext context, String viewTitle, Widget view) {
+  // Used to track the screen size from the layout builder in responsiveView below
+  // This is preferrable to using MediaQuery which has the potential to trigger unnecessary paints.
+  static Size screenSize = const Size(1, 1); // ND no div 0
+
+  // Is the width < The 'sm' breakpoint;
+  static bool small = false;
+
+  static Widget responsiveView(BuildContext context, String viewTitle,
+      Widget view, PreferredSize? appBarBottomContents) {
     return LayoutBuilder(builder: (context, constraints) {
-      final bool mobile = (constraints.maxWidth <= SkyveView.sm);
+      screenSize = Size(constraints.maxWidth, constraints.maxHeight);
+      small = (screenSize.width <= ResponsiveWidth.maxSmallScreenWidthPixels);
       final Drawer? drawer =
-          mobile ? const Drawer(child: SkyveMenu(inDrawer: true)) : null;
+          small ? const Drawer(child: SkyveMenu(inDrawer: true)) : null;
       Widget body;
-      if (mobile) {
+      if (small) {
         body = view;
       } else {
         body = Row(children: [
@@ -42,6 +46,7 @@ abstract class SkyveView {
       return Scaffold(
           drawer: drawer,
           // NB Use NestedScrollViewPlus to allow over-stretch of SliverAppBar
+// TODO In chrome having scrolling menu inlined causes - The provided ScrollController is currently attached to more than one ScrollPosition.
           body: NestedScrollViewPlus(
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
@@ -50,7 +55,10 @@ abstract class SkyveView {
                     snap: true,
                     floating: true,
                     stretch: true,
-                    expandedHeight: mobile ? 120.0 : 160.0,
+//                    actions: [], TODO for RHS actions
+                    expandedHeight: small ? 120.0 : 160.0,
+// TODO use a leading icon when making this thing and the title and then add the tab bar in below
+                    bottom: appBarBottomContents,
                     flexibleSpace: FlexibleSpaceBar(
                         title: Text(viewTitle),
                         stretchModes: const [
@@ -88,7 +96,22 @@ abstract class SkyveView {
                 child: Form(
                   child: body,
                 ),
-              )));
+              )),
+// TODO Put the actions in here
+          bottomNavigationBar: BottomAppBar(
+              child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {},
+                ),
+              ])));
     });
   }
 }

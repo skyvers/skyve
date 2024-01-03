@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveTextArea extends StatelessWidget with Sizable {
-  final String label;
-
-  SkyveTextArea(
+class SkyveZoomIn extends StatelessWidget with Sizable {
+  SkyveZoomIn(
       {super.key,
-      required this.label,
       int? pixelWidth,
       int? pixelHeight,
-      int? minPixelHeight}) {
+      int? minPixelHeight,
+      int? maxPixelHeight}) {
     this.pixelWidth = pixelWidth;
     this.pixelHeight = pixelHeight;
     this.minPixelHeight = minPixelHeight;
+    this.maxPixelHeight = maxPixelHeight;
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget result = Stack(alignment: Alignment.center, children: [
-      const Placeholder(fallbackHeight: 100, color: Colors.orange),
-      Text('TextArea $label')
+    // TODO: implement widget
+    Widget result = const Stack(alignment: Alignment.center, children: [
+      Placeholder(fallbackHeight: 50, color: Colors.orange),
+      Text('ZoomIn')
     ]);
     if ((pixelWidth != null) || (pixelHeight != null)) {
       result = SizedBox(

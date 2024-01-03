@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 
 import '../../util/validators.dart';
 import '../skyve_textfield.dart';
 
-class Decimal2Field extends StatelessWidget {
+class Decimal2Field extends StatelessWidget with Sizable {
   // TODO this'll likely be the same across the various decimal fields
   static final TextInputFormatter decimalFormatter =
       FilteringTextInputFormatter.allow(RegExp(r'[\-0-9.]'));
@@ -18,8 +19,10 @@ class Decimal2Field extends StatelessWidget {
     this.label,
     required this.propertyKey,
     List<Validator> validators = const [],
+    int? pixelWidth,
   }) {
     this.validators = List.of(validators)..add(Decimal2FieldValidator());
+    this.pixelWidth = pixelWidth;
   }
 
   @override
@@ -30,6 +33,7 @@ class Decimal2Field extends StatelessWidget {
       validators: validators,
       keyboardType: const TextInputType.numberWithOptions(signed: true),
       inputFormatters: [decimalFormatter],
+      pixelWidth: pixelWidth,
     );
   }
 }

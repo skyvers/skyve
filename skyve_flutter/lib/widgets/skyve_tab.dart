@@ -5,7 +5,7 @@ class SkyveTab extends SkyveVBox {
   final String title;
   final String? icon;
 
-  const SkyveTab(
+  SkyveTab(
       {Key? key,
       required this.title,
       this.icon,

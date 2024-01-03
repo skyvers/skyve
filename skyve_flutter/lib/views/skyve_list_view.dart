@@ -101,7 +101,8 @@ class _SkyveListViewState extends ConsumerState<SkyveListView> {
                       }).toString());
                     }),
               )
-            ])));
+            ])),
+        null);
   }
 
   void _fetch(int startRow, int endRow) async {

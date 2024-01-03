@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:skyve_flutter/util/skyve_flutter_form.dart';
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 import 'package:skyve_flutter/util/validators.dart';
 
-class SkyveTextField extends StatefulWidget {
+class SkyveTextField extends StatefulWidget with Sizable {
   final String? label;
   final String propertyKey;
   final bool obscureText;
@@ -11,7 +12,7 @@ class SkyveTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
 
-  const SkyveTextField({
+  SkyveTextField({
     super.key,
     required this.propertyKey,
     this.label,
@@ -19,7 +20,10 @@ class SkyveTextField extends StatefulWidget {
     this.obscureText = false,
     this.inputFormatters,
     this.keyboardType,
-  });
+    int? pixelWidth,
+  }) {
+    this.pixelWidth = pixelWidth;
+  }
 
   @override
   State<StatefulWidget> createState() => _SkyveTextFieldState();

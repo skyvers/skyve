@@ -109,7 +109,7 @@ class SkyveRestClient {
       } else {
         return false;
       }
-    } on DioError catch (err) {
+    } on DioException catch (err) {
       // On Android etc, we'll end up here
 
       // This URI thing is very dumb....
