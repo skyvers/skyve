@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skyve_flutter/util/skyve_interfaces.dart';
 import '../models/skyve_view_models.dart';
-import '../widgets/skyve_view.dart';
 import '../main.dart';
 import '../models/skyve_datasource_models.dart';
 import '../models/skyve_menu_models.dart';
 import '../util/skyve_rest_client.dart';
 import '../views/auto_log_in.dart';
-import '../views/skyve_container.dart';
+import '../views/skyve_home_view.dart';
 import '../views/skyve_edit_view.dart';
 import '../views/skyve_list_view.dart';
 
@@ -112,31 +112,76 @@ final containerRouterProvider = Provider((ref) {
     ),
     GoRoute(path: '/', builder: (context, state) => const SkyveContainer()),
     GoRoute(
-        name: 'List',
-        path: '/l',
-        builder: (context, state) {
-          final String m = state.queryParams['m']!;
-          final String? d = state.queryParams['d'];
-          final String q = state.queryParams['q']!;
-          return SkyveListView(m: m, d: d, q: q);
-        }),
+      name: 'List',
+      path: '/l',
+/* default slide effect
+      builder: (BuildContext context, GoRouterState state) {
+        final String m = state.queryParams['m']!;
+        final String? d = state.queryParams['d'];
+        final String q = state.queryParams['q']!;
+        return SkyveListView(m: m, d: d, q: q);
+      },
+*/
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        final String m = state.queryParams['m']!;
+        final String? d = state.queryParams['d'];
+        final String q = state.queryParams['q']!;
+        return CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: SkyveListView(m: m, d: d, q: q),
+          transitionDuration: const Duration(milliseconds: 500),
+          transitionsBuilder: (BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child) {
+            return FadeTransition(
+              opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
     GoRoute(
-        name: 'Edit',
-        path: '/e',
+      name: 'Edit',
+      path: '/e',
+/* default slide effect
         builder: (context, state) {
           final String m = state.queryParams['m']!;
           final String d = state.queryParams['d']!;
           final String? i = state.queryParams['i'];
           return SkyveEditView(m: m, d: d, i: i);
         }),
+*/
+      pageBuilder: (BuildContext context, GoRouterState state) {
+        final String m = state.queryParams['m']!;
+        final String d = state.queryParams['d']!;
+        final String? i = state.queryParams['i'];
+        return CustomTransitionPage<void>(
+          key: state.pageKey,
+          child: SkyveEditView(m: m, d: d, i: i),
+          transitionDuration: const Duration(milliseconds: 500),
+          transitionsBuilder: (BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child) {
+            return FadeTransition(
+              opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
   ]);
 
   return GoRouter(initialLocation: '/', redirect: redirect, routes: allRoutes);
 });
 
 // Provider which maps from a Modoc to a view definition
-final FutureProviderFamily<SkyveView, String> containerViewProvider =
-    FutureProvider.family<SkyveView, String>((ref, modoc) async {
+final FutureProviderFamily<SkyveAbstractEditView, String>
+    containerViewProvider =
+    FutureProvider.family<SkyveAbstractEditView, String>((ref, modoc) async {
   // Look for the view in the global variable above
   if (views[modoc] != null) {
     return views[modoc]!;
@@ -163,8 +208,8 @@ final FutureProviderFamily<SkyveView, String> containerViewProvider =
   });
 });
 
-// Provider which indicates if we are on a mobile device and what the current edit view title is
-// This is mutated by SkyveView.responsiveLayout()
+// Provider which indicates what the current edit view title is
+// This is mutated by LoaderWidget.
 final viewStateProvider =
     NotifierProvider<ViewStateNotifier, ViewState>(ViewStateNotifier.new);
 

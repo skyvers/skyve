@@ -42,9 +42,14 @@ dependencies:
   cookie_jar: ^3.0.1
   pretty_dio_logger: ^1.3.1
   go_router: ^6.0.1
+  # state management
   flutter_riverpod: ^2.1.3
+  # lists/grids
   pluto_grid: ^6.0.4
+  # allows sliverappbar without sliver list as children
   nested_scroll_view_plus: ^1.0.2
+  # allows tabbar sized to children
+  autoscale_tabbarview: ^1.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

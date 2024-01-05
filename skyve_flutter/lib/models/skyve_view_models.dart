@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skyve_flutter/util/skyve_enums.dart';
+import 'package:skyve_flutter/util/skyve_interfaces.dart';
 import 'package:skyve_flutter/widgets/skyve_chart.dart';
 import 'package:skyve_flutter/widgets/skyve_checkbox.dart';
 import 'package:skyve_flutter/widgets/skyve_colourpicker.dart';
@@ -44,9 +45,8 @@ import '../widgets/skyve_formrow.dart';
 import '../widgets/skyve_hbox.dart';
 import '../widgets/skyve_textfield.dart';
 import '../widgets/skyve_vbox.dart';
-import '../widgets/skyve_view.dart';
 
-class SkyveViewModel implements SkyveView {
+class SkyveViewModel implements SkyveAbstractEditView {
   final String module;
   final String document;
   final Map<String, dynamic> jsonMetaData;

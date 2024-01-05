@@ -47,14 +47,14 @@ class SkyveContentImage extends StatelessWidget with Sizable {
     String? contentId = formState.beanValues[propertyKey];
 
     if (contentId != null) {
-      var imageUrl = SkyveRestClient().contentUrl(
+      var imageUrl = SkyveRestClient.contentUrl(
           module: formState.moduleName,
           document: formState.documentName,
           binding: propertyKey,
           contentId: contentId);
 
       return Image.network(imageUrl,
-          // TODO size to pixles based on responsive etc
+          // TODO size to pixels based on responsive etc
           width: pixelWidth?.toDouble(),
           height: pixelHeight?.toDouble());
     } else {

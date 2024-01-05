@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:skyve_flutter/widgets/skyve_view.dart';
+import 'package:skyve_flutter/views/skyve_responsive_view.dart';
 
 class ResponsiveWidth {
   static const int maxResponsiveWidthColumns = 12;
@@ -32,7 +32,7 @@ class ResponsiveWidth {
 
   // Depending on the responsive break point, is the column 12?
   bool willBreak() {
-    double screenWidth = SkyveView.screenSize.width;
+    double screenWidth = SkyveResponsiveView.screenSize.width;
     return ((screenWidth > ResponsiveWidth.maxLargeScreenWidthPixels) &&
             (xl == 12)) ||
         ((screenWidth > ResponsiveWidth.maxMediumScreenWidthPixels) &&
@@ -181,7 +181,7 @@ class ResponsiveItem extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // Get the prefix for the definition, based on screen width
-        double screenWidth = SkyveView.screenSize.width;
+        double screenWidth = SkyveResponsiveView.screenSize.width;
         int cols = 0;
         if (screenWidth > ResponsiveWidth.maxLargeScreenWidthPixels) {
           cols = width.xl;

@@ -26,6 +26,6 @@ class SkvyeNetworkImage extends StatelessWidget {
   }
 
   String get logoUri {
-    return '${SkyveRestClient().getBaseUri()}resources?_n=$resourceName';
+    return '${SkyveRestClient.baseUri}resources?_n=$resourceName';
   }
 }

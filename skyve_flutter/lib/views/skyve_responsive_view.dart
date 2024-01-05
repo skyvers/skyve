@@ -1,35 +1,28 @@
-import 'dart:math';
-
-import 'package:flutter/foundation.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nested_scroll_view_plus/nested_scroll_view_plus.dart';
 import 'package:skyve_flutter/util/responsive_grid.dart';
+import 'package:skyve_flutter/util/skyve_providers.dart';
+import 'package:skyve_flutter/util/skyve_rest_client.dart';
 import '../util/skyve_flutter_form.dart';
-import 'skyve_menu.dart';
+import '../widgets/skyve_menu.dart';
 
-abstract class SkyveView {
+mixin SkyveResponsiveView {
   // width of drawer/panel for menu
   static const double menuWidth = 240.0;
-
-  // Produces the widgets for the action bar.
-  List<Widget> actions(BuildContext context);
-
-  // Produces the widgets for the view.
-  List<Widget> contained(BuildContext context);
 
   // Used to track the screen size from the layout builder in responsiveView below
   // This is preferrable to using MediaQuery which has the potential to trigger unnecessary paints.
   static Size screenSize = const Size(1.0, 1.0); // NB no div 0
 
-  // Is the width < The 'sm' breakpoint;
+  // Is the width < the 'sm' breakpoint;
   static bool small = false;
 
-  static Widget responsiveView(
+  Widget responsiveView(
       {required BuildContext context,
       required String viewTitle,
-      required Widget view,
-      PreferredSize? appBarBottomContents,
-      List<Widget> actions = const []}) {
+      required Widget view}) {
     return LayoutBuilder(builder: (context, constraints) {
       screenSize = Size(constraints.maxWidth, constraints.maxHeight);
       small = (screenSize.width <= ResponsiveWidth.maxSmallScreenWidthPixels);
@@ -50,51 +43,6 @@ abstract class SkyveView {
         ]);
       }
 
-      // Determine the bottom app bar
-      // DB This is built here inside a LayoutBuilder since it is responsive
-      BottomAppBar? bottomNavigationBar;
-      if (actions.isNotEmpty) {
-        Widget guts = SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Container(
-            constraints: BoxConstraints(
-                minWidth: SkyveView.small
-                    // NB -20 for padding
-                    ? SkyveView.screenSize.width - 20.0
-                    : max(
-                        // NB -menuWidth for left padding -10 for right padding
-                        SkyveView.screenSize.width - SkyveView.menuWidth - 10.0,
-                        SkyveView.menuWidth,
-                      )),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8.0,
-              children: actions,
-            ),
-          ),
-        );
-        if (kIsWeb) {
-          guts = Padding(
-            padding: SkyveView.small
-                ? const EdgeInsets.all(10.0)
-                : const EdgeInsets.only(
-                    left: SkyveView.menuWidth,
-                    right: 10.0,
-                    top: 10.0,
-                    bottom: 10.0),
-            child: guts,
-          );
-        } else {
-          guts = Padding(
-            padding: SkyveView.small
-                ? const EdgeInsets.symmetric(horizontal: 10.0)
-                : const EdgeInsets.only(left: SkyveView.menuWidth, right: 10.0),
-            child: guts,
-          );
-        }
-        bottomNavigationBar = BottomAppBar(child: guts);
-      }
-
       ThemeData theme = Theme.of(context);
 
       return Scaffold(
@@ -110,10 +58,11 @@ abstract class SkyveView {
                       snap: true,
                       floating: true,
                       stretch: true,
-//                    actions: [], TODO for RHS actions
+                      toolbarHeight: 50.0,
+                      actions: appBarActions(context),
                       expandedHeight: small ? 120.0 : 160.0,
 // TODO use a leading icon when making this thing and the title and then add the tab bar in below
-                      bottom: appBarBottomContents,
+                      bottom: appBarBottomContents(context),
                       flexibleSpace: FlexibleSpaceBar(
                         title: Text(viewTitle),
                         stretchModes: const [
@@ -161,7 +110,85 @@ abstract class SkyveView {
                   child: body,
                 ),
               )),
-          bottomNavigationBar: bottomNavigationBar);
+          bottomNavigationBar: bottomNavigationBar(context));
     });
+  }
+
+  // Determine the bottom app bar
+  // NB This is built inside a LayoutBuilder since it is responsive
+  BottomAppBar? bottomNavigationBar(BuildContext context) {
+    return null;
+  }
+
+  // Determine what the top app bar RHS contents should be, if anything.
+  // The default implementation adds the avatar menu.
+  // NB This is built inside a LayoutBuilder since it is responsive
+  List<Widget>? appBarActions(BuildContext context) {
+    String? avatarInitials;
+    String? imageId;
+    final Map<String, dynamic>? metadata =
+        ProviderScope.containerOf(context, listen: false)
+            .read(containerMetaDataProvider)
+            .value;
+    if (metadata == null) {
+      avatarInitials = '??';
+    } else {
+      imageId = metadata['userContactImageId'];
+      if (imageId == null) {
+        avatarInitials = metadata['userContactAvatarInitials'] ?? '??';
+      }
+    }
+    CircleAvatar avatar = (imageId == null)
+        ? CircleAvatar(
+            backgroundColor: Colors.brown.shade800,
+            radius: 50.0,
+            child: Text(avatarInitials!),
+          )
+        : CircleAvatar(
+            backgroundImage: CachedNetworkImageProvider(
+              // TODO CustomerResourceServlet requires a user in the session to serve content and we don't have one in phone mode
+              SkyveRestClient.contentImageUrl(
+                module: 'admin',
+                document: 'Contact',
+                binding: 'image',
+                contentId: imageId,
+                width: 50,
+                height: 50,
+              ),
+            ),
+          );
+
+    return [
+      SizedBox(
+        width: 50.0,
+        height: 50.0,
+        child: PopupMenuButton<String>(
+          icon: avatar,
+          position: PopupMenuPosition.under,
+          itemBuilder: (BuildContext context) {
+            return [
+              PopupMenuItem<String>(
+                child: const Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.black45),
+                    SizedBox(width: 10.0),
+                    Text('Logout'),
+                  ],
+                ),
+                onTap: () {
+                  print('Logout');
+                },
+              ),
+            ];
+          },
+        ),
+      ),
+    ];
+  }
+
+  // Determine what the top app bar bottom contents should be, if anything
+  // NB This is built inside a LayoutBuilder since it is responsive
+  PreferredSizeWidget? appBarBottomContents(BuildContext context) {
+    return null;
   }
 }

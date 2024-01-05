@@ -273,7 +273,18 @@ public class MetaDataServlet extends HttpServlet {
 		StringBuilder menus = new StringBuilder(2048);
 		StringBuilder dataSources = new StringBuilder(2048);
 		processModules(uxui, user, chosenModuleName, menus, dataSources);
-		pw.append("{\"menus\":").append(menus).append(",\"dataSources\":").append(dataSources).append('}');
+		pw.append("{\"menus\":").append(menus).append(",\"dataSources\":").append(dataSources);
+		
+		pw.append(",\"userContactImageId\":");
+		String value = user.getContactImageId();
+		if (value == null) {
+			pw.append("null");
+		}
+		else {
+			pw.append('"').append(value).append('"');
+		}
+		value = user.getContactAvatarInitials();
+		pw.append(",\"userContactAvatarInitials\":\"").append(value).append("\"}");
 	}
 	
 	private static void processModules(final String uxui, 

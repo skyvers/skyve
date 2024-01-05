@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'widgets/skyve_view.dart';
+import 'package:skyve_flutter/util/skyve_interfaces.dart';
 import 'models/skyve_datasource_models.dart';
 import 'models/skyve_menu_models.dart';
 import 'util/skyve_providers.dart';
@@ -26,7 +26,7 @@ List<SkyveModuleMenuModel> menu = [
 const Map<String, SkyveDataSourceModel>? dataSources = null;
 
 // Allow metadata to drive the view definitions
-final Map<String, SkyveView> views = {};
+final Map<String, SkyveAbstractEditView> views = {};
 
 final List<GoRoute> goRoutes = [];
 

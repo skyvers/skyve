@@ -17,7 +17,7 @@ class SkyveRestClient {
   //             ? '/'
   //             : '/${Uri.base.pathSegments[0]}/'))
   //     : 'http://localhost:8080/skyve/');
-  static const _baseUri = 'http://localhost:8080/skyve/';
+  static const baseUri = 'http://localhost:8080/skyve/';
 
   static const csrfHeader = 'x-csrf-token';
   static const conversationIdKey = '_c';
@@ -33,7 +33,7 @@ class SkyveRestClient {
   }
 
   SkyveRestClient._internal() {
-    debugPrint('BaseURI is $_baseUri');
+    debugPrint('BaseURI is $baseUri');
     // Manage cookies
     if (!kIsWeb) {
       final cookieJar = CookieJar();
@@ -51,16 +51,12 @@ class SkyveRestClient {
         maxWidth: 90));
   }
 
-  String getBaseUri() {
-    return _baseUri;
-  }
-
   bool get loggedIn {
     return _loggedIn;
   }
 
   Future<String> _fetch(String url) async {
-    final Response<String> response = await _dio.get(_baseUri + url);
+    final Response<String> response = await _dio.get(baseUri + url);
     if (response.data == null) {
       throw Exception('Response data was null');
     }
@@ -93,7 +89,7 @@ class SkyveRestClient {
     /// any chance of us touching it. On mobile the redirect
     /// will not be followed because we're doing a POST.
     try {
-      Response<String> response = await _dio.post('${_baseUri}loginAttempt',
+      Response<String> response = await _dio.post('${baseUri}loginAttempt',
           queryParameters: params,
           options: Options(validateStatus: validateStatus));
       // This'll throw an error when running anywhere except the browser
@@ -176,7 +172,7 @@ class SkyveRestClient {
       url += '&bizId=$bizId';
     }
 
-    final Response<String> response = await _dio.get(_baseUri + url);
+    final Response<String> response = await _dio.get(baseUri + url);
     if (response.data == null) {
       throw Exception('Response data was null');
     }
@@ -287,10 +283,10 @@ class SkyveRestClient {
   Future<Response<String>> _postForm(
       String url, Map<String, dynamic> formDataMap) {
     Options options = Options(contentType: Headers.formUrlEncodedContentType);
-    return _dio.post(_baseUri + url, data: formDataMap, options: options);
+    return _dio.post(baseUri + url, data: formDataMap, options: options);
   }
 
-  String contentUrl(
+  static String contentUrl(
       {required String module,
       required String document,
       required String binding,
@@ -303,7 +299,17 @@ class SkyveRestClient {
 
     String paramString = Uri(queryParameters: params).query;
 
-    return '${_baseUri}content?$paramString';
+    return '${baseUri}content?$paramString';
+  }
+
+  static String contentImageUrl(
+      {required String module,
+      required String document,
+      required String binding,
+      required String contentId,
+      required int width,
+      required int height}) {
+    return '${baseUri}content?_n=$contentId&_doc=$module.$document&_b=$binding&_w=$width&_h=$height';
   }
 }
 

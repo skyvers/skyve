@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../models/skyve_datasource_models.dart';
 import '../util/skyve_providers.dart';
 import '../util/skyve_rest_client.dart';
-import '../widgets/skyve_view.dart';
+import 'skyve_responsive_view.dart';
 
 class SkyveListView extends ConsumerStatefulWidget {
   final String m;
@@ -20,7 +20,8 @@ class SkyveListView extends ConsumerStatefulWidget {
   }
 }
 
-class _SkyveListViewState extends ConsumerState<SkyveListView> {
+class _SkyveListViewState extends ConsumerState<SkyveListView>
+    with SkyveResponsiveView {
   final SkyveRestClient _rest = SkyveRestClient();
   late String _dataSourceName;
   SkyveDataSourceModel? _dataSource;
@@ -62,7 +63,7 @@ class _SkyveListViewState extends ConsumerState<SkyveListView> {
       ),
     );
 
-    return SkyveView.responsiveView(
+    return responsiveView(
       context: context,
       viewTitle: _dataSource!.title,
       view: Stack(

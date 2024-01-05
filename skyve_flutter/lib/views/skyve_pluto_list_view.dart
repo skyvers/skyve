@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-import 'package:skyve_flutter/widgets/skyve_view.dart';
+import 'package:skyve_flutter/views/skyve_responsive_view.dart';
 import '../util/skyve_rest_client.dart';
 
 class ContactListPage2 extends StatefulWidget {
@@ -104,7 +104,7 @@ class _ContactListState2 extends State<ContactListPage2> {
     Size? size = renderBox?.size; // or _widgetKey.currentContext?.size
     debugPrint('Build Size: ${size?.width}, ${size?.height}');
 
-    bool small = SkyveView.small;
+    bool small = SkyveResponsiveView.small;
     debugPrint('build $small');
     return LayoutBuilder(builder: (context, constraints) {
       debugPrint('layout builder ${constraints.maxWidth}');
@@ -128,7 +128,7 @@ class _ContactListState2 extends State<ContactListPage2> {
   }
 
   bool _sizeChanged(SizeChangedLayoutNotification? notification) {
-    bool small = SkyveView.small;
+    bool small = SkyveResponsiveView.small;
     debugPrint('size changed $small');
     _gridStateManager.hideColumn(columns[0], !small, notify: false);
     _gridStateManager.hideColumn(columns[1], small, notify: false);
