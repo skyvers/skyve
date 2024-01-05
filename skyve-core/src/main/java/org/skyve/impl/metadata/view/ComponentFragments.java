@@ -67,7 +67,7 @@ class ComponentFragments {
 				else {
 					result = new ViewImpl();
 					view.getContained().addAll(visitor.getContained());
-					result.resolve(uxui, c, m, d, generate);
+					result.resolve(uxui, c, m, d, generate, null);
 				}
 					
 				read.unlock();

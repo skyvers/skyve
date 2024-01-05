@@ -54,6 +54,8 @@ public interface ProvidedRepository extends CachedRepository {
 	final String DOMAIN_NAME = "domain";
 	final String DOMAIN_NAMESPACE = DOMAIN_NAME + '/';
 	final String BIZLET_SUFFIX = "Bizlet";
+	public final String JASPER_SUFFIX = "Jasper";
+	public final String FREEMARKER_SUFFIX = "Freemarker";
 	final String META_DATA_SUFFIX = "MetaData";
 
 	@Nonnull List<String> getAllCustomerNames();

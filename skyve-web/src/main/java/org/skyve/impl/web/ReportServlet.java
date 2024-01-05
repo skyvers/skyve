@@ -143,21 +143,20 @@ public class ReportServlet extends HttpServlet {
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
 			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
-	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final JasperPrint jasperPrint;
-	        if (generatedReport) {
-	            reportName = String.format("%s - %s", moduleName, documentName);
+			if (generatedReport) {
+				reportName = String.format("%s - %s", moduleName, documentName);
 
-	        	final DesignSpecification designSpecification = new DesignSpecification();
+				final DesignSpecification designSpecification = new DesignSpecification();
 				designSpecification.setName("EditView");
-	        	designSpecification.setModuleName(moduleName);
-	        	designSpecification.setDocumentName(documentName);
+				designSpecification.setModuleName(moduleName);
+				designSpecification.setDocumentName(documentName);
 
-				final ReportDesignGenerator generator = new ReportDesignGeneratorFactory()
-						.getGeneratorForDesign(designSpecification);
+				final ReportDesignGenerator generator = new ReportDesignGeneratorFactory().getGeneratorForDesign(designSpecification);
 				generator.populateDesign(designSpecification);
 				designSpecification.setMode(DesignSpecification.Mode.bean);
 				designSpecification.setDefinitionSource(DesignSpecification.DefinitionSource.view);
@@ -167,42 +166,25 @@ public class ReportServlet extends HttpServlet {
 
 				final Map<String, Object> parameters = getParameters(request);
 				parameters.put(JasperReportRenderer.DESIGN_SPEC_PARAMETER_NAME, designSpecification);
-				jasperPrint = JasperReportUtil.runReport(reportRenderer.getReport(),
-						user,
-						document,
-						parameters,
-						bean,
-						format,
-						baos);
-			} else {
+				jasperPrint = JasperReportUtil.runReport(reportRenderer.getReport(), user, document, parameters, bean, format, baos);
+			}
+			else {
 				final String isList = request.getParameter(AbstractWebContext.IS_LIST);
 				if (isList != null && Boolean.parseBoolean(isList)) {
 					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
 					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
-					final String documentOrQueryOrModelName = modelName != null ? modelName : queryName != null ? queryName : documentName;
+					final String documentOrQueryOrModelName = (modelName != null) ? modelName : ((queryName != null) ? queryName : documentName);
 					final ListModel<Bean> listModel = JasperReportUtil.getQueryListModel(module, documentOrQueryOrModelName);
-					jasperPrint = JasperReportUtil.runReport(user,
-							document,
-							reportName,
-							getParameters(request),
-							listModel,
-							format,
-							baos);
-				} else {
-					// Manually load the bean if an id is specified but there is no appropriate bean to load from
-					// the conversation.
+					jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), listModel, format, baos);
+				}
+				else {
+					// Manually load the bean if an id is specified but there is no appropriate bean to load from the conversation.
 					final String id = request.getParameter(AbstractWebContext.ID_NAME);
-					if (id != null && (bean == null || (contextKey != null && !contextKey.endsWith(id)))) {
+					if ((id != null) && ((bean == null) || ((contextKey != null) && (! contextKey.endsWith(id))))) {
 						bean = AbstractPersistence.get().retrieve(document, id);
 					}
 
-					jasperPrint = JasperReportUtil.runReport(user,
-							document,
-							reportName,
-							getParameters(request),
-							bean,
-							format,
-							baos);
+					jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), bean, format, baos);
 				}
 			}
 
@@ -219,7 +201,7 @@ public class ReportServlet extends HttpServlet {
 		Map<String, Object> params = new TreeMap<>();
 
 		for (String paramName : request.getParameterMap().keySet()) {
-    		String paramValue = request.getParameter(paramName);
+			String paramValue = request.getParameter(paramName);
 			if (! (AbstractWebContext.CONTEXT_NAME.equals(paramName) ||
 					AbstractWebContext.ID_NAME.equals(paramName) ||
 					AbstractWebContext.REPORT_FORMAT.equals(paramName) ||
@@ -229,9 +211,9 @@ public class ReportServlet extends HttpServlet {
 				params.put(paramName, paramValue);
 				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("ReportServlet: Report Parameter " + paramName + " = " + paramValue);
 			}
-    	}
+		}
 
-    	return params;
+		return params;
 	}
 
 	private static void pumpOutReportFormat(byte[] bytes,
@@ -251,7 +233,7 @@ public class ReportServlet extends HttpServlet {
 		case csv:
 			response.setContentType(MimeType.csv.toString());
 			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".csv\"");
-			response.setHeader("Content-Disposition",  sb.toString());
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case html:
 			response.setContentType(MimeType.html.toString());
@@ -313,9 +295,10 @@ public class ReportServlet extends HttpServlet {
 
 		// NEED TO KEEP THIS FOR IE TO SHOW PDFs ACTIVE-X temp files required
 		response.setHeader("Cache-Control", "cache");
-        response.setHeader("Pragma", "cache");
-        response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
-		// The following allows partial requests which are useful for large media or downloading files with pause and resume functions.
+		response.setHeader("Pragma", "cache");
+		response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
+		// The following allows partial requests which are useful for large media or
+		// downloading files with pause and resume functions.
 		response.setHeader("Accept-Ranges", "bytes");
 
 		try (ServletOutputStream outputStream = response.getOutputStream()) {
@@ -369,7 +352,7 @@ public class ReportServlet extends HttpServlet {
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+					AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
 					drivingDocument = model.getDrivingDocument();
@@ -466,11 +449,14 @@ public class ReportServlet extends HttpServlet {
 						}
 						String binding = name.replace('_', '.');
 						if (! PersistentBean.FLAG_COMMENT_NAME.equals(binding)) { // allow bizFlagComment
-							MetaDataQueryColumn mdqc = model.getColumns().stream().filter(c -> binding.equals(c.getBinding()) || binding.equals(c.getName())).findAny().orElse(null);
+							MetaDataQueryColumn mdqc = model.getColumns().stream()
+																.filter(c -> binding.equals(c.getBinding()) || binding.equals(c.getName()))
+																.findAny().orElse(null);
 							if (mdqc == null) {
 								throw new SecurityException("Non-existent data", user.getName());
 							}
-							if ((mdqc instanceof MetaDataQueryProjectedColumn) && (! ((MetaDataQueryProjectedColumn) mdqc).isProjected())) {
+							if ((mdqc instanceof MetaDataQueryProjectedColumn) &&
+									(! ((MetaDataQueryProjectedColumn) mdqc).isProjected())) {
 								throw new SecurityException("Non-projected data", user.getName());
 							}
 						}
@@ -511,9 +497,7 @@ public class ReportServlet extends HttpServlet {
 					params.put("RESOURCE_DIR", sb.toString());
 					params.put("TITLE", model.getLocalisedDescription());
 
-					jasperPrint = JasperFillManager.fillReport(jasperReport,
-																params,
-																dataSource);
+					jasperPrint = JasperFillManager.fillReport(jasperReport, params, dataSource);
 				}
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -521,11 +505,11 @@ public class ReportServlet extends HttpServlet {
 				JasperReportUtil.runReport(jasperPrint, format, baos);
 
 				pumpOutReportFormat(baos.toByteArray(),
-										jasperPrint,
-										format,
-										(String) values.get("fileNameNoSuffix"),
-										request.getSession(),
-										response);
+									jasperPrint,
+									format,
+									(String) values.get("fileNameNoSuffix"),
+									request.getSession(),
+									response);
 			}
 			catch (Exception e) {
 				System.err.println("Problem generating the report - " + e.toString());

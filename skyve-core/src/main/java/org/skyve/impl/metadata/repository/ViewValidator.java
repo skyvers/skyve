@@ -69,6 +69,7 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
@@ -100,6 +101,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
@@ -124,6 +126,7 @@ import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
@@ -2161,6 +2164,42 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitReportAction(ActionImpl action) {
 		validateAction(action);
+
+		String fileName = repository.getReportFileName(customer, document, action.getResourceName());
+		if (fileName == null) {
+			throw new MetaDataException("Report Action for report " + action.getResourceName() + 
+											" in view " + viewIdentifier + 
+											" does not reference a Jasper or Freemarker resource");
+		}
+
+		List<Parameter> reportParameters = action.getParameters();
+		
+		ParameterImpl parameter = new ParameterImpl();
+		parameter.setName(AbstractWebContext.REPORT_ENGINE);
+		if (fileName.endsWith(".jasper")) {
+			parameter.setValue(ProvidedRepository.JASPER_SUFFIX);
+		}
+		else if (fileName.endsWith(".flth")) {
+			parameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
+			
+			// Report format can on be PDF or CSV for freemarker
+			Parameter fp = reportParameters.stream().filter(p -> AbstractWebContext.REPORT_FORMAT.equals(p.getName())).findAny().orElse(null);
+			if (fp != null) {
+				String format = fp.getValue();
+				if (! (ReportFormat.pdf.toString().equals(format) || ReportFormat.csv.toString().equals(format))) {
+					throw new MetaDataException("Report Action for report " + action.getResourceName() + 
+													" in view " + viewIdentifier + 
+													" has a format of " + format + 
+													" but must be PDF or CSV for a freemarker report");
+				}
+			}
+		}
+		else {
+			throw new MetaDataException("Report action for report " + action.getResourceName() + 
+											" in view " + viewIdentifier + 
+											" does not reference a Jasper or Freemarker resource");
+		}
+		reportParameters.add(parameter);
 	}
 
 	@Override

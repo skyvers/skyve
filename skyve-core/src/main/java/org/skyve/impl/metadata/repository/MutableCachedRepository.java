@@ -521,7 +521,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		result.convertAccesses(documentModule, documentName, metaDataName, accesses);
 		
 		// Resolve the view ensuring view components within vanilla views are resolved with the current uxui
-		result.resolve(uxui, customer, documentModule, document, (accesses == null) ? true : accesses.isGenerate());
+		result.resolve(uxui, customer, documentModule, document, (accesses == null) ? true : accesses.isGenerate(), this);
 		return result;
 	}
 	
@@ -531,7 +531,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				ViewType.params.toString().equals(viewName)) {
 			ViewImpl result = new ViewGenerator(this).generate(customer, document, viewName);
 			final Module documentModule = customer.getModule(document.getOwningModuleName());
-			result.resolve(uxui, customer, documentModule, document, true);
+			result.resolve(uxui, customer, documentModule, document, true, this);
 			return result;
 		}
 		return null;
