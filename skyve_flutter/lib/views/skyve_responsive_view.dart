@@ -23,95 +23,100 @@ mixin SkyveResponsiveView {
       {required BuildContext context,
       required String viewTitle,
       required Widget view}) {
-    return LayoutBuilder(builder: (context, constraints) {
-      screenSize = Size(constraints.maxWidth, constraints.maxHeight);
-      small = (screenSize.width <= ResponsiveWidth.maxSmallScreenWidthPixels);
-      final Drawer? drawer =
-          small ? const Drawer(child: SkyveMenu(inDrawer: true)) : null;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        screenSize = Size(constraints.maxWidth, constraints.maxHeight);
+        small = (screenSize.width <= ResponsiveWidth.maxSmallScreenWidthPixels);
+        final Drawer? drawer =
+            small ? const Drawer(child: SkyveMenu(inDrawer: true)) : null;
 
-      // Determine the body widget
-      Widget body;
-      if (small) {
-        body = view;
-      } else {
-        body = Row(children: [
-          const SizedBox(
-              width: menuWidth,
-              child: Column(
-                  children: [Expanded(child: SkyveMenu(inDrawer: false))])),
-          Expanded(child: view)
-        ]);
-      }
+        // Determine the body widget
+        Widget body;
+        if (small) {
+          body = view;
+        } else {
+          body = Row(children: [
+            const SizedBox(
+                width: menuWidth,
+                child: Column(
+                    children: [Expanded(child: SkyveMenu(inDrawer: false))])),
+            Expanded(child: view)
+          ]);
+        }
 
-      ThemeData theme = Theme.of(context);
+        ThemeData theme = Theme.of(context);
 
-      return Scaffold(
-          drawer: drawer,
-          // NB Use NestedScrollViewPlus to allow over-stretch of SliverAppBar
+        return SkyveFlutterForm(
+          child: Form(
+            child: Scaffold(
+              drawer: drawer,
+              // NB Use NestedScrollViewPlus to allow over-stretch of SliverAppBar
 // TODO In chrome having scrolling menu inlined causes - The provided ScrollController is currently attached to more than one ScrollPosition.
-          body: NestedScrollViewPlus(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  OverlapAbsorberPlus(
-                    sliver: SliverAppBar(
-                      pinned: true,
-                      snap: true,
-                      floating: true,
-                      stretch: true,
-                      toolbarHeight: 50.0,
-                      actions: appBarActions(context),
-                      expandedHeight: small ? 120.0 : 160.0,
+              body: NestedScrollViewPlus(
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    OverlapAbsorberPlus(
+                      sliver: SliverAppBar(
+                        pinned: true,
+                        snap: true,
+                        floating: true,
+                        stretch: true,
+                        toolbarHeight: 50.0,
+                        actions: appBarActions(context),
+                        expandedHeight: small ? 120.0 : 160.0,
 // TODO use a leading icon when making this thing and the title and then add the tab bar in below
-                      bottom: appBarBottomContents(context),
-                      flexibleSpace: FlexibleSpaceBar(
-                        title: Text(viewTitle),
-                        stretchModes: const [
-                          StretchMode.zoomBackground,
-                          StretchMode.blurBackground,
-                        ],
-                        background: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            DecoratedBox(
-                              position: DecorationPosition.foreground,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    theme.primaryColor,
-                                    Colors.transparent,
-                                  ],
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
+                        bottom: appBarBottomContents(context),
+                        flexibleSpace: FlexibleSpaceBar(
+                          title: Text(viewTitle),
+                          stretchModes: const [
+                            StretchMode.zoomBackground,
+                            StretchMode.blurBackground,
+                          ],
+                          background: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              DecoratedBox(
+                                position: DecorationPosition.foreground,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      theme.primaryColor,
+                                      Colors.transparent,
+                                    ],
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                  ),
+                                ),
+                                child: const Image(
+                                  image:
+                                      AssetImage('assets/AppBarBackground.jpg'),
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                              child: const Image(
-                                image:
-                                    AssetImage('assets/AppBarBackground.jpg'),
-                                fit: BoxFit.cover,
+                              Container(
+                                padding: const EdgeInsets.all(32.0),
+                                child: const Image(
+                                  image:
+                                      AssetImage('assets/skyve_inv_logo.png'),
+                                  fit: BoxFit.contain,
+                                  opacity: AlwaysStoppedAnimation(0.3),
+                                ),
                               ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(32.0),
-                              child: const Image(
-                                image: AssetImage('assets/skyve_inv_logo.png'),
-                                fit: BoxFit.contain,
-                                opacity: AlwaysStoppedAnimation(0.3),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ];
-              },
-              body: SkyveFlutterForm(
-                child: Form(
-                  child: body,
-                ),
-              )),
-          bottomNavigationBar: bottomNavigationBar(context));
-    });
+                  ];
+                },
+                body: body,
+              ),
+              bottomNavigationBar: bottomNavigationBar(context),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   // Determine the bottom app bar
