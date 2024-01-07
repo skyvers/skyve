@@ -11,7 +11,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 class SkyveRestClient {
   // if served from the web, use host/ or host/context/
   // NB change this to use chrome (web) for running or debugging
-  // static final String _baseUri = (kIsWeb
+  // static final String baseUri = (kIsWeb
   //     ? (Uri.base.origin +
   //         (Uri.base.pathSegments.isEmpty
   //             ? '/'

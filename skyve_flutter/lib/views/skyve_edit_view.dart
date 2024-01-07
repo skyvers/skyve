@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:skyve_flutter/util/responsive_grid.dart';
 import 'package:skyve_flutter/util/skyve_interfaces.dart';
 import 'package:skyve_flutter/views/skyve_responsive_view.dart';
@@ -117,26 +118,52 @@ class _SkyveEditViewState extends ConsumerState<SkyveEditView>
           ),
         ),
       );
-      if (kIsWeb) {
+
+      if (SkyveResponsiveView.small) {
         guts = Padding(
-          padding: SkyveResponsiveView.small
+          padding: kIsWeb
               ? const EdgeInsets.all(10.0)
-              : const EdgeInsets.only(
-                  left: SkyveResponsiveView.menuWidth,
-                  right: 10.0,
-                  top: 10.0,
-                  bottom: 10.0),
+              : const EdgeInsets.symmetric(horizontal: 10.0),
           child: guts,
         );
       } else {
-        guts = Padding(
-          padding: SkyveResponsiveView.small
-              ? const EdgeInsets.symmetric(horizontal: 10.0)
-              : const EdgeInsets.only(
-                  left: SkyveResponsiveView.menuWidth,
-                  right: 10.0,
-                ),
-          child: guts,
+        guts = Row(
+          children: [
+            const SizedBox(
+              width: SkyveResponsiveView.menuWidth,
+              height: 16.0,
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 16.0,
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.copyright,
+                    size: 16.0,
+                    color: Colors.black54,
+                  ),
+                  Text('All Rights Reserved',
+                      style: TextStyle(color: Colors.black54)),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: SkyveResponsiveView.screenSize.width -
+                  SkyveResponsiveView.menuWidth,
+              child: Padding(
+                padding: kIsWeb
+                    ? const EdgeInsets.only(
+                        right: 10.0,
+                        top: 10.0,
+                        bottom: 10.0,
+                      )
+                    : const EdgeInsets.only(
+                        right: 10.0,
+                      ),
+                child: guts,
+              ),
+            ),
+          ],
         );
       }
       result = BottomAppBar(child: guts);

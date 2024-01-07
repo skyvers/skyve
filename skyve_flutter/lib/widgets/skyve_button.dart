@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skyve_flutter/util/skyve_mixins.dart';
 
@@ -38,18 +39,55 @@ class SkyveButton extends StatelessWidget with Sizable {
   @override
   Widget build(BuildContext context) {
     Widget result;
+    IconData icon;
+    switch (actionType) {
+      case 'OK':
+        icon = FontAwesomeIcons.check;
+        break;
+      case 'Save':
+        icon = FontAwesomeIcons.floppyDisk;
+        break;
+      case 'Delete':
+        icon = FontAwesomeIcons.trash;
+        break;
+      case 'Add':
+        icon = FontAwesomeIcons.plus;
+        break;
+      case 'ZoomOut':
+        icon = FontAwesomeIcons.reply;
+        break;
+      case 'Cancel':
+        icon = FontAwesomeIcons.chevronLeft;
+        break;
+      case 'Remove':
+        icon = FontAwesomeIcons.minus;
+        break;
+      case 'Edit':
+        icon = FontAwesomeIcons.pencil;
+        break;
+      default:
+        icon = FontAwesomeIcons.gear;
+    }
+
     if (actionType == 'Cancel') {
-      result =
-          ElevatedButton(onPressed: () => _pop(context), child: Text(label));
+      result = ElevatedButton.icon(
+        icon: FaIcon(icon, size: 16.0),
+        label: Text(label),
+        onPressed: () => _pop(context),
+      );
     } else {
-      result = ElevatedButton(
-          onPressed: () => _onPressed(context), child: Text(label));
+      result = ElevatedButton.icon(
+        icon: FaIcon(icon, size: 16.0),
+        label: Text(label),
+        onPressed: () => _onPressed(context),
+      );
     }
     if ((pixelWidth != null) || (pixelHeight != null)) {
       result = SizedBox(
-          width: pixelWidth?.toDouble(),
-          height: pixelHeight?.toDouble(),
-          child: result);
+        width: pixelWidth?.toDouble(),
+        height: pixelHeight?.toDouble(),
+        child: result,
+      );
     }
     return result;
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -114,64 +115,74 @@ final containerRouterProvider = Provider((ref) {
     GoRoute(
       name: 'List',
       path: '/l',
-/* default slide effect
-      builder: (BuildContext context, GoRouterState state) {
-        final String m = state.queryParams['m']!;
-        final String? d = state.queryParams['d'];
-        final String q = state.queryParams['q']!;
-        return SkyveListView(m: m, d: d, q: q);
-      },
-*/
-      pageBuilder: (BuildContext context, GoRouterState state) {
-        final String m = state.queryParams['m']!;
-        final String? d = state.queryParams['d'];
-        final String q = state.queryParams['q']!;
-        return CustomTransitionPage<void>(
-          key: state.pageKey,
-          child: SkyveListView(m: m, d: d, q: q),
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-              Widget child) {
-            return FadeTransition(
-              opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
-              child: child,
-            );
-          },
-        );
-      },
+      // default slide effect for mobile
+      builder: kIsWeb
+          ? null
+          : (BuildContext context, GoRouterState state) {
+              final String m = state.queryParams['m']!;
+              final String? d = state.queryParams['d'];
+              final String q = state.queryParams['q']!;
+              return SkyveListView(m: m, d: d, q: q);
+            },
+      // fade effect for web
+      pageBuilder: kIsWeb
+          ? (BuildContext context, GoRouterState state) {
+              final String m = state.queryParams['m']!;
+              final String? d = state.queryParams['d'];
+              final String q = state.queryParams['q']!;
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: SkyveListView(m: m, d: d, q: q),
+                transitionDuration: const Duration(milliseconds: 500),
+                transitionsBuilder: (BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                    Widget child) {
+                  return FadeTransition(
+                    opacity:
+                        CurveTween(curve: Curves.easeInOut).animate(animation),
+                    child: child,
+                  );
+                },
+              );
+            }
+          : null,
     ),
     GoRoute(
       name: 'Edit',
       path: '/e',
-/* default slide effect
-        builder: (context, state) {
-          final String m = state.queryParams['m']!;
-          final String d = state.queryParams['d']!;
-          final String? i = state.queryParams['i'];
-          return SkyveEditView(m: m, d: d, i: i);
-        }),
-*/
-      pageBuilder: (BuildContext context, GoRouterState state) {
-        final String m = state.queryParams['m']!;
-        final String d = state.queryParams['d']!;
-        final String? i = state.queryParams['i'];
-        return CustomTransitionPage<void>(
-          key: state.pageKey,
-          child: SkyveEditView(m: m, d: d, i: i),
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-              Widget child) {
-            return FadeTransition(
-              opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
-              child: child,
-            );
-          },
-        );
-      },
+      // default slide effect for mobile
+      builder: kIsWeb
+          ? null
+          : (context, state) {
+              final String m = state.queryParams['m']!;
+              final String d = state.queryParams['d']!;
+              final String? i = state.queryParams['i'];
+              return SkyveEditView(m: m, d: d, i: i);
+            },
+      // fade effect for web
+      pageBuilder: kIsWeb
+          ? (BuildContext context, GoRouterState state) {
+              final String m = state.queryParams['m']!;
+              final String d = state.queryParams['d']!;
+              final String? i = state.queryParams['i'];
+              return CustomTransitionPage<void>(
+                key: state.pageKey,
+                child: SkyveEditView(m: m, d: d, i: i),
+                transitionDuration: const Duration(milliseconds: 500),
+                transitionsBuilder: (BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                    Widget child) {
+                  return FadeTransition(
+                    opacity:
+                        CurveTween(curve: Curves.easeInOut).animate(animation),
+                    child: child,
+                  );
+                },
+              );
+            }
+          : null,
     ),
   ]);
 
