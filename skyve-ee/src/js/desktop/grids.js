@@ -236,7 +236,7 @@ isc.BizListGrid.addMethods({
 			shadowSoftness: 10,
 			shadowOffset: 0,
 			title: 'Flag',
-			headerIconDefaults: {src: '../images/flag.gif', width:16, height: 16},
+			headerIconDefaults: {src: '../images/flag.gif', width:22, height: 22},
 			showMaximizeButton: false,
 			showMinimizeButton: false,
 			showHeaderIcon: true,
@@ -451,6 +451,7 @@ isc.BizListGrid.addMethods({
 			var selectedFields = [];
 			// fieldNames[0] is bizTagged
 			// fieldNames[1] is "bizFlagComment"
+			// NB get the actual object, not the String from me.grid.fieldStateChanged()
 			var fieldState = me.getFieldState();
 			for (var i = 0, l = fieldNames.length; i < l; i++) {
 				var fieldName = fieldNames[i];
@@ -1101,7 +1102,7 @@ isc.BizListGrid.addMethods({
 		return (this.grid != null);
 	},
 	
-	_createGrid: function(config, fields) {
+	_createGrid: function(config, fields, canExpandRecords) {
 		var me = this;
 
 		var gridConfig = {
@@ -1138,7 +1139,7 @@ isc.BizListGrid.addMethods({
 			showRollOver: true,
 			// change the default of 'enabled' coz it clashes
 			recordEnabledProperty: '_enabled',
-			canExpandRecords: false,
+			canExpandRecords: canExpandRecords,
 			expansionMode: 'details',
 //			autoFitWidthApproach: 'both', - The summary row doesn't scroll in sync with the list
 //gridComponents:[isc.Canvas.create({width: '100%', height:1}), "header", "filterEditor", "body"],
@@ -1347,7 +1348,7 @@ isc.BizListGrid.addMethods({
 						me._csrf = dsResponse.httpHeaders['x-csrf-token'];
 						
 						// Ensure the summary grid fields match what will be in the data grid
-						var fields = [{
+						var summaryFields = [{
 							name: "bizFlagComment", 
 							type: "enum", 
 							valueMap: ["", "Count", "Avg", "Sum", "Min", "Max"],
@@ -1364,7 +1365,7 @@ isc.BizListGrid.addMethods({
 
 						// Make the count summary fields numeric (if applicable)
 						var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
-						fields.setLength(fieldNames.length - 1);
+						summaryFields.setLength(fieldNames.length - 1);
 						// if (me.showTag) then fieldNames[0] is "bizTagged", fieldNames[1] is "bizFlagComment"
 						// else fieldNames[0] is "bizFlagComment"
 						for (var i = 0, l = fieldNames.length; i < l; i++) {
@@ -1384,9 +1385,9 @@ isc.BizListGrid.addMethods({
 										editorType = field.editorType;
 									}
 								}
-								fields[i - 1] = {name: fieldName, type: fieldType, editorType: editorType, canEdit: false};
+								summaryFields[i - 1] = {name: fieldName, type: fieldType, editorType: editorType, canEdit: false};
 								if (fieldType == 'float') {
-									fields[i - 1].formatCellValue = function(value, record, rowNum, colNum, grid) {
+									summaryFields[i - 1].formatCellValue = function(value, record, rowNum, colNum, grid) {
 										if (isc.isA.Boolean(value)) {
 											return null;
 										}
@@ -1395,7 +1396,7 @@ isc.BizListGrid.addMethods({
 								}
 							}
 						}
-						me._summaryGrid.setFields(fields);
+						me._summaryGrid.setFields(summaryFields);
 	
 						// pop off the last record in the page from the server as this is the summary row
 						var summaryData = newData.pop();
@@ -1417,29 +1418,34 @@ isc.BizListGrid.addMethods({
 				return (! me._disabled) && (colNum > (me.showTag ? 1 : 0)) && this.Super("canEditCell", arguments);
 			},
 	
+			// Keep summary grid field state sync'd 
 			fieldStateChanged: function() {
 				// ensure the widths of all fields are set
+				// NB get the actual object, not the String from me.grid.fieldStateChanged()
 				var fieldState = me.getFieldState();
 				// If we have a tag column (the first column)
 				if (me.showTag) {
 					// make the first column = the width of the first and second columns together
 					// ie the bizTagged and BizFlagComment columns
-					fieldState[1].width = fieldState[0].width + fieldState[1].width;
+					// if there is an expansion column, then take that into account 
+					// NB we are assuming LTR until we get an international customer...
+					fieldState[1] = {name: 'bizFlagComment', width: fieldState[0].width + fieldState[1].width + (me.grid.canExpandRecords ? 32 : 0)};
+				}
+				else {
+					fieldState[1] = {name: 'bizFlagComment', width: fieldState[1].width + (me.grid.canExpandRecords ? 32 : 0)};
 				}
 				fieldState.removeAt(0); // bizTagged needs to go now
-				
-				// if there is an expansion column, then take that into account 
-				// NB we are assuming LTR until we get an international customer...
-				if (this.canExpandRecords) {
-					fieldState[0].width += 30;
-				}
+
 				me._summaryGrid.setFieldState(fieldState);
 			},
+
+			// Keep summary grid scroll postiion sync'd
 			scrolled: function() {
 				if (me._summaryGrid.body) {
 					me._summaryGrid.body.scrollTo(me.grid.body.getScrollLeft(), 0);
 				}
 			},
+			// Highlight tagged rows
 			getCellCSSText: function (record, rowNum, colNum) {
 				if (record) {
 					if (record.bizTagged) {
@@ -1448,29 +1454,6 @@ isc.BizListGrid.addMethods({
 				}
 				return this.Super("getCellCSSText", arguments);
 		    }
-/*
-			showRollOverCanvas:true,
-			rollOverCanvasConstructor:isc.HLayout,
-			rollOverCanvasProperties: {
-				snapTo:"TL", 
-				height:20, 
-				width:40,
-				members:[
-					{_constructor:"Button", 
-						icon: "../images/zoom.gif",
-	             		click:"isc.say('Zoom record:' + this.echo(this.parentElement.record))", 
-	             		height:20, 
-	             		width:20
-	         		},
-					{_constructor:"Button",
-						icon: "../images/delete.gif",
-						click:"isc.say('Delete record:' + this.echo(this.parentElement.record))",
-						height:20,
-						width:20
-					}
-				]
-			}
-*/
 		};
 		
 		if (config.isRepeater) {
@@ -1633,13 +1616,14 @@ isc.BizListGrid.addMethods({
 		else if (me.showTag) {
 			fields.add(
 				{name: "bizTagged",
-					width: 30,
+					width: 38,
 					align: 'center',
 					canHide: false,
 					canSort: false,
-					canToggle: true,
+					canToggle: false, // if true, this displays disabled
 					canGroupBy: false,
 					showHover: false,
+					ignoreKeyboardClicks: true, // stop keyboard navigation setting off tag column click events
 //					frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
 					recordClick: function(viewer, // the parent list grid 
 											record, 
@@ -1647,7 +1631,8 @@ isc.BizListGrid.addMethods({
 											field, 
 											fieldNum, 
 											value, 
-											rawValue) {
+											rawValue,
+											editedRecord) {
 						if (record) {
 							if (me.canUpdate && me.canEdit) {
 								if (me.tagId) {
@@ -1691,13 +1676,14 @@ isc.BizListGrid.addMethods({
 				{name: "bizFlagComment", 
 					// extend the width of the flag column to allow the summary grid dropdown to display nicely
 					// if we are not showing the tag column and we have the summary row showing
-					width: ((! me.showTag) && me.showSummary) ? 60 : 40, 
+					width: ((! me.showTag) && me.showSummary) ? 80 : 40, 
 					align: 'center',
 					// Cant hide this field as the summary type
 					// relies on the real-estate this column uses.
 					canHide: false,
+					ignoreKeyboardClicks: true, // stop keyboard navigation setting off flag column click events
 //					frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-					formatCellValue: function(value) {
+					formatCellValue: function(value, record, rowNum, colNum, grid) {
 						if (value) {
 							return '<img src="images/flag.gif">';
 						}
@@ -1711,7 +1697,8 @@ isc.BizListGrid.addMethods({
 											field, 
 											fieldNum, 
 											value, 
-											rawValue) {
+											rawValue,
+											editedRecord) {
 						if (me.canUpdate && me.canEdit) {
 							me._eventRecord = record;
 							me._eventRowNum = recordNum;
@@ -1744,7 +1731,9 @@ isc.BizListGrid.addMethods({
 					if (dsField.canSave == false) {
 						gridField.canEdit = false;
 					}
-					hasDetailFields = (hasDetailFields || dsField.detail);
+					if ((! hasDetailFields) && dsField.detail) { // protect against assigning undefined
+						hasDetailFields = true;
+					}
 					fields.add(gridField);
 				}
 			}
@@ -1813,8 +1802,7 @@ isc.BizListGrid.addMethods({
 			me.removeMember(me.grid);
 			me.grid.destroy();
 		}
-		me._createGrid(me._config, fields);
-		me.grid.setCanExpandRecords(hasDetailFields);
+		me._createGrid(me._config, fields, hasDetailFields);
 
 		if (me._config.isTree || me._config.isRepeater) {
 			me.addMember(me.grid); // add to the end - no summary row
@@ -1847,11 +1835,20 @@ isc.BizListGrid.addMethods({
 		// ensure the widths of all fields are set
 		var fieldState = eval(this.grid.getFieldState());
 		for (var i = 0, l = fieldState.length; i < l; i++) {
-			if (fieldState[i].width) {
-				continue;
+			// bizTagged and bizFlagComment fields can be just a string for some insanity
+			if (fieldState[i] == 'bizTagged') {
+				fieldState[i] = {name: 'bizTagged', width: 38};
+			}
+			else if (fieldState[i] == 'bizFlagComment') {
+				fieldState[i] = {name: 'bizFlagComment', width: this.showTag ? 40 : 80};
 			}
 			else {
-				fieldState[i].width = this.grid.getFieldWidth(fieldState[i].name);
+				if (fieldState[i].width) {
+					continue;
+				}
+				else {
+					fieldState[i].width = this.grid.getFieldWidth(fieldState[i].name);
+				}
 			}
 		}
 
