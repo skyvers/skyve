@@ -106,7 +106,7 @@ public abstract class ReportDesignGenerator {
 
                 design.setAlias(design.getAlias() + 1);
                 StringBuilder sJoin = new StringBuilder();
-                sJoin.append(" join ").append(Renderer.getPersistentFromDocument(extDocument)).append(" ").append((char) design.getAlias());
+                sJoin.append(" join ").append(Renderer.getPersistentIdentifierForDocument(extDocument)).append(" ").append((char) design.getAlias());
                 sJoin.append(" on ").append("a.bizId = ").append((char) design.getAlias()).append(".bizId");
 
                 design.addJoin(extDocument.getName(), Character.toString((char) design.getAlias()), sJoin.toString());
@@ -369,7 +369,7 @@ public abstract class ReportDesignGenerator {
         } else {
             sJoin.append(" join ");
         }
-        sJoin.append(Renderer.getPersistentFromDocument(fDoc));
+        sJoin.append(Renderer.getPersistentIdentifierForDocument(fDoc));
         sJoin.append(" ").append((char) bean.getAlias());
         sJoin.append(" on ").append("a.bizId = ");
         sJoin.append(" ").append((char) bean.getAlias()).append(".").append(a.getName()).append("_id");
@@ -407,7 +407,7 @@ public abstract class ReportDesignGenerator {
 
         subreport.setMode(design.getMode()); // default to same mode as containing report
         subreport.setField(fld);
-        subreport.setParentReportPersistentName(Renderer.getPersistentFromDocument(document));
+        subreport.setParentReportPersistentName(Renderer.getPersistentIdentifierForDocument(document));
         subreport.setRepositoryPath(design.getRepositoryPath());
 		subreport.setSaveToDocumentPackage(design.getSaveToDocumentPackage());
 

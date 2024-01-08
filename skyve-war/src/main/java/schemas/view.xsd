@@ -730,7 +730,9 @@
   <xs:complexType name="sidebar">
     <xs:complexContent>
       <xs:extension base="tns:container">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
         <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="floatingPixelWidth" type="xs:int"/>
         <xs:attribute name="floatingPixelWidthBreakpoint" type="xs:int" use="required"/>

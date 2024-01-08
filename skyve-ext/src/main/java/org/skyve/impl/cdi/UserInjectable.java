@@ -78,6 +78,11 @@ public class UserInjectable implements User {
 	}
 	
 	@Override
+	public String getContactAvatarInitials() {
+		return CORE.getUser().getContactAvatarInitials();
+	}
+	
+	@Override
 	public Customer getCustomer() {
 		return CORE.getUser().getCustomer();
 	}

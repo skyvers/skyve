@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
-import 'skyve_textfield.dart';
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveBlurb extends StatelessWidget {
+class SkyveBlurb extends StatelessWidget with Sizable {
   final String label;
 
-  const SkyveBlurb({super.key, required this.label});
+  SkyveBlurb(
+      {super.key, required this.label, int? pixelWidth, int? pixelHeight}) {
+    this.pixelWidth = pixelWidth;
+    this.pixelHeight = pixelHeight;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement widget
-    return SkyveTextField(label: label);
+    Widget result = const Stack(alignment: Alignment.center, children: [
+      Placeholder(fallbackHeight: 50, color: Colors.orange),
+      Text('Blurb')
+    ]);
+    if ((pixelWidth != null) || (pixelHeight != null)) {
+      result = SizedBox(
+          width: pixelWidth?.toDouble(),
+          height: pixelHeight?.toDouble(),
+          child: result);
+    }
+    return result;
   }
 }

@@ -67,6 +67,12 @@ public interface User extends NamedMetaData {
 	public String getContactImageUrl(int width, int height);
 	
 	/**
+	 * Returns a 2 Upper Case initials for the contact name if possible.
+	 * @return	Avatar Initials
+	 */
+	public String getContactAvatarInitials();
+
+	/**
 	 * 
 	 * @return
 	 */

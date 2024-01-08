@@ -79,7 +79,9 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												int widgetColspan,
 												boolean widgetRequired,
 												String widgetInvisible,
-												String widgetHelpText);
+												String widgetHelpText,
+												boolean showLabel,
+												boolean topLabel);
 	
 	public abstract UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature);
 	

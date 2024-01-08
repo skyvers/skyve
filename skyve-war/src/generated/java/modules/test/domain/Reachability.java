@@ -11,7 +11,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
 
 /**
- * NonPersistentAssociationToPersistent
+ * Reachability
  * <br/>
  * Test persistence by reachability to inform when to call Bizlet events.
  * 

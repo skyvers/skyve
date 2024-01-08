@@ -121,7 +121,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	private List<RenderedComponent> toolbarLayouts; // the toolbar layouts
 
 	public ClientViewRenderer(User user, Module module, Document document, View view, String uxui) {
-		super(user, module, document, view, uxui, false);
+		super(user, module, document, view, uxui);
 		createView = ViewType.create.toString().equals(view.getName());
 	}
 	

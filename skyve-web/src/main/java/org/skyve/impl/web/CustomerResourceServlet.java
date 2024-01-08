@@ -312,8 +312,14 @@ public class CustomerResourceServlet extends HttpServlet {
 			String contentType = resource.getContentType();
 			if (contentType != null) {
 				response.setContentType(contentType);
+				// Only set char encoding for text types as it can do weird things in chrome - eg for images
+				if (contentType.startsWith("text/")) {
+					response.setCharacterEncoding(Util.UTF8);
+				}
 			}
-			response.setCharacterEncoding(Util.UTF8);
+			else { // if we don't know the content type, set the char encoding to be safe (no charset sniffing)
+				response.setCharacterEncoding(Util.UTF8);
+			}
 			if (resource.isContent()) {
 				StringBuilder disposition = new StringBuilder(32);
 				disposition.append("inline; filename=\"");

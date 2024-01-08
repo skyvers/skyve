@@ -123,7 +123,9 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
-										String widgetHelpText) {
+										String widgetHelpText,
+										boolean showLabel,
+										boolean topLabel) {
 		// do nothing
 	}
 

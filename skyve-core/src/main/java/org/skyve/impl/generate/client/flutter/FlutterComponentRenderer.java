@@ -1,24 +1,8 @@
 package org.skyve.impl.generate.client.flutter;
 
-import static org.skyve.metadata.controller.ImplicitActionName.Add;
-import static org.skyve.metadata.controller.ImplicitActionName.BizExport;
-import static org.skyve.metadata.controller.ImplicitActionName.BizImport;
-import static org.skyve.metadata.controller.ImplicitActionName.Cancel;
-import static org.skyve.metadata.controller.ImplicitActionName.Delete;
-import static org.skyve.metadata.controller.ImplicitActionName.Download;
-import static org.skyve.metadata.controller.ImplicitActionName.Edit;
-import static org.skyve.metadata.controller.ImplicitActionName.New;
-import static org.skyve.metadata.controller.ImplicitActionName.OK;
-import static org.skyve.metadata.controller.ImplicitActionName.Print;
-import static org.skyve.metadata.controller.ImplicitActionName.Remove;
-import static org.skyve.metadata.controller.ImplicitActionName.Report;
-import static org.skyve.metadata.controller.ImplicitActionName.Save;
-import static org.skyve.metadata.controller.ImplicitActionName.Upload;
-import static org.skyve.metadata.controller.ImplicitActionName.ZoomOut;
-
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.skyve.domain.Bean;
@@ -64,9 +48,12 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
-import com.google.common.collect.ImmutableMap;
-
 public class FlutterComponentRenderer extends ComponentRenderer {
+    
+    /**
+     * Template for a SkyveButton; params are actionType, actionName & label
+     */
+    private final String btnTemplate = "SkyveButton( actionType: '%s', actionName: '%s', label: '%s'),";
     
 	public static final String BORDER_IMPORT = "widgets/skyve_border";
 	public static final String BUTTON_IMPORT = "widgets/skyve_button";
@@ -97,28 +84,6 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	private static final String STATICIMAGE_IMPORT = "widgets/skyve_staticimage";
 	private static final String DYNAMICIMAGE_IMPORT = "widgets/skyve_dynamicimage";
 	private static final String BLURB_IMPORT = "widgets/skyve_blurb";
-
-    /**
-     * Map from ImplicitActionName to a single character 'actionType' for use in buttons. Mimics
-     * output of ViewRenderer.preProcessAction().
-     */
-    private static final Map<ImplicitActionName, String> actionToType = ImmutableMap.<ImplicitActionName, String>builder()
-                                                                                    .put(Add, "A")
-                                                                                    .put(BizExport, "X")
-                                                                                    .put(BizImport, "I")
-                                                                                    .put(Download, "L")
-                                                                                    .put(Upload, "U")
-                                                                                    .put(Cancel, "C")
-                                                                                    .put(Delete, "D")
-                                                                                    .put(Edit, "E")
-                                                                                    .put(New, "N")
-                                                                                    .put(OK, "O")
-                                                                                    .put(Remove, "R")
-                                                                                    .put(Report, "P")
-                                                                                    .put(Save, "S")
-                                                                                    .put(ZoomOut, "Z")
-                                                                                    .put(Print, "V")
-                                                                                    .build();
 
 	private Set<String> imports;
 	private String startingIndent;
@@ -205,46 +170,34 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 											String dataWidgetVar,
 											Button button,
 											Action action) {
-		imports.add(BUTTON_IMPORT);
-		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
-		StringBuilder output = result.getOutput();
-		
-        output.append("const SkyveButton(name: '")
-              .append(button.getActionName())
-              .append("', label: '")
-              .append(action.getLocalisedDisplayName())
-              .append("', type: '")
-              .append(deriveActionType(action.getImplicitName()))
-              .append("'),");
-		return result;
-	}
+        imports.add(BUTTON_IMPORT);
+        RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
+
+        String btnText = createButton(deriveActionType(action.getImplicitName()), action.getName(),
+                action.getLocalisedDisplayName());
+        result.getOutput()
+              .append(btnText);
+
+        return result;
+    }
 	
     private String deriveActionType(ImplicitActionName implicitName) {
 
-        if (implicitName == null) {
-            return " ";
-        }
-
-        String actionType = actionToType.get(implicitName);
-        if (actionType == null) {
-            throw new FlutterGeneratorException(implicitName + " not catered for");
-        }
-
-        return actionType;
+        return Optional.ofNullable(implicitName)
+                       .map(ImplicitActionName::name)
+                       .orElse(" ");
     }
 
 	@Override
 	public RenderedComponent reportButton(RenderedComponent component, Button button, Action action) {
 		imports.add(BUTTON_IMPORT);
-		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
-		StringBuilder output = result.getOutput();
-        output.append("const SkyveButton(name: '")
-              .append(button.getActionName())
-              .append("', label: '")
-              .append(action.getLocalisedDisplayName())
-              .append("', type: 'P'),");
-		return result;
-	}
+        RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
+        
+        String btnText = createButton("P", action.getName(), action.getLocalisedDisplayName());
+        result.getOutput().append(btnText);
+
+        return result;
+    }
 
 	@Override
 	public RenderedComponent downloadButton(RenderedComponent component,
@@ -252,16 +205,15 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 												Action action,
 												String moduleName,
 												String documentName) {
-		imports.add(BUTTON_IMPORT);
-		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
-		StringBuilder output = result.getOutput();
-        output.append("const SkyveButton(name: '")
-              .append(button.getActionName())
-              .append("', label: '")
-              .append(action.getLocalisedDisplayName())
-              .append("', type: 'L'),");
-		return result;
-	}
+        imports.add(BUTTON_IMPORT);
+        RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
+
+        String btnText = createButton("L", action.getName(), action.getLocalisedDisplayName());
+        result.getOutput()
+              .append(btnText);
+
+        return result;
+    }
 
 	@Override
 	public RenderedComponent staticImage(RenderedComponent component, String fileUrl, StaticImage image) {
@@ -618,16 +570,17 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 									Integer length,
 									Converter<?> converter,
 									Format<?> format) {
-		imports.add(TEXTFIELD_IMPORT);
-		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
-		StringBuilder output = result.getOutput();
-		// output.append("TextFormField(decoration: const InputDecoration(border: OutlineInputBorder(), labelText:
-		// '").append(title);
+        imports.add(TEXTFIELD_IMPORT);
+        RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 
-		output.append("SkyveTextField(label: '").append(title);
-		output.append("', initialValue: nvl(_bean['").append(BindUtil.sanitiseBinding(text.getBinding())).append("'])),");
-		return result;
-	}
+        final String stfTemplate = "SkyveTextField(label: '%s', propertyKey: '%s'),";
+        String stfCode = String.format(stfTemplate, title, BindUtil.sanitiseBinding(text.getBinding()));
+
+        result.getOutput()
+              .append(stfCode);
+
+        return result;
+    }
 
 	@Override
 	public RenderedComponent textArea(RenderedComponent component,
@@ -685,7 +638,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 		output.append("SkyveUpload(label: 'Upload'),");
 		return result;
 	}
-	
+
 	@Override
 	public RenderedComponent action(RenderedComponent component,
 										String dataWidgetBinding,
@@ -693,16 +646,30 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 										Action action,
 										ImplicitActionName name,
 										String title) {
-		imports.add(BUTTON_IMPORT);
-		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
-		StringBuilder output = result.getOutput();
-        output.append("const SkyveButton(name: '")
-              .append(name)
-              .append("', label: '")
-              .append(title)
-              .append("', type: '")
-              .append(deriveActionType(name))
-              .append("'),");
-		return result;
-	}
+        imports.add(BUTTON_IMPORT);
+        RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
+
+        final String actionName;
+
+        if (name == null) {
+            // custom action
+            // name == null
+            // action.getName() has what we need
+            actionName = action.getName();
+        } else {
+            // typical action
+            // name != null
+            actionName = name.name();
+        }
+
+        String actionType = deriveActionType(name);
+        String btnText = createButton(actionType, actionName, title);
+        result.getOutput()
+              .append(btnText);
+        return result;
+    }
+
+    private String createButton(String actionType, String actionName, String label) {
+        return String.format(btnTemplate, actionType, actionName, label);
+    }
 }

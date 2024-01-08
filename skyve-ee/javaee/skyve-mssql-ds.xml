@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasources>
+	<datasource jndi-name="java:/SkyveDB" pool-name="Skyve DB" enabled="true" jta="false" use-ccm="true">
+		<connection-url>jdbc:sqlserver://localhost;databaseName=skyve;sendStringParametersAsUnicode=false;IntegratedSecurity=false;encrypt=false;</connection-url>
+		<driver>sqlserver</driver>
+		<pool>
+			<min-pool-size>5</min-pool-size>
+			<max-pool-size>10</max-pool-size>
+		</pool>
+		<security>
+			<user-name>sa</user-name>
+			<password>someThingComplicated1234</password>
+		</security>
+		<validation>
+			<check-valid-connection-sql>select 1</check-valid-connection-sql>
+			<validate-on-match>true</validate-on-match>
+			<background-validation>false</background-validation>
+			<background-validation-millis>0</background-validation-millis>
+		</validation>
+		<statement>
+			<prepared-statement-cache-size>0</prepared-statement-cache-size>
+			<share-prepared-statements>false</share-prepared-statements>
+		</statement>
+	</datasource>
+</datasources>

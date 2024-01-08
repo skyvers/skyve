@@ -14,6 +14,7 @@ import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
@@ -33,37 +34,6 @@ import org.skyve.persistence.SQL;
  * @author Mike
  */
 public class LocalDataStoreRepository extends LocalDesignRepository {
-	public static final String ADMIN_MODULE_NAME = "admin";
-	public static final String CHANGE_PASSWORD_DOCUMENT_NAME = "ChangePassword";
-	public static final String CONTACT_DOCUMENT_NAME = "Contact";
-	public static final String CONFIGURATION_DOCUMENT_NAME = "Configuration";
-	public static final String USER_DOCUMENT_NAME = "User";
-	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
-	
-	public static final String CONFIRM_PASSWORD_PROPERTY_NAME = "confirmPassword";
-	public static final String CONTACT_PROPERTY_NAME = "contact";
-	public static final String CONTACT_TYPE_PROPERTY_NAME = "contactType";
-	public static final String EMAIL1_PROPERTY_NAME = "email1";
-	public static final String FROM_EMAIL_PROPERTY_NAME = "fromEmail";
-	public static final String NAME_PROPERTY_NAME = "name";
-	public static final String NEW_PASSWORD_PROPERTY_NAME = "newPassword";
-	public static final String OLD_PASSWORD_PROPERTY_NAME = "oldPassword";
-	public static final String PASSWORD_PROPERTY_NAME = "password";
-	public static final String PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME = "passwordResetEmailBody";
-	public static final String PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME = "passwordResetEmailSubject";
-	public static final String PASSWORD_RESET_TOKEN_PROPERTY_NAME = "passwordResetToken";
-	public static final String ROLE_NAME_PROPERTY_NAME = "roleName";
-	public static final String ROLES_PROPERTY_NAME = "roles";
-	public static final String USER_NAME_PROPERTY_NAME = "userName";
-	public static final String PASSWORD_LAST_CHANGED_PROPERTY_NAME = "passwordLastChanged";
-	
-	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
-	
-	// resend activation email properties
-	public static final String RESEND_ACTIVATION_ACTION_NAME = "ResendActivation";
-	public static final String SELF_REGISTRATION_DOCUMENT_NAME = "SelfRegistration";
-	public static final String USER_PROPERTY_NAME = "user";
-
 	@Override
 	public UserImpl retrieveUser(String userPrincipal) {
 		if (userPrincipal == null) {
@@ -104,20 +74,20 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
-			Module admin = getModule(customer, ADMIN_MODULE_NAME);
+			Module admin = getModule(customer, AppConstants.ADMIN_MODULE_NAME);
 			@SuppressWarnings("null")
-			String ADM_SecurityUser = admin.getDocument(customer, USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			String ADM_SecurityUser = admin.getDocument(customer, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			@SuppressWarnings("null")
-			String ADM_SecurityUserRole = admin.getDocument(customer, USER_ROLE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			String ADM_SecurityUserRole = admin.getDocument(customer, AppConstants.USER_ROLE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			@SuppressWarnings("null")
-			String ADM_Contact = admin.getDocument(customer, CONTACT_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
-			String ADM_SecurityUser_groups = ADM_SecurityUser + "_groups";
+			String ADM_Contact = admin.getDocument(customer, AppConstants.CONTACT_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			String ADM_SecurityUser_groups = ADM_SecurityUser + '_' + AppConstants.GROUPS_ATTRIBUTE_NAME;
 			@SuppressWarnings("null")
-			String ADM_SecurityGroup = admin.getDocument(customer, "Group").getPersistent().getPersistentIdentifier();
+			String ADM_SecurityGroup = admin.getDocument(customer, AppConstants.GROUP_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			@SuppressWarnings("null")
-			String ADM_SecurityGroupRole = admin.getDocument(customer, "GroupRole").getPersistent().getPersistentIdentifier();
+			String ADM_SecurityGroupRole = admin.getDocument(customer, AppConstants.GROUP_ROLE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			@SuppressWarnings("null")
-			String ADM_Configuration = admin.getDocument(customer, CONFIGURATION_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			String ADM_Configuration = admin.getDocument(customer, AppConstants.CONFIGURATION_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			
 			StringBuilder sql = new StringBuilder(512);
 			sql.append("select u.bizId, " +

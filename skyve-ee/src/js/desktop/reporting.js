@@ -123,8 +123,8 @@ isc.ReportDialog.addClassProperties({
 	})
 });
 isc.ReportDialog.addClassProperties({
-	// create a report format picklist
-	_createReportFormatPickList: function(colSpan, onChangeFunction) { // callback for onchange event
+	// create a jasper report format picklist
+	_createJasperReportFormatPickList: function(colSpan, onChangeFunction) { // callback for onchange event
 		var valueMap = {};
 		var valueIcons = {};
 		// An array of report format names from org.skyve.report.ReportFormat.
@@ -197,6 +197,44 @@ isc.ReportDialog.addClassProperties({
 			defaultValue: SKYVE.Util.allowedReportFormats[0],
 			colSpan: colSpan,
 			change: onChangeFunction
+		};
+	},
+	// create a freemarker report format picklist
+	_createFreemarkerReportFormatPickList: function() {
+		var valueMap = {};
+		var valueIcons = {};
+		var defaultValue = null;
+		// An array of report format names from org.skyve.report.ReportFormat.
+		for (var i = 0, l = SKYVE.Util.allowedReportFormats.length; i < l; i++) {
+			var format = SKYVE.Util.allowedReportFormats[i];
+			if (format == 'pdf') {
+				valueMap[format] = 'PDF (Adobe Portable Document Format)';
+				valueIcons[format] = format;
+				if (defaultValue == null) {
+					defaultValue = format;
+				}
+			}
+			else if (format == 'csv') {
+				valueMap[format] = 'CSV (Comma Separated Values)';
+				valueIcons[format] = format;
+				if (defaultValue == null) {
+					defaultValue = format;
+				}
+			}
+		} 
+
+		return {
+			name: 'reportFormat', 
+			showTitle: false, 
+			type: 'select',
+			width: 300,
+			required: true,
+			valueMap: valueMap,
+			imageURLPrefix: 'reporting/',
+			imageURLSuffix: '.png',
+			valueIcons: valueIcons,
+			defaultValue: defaultValue,
+			colSpan: 1
 		};
 	}
 });
@@ -469,7 +507,7 @@ isc.ReportDialog.addClassProperties({
 				colWidths: [60, 200, 40, 30, '*', 60, '*'],
 				padding: 15,
 				items: [
-			        isc.ReportDialog._createReportFormatPickList(3, changeHandler),
+			        isc.ReportDialog._createJasperReportFormatPickList(3, changeHandler),
 					{name: "isPaginated",
 						title: "Paginated Report",
 						type: "checkbox",
@@ -638,25 +676,53 @@ isc.ReportDialog.addClassProperties({
 			delete paramsCopy._f;
 			isc.ReportDialog._redirectToReport(view, paramsCopy, format);
 		}
-		else {
-			if (isc.ReportDialog._reportLayout == null) {
-				isc.ReportDialog._reportLayout = isc.ReportDialog._createReportPanel(
+		else if (params && params._e && params._e == 'Freemarker') {
+			if (isc.ReportDialog._freemarkerReportLayout == null) {
+				isc.ReportDialog._freemarkerReportLayout = isc.ReportDialog._createReportPanel(
 					isc.IButton.create({
 						title: 'View',
-						ID: '_reportViewButton',
+						ID: '_freemarkerReportViewButton',
 						_view: null,
 						_params: null,
 						click: function() {
-							var format = _reportForm.getValue("reportFormat");
+							var format = _freemarkerReportForm.getValue("reportFormat");
 							isc.ReportDialog._redirectToReport(this._view, this._params, format);
 						}
 					}),
 					isc.DynamicForm.create({
-						ID: '_reportForm',
+						ID: '_freemarkerReportForm',
 						fields: [
 					        {type:'rowSpacer'}, 
 					        {type:'rowSpacer'},
-						    isc.ReportDialog._createReportFormatPickList(
+						    isc.ReportDialog._createFreemarkerReportFormatPickList()
+			         	]
+					})
+				);
+			}
+			
+			_freemarkerReportViewButton._view = view;
+			_freemarkerReportViewButton._params = params;
+			isc.WindowStack.popup(null, "Report", true, [isc.ReportDialog._freemarkerReportLayout], 180, 480);
+		}
+		else {
+			if (isc.ReportDialog._jasperReportLayout == null) {
+				isc.ReportDialog._jasperReportLayout = isc.ReportDialog._createReportPanel(
+					isc.IButton.create({
+						title: 'View',
+						ID: '_jasperReportViewButton',
+						_view: null,
+						_params: null,
+						click: function() {
+							var format = _jasperReportForm.getValue("reportFormat");
+							isc.ReportDialog._redirectToReport(this._view, this._params, format);
+						}
+					}),
+					isc.DynamicForm.create({
+						ID: '_jasperReportForm',
+						fields: [
+					        {type:'rowSpacer'}, 
+					        {type:'rowSpacer'},
+						    isc.ReportDialog._createJasperReportFormatPickList(
 						    	1,
 					    		function(form, item, value, oldValue) {
 					    			// do nothing
@@ -666,9 +732,9 @@ isc.ReportDialog.addClassProperties({
 				);
 			}
 			
-			_reportViewButton._view = view;
-			_reportViewButton._params = params;
-			isc.WindowStack.popup(null, "Report", true, [isc.ReportDialog._reportLayout], 180, 480);
+			_jasperReportViewButton._view = view;
+			_jasperReportViewButton._params = params;
+			isc.WindowStack.popup(null, "Report", true, [isc.ReportDialog._jasperReportLayout], 180, 480);
 		}
 	},
 	

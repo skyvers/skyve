@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -103,12 +103,12 @@ public class BasicAuthFilter extends AbstractRestFilter {
 	private static void validateUserCredentials(Persistence p, String username, String password)
 	throws Exception {
 		ProvidedRepository r = ProvidedRepositoryFactory.get();
-		Module admin = r.getModule(null, LocalDataStoreRepository.ADMIN_MODULE_NAME);
+		Module admin = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
 		@SuppressWarnings("null")
-		String ADM_SecurityUser = admin.getDocument(null, LocalDataStoreRepository.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+		String ADM_SecurityUser = admin.getDocument(null, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 		StringBuilder sql = new StringBuilder(128);
-		sql.append("select ").append(LocalDataStoreRepository.PASSWORD_PROPERTY_NAME).append(" from ").append(ADM_SecurityUser);
-		sql.append(" where " ).append(LocalDataStoreRepository.USER_NAME_PROPERTY_NAME).append(" = :").append(LocalDataStoreRepository.USER_NAME_PROPERTY_NAME);
+		sql.append("select ").append(AppConstants.PASSWORD_ATTRIBUTE_NAME).append(" from ").append(ADM_SecurityUser);
+		sql.append(" where " ).append(AppConstants.USER_NAME_ATTRIBUTE_NAME).append(" = :").append(AppConstants.USER_NAME_ATTRIBUTE_NAME);
 
 		final String[] customerAndUser = username.split("/");
 		if (customerAndUser.length > 1) {
@@ -119,7 +119,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				throw new SecurityException("Invalid username/password");
 			}
-			q.putParameter(LocalDataStoreRepository.USER_NAME_PROPERTY_NAME, customerAndUser[0], false);
+			q.putParameter(AppConstants.USER_NAME_ATTRIBUTE_NAME, customerAndUser[0], false);
 		}
 		else {
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
@@ -128,7 +128,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			else {
 				throw new SecurityException("Invalid username/password");
 			}
-			q.putParameter(LocalDataStoreRepository.USER_NAME_PROPERTY_NAME, customerAndUser[1], false);
+			q.putParameter(AppConstants.USER_NAME_ATTRIBUTE_NAME, customerAndUser[1], false);
 		}
 
 		String hashedPassword = q.scalarResult(String.class);

@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
@@ -26,6 +27,7 @@ import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -35,6 +37,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -43,10 +46,12 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class ViewImpl extends Container implements View {
@@ -331,7 +336,7 @@ public class ViewImpl extends Container implements View {
 	 * Convert and validate any accesses defined in the view metadata.
 	 * If accesses are not defined then determine them.
 	 */
-	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate) {
+	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate, final ProvidedRepository optionalRepositoryToUse) {
 		final String moduleName = module.getName();
 		final String documentName = document.getName();
 
@@ -560,6 +565,30 @@ public class ViewImpl extends Container implements View {
 				@SuppressWarnings("null")
 				String relatedModuleName = relatedDocument.getOwningModuleName();
 				accesses.add(UserAccess.singular(relatedModuleName, relatedDocument.getName()));
+			}
+			
+			@Override
+			public void visitReportAction(ActionImpl action) {
+				ProvidedRepository r = (optionalRepositoryToUse == null) ? ProvidedRepositoryFactory.get() : optionalRepositoryToUse;
+				String fileName = r.getReportFileName(customer, document, action.getResourceName());
+				if (fileName != null) {
+					List<Parameter> reportParameters = action.getParameters();
+					
+					ParameterImpl parameter = new ParameterImpl();
+					parameter.setName(AbstractWebContext.REPORT_ENGINE);
+					if (fileName.endsWith(".jasper")) {
+						parameter.setValue(ProvidedRepository.JASPER_SUFFIX);
+					}
+					else if (fileName.endsWith(".flth")) {
+						parameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
+					}
+					else {
+						throw new MetaDataException("Report Action for report " + action.getResourceName() + 
+														" in view " + name + " for module " + moduleName + " and document " + documentName + 
+														" does not reference a Jasper or Freemarker resource");
+					}
+					reportParameters.add(parameter);
+				}
 			}
 		}.visit();
 	}

@@ -14,6 +14,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -161,7 +162,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 		Document d = m.getDocument(c, bean.getBizDocument());
 		String icon = d.getIconStyleClass();
 		
-		properties.put(ListModel.MEMO_1_PROPERTY_NAME,
+		properties.put(AppConstants.MEMO_1_ATTRIBUTE_NAME,
 						String.format("<i class=\"%s\"></i>&nbsp;%s",
 										(icon == null) ? "fa fa-document" : icon,
 										bean.getBizKey()));

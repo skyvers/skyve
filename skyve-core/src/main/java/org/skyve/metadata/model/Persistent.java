@@ -77,25 +77,27 @@ public class Persistent extends NamedMetaData {
 		this.cacheName = cacheName;
 	}
 
-    public String getPersistentIdentifier() {
-    	String name = getName();
+	public String getPersistentIdentifier() {
+		String name = getName();
+		if (name == null) {
+			return null;
+		}
 
-    	if (name == null) {
-    		return null;
-    	}
-    	if ((schema == null) && (catalog == null)) {
-    		return name;
-    	}
-    	
-    	StringBuilder result = new StringBuilder(64);
-    	if (schema != null) {
-    		result.append(schema).append('.');
-    	}
-    	if (catalog != null) {
-    		result.append(catalog).append('.');
-    	}
-    	result.append(name);
-    	
-    	return result.toString();
-    }
+		String c = (catalog == null) ? UtilImpl.CATALOG : catalog;
+		String s = (schema == null) ? UtilImpl.SCHEMA : schema;
+		if ((c == null) && (s == null)) {
+			return name;
+		}
+
+		StringBuilder result = new StringBuilder(64);
+		if (c != null) {
+			result.append(c).append('.');
+		}
+		if (s != null) {
+			result.append(s).append('.');
+		}
+		result.append(name);
+
+		return result.toString();
+	}
 }

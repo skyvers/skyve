@@ -101,7 +101,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
             config.setProjectPath(projectPath);
             config.setCustomerName(customer);
 
-            modocWhitelist.forEach(config::addModocWhitelistEnty);
+            modocWhitelist.forEach(config::addModocWhitelistEntry);
 
             FlutterGenerator generator = new FlutterGenerator(config);
             generator.generate();
@@ -184,7 +184,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
                     }
                 } catch (IOException e) {
                     getLog().error(e);
-                    throw new MojoExecutionException("Unabled to clear target directory: " + root, e);
+                    throw new MojoExecutionException("Unable to clear target directory: " + root, e);
                 }
             } else {
                 throw new MojoFailureException("Target directory '" + root + "' already exists and overwrite=false");

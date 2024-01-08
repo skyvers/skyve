@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Tag;
-import org.skyve.domain.app.admin.Tagged;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -45,16 +45,16 @@ public class DefaultTagManager implements TagManager {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Module adminModule = customer.getModule(Tag.MODULE_NAME);
-		Document tagDocument = adminModule.getDocument(customer, Tag.DOCUMENT_NAME);
-		Document taggedDocument = adminModule.getDocument(customer, Tagged.DOCUMENT_NAME);
+		Module adminModule = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document tagDocument = adminModule.getDocument(customer, AppConstants.TAG_DOCUMENT_NAME);
+		Document taggedDocument = adminModule.getDocument(customer, AppConstants.TAGGED_DOCUMENT_NAME);
 		PersistentBean tag = persistence.retrieve(tagDocument, tagId);
 
 		PersistentBean tagged = taggedDocument.newInstance(user);
-		BindUtil.set(tagged, Tagged.tagPropertyName, tag);
-		BindUtil.set(tagged, Tagged.taggedModulePropertyName, taggedModuleName);
-		BindUtil.set(tagged, Tagged.taggedDocumentPropertyName, taggedDocumentName);
-		BindUtil.set(tagged, Tagged.taggedBizIdPropertyName, taggedBizId);
+		BindUtil.set(tagged, AppConstants.TAG_ATTRIBUTE_NAME, tag);
+		BindUtil.set(tagged, AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME, taggedModuleName);
+		BindUtil.set(tagged, AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME, taggedDocumentName);
+		BindUtil.set(tagged, AppConstants.TAGGED_BIZID_ATTRIBUTE_NAME, taggedBizId);
 
 		try {
 			persistence.preMerge(taggedDocument, tagged);
@@ -86,24 +86,24 @@ public class DefaultTagManager implements TagManager {
 																	"and bean.%s = :%s " +
 																	"and bean.%s = :%s " +
 																	"and bean.%s = :%s",
-																		Tagged.MODULE_NAME,
-																		Tagged.DOCUMENT_NAME,
-																		Tagged.tagPropertyName,
+																		AppConstants.ADMIN_MODULE_NAME,
+																		AppConstants.TAGGED_DOCUMENT_NAME,
+																		AppConstants.TAG_ATTRIBUTE_NAME,
 																		Bean.DOCUMENT_ID,
 																		Bean.DOCUMENT_ID,
 																		Bean.USER_ID,
 																		Bean.USER_ID,
-																		Tagged.taggedModulePropertyName,
-																		Tagged.taggedModulePropertyName,
-																		Tagged.taggedDocumentPropertyName,
-																		Tagged.taggedDocumentPropertyName,
-																		Tagged.taggedBizIdPropertyName,
-																		Tagged.taggedBizIdPropertyName));
+																		AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
+																		AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
+																		AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME,
+																		AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME,
+																		AppConstants.TAGGED_BIZID_ATTRIBUTE_NAME,
+																		AppConstants.TAGGED_BIZID_ATTRIBUTE_NAME));
 		deleteStatement.putParameter(Bean.DOCUMENT_ID, tagId);
 		deleteStatement.putParameter(Bean.USER_ID, user.getId());
-		deleteStatement.putParameter(Tagged.taggedModulePropertyName, taggedModuleName);
-		deleteStatement.putParameter(Tagged.taggedDocumentPropertyName, taggedDocumentName);
-		deleteStatement.putParameter(Tagged.taggedBizIdPropertyName, taggedBizId);
+		deleteStatement.putParameter(AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME, taggedModuleName);
+		deleteStatement.putParameter(AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME, taggedDocumentName);
+		deleteStatement.putParameter(AppConstants.TAGGED_BIZID_ATTRIBUTE_NAME, taggedBizId);
 
 		deleteStatement.execute();
 	}
@@ -113,8 +113,8 @@ public class DefaultTagManager implements TagManager {
 	    AbstractPersistence persistence = AbstractPersistence.get();
         User user = persistence.getUser();
         Customer customer = user.getCustomer();
-        Module adminModule = customer.getModule(Tag.MODULE_NAME);
-        Document tagDocument = adminModule.getDocument(customer, Tag.DOCUMENT_NAME);
+        Module adminModule = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+        Document tagDocument = adminModule.getDocument(customer, AppConstants.TAG_DOCUMENT_NAME);
         
         Tag tag = tagDocument.newInstance(user);
         tag.setName(tagName);
@@ -129,10 +129,10 @@ public class DefaultTagManager implements TagManager {
 	    AbstractPersistence persistence = AbstractPersistence.get();
         User user = persistence.getUser();
 
-        DocumentQuery query = persistence.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+        DocumentQuery query = persistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.TAG_DOCUMENT_NAME);
         query.addBoundProjection(Bean.DOCUMENT_ID);
         DocumentFilter filter = query.getFilter();
-        filter.addEquals(Tag.namePropertyName, tagName);
+        filter.addEquals(AppConstants.NAME_ATTRIBUTE_NAME, tagName);
         filter.addEquals(Bean.USER_ID, user.getId());
 
         List<Bean> results = query.projectedResults();
@@ -149,16 +149,16 @@ public class DefaultTagManager implements TagManager {
 	    AbstractPersistence persistence = AbstractPersistence.get();
         User user = persistence.getUser();
         
-        DocumentQuery query = persistence.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+        DocumentQuery query = persistence.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.TAG_DOCUMENT_NAME);
         query.addBoundProjection(Bean.DOCUMENT_ID);
-        query.addBoundProjection(Tag.namePropertyName);
+        query.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME);
         query.getFilter().addEquals(Bean.USER_ID, user.getId());
-        query.addBoundOrdering(Tag.namePropertyName);
+        query.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
         
         List<Bean> tags = query.projectedResults();
         List<DomainValue> result = new ArrayList<>(tags.size());
         for (Bean tag : tags) {
-            result.add(new DomainValue(tag.getBizId(), (String) BindUtil.get(tag, Tag.namePropertyName)));
+            result.add(new DomainValue(tag.getBizId(), (String) BindUtil.get(tag, AppConstants.NAME_ATTRIBUTE_NAME)));
         }
 
         return result;
@@ -173,8 +173,8 @@ public class DefaultTagManager implements TagManager {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Tag.MODULE_NAME);
-		Document document = module.getDocument(customer, Tag.DOCUMENT_NAME);
+		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document document = module.getDocument(customer, AppConstants.TAG_DOCUMENT_NAME);
 		PersistentBean bean = persistence.retrieveAndLock(document, tagId);
 		persistence.delete(document, bean);
 	}
@@ -200,9 +200,9 @@ public class DefaultTagManager implements TagManager {
 		BizQL deleteStatement = persistence.newBizQL(String.format("delete from {%s.%s} as bean " +
 																	"where bean.%s.%s = :%s " +
 																	"and bean.%s = :%s",
-																		Tagged.MODULE_NAME,
-																		Tagged.DOCUMENT_NAME,
-																		Tagged.tagPropertyName,
+																		AppConstants.ADMIN_MODULE_NAME,
+																		AppConstants.TAGGED_DOCUMENT_NAME,
+																		AppConstants.TAG_ATTRIBUTE_NAME,
 																		Bean.DOCUMENT_ID,
 																		Bean.DOCUMENT_ID,
 																		Bean.USER_ID,
@@ -224,15 +224,15 @@ public class DefaultTagManager implements TagManager {
 															"from {%s.%s} as bean " + 
 															"where bean.%s.%s = :%s " +
 															"and bean.%s = :%s",
-																Tagged.taggedModulePropertyName,
-																Tagged.taggedModulePropertyName,
-																Tagged.taggedDocumentPropertyName,
-																Tagged.taggedDocumentPropertyName,
-																Tagged.taggedBizIdPropertyName,
-																Tagged.taggedBizIdPropertyName,
-																Tagged.MODULE_NAME,
-																Tagged.DOCUMENT_NAME,
-																Tagged.tagPropertyName,
+																AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
+																AppConstants.TAGGED_MODULE_ATTRIBUTE_NAME,
+																AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME,
+																AppConstants.TAGGED_DOCUMENT_ATTRIBUTE_NAME,
+																AppConstants.TAGGED_BIZID_ATTRIBUTE_NAME,
+																AppConstants.TAGGED_BIZID_ATTRIBUTE_NAME,
+																AppConstants.ADMIN_MODULE_NAME,
+																AppConstants.TAGGED_DOCUMENT_NAME,
+																AppConstants.TAG_ATTRIBUTE_NAME,
 																Bean.DOCUMENT_ID,
 																Bean.DOCUMENT_ID,
 																Bean.USER_ID,

@@ -8,9 +8,9 @@
 			Test persistence by reachability to inform when to call Bizlet events.
 		]]>
 	</documentation>
-	<persistent name="TEST_NonPersistentAssociationToPersistent" />
-	<singularAlias>NonPersistentAssociationToPersistent</singularAlias>
-	<pluralAlias>NonPersistentAssociationToPersistent</pluralAlias>
+	<persistent name="TEST_Reachability" />
+	<singularAlias>Reachability</singularAlias>
+	<pluralAlias>Reachabilities</pluralAlias>
 	<bizKey expression="{text}" />
 	<attributes>
 		<text name="text" required="true">

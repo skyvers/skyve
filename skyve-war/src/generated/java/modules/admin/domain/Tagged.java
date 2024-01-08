@@ -17,7 +17,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-public class Tagged extends AbstractPersistentBean implements org.skyve.domain.app.admin.Tagged {
+public class Tagged extends AbstractPersistentBean {
 	/**
 	 * For Serialization
 	 * @hidden

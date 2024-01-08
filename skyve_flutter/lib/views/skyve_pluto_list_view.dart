@@ -1,7 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:skyve_flutter/views/skyve_responsive_view.dart';
 import '../util/skyve_rest_client.dart';
 
 class ContactListPage2 extends StatefulWidget {
@@ -105,12 +104,11 @@ class _ContactListState2 extends State<ContactListPage2> {
     Size? size = renderBox?.size; // or _widgetKey.currentContext?.size
     debugPrint('Build Size: ${size?.width}, ${size?.height}');
 
-    bool mobileView = (MediaQuery.of(context).size.width < 800.0);
-    debugPrint('build $mobileView');
+    bool small = SkyveResponsiveView.small;
+    debugPrint('build $small');
     return LayoutBuilder(builder: (context, constraints) {
-//      bool mobileView = (constraints.maxWidth < 800);
       debugPrint('layout builder ${constraints.maxWidth}');
-      if (mobileView) {
+      if (small) {
         columnWidthP = constraints.maxWidth;
       }
 
@@ -118,7 +116,7 @@ class _ContactListState2 extends State<ContactListPage2> {
 
       // trying to switch the pluto column from single row to multirow
       // however, the grid seems to only redraw properly if I put something in between.
-      PlutoGrid grid = _buildGrid(mobileView);
+      PlutoGrid grid = _buildGrid(small);
       body = Center(child: grid);
 
       return Scaffold(
@@ -130,14 +128,14 @@ class _ContactListState2 extends State<ContactListPage2> {
   }
 
   bool _sizeChanged(SizeChangedLayoutNotification? notification) {
-    bool mobile = MediaQuery.of(context).size.width < 800.0;
-    debugPrint('size changed $mobile');
-    _gridStateManager.hideColumn(columns[0], !mobile, notify: false);
-    _gridStateManager.hideColumn(columns[1], mobile, notify: false);
-    _gridStateManager.hideColumn(columns[2], mobile, notify: false);
-    _gridStateManager.hideColumn(columns[3], mobile, notify: false);
-    _gridStateManager.hideColumn(columns[4], mobile, notify: false);
-    _gridStateManager.hideColumn(columns[5], mobile, notify: true);
+    bool small = SkyveResponsiveView.small;
+    debugPrint('size changed $small');
+    _gridStateManager.hideColumn(columns[0], !small, notify: false);
+    _gridStateManager.hideColumn(columns[1], small, notify: false);
+    _gridStateManager.hideColumn(columns[2], small, notify: false);
+    _gridStateManager.hideColumn(columns[3], small, notify: false);
+    _gridStateManager.hideColumn(columns[4], small, notify: false);
+    _gridStateManager.hideColumn(columns[5], small, notify: true);
     return true;
   }
 

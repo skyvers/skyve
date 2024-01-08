@@ -18,12 +18,12 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
-import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -233,18 +233,18 @@ public class WebUtil {
 		String errorMessage = null;
 		
 		Customer c = user.getCustomer();
-		Module admin = c.getModule(LocalDataStoreRepository.ADMIN_MODULE_NAME);
-		Document changePassword = admin.getDocument(c, LocalDataStoreRepository.CHANGE_PASSWORD_DOCUMENT_NAME);
+		Module admin = c.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document changePassword = admin.getDocument(c, AppConstants.CHANGE_PASSWORD_DOCUMENT_NAME);
 		Bean bean = changePassword.newInstance(user);
-		BindUtil.set(bean, LocalDataStoreRepository.OLD_PASSWORD_PROPERTY_NAME, oldPassword);
-		BindUtil.set(bean, LocalDataStoreRepository.NEW_PASSWORD_PROPERTY_NAME, newPassword);
-		BindUtil.set(bean, LocalDataStoreRepository.CONFIRM_PASSWORD_PROPERTY_NAME, confirmPassword);
+		BindUtil.set(bean, AppConstants.OLD_PASSWORD_ATTRIBUTE_NAME, oldPassword);
+		BindUtil.set(bean, AppConstants.NEW_PASSWORD_ATTRIBUTE_NAME, newPassword);
+		BindUtil.set(bean, AppConstants.CONFIRM_PASSWORD_ATTRIBUTE_NAME, confirmPassword);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user); // user has not been set as this is called directly from changePassword.jsp
 		persistence.begin();
 		try {
-			changePassword.getServerSideAction(c, LocalDataStoreRepository.MAKE_PASSWORD_CHANGE_ACTION_NAME, true).execute(bean, null);
+			changePassword.getServerSideAction(c, AppConstants.MAKE_PASSWORD_CHANGE_ACTION_NAME, true).execute(bean, null);
 		}
 		catch (ValidationException e) {
 			persistence.rollback();
@@ -279,8 +279,8 @@ public class WebUtil {
 		try {
 			p.begin();
 			p.setUser(u);
-			DocumentQuery q = p.newDocumentQuery(LocalDataStoreRepository.ADMIN_MODULE_NAME, LocalDataStoreRepository.USER_DOCUMENT_NAME);
-			q.getFilter().addEquals(Binder.createCompoundBinding(LocalDataStoreRepository.CONTACT_PROPERTY_NAME, LocalDataStoreRepository.EMAIL1_PROPERTY_NAME), email);
+			DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.USER_DOCUMENT_NAME);
+			q.getFilter().addEquals(Binder.createCompoundBinding(AppConstants.CONTACT_ATTRIBUTE_NAME, AppConstants.EMAIL1_ATTRIBUTE_NAME), email);
 			
 			// set reset password token for all users with the same email address across all customers
 			List<PersistentBean> users = q.beanResults();
@@ -288,7 +288,7 @@ public class WebUtil {
 				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
 				for(PersistentBean user: users) {
-					Binder.set(user, LocalDataStoreRepository.PASSWORD_RESET_TOKEN_PROPERTY_NAME, passwordResetToken);
+					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME, passwordResetToken);
 					p.upsertBeanTuple(user);
 					if(firstUser==null) {
 						firstUser = user;
@@ -297,19 +297,19 @@ public class WebUtil {
 
 				// send a single email to the user's email address 
 				// (if multiple user with the same email, only 1 email should be sent)
-				Module m = c.getModule(LocalDataStoreRepository.ADMIN_MODULE_NAME);
-				Document d = m.getDocument(c, LocalDataStoreRepository.CONFIGURATION_DOCUMENT_NAME);
+				Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
+				Document d = m.getDocument(c, AppConstants.CONFIGURATION_DOCUMENT_NAME);
 				Bean configuration = d.newInstance(u);
-				String subject = (String) Binder.get(configuration, LocalDataStoreRepository.PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME);
+				String subject = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME);
 				subject = Binder.formatMessage(subject, firstUser);
-				String body = (String) Binder.get(configuration, LocalDataStoreRepository.PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME); 
+				String body = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME); 
 				
 				body = body.replace("{#resetPasswordUrl}", Util.getResetPasswordUrl());
 				// keeping this for backwards compatibility
 				body = body.replace("{url}", Util.getSkyveContextUrl());
 				
 				body = Binder.formatMessage(body, firstUser);
-				String fromEmail = (String) Binder.get(configuration, LocalDataStoreRepository.FROM_EMAIL_PROPERTY_NAME);
+				String fromEmail = (String) Binder.get(configuration, AppConstants.FROM_EMAIL_ATTRIBUTE_NAME);
 				EXT.sendMail(new Mail().addTo(email).from(fromEmail).subject(subject).body(body));
 			}
 		}
@@ -381,8 +381,8 @@ public class WebUtil {
 		try (Connection c = EXT.getDataStoreConnection()) {
 			try (PreparedStatement s = c.prepareStatement(String.format("select %s, %s from ADM_SecurityUser where %s = ?",
 																			Bean.CUSTOMER_NAME,
-																			LocalDataStoreRepository.USER_NAME_PROPERTY_NAME,
-																			LocalDataStoreRepository.PASSWORD_RESET_TOKEN_PROPERTY_NAME))) {
+																			AppConstants.USER_NAME_ATTRIBUTE_NAME,
+																			AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME))) {
 				s.setString(1, passwordResetToken);
 				try (ResultSet rs = s.executeQuery()) {
 					if (!rs.isBeforeFirst() ) {
@@ -474,16 +474,16 @@ public class WebUtil {
 	 */
 	public static void sendRegistrationEmail(final String userBizId) throws Exception {
 		Customer cust = CORE.getCustomer();
-		Module admin = cust.getModule(LocalDataStoreRepository.ADMIN_MODULE_NAME);
-		Document selfRegistration = admin.getDocument(cust, LocalDataStoreRepository.SELF_REGISTRATION_DOCUMENT_NAME);
+		Module admin = cust.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document selfRegistration = admin.getDocument(cust, AppConstants.SELF_REGISTRATION_DOCUMENT_NAME);
 		Bean bean = selfRegistration.newInstance(CORE.getUser());
-		BindUtil.set(bean, Binder.createCompoundBinding(LocalDataStoreRepository.USER_PROPERTY_NAME, Bean.DOCUMENT_ID), userBizId);
+		BindUtil.set(bean, Binder.createCompoundBinding(AppConstants.USER_ATTRIBUTE_NAME, Bean.DOCUMENT_ID), userBizId);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(CORE.getUser()); // user has not been set as this is called directly from changePassword.jsp
 		persistence.begin();
 		try {
-			selfRegistration.getServerSideAction(cust, LocalDataStoreRepository.RESEND_ACTIVATION_ACTION_NAME, true).execute(bean, null);
+			selfRegistration.getServerSideAction(cust, AppConstants.RESEND_ACTIVATION_ACTION_NAME, true).execute(bean, null);
 		}
 		catch (Exception e) {
 			persistence.rollback();

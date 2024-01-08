@@ -207,6 +207,23 @@ public class UserImpl implements User {
 		return String.format("content?_n=%s&_doc=admin.Contact&_b=image&_w=%d&_h=%d", contactImageId, width, height);
 	}
 
+	@Override
+	public String getContactAvatarInitials() {
+		String n = (contactName == null) ? name : contactName;
+		if (n == null) {
+			return "??";
+		}
+		String[] tokens = n.split(" ");
+		if (tokens.length == 0) {
+			return "??";
+		}
+		if (tokens.length == 1) {
+			return tokens[0].substring(0, 1).toUpperCase();
+		}
+		return tokens[0].substring(0, 1).toUpperCase() +
+				tokens[tokens.length - 1].substring(0, 1).toUpperCase();
+	}
+	
 	/**
 	 * Hold other user (session) attributes for processing. 
 	 * NOTE: Keep this small since the user is in the web session.

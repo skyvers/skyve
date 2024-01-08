@@ -251,7 +251,9 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
-										String widgetHelpText) {
+										String widgetHelpText,
+										boolean showLabel,
+										boolean topLabel) {
 		for (LayoutBuilder builder : builders) {
 			builder.layoutFormItemWidget(formOrRowLayout,
 											formItemComponent,
@@ -262,7 +264,9 @@ public class LayoutBuilderChain extends LayoutBuilder {
 											widgetColspan,
 											widgetRequired,
 											widgetInvisible,
-											widgetHelpText);
+											widgetHelpText,
+											showLabel,
+											topLabel);
 		}
 	}
 

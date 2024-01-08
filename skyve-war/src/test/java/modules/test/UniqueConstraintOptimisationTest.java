@@ -45,6 +45,30 @@ public class UniqueConstraintOptimisationTest extends AbstractSkyveTest {
 		p.save(bean1);
 	}
 	
+	@Test(expected = UniqueConstraintViolationException.class)
+	public void testEllipsisSaveInsertsTested() throws Exception {
+		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		bean1.setUc1("1");
+		bean1.setUc2("1");
+
+		UniqueConstraintOptimisation bean2 = ucno.newInstance(u);
+		bean2.setUc1("1");
+		bean2.setUc2("1");
+		p.save(bean1, bean2);
+	}
+
+	@Test
+	public void testEllipsisSaveInsertsNullNotTested() throws Exception {
+		UniqueConstraintOptimisation bean1 = ucno.newInstance(u);
+		bean1.setUc1("1");
+		bean1.setUc2(null);
+		
+		UniqueConstraintOptimisation bean2 = ucno.newInstance(u);
+		bean2.setUc1("1");
+		bean2.setUc2(null);
+		p.save(bean1, bean2);
+	}
+
 	/**
 	 * Test that a non-persistent relation with a persisted bean is tested.
 	 */

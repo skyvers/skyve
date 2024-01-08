@@ -46,7 +46,7 @@ public class Snapshots extends AbstractTransientBean {
 	private String moduleName;
 
 	/**
-	 * Query
+	 * List
 	 **/
 	private String queryName;
 

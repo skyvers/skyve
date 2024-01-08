@@ -15,10 +15,17 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
+import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 
@@ -93,7 +100,16 @@ public class HealthServlet extends HttpServlet {
 				// Primary Data Store
 				result.append("\",\"database\":\"");
 				p.begin();
-				p.newSQL("select 1 from ADM_Configuration where 1 = 0").scalarResults(Number.class);
+				ProvidedRepository r = ProvidedRepositoryFactory.get();
+				Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
+				Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
+				Persistent persistent = d.getPersistent();
+				if (persistent == null) {
+					throw new DomainException("admin.Configuration not persistent");
+				}
+				StringBuilder sql = new StringBuilder(64);
+				sql.append("select 1 from ").append(persistent.getPersistentIdentifier()).append(" where 1 = 0");
+				p.newSQL(sql.toString()).scalarResults(Number.class);
 				p.rollback();
 				result.append("ok");
 			}

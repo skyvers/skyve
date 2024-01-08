@@ -1,14 +1,45 @@
 import 'package:flutter/material.dart';
-import 'skyve_textfield.dart';
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveDynamicImage extends StatelessWidget {
-  final String label;
+class SkyveDynamicImage extends StatelessWidget with Sizable {
+  SkyveDynamicImage(
+      {super.key,
+      int? pixelWidth,
+      int? responsiveWidth,
+      int? percentageWidth,
+      int? sm,
+      int? md,
+      int? lg,
+      int? xl,
+      int? minPixelWidth,
+      int? maxPixelWidth,
+      int? pixelHeight,
+      int? percentageHeight,
+      int? minPixelHeight,
+      int? maxPixelHeight}) {
+    // Sizable
+    this.pixelWidth = pixelWidth;
+    this.responsiveWidth = responsiveWidth;
+    this.percentageWidth = percentageWidth;
+    this.sm = sm;
+    this.md = md;
+    this.lg = lg;
+    this.xl = xl;
+    this.minPixelWidth = minPixelWidth;
+    this.maxPixelWidth = maxPixelWidth;
 
-  const SkyveDynamicImage({super.key, required this.label});
+    this.pixelHeight = pixelHeight;
+    this.percentageHeight = percentageHeight;
+    this.minPixelHeight = minPixelHeight;
+    this.maxPixelHeight = maxPixelHeight;
+  }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement widget
-    return SkyveTextField(label: label);
+    return const Stack(alignment: Alignment.center, children: [
+      Placeholder(fallbackHeight: 200, color: Colors.orange),
+      Text('DynamicImage')
+    ]);
   }
 }

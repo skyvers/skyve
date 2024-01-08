@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
@@ -36,14 +37,6 @@ import org.skyve.util.Util;
 public class SmartClientSnapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private static final String SNAPSHOT_MODULE_NAME = "admin";
-	private static final String SNAPSHOT_DOCUMENT_NAME = "Snapshot";
-	private static final String SNAPSHOT_MODULE_NAME_PROPERTY_NAME = "moduleName";
-	private static final String SNAPSHOT_QUERY_NAME_PROPERTY_NAME = "queryName";
-	private static final String SNAPSHOT_ORDINAL_PROPERTY_NAME = "ordinal";
-	private static final String SNAPSHOT_NAME_PROPERTY_NAME = "name";
-	private static final String SNAPSHOT_SNAPSHOT_PROPERTY_NAME = "snapshot";
-    
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
@@ -181,20 +174,20 @@ public class SmartClientSnapServlet extends HttpServlet {
 	    sb.append("{isSeparator:true}");
 
 	    Persistence p = CORE.getPersistence();
-	    DocumentQuery q = p.newDocumentQuery(SNAPSHOT_MODULE_NAME, SNAPSHOT_DOCUMENT_NAME);
+	    DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME);
 	    q.addBoundProjection(Bean.DOCUMENT_ID);
-	    q.addBoundProjection(SNAPSHOT_NAME_PROPERTY_NAME);
-	    q.addBoundProjection(SNAPSHOT_SNAPSHOT_PROPERTY_NAME);
+	    q.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME);
+	    q.addBoundProjection(AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
 	    DocumentFilter f = q.getFilter();
-	    f.addEquals(SNAPSHOT_MODULE_NAME_PROPERTY_NAME, moduleName);
-	    f.addEquals(SNAPSHOT_QUERY_NAME_PROPERTY_NAME, queryName);
-	    q.addBoundOrdering(SNAPSHOT_ORDINAL_PROPERTY_NAME);
-	    q.addBoundOrdering(SNAPSHOT_NAME_PROPERTY_NAME);
+	    f.addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
+	    f.addEquals(AppConstants.QUERY_NAME_ATTRIBUTE_NAME, queryName);
+	    q.addBoundOrdering(AppConstants.ORDINAL_ATTRIBUTE_NAME);
+	    q.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
 
 	    for (Bean bean : q.projectedResults()) {
         	String escapedCode = OWASP.escapeJsString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
-        	String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, SNAPSHOT_NAME_PROPERTY_NAME));
-        	String snapshot = (String) BindUtil.get(bean, SNAPSHOT_SNAPSHOT_PROPERTY_NAME);
+        	String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
+        	String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
 
         	// snap select menu
             sb.append(",{title:'").append(escapedDescription).append("',icon:'icons/snap.png',click:function(){");
@@ -230,14 +223,14 @@ public class SmartClientSnapServlet extends HttpServlet {
 		Persistence p = CORE.getPersistence();
 		User user = p.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(SNAPSHOT_MODULE_NAME);
-		Document document = module.getDocument(customer, SNAPSHOT_DOCUMENT_NAME);
+		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+		Document document = module.getDocument(customer, AppConstants.SNAPSHOT_DOCUMENT_NAME);
 
 		PersistentBean snap = document.newInstance(user);
-		BindUtil.set(snap, SNAPSHOT_MODULE_NAME_PROPERTY_NAME, snapModuleName);
-		BindUtil.set(snap, SNAPSHOT_QUERY_NAME_PROPERTY_NAME, snapQueryName);
-		BindUtil.set(snap, SNAPSHOT_NAME_PROPERTY_NAME, snapName);
-		BindUtil.set(snap, SNAPSHOT_SNAPSHOT_PROPERTY_NAME, snapshot);
+		BindUtil.set(snap, AppConstants.MODULE_NAME_ATTRIBUTE_NAME, snapModuleName);
+		BindUtil.set(snap, AppConstants.QUERY_NAME_ATTRIBUTE_NAME, snapQueryName);
+		BindUtil.set(snap, AppConstants.NAME_ATTRIBUTE_NAME, snapName);
+		BindUtil.set(snap, AppConstants.SNAPSHOT_ATTRIBUTE_NAME, snapshot);
 		// NB SnapshotBizlet puts the new snapshot at the bottom of the list with max(ordinal) + 1
 		snap = p.save(document, snap);
 
@@ -247,15 +240,15 @@ public class SmartClientSnapServlet extends HttpServlet {
 	private static void update(String snapId, String snapshot) 
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean snap = p.retrieveAndLock(SNAPSHOT_MODULE_NAME, SNAPSHOT_DOCUMENT_NAME, snapId);
-		BindUtil.set(snap, SNAPSHOT_SNAPSHOT_PROPERTY_NAME, snapshot);
+		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME, snapId);
+		BindUtil.set(snap, AppConstants.SNAPSHOT_ATTRIBUTE_NAME, snapshot);
 		p.save(snap);
 	}
 
 	private static void delete(String snapId) 
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean snap = p.retrieveAndLock(SNAPSHOT_MODULE_NAME, SNAPSHOT_DOCUMENT_NAME, snapId);
+		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME, snapId);
 		p.delete(snap);
 	}
 }

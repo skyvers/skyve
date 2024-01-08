@@ -40,10 +40,6 @@ import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
 public abstract class ListModel<T extends Bean> implements MetaData {
-	public static final String ADMIN_MODULE_NAME = "admin";
-	public static final String GENERIC_DOCUMENT_NAME = "Generic";
-	public static final String MEMO_1_PROPERTY_NAME = "memo1";
-
 	private T bean;
 	public T getBean() {
 		return bean;
@@ -335,6 +331,46 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	
 	public String getLocalisedDescription() {
 		return Util.i18n(getDescription());
+	}
+	
+	/**
+	 * Use this to get the localised column title to use as set in the displayName in the column definition 
+	 * or if no displayName, and their is a column binding, use the displayName from the document meta data.
+	 * 
+	 * @param column	The column to get the title for.
+	 * @return	The title.
+	 */
+	public String determineColumnTitle(MetaDataQueryColumn column) {
+		String result = column.getLocalisedDisplayName();
+		if (result == null) {
+			String binding = column.getBinding();
+			if (binding != null) {
+				Document d = getDrivingDocument();
+				Customer c = CORE.getCustomer();
+				Module m = c.getModule(d.getOwningModuleName());
+				TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+				Document targetDocument = target.getDocument();
+				Attribute targetAttribute = target.getAttribute();
+				if (binding.endsWith(Bean.BIZ_KEY)) {
+					if (targetDocument != null) {
+						result = targetDocument.getLocalisedSingularAlias();
+					}
+					else {
+						result = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
+					}
+				}
+				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
+					result = DocumentImpl.getBizOrdinalAttribute().getLocalisedDisplayName();
+				}
+				else if (targetAttribute != null) {
+					result = targetAttribute.getLocalisedDisplayName();
+				}
+			}
+			if (result == null) {
+				result = column.getName();
+			}
+		}
+		return result;
 	}
 	
 	public abstract Document getDrivingDocument();

@@ -12,15 +12,6 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
 public interface Communication extends PersistentBean {
-	public static final String MODULE_NAME = Contact.MODULE_NAME;
-	public static final String DOCUMENT_NAME = "Communication";
-	
-	public static final String descriptionPropertyName = "description";
-	public static final String resultsPropertyName = "results";
-	public static final String moduleNamePropertyName = "moduleName";
-	public static final String documentNamePropertyName = "documentName";
-	public static final String tagPropertyName = "tag";
-		
 	/**
 	 * Format
 	 **/

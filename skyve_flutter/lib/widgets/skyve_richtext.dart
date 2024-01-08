@@ -1,14 +1,35 @@
 import 'package:flutter/material.dart';
-import 'skyve_textfield.dart';
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveRichText extends StatelessWidget {
+class SkyveRichText extends StatelessWidget with Sizable {
   final String label;
 
-  const SkyveRichText({super.key, required this.label});
+  SkyveRichText(
+      {super.key,
+      required this.label,
+      int? pixelWidth,
+      int? pixelHeight,
+      int? minPixelHeight,
+      int? maxPixelHeight}) {
+    this.pixelWidth = pixelWidth;
+    this.pixelHeight = pixelHeight;
+    this.minPixelHeight = minPixelHeight;
+    this.maxPixelHeight = maxPixelHeight;
+  }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement widget
-    return SkyveTextField(label: label);
+    Widget result = Stack(alignment: Alignment.center, children: [
+      const Placeholder(fallbackHeight: 50, color: Colors.orange),
+      Text('RichText: $label')
+    ]);
+    if ((pixelWidth != null) || (pixelHeight != null)) {
+      result = SizedBox(
+          width: pixelWidth?.toDouble(),
+          height: pixelHeight?.toDouble(),
+          child: result);
+    }
+    return result;
   }
 }

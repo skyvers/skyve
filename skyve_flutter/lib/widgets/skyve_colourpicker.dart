@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'skyve_textfield.dart';
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-class SkyveColourPicker extends StatelessWidget {
+class SkyveColourPicker extends StatelessWidget with Sizable {
   final String label;
 
-  const SkyveColourPicker({super.key, required this.label});
+  SkyveColourPicker({super.key, required this.label, int? pixelWidth}) {
+    this.pixelWidth = pixelWidth;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement widget
-    return SkyveTextField(label: label);
+    return Stack(alignment: Alignment.center, children: [
+      const Placeholder(fallbackHeight: 50, color: Colors.orange),
+      Text('ColourPicker: $label')
+    ]);
   }
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputText;
-import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
 
 import org.primefaces.component.message.Message;
@@ -304,54 +303,79 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										int widgetColspan,
 										boolean widgetRequired,
 										String widgetInvisible,
-										String widgetHelpText) {
-		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
-		setInvisible(div, widgetInvisible, null);
+										String widgetHelpText,
+										boolean showLabel,
+										boolean topLabel) {
+		HtmlPanelGroup flex = panelGroup(false, false, true, null, null);
+		if (showLabel && topLabel) {
+			flex.setStyle("display:flex;align-items:center;flex-wrap:nowrap;padding-top:16px");
+		}
+		else {
+			flex.setStyle("display:flex;align-items:center;flex-wrap:nowrap");
+		}
+		setInvisible(flex, widgetInvisible, null);
+		List<UIComponent> flexChildren = flex.getChildren();
 		
-		// Create a grid
-		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
-		HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
-		setId(pg, null);
-		pg.setCellpadding("0"); //Don't pad cells
-		pg.setStyleClass("inputComponent");
-		pg.setColumns((helpText != null) ? 3 : 2);
-		// First (and possibly 3rd if there is help defined) column(s) should shrink
-		pg.setColumnClasses((helpText != null) ? "shrink,,shrink" : "shrink");
-		div.getChildren().add(pg);
+		// Add message, component and help to flex box as required
+		
 		Message m = message(formItemComponent.getId());
 		m.setStyleClass("formMessageStyle");
-		pg.getChildren().add(m);
-		pg.getChildren().add(formItemComponent);
+		flexChildren.add(m);
+
+		if (showLabel && topLabel) {
+			HtmlPanelGroup fieldDiv = panelGroup(false, false, true, null, null);
+			fieldDiv.setStyleClass("field");
+			fieldDiv.setStyle("width:100%");
+			HtmlPanelGroup floatSpan = panelGroup(false, false, false, null, null);
+			floatSpan.setStyleClass("ui-float-label");
+			fieldDiv.getChildren().add(floatSpan);
+			List<UIComponent> floatSpanChildren = floatSpan.getChildren();
+			floatSpanChildren.add(formItemComponent);
+
+			String label = currentFormItem.getLocalisedLabel();
+			if (label == null) {
+				label = widgetLabel;
+			}
+
+			floatSpanChildren.add(label(label, formItemComponent.getId(), widgetRequired));
+
+			flexChildren.add(fieldDiv);
+		}
+		else {
+			flexChildren.add(formItemComponent);
+		}
+
+		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
 		if (helpText != null) {
 			HtmlOutputText output = new HtmlOutputText();
 			output.setEscape(false);
 			output.setValue(String.format("<i class=\"fa fa-info-circle help\" data-tooltip=\"%s\"></i>",
 											helpText));
-			pg.getChildren().add(output);
+			flexChildren.add(output);
 		}
 		
 		// Update div's style
 		// colspan should be 1.
 		if (widgetColspan <= 1) {
-			// style="<repsonsive column calc method call>"
+			// styleClass="<repsonsive column calc method call>"
 			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', 1)}", 
 												managedBeanName, 
 												Integer.toString(formIndex),
 												alignment(currentFormItem.getHorizontalAlignment(), false));
-			div.setValueExpression("styleClass", 
+			flex.setValueExpression("styleClass", 
 									ef.createValueExpression(elc, expression, String.class));
 		}
 		else { // colspan > 1
-			// style="<repsonsive column calc method call>"
+			// styleClass="<repsonsive column calc method call>"
 			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', %s)}", 
 												managedBeanName, 
 												Integer.toString(formIndex),
 												alignment(currentFormItem.getHorizontalAlignment(), false),
 												Integer.toString(widgetColspan));
-			div.setValueExpression("styleClass", 
+			flex.setValueExpression("styleClass", 
 									ef.createValueExpression(elc, expression, String.class));
 		}
-		formOrRowLayout.getChildren().add(div);
+		formOrRowLayout.getChildren().add(flex);
 	}
 	
 	private static String alignment(HorizontalAlignment alignment, boolean forFormLabel) {

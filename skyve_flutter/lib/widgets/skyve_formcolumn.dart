@@ -1,18 +1,20 @@
-class SkyveFormColumn {
-  final int? pixelWidth;
-  final int? percentageWidth;
-  final int? responsiveWidth;
-  final int? sm;
-  final int? md;
-  final int? lg;
-  final int? xl;
+import 'package:skyve_flutter/util/skyve_mixins.dart';
 
-  const SkyveFormColumn(
-      {this.pixelWidth,
-      this.responsiveWidth,
-      this.percentageWidth,
-      this.sm,
-      this.md,
-      this.lg,
-      this.xl});
+class SkyveFormColumn with Sizable {
+  SkyveFormColumn(
+      {int? pixelWidth,
+      int? responsiveWidth,
+      int? percentageWidth,
+      int? sm,
+      int? md,
+      int? lg,
+      int? xl}) {
+    this.pixelWidth = pixelWidth;
+    this.responsiveWidth = responsiveWidth;
+    this.percentageWidth = percentageWidth;
+    this.sm = sm;
+    this.md = md;
+    this.lg = lg;
+    this.xl = xl;
+  }
 }

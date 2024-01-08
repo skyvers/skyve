@@ -27,6 +27,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
@@ -69,7 +70,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.app.admin.Contact;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
@@ -115,6 +116,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
+import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.BizQLDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -316,6 +318,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		MetadataSources sources = new MetadataSources(standardRegistry);
 
 		sources.addAnnotatedClass(AbstractPersistentBean.class);
+		sources.addAnnotatedClass(UniquenessEntity.class);
 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		if (UtilImpl.USING_JPA) {
@@ -357,7 +360,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		metadata = sources.getMetadataBuilder().build();
 		SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
 
-		bizKeyLength = ((Column) metadata.getEntityBinding(Contact.MODULE_NAME + Contact.DOCUMENT_NAME).getProperty(Bean.BIZ_KEY).getValue().getColumnIterator().next()).getLength();
+		bizKeyLength = ((Column) metadata.getEntityBinding(AppConstants.ADMIN_MODULE_NAME + AppConstants.CONTACT_DOCUMENT_NAME).getProperty(Bean.BIZ_KEY).getValue().getColumnIterator().next()).getLength();
 		
 		try {
 			sf = sessionFactoryBuilder.build();
@@ -683,9 +686,14 @@ t.printStackTrace();
 			}
 		}
 		finally {
-			if ((! rollbackOnly) && (dynamicPersistence != null)) {
-				dynamicPersistence.rollback();
+			try {
+				if ((! rollbackOnly) && (dynamicPersistence != null)) {
+					dynamicPersistence.rollback();
+				}
 			}
+			finally {
+				uniqueHashes.clear();
+			}				
 		}
 	}
 
@@ -706,10 +714,29 @@ t.printStackTrace();
 						et.rollback();
 					}
 					else {
-						// FROM THE HIBERNATE_REFERENCE DOCS Page 190
-					    // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-					    // These methods are deprecated, as beginning and ending a transaction has the same effect.
-					    et.commit();
+						try {
+							// remove all inserted unique hashes (can only do if we have an em)
+							try {
+								final Persistent persistent = new Persistent();
+								persistent.setName(UniquenessEntity.TABLE_NAME);
+								final String persistentIdentifier = persistent.getPersistentIdentifier();
+								for (String hash : uniqueHashes) {
+									StringBuilder query = new StringBuilder(64);
+									query.append("delete from ").append(persistentIdentifier).append(" where ");
+									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+								}
+							}
+							finally {
+								uniqueHashes.clear();
+							}
+						}
+						finally {
+							// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+							// Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+							// These methods are deprecated, as beginning and ending a transaction has the same effect.
+							et.commit();
+						}
 					}
 				}
 			}
@@ -1271,7 +1298,7 @@ t.printStackTrace();
 						try {
 							beansToMerge.put(beanToMerge, (PersistentBean) session.merge(entityName, beanToMerge));
 						}
-						// if we cant merge any bean, act like we didn't merge the main beans
+						// if we can't merge any bean, act like we didn't merge the main beans
 						catch (Throwable t) {
 							results.clear();
 							throw t;
@@ -1492,6 +1519,10 @@ t.printStackTrace();
 		}.visit(document, unmergedBean, customer);
 	}
 
+	// A set of unique constraint hashes from when a transaction begins until it commits or rolls back.
+	// This set of hashes is inserted in ADM_Uniqueness (temporarily) to allow database locking between transactions.
+	private Set<String> uniqueHashes = new TreeSet<>();
+	
 	/**
 	 * Check the unique constraints for a document bean.
 	 * 
@@ -1511,18 +1542,88 @@ if (document.isDynamic()) return;
 		
 		try {
 			for (UniqueConstraint constraint : document.getAllUniqueConstraints(customer)) {
+				DocumentScope scope = constraint.getScope();
+				
+				// Don't check unique constraints if any of the parameters is null
+				boolean nullParameter = false;
+
+				// Calculate a hash of the unique key and place into the uniqueHashes Set.
+				// If the hash is inserted twice then we have a unique constraint violation within the same transaction.
+				// To detect unique constraints between simultaneous transactions, we insert into ADM_Uniqueness.
+				// This will lock any transaction with the same hash until the commit of the first transaction.
+				// At this point the normal read lock unique constraint check will find the freshly inserted duplicate.
+				// Note that these rows are deleted just before commit of the transaction to release the locks
+				// and nothing is actually ever committed to this table.
+				if (! persisted) {
+					StringBuilder uniqueKey = new StringBuilder(128);
+					uniqueKey.append(document.getOwningModuleName()).append('|').append(document.getName()).append('|');
+					if (DocumentScope.customer.equals(scope)) {
+						uniqueKey.append(bean.getBizCustomer()).append('|');
+					}
+					else if (DocumentScope.dataGroup.equals(scope)) {
+						uniqueKey.append(bean.getBizCustomer()).append('|');
+						uniqueKey.append(bean.getBizDataGroupId()).append('|');
+					}
+					else if (DocumentScope.user.equals(scope)) {
+						uniqueKey.append(bean.getBizCustomer()).append('|');
+						uniqueKey.append(bean.getBizDataGroupId()).append('|');
+						uniqueKey.append(bean.getBizUserId()).append('|');
+					}
+					for (String fieldName : constraint.getFieldNames()) {
+						Object constraintFieldValue = null;
+						try {
+							constraintFieldValue = BindUtil.get(bean, fieldName);
+						}
+						catch (Exception e) {
+							throw new DomainException(e);
+						}
+						
+						// Don't do the constraint check if any query parameter is null
+						if (constraintFieldValue == null) {
+							if (UtilImpl.QUERY_TRACE) {
+								StringBuilder log = new StringBuilder(256);
+								log.append("NOT TESTING CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+								log.append(" as field ").append(fieldName).append(" is null");
+								Util.LOGGER.info(log.toString());
+							}
+							nullParameter = true;
+							break; // stop checking the field names of this constraint
+						}
+						uniqueKey.append(constraintFieldValue.toString()).append('|');
+					}
+					if (nullParameter) {
+						continue; // iterate to next constraint
+					}
+
+					String hash = DigestUtils.sha256Hex(uniqueKey.toString());
+					if (! uniqueHashes.add(hash)) { // this transaction has this hash already
+						throwUniqueConstraintViolationException(constraint, document, bean);
+					}
+					else {
+						try {
+							final Persistent persistent = new Persistent();
+							persistent.setName(UniquenessEntity.TABLE_NAME);
+							String persistentIdentifier = persistent.getPersistentIdentifier();
+							StringBuilder sql = new StringBuilder(64);
+							sql.append("insert into ").append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
+							sql.append(") values (:").append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
+							newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+						}
+						catch (@SuppressWarnings("unused") DomainException e) {
+							// Unique constraint violation caught here - within the same transaction
+							throwUniqueConstraintViolationException(constraint, document, bean);
+						}
+					}
+				}
+				
 				StringBuilder queryString = new StringBuilder(48);
 				queryString.append("select bean from ").append(entityName).append(" as bean");
 				
-				setFilters(document, constraint.getScope().toDocumentPermissionScope());
+				setFilters(document, scope.toDocumentPermissionScope());
 
 				// indicates if we have appended any where clause conditions
 				boolean noWhere = true;
 
-				
-				// Don't check unique constraints if any of the parameters is null
-				boolean nullParameter = false;
-				
 				// Don't check unique constraints if any of the parameters is an unpersisted bean.
 				// The query will produce an error and there is no use anyway as there cannot possibly be unique constraint violation.
 				boolean unpersistedBeanParameter = false;
@@ -1654,17 +1755,7 @@ if (document.isDynamic()) return;
 						if ((! persistent) || // we are inserting and 1 already exists
 								results.next() || // more than 1 exists
 								(persistent && (! first.getBizId().equals(bean.getBizId())))) { // updating, and 1 exists that is not this ID
-							String message = null;
-							try {
-								message = BindUtil.formatMessage(constraint.getMessage(), bean);
-							}
-							catch (Exception e) {
-								e.printStackTrace();
-								message = "Unique Constraint Violation occurred but could not display the unique constraint message for constraint " +
-												constraint.getName();
-							}
-	
-							throw new UniqueConstraintViolationException(document, constraint.getName(), message);
+							throwUniqueConstraintViolationException(constraint, document, bean);
 						}
 					}
 				}
@@ -1673,6 +1764,20 @@ if (document.isDynamic()) return;
 		finally {
 			resetFilters(document);
 		}
+	}
+	
+	private static void throwUniqueConstraintViolationException(UniqueConstraint constraint, Document document, Bean bean) {
+		String message = null;
+		try {
+			message = BindUtil.formatMessage(constraint.getMessage(), bean);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			message = "Unique Constraint Violation occurred but could not display the unique constraint message for constraint " +
+							constraint.getName();
+		}
+
+		throw new UniqueConstraintViolationException(document, constraint.getName(), message);
 	}
 
 	/**
