@@ -89,7 +89,7 @@
 							<td style="height:100%;vertical-align:top">
 								<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>
 								<h:form id="menuform" prependId="false"> 
-									<p:panelMenu model="#{menu.menu}" />
+									<p:panelMenu model="#{menu.menu}" stateful="true" statefulGlobal="true" />
 								</h:form>
 							</td>
 						</c:if>

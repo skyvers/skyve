@@ -341,11 +341,6 @@
 	<render-kit>
 		<renderer>
 			<component-family>org.primefaces.component</component-family>
-			<renderer-type>org.primefaces.component.CommandButtonRenderer</renderer-type>
-			<renderer-class>org.primefaces.extensions.renderer.CommandButtonSingleClickRenderer</renderer-class>
-		</renderer>
-		<renderer>
-			<component-family>org.primefaces.component</component-family>
 			<renderer-type>org.primefaces.component.PanelRenderer</renderer-type>
 			<renderer-class>org.skyve.impl.web.faces.renderers.SkyvePanelRenderer</renderer-class>
 		</renderer>

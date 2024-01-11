@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 
-import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.picklist.PickList;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -2862,10 +2861,12 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 		else {
 			cb.addAjaxBehavior(eventSource, "change", dataWidgetBinding, dataWidgetVar, binding, changedActions);
-			// Add this special event for date selection on calendar as "changed" doesn't fire on select
+			// No need to add dateSelect event to datePicker as "changed" fires on the input field when selected
+/*
 			if (eventSource instanceof DatePicker) {
 				cb.addAjaxBehavior(eventSource, "dateSelect", dataWidgetBinding, dataWidgetVar, binding, changedActions);
 			}
+*/
 		}
 	}
 

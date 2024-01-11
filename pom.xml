@@ -56,8 +56,8 @@
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.10.0</pf4j.version>
 		<poi.version>5.2.3</poi.version>
-		<primefaces.version>12.0.0</primefaces.version>
-		<primefaces-extensions.version>12.0.7</primefaces-extensions.version>
+		<primefaces.version>13.0.4</primefaces.version>
+		<primefaces-extensions.version>13.0.4</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
 		<quartz.version>2.3.2</quartz.version>
 		<slf4j-api.version>1.7.32</slf4j-api.version>

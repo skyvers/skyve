@@ -946,7 +946,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		button.setIcon("fa fa-minus");
 		// We cannot just update the data table ever when removing a row as
 		// the grid may go invisible if the last row is removed.
-		// There is no performance shortcut we can do as we dont know what is going on
+		// There is no performance shortcut we can do as we don't know what is going on
 		button.setUpdate(update); // update all forms (by default)
 
 		action(button, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
@@ -3280,6 +3280,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		result.setShowButtonBar(true);
 
+		// NB we would like a relative year range for the year drop down in the date picker but it doesn't work.
+		// prime docs (not faces) talks about using "-20:+20" for 20 years each side of current date for result.setYearRange()
+		// but this doesn't work.
+		// Using absolute range like "1900:2050" works but this isn't very useful.
+		
 		String converterName = converter.getClass().getSimpleName();
 		if (DD_MM_YYYY.class.getSimpleName().equals(converterName)) {
 			result.setPattern(DD_MM_YYYY.PATTERN);

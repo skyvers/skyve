@@ -182,6 +182,9 @@ public class ComponentRenderer {
 			if (button.isDisabled()) {
 				putValue(attributes, "disabled", "true");
 			}
+			if (button.isDisableOnAjax()) {
+				putValue(attributes, "disableOnAjax", "true");
+			}
 			putValue(attributes, "style", button.getStyle());
 			putValue(attributes, "styleClass", button.getStyleClass());
 		}
