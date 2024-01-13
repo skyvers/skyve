@@ -184,7 +184,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
-public class TabularComponentBuilder extends ComponentBuilder {
+public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
 	public static final String SINGLE_ACTION_COLUMN_WIDTH = "60";
@@ -607,7 +607,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setEscape(false);
 
 		setTextAlign(result, textAlignment);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, ONE_HUNDRED, null);
 		setInvisible(result, invisibleConditionName, null);
 
 		return result;
@@ -1111,8 +1111,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											null,
 											null,
 											null,
-											null,
-											true);
+											null);
 		textField.setId(id + "_value");
 		toAddTo.add(textField);
 		editableGeometry(toAddTo,
@@ -2178,8 +2177,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											textAlignment,
 											colour.getDisabledConditionName(),
 											formDisabledConditionName,
-											colour.getPixelWidth(),
-											true);
+											colour.getPixelWidth());
 		return new EventSourceComponent(result, result);
 	}
 
@@ -2639,8 +2637,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					                textAlignment,
 					                password.getDisabledConditionName(),
 					                formDisabledConditionName,
-					                password.getPixelWidth(),
-					                true);
+					                password.getPixelWidth());
 		result.setRedisplay(true);
 		return new EventSourceComponent(result, result);
 	}
@@ -2743,8 +2740,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											formDisabledConditionName,
 											length,
 											text.getPixelWidth(),
-											text.getPixelHeight(),
-											true);
+											text.getPixelHeight());
 		KeyboardType keyboardType = text.getKeyboardType();
 		if (keyboardType != null) {
 			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
@@ -2811,8 +2807,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								mutableFormat,
 								facesConverter,
 								text.getKeyboardType(),
-								text.getPixelWidth(),
-								true);
+								text.getPixelWidth());
         }
         else if (complete != null) {
         	result = complete(dataWidgetVar,
@@ -2840,8 +2835,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								(mutableFormat == null) ? null : mutableFormat.getTextCase(),
 								facesConverter,
 								text.getKeyboardType(),
-								text.getPixelWidth(),
-								true);
+								text.getPixelWidth());
         }
 
         return new EventSourceComponent(result, result);
@@ -3048,7 +3042,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		setValueOrValueExpression(title, result::setHeader, "header", result);
 		setInvisible(result, invisible, null);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, NINETY_EIGHT, null);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, null);
 		setId(result, widgetId);
 		
 		if (collapsible != null) {
@@ -3072,8 +3066,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									HorizontalAlignment textAlignment,
 									String disabled,
 									String formDisabled,
-									Integer pixelWidth,
-									boolean applyDefaultWidth) {
+									Integer pixelWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
 		
@@ -3084,7 +3077,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		passThroughAttributes.put("autocapitalize", "none");
 		passThroughAttributes.put("autocorrect", "none");
 		
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -3100,8 +3093,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									TextCase textCase,
 									Converter converter,
 									KeyboardType keyboardType,
-									Integer pixelWidth,
-									boolean applyDefaultWidth) {
+									Integer pixelWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE,
 												dataWidgetVar,
 												binding,
@@ -3123,7 +3115,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			passThroughAttributes.put("inputmode", keyboardType.toString());
 		}
 		String existingStyle = determineTextTransformStyle(textCase);
-		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -3139,8 +3131,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									Format<?> format,
 									Converter converter,
 									KeyboardType keyboardType,
-									Integer pixelWidth,
-									boolean applyDefaultWidth) {
+									Integer pixelWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE,
 												dataWidgetVar,
 												binding,
@@ -3163,7 +3154,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
 			passThroughAttributes.put("inputmode", keyboardType.toString());
 		}
-		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -3523,8 +3514,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String formDisabled,
 										Integer maxLength,
 										Integer pixelWidth,
-										Integer pixelHeight,
-										boolean applyDefaultWidth) {
+										Integer pixelHeight) {
 		InputTextarea result = (InputTextarea) input(InputTextarea.COMPONENT_TYPE,
 														dataWidgetVar,
 														binding,
@@ -3538,7 +3528,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (maxLength != null) {
 			result.setMaxlength(maxLength.intValue());
 		}
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, textAlignment);
 		return result;
 	}
 
@@ -4166,8 +4156,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										HorizontalAlignment textAlignment,
 										String disabled,
 										String formDisabled,
-										Integer pixelWidth,
-										boolean applyDefaultWidth) {
+										Integer pixelWidth) {
 		ColorPicker result = (ColorPicker) input(ColorPicker.COMPONENT_TYPE,
 													dataWidgetVar,
 													binding,
@@ -4175,7 +4164,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -4286,7 +4275,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									null,
 									null,
 									// width cannot be set correctly on this component when laid out in a table
-									null, // applyDefaultWidth ? ONE_HUNDRED : null);
+									null,
 									textAlignment);
 		
 		return result;

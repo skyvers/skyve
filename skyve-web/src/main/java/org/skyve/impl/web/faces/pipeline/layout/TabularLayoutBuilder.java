@@ -281,6 +281,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText,
+										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		Integer rowspan = currentFormItem.getRowspan();
@@ -397,7 +398,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 									percentageWidth, 
 									pixelHeight, 
 									percentageHeight, 
-									NINETY_EIGHT,
+									null,
 									null);
 		setId(result, widgetId);
 		result.setStyleClass("ui-panelgrid-blank");
@@ -421,7 +422,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 									percentageWidth, 
 									pixelHeight, 
 									percentageHeight, 
-									NINETY_EIGHT,
+									null,
 									null);
 		setId(result, widgetId);			
 		return result;

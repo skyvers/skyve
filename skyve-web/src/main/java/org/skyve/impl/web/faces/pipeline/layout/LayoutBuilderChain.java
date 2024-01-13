@@ -252,6 +252,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText,
+										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		for (LayoutBuilder builder : builders) {
@@ -265,6 +266,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 											widgetRequired,
 											widgetInvisible,
 											widgetHelpText,
+											widgetPixelWidth,
 											showLabel,
 											topLabel);
 		}

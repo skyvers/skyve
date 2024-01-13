@@ -53,39 +53,54 @@ span.right {
 }
 
 /* skyve form label alignment (left always on phone) */
-.leftFormLabel {
-	text-align: left;
+.leftForm {
+	display: flex;
+	align-items: center;
+	justify-content: start;
 }
 @media (min-width: 641px) {
-	.rightFormLabel {
-		text-align: right;
+	.rightForm {
+		display: flex;
+		align-items: center;
+		justify-content: end;
 	}
-	.centerFormLabel {
-		text-align: center;
+	.centerForm {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 }
 @media (max-width: 640px) {
-	.rightFormLabel {
-		text-align: left;
+	.rightForm {
+		justify-content: start;
 	}
-	.centerFormLabel {
-		text-align: left;
+	.centerForm {
+		justify-content: start;
 	}
 }
+.leftFormFlex {
+	display: flex;
+	align-items: center;
+	justify-content: start;
+}
 @media (min-width: 768px) {
-	.rightFormLabelFlex {
-		text-align: right;
+	.rightFormFlex {
+		display: flex;
+		align-items: center;
+		justify-content: end;
 	}
-	.centerFormLabelFlex {
-		text-align: center;
+	.centerFormFlex {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 }
 @media (max-width: 767px) {
-	.rightFormLabelFlex {
-		text-align: left;
+	.rightFormFlex {
+		justify-content: start;
 	}
-	.centerFormLabelFlex {
-		text-align: left;
+	.centerFormFlex {
+		justify-content: start;
 	}
 }
 

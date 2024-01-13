@@ -80,6 +80,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												boolean widgetRequired,
 												String widgetInvisible,
 												String widgetHelpText,
+												Integer widgetPixelWidth,
 												boolean showLabel,
 												boolean topLabel);
 	

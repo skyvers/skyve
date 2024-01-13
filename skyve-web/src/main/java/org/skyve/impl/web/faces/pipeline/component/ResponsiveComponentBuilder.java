@@ -72,31 +72,6 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		return result;
 	}
 	
-	@Override
-	protected void setSizeAndTextAlignStyle(UIComponent component, 
-												String styleAttributeNameOverride,
-												String existingStyle, 
-												Integer pixelWidth, 
-												Integer responsiveWidth,
-												Integer percentageWidth,
-												Integer pixelHeight, 
-												Integer percentageHeight, 
-												Integer defaultPercentageWidth,
-												HorizontalAlignment textAlign) {
-		// Ensure no default percentage width is ever set for this renderer.
-		// Leave this to the responsive shit.
-		super.setSizeAndTextAlignStyle(component,
-										styleAttributeNameOverride,
-										existingStyle, 
-										pixelWidth, 
-										responsiveWidth, 
-										percentageWidth, 
-										pixelHeight, 
-										percentageHeight, 
-										null,
-										textAlign);
-	}
-	
 	// Add floating label support to other input widgets
 	
 	@Override

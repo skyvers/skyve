@@ -282,7 +282,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		setInvisible(div, widgetInvisible, null);
 		// style="<repsonsive column calc method call>"
         String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
-		String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)} %s", 
+		String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', 1)}", 
 											managedBeanName,
 											Integer.toString(formIndex),
 											alignment);
@@ -304,14 +304,15 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText,
+										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		HtmlPanelGroup flex = panelGroup(false, false, true, null, null);
 		if (showLabel && topLabel) {
-			flex.setStyle("display:flex;align-items:center;flex-wrap:nowrap;padding-top:16px");
+			flex.setStyle("flex-wrap:nowrap;padding-top:16px");
 		}
 		else {
-			flex.setStyle("display:flex;align-items:center;flex-wrap:nowrap");
+			flex.setStyle("flex-wrap:nowrap");
 		}
 		setInvisible(flex, widgetInvisible, null);
 		List<UIComponent> flexChildren = flex.getChildren();
@@ -325,7 +326,12 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		if (showLabel && topLabel) {
 			HtmlPanelGroup fieldDiv = panelGroup(false, false, true, null, null);
 			fieldDiv.setStyleClass("field");
-			fieldDiv.setStyle("width:100%");
+			if (widgetPixelWidth != null) {
+				fieldDiv.setStyle("width:" + widgetPixelWidth + "px");
+			}
+			else {
+				fieldDiv.setStyle("width:100%");
+			}
 			HtmlPanelGroup floatSpan = panelGroup(false, false, false, null, null);
 			floatSpan.setStyleClass("ui-float-label");
 			fieldDiv.getChildren().add(floatSpan);
@@ -389,10 +395,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			result = alignment.toAlignmentString();
 		}
 
-		if (forFormLabel) {
-			result = result + (UtilImpl.PRIMEFLEX ? "FormLabelFlex" : "FormLabel");
-		}
-		return result;
+		return result + (UtilImpl.PRIMEFLEX ? "FormFlex" : "Form");
 	}
 	
 	private HtmlPanelGroup responsiveContainer(VerticalAlignment vertical,

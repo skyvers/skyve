@@ -643,6 +643,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											widgetRequired,
 											widgetInvisible,
 											helpText,
+											pixelWidth,
 											isCurrentWidgetShowLabel(),
 											isCurrentFormRenderTopLabels());
 				for (int i = 0, l = formColspan; i < l; i++) {
