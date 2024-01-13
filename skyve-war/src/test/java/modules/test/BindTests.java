@@ -367,6 +367,14 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("Test", Binder.formatMessage("{bean:text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
 		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.condition}", bean));
+
+		// Check falsey boolean evaluation
+		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, Boolean.TRUE);
+		Assert.assertEquals(Boolean.TRUE, ExpressionEvaluator.evaluate("{el:bean.falseyBooleanEvaluation}", bean));
+		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, Boolean.FALSE);
+		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.falseyBooleanEvaluation}", bean));
+		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, null);
+		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.falseyBooleanEvaluation}", bean));
 		
 		bean = aadpd.newInstance(u);
 		System.out.println(bean);

@@ -170,5 +170,12 @@
 				]]>
 			</expression>
 		</condition>
+		<condition name="falseyBooleanEvaluation" usage="domain">
+			<expression>
+				<![CDATA[
+					{el:bean.booleanFlag}
+				]]>
+			</expression>
+		</condition>
 	</conditions>
 </document>
