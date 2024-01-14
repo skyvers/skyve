@@ -12,6 +12,24 @@
 	padding: 4px !important;
 }
 
+@media (min-width: 641px) {
+	html {
+		zoom: 95%
+	}
+}
+
+@media (min-width: 737px) {
+	html {
+		zoom: 90%
+	}
+}
+
+@media (min-width: 1281px) {
+	html {
+		zoom: 85%
+	}
+}
+
 /*
 	Editorial by HTML5 UP
 	html5up.net | @ajlkn
