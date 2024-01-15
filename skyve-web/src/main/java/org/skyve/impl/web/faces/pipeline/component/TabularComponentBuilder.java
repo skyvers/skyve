@@ -913,15 +913,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														boolean inline,
 														String dataWidgetBinding,
 														String disabledConditionName) {
-		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(button, null);
-		button.setValue(null);
-		button.setTitle("Add a new " + singularDocumentAlias);
-		button.setIcon("fa fa-plus");
-		action(button, ImplicitActionName.Add, null, dataWidgetBinding, dataWidgetVar, inline, null);
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(null);
+		result.setTitle("Add a new " + singularDocumentAlias);
+		result.setIcon("fa fa-plus");
+		action(result, ImplicitActionName.Add, null, dataWidgetBinding, dataWidgetVar, inline, null);
+		result.setProcess(process);
 		// if we are in an inline data grid, update the grid on a new record
 		if (inline) {
-			button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
+			result.setUpdate("@namingcontainer"); // update the data table - the closest naming container
+		}
+		else { // else default update
+			result.setUpdate(update);
 		}
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String[] createDisabled = (disableAddConditionName == null) ?
@@ -933,23 +937,25 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										new String[] {disableAddConditionName, disabledConditionName});
 		ValueExpression disabled = createOredValueExpressionFromConditions(createDisabled);
 		if (disabled != null) {
-			button.setValueExpression("disabled", disabled);
+			result.setValueExpression("disabled", disabled);
 		}
-		return button;
+		
+		return result;
 	}
 
 	protected CommandButton createDataGridRemoveButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, String dataWidgetBinding, String disabledConditionName) {
-		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(button, null);
-		button.setValue(null);
-		button.setTitle("Remove this " + singularDocumentAlias);
-		button.setIcon("fa fa-minus");
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(null);
+		result.setTitle("Remove this " + singularDocumentAlias);
+		result.setIcon("fa fa-minus");
+		result.setProcess(process);
 		// We cannot just update the data table ever when removing a row as
 		// the grid may go invisible if the last row is removed.
 		// There is no performance shortcut we can do as we don't know what is going on
-		button.setUpdate(update); // update all forms (by default)
+		result.setUpdate(update); // update all forms (by default)
 
-		action(button, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
+		action(result, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
 		String disableRemoveConditionName = grid.getDisableRemoveConditionName();
 		String[] removeDisabled = (disableRemoveConditionName == null) ?
 									((disabledConditionName == null) ?
@@ -959,19 +965,21 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										new String[] {disableRemoveConditionName} :
 										new String[] {disableRemoveConditionName, disabledConditionName});
 		if (removeDisabled != null) {
-			button.setValueExpression("disabled",
+			result.setValueExpression("disabled",
 										createOredValueExpressionFromConditions(removeDisabled));
 		}
-		return button;
+		return result;
 	}
 
 	protected CommandButton createDataGridZoomButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, boolean inline, String dataWidgetBinding, String disabledConditionName) {
-		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(button, null);
-		button.setValue(null);
-		button.setTitle("Edit this " + singularDocumentAlias);
-		button.setIcon("fa fa-chevron-right");
-		action(button, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(null);
+		result.setTitle("Edit this " + singularDocumentAlias);
+		result.setIcon("fa fa-chevron-right");
+		result.setProcess(process);
+		result.setUpdate(update);
+		action(result, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
 		String disableZoomConditionName = grid.getDisableZoomConditionName();
 		String[] zoomDisabled = (disableZoomConditionName == null) ?
 									((disabledConditionName == null) ?
@@ -981,10 +989,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										new String[] {disableZoomConditionName} :
 										new String[] {disableZoomConditionName, disabledConditionName});
 		if (zoomDisabled != null) {
-			button.setValueExpression("disabled",
+			result.setValueExpression("disabled",
 										createOredValueExpressionFromConditions(zoomDisabled));
 		}
-		return button;
+		return result;
 	}
 
 	@Override
@@ -1149,7 +1157,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		mapButton.setIcon("fa fa-globe");
 		mapButton.setTitle("Map");
 		mapButton.setValue(null);
-		mapButton.setType("button");
+		mapButton.setType("button"); // no process or update required
 		setDisabled(mapButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
 		setSizeAndTextAlignStyle(mapButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
@@ -1863,7 +1871,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			button.setValue(null);
 			button.setTitle("New record");
 			button.setIcon("fa fa-plus");
-			button.setType("button");
+			button.setType("button"); // no process or update required
 			ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
 			if (disabled != null) {
 				button.setValueExpression("disabled", disabled);
@@ -1906,7 +1914,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setValue(null);
 		button.setTitle("View Detail");
 		button.setIcon("fa fa-chevron-right");
-		button.setType("button");
+		button.setType("button"); // no process or update required
 		if (zoomDisabledConditionName != null) {
 			button.setValueExpression("disabled",
 					createValueExpressionFromCondition(zoomDisabledConditionName, null));
@@ -2386,8 +2394,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setTitle("Submit Signature");
 		button.setStyle("width:75px");
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
-		button.setProcess("@this");
-		button.setUpdate(id);
+		button.setProcess("@this"); // process the button
+		button.setUpdate(id); // update the signature widget
 		// action
 		sb.setLength(0);
 		sb.append("#{").append(managedBeanName).append(".sign('").append(clientId).append("','").append(binding).append("',");
@@ -2419,13 +2427,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		
 		toAddTo.add(button);
 
+		// client-side clear button if we have no content sitting in the server state
 		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Clear");
 		button.setIcon("fa fa-trash");
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
-		button.setType("button");
+		button.setType("button"); // no process or update required
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
 		// onclick
 		sb.setLength(0);
@@ -2438,6 +2447,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		toAddTo.add(button);
 
+		// server-side clear button if we have some content in the signature
 		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Clear");
@@ -2445,8 +2455,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
-		button.setProcess("@this");
-		button.setUpdate(id);
+		button.setProcess("@this"); // process the button
+		button.setUpdate(id); // update the signature widget
 		// action
 		sb.setLength(0);
 		sb.append("#{").append(managedBeanName).append(".clear('").append(binding).append("')}");
@@ -2495,7 +2505,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		uploadButton.setIcon("fa fa-upload");
 		uploadButton.setTitle("Upload Content");
 		uploadButton.setValue(null);
-		uploadButton.setType("button");
+		uploadButton.setType("button"); // no process or update required
 		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
 		setSizeAndTextAlignStyle(uploadButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
@@ -2555,7 +2565,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		clearButton.setIcon("fa fa-trash");
 		clearButton.setTitle("Clear Content");
 		clearButton.setValue(null);
-		clearButton.setType("button");
+		clearButton.setType("button"); // no process or update required
 		if (image) {
 			clearButton.setOnclick(String.format("SKYVE.PF.clearContentImage('%s')", sanitisedBinding));
 		}
@@ -3817,8 +3827,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String refreshId = refresh.getId();
 		refresh.setName(refreshId);
 		refresh.setActionExpression(methodExpressionForRerender(actionName, false));
-		refresh.setProcess("@none");
-		refresh.setUpdate(update);
+		refresh.setProcess("@none"); // no processing - just a refresh required
+		refresh.setUpdate(update); // default update
 		children.add(refresh);
 
 		// Upload button that the overlay panel is attached to
@@ -3828,7 +3838,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		uploadButton.setValue(title);
 		uploadButton.setIcon((iconStyleClass == null) ? "fa fa-upload" : iconStyleClass);
 		uploadButton.setTitle(tooltip);
-		uploadButton.setType("button");
+		uploadButton.setType("button"); // no process or update required
 		setSizeAndTextAlignStyle(uploadButton, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
 		setDisabled(uploadButton, disabled, formDisabled);
 		setConfirmation(uploadButton, confirmationText);
