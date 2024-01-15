@@ -187,12 +187,15 @@ public class Util {
 			char ch = sequence.charAt(i);
 			if (ch <= 0x7F) {
 				count++;
-			} else if (ch <= 0x7FF) {
+			}
+			else if (ch <= 0x7FF) {
 				count += 2;
-			} else if (Character.isHighSurrogate(ch)) {
+			}
+			else if (Character.isHighSurrogate(ch)) {
 				count += 4;
 				++i;
-			} else {
+			}
+			else {
 				count += 3;
 			}
 		}
@@ -485,5 +488,4 @@ public class Util {
     public static String getContentAnchorWithImageUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, int width, int height) {
     	return getContentAnchorUrl(bizModule, bizDocument, binding, contentId, targetNewWindow, getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
-
 }

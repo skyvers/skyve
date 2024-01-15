@@ -2,8 +2,10 @@ package org.skyve.impl.util;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
+import org.skyve.util.Util;
 
 import net.gcardone.junidecode.Junidecode;
 
@@ -333,7 +336,8 @@ public class UtilImpl {
 		if (absoluteBasePath == null) {
 			if (APPS_JAR_DIRECTORY != null) {
 				absoluteBasePath = APPS_JAR_DIRECTORY;
-			} else {
+			}
+			else {
 				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
 				if (url == null) {
 					UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
@@ -343,11 +347,19 @@ public class UtilImpl {
 						for (URL entry : ((URLClassLoader) cl).getURLs()) {
 							UtilImpl.LOGGER.severe(entry.getFile());
 						}
-					} else {
+					}
+					else {
 						UtilImpl.LOGGER.severe("Cannot determine the context classloader paths...");
 					}
-				} else {
+				}
+				else {
 					absoluteBasePath = url.getPath();
+					try {
+						absoluteBasePath = URLDecoder.decode(absoluteBasePath, Util.UTF8);
+					}
+					catch (UnsupportedEncodingException e) {
+						throw new IllegalStateException("UtilImpl.getAbsoluteBasePath() cannot URL decode " + absoluteBasePath, e);
+					}
 					absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
 					absoluteBasePath = absoluteBasePath.replace('\\', '/');
 				}
@@ -392,7 +404,8 @@ public class UtilImpl {
 					populateFully((AbstractPersistentBean) object);
 				}
 			}
-		} else if (object instanceof AbstractPersistentBean) {
+		}
+		else if (object instanceof AbstractPersistentBean) {
 			populateFully((AbstractPersistentBean) object);
 		}
 
@@ -453,9 +466,9 @@ public class UtilImpl {
 
 			if (beanAccepted.isChanged()) {
 				changed = true;
-				if (UtilImpl.DIRTY_TRACE)
-					UtilImpl.LOGGER.info(
-							"UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+				if (UtilImpl.DIRTY_TRACE) {
+					UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+				}
 				return false;
 			}
 			return true;
@@ -509,7 +522,8 @@ public class UtilImpl {
 			for (Object element : list) {
 				setTransient(element);
 			}
-		} else if (object instanceof AbstractPersistentBean) {
+		}
+		else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
 			bean.setBizId(UUID.randomUUID().toString());
 			bean.setBizLock(null);
@@ -528,7 +542,8 @@ public class UtilImpl {
 						if (association.getType() != AssociationType.aggregation) {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
-					} else if (reference instanceof Collection) {
+					}
+					else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient
@@ -547,7 +562,8 @@ public class UtilImpl {
 			for (Object element : list) {
 				setDataGroup(element, bizDataGroupId);
 			}
-		} else if (object instanceof AbstractPersistentBean) {
+		}
+		else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
 			bean.setBizDataGroupId(bizDataGroupId);
 
@@ -564,7 +580,8 @@ public class UtilImpl {
 						if (association.getType() != AssociationType.aggregation) {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
-					} else if (reference instanceof Collection) {
+					}
+					else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient

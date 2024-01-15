@@ -51,9 +51,9 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
 
     protected Path getSkyveDirectory(String directoryName) throws FileNotFoundException {
         for (final String sourceRoot : project.getCompileSourceRoots()) {
-            final Path modules = Paths.get(sourceRoot, directoryName);
-            if (modules.toFile().exists()) {
-                return modules;
+            final Path sourceDirectory = Paths.get(sourceRoot, directoryName);
+            if (sourceDirectory.toFile().exists()) {
+                return sourceDirectory;
             }
         }
 
