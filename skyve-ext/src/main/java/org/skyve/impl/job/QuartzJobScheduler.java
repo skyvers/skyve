@@ -142,16 +142,43 @@ public class QuartzJobScheduler implements JobScheduler {
 
 	private static void scheduleInternalJobs()
 	throws Exception {
-		// initialise the CMS in a 1 shot immediate job
-		JobDetail detail = JobBuilder.newJob(ContentStartupJob.class)
-										.withIdentity("CMS Startup", Scheduler.DEFAULT_GROUP)
+		// Initialise BrowsCap load
+		JobDetail detail = JobBuilder.newJob(LoadBrowsCapJob.class)
+										.withIdentity("Load BrowsCap", Scheduler.DEFAULT_GROUP)
 										.storeDurably(false)
 										.build();
 		Trigger trigger = TriggerBuilder.newTrigger()
-											.forJob(detail)
-											.withIdentity("CMS Startup trigger", Scheduler.DEFAULT_GROUP)
-											.startNow()
-											.build();
+							.forJob(detail)
+							.withIdentity("\"Load Browscap trigger", Scheduler.DEFAULT_GROUP)
+							.startNow()
+							.build();
+		JOB_SCHEDULER.scheduleJob(detail, trigger);
+
+		// Initialise warming metadata if access control is on
+		if (UtilImpl.ACCESS_CONTROL) {
+			detail = JobBuilder.newJob(WarmMetaDataJob.class)
+								.withIdentity("Warm MetaData", Scheduler.DEFAULT_GROUP)
+								.storeDurably(false)
+								.build();
+			trigger = TriggerBuilder.newTrigger()
+										.forJob(detail)
+										.withIdentity("\"Warm MetaData trigger", Scheduler.DEFAULT_GROUP)
+										.startNow()
+										.build();
+			JOB_SCHEDULER.scheduleJob(detail, trigger);
+			
+		}
+
+		// initialise the CMS in a 1 shot immediate job
+		detail = JobBuilder.newJob(ContentStartupJob.class)
+							.withIdentity("CMS Startup", Scheduler.DEFAULT_GROUP)
+							.storeDurably(false)
+							.build();
+		trigger = TriggerBuilder.newTrigger()
+									.forJob(detail)
+									.withIdentity("CMS Startup trigger", Scheduler.DEFAULT_GROUP)
+									.startNow()
+									.build();
 		JOB_SCHEDULER.scheduleJob(detail, trigger);
 
 		// Do CMS garbage collection as schedule in the CRON expression in the application properties file
