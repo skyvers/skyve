@@ -1,7 +1,7 @@
 package org.umlgraph.doclet;
 
-import java.util.Map;
-import java.util.regex.Pattern;
+//import java.util.Map;
+//import java.util.regex.Pattern;
 
 public class AccessibleOptions {
 //DC JAVA 11

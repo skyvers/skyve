@@ -8,7 +8,9 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
 
 public class FlutterCalendarView extends FlutterView {
+	@SuppressWarnings("unused")
 	private ListModel<Bean> model;
+	@SuppressWarnings("unused")
 	private MetaDataQueryDefinition query;
 	
 	public FlutterCalendarView(FlutterGenerator generator, String moduleName, String viewName) {

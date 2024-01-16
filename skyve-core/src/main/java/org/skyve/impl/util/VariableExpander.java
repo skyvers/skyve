@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 
 /**
  * Used to replace Strings in a property map with a value defined by a variable.
@@ -31,14 +31,14 @@ public class VariableExpander {
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> expand(Map<String, Object> properties, Map<String, String> variables) {
 		final Map<String, Object> expandedProperties = new HashMap<>();
-		final StrSubstitutor strSubstitutor = new StrSubstitutor(variables);
-		strSubstitutor.setValueDelimiter(delimiter);
+		final StringSubstitutor stringSubstitutor = new StringSubstitutor(variables); 
+		stringSubstitutor.setValueDelimiter(delimiter);
 
 		for (Map.Entry<String, Object> property : properties.entrySet()) {
 			final String key = property.getKey();
 			Object value = property.getValue();
 			if (value instanceof String) {
-				value = strSubstitutor.replace(value);
+				value = stringSubstitutor.replace(value);
 				if (Objects.equals(value, "null")) {
 					value = null;
 				}

@@ -337,10 +337,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	@Override
 	public void renderFormItem(String label, boolean required, String help, boolean showsLabel, int colspan, FormItem item) {
+		// TODO not implemented yet
 	}
 
 	@Override
 	public void renderedFormItem(String label, boolean required, String help, boolean showLabel, int colspan, FormItem item) {
+		// TODO not implemented yet
 	}
 
 	@Override
@@ -458,6 +460,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		renderButton(name, label, 0, iconUrl, iconStyleClass, toolTip, confirmationText, action, button);
 	}
 	
+	@SuppressWarnings("unused")
 	private void renderButton(String name,
 								String label,
 								int formColspan,
@@ -507,6 +510,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		renderZoomIn(label, 0, iconUrl, iconStyleClass, toolTip, zoomIn);
 	}
 	
+	@SuppressWarnings("unused")
 	private void renderZoomIn(String label,
 								int formColspan,
 								String iconUrl,
@@ -624,7 +628,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		renderDialogButton(label, 0, button);
 	}
 	
-	private void renderDialogButton(String label, int formColspan, DialogButton button) {
+	private void renderDialogButton(@SuppressWarnings("unused") String label, int formColspan, DialogButton button) {
 		RenderedComponent bn = cr.label(null, "dialogButton"); // TODO dialog button
 	    addComponent(null, 
 	    				formColspan,
@@ -760,8 +764,9 @@ public class ClientViewRenderer extends ViewRenderer {
 		renderLink(value, 0, link);
 	}
 
-	private void renderLink(String value, int formColspan, Link link) {
+	private void renderLink(@SuppressWarnings("unused") String value, int formColspan, Link link) {
 		org.skyve.impl.metadata.view.reference.Reference outerReference = link.getReference();
+		@SuppressWarnings("unused")
 		final ReferenceTarget target = link.getTarget();
 		final AtomicReference<RenderedComponent> c = new AtomicReference<>();
 		new ReferenceProcessor() {
@@ -1274,7 +1279,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		renderContentLink(value, getCurrentWidgetColspan(), link);
 	}
 	
-	private void renderContentLink(String value, int formColspan, ContentLink link) {
+	private void renderContentLink(@SuppressWarnings("unused") String value, int formColspan, ContentLink link) {
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
 		RenderedComponent c = cr.contentLink(null, dataWidgetBinding, link, title, required);
@@ -1354,8 +1359,8 @@ public class ClientViewRenderer extends ViewRenderer {
 	
 	private void renderLookupDescription(int formColspan,
 											MetaDataQueryDefinition query,
-											boolean canCreate,
-											boolean canUpdate,
+											@SuppressWarnings("unused") boolean canCreate,
+											@SuppressWarnings("unused") boolean canUpdate,
 											String descriptionBinding,
 											LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();

@@ -54,10 +54,9 @@ public class FlutterRouting {
             if (generator.getConfig().allowsMoDoc(moduleName, docName)) {
                 log.debug("Generating " + moduleName + "-" + docName);
                 return true;
-            } else {
-                log.debug("Filtered out " + moduleName + "-" + docName);
-                return false;
             }
+			log.debug("Filtered out " + moduleName + "-" + docName);
+			return false;
         };
 	    
 		menuImportsAndRoutes(whiteListPredicate);

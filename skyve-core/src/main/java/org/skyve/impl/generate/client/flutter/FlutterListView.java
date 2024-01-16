@@ -18,8 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class FlutterListView extends FlutterView {
-
-    protected Logger log = LoggerFactory.getLogger(getClass());
+    private static Logger logger = LoggerFactory.getLogger(FlutterListView.class);
 
     private Document document;
     private ListModel<Bean> model;
@@ -29,12 +28,12 @@ class FlutterListView extends FlutterView {
         super(generator, moduleName, viewName);
     }
 
-    void setModel(Module module, Document document, String name, ListModel<Bean> model) {
+    void setModel(@SuppressWarnings("unused") Module module, Document document, @SuppressWarnings("unused") String name, ListModel<Bean> model) {
         this.document = document;
         this.model = model;
     }
 
-    void setQuery(Module module, Document document, MetaDataQueryDefinition query) {
+    void setQuery(@SuppressWarnings("unused") Module module, Document document, MetaDataQueryDefinition query) {
         this.document = document;
         this.query = query;
     }
@@ -55,7 +54,7 @@ class FlutterListView extends FlutterView {
 
         addQuerySubstitutes(subs);
 
-        log.debug("Creating list view '{}' with query: {}", viewName, query.getName());
+        logger.debug("Creating list view '{}' with query: {}", viewName, query.getName());
         fw.write(substitute("templates/list.dart", subs));
     }
 

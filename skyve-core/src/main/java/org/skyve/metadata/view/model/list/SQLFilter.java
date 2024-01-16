@@ -9,8 +9,11 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 
 public class SQLFilter implements Filter {
+	@SuppressWarnings("unused")
 	private SQL detailSQL;
+	@SuppressWarnings("unused")
 	private SQL summarySQL;
+	@SuppressWarnings("unused")
 	private User user;
 	private boolean empty = true;
 	

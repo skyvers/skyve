@@ -149,14 +149,14 @@ public class CommunicationUtil {
 		} else {
 			sendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
 		}
-		List<String> sendToAddresses = resolveAndValidateEmailAddressList(communication, sendTo, responseMode, communicationDocument, subscriptionDocument);
+		List<String> sendToAddresses = resolveAndValidateEmailAddressList(sendTo, responseMode, communicationDocument, subscriptionDocument);
 
 		// Resolve email message contents
 		String ccTo = formatCommunicationMessage(customer, communication.getCcTo(), beans);
 		if (communication.getCcToOverride() != null) {
 			ccTo = formatCommunicationMessage(customer, communication.getCcToOverride(), beans);
 		}
-		List<String> ccToAddresses = resolveAndValidateEmailAddressList(communication, ccTo, responseMode, communicationDocument, subscriptionDocument);
+		List<String> ccToAddresses = resolveAndValidateEmailAddressList(ccTo, responseMode, communicationDocument, subscriptionDocument);
 
 		// add the current admin user to bcc if monitoring outgoing email
 		String[] bcc = null;
@@ -278,7 +278,7 @@ public class CommunicationUtil {
 	 * @param addressList
 	 * @return
 	 */
-	private static List<String> resolveAndValidateEmailAddressList(Communication c, String addressList, ResponseMode responseMode, Document communicationDoc,
+	private static List<String> resolveAndValidateEmailAddressList(String addressList, ResponseMode responseMode, Document communicationDoc,
 			Document subscriptionDoc) throws Exception {
 
 		List<String> resolvedAndValidatedAddresses = new ArrayList<>();

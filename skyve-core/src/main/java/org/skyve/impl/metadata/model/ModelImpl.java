@@ -178,7 +178,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	@Override
 	public boolean hasDynamic() {
 		if (hasDynamic == null) {
-			determineHasDynamic(new TreeSet<String>());
+			determineHasDynamic(new TreeSet<>());
 		}
 
 		return hasDynamic.booleanValue();

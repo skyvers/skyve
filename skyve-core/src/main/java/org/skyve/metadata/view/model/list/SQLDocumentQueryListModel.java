@@ -91,6 +91,7 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 			detailSQL = inputSQL;//query.constructDocumentQuery(null, getSelectedTagId());
 		}
 		if (summarySQL == null) {
+			@SuppressWarnings("unused")
 			AggregateFunction summary = getSummary();
 			summarySQL = inputSQL;//query.constructDocumentQuery((summary == null) ? AggregateFunction.Count : summary, getSelectedTagId());
 		}
