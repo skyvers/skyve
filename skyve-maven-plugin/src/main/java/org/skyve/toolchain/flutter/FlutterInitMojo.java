@@ -94,26 +94,29 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 
         try {
             Weld weld = bootstrapSkyve();
-
-            GeneratorConfig config = new FlutterGenerator.GeneratorConfig();
-            config.setUxui(uxui);
-            config.setProjectName(projectName);
-            config.setProjectPath(projectPath);
-            config.setCustomerName(customer);
-
-            modocWhitelist.forEach(config::addModocWhitelistEntry);
-
-            FlutterGenerator generator = new FlutterGenerator(config);
-            generator.generate();
-
-            weld.shutdown();
+            try {
+	            GeneratorConfig config = new FlutterGenerator.GeneratorConfig();
+	            config.setUxui(uxui);
+	            config.setProjectName(projectName);
+	            config.setProjectPath(projectPath);
+	            config.setCustomerName(customer);
+	
+	            modocWhitelist.forEach(config::addModocWhitelistEntry);
+	
+	            FlutterGenerator generator = new FlutterGenerator(config);
+	            generator.generate();
+            }
+	        finally {
+                weld.shutdown();
+            }
         } catch (Exception e) {
             getLog().error(e);
             throw new MojoExecutionException("Error while generating project", e);
         }
     }
 
-    private Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
+    @SuppressWarnings("resource") // NB for weld use
+	private Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
         configureClasspath(srcDir);
 
         String output = project.getBuild()
@@ -128,7 +131,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 
         Weld weld = new Weld();
         weld.addPackage(true, SkyveCDIProducer.class);
-//        weld.addPackage(true, WeldMarker.class); // class is in ejb project...
+//        weld.addPackage(true, WeldMarker.class); // class is in war project...
         weld.initialize();
 
         Class<BeforeShutdownImpl> bsi = BeforeShutdownImpl.class;
