@@ -83,6 +83,7 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("unchecked")
 	<T> List<T> list(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
+			@SuppressWarnings("deprecation") // TODO should use javax.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
 			if ((returnAliases == null) || (returnAliases.length == 0)) {
 				throw new DomainException("There should be at least 1 projected value in the query");
@@ -144,6 +145,7 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("resource")
 	<T> AutoClosingIterable<T> iterate(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
+			@SuppressWarnings("deprecation") // TODO should use javax.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
 			if ((returnAliases == null) || (returnAliases.length == 0)) {
 				throw new DomainException("There should be at least 1 projected value in the query");

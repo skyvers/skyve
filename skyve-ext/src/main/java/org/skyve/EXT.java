@@ -388,10 +388,10 @@ public class EXT {
 			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
 		}
 		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
-			result = "{pbkdf2}" + new Pbkdf2PasswordEncoder().encode(clearText);
+			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else if ("scrypt".equals(passwordHashingAlgorithm)) {
-			result = "{scrypt}" + new SCryptPasswordEncoder().encode(clearText);
+			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else {
 			throw new DomainException(passwordHashingAlgorithm + " not supported");

@@ -39,6 +39,7 @@ public class HibernateListener implements PostUpdateEventListener,
 	 */
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
+		@SuppressWarnings("deprecation") // TODO will be removed in Hibernate 6
 		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		EntityPersister ep = event.getPersister();
 		Object[] state = event.getState();

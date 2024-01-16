@@ -14,7 +14,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
 public class DesignSpecification {
-	private int alias = (int)('a');
+	private int alias = 'a';
 	private Map<String, String> joinAlias = null;
 	private Map<String, String> joins = null;
 	
@@ -708,7 +708,7 @@ public class DesignSpecification {
 		this.joins = joins;
 	}
 	
-	public void addJoin(String documentName, String alias, String join){
+	public void addJoin(@SuppressWarnings("hiding") String documentName, @SuppressWarnings("hiding") String alias, String join){
 		if(joins==null){
 			joins = new HashMap<>();
 			joinAlias = new HashMap<>();
@@ -777,27 +777,23 @@ public class DesignSpecification {
 	
 	public void resetDesign() {
 		if (Orientation.portrait.equals(getOrientation())) {
-			setWidth(595);
-			setColumnWidth(595 - getLeftMargin() - getRightMargin());
-			setHeight(842);
+			setWidth(Integer.valueOf(595));
+			setColumnWidth(Integer.valueOf(595 - getLeftMargin().intValue() - getRightMargin().intValue()));
+			setHeight(Integer.valueOf(842));
 		} else {
-			setWidth(842);
-			setColumnWidth(842 - getLeftMargin() - getRightMargin());
-			setHeight(595);
+			setWidth(Integer.valueOf(842));
+			setColumnWidth(Integer.valueOf(842 - getLeftMargin().intValue() - getRightMargin().intValue()));
+			setHeight(Integer.valueOf(595));
 		}
 	}
 
-	public Customer getCustomer() {
-		return CORE.getPersistence().getUser().getCustomer();
-	}
-
 	public Module getModule() {
-		final Customer customer = getCustomer();
+		final Customer customer = CORE.getCustomer();
 		return customer.getModule(getModuleName());
 	}
 
 	public Document getDocument() {
-		final Customer customer = getCustomer();
+		final Customer customer = CORE.getCustomer();
 		return getModule().getDocument(customer, getDocumentName());
 	}
 

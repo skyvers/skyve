@@ -2,6 +2,7 @@ package org.skyve.impl.generate.jasperreports;
 
 import java.util.HashMap;
 
+import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -70,7 +71,7 @@ public abstract class ReportDesignGenerator {
 
     @SuppressWarnings("static-method") // overridable
 	protected void addFields(DesignSpecification design) {
-        final Customer customer = design.getCustomer();
+        final Customer customer = CORE.getCustomer();
         final Module module = design.getModule();
         final Document document = design.getDocument();
         if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
@@ -233,7 +234,8 @@ public abstract class ReportDesignGenerator {
     }
 
     protected static ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {
-        ReportField f = new ReportField();
+    	StringBuilder mutableSJoin = sJoin;
+    	ReportField f = new ReportField();
         f.setParent(bean);
         switch (a.getAttributeType()) {
             case collection:
@@ -255,19 +257,19 @@ public abstract class ReportDesignGenerator {
                     f.setNameSql(a.getName() + ".bizKey as " + f.getName());
                 }
 
-                sJoin = addJoinForAssociation(new StringBuilder(), customer, bean, document, a, a.getName());
-                f.setJoinSql(sJoin.toString());
+                mutableSJoin = addJoinForAssociation(new StringBuilder(), customer, bean, document, a, a.getName());
+                f.setJoinSql(mutableSJoin.toString());
 
                 f.setTypeClass("java.lang.String");
                 break;
             default:
                 fieldPrefix.append(a.getName());
                 f.setName(fieldPrefix.toString());
-                if (sJoin.length() == 0) {
+                if (mutableSJoin.length() == 0) {
                     f.setNameSql("a." + f.getName());
                 } else {
-                    f.setJoinSql(sJoin.toString());
-                    f.setNameSql(bean.getJoinAlias().get(sJoin.toString()) + "." + a.getName() + " as " + f.getName());
+                    f.setJoinSql(mutableSJoin.toString());
+                    f.setNameSql(bean.getJoinAlias().get(mutableSJoin.toString()) + "." + a.getName() + " as " + f.getName());
                 }
 
                 if (DesignSpecification.Mode.bean.equals(bean.getMode())) {

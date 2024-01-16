@@ -211,6 +211,7 @@ public class ReportViewVisitor extends ViewVisitor {
 
 		} catch (Exception e) {
 			Util.LOGGER.warning("COULD NOT CONSTRUCT BAND " + detailBands.size() + " FOR WIDGET_ID " + widgetId);
+			e.printStackTrace();
 		}
 	}
 
@@ -254,7 +255,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		}
 
 		if (currentContainer == null) {
-			currentContainer = new Container(top, left, null, horizontal, type);
+			currentContainer = new Container(Integer.valueOf(top), Integer.valueOf(left), null, horizontal.booleanValue(), type);
 			currentContainer.setPixelWidth(pixelWidth);
 			currentContainer.setPercentageWidth(percentageWidth);
 			currentContainer.setResponsiveWidth(responsiveWidth);
@@ -266,7 +267,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			}
 
 		} else {
-			Container container = new Container(top, left, null, horizontal, type);
+			Container container = new Container(Integer.valueOf(top), Integer.valueOf(left), null, horizontal.booleanValue(), type);
 			container.setPixelWidth(pixelWidth);
 			container.setPercentageWidth(percentageWidth);
 			container.setResponsiveWidth(responsiveWidth);
@@ -576,8 +577,8 @@ public class ReportViewVisitor extends ViewVisitor {
 			int[] maxRowHeight = new int[container.getRows()];
 			for(int r= 0; r<container.getRows(); r++){
 				maxRowHeight[r] = 0;
-				for (Container col : container.getContainers()) {
-					for(ReportElement e: col.getElements()){
+				for (Container child : container.getContainers()) {
+					for(ReportElement e: child.getElements()){
 						if(e.getRow().intValue()==r){
 							if(e.getElementHeight()!=null && e.getElementHeight().intValue()>maxRowHeight[r]){
 								maxRowHeight[r] = e.getElementHeight().intValue();
@@ -595,10 +596,10 @@ public class ReportViewVisitor extends ViewVisitor {
 			}
 			
 			//and set top to be max height of previous row
-			for (Container col : container.getContainers()) {
-				col.setHeight(colHeight);
+			for (Container child : container.getContainers()) {
+				child.setHeight(colHeight);
 				
-				for(ReportElement e: col.getElements()){
+				for(ReportElement e: child.getElements()){
 					//set element top to be the max height of the previous row
 					if(e.getRow().intValue()>0){
 						e.setElementTop(absoluteRowHeight[e.getRow().intValue()-1]);
@@ -725,7 +726,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			case staticText:
 			case textField:
 				if (binding != null) {
-					fld = reportDesignGenerator.fieldFromBinding(design, customer, document, binding);
+					fld = ReportDesignGenerator.fieldFromBinding(design, customer, document, binding);
 				}
 
 				String valueExpression = null;
@@ -825,7 +826,7 @@ public class ReportViewVisitor extends ViewVisitor {
 				break;
 			case line:
 			case subreport:
-				fld = reportDesignGenerator.fieldFromBinding(design, customer, document, binding);
+				fld = ReportDesignGenerator.fieldFromBinding(design, customer, document, binding);
 				design.getFields().add(fld);
 				ReportElement s = new ReportElement(elementType, binding , binding, null, null, null, invisibleConditionName);
 				s.setPixelWidth(pixelWidth);
@@ -965,8 +966,8 @@ public class ReportViewVisitor extends ViewVisitor {
 		// get the attribute and collection type
 		for (Attribute attr : document.getAttributes()) {
 			if (attr.getName().equals(fld.getName())) {
-				Collection col = (Collection) attr;
-				sub.setCollectionType(CollectionType.valueOf(col.getType().name()));
+				Collection collection = (Collection) attr;
+				sub.setCollectionType(CollectionType.valueOf(collection.getType().name()));
 				break;
 			}
 		}
@@ -976,6 +977,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			subReportGenerator.populateDesign(sub);
 		} catch (Exception e){
 			Util.LOGGER.info("COULD NOT CREATE DEFAULT DESIGN FOR SUB REPORT " + sub.getName());
+			e.printStackTrace();
 		}
 		
 		design.getSubReports().add(sub);
@@ -1356,8 +1358,8 @@ public class ReportViewVisitor extends ViewVisitor {
 		}
 
 		// set the total rows for all columns 
-		for (Container col : currentContainer.getContainers()) {
-			col.setRows(currentContainer.getRows());
+		for (Container container : currentContainer.getContainers()) {
+			container.setRows(currentContainer.getRows());
 		}
 		
 		handleEndContainer();
@@ -1373,9 +1375,9 @@ public class ReportViewVisitor extends ViewVisitor {
 	public void visitedFormRow(FormRow arg0, boolean arg1, boolean arg2) {
 		// ignore row if all columns for this row are empty
 		boolean allEmpty = true;
-		for (Container col : currentContainer.getContainers()) {
-			for (ReportElement e : col.getElements()) {
-				if (e.getRow().equals(row)) {
+		for (Container container : currentContainer.getContainers()) {
+			for (ReportElement e : container.getElements()) {
+				if (e.getRow().equals(Integer.valueOf(row))) {
 					allEmpty = false;
 					break;
 				}

@@ -566,7 +566,7 @@ public class PluralUtil {
 			int r = 0;
 			try {
 				r = Integer.parseInt(s, 36);
-			} catch (NumberFormatException nfe) {
+			} catch (@SuppressWarnings("unused") NumberFormatException nfe) {
 				// swallow
 			}
 			return r;
@@ -612,7 +612,7 @@ public class PluralUtil {
 				return result;
 			try {
 				c = word.charAt(sI++);
-			} catch (IndexOutOfBoundsException e) {
+			} catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {
 				c = ' ';
 			}
 		}
