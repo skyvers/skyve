@@ -265,6 +265,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 												boolean required,
 												Integer length);
 	
+	@SuppressWarnings({"static-method", "unused"})
 	public String outputLink(String dataWidgetVar, 
 										String value, 
 										String href, 
@@ -327,6 +328,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	}
 */
 
+	@SuppressWarnings("unused")
 	public void addAjaxBehavior(RenderedComponent component, 
 									String eventName,
 									String collectionBinding,

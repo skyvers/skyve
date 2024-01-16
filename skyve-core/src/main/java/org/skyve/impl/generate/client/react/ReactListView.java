@@ -17,7 +17,9 @@ import org.skyve.metadata.view.model.list.ListModel;
 
 
 class ReactListView extends ReactComponent {
+	@SuppressWarnings("unused")
 	private Module module;
+	@SuppressWarnings("unused")
 	private Document document;
 	private String modelName;
 	private ListModel<Bean> model;
@@ -95,6 +97,7 @@ class ReactListView extends ReactComponent {
 		List<MetaDataQueryColumn> columns = (query != null) ? query.getColumns() : ((model == null) ? null : model.getColumns());
 		if (columns != null) {
 			User u = CORE.getUser();
+			@SuppressWarnings("unused")
 			Customer c = u.getCustomer();
 			for (MetaDataQueryColumn column : columns) {
 				// don't show hidden columns

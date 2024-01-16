@@ -9,7 +9,9 @@ import org.skyve.metadata.view.model.list.ListModel;
 
 
 public class ReactTreeView extends ReactComponent {
+	@SuppressWarnings("unused")
 	private ListModel<Bean> model;
+	@SuppressWarnings("unused")
 	private MetaDataQueryDefinition query;
 	
 	public ReactTreeView(ReactGenerator generator, String moduleName, String componentName) {

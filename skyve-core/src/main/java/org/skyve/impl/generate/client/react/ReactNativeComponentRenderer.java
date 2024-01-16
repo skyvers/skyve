@@ -215,7 +215,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		//imports.put("{DataTable}", "primereact/datatable");
 		RenderedComponent result = new RenderedComponent();
 		//result.setAfter("</DataTable>").setIndent("");
-		StringBuilder output = result.getOutput();
+		//StringBuilder output = result.getOutput();
 		//output.append("<DataTable value={this.state.").append(BindUtil.sanitiseBinding(grid.getBinding()));
 		//output.append("} selectionMode=\"single\" onSelectionChange={e => alert(e.data.bizModule + '.' + e.data.bizDocument + '.' + e.data.bizId)}>");
 		return result;
@@ -228,7 +228,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 											DataRepeater repeater) {
 		RenderedComponent result = new RenderedComponent();
 		//result.setAfter("</div>").setIndent("");
-		StringBuilder output = result.getOutput();
+		//StringBuilder output = result.getOutput();
 		//output.append("<div>dataRepeater");
 		return result;
 	}
@@ -245,7 +245,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 		//imports.put("{Column}", "primereact/column");
 		RenderedComponent result = new RenderedComponent();
 		//result.setIndent("");
-		StringBuilder output = result.getOutput();
+		//StringBuilder output = result.getOutput();
 		//output.append("<Column field=\"").append(BindUtil.sanitiseBinding(columnBinding));
 		//output.append("\" header=\"").append(columnTitle).append("\" />");
 		current.addChild(result);
@@ -266,7 +266,7 @@ System.out.println("end column " + current);
 															DataGridContainerColumn column) {
 System.out.println("conatin column " + column.getTitle());
 		RenderedComponent result = new RenderedComponent();
-		StringBuilder output = result.getOutput();
+		//StringBuilder output = result.getOutput();
 		//output.append("<span>addDataGridContainerColumn</span>");
 		current.addChild(result);
 		return result;
@@ -299,7 +299,7 @@ System.out.println("action column " + current);
 										ListGrid listGrid,
 										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent();
-		StringBuilder output = result.getOutput();
+		//StringBuilder output = result.getOutput();
 		//output.append("<span>ListGrid</span>");
 		return result;
 	}
@@ -315,7 +315,7 @@ System.out.println("action column " + current);
 											boolean showColumnHeaders,
 											boolean showGrid) {
 		RenderedComponent result = new RenderedComponent();
-		StringBuilder output = result.getOutput();
+		//StringBuilder output = result.getOutput();
 		//output.append("<span>listRepeater</span>");
 		return result;
 	}
