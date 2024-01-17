@@ -516,10 +516,11 @@ public abstract class ExpressionEvaluator {
 	
 	/**
 	 * Called by format and evaluate methods.
-	 * @param expression	The expression to evaluate 
-	 * @param bean	The context bean
-	 * @param format	Whether this is called by format(), otherwise called by evaluate().
-	 * @return	The evaluated expression.
+	 * 
+	 * @param expression The expression to evaluate
+	 * @param bean The context bean
+	 * @param format Whether this is called by format(), otherwise called by evaluate().
+	 * @return The evaluated expression.
 	 */
 	private static Object process(String expression, Bean bean, boolean format) {
 		String expressionWithoutSuffix = expression;
@@ -527,7 +528,7 @@ public abstract class ExpressionEvaluator {
 		
 		// Look for a format suffix and extract the format name
 		int pipeIndex = expression.lastIndexOf('|');
-		if (pipeIndex > -1) { // fpound a pipe format suffix
+		if (pipeIndex > -1) { // found a pipe format suffix
 			String formatSuffix = expression.substring(pipeIndex, expression.length() - 1); // assume '}' on end
 			if (! formatSuffix.isEmpty()) {
 				expressionWithoutSuffix = expression.replace(formatSuffix, "");
