@@ -189,7 +189,10 @@ public final class BindUtil {
 					(expression.charAt(length - 1) == '}'));
 	}
 	
-	public static String validateMessageExpressions(String message, Customer customer, Document... documents) {
+	public static String validateMessageExpressions(@Nonnull String message, 
+														// NB Binding Expression evaluators require a customer
+														@Nonnull Customer customer,
+														@Nonnull Document... documents) {
 		String error = null;
 		
 		StringBuilder result = new StringBuilder(message);

@@ -2,6 +2,9 @@ package org.skyve.metadata.module.query;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
@@ -37,7 +40,7 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	 * @param customer
 	 * @return
 	 */
-	public Module getDocumentModule(Customer customer);
+	public Module getDocumentModule(@Nonnull Customer customer);
 	
 	/**
 	 * 
@@ -63,5 +66,5 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	 * @param tagId
 	 * @return
 	 */
-	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType, String tagId);
+	public DocumentQuery constructDocumentQuery(@Nullable AggregateFunction summaryType, @Nullable String tagId);
 }

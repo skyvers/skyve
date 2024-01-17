@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SkyveException;
@@ -773,7 +776,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
-	protected <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
+	protected <T extends MetaData> T getModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		// If dynamic, use the models map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -949,10 +952,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	@Override
-	public Class<?> getJavaClass(Customer customer, String key) {
+	public Class<?> getJavaClass(@Nullable Customer customer, @Nonnull String key) {
 		Class<?> result = null;
 		
-		String newKey = vtable(customer.getName(), key);
+		String newKey = vtable((customer == null) ? null : customer.getName(), key);
 		if (newKey != null) {
 			result = classes.computeIfAbsent(newKey, k -> {
 				String className = k.replace('/', '.');
@@ -991,8 +994,8 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends MetaData> T getJavaMetaData(Customer customer, 
-															String key,
+	public final <T extends MetaData> T getJavaMetaData(@Nullable Customer customer, 
+															@Nonnull String key,
 															boolean assertExistence,
 															boolean runtime) {
 		T result = null;

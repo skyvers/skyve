@@ -132,7 +132,7 @@ public interface ProvidedRepository extends CachedRepository {
 
 	<T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime);
 	
-	<T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime);
+	<T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime);
 
 	<T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime);
 
