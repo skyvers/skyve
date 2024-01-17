@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.content.MimeType;
-import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.generate.ViewRenderer;
@@ -167,7 +166,6 @@ import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.FilterOperator;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -200,7 +198,6 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.chart.Bucket;
-import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -607,6 +604,7 @@ public class MetaDataServlet extends HttpServlet {
 				visitedDataSourceNames.add(dataSourceName);
 			}
 
+/*
 			private void addModelDataSource(Document itemDocument, String modelName) {
 				ListModel<Bean> model = itemDocument.getListModel(customer, modelName, true);
 				// Note we cannot set the bean on the model here as we are only generating out the UI.
@@ -619,6 +617,7 @@ public class MetaDataServlet extends HttpServlet {
 
 				String dataSourceName = new StringBuilder(32).append(drivingDocumentModuleName).append('_').append(itemDocument.getName()).append("__").append(modelName).toString();
 			}
+*/
 /*			
 			private void addDataSource() {
 				String documentName = query.getDocumentName();

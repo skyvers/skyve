@@ -1,18 +1,17 @@
 package org.skyve.impl.web.faces.converters.time;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 import javax.faces.convert.ConverterException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.skyve.domain.types.TimeOnly;
-import org.skyve.impl.web.faces.converters.time.HH24_MI_SS;
 import org.skyve.util.Time;
 
 public class HH24_MI_SSTest {
-
 	private HH24_MI_SS formatter;
 
 	@Before

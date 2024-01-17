@@ -92,7 +92,7 @@ public class WebUtil {
 					// credentials = username:password or customer/username:password
 					final String[] values = credentials.split(":", 2);
 					final String username = UtilImpl.processStringValue(values[0]);
-					final String password = UtilImpl.processStringValue(values[1]);
+//					final String password = UtilImpl.processStringValue(values[1]);
 					// TODO check password...
 					user = ProvidedRepositoryFactory.get().retrieveUser(username);
 					AbstractPersistence.get().setUser(user);

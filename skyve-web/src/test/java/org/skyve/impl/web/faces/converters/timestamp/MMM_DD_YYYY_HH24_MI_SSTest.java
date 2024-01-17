@@ -1,7 +1,8 @@
 package org.skyve.impl.web.faces.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 import javax.faces.convert.ConverterException;
 
@@ -11,7 +12,6 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
 
 public class MMM_DD_YYYY_HH24_MI_SSTest {
-
 	private MMM_DD_YYYY_HH24_MI_SS formatter;
 
 	@Before

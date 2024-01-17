@@ -617,7 +617,8 @@ public class SmartClientListServlet extends HttpServlet {
 		return result;
     }
     
-    static void checkCsrfToken(HttpSession session,
+    @SuppressWarnings("unused")
+	static void checkCsrfToken(HttpSession session,
 								HttpServletRequest request,
 								HttpServletResponse response,
 								Integer currentCsrfToken) {
