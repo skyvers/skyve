@@ -14,14 +14,10 @@ import modules.admin.ReportDesign.ReportDesignBizlet;
 import modules.admin.domain.ReportDesign;
 
 public class GenerateDefault implements ServerSideAction<ReportDesign> {
-
 	@Override
 	public ServerSideActionResult<ReportDesign> execute(ReportDesign bean, WebContext webContext) throws Exception {
-
 		final DesignSpecification designSpecification = ReportDesignBizlet.specificationFromDesignBean(bean);
-		final ReportDesignGenerator generator = new ReportDesignGeneratorFactory()
-				.getGeneratorForDesign(designSpecification);
-
+		final ReportDesignGenerator generator = ReportDesignGeneratorFactory.getGeneratorForDesign(designSpecification);
 		generator.populateDesign(designSpecification);
 
 		final JasperReportRenderer reportRenderer = new JasperReportRenderer(designSpecification);
@@ -34,5 +30,4 @@ public class GenerateDefault implements ServerSideAction<ReportDesign> {
 
 		return new ServerSideActionResult<>(bean);
 	}
-
 }

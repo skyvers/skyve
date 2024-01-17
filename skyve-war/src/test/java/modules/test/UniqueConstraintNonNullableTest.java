@@ -1,7 +1,7 @@
 package modules.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +12,6 @@ import org.skyve.util.test.TestUtil;
 import modules.test.domain.UniqueConstraintNonNullable;
 
 public class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
-
 	private UniqueConstraintNonNullable uniqueConstraintNonNullable;
 
 	@Before public void setup() throws Exception {
@@ -56,5 +55,4 @@ public class UniqueConstraintNonNullableTest extends AbstractSkyveTest {
 		// call the method under test
 		CORE.getPersistence().save(uniqueConstraintNonNullable2);
 	}
-
 }
