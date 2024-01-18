@@ -607,6 +607,10 @@ public class DoctorUtil {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		
 		Customer customer = repository.getCustomer(args[1]);
+		if (customer == null) {
+			throw new IllegalArgumentException("Customer " + args[1] + " does not exist.");
+		}
+		
 		try (PrintStream overview = new PrintStream(new FileOutputStream(String.format("%s%soverview.html", args[0], ProvidedRepository.MODULES_NAMESPACE)))) {
 			overview.println("<!DOCTYPE html>");
 			overview.println("<html>");

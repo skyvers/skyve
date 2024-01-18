@@ -265,7 +265,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return result;
 	}
 
-	private Document getDocumentInternal(boolean customerOverride, @Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
+	private @Nullable Document getDocumentInternal(boolean customerOverride, @Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		DocumentRef ref = module.getDocumentRefs().get(documentName);
 		if (ref == null) {
 			throw new IllegalArgumentException(documentName + " does not exist for this module - " + module.getName());
@@ -309,11 +309,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return ((result == null) || result.isEmpty()) ? null : (Document) result.get();
 	}
 
-	private Document convertDocument(String customerName,
-										String moduleName,
-										Module module,
-										String documentName,
-										DocumentMetaData document) {
+	private @Nonnull Document convertDocument(@Nullable String customerName,
+												@Nonnull String moduleName,
+												@Nonnull Module module,
+												@Nonnull String documentName,
+												@Nonnull DocumentMetaData document) {
 		StringBuilder metaDataName = new StringBuilder(128);
 		metaDataName = new StringBuilder(64).append(moduleName).append('.').append(documentName);
 		if (customerName != null) {
@@ -438,12 +438,12 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return result;
 	}
 
-	private View getViewInternal(String searchCustomerName, // the name of the customer to try to load
-									String searchUxUi, // the uxui to try to load {from getView()}
-									Customer customer,
-									Document document,
-									String uxui, // the current uxui
-									String viewName) {
+	private @Nullable View getViewInternal(@Nullable String searchCustomerName, // the name of the customer to try to load
+											@Nullable String searchUxUi, // the uxui to try to load {from getView()}
+											@Nullable Customer customer,
+											@Nonnull Document document,
+											@Nullable String uxui, // the current uxui
+											@Nonnull String viewName) {
 		StringBuilder viewKeySB = new StringBuilder(128);
 		if (searchCustomerName != null) {
 			viewKeySB.append(CUSTOMERS_NAMESPACE).append(searchCustomerName).append('/');
@@ -500,14 +500,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return ((result == null) || result.isEmpty()) ? null : (View) result.get();
 	}
 
-	private ViewImpl convertView(String searchCustomerName,
-									String searchUxUi, // only used to make the metadata name
-									Customer customer,
-									String moduleName,
-									String documentName,
-									Document document,
-									String uxui, // the current uxui used to resolve view components
-									ViewMetaData view) {
+	private @Nonnull ViewImpl convertView(@Nullable String searchCustomerName,
+											@Nullable String searchUxUi, // only used to make the metadata name
+											@Nullable Customer customer,
+											@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull Document document,
+											@Nullable String uxui, // the current uxui used to resolve view components
+											@Nonnull ViewMetaData view) {
 		StringBuilder metaDataNameSB = new StringBuilder(128);
 		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		if (searchUxUi != null) {
@@ -524,7 +524,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		result.setOverriddenCustomerName(searchCustomerName);
 		result.setOverriddenUxUiName(searchUxUi);
 
-		final Module documentModule = customer.getModule(document.getOwningModuleName());
+		final Module documentModule = getModule(customer, document.getOwningModuleName());
 		
 		// Convert accesses in ViewMetaData to view, which requires customer/module/document context
 		ViewUserAccessesMetaData accesses = view.getAccesses();
@@ -535,12 +535,12 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return result;
 	}
 	
-	private View scaffoldView(Customer customer, Document document, String viewName, String uxui) {
+	private View scaffoldView(@Nullable Customer customer, @Nonnull Document document, @Nonnull String viewName, @Nullable String uxui) {
 		if (ViewType.edit.toString().equals(viewName) || 
 				ViewType.pick.toString().equals(viewName) || 
 				ViewType.params.toString().equals(viewName)) {
 			ViewImpl result = new ViewGenerator(this).generate(customer, document, viewName);
-			final Module documentModule = customer.getModule(document.getOwningModuleName());
+			final Module documentModule = getModule(customer, document.getOwningModuleName());
 			result.resolve(uxui, customer, documentModule, document, true, this);
 			return result;
 		}
@@ -624,7 +624,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return result;
 	}
 
-	private ActionMetaData getMetaDataActionInternal(String customerName, Document document, String actionName) {
+	private @Nullable ActionMetaData getMetaDataActionInternal(@Nullable String customerName,
+																@Nonnull Document document,
+																@Nonnull String actionName) {
 		StringBuilder actionKeySB = new StringBuilder(128);
 		if (customerName != null) {
 			actionKeySB.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
@@ -672,10 +674,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return ((result == null) || result.isEmpty()) ? null : (ActionMetaData) result.get();
 	}
 
-	private ActionMetaData convertMetaDataAction(String customerName,
-													String moduleName,
-													String documentName,
-													ActionMetaData action) {
+	private @Nonnull ActionMetaData convertMetaDataAction(@Nullable String customerName,
+															@Nonnull String moduleName,
+															@Nonnull String documentName,
+															@Nonnull ActionMetaData action) {
 		StringBuilder metaDataNameSB = new StringBuilder(128);
 		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		metaDataNameSB.append(action.getName());
@@ -733,7 +735,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return result;
 	}
 
-	private BizletMetaData getMetaDataBizletInternal(String customerName, Document document) {
+	private @Nullable BizletMetaData getMetaDataBizletInternal(@Nullable String customerName, @Nonnull Document document) {
 		StringBuilder bizletKeySB = new StringBuilder(128);
 		if (customerName != null) {
 			bizletKeySB.append(CUSTOMERS_NAMESPACE).append(customerName).append('/');
@@ -781,10 +783,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 		return ((result == null) || result.isEmpty()) ? null : (BizletMetaData) result.get();
 	}
 
-	private BizletMetaData convertMetaDataBizlet(String customerName,
-													String moduleName,
-													String documentName,
-													BizletMetaData bizlet) {
+	private @Nonnull BizletMetaData convertMetaDataBizlet(@Nullable String customerName,
+															@Nonnull String moduleName,
+															@Nonnull String documentName,
+															@Nonnull BizletMetaData bizlet) {
 		StringBuilder metaDataNameSB = new StringBuilder(128);
 		metaDataNameSB.append(moduleName).append('.').append(documentName).append('.');
 		metaDataNameSB.append(documentName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);

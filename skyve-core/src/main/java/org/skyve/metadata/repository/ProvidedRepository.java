@@ -125,28 +125,30 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param runtime
 	 * @return
 	 */
-	<T extends Bean> DynamicImage<T> getDynamicImage(Customer customer,
-														Document document,
-														String imageName,
-														boolean runtime);
+	<T extends Bean> @Nonnull DynamicImage<T> getDynamicImage(@Nullable Customer customer,
+																@Nonnull Document document,
+																@Nonnull String imageName,
+																boolean runtime);
 
-	<T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime);
+	<T extends Bean, C extends Bean> @Nonnull ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer,
+																						@Nonnull Document document,
+																						@Nonnull String modelName, boolean runtime);
 	
-	<T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime);
+	<T extends Bean> @Nonnull MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime);
 
-	<T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime);
+	<T extends Bean> @Nonnull ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime);
 
-	<T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime);
+	<T extends Bean> @Nonnull ListModel<T> getListModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime);
 	
-	ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime);
+	@Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
-	BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime);
+	@Nonnull BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
-	BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime);
+	@Nonnull BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
-	DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime);
+	@Nonnull DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
-	UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime);
+	@Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 
 	void validateCustomerForGenerateDomain(@Nonnull Customer customer);
 
@@ -159,12 +161,12 @@ public interface ProvidedRepository extends CachedRepository {
 	/**
 	 * @return The global router that is not module specific.
 	 */
-	Router getGlobalRouter();
+	@Nonnull Router getGlobalRouter();
 
 	/**
 	 * @return A list of module-specific routers.
 	 */
-	List<Router> getModuleRouters();
+	@Nonnull List<Router> getModuleRouters();
 	
 	/**
 	 * 
@@ -173,28 +175,28 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param reportName
 	 * @return
 	 */
-	String getReportFileName(Customer customer, Document document, String reportName);
+	@Nullable String getReportFileName(@Nullable Customer customer, @Nonnull Document document, @Nonnull String reportName);
 	
-	@Nullable Class<?> getJavaClass(@Nonnull Customer customer, @Nonnull String fullyQualifiedJavaCodeName);
+	@Nullable Class<?> getJavaClass(@Nullable Customer customer, @Nonnull String fullyQualifiedJavaCodeName);
 	
 	/**
 	 * Overridden to return a UserImpl in this interface.
 	 */
 	@Override
-	UserImpl retrieveUser(String userPrincipal);
+	@Nullable UserImpl retrieveUser(@Nonnull String userPrincipal);
 	
 	/**
 	 * 
 	 * @param user
 	 */
-	void resetMenus(User user);
+	void resetMenus(@Nonnull User user);
 	
 	
 	/**
 	 * Populate the permissions available to a user.
 	 * @param user the user to populate permissions for
 	 */
-	void populatePermissions(User user);
+	void populatePermissions(@Nonnull User user);
 	
 	
 	/**
@@ -204,37 +206,37 @@ public interface ProvidedRepository extends CachedRepository {
 	 * and {@link Repository#resetMenus(User)}
 	 * @param user the user to reset user permissions for
 	 */
-	void resetUserPermissions(User user);
+	void resetUserPermissions(@Nonnull User user);
 	
 	/**
 	 * Populate user data from a data store using the given connection.
 	 * @param user User to populate.
 	 * @param connection	The connection to use.
 	 */
-	void populateUser(User user, Connection connection);
+	void populateUser(@Nonnull User user, @Nonnull Connection connection);
 	
 	/**
 	 * Return a list of admin.JobSchedule projections with at least the following document attributes populated
 	 * "jobName", startTime", endTime", "cronExpression", "disabled", "user"
 	 * @return	The Job Schedules
 	 */
-	List<Bean> retrieveAllJobSchedulesForAllCustomers();
+	@Nonnull List<Bean> retrieveAllJobSchedulesForAllCustomers();
 	
 	/**
 	 * Return a list of admin.ReportTemplate projections with at least the following document attributes populated
 	 * "name", startTime", endTime", "cronExpression", "scheduled", "user"
 	 * @return	The Report Templates.
 	 */
-	List<Bean> retrieveAllReportSchedulesForAllCustomers();
+	@Nonnull List<Bean> retrieveAllReportSchedulesForAllCustomers();
 	
 	/**
 	 * Return the name of the public user for a customer set on the Configuration document.
 	 * @param customerName	The customer to get the public user for.
 	 * @return	Return the public user name (without the customer name)
 	 */
-	public String retrievePublicUserName(String customerName);
+	public @Nullable String retrievePublicUserName(@Nonnull String customerName);
 	
-	default Document findNearestPersistentUnmappedSuperDocument(Customer customer, Module module, Document document) {
+	default @Nullable Document findNearestPersistentUnmappedSuperDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull Document document) {
 		Document result = null;
 		
 		Extends inherits = document.getExtends();
@@ -271,10 +273,10 @@ public interface ProvidedRepository extends CachedRepository {
 	/**
 	 * Return its delegating repository or itself if it is not a delegate.
 	 */
-	ProvidedRepository getDelegator();
+	@Nonnull ProvidedRepository getDelegator();
 
 	/**
 	 * Set the delegating repository.
 	 */
-	void setDelegator(ProvidedRepository delegator);
+	void setDelegator(@Nullable ProvidedRepository delegator);
 }

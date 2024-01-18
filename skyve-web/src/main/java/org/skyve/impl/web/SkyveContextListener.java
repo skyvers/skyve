@@ -124,12 +124,18 @@ public class SkyveContextListener implements ServletContextListener {
 			if (UtilImpl.CUSTOMER != null) {
 				// if a default customer is specified, only notify that one
 				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
+				if (internalCustomer == null) {
+					throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+				}
 				internalCustomer.notifyStartup();
 			}
 			else {
 				// notify all customers
 				for (String customerName : repository.getAllCustomerNames()) {
 					CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+					if (internalCustomer == null) {
+						throw new IllegalStateException("Customer " + customerName + " does not exist.");
+					}
 					internalCustomer.notifyStartup();
 				}
 			}
@@ -804,12 +810,18 @@ public class SkyveContextListener implements ServletContextListener {
 								if (UtilImpl.CUSTOMER != null) {
 									// if a default customer is specified, only notify that one
 									CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
+									if (internalCustomer == null) {
+										throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+									}
 									internalCustomer.notifyShutdown();
 								}
 								else {
 									// notify all customers
 									for (String customerName : repository.getAllCustomerNames()) {
 										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+										if (internalCustomer == null) {
+											throw new IllegalStateException("Customer " + customerName + " does not exist.");
+										}
 										internalCustomer.notifyShutdown();
 									}
 								}

@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -44,6 +45,9 @@ public final class JPADomainGenerator extends DomainGenerator {
 	public void generate() throws Exception {
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
+			if (customer == null) {
+				throw new MetaDataException("Customer " + customerName + " does not exist.");
+			}
 
 			for (Module module : customer.getModules()) {
 				for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {

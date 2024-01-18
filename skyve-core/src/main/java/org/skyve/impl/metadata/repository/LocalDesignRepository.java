@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.domain.types.formatters.Formatters;
@@ -73,11 +76,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 		super();
 	}
 
-	public LocalDesignRepository(String absolutePath) {
+	public LocalDesignRepository(@Nonnull String absolutePath) {
 		super(absolutePath);
 	}
 
-	public LocalDesignRepository(String absolutePath, boolean loadClasses) {
+	public LocalDesignRepository(@Nonnull String absolutePath, boolean loadClasses) {
 		super(absolutePath, loadClasses);
 	}
 
@@ -131,7 +134,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
-	private static void removeInaccessibleItems(String moduleName, Menu menu, User user) {
+	private static void removeInaccessibleItems(@Nonnull String moduleName, @Nonnull Menu menu, @Nonnull User user) {
 		// Check all the child items to see if we have access
 		Iterator<MenuItem> i = menu.getItems().iterator();
 		while (i.hasNext()) {
@@ -393,7 +396,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
-	private void checkMenu(List<MenuItem> items, Customer customer, Module module) {
+	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup) {
 				checkMenu(((MenuGroup) item).getItems(), customer, module);
@@ -770,7 +773,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 */
 				}
 				else if (access.isPreviousComplete()) {
-					final Module module = customer.getModule(document.getOwningModuleName());
+					final Module module = getModule(customer, document.getOwningModuleName());
 					final String binding = access.getComponent();
 					try {
 						BindUtil.getMetaDataForBinding(customer, module, document, binding);

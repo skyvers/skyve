@@ -15,6 +15,7 @@ public class CustomerOverrideTests extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	public void testCustomerOverridesExist() throws Exception {
 		Customer customer = CORE.getRepository().getCustomer("test");
+		Assert.assertNotNull(customer);
 		Module module = customer.getModule("test");
 		Assert.assertNotNull(module.getRole("TestRole"));
 		Document document = module.getDocument(customer, AllAttributesPersistent.DOCUMENT_NAME);

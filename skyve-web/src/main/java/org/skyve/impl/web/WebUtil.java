@@ -62,8 +62,11 @@ public class WebUtil {
 		// then the session user needs to be reset.
 		if ((user != null) && (userPrincipal != null)) {
 			UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-			if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
-					user.getName().equals(principalUser.getName()))) {
+			if (principalUser == null) {
+				user = null;
+			}
+			else if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
+							user.getName().equals(principalUser.getName()))) {
 				user = null;
 			}
 		}

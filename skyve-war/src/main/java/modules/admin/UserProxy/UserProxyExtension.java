@@ -21,19 +21,21 @@ public class UserProxyExtension extends UserProxy {
 	 * @return the metadata user that is this user
 	 */
 	public org.skyve.metadata.user.User toMetaDataUser() {
-		UserImpl metaDataUser = null;
+		UserImpl result = null;
 		if (isPersisted()) {
 			// Populate the user using the persistence connection since it might have just been inserted and not committed yet
-			metaDataUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ?
-																						getBizCustomer() + "/" + getUserName() : 
-																						getUserName());
-			metaDataUser.clearAllPermissionsAndMenus();
-			@SuppressWarnings("resource")
-			Connection connection = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
-			ProvidedRepositoryFactory.get().populateUser(metaDataUser, connection);
+			result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ?
+																					getBizCustomer() + "/" + getUserName() : 
+																					getUserName());
+			if (result != null) {
+				result.clearAllPermissionsAndMenus();
+				@SuppressWarnings("resource")
+				Connection connection = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
+				ProvidedRepositoryFactory.get().populateUser(result, connection);
+			}
 		}
 
-		return metaDataUser;
+		return result;
 	}
 
 	/**

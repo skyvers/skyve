@@ -615,6 +615,9 @@ public class ViewGenerator {
 
 		// If the module and/or document was not specified, we will just generate all edit views.
 		if ((moduleName == null) || (documentName == null)) {
+			if (customer == null) {
+				throw new MetaDataException("Customer " + customerName + " does not exist.");
+			}
 			for (Module module : customer.getModules()) {
 				for (Map.Entry<String, Module.DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 					Module.DocumentRef documentRef = entry.getValue();

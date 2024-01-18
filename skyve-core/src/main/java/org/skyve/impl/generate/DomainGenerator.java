@@ -222,6 +222,9 @@ public abstract class DomainGenerator {
 	public void validate(String customerName) throws Exception {
 		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
+		if (customer == null) {
+			throw new MetaDataException(customerName + " does not exist.");
+		}
 		if (debug) System.out.println("Validate customer " + customerName);
 		repository.validateCustomerForGenerateDomain(customer);
 		for (Module module : customer.getModules()) {

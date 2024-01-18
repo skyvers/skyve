@@ -193,6 +193,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// Restrict the base class definitions based on customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			final Customer customer = repository.getCustomer(customerName);
+			if (customer == null) {
+				throw new MetaDataException("Customer " + customerName + " does not exist.");
+			}
 			String modulesPath = new StringBuilder(256).append(generatedSrcPath)
 														.append(ProvidedRepository.CUSTOMERS_NAMESPACE)
 														.append(customerName)

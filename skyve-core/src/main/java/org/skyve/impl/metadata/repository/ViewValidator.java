@@ -145,7 +145,7 @@ class ViewValidator extends ViewVisitor {
 					CustomerImpl customer, 
 					DocumentImpl document, 
 					String uxui) {
-		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view, uxui);
+		super(customer, (ModuleImpl) repository.getModule(customer, document.getOwningModuleName()), document, view, uxui);
 		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 	}
@@ -326,7 +326,7 @@ class ViewValidator extends ViewVisitor {
 			}
 			
 			DocumentImpl baseDocument = (DocumentImpl) currentModule.getDocument(customer, extension.getDocumentName());
-			ModuleImpl baseModule = (ModuleImpl) customer.getModule(baseDocument.getOwningModuleName());
+			ModuleImpl baseModule = (ModuleImpl) repository.getModule(customer, baseDocument.getOwningModuleName());
 			validateCondition(baseModule, baseDocument, testConditionName, widgetIdentifier);
 		}
 	}
@@ -349,7 +349,7 @@ class ViewValidator extends ViewVisitor {
 													String parentWidgetIdentifier,
 													Document drivingDocument) {
 		if (parameters != null) {
-			Module drivingModule = (drivingDocument == null) ? null : customer.getModule(drivingDocument.getOwningModuleName());
+			Module drivingModule = (drivingDocument == null) ? null : repository.getModule(customer, drivingDocument.getOwningModuleName());
 
 			for (FilterParameter parameter : parameters) {
 				String filterBinding = parameter.getFilterBinding();
@@ -1066,7 +1066,7 @@ class ViewValidator extends ViewVisitor {
 	private void validateChartModel(ChartBuilderMetaData model, String chartIdentifier) {
 		Module contextModule = null;
 		try {
-			contextModule = customer.getModule(model.getModuleName());
+			contextModule = repository.getModule(customer, model.getModuleName());
 		}
 		catch (Exception e) {
 			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid moduleName of " + model.getModuleName(), e);
@@ -1664,7 +1664,7 @@ class ViewValidator extends ViewVisitor {
 				
 				if (referenceModuleName.indexOf('{') < 0) {
 					try {
-						result = (ModuleImpl) customer.getModule(referenceModuleName);
+						result = (ModuleImpl) repository.getModule(customer, referenceModuleName);
 						if (result == null) {
 							throw new MetaDataException(referenceModuleName + " DNE");
 						}
@@ -1846,7 +1846,7 @@ class ViewValidator extends ViewVisitor {
 						if (targetReference == null) {
 							throw new MetaDataException("Target Reference " + dataWidgetBinding + " DNE");
 						}
-						ModuleImpl targetModule = (ModuleImpl) customer.getModule(target.getDocument().getOwningModuleName());
+						ModuleImpl targetModule = (ModuleImpl) repository.getModule(customer, target.getDocument().getOwningModuleName());
 						DocumentImpl targetDocument = (DocumentImpl) targetModule.getDocument(customer, targetReference.getDocumentName());
 						
 						// This is a container column of an existing row in a table/grid - so get the edit view
