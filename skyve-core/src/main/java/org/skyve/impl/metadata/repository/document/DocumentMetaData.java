@@ -464,10 +464,13 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 				if (BindUtil.isImplicit(value)) {
 					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is already an implicit attribute.");
 				}
+				if (! value.equals(BindUtil.toJavaInstanceIdentifier(value))) {
+					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is not a valid attribute name. This should be camel case with no punctuation");
+				}
 				if (! attributeNames.add(value)) {
 					throw new MetaDataException(metaDataName + " : Duplicate attribute named " + value);
 				}
-
+				
 				value = attribute.getDisplayName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The attribute [displayName] is required for attribute " + attribute.getName());
@@ -850,13 +853,20 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 				if (conditionName == null) {
 					throw new MetaDataException(metaDataName + " : A condition [name] is required.");
 				}
+				// Check that conditions do not start with is or not and are a valid java bean property
+				if (conditionName.startsWith("is")) {
+					throw new MetaDataException(metaDataName + " Condition name " + conditionName + " cannot start with 'is' - the 'is' prefix is generated in the bean method.");
+				}
 				if (conditionName.startsWith("not")) {
 					throw new MetaDataException(metaDataName + " : Condition name " + conditionName + " cannot start with 'not'.  The negated condition will be generated automatically.");
 				}
-				if (! attributeNames.add(conditionName)) {
-					throw new MetaDataException(metaDataName + " : Condition name clashes with field/association/reference/condition named " + 
-													conditionName);
+				if (! conditionName.equals(BindUtil.toJavaInstanceIdentifier(conditionName))) {
+					throw new MetaDataException(metaDataName + " : The condition named " + conditionName + " is not a valid condition name. This should be camel case with no punctuation.");
 				}
+				if (! attributeNames.add(conditionName)) {
+					throw new MetaDataException(metaDataName + " : Condition name clashes with field/association/reference/condition named " + conditionName);
+				}
+
 				String conditionExpression = conditionMetaData.getExpression();
 				if (conditionExpression == null) {
 					throw new MetaDataException(metaDataName + " : A condition [expression] is required.");
