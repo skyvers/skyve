@@ -656,12 +656,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 					Collection collection = (Collection) reference;
 					for (Ordering ordering : collection.getOrdering()) {
 						String by = ordering.getBy();
+						TargetMetaData target = null; 
 						try {
-							BindUtil.validateBinding(customer, targetModule, targetDocument, by);
+							target = BindUtil.validateBinding(customer, targetModule, targetDocument, by);
 						}
 						catch (MetaDataException e) {
 							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
 															" in document " +  documentIdentifier + " is invalid", e);
+						}
+						if (! BindUtil.isAScalarType(target.getType())) {
+							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
+															" in document " +  documentIdentifier + " is not scalar.");
 						}
 					}
 				}
