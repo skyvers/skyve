@@ -799,6 +799,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 															relation.getName());
 						}
 
+						// Ordered and Ordering are mutually exclusive
+						List<Ordering> orderings = collection.getOrdering();
+						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && 
+								(orderings != null) && (! orderings.isEmpty())) {
+							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " + 
+															relation.getName());
+						}
+						
 						java.lang.Boolean ownerDatabaseIndex = collection.getOwnerDatabaseIndex();
 						java.lang.Boolean elementDatabaseIndex = collection.getElementDatabaseIndex();
 
@@ -807,7 +815,6 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 						// This means, no compound bindings and references must actually be to foreign key columns.
 						// We need to indicate to the framework that we will need to order the collection ourselves in memory.
 						if (collection.isPersistent()) {
-							List<Ordering> orderings = collection.getOrdering();
 							if (orderings != null) {
 								for (Ordering ordering : orderings) {
 									String by = ordering.getBy();
