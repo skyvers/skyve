@@ -172,18 +172,17 @@ public abstract class ExpressionEvaluator {
 		int pipeIndex = expression.lastIndexOf('|');
 		if (pipeIndex > -1) { // found a pipe format suffix
 			String formatSuffix = expression.substring(pipeIndex, expression.length() - 1); // assume '}' on end
-			if (! formatSuffix.isEmpty()) {
-				expressionWithoutSuffix = expression.replace(formatSuffix, "");
-				formatName = UtilImpl.processStringValue(formatSuffix.substring(1)); //remove '|' at beginning
-				if (formatName != null) {
-					formatter = Formatters.get(formatName);
-					if (formatter == null) {
-						return "Formatter " + formatName + " does not exist";
-					}
-					if ((returnType != null) && (! returnType.isAssignableFrom(String.class))) {
-						return "Formatter " + formatName + " evaluates to a String, not " + returnType;
-					}
-				}
+			expressionWithoutSuffix = expression.replace(formatSuffix, "");
+			formatName = UtilImpl.processStringValue(formatSuffix.substring(1)); //remove '|' at beginning
+			if (formatName == null) {
+				return "Formatter expected after '|' in expression " + expression;
+			}
+			formatter = Formatters.get(formatName);
+			if (formatter == null) {
+				return "Formatter " + formatName + " does not exist";
+			}
+			if ((returnType != null) && (! returnType.isAssignableFrom(String.class))) {
+				return "Formatter " + formatName + " evaluates to a String, not " + returnType;
 			}
 		}
 		
@@ -193,6 +192,9 @@ public abstract class ExpressionEvaluator {
 		int colonIndex = expressionWithoutSuffix.indexOf(':');
 		if (colonIndex < 0) { // no prefix
 			String expressionWithoutPrefixOrSuffix = expressionWithoutSuffix.substring(1, expressionWithoutSuffix.length() - 1).trim(); // no curly braces
+			if (expressionWithoutPrefixOrSuffix.isEmpty()) {
+				return "Nothing to evaluate in expression " + expression;
+			}
 			
 			// String implicit expressions
 			if (USER_EXPRESSION.equals(expressionWithoutPrefixOrSuffix) ||
@@ -229,6 +231,9 @@ public abstract class ExpressionEvaluator {
 			// Get the prefix
 			String prefix = expressionWithoutSuffix.substring(1, colonIndex).trim();
 			String expressionWithoutPrefixOrSuffix = expressionWithoutSuffix.substring(colonIndex + 1, expressionWithoutSuffix.length() - 1).trim(); // no curly braces
+			if (expressionWithoutPrefixOrSuffix.isEmpty()) {
+				return "Nothing to evaluate in expression " + expression;
+			}
 	
 			// Select the evaluator
 			ExpressionEvaluator eval = EVALUATORS.get(prefix);
@@ -262,7 +267,7 @@ public abstract class ExpressionEvaluator {
 	 * @param binding	The binding to prefix with.
 	 * @return	The prefixed expression.
 	 */
-	public static String prefixBinding(String expression, String binding) {
+	public static @Nonnull String prefixBinding(@Nonnull String expression, @Nonnull String binding) {
 		String expressionWithoutSuffix = expression; // includes curly braces
 		String formatName = null; // The formatter in the format suffix
 

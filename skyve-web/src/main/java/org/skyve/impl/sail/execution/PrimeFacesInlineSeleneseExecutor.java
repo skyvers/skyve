@@ -499,15 +499,18 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		Module m = c.getModule(context.getModuleName());
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-		String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
-		d = m.getDocument(c, newDocumentName);
-		String newModuleName = d.getOwningModuleName();
-		
-		// Push it
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(newModuleName);
-		push.setDocumentName(newDocumentName);
-		push.execute(this);
+		Relation relation = (Relation) target.getAttribute();
+		if (relation != null) { // should always be
+			String newDocumentName = relation.getDocumentName();
+			d = m.getDocument(c, newDocumentName);
+			String newModuleName = d.getOwningModuleName();
+			
+			// Push it
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(newModuleName);
+			push.setDocumentName(newDocumentName);
+			push.execute(this);
+		}
 	}
 	
 	@Override
@@ -606,15 +609,18 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			Module m = c.getModule(context.getModuleName());
 			Document d = m.getDocument(c, context.getDocumentName());
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-			String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
-			d = m.getDocument(c, newDocumentName);
-			String newModuleName = d.getOwningModuleName();
-			
-			// Push it
-			PushEditContext push = new PushEditContext();
-			push.setModuleName(newModuleName);
-			push.setDocumentName(newDocumentName);
-			push.execute(this);
+			Relation relation = (Relation) target.getAttribute();
+			if (relation != null) { // should always be
+				String newDocumentName = relation.getDocumentName();
+				d = m.getDocument(c, newDocumentName);
+				String newModuleName = d.getOwningModuleName();
+				
+				// Push it
+				PushEditContext push = new PushEditContext();
+				push.setModuleName(newModuleName);
+				push.setDocumentName(newDocumentName);
+				push.execute(this);
+			}
 		}
 	}
 

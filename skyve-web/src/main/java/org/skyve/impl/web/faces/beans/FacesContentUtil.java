@@ -66,6 +66,9 @@ public class FacesContentUtil {
 				Document d = m.getDocument(customer, bean.getBizDocument());
 				contentOwner = (Bean) BindUtil.instantiateAndGet(u, m, d, bean, penultimateBinding);
 			}
+			if (contentOwner == null) { // should never happen
+				throw new IllegalStateException("contentOwner is null");
+			}
 			contentAttributeName = binding.substring(contentBindingLastDotIndex + 1);
 		}
 

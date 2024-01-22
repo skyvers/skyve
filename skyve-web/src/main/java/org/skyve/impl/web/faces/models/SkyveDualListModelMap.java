@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -166,6 +167,9 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 				if (collection != null) {
 					TargetMetaData tmd = Binder.getMetaDataForBinding(c, m, d, binding);
 					Relation r = (Relation) tmd.getAttribute();
+					if (r == null) { // should never happen
+						throw new MetaDataException(binding + " does not point to a relation");
+					}
 					Document rd = m.getDocument(c, r.getDocumentName());
 
 					// process the existing beans applying the changes and ordering from the model target

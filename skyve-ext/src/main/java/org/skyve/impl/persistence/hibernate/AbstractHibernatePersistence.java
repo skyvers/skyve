@@ -1500,9 +1500,10 @@ t.printStackTrace();
 								@SuppressWarnings("unchecked")
 								List<Bean> unmergedCollection = (List<Bean>) BindUtil.get(unmergedPart, attributeName);
 	
-								// ensure that we do not try to add the elements
-								// of a collection to itself
-								if (mergedCollection != unmergedCollection) {
+								// ensure that we do not try to add the elements of a collection to itself
+								if ((mergedCollection != null) && 
+										(unmergedCollection != null) &&
+										(mergedCollection != unmergedCollection)) {
 									mergedCollection.clear();
 									mergedCollection.addAll(unmergedCollection);
 								}
@@ -2860,31 +2861,32 @@ public void doWorkOnConnection(Session session) {
 										" from bean " + owningBean, e);
 		}
 		
-		
-		for (Bean elementBean : elementBeans) {
-			query.append("select * from ").append(persistentIdentifier).append('_').append(collectionName);
-			query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
-			query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
-			query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
-
-			SQL sql = newSQL(query.toString());
-			sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
-			sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
-
-			boolean notExists = sql.tupleResults().isEmpty();
-			query.setLength(0);
-			if (notExists) {
-				query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
-				query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
-				query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
-				query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
-
-				sql = newSQL(query.toString());
+		if (elementBeans != null) {
+			for (Bean elementBean : elementBeans) {
+				query.append("select * from ").append(persistentIdentifier).append('_').append(collectionName);
+				query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
+				query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
+				query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
+	
+				SQL sql = newSQL(query.toString());
 				sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
 				sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
-
-				sql.execute();
+	
+				boolean notExists = sql.tupleResults().isEmpty();
 				query.setLength(0);
+				if (notExists) {
+					query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
+					query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
+					query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+					query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
+	
+					sql = newSQL(query.toString());
+					sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
+					sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
+	
+					sql.execute();
+					query.setLength(0);
+				}
 			}
 		}
 	}
@@ -2916,12 +2918,14 @@ public void doWorkOnConnection(Session session) {
 										" from bean " + owningBean, e);
 		}
 		
-		for (Bean elementBean : elementBeans) {
-			SQL sql = newSQL(query.toString());
-			sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
-			sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
-
-			sql.execute();
+		if (elementBeans != null) {
+			for (Bean elementBean : elementBeans) {
+				SQL sql = newSQL(query.toString());
+				sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
+				sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
+	
+				sql.execute();
+			}
 		}
 	}
 

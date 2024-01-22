@@ -380,7 +380,11 @@ public class FacesView<T extends Bean> extends Harness {
 		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
 		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
 		// change list var back to Data Widget binding - '_' to '.' and remove "Row" from the end.
-		navigate(BindUtil.unsanitiseBinding(dataWidgetBinding).substring(0, dataWidgetBinding.length() - 3), bizId);
+		dataWidgetBinding = BindUtil.unsanitiseBinding(dataWidgetBinding);
+		if (dataWidgetBinding == null) { // should never happen
+			throw new FacesException("Cannot zoom in on data grid row selection as there is no binding");
+		}
+		navigate(dataWidgetBinding.substring(0, dataWidgetBinding.length() - 3), bizId);
 	}
 	
 	// Called by ZoomIn widget
@@ -518,6 +522,9 @@ public class FacesView<T extends Bean> extends Harness {
 			if (collectionBinding != null) {
 				@SuppressWarnings("unchecked")
 				final List<Bean> list = (List<Bean>) BindUtil.get(getCurrentBean().getBean(), collectionBinding);
+				if (list == null) { // should never occur
+					throw new FacesException(collectionBinding + " points to null value");
+				}
 				list.add(toIndex, list.remove(fromIndex));
 
 				for (int i = 0, l = list.size(); i < l; i++) {

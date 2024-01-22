@@ -123,7 +123,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 									owningBean = bean;
 								}
 								// If the owningBean is persisted then the embedded object has been persisted also
-								if (owningBean.isPersisted()) {
+								if ((owningBean != null) && owningBean.isPersisted()) {
 									persistOne(c, visitedDocument, (PersistentBean) visitedBean);
 								}
 							}

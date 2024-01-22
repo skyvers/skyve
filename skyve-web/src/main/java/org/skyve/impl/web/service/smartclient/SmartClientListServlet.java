@@ -661,6 +661,7 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			
 			binding = BindUtil.unsanitiseBinding(binding);
+			@SuppressWarnings("null") // BindUtil.unsantiseBinding will never return null for non-null argument
 			boolean parameter = (binding.charAt(0) == ':');
 			if (parameter) {
 				binding = binding.substring(1); // lose the colon

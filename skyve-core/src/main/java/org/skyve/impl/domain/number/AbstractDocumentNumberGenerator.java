@@ -70,11 +70,8 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 					List<Bean> beans = query.projectedResults();
 					if (! beans.isEmpty()) {
 						Object o = Binder.get(beans.get(0), "MaxNumber");
-						if (o instanceof Integer) {
-							lastNumber = ((Integer) Binder.get(beans.get(0), "MaxNumber")).toString();
-						}
-						else {
-							lastNumber = (String) Binder.get(beans.get(0), "MaxNumber");
+						if (o != null) {
+							lastNumber = o.toString();
 						}
 					}
 				}

@@ -3,6 +3,8 @@ package org.skyve.metadata.customer;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -56,7 +58,7 @@ public interface Customer extends NamedMetaData, PersistentMetaData {
 	 * @param moduleName
 	 * @return
 	 */
-	public Module getModule(String moduleName);
+	public @Nonnull Module getModule(@Nonnull String moduleName);
 	
 	/**
 	 * 

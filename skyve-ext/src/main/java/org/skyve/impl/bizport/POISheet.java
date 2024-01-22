@@ -200,9 +200,11 @@ public final class POISheet implements BizPortSheet {
 																			drivingDocument,
 																			collectionBinding);
 					Reference reference = (Reference) target.getAttribute();
-					Document referenceDocument = drivingModule.getDocument(customer, reference.getDocumentName());
-					column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(),
-															referenceDocument.getName()));
+					if (reference != null) { // should always be
+						Document referenceDocument = drivingModule.getDocument(customer, reference.getDocumentName());
+						column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(),
+																referenceDocument.getName()));
+					}
 				}
 			}
 			addColumn(binding, column);

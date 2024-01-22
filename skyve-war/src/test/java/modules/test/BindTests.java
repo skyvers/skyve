@@ -469,6 +469,12 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{| }", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{|", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{ |", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:|}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean: |}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:| }", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:|", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean: |", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("|}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("|", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{text\\}", c, aapd));

@@ -453,16 +453,18 @@ public class EXT {
 			// Add roles
 			@SuppressWarnings("unchecked")
 			List<Bean> roles = (List<Bean>) BindUtil.get(user, AppConstants.ROLES_ATTRIBUTE_NAME);
-			for (Module m : c.getModules()) {
-				String moduleName = m.getName();
-				for (Role r : m.getRoles()) {
-					Bean role = userRoleDoc.newInstance(u);
-					BindUtil.set(role, ChildBean.PARENT_NAME, user);
-					BindUtil.set(role, AppConstants.ROLE_NAME_ATTRIBUTE_NAME, String.format("%s.%s", moduleName, r.getName()));
-					roles.add(role);
+			if (roles != null) { // should always be
+				for (Module m : c.getModules()) {
+					String moduleName = m.getName();
+					for (Role r : m.getRoles()) {
+						Bean role = userRoleDoc.newInstance(u);
+						BindUtil.set(role, ChildBean.PARENT_NAME, user);
+						BindUtil.set(role, AppConstants.ROLE_NAME_ATTRIBUTE_NAME, String.format("%s.%s", moduleName, r.getName()));
+						roles.add(role);
+					}
 				}
 			}
-
+			
 			// Save the bootstrap user
 			p.save(user);
 		}

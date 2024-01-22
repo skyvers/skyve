@@ -273,29 +273,30 @@ public abstract class AbstractDataFileLoader {
 			TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, field.getBinding());
 
 			Attribute attr = tm.getAttribute();
-			if (field.getConverter() == null && attr instanceof ConvertableField) {
-				ConvertableField fld = (ConvertableField) attr;
-				field.setConverter(fld.getConverterForCustomer(CORE.getPersistence().getUser().getCustomer()));
-			}
-
-			// special case attribute is an association - go to bizkey
-			if (AttributeType.association.equals(attr.getAttributeType())) {
-
-				String newBinding = Binder.createCompoundBinding(field.getBinding(), Bean.BIZ_KEY);
-				field.setAttribute(attr);
-				field.setBinding(newBinding);
-				field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
-				if (debugMode) {
-					Util.LOGGER.info("Finalising field for association " + attr.getLocalisedDisplayName());
+			if (attr != null) { // should always be
+				if (field.getConverter() == null && attr instanceof ConvertableField) {
+					ConvertableField fld = (ConvertableField) attr;
+					field.setConverter(fld.getConverterForCustomer(CORE.getPersistence().getUser().getCustomer()));
 				}
-			} else {
-				// default
-				field.setAttribute(attr);
-				if (debugMode) {
-					Util.LOGGER.info("Finalising field for scalar " + attr.getLocalisedDisplayName());
+	
+				// special case attribute is an association - go to bizkey
+				if (AttributeType.association.equals(attr.getAttributeType())) {
+					String newBinding = Binder.createCompoundBinding(field.getBinding(), Bean.BIZ_KEY);
+					field.setAttribute(attr);
+					field.setBinding(newBinding);
+					field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
+					if (debugMode) {
+						Util.LOGGER.info("Finalising field for association " + attr.getLocalisedDisplayName());
+					}
+				} else {
+					// default
+					field.setAttribute(attr);
+					if (debugMode) {
+						Util.LOGGER.info("Finalising field for scalar " + attr.getLocalisedDisplayName());
+					}
 				}
 			}
-
+			
 			if (debugMode) {
 				StringBuilder log = new StringBuilder();
 				log.append("Field added for binding ").append(field.getBinding());

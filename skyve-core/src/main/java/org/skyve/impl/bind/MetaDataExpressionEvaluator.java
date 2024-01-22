@@ -8,11 +8,10 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
@@ -50,101 +49,25 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 		}
 
 		String error = null;
-
-		Document contextDocument = document;
-		String ultimateBinding = expression;
-		int lastDotIndex = expression.lastIndexOf('.');
-		if (lastDotIndex > 0) {
-			String penultimateBinding = expression.substring(0, lastDotIndex);
-			ultimateBinding = expression.substring(lastDotIndex + 1);
-			try {
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
-				Attribute relation = target.getAttribute();
-				if (relation instanceof Relation) {
-					Module owningModule = customer.getModule(target.getDocument().getOwningModuleName());
-					String contextDocumentName = ((Relation) relation).getDocumentName();
-					contextDocument = owningModule.getDocument(customer, contextDocumentName);
-				}
-				else {
-					if (ChildBean.PARENT_NAME.equals(penultimateBinding) || penultimateBinding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-						contextDocument = target.getDocument();
-						contextDocument = contextDocument.getParentDocument(customer);
-						if (contextDocument == null) {
-							error = "Binding " + penultimateBinding + " does not resolve to a parent document.";
-						}
+		try {
+			TargetMetaData target = BindUtil.validateBinding(customer, module, document, expression);
+			Attribute attribute = target.getAttribute();
+			Class<?> type = target.getType();
+			if ((returnType != null) && (! returnType.isAssignableFrom(type))) {
+				if (attribute == null) { // implicit type or condition
+					if (Boolean.class.equals(type)) { // condition)
+						throw new MetaDataException("Binding " + expression + " resolves to a condition that is incompatible with required type of " + returnType);
 					}
-					else {
-						error = "Binding " + penultimateBinding + " does not resolve to a relation.";
-					}
+					throw new MetaDataException("Binding " + expression + " resolves to implicit attribute of type " + type + 
+													" that is incompatible with required type of " + returnType);
 				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				error = e.getMessage();
-				if (error == null) {
-					error = "Binding " + penultimateBinding + " does not resolve to a document attribute.";
-				}
-				else {
-					error = "Binding " + penultimateBinding + " does not resolve to a document attribute: " + error;
-				}
+				throw new MetaDataException("Binding " + expression + " resolves to an attribute of type " + type + 
+												" that is incompatible with required type of " + returnType);
 			}
 		}
-		
-		if (error == null) { // continue unless we have an error already
-			if (contextDocument == null) {
-				error = "Binding " + expression + " does not resolve to a document attribute.";
-			}
-			else {
-				if (contextDocument.getCondition(ultimateBinding) != null) {
-					if ((returnType != null) && (! returnType.isAssignableFrom(Boolean.class))) {
-						error = "Binding " + expression + " resolves to a boolean condition that is incompatible with required type of " + returnType;
-					}
-				}
-				else {
-					Class<?> implicitClass = BindUtil.implicitAttributeType(ultimateBinding);
-					if (implicitClass != null) {
-						if ((returnType != null) && (! returnType.isAssignableFrom(implicitClass))) {
-							error = "Binding " + expression + " resolves to implicit attribute " + ultimateBinding + 
-										" of type " + implicitClass + 
-										" that is incompatible with required type of " + returnType;
-						}
-					}
-					else {
-						// Check the document hierarchy for the attribute
-						Attribute attribute = contextDocument.getPolymorphicAttribute(customer, ultimateBinding);
-						if (attribute == null) {
-							error = "Binding " + expression + " does not resolve to a document attribute, condition or an implicit attribute.";
-						}
-						else {
-							if (returnType != null) {
-								AttributeType type = attribute.getAttributeType();
-								Class<?> attributeClass = null;
-								if ((AttributeType.association == type) || (AttributeType.inverseOne == type)) {
-									DocumentImpl d = (DocumentImpl) customer.getModule(contextDocument.getOwningModuleName()).getDocument(customer, ((Relation) attribute).getDocumentName());
-									try {
-										attributeClass = d.getBeanClass(customer);
-									}
-									catch (ClassNotFoundException e) {
-										e.printStackTrace();
-										error = "Binding " + expression + " resolves to an attribute of type " + type + 
-												" but the document class for document " + d.getOwningModuleName() + '.' + d.getName() + " cannot be loaded:- " + e.toString();
-									}
-								}
-								else {
-									attributeClass = type.getImplementingType();
-								}
-		
-								if (! returnType.isAssignableFrom(attributeClass)) {
-									error = "Binding " + expression + " resolves to an attribute of type " + attributeClass + 
-												" that is incompatible with required type of " + returnType;
-								}
-							}
-						}
-					}
-				}
-			}
+		catch (MetaDataException e) {
+			error = e.getLocalizedMessage();
 		}
-	
 		return error;
 	}
 	

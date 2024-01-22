@@ -299,6 +299,10 @@ public class QuartzJobScheduler implements JobScheduler {
 	public void scheduleJob(Bean jobSchedule, User user) {
 		String bizId = (String) BindUtil.get(jobSchedule, Bean.DOCUMENT_ID);
 		String jobName = (String) BindUtil.get(jobSchedule, "jobName");
+		if (jobName == null) {
+			throw new MetaDataException("Unnamed Job in the data store (ADM_JobSchedule) cannot be run."); 
+			
+		}
 		
 		int dotIndex = jobName.indexOf('.');
 		String moduleName = jobName.substring(0, dotIndex);

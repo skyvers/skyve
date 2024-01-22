@@ -485,6 +485,10 @@ public class ViewGenerator {
 			for (String propertyName : propertyNames) {
 				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, propertyName);
 				Attribute attribute = target.getAttribute();
+				// Should never happen as property names comes straight from the bound Document.
+				if (attribute == null) {
+					throw new MetaDataException(propertyName + " is not an attribute on document " + document.getName());
+				}
 				DataGridBoundColumn column = new DataGridBoundColumn();
 
 				DomainType domainType = attribute.getDomainType();

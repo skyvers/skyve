@@ -477,6 +477,10 @@ public class ViewImpl extends Container implements View {
 					
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					Relation targetRelation = (Relation) target.getAttribute();
+					// This should never happen as the bindings should be validated by now
+					if (targetRelation == null) {
+						throw new MetaDataException(binding + " does not point anywhere from context document " + document.getName());
+					}
 					String targetDocumentName = targetRelation.getDocumentName();
 	
 					// Check lookup query
@@ -559,6 +563,10 @@ public class ViewImpl extends Container implements View {
 				}
 				else {
 					Relation targetRelation = (Relation) target.getAttribute();
+					// This should never happen as the bindings should be validated by now
+					if (targetRelation == null) {
+						throw new MetaDataException(binding + " does not point anywhere from context document " + document.getName());
+					}
 					String relatedDocumentName = targetRelation.getDocumentName();
 					relatedDocument = module.getDocument(customer, relatedDocumentName);
 				}

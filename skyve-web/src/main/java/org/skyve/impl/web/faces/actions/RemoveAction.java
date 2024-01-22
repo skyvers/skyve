@@ -78,6 +78,9 @@ public class RemoveAction extends FacesAction<Void> {
 		else { // Remove on zoomed view
 			int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
 			Bean beanToRemove = (Bean) BindUtil.get(bean, viewBinding);
+			if (beanToRemove == null) { // should never happen
+				throw new IllegalStateException("beanToRemove is null");
+			}
 			
 			// Run preExecute after the copy is taken, in case we rollback
 			WebContext webContext = facesView.getWebContext();

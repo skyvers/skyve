@@ -304,8 +304,14 @@ public class WebUtil {
 				Document d = m.getDocument(c, AppConstants.CONFIGURATION_DOCUMENT_NAME);
 				Bean configuration = d.newInstance(u);
 				String subject = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME);
+				if (subject == null) { // should never happen
+					throw new IllegalStateException(AppConstants.ADMIN_MODULE_NAME + '.' + AppConstants.CONFIGURATION_DOCUMENT_NAME + '.' + AppConstants.PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME + " is null.");
+				}
 				subject = Binder.formatMessage(subject, firstUser);
 				String body = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME); 
+				if (body == null) { // should never happen
+					throw new IllegalStateException(AppConstants.ADMIN_MODULE_NAME + '.' + AppConstants.CONFIGURATION_DOCUMENT_NAME + '.' + AppConstants.PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME + " is null.");
+				}
 				
 				body = body.replace("{#resetPasswordUrl}", Util.getResetPasswordUrl());
 				// keeping this for backwards compatibility

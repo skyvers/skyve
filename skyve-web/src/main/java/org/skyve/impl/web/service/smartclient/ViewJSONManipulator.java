@@ -504,6 +504,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 																	appliedToDoc, 
 																	childBindingPrefix);
 			Relation relation = (Relation) target.getAttribute();
+		    if (relation == null) { // should never happen
+		    	throw new MetaDataException("No target relation for binding " + childBindingPrefix);
+		    }
 			Document relatedDocument = module.getDocument(customer, relation.getDocumentName());
 			AttributeType relationType = relation.getAttributeType();
 			if (List.class.equals(relationType.getImplementingType())) { // relation is a collection (or many to many inverse)
@@ -675,6 +678,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 																	binding);
 			Attribute attribute = target.getAttribute();
 			if ((attribute instanceof Association) || (attribute instanceof InverseOne)) {
+				@SuppressWarnings("null") // suppress as its either an Association or an InverseOne - WTF
 				String documentName = ((Relation) attribute).getDocumentName();
 				Document relatedDocument = module.getDocument(customer, documentName);
 
@@ -773,7 +777,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		if (! valueMaps.containsKey(safeBinding)) {
             TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
             Attribute attribute = target.getAttribute();
-            DomainType domainType = attribute.getDomainType();
+            DomainType domainType = (attribute == null) ? null : attribute.getDomainType();
 
             // Keep the domain values ordered with a LinkedHashMap
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
@@ -1511,6 +1515,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 				String gridBinding = widget.getBinding();
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
 			    Relation targetRelation = (Relation) target.getAttribute();
+			    if (targetRelation == null) { // should never happen
+			    	throw new MetaDataException("No target relation for data grid/repeater binding " + gridBinding);
+			    }
 			    Document relatedDocument = module.getDocument(customer, targetRelation.getDocumentName());
 		        currentBindings = currentBindings.putOrGetChild(gridBinding, relatedDocument);
 		        
@@ -1701,7 +1708,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 				String binding = membership.getBinding();
 				if (binding != null) {
 				    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				    Document referenceDocument = module.getDocument(customer, ((Reference) target.getAttribute()).getDocumentName());
+				    Reference reference = (Reference) target.getAttribute();
+				    if (reference == null) { // should never happen
+				    	throw new MetaDataException("No target reference for checkMembership binding " + binding);
+				    }
+				    Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
 				    currentBindings = currentBindings.putOrGetChild(binding, referenceDocument);
 				}
 	
@@ -1838,7 +1849,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 				String binding = membership.getBinding();
 				if (binding != null) {
 				    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				    Document referenceDocument = module.getDocument(customer, ((Relation) target.getAttribute()).getDocumentName());
+				    Relation relation = (Relation) target.getAttribute();
+				    if (relation == null) { // should never happen
+				    	throw new MetaDataException("No target relation for listMembership binding " + binding);
+				    }
+				    Document referenceDocument = module.getDocument(customer, relation.getDocumentName());
 				    currentBindings = currentBindings.putOrGetChild(binding, referenceDocument);
 				}
 	
@@ -1913,6 +1928,9 @@ public class ViewJSONManipulator extends ViewVisitor {
         for (ComparisonComposite child : node.getChildren()) {
         	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, child.getReferenceName());
         	Relation childRelation = (Relation) target.getAttribute();
+		    if (childRelation == null) { // should never happen
+		    	throw new MetaDataException("No target relation for comparison binding " + child.getReferenceName());
+		    }
             Document childDocument = module.getDocument(customer, childRelation.getDocumentName());
             addComparisonBindingsForApply(child, childDocument);
         }

@@ -67,6 +67,9 @@ public class ZoomInAction extends FacesAction<Void> {
 				Document d = m.getDocument(c, parentBean.getBizDocument());
 				currentBean = (Bean) BindUtil.instantiateAndGet(u, m, d, parentBean, sb.toString());
 			}
+			if (currentBean == null) { // should never happen
+				throw new IllegalStateException("currentBean is null");
+			}
 
 			// Call the bizlet
 			Customer customer = CORE.getUser().getCustomer();

@@ -169,6 +169,9 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 			try {
 				TargetMetaData targetMetaData = BindUtil.getMetaDataForBinding(customer, owningModule, owningDocument, binding);
 				Association a = (Association) targetMetaData.getAttribute();
+				if (a == null) { // should never be
+					throw new MetaDataException(binding + " doesn't point to an association");
+				}
 				d = (DocumentImpl) owningModule.getDocument(customer, a.getDocumentName());
 				m = (ModuleImpl) customer.getModule(d.getOwningModuleName());
 			}

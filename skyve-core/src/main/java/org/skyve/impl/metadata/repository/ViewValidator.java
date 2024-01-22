@@ -196,32 +196,17 @@ class ViewValidator extends ViewVisitor {
 		if (bindingPrefix != null) {
 			bindingToTest = new StringBuilder(64).append(bindingPrefix).append('.').append(binding).toString();
 		}
-		else {
-			// conditions can be used in parameter bindings for reports etc
-			String testConditionName = bindingToTest;
-			if (testConditionName.startsWith("not")) {
-				testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
-			}
 
-			if (contextDocument.getConditionNames().contains(testConditionName)) {
-				return Boolean.class;
-			}
-		}
-		
 		TargetMetaData target = null;
 		try {
-			target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, bindingToTest);
+			target = BindUtil.validateBinding(customer, contextModule, contextDocument, bindingToTest);
 		}
 		catch (MetaDataException e) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
 		}
-		
-		if (target == null) {
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Binding points nowhere");
-		}
 		Attribute attribute = target.getAttribute();
 		AttributeType attributeType = (attribute == null) ? null : attribute.getAttributeType();
-		Class<?> result = (attributeType == null) ? null : attributeType.getImplementingType();
+		Class<?> result = target.getType();
 
 		if (domainValuesRequired) {
 			if (attribute == null) {
@@ -1404,6 +1389,10 @@ class ViewValidator extends ViewVisitor {
 			}
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
     		Relation relation = (Relation) target.getAttribute();
+    		// This should never happen as shit was validated above
+    		if (relation == null) {
+    			throw new MetaDataException(fullBinding + " doesn't point to an attribute from document " + document.getName());
+    		}
     		String queryName = (relation instanceof Reference) ? ((Reference) relation).getQueryName() : null;
     		if (queryName != null) {
         		query = module.getMetaDataQuery(queryName);

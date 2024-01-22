@@ -711,7 +711,11 @@ public class SmartClientEditServlet extends HttpServlet {
     		}
     	}
 
-		try {
+		if (processBean == null) { // should never happen
+			throw new ServletException("processBean is null");
+		}
+
+    	try {
 			StringBuilder message = new StringBuilder(256);
 	    	message.append("{\"response\":{\"status\":0,\"startRow\":0,\"endRow\":0,\"totalRows\":1,\"data\":[");
 			ViewJSONManipulator manipulator = newManipulator(user, 
@@ -1035,12 +1039,14 @@ public class SmartClientEditServlet extends HttpServlet {
 		if (gridBinding != null) {
 			@SuppressWarnings("unchecked")
 			List<Bean> gridList = (List<Bean>) BindUtil.get(formBean, gridBinding);
-			int processedIndex = gridList.indexOf(processedBean);
-			if (processedIndex < 0) { // new not in the list
-				// look for old bean and replace it with the new
-				int processIndex = gridList.indexOf(processBean);
-				if (processIndex >= 0) { // found old bean
-					gridList.set(processIndex, processedBean);
+			if (gridList != null) { // should always happen
+				int processedIndex = gridList.indexOf(processedBean);
+				if (processedIndex < 0) { // new not in the list
+					// look for old bean and replace it with the new
+					int processIndex = gridList.indexOf(processBean);
+					if (processIndex >= 0) { // found old bean
+						gridList.set(processIndex, processedBean);
+					}
 				}
 			}
 		}

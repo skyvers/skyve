@@ -124,7 +124,10 @@ public class FileUpload extends AbstractUpload {
 			if (binding != null) {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
-
+			if (bean == null) { // should never happen
+				throw new IllegalStateException("bean is null");
+			}
+			
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
 			

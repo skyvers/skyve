@@ -1506,8 +1506,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		TargetMetaData target = getCurrentTarget();
 		HorizontalAlignment alignment = column.getAlignment();
-		if ((alignment == null) && (target != null) && (target.getAttribute() != null)) {
-			alignment = CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, target.getAttribute().getAttributeType());
+		if ((alignment == null) && (target != null)) {
+			Attribute targetAttribute = target.getAttribute();
+			if (targetAttribute != null) {
+				alignment = CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, targetAttribute.getAttributeType());
+			}
 		}
 
 		current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
