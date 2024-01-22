@@ -125,28 +125,30 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param runtime
 	 * @return
 	 */
-	@Nonnull
-	<T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer,
+	@Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer,
 																@Nonnull Document document,
 																@Nonnull String imageName,
 																boolean runtime);
 
-	@Nonnull
-	<T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer,
+	@Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer,
 																						@Nonnull Document document,
-																						@Nonnull String modelName, boolean runtime);
+																						@Nonnull String modelName,
+																						boolean runtime);
 	
-	@Nonnull
-	<T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName,
-			boolean runtime);
+	@Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer,
+														@Nonnull Document document,
+														@Nonnull String modelName,
+														boolean runtime);
 
-	@Nonnull
-	<T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName,
-			boolean runtime);
+	@Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer,
+															@Nonnull Document document,
+															@Nonnull String modelName,
+															boolean runtime);
 
-	@Nonnull
-	<T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName,
-			boolean runtime);
+	@Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer,
+															@Nonnull Document document,
+															@Nonnull String modelName,
+															boolean runtime);
 	
 	@Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime);
 

@@ -263,7 +263,7 @@ class ViewValidator extends ViewVisitor {
 		
 		// Can only check this if the attribute is defined.
 		// Bindings to implicit attributes are always scalar.
-		// NB check assert type in outer if coz we dont need to do the test if we are asserting a type
+		// NB check assert type in outer if coz we don't need to do the test if we are asserting a type
 		if (scalarBindingOnly && ((assertTypes == null) || (assertTypes.length == 0)) && (attribute != null)) {
 			if (AttributeType.association.equals(attributeType) || 
 					AttributeType.collection.equals(attributeType) || 
@@ -1074,47 +1074,34 @@ class ViewValidator extends ViewVisitor {
 			if (query == null) {
 				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid queryName of " + queryName);
 			}
-			contextDocument = query.getDocumentModule(customer).getDocument(customer, queryName);
+			Module queryDocumentModule = query.getDocumentModule(customer);
+			contextDocument = queryDocumentModule.getDocument(customer, query.getDocumentName());
 		}
 		else {
 			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " needs either a documentName or queryName");
 		}
 
+		String categoryBinding = model.getCategoryBinding();
 		validateBinding(contextModule,
 							contextDocument,
 							null,
-							model.getCategoryBinding(),
+							categoryBinding,
 							true,
 							false,
 							false,
 							true,
-							chartIdentifier + " category binding",
-							AttributeType.bool,
-							AttributeType.colour,
-							AttributeType.date,
-							AttributeType.dateTime,
-							AttributeType.decimal2,
-							AttributeType.decimal5,
-							AttributeType.decimal10,
-							AttributeType.enumeration,
-							AttributeType.integer,
-							AttributeType.longInteger,
-							AttributeType.markup,
-							AttributeType.memo,
-							AttributeType.text,
-							AttributeType.time,
-							AttributeType.timestamp);
+							"The category binding of " + chartIdentifier);
 
 		String valueBinding = model.getValueBinding();
-		validateBinding(contextModule,
-							contextDocument,
-							null,
-							valueBinding,
-							true,
-							false,
-							false,
-							true,
-							chartIdentifier + " value binding");
+		Class<?> type = validateBinding(contextModule,
+											contextDocument,
+											null,
+											valueBinding,
+											true,
+											false,
+											false,
+											true,
+											"The value binding of " + chartIdentifier);
 
 		AggregateFunction function = model.getValueFunction();
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, valueBinding);
@@ -1122,18 +1109,16 @@ class ViewValidator extends ViewVisitor {
 
 		// check for numeric value if no value function is defined
 		if (function == null) { // we need a number here
-			boolean invalidValueType = false;
 			if (attribute == null) { // implicit attribute
-				invalidValueType = true;
-			}
-			else {
-				AttributeType type = attribute.getAttributeType(); 
-				invalidValueType = (! Number.class.isAssignableFrom(type.getImplementingType()));
-			}
-			if (invalidValueType) {
 				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
 												" has an invalid value binding of " + valueBinding + 
-												" to a non-numeric or implicit attribute");
+												" to an implicit attribute");
+			}
+			else if (! Number.class.isAssignableFrom(type)) {
+				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
+						" has an invalid value binding of " + valueBinding + 
+						" to a non-numeric attribute");
+				
 			}
 		}
 		// check that aggregate function can be numeric, otherwise must be count
@@ -1144,8 +1129,7 @@ class ViewValidator extends ViewVisitor {
 					invalidFunctionType = "an implicit attribute";
 				}
 				else {
-					AttributeType type = attribute.getAttributeType(); 
-					if (! Number.class.isAssignableFrom(type.getImplementingType())) {
+					if (! Number.class.isAssignableFrom(type)) {
 						invalidFunctionType = "a non-numeric type of " + type;
 					}
 				}

@@ -2232,9 +2232,9 @@ public final class BindUtil {
 
 		StringTokenizer tokenizer = new StringTokenizer(binding, ".");
 		while (tokenizer.hasMoreTokens()) {
-			String fieldName = tokenizer.nextToken();
+			String attributeName = tokenizer.nextToken();
 			String parentDocumentName = null;
-			if (fieldName.equals(ChildBean.PARENT_NAME)) {
+			if (attributeName.equals(ChildBean.PARENT_NAME)) {
 				parentDocumentName = navigatingDocument.getParentDocumentName();
 				Extends inherits = navigatingDocument.getExtends();
 				while ((parentDocumentName == null) && (inherits != null)) {
@@ -2249,23 +2249,23 @@ public final class BindUtil {
 							" is not a child document)");
 				}
 			}
-			int openBraceIndex = fieldName.indexOf('[');
+			int openBraceIndex = attributeName.indexOf('[');
 			if (openBraceIndex > -1) {
-				fieldName = fieldName.substring(0, openBraceIndex);
+				attributeName = attributeName.substring(0, openBraceIndex);
 			}
-			int openParenthesisIndex = fieldName.indexOf("ElementById(");
+			int openParenthesisIndex = attributeName.indexOf("ElementById(");
 			if (openParenthesisIndex > -1) {
-				fieldName = fieldName.substring(0, openParenthesisIndex);
+				attributeName = attributeName.substring(0, openParenthesisIndex);
 			}
-			attribute = navigatingDocument.getAttribute(fieldName);
+			attribute = navigatingDocument.getAttribute(attributeName);
 			Extends inherits = navigatingDocument.getExtends();
 			while ((attribute == null) && (inherits != null)) {
 				Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
-				attribute = baseDocument.getAttribute(fieldName);
+				attribute = baseDocument.getAttribute(attributeName);
 				inherits = baseDocument.getExtends();
 			}
 			if (tokenizer.hasMoreTokens()) {
-				if (ChildBean.PARENT_NAME.equals(fieldName)) {
+				if (ChildBean.PARENT_NAME.equals(attributeName)) {
 					if (parentDocumentName == null) {
 						throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
 														navigatingDocument.getName() + " @ " + binding + 
@@ -2281,7 +2281,7 @@ public final class BindUtil {
 					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
 													navigatingDocument.getName() + " @ " + binding + 
 													" does not exist (token [" + 
-													fieldName +
+													attributeName +
 													"] doesn't check out)");
 				}
 				navigatingModule = (customer == null) ?
@@ -2307,7 +2307,7 @@ public final class BindUtil {
 					}
 				}
 				else {
-					Class<?> implicitType = implicitAttributeType(fieldName);
+					Class<?> implicitType = implicitAttributeType(attributeName);
 					if (implicitType != null) { // implicit attribute
 						type = implicitType;
 					}
