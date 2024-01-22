@@ -26,8 +26,8 @@ import org.locationtech.jts.io.WKTWriter;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
@@ -64,9 +64,9 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
@@ -970,7 +970,7 @@ public final class BindUtil {
 		return getElementInCollection(list, elementBizId);
 	}
 
-	public static <T extends Bean> @Nullable T getElementInCollection(@Nonnull List<T> list, @Nonnull String elementBizId) {
+	public static @Nullable <T extends Bean> T getElementInCollection(@Nonnull List<T> list, @Nonnull String elementBizId) {
 		// check each bean in the list to see if its ID is the same
 		for (T existing : list) {
 			if (elementBizId.equals(existing.getBizId())) {
@@ -1317,7 +1317,7 @@ public final class BindUtil {
 	 * @param index	The index to add the element at.
 	 * @return	The removed element.
 	 */
-	public static <T extends Bean> @Nonnull T removeElementFromCollection(@Nonnull Bean bean,
+	public static @Nonnull <T extends Bean> T removeElementFromCollection(@Nonnull Bean bean,
 																			@Nonnull String collectionBinding,
 																			int index) {
 		try {

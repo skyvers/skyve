@@ -201,7 +201,7 @@ public class Binder {
 	 * @param elementBizId
 	 * @return
 	 */
-	public static <T extends Bean> @Nullable T findElementInCollection(@Nonnull List<T> list,
+	public static @Nullable <T extends Bean> T findElementInCollection(@Nonnull List<T> list,
 																		@Nonnull String elementBizId) {
 		// check each bean in the list to see if its ID is the same
 		for (T existing : list) {
@@ -274,7 +274,7 @@ public class Binder {
 	 * @param index	The index to add the element at.
 	 * @return	The removed element.
 	 */
-	public static <T extends Bean> @Nonnull T removeElementFromCollection(@Nonnull Bean bean,
+	public static @Nonnull <T extends Bean> T removeElementFromCollection(@Nonnull Bean bean,
 																			@Nonnull String collectionBinding,
 																			int index) {
 		return BindUtil.removeElementFromCollection(bean, collectionBinding, index);
