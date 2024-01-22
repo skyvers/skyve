@@ -42,6 +42,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
@@ -646,6 +647,22 @@ public class LocalDesignRepository extends FileSystemRepository {
 														reference.getName() + " in document " + 
 														documentIdentifier + " references a document query for document " + 
 														queryDocumentName + ", not document " + targetDocumentName);
+					}
+				}
+				
+				// Check collection order by bindings are valid
+				if (reference instanceof Collection) {
+					Module targetModule = getModule(customer, targetDocument.getOwningModuleName());
+					Collection collection = (Collection) reference;
+					for (Ordering ordering : collection.getOrdering()) {
+						String by = ordering.getBy();
+						try {
+							BindUtil.validateBinding(customer, targetModule, targetDocument, by);
+						}
+						catch (MetaDataException e) {
+							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
+															" in document " +  documentIdentifier + " is invalid", e);
+						}
 					}
 				}
 				
