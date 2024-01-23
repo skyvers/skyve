@@ -31,6 +31,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.MappingException;
 import org.hibernate.ScrollMode;
@@ -50,6 +51,7 @@ import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
+import org.hibernate.hql.internal.ast.QuerySyntaxException;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
@@ -503,6 +505,14 @@ t.printStackTrace();
 			throw (MetaDataException) t.getCause();
 		}
 		else {
+			if (UtilImpl.DEV_MODE) {
+				if (t instanceof QuerySyntaxException) {
+					String m = t.getMessage();
+					if ((m != null) && m.contains("is not mapped")) {
+						throw new DomainException("Entity is not mapped.  Is domain generation required or are there compile errors?", t);
+					}
+				}
+			}
 			throw new DomainException(t);
 		}
 	}
@@ -612,36 +622,45 @@ t.printStackTrace();
 
 		String entityName = getDocumentEntityName(filterDocument.getOwningModuleName(), filterDocument.getName());
 		
-		String noneFilterName = new StringBuilder(32).append(entityName).append("NoneFilter").toString();
-		String customerFilterName = new StringBuilder(32).append(entityName).append("CustomerFilter").toString();
-		String dataGroupIdFilterName = new StringBuilder(32).append(entityName).append("DataGroupIdFilter").toString();
-		String userIdFilterName = new StringBuilder(32).append(entityName).append("UserIdFilter").toString();
-		session.disableFilter(noneFilterName);
-		session.disableFilter(customerFilterName);
-		session.disableFilter(dataGroupIdFilterName);
-		session.disableFilter(userIdFilterName);
-		
-		if (DocumentPermissionScope.none.equals(scope)) {
-			session.enableFilter(noneFilterName);
-		}
-		// Only apply the customer filter if we are in multi-tenant mode
-		if (UtilImpl.CUSTOMER == null) {
-			if (DocumentPermissionScope.customer.equals(scope) ||
-					DocumentPermissionScope.dataGroup.equals(scope) ||
-					DocumentPermissionScope.user.equals(scope)) {
-				Filter filter = session.enableFilter(customerFilterName);
-				filter.setParameter("customerParam", customer.getName());
+		// Catch HibernateException here which may mean that gen domain needs to be run.
+		try {
+			String noneFilterName = new StringBuilder(32).append(entityName).append("NoneFilter").toString();
+			String customerFilterName = new StringBuilder(32).append(entityName).append("CustomerFilter").toString();
+			String dataGroupIdFilterName = new StringBuilder(32).append(entityName).append("DataGroupIdFilter").toString();
+			String userIdFilterName = new StringBuilder(32).append(entityName).append("UserIdFilter").toString();
+			session.disableFilter(noneFilterName);
+			session.disableFilter(customerFilterName);
+			session.disableFilter(dataGroupIdFilterName);
+			session.disableFilter(userIdFilterName);
+			
+			if (DocumentPermissionScope.none.equals(scope)) {
+				session.enableFilter(noneFilterName);
+			}
+			// Only apply the customer filter if we are in multi-tenant mode
+			if (UtilImpl.CUSTOMER == null) {
+				if (DocumentPermissionScope.customer.equals(scope) ||
+						DocumentPermissionScope.dataGroup.equals(scope) ||
+						DocumentPermissionScope.user.equals(scope)) {
+					Filter filter = session.enableFilter(customerFilterName);
+					filter.setParameter("customerParam", customer.getName());
+				}
+			}
+			if ((userDataGroupId != null) && 
+					(DocumentPermissionScope.dataGroup.equals(scope) ||
+						DocumentPermissionScope.user.equals(scope))) {
+				Filter filter = session.enableFilter(dataGroupIdFilterName);
+				filter.setParameter("dataGroupIdParam", userDataGroupId);
+			}
+			if (DocumentPermissionScope.user.equals(scope)) {
+				Filter filter = session.enableFilter(userIdFilterName);
+				filter.setParameter("userIdParam", user.getId());
 			}
 		}
-		if ((userDataGroupId != null) && 
-				(DocumentPermissionScope.dataGroup.equals(scope) ||
-					DocumentPermissionScope.user.equals(scope))) {
-			Filter filter = session.enableFilter(dataGroupIdFilterName);
-			filter.setParameter("dataGroupIdParam", userDataGroupId);
-		}
-		if (DocumentPermissionScope.user.equals(scope)) {
-			Filter filter = session.enableFilter(userIdFilterName);
-			filter.setParameter("userIdParam", user.getId());
+		catch (HibernateException e) {
+			if (UtilImpl.DEV_MODE) {
+				throw new DomainException("Unable to set hibernate filters - Is domain generation required or are there compile errors?", e);
+			}
+			throw e;
 		}
 	}
 	
