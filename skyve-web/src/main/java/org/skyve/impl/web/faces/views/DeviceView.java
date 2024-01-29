@@ -1,22 +1,22 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
-import javax.faces.context.FacesContext;
-
 import org.skyve.util.Util;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Named;
 
 /**
  * Backs device.xhtml
  */
 @RequestScoped
-@ManagedBean(name = "device")
-public class Device implements Serializable {
+@Named("device")
+public class DeviceView implements Serializable {
 	private static final long serialVersionUID = 4687894848392321390L;
 
 	private String startingDeviceJspUrl;

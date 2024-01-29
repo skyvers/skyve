@@ -3,17 +3,17 @@ package org.skyve.impl.web.faces.converters.select;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.model.SelectItem;
-import javax.faces.model.SelectItemGroup;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 
-public class SelectItemsBeanConverter implements Converter {
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.model.SelectItem;
+import jakarta.faces.model.SelectItemGroup;
+
+public class SelectItemsBeanConverter implements Converter<Object> {
 	@Override
 	public Object getAsObject(FacesContext context, UIComponent component, String value) {
 		Object result = null;
@@ -30,7 +30,7 @@ public class SelectItemsBeanConverter implements Converter {
 		String result = "";
 		
 		if (value instanceof BeanMapAdapter) {
-			result = ((BeanMapAdapter<?>) value).getBean().getBizId();
+			result = ((BeanMapAdapter) value).getBean().getBizId();
 		}
 		else if (value instanceof Bean) {
 			result = ((Bean) value).getBizId();
@@ -45,7 +45,7 @@ public class SelectItemsBeanConverter implements Converter {
 		return result;
 	}
 
-	public static Object findValueByStringConversion(FacesContext context, UIComponent component, String value, Converter converter) {
+	private static Object findValueByStringConversion(FacesContext context, UIComponent component, String value, Converter<Object> converter) {
 		return findValueByStringConversion(context, component, new SelectItemsIterator(context, component), value, converter);
 	}
 
@@ -53,7 +53,7 @@ public class SelectItemsBeanConverter implements Converter {
 														UIComponent component,
 														Iterator<SelectItem> items,
 														String value,
-														Converter converter) {
+														Converter<Object> converter) {
 		while (items.hasNext()) {
 			SelectItem item = items.next();
 			Object itemValue = item.getValue();

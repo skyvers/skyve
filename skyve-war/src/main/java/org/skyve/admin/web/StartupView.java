@@ -2,21 +2,20 @@ package org.skyve.admin.web;
 
 import java.io.IOException;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Named;
 import modules.admin.domain.Startup;
 import router.DefaultUxUiSelector;
 
 @ViewScoped
-@ManagedBean(name = "skyveStartup")
-public class StartupView extends FacesView<Startup> {
+@Named("skyveStartup")
+public class StartupView extends FacesView {
 	private static final long serialVersionUID = -5794022492296214306L;
 
 	@Override

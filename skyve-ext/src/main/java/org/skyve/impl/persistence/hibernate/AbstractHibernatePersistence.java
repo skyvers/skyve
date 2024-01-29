@@ -22,13 +22,8 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 
 import javax.cache.management.CacheStatisticsMXBean;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.EntityTransaction;
-import javax.persistence.RollbackException;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
@@ -76,8 +71,8 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
-import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
@@ -134,6 +129,11 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.RollbackException;
 
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
@@ -280,7 +280,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			 */
 			@Override
 			public Iterable<Integrator> getIntegrators() {
-				List<Integrator> result = new ArrayList<>();
+				List<Integrator> result = new ArrayList<>(1);
+				
 				result.add(new Integrator() {
 					@Override
 					public void integrate(@SuppressWarnings("hiding") Metadata metadata,
@@ -289,6 +290,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 						HibernateListener listener = new HibernateListener();
 						final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
 
+						// For Bizlet callbacks
+						eventListenerRegistry.appendListeners(EventType.POST_LOAD, listener);
+						eventListenerRegistry.appendListeners(EventType.PRE_DELETE, listener);
+						eventListenerRegistry.appendListeners(EventType.POST_DELETE, listener);
+						
 						// For CMS Update callbacks
 						eventListenerRegistry.appendListeners(EventType.POST_UPDATE, listener);
 						eventListenerRegistry.appendListeners(EventType.POST_INSERT, listener);
@@ -465,7 +471,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 	private void treatPersistenceThrowable(Throwable t, OperationType operationType, PersistentBean bean) {
 t.printStackTrace();
-		if (t instanceof javax.persistence.OptimisticLockException) {
+		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean.isPersisted()) {
 				try {
 					session.refresh(bean);
@@ -2270,7 +2276,7 @@ if (document.isDynamic()) return;
 	public void postLoad(PersistentBean loadedBean)
 	throws Exception {
 		// Inject any dependencies
-		BeanProvider.injectFields(loadedBean);
+		UtilImpl.inject(loadedBean);
 
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(loadedBean.getBizModule());

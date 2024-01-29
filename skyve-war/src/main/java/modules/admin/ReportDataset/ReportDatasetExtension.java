@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.enterprise.inject.spi.CDI;
-
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -26,6 +24,7 @@ import org.skyve.util.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.inject.spi.CDI;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportParameter;

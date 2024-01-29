@@ -4,14 +4,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.

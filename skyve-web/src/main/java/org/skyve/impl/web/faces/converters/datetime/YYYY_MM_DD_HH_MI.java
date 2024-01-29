@@ -1,18 +1,19 @@
 package org.skyve.impl.web.faces.converters.datetime;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.ConverterException;
-
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.UtilImpl;
 
-public class YYYY_MM_DD_HH_MI extends org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI implements Converter {
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.convert.ConverterException;
+
+public class YYYY_MM_DD_HH_MI extends org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI
+								implements Converter<DateTime> {
 	@Override
-	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
+	public DateTime getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
@@ -27,12 +28,12 @@ public class YYYY_MM_DD_HH_MI extends org.skyve.domain.types.converters.datetime
 	}
 
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, Object value) {
+	public String getAsString(FacesContext fc, UIComponent component, DateTime value) {
 		if (value == null) {
 			return "";
 		}
 		try {
-			return toDisplayValue((DateTime) value);
+			return toDisplayValue(value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "";

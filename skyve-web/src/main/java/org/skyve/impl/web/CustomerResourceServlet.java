@@ -5,12 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -32,6 +26,12 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 		
 public class CustomerResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;

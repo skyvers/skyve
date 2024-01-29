@@ -1,11 +1,6 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.util.Stack;
-
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
 
 import org.primefaces.model.menu.DefaultMenuItem;
 import org.primefaces.model.menu.DefaultMenuModel;
@@ -29,16 +24,21 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * The menu is session scoped.
  * The expanded state is set based on the "m" parameter of first URL hit.
  * The menu is reset by home.xhtml <s:resetMenuState /> tag so that the / URL sets up the menu based on the defaults.
- * The menus respond to the cookies in the browser before adhering to the server side state in this menu model.
- * This means the menu model expanded state is really on used once WebUtil.clearMenuCookies() has been called.
+ * The menus respond to the cookie/localStorage in the browser before adhering to the server side state in this menu model.
+ * This means the menu model expanded state is really only used once WebUtil.clearMenuCookies() has been called.
  */
-@ManagedBean
+@Named("menu")
 @SessionScoped
-public class Menu extends Harness {
+public class MenuView extends HarnessView {
 	private static final long serialVersionUID = -7523306130675202901L;
 
 	// The modules menu on the LHS

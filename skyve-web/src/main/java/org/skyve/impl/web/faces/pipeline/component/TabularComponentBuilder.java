@@ -5,24 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.el.MethodExpression;
-import javax.el.ValueExpression;
-import javax.faces.component.UICommand;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIComponentBase;
-import javax.faces.component.UIInput;
-import javax.faces.component.UIOutput;
-import javax.faces.component.UIPanel;
-import javax.faces.component.UISelectItems;
-import javax.faces.component.html.HtmlInputHidden;
-import javax.faces.component.html.HtmlInputText;
-import javax.faces.component.html.HtmlOutputLink;
-import javax.faces.component.html.HtmlOutputText;
-import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.component.html.HtmlSelectOneMenu;
-import javax.faces.convert.Converter;
-
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
@@ -183,6 +165,24 @@ import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
+
+import jakarta.el.MethodExpression;
+import jakarta.el.ValueExpression;
+import jakarta.faces.component.UICommand;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.component.UIInput;
+import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.UIPanel;
+import jakarta.faces.component.UISelectItems;
+import jakarta.faces.component.html.HtmlInputHidden;
+import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLink;
+import jakarta.faces.component.html.HtmlOutputText;
+import jakarta.faces.component.html.HtmlPanelGrid;
+import jakarta.faces.component.html.HtmlPanelGroup;
+import jakarta.faces.component.html.HtmlSelectOneMenu;
+import jakarta.faces.convert.Converter;
 
 public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
@@ -1368,7 +1368,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		if (managedBean != null) {
-			BeanMapAdapter<? extends Bean> currentBean = managedBean.getCurrentBean();
+			BeanMapAdapter currentBean = managedBean.getCurrentBean();
 			if (currentBean != null) {
 				Bean bean = currentBean.getBean();
 				model.setBean(bean);
@@ -2007,7 +2007,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		if (managedBean != null) {
-			BeanMapAdapter<? extends Bean> currentBean = managedBean.getCurrentBean();
+			BeanMapAdapter currentBean = managedBean.getCurrentBean();
 			if (currentBean != null) {
 				Bean bean = currentBean.getBean();
 				model.setBean(bean);
@@ -2706,7 +2706,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											String title,
 											boolean required,
 											HorizontalAlignment textAlignment,
-											Converter facesConverter) {
+											Converter<?> facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -2770,7 +2770,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										Integer length,
 										org.skyve.domain.types.converters.Converter<?> converter,
 										Format<?> format,
-										Converter facesConverter) {
+										Converter<?> facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -3101,7 +3101,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String formDisabled,
 									Integer maxLength,
 									TextCase textCase,
-									Converter converter,
+									Converter<?> converter,
 									KeyboardType keyboardType,
 									Integer pixelWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE,
@@ -3139,7 +3139,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String formDisabled,
 									Integer maxLength,
 									Format<?> format,
-									Converter converter,
+									Converter<?> converter,
 									KeyboardType keyboardType,
 									Integer pixelWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE,
@@ -3236,7 +3236,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								Double step,
 								String disabled,
 								String formDisabled,
-								Converter converter,
+								Converter<?> converter,
 								Integer pixelWidth) {
 		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 
@@ -3273,7 +3273,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									boolean mobile,
 									String disabled,
 									String formDisabled,
-									Converter converter) {
+									Converter<?> converter) {
 		DatePicker result = (DatePicker) input(DatePicker.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		if (! mobile) {
 			result.setShowIcon(true);

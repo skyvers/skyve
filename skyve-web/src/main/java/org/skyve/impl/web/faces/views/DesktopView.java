@@ -1,14 +1,9 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.CORE;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
@@ -37,9 +32,14 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 import org.skyve.web.WebAction;
 
-@ManagedBean
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+
 @RequestScoped
-public class Desktop extends Harness {
+@Named("desktop")
+public class DesktopView extends HarnessView {
 	private static final long serialVersionUID = 913239189728613263L;
 
 	private String localeScript;
@@ -107,7 +107,7 @@ public class Desktop extends Harness {
 					sb.setLength(0);
 	
 					// Set the first view to show
-					WebAction a = Desktop.this.getWebActionParameter();
+					WebAction a = DesktopView.this.getWebActionParameter();
 					if (WebAction.e.equals(a)) { // edit
 						sb.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
 						sb.append(bizDocument).append("',function(view){");

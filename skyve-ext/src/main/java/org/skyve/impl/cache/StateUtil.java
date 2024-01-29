@@ -14,10 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.codec.binary.Base64;
 import org.ehcache.Cache;
 import org.ehcache.Cache.Entry;
@@ -30,6 +26,10 @@ import org.skyve.cache.Caching;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class StateUtil {
 	private StateUtil() {

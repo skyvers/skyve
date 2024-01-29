@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -24,14 +24,13 @@ import org.skyve.web.WebContext;
 /**
  * Strip the last term off the view binding
  */
-public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
-	private FacesView<T> facesView;
-	public ZoomOutAction(FacesView<T> facesView) {
+public class ZoomOutAction extends FacesAction<Void> {
+	private FacesView facesView;
+	public ZoomOutAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
 		Stack<String> zoomInBindings = facesView.getZoomInBindings();
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("ZoomOutAction by zoom in binding of %s with view binding of %s",
@@ -66,7 +65,7 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 					ValidationUtil.validateBeanAgainstBizlet(bizlet, referenceBean);
 				}
 				// Set the current bean back in the collection
-				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) referenceBean);
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, referenceBean);
 
 				// Sort the owning collection (if this is a collection element binding)
 				String viewBinding = facesView.getViewBinding();
@@ -93,7 +92,7 @@ public class ZoomOutAction<T extends Bean> extends FacesAction<Void> {
 		return null;
 	}
 	
-	static void zoomOut(FacesView<? extends Bean> facesView, CustomerImpl internalCustomer) throws Exception {
+	static void zoomOut(FacesView facesView, CustomerImpl internalCustomer) throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		Stack<String> zoomInBindings = facesView.getZoomInBindings();
 		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();

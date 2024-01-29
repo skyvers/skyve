@@ -728,8 +728,8 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
-		<property name="year" />
-		<property name="month" />
+		<property name="hitYear" />
+		<property name="hitMonth" />
 		<property name="userAgentHeader" length="400" />
 		<property name="device" length="1">
 			<type name="Enum">

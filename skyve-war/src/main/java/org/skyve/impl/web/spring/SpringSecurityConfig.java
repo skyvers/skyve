@@ -34,10 +34,9 @@ public class SpringSecurityConfig {
 	
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-			.authorizeHttpRequests()
-				// Permit H2 servlet if enabled
-				.requestMatchers("/h2/**").permitAll()
+		http.authorizeHttpRequests(c ->
+			// Permit H2 servlet if enabled
+			c.requestMatchers("/h2/**").permitAll()
 				// Enable access to all rest endpoints as these will have Servlet Filters to secure.
 				.requestMatchers("/rest/**").permitAll()
 				// Permit the login servlet resource
@@ -104,56 +103,56 @@ public class SpringSecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/**").authenticated()
 				// Only allow get and post methods by default
 				.anyRequest().denyAll()
-				.and()
-			.sessionManagement()
-				.sessionFixation().changeSessionId()
-				.and()
-			
-			.rememberMe()
-				.key("remember")
+		)
+		.sessionManagement(c -> c.sessionFixation().changeSessionId())
+		.rememberMe(c ->
+			c.key("remember")
 				.tokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60)
 				.rememberMeParameter("remember")
 				.rememberMeCookieName("remember")
 				.tokenRepository(tokenRepository())
 				.useSecureCookie(Util.isSecureUrl())
-				.and()
-			.formLogin()
-				.defaultSuccessUrl(Util.getHomeUrl())
+		)
+		.formLogin(c -> 
+			c.defaultSuccessUrl(Util.getHomeUrl())
 				.loginPage(Util.getLoginUrl())
 				.loginProcessingUrl("/loginAttempt")
 				.failureUrl(Util.getLoginUrl() + "?error")
 				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
-				.and()
-			.logout()
-				.logoutSuccessUrl(Util.getLoggedOutUrl())
+		)
+		.logout(c -> 
+			c.logoutSuccessUrl(Util.getLoggedOutUrl())
 				.deleteCookies("JSESSIONID")
-				.and()
-			.csrf().disable()
-			.httpBasic().disable()
-			.headers()
-				.httpStrictTransportSecurity().disable()
-				.frameOptions().disable()
-				.contentTypeOptions().disable();
-
-		TwoFactorAuthPushEmailFilter tfaEmail = new TwoFactorAuthPushEmailFilter(userDetailsManager());
-		http.addFilterBefore(tfaEmail, UsernamePasswordAuthenticationFilter.class);
+		)
+		.csrf(c -> c.disable())
+		.httpBasic(c -> c.disable())
+		.headers(c -> 
+			c.httpStrictTransportSecurity(ic -> ic.disable())
+				.frameOptions(ic -> ic.disable())
+				.contentTypeOptions(ic -> ic.disable())
+		);
 
 		if ((UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null)
 				|| (UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID != null)
 				|| (UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID != null)
 				|| (UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID != null)) {
-			http.oauth2Login()
-					.defaultSuccessUrl(Util.getHomeUrl())
+			http.oauth2Login(c ->
+				c.defaultSuccessUrl(Util.getHomeUrl())
 					.loginPage(Util.getLoginUrl())
 					.failureUrl(Util.getLoginUrl() + "?error")
-					.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()));
+					.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
+			);
 		}
 
-//		http.saml2Login()
-//				.defaultSuccessUrl(Util.getHomeUrl())
+//		http.saml2Login(c -> 
+//			c.defaultSuccessUrl(Util.getHomeUrl())
 //				.loginPage(Util.getLoginUrl())
 //				.failureUrl(Util.getLoginUrl() + "?error")
-//				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()));
+//				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
+//		);
+
+		TwoFactorAuthPushEmailFilter tfaEmail = new TwoFactorAuthPushEmailFilter(userDetailsManager());
+		http.addFilterBefore(tfaEmail, UsernamePasswordAuthenticationFilter.class);
 
 		DefaultSecurityFilterChain result = http.build();
 		// Note AuthenticationManager is not available as a shared object until after build()
@@ -181,7 +180,7 @@ public class SpringSecurityConfig {
 	}
 	
 	@Bean
-	public PersistentTokenRepository tokenRepository() throws Exception {
+	public PersistentTokenRepository tokenRepository() {
 		return skyve.tokenRepository();
 	}
 	

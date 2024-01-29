@@ -1,8 +1,8 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Represents different keyboard modes on mobile devices.

@@ -2,12 +2,12 @@ package org.skyve.impl.web.faces.components;
 
 import java.io.IOException;
 
-import javax.faces.component.FacesComponent;
-import javax.faces.component.UIComponentBase;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.skyve.impl.web.UserAgent;
+
+import jakarta.faces.component.FacesComponent;
+import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 @FacesComponent(SetUxUi.COMPONENT_TYPE)
 public class SetUxUi extends UIComponentBase {

@@ -1,18 +1,9 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FilenameUtils;
 import org.primefaces.event.FileUploadEvent;
@@ -40,15 +31,24 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
-@ManagedBean(name = "_skyveUpload")
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.annotation.ManagedProperty;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @RequestScoped
-public class FileUpload extends AbstractUpload {
+@Named("_skyveUpload")
+public class FileUploadView extends AbstractUploadView {
 	private static final long serialVersionUID = -8705052124876109265L;
 
     @ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
     private String action;
 
-    public FileUpload() {
+    public FileUploadView() {
     	super(UtilImpl.UPLOADS_FILE_WHITELIST_REGEX, UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB);
     }
     

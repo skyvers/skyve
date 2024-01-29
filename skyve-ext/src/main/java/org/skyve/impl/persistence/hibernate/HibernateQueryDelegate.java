@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.persistence.QueryTimeoutException;
-
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.hql.internal.ast.QuerySyntaxException;
@@ -21,6 +19,8 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
+
+import jakarta.persistence.QueryTimeoutException;
 
 class HibernateQueryDelegate {
 	private AbstractHibernatePersistence persistence;
@@ -94,7 +94,7 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("unchecked")
 	<T> List<T> list(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
-			@SuppressWarnings("deprecation") // TODO should use javax.persistence.Tuple
+			@SuppressWarnings("deprecation") // TODO should use jakarta.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
 			if ((returnAliases == null) || (returnAliases.length == 0)) {
 				throw new DomainException("There should be at least 1 projected value in the query");
@@ -156,7 +156,7 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("resource")
 	<T> AutoClosingIterable<T> iterate(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
-			@SuppressWarnings("deprecation") // TODO should use javax.persistence.Tuple
+			@SuppressWarnings("deprecation") // TODO should use jakarta.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
 			if ((returnAliases == null) || (returnAliases.length == 0)) {
 				throw new DomainException("There should be at least 1 projected value in the query");

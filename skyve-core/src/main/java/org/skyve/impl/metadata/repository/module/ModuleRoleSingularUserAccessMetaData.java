@@ -1,10 +1,10 @@
 package org.skyve.impl.metadata.repository.module;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.UserAccess;
+
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "singular")

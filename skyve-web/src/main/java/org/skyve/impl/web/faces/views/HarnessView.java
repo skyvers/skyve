@@ -1,10 +1,6 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.util.Set;
-
-import javax.faces.FacesException;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 
 import org.skyve.CORE;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -25,7 +21,11 @@ import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.web.WebContext;
 
-public abstract class Harness extends Localisable {
+import jakarta.faces.FacesException;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+
+public abstract class HarnessView extends LocalisableView {
 	private static final long serialVersionUID = 2805839690076647L;
 
 	private String logoRelativeFileNameUrl;

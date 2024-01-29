@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.job.JobDescription;
@@ -14,6 +12,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.

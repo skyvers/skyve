@@ -1,27 +1,27 @@
 package org.skyve.impl.tools.kickstart;
 
-import geodb.GeoDB;
-
 import java.awt.event.ActionEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.swing.AbstractAction;
 
 import org.apache.commons.codec.binary.Base64;
-import java.util.UUID;
 import org.skyve.domain.types.OptimisticLock;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
+
+import geodb.GeoDB;
 
 class CreateAction extends AbstractAction {
 	private static final long serialVersionUID = -7217121655136714836L;

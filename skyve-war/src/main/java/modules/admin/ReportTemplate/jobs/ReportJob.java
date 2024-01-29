@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.util.Binder;
 import org.skyve.util.CommunicationUtil;
@@ -43,7 +43,7 @@ public class ReportJob extends Job {
 	}
 
 	public void executeReport() throws Exception {
-		BeanProvider.injectFields(this);
+		UtilImpl.inject(this);
 
 		final ReportTemplate report = CORE.getPersistence().retrieve(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME, getBean().getBizId());
 

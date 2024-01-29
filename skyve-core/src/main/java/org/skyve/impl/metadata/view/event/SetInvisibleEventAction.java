@@ -3,17 +3,18 @@ package org.skyve.impl.metadata.view.event;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)

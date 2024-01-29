@@ -1,13 +1,5 @@
 package org.skyve.impl.web.faces.pipeline;
 
-import javax.el.ELContext;
-import javax.el.ExpressionFactory;
-import javax.el.ValueExpression;
-import javax.faces.application.Application;
-import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.context.FacesContext;
-
 import org.primefaces.component.column.Column;
 import org.primefaces.component.message.Message;
 import org.skyve.impl.bind.BindUtil;
@@ -15,9 +7,17 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.web.faces.FacesUtil;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.web.UserAgentType;
+
+import jakarta.el.ELContext;
+import jakarta.el.ExpressionFactory;
+import jakarta.el.ValueExpression;
+import jakarta.faces.application.Application;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlPanelGroup;
+import jakarta.faces.context.FacesContext;
 
 public abstract class AbstractFacesBuilder {
 	protected static final Integer ONE_HUNDRED = Integer.valueOf(100);
@@ -35,7 +35,7 @@ public abstract class AbstractFacesBuilder {
 	protected ExpressionFactory ef = a.getExpressionFactory();
 	protected ELContext elc = fc.getELContext();
 	protected String managedBeanName = "skyve";
-	protected FacesView<?> managedBean;
+	protected FacesView managedBean;
 	protected String process = "@form";
 	protected String update = "@(form)";
 	protected UserAgentType userAgentType;
@@ -50,7 +50,7 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 	
-	public void setSAILManagedBean(FacesView<?> managedBean) {
+	public void setSAILManagedBean(FacesView managedBean) {
 		this.managedBean = managedBean;
 	}
 	

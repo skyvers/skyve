@@ -3,9 +3,6 @@ package org.skyve.metadata.model.document;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.PersistentMetaData;
@@ -22,6 +19,9 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * 

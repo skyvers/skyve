@@ -1,11 +1,11 @@
 package org.skyve.impl.metadata.repository.document;
 
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
-
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlValue;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class FieldReference implements SerializableMetaData {

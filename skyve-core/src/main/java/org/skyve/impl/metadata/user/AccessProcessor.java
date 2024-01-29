@@ -8,9 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
-
 import org.skyve.CORE;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
@@ -28,6 +25,9 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View.ViewType;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 class AccessProcessor {
 	private CustomerImpl customer;
@@ -194,7 +194,7 @@ class AccessProcessor {
 		}
 	}
 	
-	private void addAccessForUxUis(@NotNull UserAccess access, @NotNull Set<String> uxuis) {
+	private void addAccessForUxUis(@Nonnull UserAccess access, @Nonnull Set<String> uxuis) {
 		String accessString = access.toString();
 		Set<String> accessUxUis = accesses.get(accessString);
 		if (accessUxUis == null) { // DNE
@@ -216,7 +216,7 @@ class AccessProcessor {
 		}
 	}
 
-	private void addAccessForUxUi(@NotNull UserAccess access, @Nullable String uxui) {
+	private void addAccessForUxUi(@Nonnull UserAccess access, @Nullable String uxui) {
 		String accessString = access.toString();
 		Set<String> accessUxUis = accesses.get(accessString);
 		if (accessUxUis == null) {
@@ -239,7 +239,7 @@ class AccessProcessor {
 		}
 	}
 	
-	private boolean hasViewAccess(@NotNull UserAccess singularUserAccess) {
+	private boolean hasViewAccess(@Nonnull UserAccess singularUserAccess) {
 		return accesses.containsKey(singularUserAccess.toString());
 	}
 }

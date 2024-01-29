@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,16 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.TreeMap;
-
-import javax.annotation.PostConstruct;
-import javax.faces.FacesException;
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.faces.component.UIComponent;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.model.SelectItem;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
@@ -77,9 +67,19 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.faces.FacesException;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.model.SelectItem;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Named;
+
 @ViewScoped
-@ManagedBean(name = "skyve")
-public class FacesView<T extends Bean> extends Harness {
+@Named("skyve")
+public class FacesView extends HarnessView {
 	private static final long serialVersionUID = 3331890232012703780L;
 
 	// NB whatever state is added here needs to be handled by hydrate/dehydrate
@@ -103,10 +103,10 @@ public class FacesView<T extends Bean> extends Harness {
 	private String title;
 	private AbstractWebContext webContext;
 	// The bean currently under edit (for the view binding)
-	private BeanMapAdapter<T> currentBean = null;
+	private BeanMapAdapter currentBean = null;
 	private Map<String, SkyveLazyDataModel> lazyDataModels = new TreeMap<>();
  	private SkyveDualListModelMap dualListModels = new SkyveDualListModelMap(this);
-	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
+	private Map<String, List<BeanMapAdapter>> beans = new TreeMap<>();
 
 	// model name for aggregate views (list, tree, map & calendar) - ie m=admin&d=DataMaintenance&q=ContentModel
 	// parameter q becomes the model name; this is not a parameter
@@ -197,7 +197,7 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	
 	protected void coldHit() {
-		new PreRenderColdHitAction<>(this).execute();
+		new PreRenderColdHitAction(this).execute();
 	}
 	
 	protected void postBack() {
@@ -294,20 +294,18 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 
 	// The edited bean
-	@SuppressWarnings("unchecked")
-	public T getBean() {
-        return (T) ((webContext == null) ? null : webContext.getCurrentBean());
+	public Bean getBean() {
+        return ((webContext == null) ? null : webContext.getCurrentBean());
     }
-	@SuppressWarnings("unchecked")
-	public void setBean(T bean)
+	public void setBean(Bean bean)
 	throws Exception {
 		if (webContext != null) {
 			webContext.setCurrentBean(bean);
 		}
-		currentBean = new BeanMapAdapter<>((T) ActionUtil.getTargetBeanForView(this), webContext);
+		currentBean = new BeanMapAdapter(ActionUtil.getTargetBeanForView(this), webContext);
 	}
 
-	public BeanMapAdapter<T> getCurrentBean() {
+	public BeanMapAdapter getCurrentBean() {
 		return currentBean;
 	}
 
@@ -325,7 +323,7 @@ public class FacesView<T extends Bean> extends Harness {
 
 	public void ok() {
 		UtilImpl.LOGGER.info("FacesView - ok");
-		new SaveAction<>(this, true).execute();
+		new SaveAction(this, true).execute();
 		
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
@@ -338,7 +336,7 @@ public class FacesView<T extends Bean> extends Harness {
 		Bean contextBean = getBean();
 		boolean notPersistedBefore = contextBean.isNotPersisted();
 
-		new SaveAction<>(this, false).execute();
+		new SaveAction(this, false).execute();
 		new SetTitleAction(this).execute();
 		
 		FacesContext c = FacesContext.getCurrentInstance();
@@ -376,8 +374,7 @@ public class FacesView<T extends Bean> extends Harness {
 	
 	// for navigate-on-select in data grids
 	public void navigate(SelectEvent<?> evt) {
-		@SuppressWarnings("unchecked")
-		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
+		String bizId = ((BeanMapAdapter) evt.getObject()).getBean().getBizId();
 		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
 		// change list var back to Data Widget binding - '_' to '.' and remove "Row" from the end.
 		dataWidgetBinding = BindUtil.unsanitiseBinding(dataWidgetBinding);
@@ -404,7 +401,7 @@ public class FacesView<T extends Bean> extends Harness {
 	
 	public void zoomout() {
 		UtilImpl.LOGGER.info("FacesView - zoomout");
-		new ZoomOutAction<>(this).execute();
+		new ZoomOutAction(this).execute();
 	}
 
 	/**
@@ -426,7 +423,7 @@ public class FacesView<T extends Bean> extends Harness {
 			log.append(" with selected row ").append(elementBizId);
 		}
 		UtilImpl.LOGGER.info(log.toString());
-		new ExecuteActionAction<>(this, actionName, collectionBinding, elementBizId).execute();
+		new ExecuteActionAction(this, actionName, collectionBinding, elementBizId).execute();
 		new SetTitleAction(this).execute();
 	}
 	
@@ -439,7 +436,7 @@ public class FacesView<T extends Bean> extends Harness {
 		log.append("FacesView - rerender from source ").append(source);
 		log.append(validate ? " with" : " without").append(" validation");
 		UtilImpl.LOGGER.info(log.toString());
-		new RerenderAction<>(this, source, validate).execute();
+		new RerenderAction(this, source, validate).execute();
 		new SetTitleAction(this).execute();
 	}
 	
@@ -460,8 +457,7 @@ public class FacesView<T extends Bean> extends Harness {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
-				@SuppressWarnings("unchecked")
-				BeanMapAdapter<Bean> adapter = (BeanMapAdapter<Bean>) evt.getObject();
+				BeanMapAdapter adapter = (BeanMapAdapter) evt.getObject();
 				if (adapter != null) {
 					Bean bean = adapter.getBean();
 					if (bean != null) {
@@ -498,11 +494,11 @@ public class FacesView<T extends Bean> extends Harness {
 	/**
 	 * Used to ensure the DataTable renderer highlights the row correctly
 	 */
-	private BeanMapAdapter<Bean> selectedRow;
-	public BeanMapAdapter<Bean> getSelectedRow() {
+	private BeanMapAdapter selectedRow;
+	public BeanMapAdapter getSelectedRow() {
 		return selectedRow;
 	}
-	public void setSelectedRow(BeanMapAdapter<Bean> selectedRow) {
+	public void setSelectedRow(BeanMapAdapter selectedRow) {
 		this.selectedRow = selectedRow;
 	}
 	
@@ -608,7 +604,7 @@ public class FacesView<T extends Bean> extends Harness {
 			log.append(" with selected row ").append(elementBizId);
 		}
 		UtilImpl.LOGGER.info(log.toString());
-		new ExecuteDownloadAction<>(this, 
+		new ExecuteDownloadAction(this, 
 									actionName, 
 									collectionBinding,
 									elementBizId).execute();
@@ -709,10 +705,10 @@ public class FacesView<T extends Bean> extends Harness {
 		log.append("' and binding ").append(binding);
 		UtilImpl.LOGGER.info(log.toString());
 
-		return new CompleteAction<>(this, query, binding, complete).execute();
+		return new CompleteAction(this, query, binding, complete).execute();
 	}
 	
- 	public List<BeanMapAdapter<Bean>> lookup(String query) {
+ 	public List<BeanMapAdapter> lookup(String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String completeModule = (String) attributes.get("module");
@@ -747,7 +743,7 @@ public class FacesView<T extends Bean> extends Harness {
 
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
 
- 		List<BeanMapAdapter<Bean>> result = null;
+ 		List<BeanMapAdapter> result = null;
  		
  		// these are ultimately web parameters that may not be present in the request
  		if ((completeQuery == null) || completeQuery.isEmpty()) {
@@ -840,7 +836,7 @@ public class FacesView<T extends Bean> extends Harness {
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		ChartType type = (ChartType) attributes.get("skyveType");
 		Object model = attributes.get("skyveModel");
-		return new ChartAction<>(this, model, type).execute();
+		return new ChartAction(this, model, type).execute();
 	}
 
 	/**

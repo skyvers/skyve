@@ -2,13 +2,13 @@ package org.skyve.metadata.model;
 
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * 

@@ -20,14 +20,14 @@ package org.skyve.impl.web.filter.gzip;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.content.MimeType;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Very Simple test servlet to test compression filter

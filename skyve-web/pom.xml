@@ -30,11 +30,13 @@
 			<groupId>org.primefaces</groupId>
 			<artifactId>primefaces</artifactId>
 			<scope>compile</scope>
+			<classifier>jakarta</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.primefaces.extensions</groupId>
 			<artifactId>primefaces-extensions</artifactId>
 			<scope>compile</scope>
+			<classifier>jakarta</classifier>
 			<exclusions>
 				<exclusion>
 					<groupId>org.apache.commons</groupId>
@@ -53,8 +55,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-    		<groupId>org.jboss.weld.se</groupId>
-    		<artifactId>weld-se</artifactId>
+			<groupId>org.jboss.weld.se</groupId>
+			<artifactId>weld-se-core</artifactId>
     		<scope>compile</scope>
 		</dependency>
 		<dependency>

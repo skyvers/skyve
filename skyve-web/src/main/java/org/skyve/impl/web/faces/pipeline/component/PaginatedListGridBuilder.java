@@ -1,12 +1,12 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
-import javax.faces.component.UIComponent;
-
 import org.primefaces.component.api.UIPageableData;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.model.list.ListModel;
+
+import jakarta.faces.component.UIComponent;
 
 public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 	@Override

@@ -1,13 +1,13 @@
 package org.skyve.impl.metadata.model.document.field;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
+
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class ConvertableField extends ConstrainableField {

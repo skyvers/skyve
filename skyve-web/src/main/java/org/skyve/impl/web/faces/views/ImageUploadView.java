@@ -1,16 +1,16 @@
-package org.skyve.impl.web.faces.beans;
-
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
+package org.skyve.impl.web.faces.views;
 
 import org.skyve.impl.util.UtilImpl;
 
-@ManagedBean(name = "_skyveImage")
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Named;
+
 @RequestScoped
-public class ImageUpload extends ContentUpload {
+@Named("_skyveImage")
+public class ImageUploadView extends ContentUploadView {
 	private static final long serialVersionUID = 3614229213369205657L;
 
-	public ImageUpload() {
+	public ImageUploadView() {
     	super(UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX, UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB);
     }
 }

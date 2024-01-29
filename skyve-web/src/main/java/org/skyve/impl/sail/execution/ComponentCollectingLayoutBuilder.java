@@ -1,9 +1,9 @@
 package org.skyve.impl.sail.execution;
 
-import javax.faces.component.UIComponent;
-
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.web.faces.pipeline.layout.NoOpLayoutBuilder;
+
+import jakarta.faces.component.UIComponent;
 
 public class ComponentCollectingLayoutBuilder extends NoOpLayoutBuilder {
 	private ComponentCollectingComponentBuilder cccb;

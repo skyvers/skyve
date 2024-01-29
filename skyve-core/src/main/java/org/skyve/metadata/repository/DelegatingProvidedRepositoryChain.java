@@ -5,8 +5,6 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
@@ -30,6 +28,8 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+
+import jakarta.annotation.Nonnull;
 
 public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegate {
 	protected List<ProvidedRepository> delegates;

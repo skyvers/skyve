@@ -1,15 +1,15 @@
 package org.skyve.impl.metadata.behaviour;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.ExpressionEvaluator;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlRootElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "set")
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE,

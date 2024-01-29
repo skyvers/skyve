@@ -3,11 +3,6 @@ package org.skyve.impl.metadata.repository.customer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
@@ -16,6 +11,11 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
+
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE,
 			name = "role",

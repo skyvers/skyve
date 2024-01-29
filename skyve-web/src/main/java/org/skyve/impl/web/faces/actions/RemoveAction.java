@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
@@ -23,12 +23,12 @@ import org.skyve.web.WebContext;
  * The onRemovedHandlers event actions are processed here also.
  */
 public class RemoveAction extends FacesAction<Void> {
-	private FacesView<? extends Bean> facesView;
+	private FacesView facesView;
 	private String collectionName;
 	private String elementBizId;
 	private List<String> removedHandlerActionNames; // "true/false" means rerender with/without client validation
 	
-	public RemoveAction(FacesView<? extends Bean> facesView,
+	public RemoveAction(FacesView facesView,
 							String collectionName,
 							String elementBizId,
 							List<String> removedHandlerActionNames) {
@@ -59,15 +59,15 @@ public class RemoveAction extends FacesAction<Void> {
 				for (String removedHandlerActionName : removedHandlerActionNames) {
 					if (Boolean.TRUE.toString().equals(removedHandlerActionName)) {
 						if (UtilImpl.FACES_TRACE) Util.LOGGER.info("RemoveAction - execute removed handler rerender with client validation");
-						new RerenderAction<>(facesView, collectionName, true).execute();
+						new RerenderAction(facesView, collectionName, true).execute();
 					}
 					else if (Boolean.FALSE.toString().equals(removedHandlerActionName)) {
 						if (UtilImpl.FACES_TRACE) Util.LOGGER.info("RemoveAction - execute removed handler rerender with no client validation");
-						new RerenderAction<>(facesView, collectionName, false).execute();
+						new RerenderAction(facesView, collectionName, false).execute();
 					}
 					else {
 						if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("RemoveAction - execute removed handler [%s] action", removedHandlerActionName));
-						new ExecuteActionAction<>(facesView, removedHandlerActionName, null, null).execute();
+						new ExecuteActionAction(facesView, removedHandlerActionName, null, null).execute();
 					}
 				}
 			}

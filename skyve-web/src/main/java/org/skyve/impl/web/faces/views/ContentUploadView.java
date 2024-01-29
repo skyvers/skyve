@@ -1,13 +1,4 @@
-package org.skyve.impl.web.faces.beans;
-
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+package org.skyve.impl.web.faces.views;
 
 import org.apache.commons.codec.binary.Base64;
 import org.primefaces.PrimeFaces;
@@ -25,9 +16,18 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.annotation.ManagedProperty;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @RequestScoped
-@ManagedBean(name = "_skyveContent")
-public class ContentUpload extends AbstractUpload {
+@Named("_skyveContent")
+public class ContentUploadView extends AbstractUploadView {
 	private static final long serialVersionUID = -6769960348990922565L;
 
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
@@ -36,11 +36,11 @@ public class ContentUpload extends AbstractUpload {
 	private String croppedDataUrl;
 	private String croppedFileName;
 
-	public ContentUpload() {
+	public ContentUploadView() {
 		super(UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX, UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB);
 	}
 
-	protected ContentUpload(String whitelistRegex, int maximumSizeMB) {
+	protected ContentUploadView(String whitelistRegex, int maximumSizeMB) {
 		super(whitelistRegex, maximumSizeMB);
 	}
 

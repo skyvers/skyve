@@ -6,13 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
@@ -29,6 +22,13 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 
 // TODO Populate defaultActions property in customer returned by convert
 @XmlRootElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "customer")

@@ -4,10 +4,10 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
-import javax.faces.convert.ConverterException;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import jakarta.faces.convert.ConverterException;
 
 public class LongIntegerSeparatorTest {
 	private LongIntegerSeparator converter;

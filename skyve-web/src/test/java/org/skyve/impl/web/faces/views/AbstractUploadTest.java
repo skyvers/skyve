@@ -1,9 +1,7 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-import javax.faces.context.FacesContext;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +9,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.primefaces.model.file.UploadedFile;
+
+import jakarta.faces.context.FacesContext;
 
 public class AbstractUploadTest {
 	private static class TestUploadedFile implements UploadedFile {
@@ -70,7 +70,7 @@ public class AbstractUploadTest {
 	
 	@Test
 	public void testUploadDefaultFiles() {
-		ContentUpload content = new ContentUpload();
+		ContentUploadView content = new ContentUploadView();
 		TestUploadedFile file = new TestUploadedFile();
 		
 		Assert.assertTrue(content.validFile(file.test("test.txt", 10485760), fc)); // largest
@@ -121,7 +121,7 @@ public class AbstractUploadTest {
 	
 	@Test
 	public void testBizPortDefaultFiles() {
-		BizportImport bizport = new BizportImport();
+		BizportImportView bizport = new BizportImportView();
 		TestUploadedFile file = new TestUploadedFile();
 		
 		Assert.assertTrue(bizport.validFile(file.test("test.xls", 10485760), fc)); // largest

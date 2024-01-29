@@ -138,11 +138,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
@@ -153,8 +148,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>
-			<artifactId>weld-se</artifactId>
+			<artifactId>weld-se-core</artifactId>
 			<scope>compile</scope>
+		</dependency>
+		<!-- EL implementation for maven tasks -->
+		<dependency>
+		    <groupId>org.glassfish.expressly</groupId>
+		    <artifactId>expressly</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 </project>

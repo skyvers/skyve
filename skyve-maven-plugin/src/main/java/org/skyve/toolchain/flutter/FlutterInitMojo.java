@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.TreeMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -177,12 +178,11 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 
                     for (Path path : dirContents) {
                         debug("Deleting: " + path);
-                        if (path.toFile()
-                                .isDirectory()) {
-                            org.terracotta.utilities.io.Files.deleteTree(path);
+                        File file = path.toFile();
+                        if (file.isDirectory()) {
+                            FileUtils.deleteDirectory(path.toFile());
                         } else {
-                            path.toFile()
-                                .delete();
+                            file.delete();
                         }
                     }
                 } catch (IOException e) {

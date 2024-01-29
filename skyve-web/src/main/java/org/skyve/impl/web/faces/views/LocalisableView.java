@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -6,15 +6,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.faces.context.FacesContext;
-
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
-public abstract class Localisable implements Serializable {
+import jakarta.faces.context.FacesContext;
+
+public abstract class LocalisableView implements Serializable {
 	private static final long serialVersionUID = 2440700208785488690L;
 
 	public static final class I18nMapAdapter implements Map<String, String>, Serializable {

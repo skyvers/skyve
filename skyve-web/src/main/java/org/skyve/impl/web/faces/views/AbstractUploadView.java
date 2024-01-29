@@ -1,10 +1,6 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.util.regex.Pattern;
-
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.context.FacesContext;
 
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.impl.util.UtilImpl;
@@ -12,7 +8,11 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 
-public abstract class AbstractUpload extends Localisable {
+import jakarta.faces.annotation.ManagedProperty;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
+
+public abstract class AbstractUploadView extends LocalisableView {
 	private static final long serialVersionUID = 8618349823087627588L;
 
 	private static long MB_IN_BYTES = 1024 * 1024;
@@ -26,7 +26,7 @@ public abstract class AbstractUpload extends Localisable {
 	private String whitelistRegex;
 	private long maximumSizeInBytes;
 
-	protected AbstractUpload(String whitelistRegex, int maximumSizeMB) {
+	protected AbstractUploadView(String whitelistRegex, int maximumSizeMB) {
 		this.whitelistRegex = whitelistRegex;
 		maximumSizeInBytes = maximumSizeMB * MB_IN_BYTES;
 	}

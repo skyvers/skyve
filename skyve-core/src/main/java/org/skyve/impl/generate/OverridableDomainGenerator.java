@@ -2971,7 +2971,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// Document and module names
 
 		if ((! overridden) || (baseDocumentName == null)) { // not an extension
-			imports.add("javax.xml.bind.annotation.XmlTransient");
+			imports.add("jakarta.xml.bind.annotation.XmlTransient");
 			imports.add("org.skyve.CORE");
 			imports.add("org.skyve.domain.messages.DomainException");
 
@@ -3055,7 +3055,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				continue;
 			}
 
-			imports.add("javax.xml.bind.annotation.XmlElement");
+			imports.add("jakarta.xml.bind.annotation.XmlElement");
 
 			boolean tranzient = attribute.isTransient();
 			// Add if
@@ -3116,7 +3116,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							imports.add("java.util.List");
 							imports.add("java.util.stream.Stream");
 							imports.add("java.util.stream.Collectors");
-							imports.add("javax.xml.bind.annotation.XmlEnum");
+							imports.add("jakarta.xml.bind.annotation.XmlEnum");
 	
 							appendEnumDefinition(enumeration, propertySimpleClassName, enums);
 						}
@@ -3239,50 +3239,50 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				methods.append("\t@XmlElement\n");
 				if (AttributeType.date.equals(type)) {
-					imports.add("javax.xml.bind.annotation.XmlSchemaType");
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.XmlSchemaType");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.DateOnlyMapper");
 					methods.append("\t@XmlSchemaType(name = \"date\")\n");
 					methods.append("\t@XmlJavaTypeAdapter(DateOnlyMapper.class)\n");
 				}
 				else if (AttributeType.time.equals(type)) {
-					imports.add("javax.xml.bind.annotation.XmlSchemaType");
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.XmlSchemaType");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimeOnlyMapper");
 					methods.append("\t@XmlSchemaType(name = \"time\")\n");
 					methods.append("\t@XmlJavaTypeAdapter(TimeOnlyMapper.class)\n");
 				}
 				else if (AttributeType.dateTime.equals(type)) {
-					imports.add("javax.xml.bind.annotation.XmlSchemaType");
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.XmlSchemaType");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.DateTimeMapper");
 					methods.append("\t@XmlSchemaType(name = \"dateTime\")\n");
 					methods.append("\t@XmlJavaTypeAdapter(DateTimeMapper.class)\n");
 				}
 				else if (AttributeType.timestamp.equals(type)) {
-					imports.add("javax.xml.bind.annotation.XmlSchemaType");
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.XmlSchemaType");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimestampMapper");
 					methods.append("\t@XmlSchemaType(name = \"dateTime\")\n");
 					methods.append("\t@XmlJavaTypeAdapter(TimestampMapper.class)\n");
 				}
 				else if (AttributeType.decimal2.equals(type)) {
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal2Mapper");
 					methods.append("\t@XmlJavaTypeAdapter(Decimal2Mapper.class)\n");
 				}
 				else if (AttributeType.decimal5.equals(type)) {
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal5Mapper");
 					methods.append("\t@XmlJavaTypeAdapter(Decimal5Mapper.class)\n");
 				}
 				else if (AttributeType.decimal10.equals(type)) {
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal10Mapper");
 					methods.append("\t@XmlJavaTypeAdapter(Decimal10Mapper.class)\n");
 				}
 				else if (AttributeType.geometry.equals(type)) {
-					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
+					imports.add("jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.GeometryMapper");
 					methods.append("\t@XmlJavaTypeAdapter(GeometryMapper.class)\n");
 				}
@@ -3333,7 +3333,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// add import for parent setter if there are no attributes in the child
 			if (document.getAttributes().size() == 0) {
-				imports.add("javax.xml.bind.annotation.XmlElement");
+				imports.add("jakarta.xml.bind.annotation.XmlElement");
 			}
 		}
 
@@ -3393,7 +3393,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if ((! overridden) ||
 						(documentClass == null) ||
 						(!documentClass.attributes.containsKey(conditionName))) {
-					imports.add("javax.xml.bind.annotation.XmlTransient");
+					imports.add("jakarta.xml.bind.annotation.XmlTransient");
 
 					boolean overriddenCondition = "created".equals(conditionName);
 
@@ -3461,8 +3461,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 		}
 
-		imports.add("javax.xml.bind.annotation.XmlType");
-		imports.add("javax.xml.bind.annotation.XmlRootElement");
+		imports.add("jakarta.xml.bind.annotation.XmlType");
+		imports.add("jakarta.xml.bind.annotation.XmlRootElement");
 
 		// Add parent reference and bizOrdinal property
 		// if this is a base class of a child document

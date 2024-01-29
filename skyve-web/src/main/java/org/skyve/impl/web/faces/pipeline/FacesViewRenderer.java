@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIComponentBase;
-
 import org.primefaces.component.picklist.PickList;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -175,6 +172,9 @@ import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
+
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIComponentBase;
 
 public class FacesViewRenderer extends ViewRenderer {
 	private ComponentBuilder cb;
@@ -2320,8 +2320,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		eventSource = null;
 	}
 
-	private static javax.faces.convert.Converter convertConverter(Converter<?> converter, AttributeType type) {
-		javax.faces.convert.Converter result = null;
+	private static jakarta.faces.convert.Converter<?> convertConverter(Converter<?> converter, AttributeType type) {
+		jakarta.faces.convert.Converter<?> result = null;
 		if (converter != null) {
 			// Date
 			if (converter instanceof org.skyve.domain.types.converters.date.DD_MM_YYYY) {

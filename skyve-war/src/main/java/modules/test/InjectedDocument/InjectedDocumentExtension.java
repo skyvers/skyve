@@ -2,13 +2,12 @@ package modules.test.InjectedDocument;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
+import jakarta.inject.Inject;
 import modules.test.domain.InjectedDocument;
 
 public class InjectedDocumentExtension extends InjectedDocument {

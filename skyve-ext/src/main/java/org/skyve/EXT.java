@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.websocket.Session;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jfree.chart.JFreeChart;
@@ -73,6 +72,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
+
+import jakarta.websocket.Session;
 
 /**
  * The central factory for creating all objects required in skyve ext.

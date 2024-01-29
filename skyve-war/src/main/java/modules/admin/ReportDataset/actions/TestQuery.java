@@ -5,8 +5,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.inject.spi.CDI;
-
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaClass;
 import org.apache.commons.beanutils.DynaProperty;
@@ -30,6 +28,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.inject.spi.CDI;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportDataset.ReportDatasetExtension.SubstitutedQueryResult;
 import modules.admin.ReportParameter.ReportParameterExtension;

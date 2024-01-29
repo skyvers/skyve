@@ -1,8 +1,8 @@
 package org.skyve.metadata.repository;
 
-import javax.annotation.Nullable;
-
 import org.skyve.metadata.customer.Customer;
+
+import jakarta.annotation.Nullable;
 
 public interface CachedRepository extends Repository {
 	/**

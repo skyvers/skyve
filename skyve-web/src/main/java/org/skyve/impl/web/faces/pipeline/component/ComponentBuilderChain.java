@@ -2,8 +2,6 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
 
-import javax.faces.component.UIComponent;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -45,7 +43,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -54,6 +52,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.web.UserAgentType;
+
+import jakarta.faces.component.UIComponent;
 
 /**
  * Delegates to a list of other builders that actually produce the components.
@@ -76,7 +76,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 	
 	@Override
-	public void setSAILManagedBean(FacesView<?> managedBean) {
+	public void setSAILManagedBean(FacesView managedBean) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setSAILManagedBean(managedBean);
 		// Now set the state on all builders in the chain
@@ -790,7 +790,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											String title,
 											boolean required,
 											HorizontalAlignment textAlignment,
-											javax.faces.convert.Converter facesConverter) {
+											jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required, textAlignment, facesConverter);
@@ -825,7 +825,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										Integer length,
 										Converter<?> converter,
 										Format<?> format,
-										javax.faces.convert.Converter facesConverter) {
+										jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.text(result,

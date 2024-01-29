@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
@@ -26,6 +24,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+import jakarta.inject.Inject;
 import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Audit;

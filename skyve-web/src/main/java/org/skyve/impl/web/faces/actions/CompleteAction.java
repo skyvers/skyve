@@ -16,7 +16,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
@@ -28,13 +28,13 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
-public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
-	private FacesView<T> facesView;
+public class CompleteAction extends FacesAction<List<String>> {
+	private FacesView facesView;
 	private String query;
 	private String binding;
 	private CompleteType complete;
 	
-	public CompleteAction(FacesView<T> facesView,
+	public CompleteAction(FacesView facesView,
 							String query,
 							String binding,
 							CompleteType complete) {

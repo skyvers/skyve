@@ -4,18 +4,6 @@ import java.security.Principal;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.faces.FacesException;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.component.UIViewRoot;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.event.PhaseEvent;
-import javax.faces.event.PhaseId;
-import javax.faces.event.PhaseListener;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.cache.StateUtil;
@@ -24,8 +12,20 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.model.document.Bizlet;
+
+import jakarta.faces.FacesException;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.application.FacesMessage.Severity;
+import jakarta.faces.component.UIViewRoot;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.PhaseEvent;
+import jakarta.faces.event.PhaseId;
+import jakarta.faces.event.PhaseListener;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class SkyveFacesPhaseListener implements PhaseListener {
 	private static final long serialVersionUID = 3757264858610371158L;
@@ -80,7 +80,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		// restore from the session - used when http redirect is used to navigate to a new view
 		if (s.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesPhaseListener - SET PERSISTENCE FROM SESSION");
-			FacesView<?> view = (FacesView<?>) s.get(FacesUtil.MANAGED_BEAN_NAME_KEY);
+			FacesView view = (FacesView) s.get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			restore(view, ec);
 		}
 		// restore from the view root - used when within the same view-scoped bean
@@ -88,7 +88,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
 				if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyveFacesPhaseListener - SET PERSISTENCE FROM VIEW");
-				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
+				FacesView view = FacesUtil.getManagedBean(managedBeanName);
 				restore(view, ec);
 			}
 		}
@@ -106,12 +106,12 @@ public class SkyveFacesPhaseListener implements PhaseListener {
     	WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 	}
 
-	private static void restore(FacesView<?> view, ExternalContext ec)
+	private static void restore(FacesView view, ExternalContext ec)
 	throws Exception {
 		// restore the context
 		AbstractWebContext webContext = StateUtil.getCachedConversation(view.getDehydratedWebId(),
-																				(HttpServletRequest) ec.getRequest(),
-																				(HttpServletResponse) ec.getResponse());
+																			(HttpServletRequest) ec.getRequest(),
+																			(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case
 			view.hydrate(webContext);
 	
@@ -125,8 +125,8 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	throws Exception {
 		// restore the context
 		AbstractWebContext webContext = StateUtil.getCachedConversation(webId,
-																				(HttpServletRequest) ec.getRequest(),
-																				(HttpServletResponse) ec.getResponse());
+																			(HttpServletRequest) ec.getRequest(),
+																			(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case
 			// place the conversation into the thread
 			AbstractPersistence persistence = webContext.getConversation();
@@ -140,7 +140,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 			// Gather an dual list models in the view.
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
-				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
+				FacesView view = FacesUtil.getManagedBean(managedBeanName);
 				view.getDualListModels().gather();
 			}
 		}
@@ -154,7 +154,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 				// Call postRender, cache and dehydrate
 				String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				if (managedBeanName != null) {
-					FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
+					FacesView view = FacesUtil.getManagedBean(managedBeanName);
 					if (view != null) {
 						AbstractWebContext webContext = view.getWebContext();
 

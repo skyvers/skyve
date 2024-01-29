@@ -7,7 +7,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -19,14 +19,14 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebContext;
 
-public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
-	private FacesView<T> facesView;
+public class ExecuteActionAction extends FacesAction<Void> {
+	private FacesView facesView;
 	private String actionName;
 	
 	private String collectionName;
 	private String elementBizId;
 	
-	public ExecuteActionAction(FacesView<T> facesView,
+	public ExecuteActionAction(FacesView facesView,
 								String actionName,
 								String collectionName,
 								String elementBizId) {
@@ -73,7 +73,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 				ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, webContext);
 				internalCustomer.interceptAfterServerSideAction(targetDocument, resourceName, result, webContext);
 				Bean resultBean = result.getBean();
-				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) resultBean);
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, resultBean);
 				contextBean = facesView.getBean();
 				if (notPersistedBefore) {
 					boolean persisted = contextBean.isPersisted();
@@ -81,7 +81,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 						// The context bean could've been saved through a child bean's action above,
 						// so we need to see if its in the DB
 						try {
-							T bean = persistence.retrieve(contextBean.getBizModule(), contextBean.getBizDocument(), contextBean.getBizId());
+							Bean bean = persistence.retrieve(contextBean.getBizModule(), contextBean.getBizDocument(), contextBean.getBizId());
 							if (bean != null) {
 								facesView.setBean(bean);
 								contextBean = bean;

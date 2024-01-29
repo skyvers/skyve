@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -23,6 +21,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import jakarta.inject.Inject;
 import modules.admin.domain.Startup;
 
 public class StartupExtension extends Startup {

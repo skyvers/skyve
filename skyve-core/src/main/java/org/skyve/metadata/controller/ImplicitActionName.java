@@ -1,9 +1,9 @@
 package org.skyve.metadata.controller;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Actions implicit to skyve.

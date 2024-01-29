@@ -1,11 +1,11 @@
 package org.skyve.impl.metadata.view.model.chart;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
-
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.model.chart.NumericRangeBucket;
+
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlValue;
 
 @XmlRootElement(name = "range", namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)

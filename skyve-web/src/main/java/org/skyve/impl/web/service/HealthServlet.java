@@ -6,11 +6,6 @@ import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
@@ -28,6 +23,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Returns a JSON response regarding the health of the relevant Skyve system components, or a 404 if turned off in the JSON.

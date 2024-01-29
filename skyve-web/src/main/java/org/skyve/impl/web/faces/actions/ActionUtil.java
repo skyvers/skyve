@@ -2,9 +2,6 @@ package org.skyve.impl.web.faces.actions;
 
 import java.util.Stack;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
@@ -13,13 +10,16 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesUtil;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
+
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
 
 public class ActionUtil {
 	/**
@@ -29,18 +29,18 @@ public class ActionUtil {
 		// nothing to see here
 	}
 	
-	public static Bean getTargetBeanForView(FacesView<? extends Bean> facesView)
+	public static Bean getTargetBeanForView(FacesView facesView)
 	throws Exception {
 		return getTargetBeanForViewAndReferenceBinding(facesView, null);
 	}
 
-	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView<? extends Bean> facesView,
+	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView facesView,
 																String referenceBinding)
 	throws Exception {
 		return getTargetBeanForViewAndReferenceBinding(facesView, referenceBinding, null);
 	}
 
-	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView<? extends Bean> facesView,
+	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView facesView,
     															String referenceBinding,
 																String elementBizId)
     throws Exception {
@@ -67,7 +67,7 @@ public class ActionUtil {
     	return result;
     }
 
-    static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView<T> facesView, String collectionName, T newValue)
+    static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView facesView, String collectionName, T newValue)
 	throws Exception {
     	Bean bean = facesView.getBean();
     	if (bean != null) { // hopefully never
@@ -95,7 +95,7 @@ public class ActionUtil {
     	}
     }
     
-    static final void redirectViewScopedConversation(FacesView<? extends Bean> facesView, boolean zoomIn)
+    static final void redirectViewScopedConversation(FacesView facesView, boolean zoomIn)
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();

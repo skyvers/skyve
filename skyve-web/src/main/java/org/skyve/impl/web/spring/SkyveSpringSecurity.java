@@ -45,7 +45,6 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 public class SkyveSpringSecurity {
-	
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
 		DelegatingPasswordEncoder result = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -53,7 +52,7 @@ public class SkyveSpringSecurity {
 		return result;
 	}
 	
-	public PersistentTokenRepository tokenRepository() throws Exception {
+	public PersistentTokenRepository tokenRepository() {
 		SkyveRememberMeTokenRepository result = new SkyveRememberMeTokenRepository();
 		result.setDataSource(dataSource());
 		return result;

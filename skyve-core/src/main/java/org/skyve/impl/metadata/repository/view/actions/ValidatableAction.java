@@ -1,10 +1,10 @@
 package org.skyve.impl.metadata.repository.view.actions;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ValidatableAction extends PositionableAction {

@@ -1,21 +1,19 @@
 package org.skyve.admin.web;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
-import javax.faces.context.FacesContext;
-
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.PublicFacesView;
+import org.skyve.impl.web.faces.views.PublicFacesView;
 import org.skyve.persistence.Persistence;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Named;
 import modules.admin.Communication.CommunicationBizlet;
 import modules.admin.Subscription.SubscriptionBizlet;
 
 @RequestScoped
-@ManagedBean(name = "adminUnsubscribe")
-public class UnsubscribeView extends PublicFacesView<Bean> {
+@Named("adminUnsubscribe")
+public class UnsubscribeView extends PublicFacesView {
 	private static final long serialVersionUID = 6713621260342289323L;
 
 	// indicates if the RSVP processing on HTTP GET was successful or not

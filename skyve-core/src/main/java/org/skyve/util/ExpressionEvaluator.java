@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
@@ -32,6 +29,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class ExpressionEvaluator {
 	public static final String USER_EXPRESSION = "USER";

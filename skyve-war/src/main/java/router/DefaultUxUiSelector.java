@@ -3,9 +3,6 @@ package router;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.web.UserAgentType;
@@ -15,6 +12,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.Startup;
 
 public class DefaultUxUiSelector implements UxUiSelector {

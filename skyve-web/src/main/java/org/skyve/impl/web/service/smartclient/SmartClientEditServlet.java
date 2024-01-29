@@ -10,13 +10,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -67,6 +60,13 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class SmartClientEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;

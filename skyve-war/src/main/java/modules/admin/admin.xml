@@ -719,12 +719,12 @@
 					<filterExpression>?</filterExpression>
 					<projected>false</projected>
 				</column>
-				<column binding="year">
+				<column binding="hitYear">
 					<filterOperator>equal</filterOperator>
 					<filterExpression>?</filterExpression>
 					<projected>false</projected>
 				</column>
-				<column binding="month">
+				<column binding="hitMonth">
 					<filterOperator>equal</filterOperator>
 					<filterExpression>?</filterExpression>
 					<projected>false</projected>

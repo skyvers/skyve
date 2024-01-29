@@ -15,10 +15,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.imageio.ImageIO;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.locationtech.jts.geom.Coordinate;
@@ -50,6 +46,11 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Service for previous values.
@@ -116,7 +117,8 @@ public class TrackmateServlet extends HttpServlet {
 	public static final String VERTEX_HEADING_ACCURACY_PROPERTY_NAME = "headingAccuracyInDecimalDegrees";
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	throws ServletException, IOException {
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never

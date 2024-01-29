@@ -43,6 +43,13 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.BeanAttributes;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.InjectionTarget;
+import jakarta.enterprise.inject.spi.InjectionTargetFactory;
 import net.gcardone.junidecode.Junidecode;
 
 public class UtilImpl {
@@ -500,6 +507,31 @@ public class UtilImpl {
 		return cbv.isChanged();
 	}
 
+	/**
+	 * Utility method to ensure that CDI injects are performed on existing (newly created) objects.
+	 * @param target	The target object to inject dependencies into (recursively)
+	 */
+	public static void inject(Object target) {
+		@SuppressWarnings("unchecked")
+		Class<Object> type = (Class<Object>) target.getClass();
+		try {
+			type.getConstructor();
+		}
+		catch (@SuppressWarnings("unused") NoSuchMethodException e) {
+			// Can't inject unless the class has a public default constructor
+			return;
+		}
+
+		BeanManager bm = CDI.current().getBeanManager();
+        AnnotatedType<Object> at = bm.createAnnotatedType(type);
+		BeanAttributes<Object> ba = bm.createBeanAttributes(at);
+		InjectionTargetFactory<Object> itf = bm.getInjectionTargetFactory(at);
+		CreationalContext<Object> cc = bm.createCreationalContext(null);
+		jakarta.enterprise.inject.spi.Bean<Object> b = bm.createBean(ba, type, itf);
+		InjectionTarget<Object> it = itf.createInjectionTarget(b);
+		it.inject(target, cc);
+	}
+	
 	/**
 	 * Utility method that tries to properly initialise the persistence layer proxies used by lazy loading.
 	 * 

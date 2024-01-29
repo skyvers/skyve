@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.faces.model.SelectItem;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -21,24 +19,26 @@ import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
 import org.skyve.web.WebContext;
 
-public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>, Serializable {
+import jakarta.faces.model.SelectItem;
+
+public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	private static final long serialVersionUID = 3398758718683866619L;
 
-	private T bean;
+	private Bean bean;
 	private WebContext webContext;
 	private Map<String, Object> delegate = new TreeMap<>();
 	
-	public BeanMapAdapter(T bean, WebContext webContext) {
+	public BeanMapAdapter(Bean bean, WebContext webContext) {
 		setBean(bean);
 		this.webContext = webContext;
 	}
 	
-	public T getBean() {
+	public Bean getBean() {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getBean " + bean);
 		return bean;
 	}
 	
-	public void setBean(T bean) {
+	public void setBean(Bean bean) {
 		this.bean = bean;
 		delegate.clear();
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.setBean " + bean);
@@ -117,14 +117,14 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 						result = string;
 					}
 					else if (result instanceof Bean) {
-						result = new BeanMapAdapter<>((Bean) result, webContext);
+						result = new BeanMapAdapter((Bean) result, webContext);
 					}
 					else if (result instanceof List<?>) {
 						@SuppressWarnings("unchecked")
 						List<Bean> childBeans = (List<Bean>) result;
-						List<BeanMapAdapter<Bean>> adaptedChildBeans = new ArrayList<>();
+						List<BeanMapAdapter> adaptedChildBeans = new ArrayList<>();
 						for (Bean childBean : childBeans) {
-							adaptedChildBeans.add(new BeanMapAdapter<>(childBean, webContext));
+							adaptedChildBeans.add(new BeanMapAdapter(childBean, webContext));
 						}
 						result = adaptedChildBeans;
 					}
@@ -187,8 +187,8 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 			@Override
 			public Void callback() throws Exception {
 				Object processedValue = value;
-				if (value instanceof BeanMapAdapter<?>) {
-					processedValue = ((BeanMapAdapter<?>) value).getBean();
+				if (value instanceof BeanMapAdapter) {
+					processedValue = ((BeanMapAdapter) value).getBean();
 				}
 				else if (value instanceof String) {
 					String processedStringValue = (String) value;
@@ -215,8 +215,8 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof BeanMapAdapter<?>) {
-			return bean.equals(((BeanMapAdapter<?>) obj).getBean());
+		if (obj instanceof BeanMapAdapter) {
+			return bean.equals(((BeanMapAdapter) obj).getBean());
 		}
 		return bean.equals(obj);
 	}

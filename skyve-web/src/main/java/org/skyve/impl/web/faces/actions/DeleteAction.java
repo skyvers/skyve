@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces.actions;
 
 import java.util.logging.Level;
 
-import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
@@ -14,7 +13,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -25,8 +24,8 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class DeleteAction extends FacesAction<Void> {
-	private FacesView<? extends Bean> facesView;
-	public DeleteAction(FacesView<? extends Bean> facesView) {
+	private FacesView facesView;
+	public DeleteAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 

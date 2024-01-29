@@ -2,12 +2,12 @@ package org.skyve.impl.metadata.repository;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	private static ProvidedRepository repository;

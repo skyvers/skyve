@@ -1,12 +1,12 @@
 package org.skyve.impl.metadata.view.widget;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.view.widget.FilterParameter;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"filterBinding", "operator", "value", "valueBinding"})
 public final class FilterParameterImpl implements FilterParameter {

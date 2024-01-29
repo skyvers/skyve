@@ -1,11 +1,11 @@
 package org.skyve.impl.web.faces.converters.timestamp;
 
-import javax.faces.convert.ConverterException;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
+
+import jakarta.faces.convert.ConverterException;
 
 public class YYYY_MM_DDTest {
 	private YYYY_MM_DD converter = new YYYY_MM_DD();

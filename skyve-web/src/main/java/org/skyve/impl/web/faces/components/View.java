@@ -5,23 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.component.FacesComponent;
-import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.context.FacesContext;
-
 import org.skyve.CORE;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
-import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.pipeline.FacesViewRenderer;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -31,6 +26,11 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
+
+import jakarta.faces.component.FacesComponent;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlPanelGroup;
+import jakarta.faces.context.FacesContext;
 
 @FacesComponent(View.COMPONENT_TYPE) 
 public class View extends HtmlPanelGroup {
@@ -106,7 +106,7 @@ public class View extends HtmlPanelGroup {
 	    	UxUi uxui = (UxUi) requestMap.get(AbstractWebContext.UXUI);
 	    	UserAgentType userAgentType = (UserAgentType) requestMap.get(AbstractWebContext.USER_AGENT_TYPE_KEY);
 	    	if ((uxui == null) || (userAgentType == null)) {
-	    		FacesView<?> fv = FacesUtil.getManagedBean(managedBeanName);
+	    		FacesView fv = FacesUtil.getManagedBean(managedBeanName);
 	    		if (uxui == null) {
 	    			uxui = fv.getUxUi();
 	    		}

@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.domain.types.formatters.Formatters;
@@ -65,6 +62,9 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Do not instantiate directly, use CORE.getRepository().

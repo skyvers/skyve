@@ -2,9 +2,9 @@ package org.skyve.impl.domain.types.jaxb;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.skyve.domain.types.DateOnly;
+
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "date")
 //@XmlJavaTypeAdapter(DateOnlyMapper.class)

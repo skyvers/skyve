@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import javax.faces.component.UIComponent;
-
 import org.skyve.util.Util;
 
-public class ResponseWriter extends javax.faces.context.ResponseWriter {
+import jakarta.faces.component.UIComponent;
+
+public class ResponseWriter extends jakarta.faces.context.ResponseWriter {
 	private StringWriter writer = new StringWriter(2048);
 	
 	@Override
@@ -72,7 +72,7 @@ public class ResponseWriter extends javax.faces.context.ResponseWriter {
 	}
 
 	@Override
-	public javax.faces.context.ResponseWriter cloneWithWriter(@SuppressWarnings("hiding") Writer writer) {
+	public jakarta.faces.context.ResponseWriter cloneWithWriter(@SuppressWarnings("hiding") Writer writer) {
 		return null;
 	}
 

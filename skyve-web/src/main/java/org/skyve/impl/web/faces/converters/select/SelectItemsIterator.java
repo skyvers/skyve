@@ -50,14 +50,13 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import javax.faces.component.UIComponent;
-import javax.faces.component.UISelectItem;
-import javax.faces.component.UISelectItems;
-import javax.faces.component.UISelectMany;
-import javax.faces.component.UISelectOne;
-import javax.faces.context.FacesContext;
-import javax.faces.model.SelectItem;
-
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UISelectItem;
+import jakarta.faces.component.UISelectItems;
+import jakarta.faces.component.UISelectMany;
+import jakarta.faces.component.UISelectOne;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.model.SelectItem;
 
 /**
  * <p>Package private class for iterating over the set of {@link SelectItem}s
@@ -78,7 +77,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * @param parent The parent {@link UIComponent} whose children will be
      *  processed
      */
-    public SelectItemsIterator(FacesContext ctx, UIComponent parent) {
+    SelectItemsIterator(FacesContext ctx, UIComponent parent) {
 
         kids = parent.getChildren().listIterator();
         this.ctx = ctx;

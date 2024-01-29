@@ -10,10 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
@@ -47,6 +43,9 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class FileSystemRepository extends MutableCachedRepository {
 	protected String absolutePath;
@@ -1025,7 +1024,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			try {
 				result = (T) type.getDeclaredConstructor().newInstance();
 				if (runtime) {
-					BeanProvider.injectFields(result);
+					UtilImpl.inject(result);
 				}
 			}
 			catch (SkyveException e) {

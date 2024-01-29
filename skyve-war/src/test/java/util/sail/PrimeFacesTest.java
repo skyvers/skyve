@@ -464,7 +464,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	protected String getViewState() {
 		String result = null;
 
-		WebElement element = byName("javax.faces.ViewState");
+		WebElement element = byName("jakarta.faces.ViewState");
 		if (element != null) {
 			result = element.getAttribute("value");
 		}

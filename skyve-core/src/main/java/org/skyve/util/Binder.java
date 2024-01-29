@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.function.Function;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
@@ -19,6 +16,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * 

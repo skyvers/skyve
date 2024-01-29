@@ -7,7 +7,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -21,13 +21,13 @@ import org.skyve.web.WebContext;
 /**
  * /download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
  */
-public class ExecuteDownloadAction<T extends Bean> extends FacesAction<Void> {
-	private FacesView<T> facesView;
+public class ExecuteDownloadAction extends FacesAction<Void> {
+	private FacesView facesView;
 	private String actionName;
 	private String dataWidgetBinding;
 	private String elementBizId;
 	
-	public ExecuteDownloadAction(FacesView<T> facesView,
+	public ExecuteDownloadAction(FacesView facesView,
 									String actionName,
 									String dataWidgetBinding,
 									String elementBizId) {

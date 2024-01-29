@@ -3,9 +3,6 @@ package org.skyve.metadata.repository;
 import java.sql.Connection;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
@@ -31,6 +28,9 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public interface ProvidedRepository extends CachedRepository {
 	final String ROUTER_NAME = "router";

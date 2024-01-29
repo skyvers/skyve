@@ -1,18 +1,17 @@
-package org.skyve.impl.web.faces.beans;
+package org.skyve.impl.web.faces.views;
 
 import java.io.IOException;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Used to assert a public user from admin.Configuration data for use with public forms.
@@ -21,8 +20,8 @@ import org.skyve.util.Util;
  * @param <T>
  */
 @ViewScoped
-@ManagedBean(name = "skyvePublic")
-public class PublicFacesView <T extends Bean> extends FacesView<T> {
+@Named("skyvePublic")
+public class PublicFacesView extends FacesView {
 	private static final long serialVersionUID = 6102123422562563165L;
 
 	// this is mainly used for public pages that need to assert a customer

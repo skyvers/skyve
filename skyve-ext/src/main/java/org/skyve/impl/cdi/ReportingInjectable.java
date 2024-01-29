@@ -7,8 +7,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.ReportParameters;
@@ -20,6 +18,7 @@ import org.skyve.report.Reporting;
 import org.skyve.util.MailAttachment;
 
 import freemarker.template.Template;
+import jakarta.enterprise.inject.Alternative;
 import net.sf.jasperreports.engine.JasperPrint;
 
 /**

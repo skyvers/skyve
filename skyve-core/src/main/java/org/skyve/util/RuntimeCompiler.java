@@ -46,7 +46,7 @@ public class RuntimeCompiler {
 											diagnostic.getCode(),
 											diagnostic.getMessage(Locale.ENGLISH),
 											diagnostic.getSource());
-			if (javax.tools.Diagnostic.Kind.ERROR.equals(diagnostic.getKind())) {
+			if (Diagnostic.Kind.ERROR.equals(diagnostic.getKind())) {
 				throw new DomainException(message);
 			}
 			Util.LOGGER.warning(message);
