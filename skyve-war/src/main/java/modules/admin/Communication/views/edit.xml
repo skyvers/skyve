@@ -318,7 +318,7 @@
 
 		<action clientValidation="false" className="AddUnsubscribeLink" displayName="admin.communication.actions.addUnsubscribeLink.displayName" iconStyleClass="fa fa-link" inActionPanel="false" />
 
-		<upload className="AddImage" displayName="admin.communication.actions.addImage.displayName" inActionPanel="false" iconStyleClass="fa fa-file-photo-o" />
+		<upload className="AddImage" displayName="admin.communication.actions.addImage.displayName" inActionPanel="false" iconStyleClass="fa fa-image" />
 
 		<action className="BatchSelected" displayName="admin.communication.actions.batchSelected.displayName" inActionPanel="false" />
 
@@ -326,7 +326,7 @@
 			iconStyleClass="fa fa-trash" />
 
 		<download className="ZipBatch" displayName="admin.communication.actions.zipBatch.displayName" inActionPanel="false" disabled="notBatchSelected"
-			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zip-o" />
+			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zipper" />
 
 	</actions>
 	<newParameters />
