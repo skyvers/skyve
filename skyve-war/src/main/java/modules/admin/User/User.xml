@@ -6,7 +6,7 @@
 	<persistent name="ADM_SecurityUser" />
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
-	<iconStyleClass>fa fa-user</iconStyleClass>
+	<iconStyleClass>fas fa-user</iconStyleClass>
 	<bizKey >
 		<![CDATA[return modules.admin.User.UserBizlet.bizKey(this);]]>
 	</bizKey>

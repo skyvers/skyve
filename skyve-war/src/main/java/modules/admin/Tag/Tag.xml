@@ -6,7 +6,7 @@
 	<persistent name="ADM_Tag" />
 	<singularAlias>Tag</singularAlias>
 	<pluralAlias>Tags</pluralAlias>
-	<iconStyleClass>fa fa-tag</iconStyleClass>
+	<iconStyleClass>fas fa-tag</iconStyleClass>
 	<bizKey expression="Tag {name}"/>
 	<implements>
 		<interface>org.skyve.domain.app.admin.Tag</interface>

@@ -7,7 +7,7 @@
 	<singularAlias>Job</singularAlias>
 	<pluralAlias>Jobs</pluralAlias>
 	<audited>false</audited>
-	<iconStyleClass>fa fa-cogs</iconStyleClass>
+	<iconStyleClass>fas fa-gears</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
 	<bizKey expression="Job {displayName}"/>

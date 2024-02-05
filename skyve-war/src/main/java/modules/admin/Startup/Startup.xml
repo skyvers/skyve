@@ -9,7 +9,7 @@
 	</documentation>
 	<singularAlias>Startup Configuration</singularAlias>
 	<pluralAlias>Startup Configuration</pluralAlias>
-	<iconStyleClass>fa fa-sliders</iconStyleClass>
+	<iconStyleClass>fas fa-sliders</iconStyleClass>
 	<attributes>
 		<boolean name="dontShowAgain">
 			<documentation>Allow the user to bypass the setup screen and set the showSetup value to false.</documentation>

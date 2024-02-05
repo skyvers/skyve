@@ -183,37 +183,37 @@
 		<defaults />
 		<export className="DataMaintenanceExportAction" displayName="admin.dataMaintenance.actions.exportData.displayName" inActionPanel="false" />
 		<import className="DataMaintenanceImportAction" displayName="admin.dataMaintenance.actions.importData.displayName" inActionPanel="false" />
-		<action className="Backup" displayName="admin.dataMaintenance.actions.backup.displayName" inActionPanel="false" relativeIconFileName="shared/icons/Backup.gif" iconStyleClass="fa fa-toggle-right" />
+		<action className="Backup" displayName="admin.dataMaintenance.actions.backup.displayName" inActionPanel="false" relativeIconFileName="shared/icons/Backup.gif" iconStyleClass="fas fa-square-caret-right" />
 		<action className="BackupSelected" displayName="admin.dataMaintenance.actions.backupSelected.displayName" inActionPanel="false" />
 		<action className="ContentSelected" displayName="admin.dataMaintenance.actions.contentSelected.displayName" inActionPanel="false" />
 		<action className="DeleteBackup" displayName="admin.dataMaintenance.actions.deleteBackup.displayName" inActionPanel="false" disabled="notBackupSelected"
-			confirm="admin.dataMaintenance.actions.deleteBackup.confirm" relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" />
+			confirm="admin.dataMaintenance.actions.deleteBackup.confirm" relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fas fa-trash-can" />
 		<action className="Reindex" displayName="admin.dataMaintenance.actions.reindex.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.reindex.confirm"
-			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fas fa-arrow-down-short-wide" />
 		<action className="ReindexData" displayName="admin.dataMaintenance.actions.reindexData.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.reindexData.confirm"
-			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fas fa-arrow-down-short-wide" />
 		<action className="ReindexContent" displayName="admin.dataMaintenance.actions.reindexContent.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.reindexContent.confirm"
-			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc" />
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fas fa-arrow-down-short-wide" />
 		<action className="Restore" displayName="admin.dataMaintenance.actions.restore.displayName" inActionPanel="false" disabled="notBackupSelected" confirm="admin.dataMaintenance.actions.restore.confirm" 
-			relativeIconFileName="shared/icons/Exclamation.gif"	iconStyleClass="fa fa-toggle-left" />
+			relativeIconFileName="shared/icons/Exclamation.gif"	iconStyleClass="fas fa-square-caret-left" />
 		<action className="Truncate" displayName="admin.dataMaintenance.actions.truncate.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.trucate.confirm"
-			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" />
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fas fa-trash-can" />
 		<action className="TruncateAuditLog" displayName="admin.dataMaintenance.actions.truncateLog.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.truncateLog.confirm" 
-			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-trash-o" disabled="jobCommenced" />
-		<action className="CheckAuditMatches" displayName="admin.dataMaintenance.actions.checkAuditMatches.displayName" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fa fa-search" />
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fas fa-trash-can" disabled="jobCommenced" />
+		<action className="CheckAuditMatches" displayName="admin.dataMaintenance.actions.checkAuditMatches.displayName" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fas fa-search" />
 		<action className="RefreshDocumentTuples" displayName="admin.dataMaintenance.actions.refreshDocumentTuples.displayName" inActionPanel="false" confirm="admin.dataMaintenance.actions.refreshDocumentTuples.confirm"
 			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs" />
 
 		<download className="DownloadBackup" displayName="admin.dataMaintenance.actions.downloadBackup.displayName" inActionPanel="false" disabled="notBackupSelected"
 			confirm="admin.dataMaintenance.actions.downloadBackup.confirm" />
 		<action className="Create" displayName="admin.dataMaintenance.actions.create.displayName" inActionPanel="false" toolTip="adin.dataMaintenance.actions.create.confirm"
-			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-pencil" />
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fas fa-pencil" />
 		<action className="Drop" displayName="admin.dataMaintenance.actions.drop.displayName" inActionPanel="false" toolTip="admin.dataMaintenance.actions.drop.confirm" relativeIconFileName="shared/icons/Script.gif"
-			iconStyleClass="fa fa-pencil" />
+			iconStyleClass="fas fa-pencil" />
 		<action className="Sync" displayName="admin.dataMaintenance.actions.sync.displayName" inActionPanel="false" toolTip="admin.dataMaintenance.actions.sync.confirm"
-			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-refresh" />
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fas fa-refresh" />
 		<upload className="UploadBackup" displayName="admin.dataMaintenance.actions.uploadBackup.displayName" inActionPanel="false" />
-		<action className="RefreshBackupList" inActionPanel="false" displayName="admin.dataMaintenance.actions.refreshBackupList.displayName" toolTip="admin.dataMaintenance.actions.refreshBackupList.toolTip" iconStyleClass="fa fa-refresh"/>
+		<action className="RefreshBackupList" inActionPanel="false" displayName="admin.dataMaintenance.actions.refreshBackupList.displayName" toolTip="admin.dataMaintenance.actions.refreshBackupList.toolTip" iconStyleClass="fas fa-refresh"/>
 		
 		<!-- Only required for migration from legacy versions -->
 		<action className="CheckContent" displayName="admin.dataMaintenance.actions.checkContent.displayName" inActionPanel="false" visible="false" />

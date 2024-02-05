@@ -644,7 +644,7 @@
 		<delete disabled="scheduledImmediately" visible="jobScheduler" />
 		<action className="RunJobNow" displayName="admin.jobSchedule.actions.runJobNow.displayName" inActionPanel="true" 
 			confirm="OK to run the schedule the Job (as you) to run immediately? (Check Job history for results)"
-			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-clock-o"
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fas fa-clock"
 			clientValidation="false"
 			disabled="scheduledImmediately"
 			visible="jobScheduler" />

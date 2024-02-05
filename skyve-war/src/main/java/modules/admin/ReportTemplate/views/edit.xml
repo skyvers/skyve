@@ -522,9 +522,9 @@
 		<action className="AddUserToEmail" displayName="Add User to Email" inActionPanel="false"
 				  iconStyleClass="fa fa-plus"/>
 		<download className="DownloadReport" displayName="Download Report" inActionPanel="false"
-				  iconStyleClass="fa fa-file-pdf-o" visible="typeFreemarker"/>
+				  iconStyleClass="fas fa-file-pdf" visible="typeFreemarker"/>
 		<download className="DownloadJasperReport" displayName="Download Report" inActionPanel="false"
-				  iconStyleClass="fa fa-file-pdf-o" visible="typeJasper"/>
+				  iconStyleClass="fas fa-file-pdf" visible="typeJasper"/>
 	</actions>
 	<newParameters/>
 </view>

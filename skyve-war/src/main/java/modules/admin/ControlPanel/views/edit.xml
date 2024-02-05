@@ -370,10 +370,10 @@
 		<download className="DownloadResults" displayName="admin.controlPanel.actions.downloadResults.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadResults.toolTip"/>
 		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
 		<action className="ApplyStartupConfiguration" displayName="admin.controlPanel.acitons.applyStartupConfiguration.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.applyStartupConfiguration.toolTip"
-			iconStyleClass="fa fa-exclamation" />
+			iconStyleClass="fas fa-exclamation" />
 		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey"
-			iconStyleClass="fa fa-plus"/>
-		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
-		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />
+			iconStyleClass="fas fa-plus"/>
+		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fas fa-plus" clientValidation="false"/>
+		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fas fa-trash-can" clientValidation="false" />
 	</actions>
 </view>

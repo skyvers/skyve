@@ -6,7 +6,7 @@
 	<persistent name="ADM_Snapshot" />
 	<singularAlias>Snapshot</singularAlias>
 	<pluralAlias>Snapshots</pluralAlias>
-	<iconStyleClass>fa fa-camera</iconStyleClass>
+	<iconStyleClass>fas fa-camera</iconStyleClass>
 	<bizKey expression="{name} for {queryName} in module {moduleName}"/>
 	<attributes>
 		<text name="moduleName" required="true">

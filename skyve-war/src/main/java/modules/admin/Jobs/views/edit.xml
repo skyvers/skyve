@@ -19,7 +19,7 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="Refresh" displayName="admin.jobs.actions.refresh.displayName" iconStyleClass="fa fa-refresh" />
-		<action className="DeleteCompletedJobs" displayName="admin.jobs.actions.deleteCompletedJobs.displayName" confirm="This will delete all completed jobs. Are you sure?" iconStyleClass="fa fa-trash-o" />
+		<action className="Refresh" displayName="admin.jobs.actions.refresh.displayName" iconStyleClass="fas fa-refresh" />
+		<action className="DeleteCompletedJobs" displayName="admin.jobs.actions.deleteCompletedJobs.displayName" confirm="This will delete all completed jobs. Are you sure?" iconStyleClass="fas fa-trash-can" />
 	</actions>
 </view>

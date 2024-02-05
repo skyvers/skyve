@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>System Dashboard</singularAlias>
 	<pluralAlias>System Dashboard</pluralAlias>
-	<iconStyleClass>fa fa-area-chart</iconStyleClass>
+	<iconStyleClass>fas fa-area-chart</iconStyleClass>
 	<attributes>
 		<collection type="aggregation" name="status">
 			<displayName>Status</displayName>

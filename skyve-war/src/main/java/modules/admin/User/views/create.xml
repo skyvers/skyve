@@ -29,10 +29,10 @@
 	</vbox>
 	<actions>
 		<cancel/>
-		<action className="New" displayName="admin.user.newUser.actions.newContact.actionName" invisible="notConfirmContact" inActionPanel="false" iconStyleClass="fa fa-user-plus"/>
-		<action className="Check" displayName="admin.user.newUser.actions.check.actionName" inActionPanel="false" iconStyleClass="fa fa-search"/>
-		<action className="Back" displayName="admin.user.newUser.actions.back.actionName" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="confirmContact" />
-		<action className="Next" displayName="admin.user.newUser.actions.next.actionName" clientValidation="false" iconStyleClass="fa fa-arrow-right" invisible="notShowNextButton" />
+		<action className="New" displayName="admin.user.newUser.actions.newContact.actionName" invisible="notConfirmContact" inActionPanel="false" iconStyleClass="fas fa-user-plus"/>
+		<action className="Check" displayName="admin.user.newUser.actions.check.actionName" inActionPanel="false" iconStyleClass="fas fa-search"/>
+		<action className="Back" displayName="admin.user.newUser.actions.back.actionName" clientValidation="false" iconStyleClass="fas fa-arrow-left" invisible="confirmContact" />
+		<action className="Next" displayName="admin.user.newUser.actions.next.actionName" clientValidation="false" iconStyleClass="fas fa-arrow-right" invisible="notShowNextButton" />
 		<save visible="confirmGroupMemberships"/>
 		<zoomOut visible="confirmGroupMemberships"/>
 	</actions>

@@ -8,7 +8,7 @@
 	</persistent>
 	<singularAlias>Contact</singularAlias>
 	<pluralAlias>Contacts</pluralAlias>
-	<iconStyleClass>fa fa-address-book</iconStyleClass>
+	<iconStyleClass>fas fa-address-book</iconStyleClass>
 	<bizKey>
 		<![CDATA[
 		  	return modules.admin.Contact.ContactBizlet.bizKey(this);
