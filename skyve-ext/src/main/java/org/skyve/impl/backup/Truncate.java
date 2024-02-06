@@ -125,7 +125,7 @@ public class Truncate {
 			while (tableResultSet.next()) {
 				String tableName = tableResultSet.getString("TABLE_NAME");
 				String tableType = tableResultSet.getString("TABLE_TYPE");
-				if ("TABLE".equalsIgnoreCase(tableType)) {
+				if ("BASE TABLE".equalsIgnoreCase(tableType)) { // true for H2, MySQL, MSSQL, PostGreSQL
 					Table table = new Table(tableName);
 					boolean hasBizIdColumn = false;
 					try (ResultSet columnResultSet = dmd.getColumns(catalog, schema, tableName, null)) {
