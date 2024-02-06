@@ -1,15 +1,20 @@
 package org.skyve.impl.web.spring;
 
+import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -58,15 +63,77 @@ public class SkyveSpringSecurity {
 		return result;
 	}
 	
-	@SuppressWarnings("static-method")
+	private DataSource dataSource = null;
+	
+	/**
+	 * Returns a JNDI DataSource or a no-op DataSource that dishes new connections.
+	 * NB This method does not have to be thread-safe as it is only referenced in Spring Configuration setup.
+	 * @return	The appropriate DataSource
+	 */
 	public DataSource dataSource() {
-		try {
-			InitialContext ctx = new InitialContext();
-			return (DataSource) ctx.lookup(UtilImpl.DATA_STORE.getJndiDataSourceName());
+		if (dataSource == null) {
+			try {
+				// Assign a JNDI Data Source, if applicable
+				String jndi = UtilImpl.DATA_STORE.getJndiDataSourceName();
+				if (jndi != null) {
+					InitialContext ctx = new InitialContext();
+					dataSource = (DataSource) ctx.lookup(jndi);
+				}
+				else {
+					// Assign a no-op DataSource that dishes out EXT.getDataStoreConnection()s.
+					dataSource = new DataSource() {
+						@Override
+						public <T> T unwrap(Class<T> iface) throws SQLException {
+							return null;
+						}
+						
+						@Override
+						public boolean isWrapperFor(Class<?> iface) throws SQLException {
+							return false;
+						}
+						
+						@Override
+						public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+							return null;
+						}
+						
+						@Override
+						public void setLoginTimeout(int seconds) throws SQLException {
+							// nothing to see here
+						}
+						
+						@Override
+						public void setLogWriter(PrintWriter out) throws SQLException {
+							// nothing to see here
+						}
+						
+						@Override
+						public int getLoginTimeout() throws SQLException {
+							return 30;
+						}
+						
+						@Override
+						public PrintWriter getLogWriter() throws SQLException {
+							return null;
+						}
+						
+						@Override
+						public Connection getConnection(String username, String password) throws SQLException {
+							return EXT.getDataStoreConnection();
+						}
+						
+						@Override
+						public Connection getConnection() throws SQLException {
+							return EXT.getDataStoreConnection();
+						}
+					};
+				}
+			}
+			catch (Exception e) {
+				throw new DomainException("Cannot obtain the JNDI datasource", e);
+			}
 		}
-		catch (Exception e) {
-			throw new DomainException("Cannot obtain the JNDI datasource", e);
-		}
+		return dataSource;
 	}
 	
 	@SuppressWarnings("static-method")

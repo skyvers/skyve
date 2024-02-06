@@ -33,10 +33,5 @@
 		    <version>${ireport.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.opengeo</groupId>
-			<artifactId>geodb</artifactId>
-			<scope>compile</scope>
-		</dependency>
 	</dependencies>
 </project>

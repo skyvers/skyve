@@ -304,11 +304,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 						// For ordering collection elements when initialised
 						eventListenerRegistry.appendListeners(EventType.INIT_COLLECTION, listener);
-
-						// For collection mutation callbacks
-						// NB this didn't work - got the event name from the hibernate envers doco - maybe in a new version of hibernate
-//						cfg.setListeners("pre-collection-update", new PreCollectionUpdateEventListener[] {hibernateListener});
-//						cfg.setListeners("pre-collection-remove", new PreCollectionRemoveEventListener[] {hibernateListener});
 					}
 					
 					@Override

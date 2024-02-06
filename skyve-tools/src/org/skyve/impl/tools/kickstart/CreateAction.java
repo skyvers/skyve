@@ -21,8 +21,6 @@ import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
 
-import geodb.GeoDB;
-
 class CreateAction extends AbstractAction {
 	private static final long serialVersionUID = -7217121655136714836L;
 
@@ -70,9 +68,6 @@ class CreateAction extends AbstractAction {
 				// Don't close this connection
 				connection = persistence.getConnection();
 				try (Statement statement = connection.createStatement()) {
-					if ("org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect".equals(UtilImpl.DATA_STORE.getDialectClassName())) {
-						GeoDB.InitGeoDB(connection);
-					}
 System.out.println(createSql());
 					statement.executeUpdate(createSql());
 				}
