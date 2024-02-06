@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ImportExportColumn"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_ImportExportColumn" />
+	<singularAlias>Import Export Column</singularAlias>
+	<pluralAlias>Import Export Columns</pluralAlias>
+	<parentDocument>ImportExport</parentDocument>
+	<bizKey expression="Column {columnName}"/>
+	<attributes>
+		<text name="columnName" required="true">
+			<displayName>admin.importExportColumn.columnName.displayName</displayName>
+			<length>500</length>
+		</text>
+		<text name="bindingName" >
+			<displayName>admin.importExportColumn.bindingName.displayName</displayName>
+			<domain>dynamic</domain>
+			<length>200</length>
+		</text>
+		<text name="bindingExpression" >
+			<displayName>admin.importExportColumn.bindingExpression.displayName</displayName>
+			<description><![CDATA[admin.importExportColumn.bindingExpression.description]]></description>
+			<length>500</length>
+		</text>
+		<enum name="loadAction" >
+			<displayName>Action</displayName>
+			<values>
+				<value code="set" name="setValue" description="admin.importExportColumn.loadAction.set.description"/>
+				<value code="equals" name="lookupEquals" description="admin.importExportColumn.loadAction.equals.description"/>
+				<value code="like" name="lookupLike" description="admin.importExportColumn.loadAction.like.description"/>
+				<value code="contains" name="lookupContains" description="admin.importExportColumn.loadAction.contains.description"/>
+				<value code="confirm" name="confirmValue" description="admin.importExportColumn.loadAction.confirm.description"/>
+			</values>
+		</enum>
+	</attributes>
+	<conditions>
+		<condition name="showExpression">
+			<description>Whether to show binding expressions</description>
+			<expression>
+				<![CDATA[
+				bindingName!=null
+				&& modules.admin.ImportExportColumn.ImportExportColumnBizlet.EXPRESSION.equals(bindingName)
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

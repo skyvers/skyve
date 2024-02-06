@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/behaviour" xmlns:tns="http://www.skyve.org/xml/behaviour" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
+
+  <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
+
+  <xs:element name="action" type="tns:action"/>
+
+  <xs:element name="bizlet" type="tns:bizlet"/>
+
+  <xs:element name="if" type="tns:if"/>
+
+  <xs:element name="set" type="tns:set"/>
+
+  <xs:complexType name="action">
+    <xs:sequence>
+      <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:if"/>
+        <xs:element ref="tns:set"/>
+      </xs:choice>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="if">
+    <xs:complexContent>
+      <xs:extension base="tns:statementMetaData">
+        <xs:sequence>
+          <xs:element name="then" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:if"/>
+                  <xs:element ref="tns:set"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="else" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:if"/>
+                  <xs:element ref="tns:set"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="condition" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="statementMetaData" abstract="true">
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="set">
+    <xs:complexContent>
+      <xs:extension base="tns:statementMetaData">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+        <xs:attribute name="expression" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="bizlet">
+    <xs:sequence>
+      <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+

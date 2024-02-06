@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Configuration"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Configuration">
+		<cache>eternal</cache>
+	</persistent>
+	<singularAlias>Setup</singularAlias>
+	<pluralAlias>Setup</pluralAlias>
+	<iconStyleClass>fa fa-lock</iconStyleClass>
+	<bizKey expression="Admin Setup"/>
+	<attributes>
+		<integer name="passwordMinLength" required="true">
+			<displayName>admin.configuration.passwordMinLength.displayName</displayName>
+			<description>admin.configuration.passwordMinLength.description</description>
+			<defaultValue>10</defaultValue>
+			<validator min="1"/>
+		</integer>
+		<boolean name="passwordRequireLowercase">
+			<displayName>admin.configuration.passwordRequireLowercase.displayName</displayName>
+			<description>admin.configuration.passwordRequireLowercase.description</description>
+		</boolean>
+		<boolean name="passwordRequireUppercase">
+			<displayName>admin.configuration.passwordRequireUppercase.displayName</displayName>
+			<description>admin.configuration.passwordRequireUppercase.description</description>
+		</boolean>
+		<boolean name="passwordRequireNumeric">
+			<displayName>admin.configuration.passwordRequireNumeric.displayName</displayName>
+			<description>admin.configuration.passwordRequireNumeric.description</description>
+		</boolean>
+		<boolean name="passwordRequireSpecial">
+			<displayName>admin.configuration.passwordRequireSpecial.displayName</displayName>
+			<description>admin.configuration.passwordRequireSpecial.description</description>
+		</boolean>
+		<text name="passwordRuleDescription" audited="false" persistent="false" trackChanges="false" usage="both">
+			<documentation>A text description which can be shown to the user if their password does not comply
+				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.</documentation>
+			<displayName>admin.configuration.passwordRuleDescription</displayName>
+			<length>250</length>
+		</text>
+		
+		<text name="fromEmail" required="true">
+			<displayName>admin.configuration.fromEmail.displayName</displayName>
+			<description>admin.configuration.fromEmail.description</description>
+			<length>254</length>
+			<validator type="email" />
+		</text>
+		<text name="passwordResetEmailSubject" required="true">
+			<displayName>admin.configuration.passwordResetEmailSubject.displayName</displayName>
+			<description>admin.configuration.passwordResetEmailSubject.description</description>
+			<length>250</length>
+		</text>
+		<markup name="passwordResetEmailBody" required="true">
+			<displayName>admin.configuration.passwordResetEmailBody.displayName</displayName>
+			<description>admin.configuration.passwordResetEmailBody.description</description>
+		</markup>
+		<association type="aggregation" name="userSelfRegistrationGroup">
+			<displayName>admin.configuration.association.userSelfRegistrationGroup.displayName</displayName>
+			<description>admin.configuration.association.userSelfRegistrationGroup.description</description>
+			<documentName>Group</documentName>
+		</association>
+		<integer name="selfRegistrationActivationExpiryHours">
+			<displayName>admin.configuration.selfRegistrationActivationExpiryHours.displayName</displayName>
+			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
+		</integer>
+		
+		<boolean name="allowUserSelfRegistration" required="false" deprecated="true">
+			<displayName>This option is now a startup property found in the project JSON file.</displayName>
+			<description>Master switch to allow or disallow self registration.</description>
+		</boolean>
+		<enum name="passwordComplexityModel" required="false" deprecated="true">
+			<documentation>Replaced by password length and complexity booleans. To be removed 
+				in a future version of Skyve. Here for backwards compatibility during Restore.</documentation>
+ 			<displayName>Password Complexity</displayName>
+ 			<description>The security level/complexity model for user passwords</description>
+ 			<values>
+ 				<value code="MINIMUM" description="Minimum - min 6 chars"/>
+ 				<value code="MEDIUM" description="Medium - min 6 chars, upper, lower and numeric"/>
+ 				<value code="MAXIMUM" description="Good - min 8 chars, upper, lower, numeric and punctuation"/>
+ 				<value code="STRONG" description="Strong - min 10 chars, upper, lower, numeric and punctuation"/>
+ 			</values>
+		</enum>
+		
+		<!-- Two Factor Authentication -->
+		<enum name="twoFactorType" required="true">
+			<displayName>admin.configuration.twoFactorType.displayName</displayName>
+			<description>admin.configuration.twoFactorType.description</description>
+			<defaultValue>off</defaultValue>
+			<values>
+				<value code="OFF" description="Off" />
+				<value code="EMAIL" description="Email"/>
+			</values>
+		</enum>
+		<integer name="twofactorPushCodeTimeOutSeconds">
+			<displayName>admin.configuration.twoFactorPushTimeOutSeconds.displayName</displayName>
+			<description>admin.configuration.twoFactorPushTimeOutSeconds.description</description>
+			<defaultValue>300</defaultValue>
+		</integer>
+		<text name="twoFactorEmailSubject">
+			<displayName>admin.configuration.twoFactorEmailSubject.displayName</displayName>
+			<description>admin.configuration.twoFactorEmailSubject.description</description>
+			<length>128</length>
+		</text>
+		<markup name="twoFactorEmailBody">
+			<displayName>admin.configuration.twoFactorEmailBody.displayName</displayName>
+			<description>admin.configuration.twoFactorEmailBody.description</description>
+		</markup>
+		
+		<association name="publicUser" type="aggregation">
+			<displayName>admin.configuration.association.publicUser.displayName</displayName>
+			<description>admin.configuration.association.publicUser.description</description>
+			<documentName>UserProxy</documentName>
+		</association>
+		
+		<!-- non-persistent configuration attributes -->
+		<text name="emailFrom" persistent="false">
+			<displayName>admin.configuration.emailFrom.displayName</displayName>
+			<length>254</length>
+		</text>
+		<text name="emailTo" persistent="false">
+			<displayName>admin.configuration.emailTo.displayName</displayName>
+			<length>254</length>
+		</text>
+		<text name="emailSubject" persistent="false">
+			<displayName>admin.configuration.emailSubject.displayName</displayName>
+			<length>128</length>
+		</text>
+		<markup name="emailContent" persistent="false">
+			<displayName>admin.configuration.emailContent.displayName</displayName>
+		</markup>
+		<text name="passwordExpiryDays" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>admin.configuration.passwordExpiryDays.displayName</displayName>
+			<description>admin.configuration.passwordExpiryDays.description</description>
+			<length>20</length>
+		</text>
+		<text name="passwordHistoryRetention" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>admin.configuration.passwordHistoryRetention.displayName</displayName>
+			<description>admin.configuration.passwordHistoryRetention.description</description>
+			<length>20</length>
+		</text>
+		<text name="passwordAccountLockoutThreshold" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>admin.configuration.passwordAccountLockoutThreshold.displayName</displayName>
+			<description>admin.configuration.passwordAccountLockoutThreshold.description</description>
+			<length>20</length>
+		</text>
+		<text name="passwordAccountLockoutDuration" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Read from the application JSON file set at system startup.</documentation>
+			<displayName>admin.configuration.passwordAccountLockoutDuration.displayName</displayName>
+			<description>admin.configuration.passwordAccountLockoutDuration.description</description>
+			<length>20</length>
+		</text>
+		<association name="emailToContact" type="aggregation" persistent="false">
+			<displayName>admin.configuration.association.emailToContact.displayName</displayName>
+			<documentName>Contact</documentName>
+		</association>
+		<association name="startup" type="aggregation" persistent="false">
+			<displayName>admin.configuration.association.startup.displayName</displayName>
+			<documentName>Startup</documentName>
+		</association>
+		<integer name="availableDiskSpaceAlarmLevelPercentage" >
+			<displayName>admin.configuration.availableDiskSpaceAlarmLevelPercentage.displayName</displayName>
+			<description>admin.configuration.availableDiskSpaceAlarmLevel.description</description>
+		</integer>
+		<longInteger name="availableDiskSpaceAlarmLevelMB" >
+			<displayName>admin.configuration.availableDiskSpaceAlarmLevelMB.displayName</displayName>
+			<description>admin.configuration.availableDiskSpaceAlarmLevel.description</description>
+		</longInteger> 
+	</attributes>
+	<conditions>
+		<condition name="emailConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validSMTPHost()
+				]]>
+			</expression>
+		</condition>	
+		<condition name="selfRegistrationConfiguredEmailOrGroupNotConfigured">
+			<expression>
+				<![CDATA[
+					(startup != null) && 
+					startup.getAccountAllowUserSelfRegistration().equals(Boolean.TRUE) &&
+					((! modules.admin.Configuration.ConfigurationExtension.validSMTPHost()) || (userSelfRegistrationGroup == null))
+				]]>
+			</expression>
+		</condition>
+		<condition name="backupsConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validBackupConfiguration()
+				]]>
+			</expression>
+		</condition>
+		<condition name="availableDiskSpaceAlarmConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validAvailableDiskSpaceAlarmSchedule()
+				]]>
+			</expression>
+		</condition>
+		<condition name="backupTypeAzure" usage="view">
+			<description>True when the selected backup type is Azure Blob Storage</description>
+			<expression>
+				<![CDATA[
+					getStartup() != null && getStartup().isBackupTypeAzure()
+				]]>
+			</expression>
+		</condition>
+		<condition name="mapTypeGmap" usage="view">
+			<description>True when the selected startup map type is Google Maps</description>
+			<expression>
+				<![CDATA[
+					getStartup() != null && getStartup().isMapTypeGmap()
+				]]>
+			</expression>
+		</condition>
+		<condition name="singleTenant" usage="view">
+			<description>True when this application has a default customer specified (is single tenant)</description>
+			<expression>
+				<![CDATA[
+					getStartup() != null && getStartup().isSingleTenant()
+				]]>
+			</expression>
+		</condition>
+		<condition name="tfaEmailEnabled" usage="view">
+			<description>True when the customer has Two Factor Auth Email enabled</description>
+			<expression>
+				<![CDATA[
+					org.skyve.impl.util.UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.contains(org.skyve.CORE.getCustomer().getName())
+				]]>
+			</expression>
+		</condition>
+		<condition name="tfaEmailSelected" usage="view">
+			<description>True when the user has selected Two Factor Auth Email type</description>
+			<expression>
+				<![CDATA[
+					TwoFactorType.email == getTwoFactorType()
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

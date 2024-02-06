@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.controlPanel.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane selectedTabIndexBinding="tabIndex">
+		<tab title="admin.controlPanel.edit.design.tabTitle">
+			<component name="_generateTestData" />
+			<form border="true" borderTitle="admin.controlPanel.edit.design.swapCustomer.borderTitle">
+				<column pixelWidth="175" />
+				<column />
+				<column pixelWidth="140" />
+				<row>
+					<item>
+						<combo binding="customerNameToSwapTo" />
+					</item>
+					<item align="centre">
+						<button action="SwapCustomer" pixelWidth="130" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.design.query.borderTitle">
+				<column pixelWidth="50" />
+				<column />
+				<column pixelWidth="140" />
+				<row>
+					<item>
+						<textArea binding="query" wrap="true" />
+					</item>
+					<item align="centre">
+						<button action="ExecuteQuery" pixelWidth="130" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.design.caches.borderTitle">
+				<column pixelWidth="50" />
+				<column />
+				<column pixelWidth="140" />
+				<column pixelWidth="140" />
+				<column pixelWidth="140" />
+				<row>
+					<item>
+						<default binding="selectedCache" />
+					</item>
+					<item align="centre">
+						<button action="EvictSelectedCache" pixelWidth="130" />
+					</item>
+					<item align="centre">
+						<button action="StopOrStartSelectedCache" pixelWidth="130" />
+					</item>
+					<item align="centre">
+						<button action="CacheStats" pixelWidth="130" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.design.sessions.borderTitle">
+				<column pixelWidth="50" />
+				<column />
+				<row>
+					<item align="right">
+						<label value="admin.controlPanel.edit.count.label" />
+					</item>
+					<item>
+						<blurb>
+							<![CDATA[
+								{sessionCount}
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.controlPanel.edit.sail.tabTitle">
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.user.borderTitle">
+				<column pixelWidth="120" />
+				<column />
+				<row>
+					<item>
+						<textField binding="sailLoginCustomer" invisible="fixedCustomer" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="sailUser" descriptionBinding="bizKey" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="sailLoginPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="sailBaseUrl" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.generate.borderTitle">
+				<column pixelWidth="120" />
+				<column />
+				<column pixelWidth="130" />
+				<column pixelWidth="130" />
+				<row>
+					<item>
+						<combo binding="sailModuleName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="sailUxUi" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="sailUserAgentType" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<radio binding="sailTestStrategy" vertical="false" />
+					</item>
+					<item align="right">
+						<button action="GenerateMenuSAIL" pixelWidth="120" />
+					</item>
+					<item align="right">
+						<button action="GenerateModuleSAIL" pixelWidth="120" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.execute.borderTitle">
+				<column pixelWidth="120" />
+				<column />
+				<column pixelWidth="130" />
+				<column pixelWidth="130" />
+				<row>
+					<item colspan="3">
+						<textField binding="sailComponentBuilder" />
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+						<textField binding="sailLayoutBuilder" />
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+						<textArea binding="sail" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="sailExecutor" />
+					</item>
+					<item align="right">
+						<button action="ExecuteSAIL" pixelWidth="120" />
+					</item>
+					<item align="right">
+						<button action="DownloadSAIL" pixelWidth="120" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.controlPanel.edit.results.tabTitle">
+			<form visible="resultsNotNull">
+				<column />
+				<row>
+					<item>
+						<button action="DownloadResults"/>
+					</item>
+					<item>
+						<blurb escape="false">
+							<![CDATA[
+								<pre>
+									{results}
+								</pre>
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+			<form visible="notResultsNotNull">
+				<column />
+				<row>
+					<item>
+						<blurb escape="false">
+							<![CDATA[
+								<pre>
+									{results}
+								</pre>
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.controlPanel.edit.instrumentation.tabTitle">
+			<form border="true" borderTitle="admin.controlPanel.edit.instrumentation.web.borderTitle">
+				<column responsiveWidth="1" />
+				<column responsiveWidth="1" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="httpTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="commandTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="facesTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.instrumentation.data.borderTitle">
+				<column responsiveWidth="1" />
+				<column responsiveWidth="1" />
+				<column responsiveWidth="1" />
+				<column responsiveWidth="1" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="queryTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+<!-- Cant influence these 2 settings as they are set in the hibernate session factory
+				<row>
+					<item>
+						<checkBox binding="sqlTrace" triState="false">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+					<item>
+						<checkBox binding="prettySqlOutput" triState="false">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+-->
+				<row>
+					<item>
+						<checkBox binding="contentTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.instrumentation.behaviour.borderTitle">
+				<column responsiveWidth="1" />
+				<column responsiveWidth="1" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="xmlTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="securityTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="bizletTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="dirtyTrace" triState="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false"/>
+							</onChangedHandlers>
+						</checkBox>
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.controlPanel.edit.userRememberMeTokens.tabTitle">
+			<listGrid query="qUserTokens" continueConversation="false" />
+		</tab>
+		<tab title="admin.controlPanel.edit.startupConfiguration.tabTitle" visible="false">
+			<vbox>
+				<form>
+					<column />
+					<row>
+						<item>
+							<button action="ApplyStartupConfiguration" pixelWidth="150" />
+						</item>
+					</row>
+				</form>
+				<dataGrid binding="startupProperties" showRemove="false" inline="true" showZoom="false">
+					<boundColumn binding="text5001" title="admin.controlPanel.startupProperties.key.title" editable="false" />
+					<boundColumn binding="text5002" title="admin.controlPanel.startupProperties.value.title" />
+					<boundColumn binding="text5003" title="admin.controlPanel.startupProperties.description.title" editable="false" />
+				</dataGrid>
+				<form border="true" borderTitle="admin.controlPanel.edit.startupConfiguration.addApiKey.borderTitle" visible="allowAddAPIKey">
+					<column />
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item label="admin.controlPanel.edit.apiKeyName.label">
+							<textField binding="newProperty.text5001" />
+						</item>
+						<item label="admin.controlPanel.edit.keyValue.label">
+							<textField binding="newProperty.text5002" />
+						</item>
+						<item>
+							<button action="AddAPIKey" />
+						</item>
+					</row>
+				</form>
+				<form border="true" borderTitle="admin.controlPanel.edit.startupConfiguration.addApiKey.borderTitle" invisible="allowAddAPIKey">
+					<column />
+					<column />
+					<row>
+						<item>
+							<blurb><![CDATA[<em>{i18n:admin.controlPanel.edit.startupConfiguration.addApiKey.complexConfigurationNotSupportedWarning}</em>]]></blurb>
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</tab>
+	</tabPane>
+	<actions>
+		<action className="CacheStats" displayName="admin.controlPanel.actions.cacheStats.actionName" clientValidation="false" inActionPanel="false" />
+		<action className="EvictSelectedCache" displayName="admin.controlPanel.actions.evictSelectedCache.actionName" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
+		<action className="StopOrStartSelectedCache" displayName="admin.controlPanel.actions.stopOrStartSelectedCache.actionName" clientValidation="false" inActionPanel="false" confirm="Are you sure?" />
+		<action className="EvictFromCache" displayName="admin.controlPanel.actions.evictFromCache.actionName" confirm="Are you sure?" />
+		<action className="SwapCustomer" displayName="admin.controlPanel.actions.swapCustomer.actionName" inActionPanel="false" />
+		<action className="ExecuteQuery" displayName="admin.controlPanel.actions.executeQuery.actionName" inActionPanel="false" />
+		<action className="GenerateMenuSAIL" displayName="admin.controlPanel.actions.generateMenuSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateMenuSail.toolTip" />
+		<action className="GenerateModuleSAIL" displayName="admin.controlPanel.actions.generateModuleSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.generateModuleSail.toolTip" />
+		<action className="ExecuteSAIL" displayName="admin.controlPanel.actions.executeSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.executeSail.toolTip" />
+		<download className="DownloadResults" displayName="admin.controlPanel.actions.downloadResults.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadResults.toolTip"/>
+		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
+		<action className="ApplyStartupConfiguration" displayName="admin.controlPanel.acitons.applyStartupConfiguration.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.applyStartupConfiguration.toolTip"
+			iconStyleClass="fa fa-exclamation" />
+		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey"
+			iconStyleClass="fa fa-plus"/>
+		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-plus" clientValidation="false"/>
+		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa fa-trash" clientValidation="false" />
+	</actions>
+</view>

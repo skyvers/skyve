@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="LookupDescription" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="KS_LookupDescription" />
+	<singularAlias>LookupDescription</singularAlias>
+	<pluralAlias>LookupDescriptions</pluralAlias>
+	<bizKey expression="{description}" />
+	<attributes>
+		<text name="description" required="true">
+			<displayName>description</displayName>
+			<length>1024</length>
+		</text>
+	</attributes>
+</document>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/common" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="namedMetaData" abstract="true">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="propertyMapType" final="extension restriction">
+    <xs:sequence>
+      <xs:element name="property" type="tns:propertyMapEntryType" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="propertyMapEntryType" final="extension restriction">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="key" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="converterName">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="DD_MM_YYYY"/>
+      <xs:enumeration value="DD_MMM_YYYY"/>
+      <xs:enumeration value="MM_DD_YYYY"/>
+      <xs:enumeration value="MMM_DD_YYYY"/>
+      <xs:enumeration value="YYYY_MM_DD"/>
+      <xs:enumeration value="DD_MM_YYYY_HH_MI"/>
+      <xs:enumeration value="DD_MM_YYYY_HH24_MI"/>
+      <xs:enumeration value="DD_MM_YYYY_DateTime"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH24_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_DateTime"/>
+      <xs:enumeration value="MM_DD_YYYY_HH_MI"/>
+      <xs:enumeration value="MM_DD_YYYY_HH24_MI"/>
+      <xs:enumeration value="MM_DD_YYYY_DateTime"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH_MI"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH24_MI"/>
+      <xs:enumeration value="MMM_DD_YYYY_DateTime"/>
+      <xs:enumeration value="YYYY_MM_DD_HH_MI"/>
+      <xs:enumeration value="YYYY_MM_DD_HH24_MI"/>
+      <xs:enumeration value="YYYY_MM_DD_DateTime"/>
+      <xs:enumeration value="Decimal10TwoDecimalPlaces"/>
+      <xs:enumeration value="Decimal2DollarsAndCents"/>
+      <xs:enumeration value="Decimal2DollarsAndCentsAbsolute"/>
+      <xs:enumeration value="Decimal2Integer"/>
+      <xs:enumeration value="Decimal2IntegerPercentage"/>
+      <xs:enumeration value="Decimal2OneDecimalPlace"/>
+      <xs:enumeration value="Decimal2TwoDecimalPlacesPercentage"/>
+      <xs:enumeration value="Decimal5Integer"/>
+      <xs:enumeration value="Decimal5IntegerPercentage"/>
+      <xs:enumeration value="Decimal5DollarsAndCents"/>
+      <xs:enumeration value="Decimal5TimeDuration"/>
+      <xs:enumeration value="Decimal5OneDecimalPlace"/>
+      <xs:enumeration value="Decimal5TwoDecimalPlaces"/>
+      <xs:enumeration value="Decimal5TwoDecimalPlacesPercentage"/>
+      <xs:enumeration value="SimplePercentage"/>
+      <xs:enumeration value="IntegerSeparator"/>
+      <xs:enumeration value="LongIntegerSeparator"/>
+      <xs:enumeration value="HH_MI"/>
+      <xs:enumeration value="HH24_MI"/>
+      <xs:enumeration value="HH_MI_SS"/>
+      <xs:enumeration value="HH24_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY_Timestamp"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="DD_MMM_YYYY_Timestamp"/>
+      <xs:enumeration value="MM_DD_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="MM_DD_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="MM_DD_YYYY_Timestamp"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="MMM_DD_YYYY_Timestamp"/>
+      <xs:enumeration value="YYYY_MM_DD_HH_MI_SS"/>
+      <xs:enumeration value="YYYY_MM_DD_HH24_MI_SS"/>
+      <xs:enumeration value="YYYY_MM_DD_Timestamp"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="formLabelLayout">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="side"/>
+      <xs:enumeration value="top"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="formatterName">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="DD_MM_YYYY"/>
+      <xs:enumeration value="DD_MMM_YYYY"/>
+      <xs:enumeration value="MM_DD_YYYY"/>
+      <xs:enumeration value="MMM_DD_YYYY"/>
+      <xs:enumeration value="YYYY_MM_DD"/>
+      <xs:enumeration value="DD_MM_YYYY_HH_MI"/>
+      <xs:enumeration value="DD_MM_YYYY_HH24_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH24_MI"/>
+      <xs:enumeration value="MM_DD_YYYY_HH_MI"/>
+      <xs:enumeration value="MM_DD_YYYY_HH24_MI"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH_MI"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH24_MI"/>
+      <xs:enumeration value="YYYY_MM_DD_HH_MI"/>
+      <xs:enumeration value="YYYY_MM_DD_HH24_MI"/>
+      <xs:enumeration value="HH_MI"/>
+      <xs:enumeration value="HH24_MI"/>
+      <xs:enumeration value="HH_MI_SS"/>
+      <xs:enumeration value="HH24_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="MM_DD_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="MM_DD_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="MMM_DD_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="YYYY_MM_DD_HH_MI_SS"/>
+      <xs:enumeration value="YYYY_MM_DD_HH24_MI_SS"/>
+      <xs:enumeration value="Integer"/>
+      <xs:enumeration value="OneDecimalPlace"/>
+      <xs:enumeration value="TwoDecimalPlaces"/>
+      <xs:enumeration value="ThreeDecimalPlaces"/>
+      <xs:enumeration value="FourDecimalPlaces"/>
+      <xs:enumeration value="FiveDecimalPlaces"/>
+      <xs:enumeration value="SixDecimalPlaces"/>
+      <xs:enumeration value="SevenDecimalPlaces"/>
+      <xs:enumeration value="EightDecimalPlaces"/>
+      <xs:enumeration value="NineDecimalPlaces"/>
+      <xs:enumeration value="TenDecimalPlaces"/>
+      <xs:enumeration value="OneOptionalDecimalPlace"/>
+      <xs:enumeration value="TwoOptionalDecimalPlaces"/>
+      <xs:enumeration value="ThreeOptionalDecimalPlaces"/>
+      <xs:enumeration value="FourOptionalDecimalPlaces"/>
+      <xs:enumeration value="FiveOptionalDecimalPlaces"/>
+      <xs:enumeration value="SixOptionalDecimalPlaces"/>
+      <xs:enumeration value="SevenOptionalDecimalPlaces"/>
+      <xs:enumeration value="EightOptionalDecimalPlaces"/>
+      <xs:enumeration value="NineOptionalDecimalPlaces"/>
+      <xs:enumeration value="TenOptionalDecimalPlaces"/>
+      <xs:enumeration value="IntegerPercentage"/>
+      <xs:enumeration value="OneDecimalPlacePercentage"/>
+      <xs:enumeration value="TwoDecimalPlacesPercentage"/>
+      <xs:enumeration value="ThreeDecimalPlacesPercentage"/>
+      <xs:enumeration value="FourDecimalPlacesPercentage"/>
+      <xs:enumeration value="FiveDecimalPlacesPercentage"/>
+      <xs:enumeration value="SixDecimalPlacesPercentage"/>
+      <xs:enumeration value="SevenDecimalPlacesPercentage"/>
+      <xs:enumeration value="EightDecimalPlacesPercentage"/>
+      <xs:enumeration value="NineDecimalPlacesPercentage"/>
+      <xs:enumeration value="TenDecimalPlacesPercentage"/>
+      <xs:enumeration value="IntegerSimplePercentage"/>
+      <xs:enumeration value="OneDecimalPlaceSimplePercentage"/>
+      <xs:enumeration value="TwoDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="ThreeDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="FourDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="FiveDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="SixDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="SevenDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="EightDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="NineDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="TenDecimalPlacesSimplePercentage"/>
+      <xs:enumeration value="AbsoluteInteger"/>
+      <xs:enumeration value="AbsoluteOneDecimalPlace"/>
+      <xs:enumeration value="AbsoluteTwoDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteThreeDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteFourDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteFiveDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteSixDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteSevenDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteEightDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteNineDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteTenDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteOneOptionalDecimalPlace"/>
+      <xs:enumeration value="AbsoluteTwoOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteThreeOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteFourOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteFiveOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteSixOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteSevenOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteEightOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteNineOptionalDecimalPlaces"/>
+      <xs:enumeration value="AbsoluteTenOptionalDecimalPlaces"/>
+      <xs:enumeration value="TimeDuration"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="sortDirection">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ascending"/>
+      <xs:enumeration value="descending"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="filterOperator">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="equal"/>
+      <xs:enumeration value="greater"/>
+      <xs:enumeration value="less"/>
+      <xs:enumeration value="greaterEqual"/>
+      <xs:enumeration value="lessEqual"/>
+      <xs:enumeration value="notEqual"/>
+      <xs:enumeration value="like"/>
+      <xs:enumeration value="notLike"/>
+      <xs:enumeration value="notNull"/>
+      <xs:enumeration value="isNull"/>
+      <xs:enumeration value="nullOrEqual"/>
+      <xs:enumeration value="nullOrGreater"/>
+      <xs:enumeration value="nullOrLess"/>
+      <xs:enumeration value="nullOrGreaterEqual"/>
+      <xs:enumeration value="nullOrLessEqual"/>
+      <xs:enumeration value="nullOrNotEqual"/>
+      <xs:enumeration value="nullOrLike"/>
+      <xs:enumeration value="nullOrNotLike"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="reportFormat">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="csv"/>
+      <xs:enumeration value="html"/>
+      <xs:enumeration value="pdf"/>
+      <xs:enumeration value="xls"/>
+      <xs:enumeration value="rtf"/>
+      <xs:enumeration value="xml"/>
+      <xs:enumeration value="odt"/>
+      <xs:enumeration value="ods"/>
+      <xs:enumeration value="docx"/>
+      <xs:enumeration value="xlsx"/>
+      <xs:enumeration value="pptx"/>
+      <xs:enumeration value="txt"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="webAction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="l"/>
+      <xs:enumeration value="c"/>
+      <xs:enumeration value="t"/>
+      <xs:enumeration value="m"/>
+      <xs:enumeration value="e"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

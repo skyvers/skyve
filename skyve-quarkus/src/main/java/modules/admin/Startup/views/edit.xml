@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Startup Configuration" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:c="http://www.skyve.org/xml/common">
+
+	<vbox border="true" borderTitle="admin.startup.environmentSettings.frameset.title">
+	    <form responsiveWidth="12" widgetId="formEnvironment">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <default binding="environmentIdentifier"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="environmentSupportEmail"/>
+	            </item>
+	        </row>
+		</form>
+	</vbox>
+
+	<vbox border="true" borderTitle="admin.startup.mailSettings.frameset.title">
+		<form responsiveWidth="12" widgetId="formMail">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <default binding="mailServerUrl"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailPort"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailUsername"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <password binding="mailPassword"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailSender"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <checkBox binding="mailBogusSend" triState="false"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mailTestRecipient"/>
+	            </item>
+	        </row>
+		</form>
+	</vbox>
+
+	<vbox border="true" borderTitle="admin.startup.mapSettings.frameset.title">
+	    <form responsiveWidth="12" widgetId="formMap">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <combo binding="mapType">
+	                	<onChangedHandlers>
+	                		<rerender clientValidation="false">
+	                			<properties>
+						            <c:property key="update">formMap</c:property>
+	                			</properties>
+	                		</rerender>
+	                	</onChangedHandlers>
+	                </combo>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiGoogleMapsKey" visible="mapTypeGmap"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer visible="mapTypeGmap" />
+	        	</item>
+	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.mapTypeGmap.obtainGoogleKey}-->
+	        		<blurb visible="mapTypeGmap">
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888; word-wrap: break-word;">
+	        					Note: Google Maps will be in Developer Mode when used without an API
+	        					key. To obtain a Google maps API Key, visit <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank">https://developers.google.com/maps/documentation/javascript/get-api-key</a>.
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	        <row>
+	            <item>
+	                <spinner binding="mapZoom"  min="1" max="19"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="mapLayer"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <geometryMap binding="mapCentre" type="point"/>
+	            </item>
+	        </row>
+		</form>
+	</vbox>
+
+	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title">
+		<form responsiveWidth="12" widgetId="formSecurity">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <default binding="apiGoogleRecaptchaKey"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer />
+	        	</item>
+	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.recaptcha.seeDevGuide}-->
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888;">
+	        					See instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix/#configuring-recaptcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	    </form>
+    </vbox>
+
+    <vbox border="true" borderTitle="admin.startup.accountSettings.frameset.title">
+	    <form responsiveWidth="12" widgetId="formAccount">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <checkBox binding="accountAllowUserSelfRegistration" triState="false" enabled="singleTenant"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer visible="notSingleTenant" />
+	        	</item>
+	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.selfRegistrationDisabledForMultiTenant}-->
+	        		<blurb visible="notSingleTenant">* Self-registration cannot be enabled for multi-tenant applications. Please specify a customer in your application json file.</blurb>
+	        	</item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer />
+	        	</item>
+	        	<item colspan="2">
+	        		<!--{i18n:admin.startup.selfRegistrationRequiresEmailConfiguration}-->
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888;">
+	        					Self-registration requires email to be configured and additional setup in Security Admin -> Configuration -> General.
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	    </form>
+    </vbox>
+
+    <vbox border="true" borderTitle="admin.startup.smsSettings.frameset.title">
+	    <form responsiveWidth="12" widgetId="formSMS">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <textField binding="apiTwilioSID" disabled="true"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiTwilioAuthToken" disabled="true"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiTwilioDefaultSendNumber" disabled="true"/>
+	            </item>
+	        </row>
+	    </form>
+    </vbox>
+    
+    <vbox border="true" borderTitle="Cloud Backup Settings">
+	    <form responsiveWidth="12" widgetId="formBackup">
+	        <column responsiveWidth="3"/>
+	        <column/>
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <!-- <textField binding="backupBackupClass"/> -->
+	                <combo binding="backupType">
+	                	<onChangedHandlers>
+	                		<rerender clientValidation="false">
+	                			<properties>
+						            <c:property key="update">formBackup</c:property>
+	                			</properties>
+	                		</rerender>
+	                	</onChangedHandlers>
+	                </combo>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <password binding="backupConnectionString" visible="backupTypeAzure"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="backupDirectoryName" visible="backupTypeAzure"/>
+	            </item>
+	        </row>
+	        <row>
+	        	<item>
+	        		<spacer />
+	        	</item>
+	        	<item colspan="2">
+	        		<blurb>
+	        			<![CDATA[
+	        				<span style="font-size: 80%; color: #888;">
+	        					See cloud backup instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/backup-restore/#cloud-backups' target='_blank'>Skyve Dev Guide</a>
+	       					</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	    </form>
+    </vbox>
+
+    <actions widgetId="actionPanel">
+        <!-- <defaults/> -->
+        <action className="Dismiss" displayName="Dismiss" clientValidation="false" iconStyleClass="fa fa-angle-left" />
+        <action className="SaveChanges" displayName="Save Changes" clientValidation="true" iconStyleClass="fa fa-floppy-o" inActionPanel="true"/>
+    </actions>
+</view>

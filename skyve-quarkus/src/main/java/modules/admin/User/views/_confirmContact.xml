@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Create User" name="_confirmContact" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+		<column />
+		<row>
+			<item>
+				<blurb escape="false" sanitise="relaxed">
+					<![CDATA[
+						<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
+							<div style="margin-bottom: 0" class="ui-messages-info ui-corner-all">
+								<span class="ui-messages-info-icon"></span>
+								<ul>
+									<li role="alert" aria-atomic="true">
+										<span class="ui-messages-info-detail">
+											{i18n:admin.user.confirmContact.existingContact.label}
+										</span>
+									</li>
+								</ul>
+							</div>
+						</div>				
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<vbox border="true" >
+		<vbox>
+			<form>
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item colspan="2">
+						<blurb textAlignment="left" escape="false" sanitise="relaxed">
+							<![CDATA[
+								{i18n:admin.user.confirmContact.existingContact.label}
+							]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="searchContactName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="searchEmail" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button action="Check" pixelWidth="150" />
+					</item>
+				</row>
+			</form>
+			<hbox invisible="candidateContactsEmpty" shrinkWrap="height">
+				<form percentageWidth="20">
+					<column />
+					<row>
+						<item>
+							<label value="Matches :" textAlignment="right" />
+						</item>
+					</row>
+				</form>
+				<dataGrid binding="candidateContacts" editable="false" pixelHeight="200">
+					<containerColumn title="Actions" pixelWidth="70" alignment="centre">
+						<link value="Select">
+							<actionReference action="Select" />
+						</link>
+					</containerColumn>
+					<boundColumn binding="contact.name" />
+					<boundColumn binding="contact.email1" />
+					<boundColumn binding="matchScore" />
+				</dataGrid>
+			</hbox>
+		</vbox>
+		<form>
+			<column percentageWidth="20" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item colspan="2">
+					<blurb textAlignment="left" escape="false" sanitise="relaxed">
+						<![CDATA[
+							{i18n:admin.user.confirmContact.newContact.label}
+						]]>
+					</blurb>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item>
+					<button action="New" pixelWidth="150" />
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<actions>
+		<action className="New" displayName="admin.user.newUser.confirmContact.action.new.actionName" invisible="notConfirmContact" inActionPanel="false" relativeIconFileName="actions/New.gif" />
+		<action className="Check" displayName="admin.user.newUser.confirmContact.action.check.actionName" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
+	</actions>	
+</view>

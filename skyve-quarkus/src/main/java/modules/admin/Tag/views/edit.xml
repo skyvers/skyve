@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="{name}" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="admin.tag.edit.details.tabTitle">
+			<form border="true">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<default binding="name" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="visible" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.tag.edit.copy.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<default binding="copyToUser" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="copyToUserTagName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button action="CopyTagToUser" pixelWidth="200" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.tag.edit.combinations.tabTitle">
+			<vbox border="true" shrinkWrap="height">
+				<form>
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item label="Tag">
+							<textField binding="name" disabled="true" />
+						</item>
+						<item>
+							<blurb>
+								<![CDATA[admin.tag.edit.blurb1]]>
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="combinationsOperator">
+								<onChangedHandlers>
+									<server action="PrepareExplanation" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="operandTag">
+								<onChangedHandlers>
+									<server action="PrepareExplanation" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+						<item>
+							<blurb>
+								<![CDATA[admin.tag.edit.blurb2]]>
+							</blurb>
+						</item>
+					</row>
+				</form>
+				<form visible="showExplanation">
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item colspan="2">
+							<blurb escape="false">
+								<![CDATA[<em>{combinationExplanation}</em>]]>
+							</blurb>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button action="PerformCombination" pixelWidth="200" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</tab>
+		<tab title="admin.tag.edit.load.tabTitle">
+			<form border="true" borderTitle="admin.tag.edit.context.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="uploadModuleName">
+							<onChangedHandlers>
+								<rerender/>
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="uploadDocumentName">
+							<onChangedHandlers>
+								<rerender/>
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button action="Clear" pixelWidth="150" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button action="TagAll" pixelWidth="150" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.tag.edit.match.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="attributeName">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="filterOperator" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="filterAction" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="fileHasHeaders" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spinner binding="filterColumn" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.tag.edit.load.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button action="UploadTagCriteria" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="uploaded" disabled="true" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="uploadMatched" disabled="true" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="uploadTagged" disabled="true" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.tag.edit.action.tabTitle">
+			<form border="true" borderTitle="admin.tag.edit.context.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="actionModuleName">
+							<onChangedHandlers>
+								<rerender/>
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="actionDocumentName">
+							<onChangedHandlers>
+								<rerender/>
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.tag.edit.action.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="documentAction" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="documentCondition" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="evictOption"/>
+					</item>
+				</row>				
+				<row>
+					<item>
+						<checkBox binding="unTagSuccessful" triState="false" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.tag.edit.notification.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="notification" triState="false" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.tag.edit.perform.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button action="BulkDocumentAction" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textArea binding="documentActionResults" />
+					</item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<action className="PrepareExplanation" displayName="admin.tag.actions.prepareExplanation" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif"
+			clientValidation="false" iconStyleClass="fa fa-search"/>
+		<action className="PerformCombination" displayName="admin.tag.actions.performCombination.displayName" inActionPanel="false"
+			clientValidation="false" toolTip="admin.tag.actions.performCombination.toolTip" confirm="Ok to perform the combination?"
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs" enabled="allowCombination"/>
+		<action className="CopyTagToUser" displayName="admin.tag.actions.copyTagToUser.displayName" inActionPanel="false" clientValidation="false"
+			toolTip="admin.tag.actions.copyTagToUser.toolTip" confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
+
+		<action className="Clear" displayName="admin.tag.actions.clear.displayName" inActionPanel="false" toolTip="admin.tag.actions.clear.toolTip"
+			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-delete" />
+		<action className="TagAll" displayName="admin.tag.actions.tagAll.displayName" inActionPanel="false" toolTip="admin.tag.actions.tagAll.toolTip"
+			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" iconStyleClass="fa fa-step-forward"/>
+		<upload className="UploadTagCriteria" displayName="admin.tag.actions.uploadTagCriteria.displayName" inActionPanel="false"
+			toolTip="admin.tag.actions.uploadTagCriteria.toolTip" disabled="notAttributeSet" />
+
+		<action className="BulkDocumentAction" displayName="admin.tag.actions.bulkDocumentAction.displayName" inActionPanel="false"
+			toolTip="admin.tag.actions.bulkDocumentAction.toolTip" confirm="Ok to perform the action for this document type?"
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-delete"/>
+
+	</actions>
+</view>
+

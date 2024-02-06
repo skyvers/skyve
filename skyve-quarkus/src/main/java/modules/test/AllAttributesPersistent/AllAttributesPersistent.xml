@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="AllAttributesPersistent" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			All persistent attributes.
+		]]>
+	</documentation>
+	<persistent name="TEST_AllAttributesPersistent" />
+	<singularAlias>All Persistent</singularAlias>
+	<pluralAlias>All Persistent</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<association name="aggregatedAssociation" type="aggregation">
+			<displayName>Aggregated Association</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+		</association>
+		<association name="composedAssociation" type="composition">
+			<displayName>Composed Association</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+		</association>
+		<association name="embeddedAssociation" type="embedded" embeddedColumnsPrefix="embedded">
+			<displayName>Embedded Association</displayName>
+			<documentName>AllAttributesEmbedded</documentName>
+		</association>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+			<defaultValue>{el:false}</defaultValue>
+		</boolean>
+		<collection name="aggregatedCollection" type="aggregation">
+			<displayName>Aggregated Collection</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="composedCollection" type="composition">
+			<displayName>Composed Collection</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+			<defaultValue>{el:'#000000'}</defaultValue>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+			<defaultValue>{el:newDateOnly()}</defaultValue>
+		</date>
+		<dateTime name="dateTime">
+			<displayName>Date Time</displayName>
+			<defaultValue>{el:newDateTime()}</defaultValue>
+		</dateTime>
+		<decimal10 name="decimal10">
+			<displayName>Decimal 10</displayName>
+			<defaultValue>{el:Decimal10.ZERO}</defaultValue>
+		</decimal10>
+		<decimal2 name="decimal2">
+			<displayName>Decimal 2</displayName>
+			<defaultValue>{el:Decimal2.ZERO}</defaultValue>
+		</decimal2>
+		<decimal5 name="decimal5">
+			<displayName>Decimal 5</displayName>
+			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
+		</decimal5>
+		<enum name="enum3">
+			<displayName>Enum 3</displayName>
+			<defaultValue>one</defaultValue>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+		<geometry name="geometry">
+			<displayName>Geometry</displayName>
+			<defaultValue>{el:newGeometry('POINT(0 0)')}</defaultValue>
+		</geometry>
+		<id name="id">
+			<displayName>Id</displayName>
+		</id>
+		<integer name="normalInteger">
+			<displayName>Integer</displayName>
+		</integer>
+		<inverseMany name="inverseAggregatedAssociation">
+			<displayName>Inverse</displayName>
+			<documentName>AllAttributesPersistent</documentName>
+			<referenceName>aggregatedAssociation</referenceName>
+		</inverseMany>
+		<longInteger name="longInteger">
+			<displayName>Long Integer</displayName>
+		</longInteger>
+		<markup name="markup">
+			<displayName>Markup</displayName>
+		</markup>
+		<memo name="memo">
+			<displayName>Memo</displayName>
+			<defaultValue>Test {el:newGeometry('POINT(0 0)')}</defaultValue>
+		</memo>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<length>255</length>
+		</text>
+		<time name="time">
+			<displayName>Time</displayName>
+		</time>
+		<timestamp name="timestamp">
+			<displayName>Timestamp</displayName>
+		</timestamp>
+	</attributes>
+	<conditions>
+		<condition name="condition">
+			<expression>
+				<![CDATA[
+					true
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

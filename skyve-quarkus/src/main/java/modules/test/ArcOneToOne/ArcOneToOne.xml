@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ArcOneToOne" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			A single Arc.
+		]]>
+	</documentation>
+	<persistent name="TEST_ArcOneToOne" />
+	<singularAlias>ArcOneToOne</singularAlias>
+	<pluralAlias>ArcOneToOnes</pluralAlias>
+	<bizKey expression="ArcOneToOne" />
+	<attributes>
+		<association name="arc" type="aggregation">
+			<displayName>Arc</displayName>
+			<documentName>AnyBase</documentName>
+		</association>
+	</attributes>
+</document>
