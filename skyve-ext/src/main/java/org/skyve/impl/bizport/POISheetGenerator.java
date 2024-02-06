@@ -162,39 +162,40 @@ public class POISheetGenerator {
 							if (resolvedBinding != null) {
 								try {
 									TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
-									Attribute attr = tm.getAttribute();
 									Object value = null;
-									switch (attr.getAttributeType()) {
-									case association:
-									case bool:
-									case colour:
-									case date:
-									case dateTime:
-									case enumeration:
-									case geometry:
-									case id:
-									case markup:
-									case memo:
-									case text:
-									case time:
-									case timestamp:
-										value = Binder.formatMessage(String.format("{%s}", resolvedBinding), b);
-										POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, value);
-										break;
-									case decimal10:
-									case decimal2:
-									case decimal5:
-									case integer:
-									case longInteger:
-										value = Binder.get(b, resolvedBinding); //allow excel to interpret from type
-										POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.NUMERIC, value);
-										break;
-									default:
-										break;
+									Attribute attr = tm.getAttribute();
+									if (attr != null) {
+										switch (attr.getAttributeType()) {
+										case association:
+										case bool:
+										case colour:
+										case date:
+										case dateTime:
+										case enumeration:
+										case geometry:
+										case id:
+										case markup:
+										case memo:
+										case text:
+										case time:
+										case timestamp:
+											value = Binder.formatMessage(String.format("{%s}", resolvedBinding), b);
+											POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, value);
+											break;
+										case decimal10:
+										case decimal2:
+										case decimal5:
+										case integer:
+										case longInteger:
+											value = Binder.get(b, resolvedBinding); //allow excel to interpret from type
+											POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.NUMERIC, value);
+											break;
+										default:
+											break;
+										}
 									}
-	
 								} catch (@SuppressWarnings("unused") Exception e) {
-	//								Util.LOGGER.info("Putting compound expression " + f.getBindingExpression() + " with value " + Binder.formatMessage(customer, f.getBindingExpression(), b));
+//									Util.LOGGER.info("Putting compound expression " + f.getBindingExpression() + " with value " + Binder.formatMessage(customer, f.getBindingExpression(), b));
 									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, Binder.formatMessage(f.getBindingExpression(), b));
 								}
 							}

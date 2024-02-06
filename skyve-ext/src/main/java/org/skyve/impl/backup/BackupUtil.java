@@ -33,6 +33,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
@@ -122,6 +123,9 @@ final class BackupUtil {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
+			if (customer == null) {
+				throw new MetaDataException(customerName + " does not exist.");
+			}
 			
 			// insert all defined documents into the tables list
 			for (Module module : customer.getModules()) {

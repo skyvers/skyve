@@ -56,7 +56,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -78,7 +78,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -130,7 +130,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -152,7 +152,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -174,7 +174,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -194,7 +194,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -215,7 +215,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -240,7 +240,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -265,7 +265,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -292,7 +292,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 

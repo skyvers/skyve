@@ -156,7 +156,7 @@ public class ReportServlet extends HttpServlet {
 				designSpecification.setModuleName(moduleName);
 				designSpecification.setDocumentName(documentName);
 
-				final ReportDesignGenerator generator = new ReportDesignGeneratorFactory().getGeneratorForDesign(designSpecification);
+				final ReportDesignGenerator generator = ReportDesignGeneratorFactory.getGeneratorForDesign(designSpecification);
 				generator.populateDesign(designSpecification);
 				designSpecification.setMode(DesignSpecification.Mode.bean);
 				designSpecification.setDefinitionSource(DesignSpecification.DefinitionSource.view);

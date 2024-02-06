@@ -388,10 +388,10 @@ public class EXT {
 			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
 		}
 		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
-			result = "{pbkdf2}" + new Pbkdf2PasswordEncoder().encode(clearText);
+			result = "{pbkdf2}" + Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else if ("scrypt".equals(passwordHashingAlgorithm)) {
-			result = "{scrypt}" + new SCryptPasswordEncoder().encode(clearText);
+			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else {
 			throw new DomainException(passwordHashingAlgorithm + " not supported");
@@ -453,16 +453,18 @@ public class EXT {
 			// Add roles
 			@SuppressWarnings("unchecked")
 			List<Bean> roles = (List<Bean>) BindUtil.get(user, AppConstants.ROLES_ATTRIBUTE_NAME);
-			for (Module m : c.getModules()) {
-				String moduleName = m.getName();
-				for (Role r : m.getRoles()) {
-					Bean role = userRoleDoc.newInstance(u);
-					BindUtil.set(role, ChildBean.PARENT_NAME, user);
-					BindUtil.set(role, AppConstants.ROLE_NAME_ATTRIBUTE_NAME, String.format("%s.%s", moduleName, r.getName()));
-					roles.add(role);
+			if (roles != null) { // should always be
+				for (Module m : c.getModules()) {
+					String moduleName = m.getName();
+					for (Role r : m.getRoles()) {
+						Bean role = userRoleDoc.newInstance(u);
+						BindUtil.set(role, ChildBean.PARENT_NAME, user);
+						BindUtil.set(role, AppConstants.ROLE_NAME_ATTRIBUTE_NAME, String.format("%s.%s", moduleName, r.getName()));
+						roles.add(role);
+					}
 				}
 			}
-
+			
 			// Save the bootstrap user
 			p.save(user);
 		}

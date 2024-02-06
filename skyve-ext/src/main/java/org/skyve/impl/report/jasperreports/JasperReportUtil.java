@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
@@ -15,6 +17,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ReportParameters;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -231,7 +234,7 @@ public final class JasperReportUtil {
 		return result;
 	}
 
-	private static String preProcess(Customer customer, ReportParameters reportParameters) {
+	private static String preProcess(@Nonnull Customer customer, @Nonnull ReportParameters reportParameters) {
 		return preProcess(customer, reportParameters.getDocument(), reportParameters.getReportName(), reportParameters.getParameters());
 	}
 
@@ -244,12 +247,16 @@ public final class JasperReportUtil {
 	 * @param parameters
 	 * @return report file name
 	 */
-	private static String preProcess(Customer customer,
-										Document document,
-										String reportName,
-										Map<String, Object> parameters) {
+	private static @Nonnull String preProcess(@Nonnull Customer customer,
+												@Nonnull Document document,
+												@Nonnull String reportName,
+												@Nonnull Map<String, Object> parameters) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		String result = repository.getReportFileName(customer, document, reportName);
+		if (result == null) {
+			throw new MetaDataException("Report " + reportName + " in document " + document.getOwningModuleName() + '.' + document.getName() + 
+											" for customer " + customer.getName() + " does not exist.");
+		}
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(UtilImpl.getAbsoluteBasePath()).append(ProvidedRepository.CUSTOMERS_NAMESPACE);
 		sb.append(customer.getName()).append('/').append(ProvidedRepository.RESOURCES_NAMESPACE);

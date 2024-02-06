@@ -101,6 +101,7 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
@@ -1202,7 +1203,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (selectedIdBinding != null) {
 			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, selectedIdBinding);
-			code.append("selectedIdTrackChanges:").append(target.getAttribute().isTrackChanges()).append(',');
+			Attribute attribute = target.getAttribute();
+			code.append("selectedIdTrackChanges:").append(((attribute != null) && attribute.isTrackChanges())).append(',');
 		}
 		disabled(grid.getDisabledConditionName(), code);
 		disableCRUD(grid, code);
@@ -1286,7 +1288,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (selectedIdBinding != null) {
 			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, selectedIdBinding);
-			code.append("selectedIdTrackChanges:").append(target.getAttribute().isTrackChanges()).append(',');
+			Attribute attribute = target.getAttribute();
+			code.append("selectedIdTrackChanges:").append((attribute != null) && attribute.isTrackChanges()).append(',');
 		}
 		disabled(grid.getDisabledConditionName(), code);
 		editable(grid.getEditable(), code);
@@ -1315,6 +1318,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	private void renderDataWidget(AbstractDataWidget widget) {
 		dataWidgetBinding = widget.getBinding();
 		Relation relation = (Relation) getCurrentTarget().getAttribute();
+		if (relation == null) { // should never happen
+			throw new MetaDataException(dataWidgetBinding + " does not point to a relation");
+		}
 		String documentName = relation.getDocumentName();
 
 		dataWidgetDocument = module.getDocument(customer, documentName);

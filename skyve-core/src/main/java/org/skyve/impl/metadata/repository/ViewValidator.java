@@ -145,7 +145,7 @@ class ViewValidator extends ViewVisitor {
 					CustomerImpl customer, 
 					DocumentImpl document, 
 					String uxui) {
-		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view, uxui);
+		super(customer, (ModuleImpl) repository.getModule(customer, document.getOwningModuleName()), document, view, uxui);
 		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 	}
@@ -196,32 +196,17 @@ class ViewValidator extends ViewVisitor {
 		if (bindingPrefix != null) {
 			bindingToTest = new StringBuilder(64).append(bindingPrefix).append('.').append(binding).toString();
 		}
-		else {
-			// conditions can be used in parameter bindings for reports etc
-			String testConditionName = bindingToTest;
-			if (testConditionName.startsWith("not")) {
-				testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
-			}
 
-			if (contextDocument.getConditionNames().contains(testConditionName)) {
-				return Boolean.class;
-			}
-		}
-		
 		TargetMetaData target = null;
 		try {
-			target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, bindingToTest);
+			target = BindUtil.validateBinding(customer, contextModule, contextDocument, bindingToTest);
 		}
 		catch (MetaDataException e) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
 		}
-		
-		if (target == null) {
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Binding points nowhere");
-		}
 		Attribute attribute = target.getAttribute();
 		AttributeType attributeType = (attribute == null) ? null : attribute.getAttributeType();
-		Class<?> result = (attributeType == null) ? null : attributeType.getImplementingType();
+		Class<?> result = target.getType();
 
 		if (domainValuesRequired) {
 			if (attribute == null) {
@@ -278,7 +263,7 @@ class ViewValidator extends ViewVisitor {
 		
 		// Can only check this if the attribute is defined.
 		// Bindings to implicit attributes are always scalar.
-		// NB check assert type in outer if coz we dont need to do the test if we are asserting a type
+		// NB check assert type in outer if coz we don't need to do the test if we are asserting a type
 		if (scalarBindingOnly && ((assertTypes == null) || (assertTypes.length == 0)) && (attribute != null)) {
 			if (AttributeType.association.equals(attributeType) || 
 					AttributeType.collection.equals(attributeType) || 
@@ -326,7 +311,7 @@ class ViewValidator extends ViewVisitor {
 			}
 			
 			DocumentImpl baseDocument = (DocumentImpl) currentModule.getDocument(customer, extension.getDocumentName());
-			ModuleImpl baseModule = (ModuleImpl) customer.getModule(baseDocument.getOwningModuleName());
+			ModuleImpl baseModule = (ModuleImpl) repository.getModule(customer, baseDocument.getOwningModuleName());
 			validateCondition(baseModule, baseDocument, testConditionName, widgetIdentifier);
 		}
 	}
@@ -349,7 +334,7 @@ class ViewValidator extends ViewVisitor {
 													String parentWidgetIdentifier,
 													Document drivingDocument) {
 		if (parameters != null) {
-			Module drivingModule = (drivingDocument == null) ? null : customer.getModule(drivingDocument.getOwningModuleName());
+			Module drivingModule = (drivingDocument == null) ? null : repository.getModule(customer, drivingDocument.getOwningModuleName());
 
 			for (FilterParameter parameter : parameters) {
 				String filterBinding = parameter.getFilterBinding();
@@ -1066,7 +1051,7 @@ class ViewValidator extends ViewVisitor {
 	private void validateChartModel(ChartBuilderMetaData model, String chartIdentifier) {
 		Module contextModule = null;
 		try {
-			contextModule = customer.getModule(model.getModuleName());
+			contextModule = repository.getModule(customer, model.getModuleName());
 		}
 		catch (Exception e) {
 			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid moduleName of " + model.getModuleName(), e);
@@ -1089,47 +1074,34 @@ class ViewValidator extends ViewVisitor {
 			if (query == null) {
 				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " has an invalid queryName of " + queryName);
 			}
-			contextDocument = query.getDocumentModule(customer).getDocument(customer, queryName);
+			Module queryDocumentModule = query.getDocumentModule(customer);
+			contextDocument = queryDocumentModule.getDocument(customer, query.getDocumentName());
 		}
 		else {
 			throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + " needs either a documentName or queryName");
 		}
 
+		String categoryBinding = model.getCategoryBinding();
 		validateBinding(contextModule,
 							contextDocument,
 							null,
-							model.getCategoryBinding(),
+							categoryBinding,
 							true,
 							false,
 							false,
 							true,
-							chartIdentifier + " category binding",
-							AttributeType.bool,
-							AttributeType.colour,
-							AttributeType.date,
-							AttributeType.dateTime,
-							AttributeType.decimal2,
-							AttributeType.decimal5,
-							AttributeType.decimal10,
-							AttributeType.enumeration,
-							AttributeType.integer,
-							AttributeType.longInteger,
-							AttributeType.markup,
-							AttributeType.memo,
-							AttributeType.text,
-							AttributeType.time,
-							AttributeType.timestamp);
+							"The category binding of " + chartIdentifier);
 
 		String valueBinding = model.getValueBinding();
-		validateBinding(contextModule,
-							contextDocument,
-							null,
-							valueBinding,
-							true,
-							false,
-							false,
-							true,
-							chartIdentifier + " value binding");
+		Class<?> type = validateBinding(contextModule,
+											contextDocument,
+											null,
+											valueBinding,
+											true,
+											false,
+											false,
+											true,
+											"The value binding of " + chartIdentifier);
 
 		AggregateFunction function = model.getValueFunction();
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, valueBinding);
@@ -1137,18 +1109,16 @@ class ViewValidator extends ViewVisitor {
 
 		// check for numeric value if no value function is defined
 		if (function == null) { // we need a number here
-			boolean invalidValueType = false;
 			if (attribute == null) { // implicit attribute
-				invalidValueType = true;
-			}
-			else {
-				AttributeType type = attribute.getAttributeType(); 
-				invalidValueType = (! Number.class.isAssignableFrom(type.getImplementingType()));
-			}
-			if (invalidValueType) {
 				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
 												" has an invalid value binding of " + valueBinding + 
-												" to a non-numeric or implicit attribute");
+												" to an implicit attribute");
+			}
+			else if (! Number.class.isAssignableFrom(type)) {
+				throw new MetaDataException(chartIdentifier + " in " + viewIdentifier + 
+						" has an invalid value binding of " + valueBinding + 
+						" to a non-numeric attribute");
+				
 			}
 		}
 		// check that aggregate function can be numeric, otherwise must be count
@@ -1159,8 +1129,7 @@ class ViewValidator extends ViewVisitor {
 					invalidFunctionType = "an implicit attribute";
 				}
 				else {
-					AttributeType type = attribute.getAttributeType(); 
-					if (! Number.class.isAssignableFrom(type.getImplementingType())) {
+					if (! Number.class.isAssignableFrom(type)) {
 						invalidFunctionType = "a non-numeric type of " + type;
 					}
 				}
@@ -1404,6 +1373,10 @@ class ViewValidator extends ViewVisitor {
 			}
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
     		Relation relation = (Relation) target.getAttribute();
+    		// This should never happen as shit was validated above
+    		if (relation == null) {
+    			throw new MetaDataException(fullBinding + " doesn't point to an attribute from document " + document.getName());
+    		}
     		String queryName = (relation instanceof Reference) ? ((Reference) relation).getQueryName() : null;
     		if (queryName != null) {
         		query = module.getMetaDataQuery(queryName);
@@ -1664,7 +1637,7 @@ class ViewValidator extends ViewVisitor {
 				
 				if (referenceModuleName.indexOf('{') < 0) {
 					try {
-						result = (ModuleImpl) customer.getModule(referenceModuleName);
+						result = (ModuleImpl) repository.getModule(customer, referenceModuleName);
 						if (result == null) {
 							throw new MetaDataException(referenceModuleName + " DNE");
 						}
@@ -1846,7 +1819,7 @@ class ViewValidator extends ViewVisitor {
 						if (targetReference == null) {
 							throw new MetaDataException("Target Reference " + dataWidgetBinding + " DNE");
 						}
-						ModuleImpl targetModule = (ModuleImpl) customer.getModule(target.getDocument().getOwningModuleName());
+						ModuleImpl targetModule = (ModuleImpl) repository.getModule(customer, target.getDocument().getOwningModuleName());
 						DocumentImpl targetDocument = (DocumentImpl) targetModule.getDocument(customer, targetReference.getDocumentName());
 						
 						// This is a container column of an existing row in a table/grid - so get the edit view

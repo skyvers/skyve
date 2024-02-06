@@ -34,8 +34,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 	@Override
 	public Download download(ReportDesign bean, WebContext webContext) throws Exception {
 		final DesignSpecification designSpecification = ReportDesignBizlet.specificationFromDesignBean(bean);
-		final ReportDesignGenerator generator = new ReportDesignGeneratorFactory()
-				.getGeneratorForDesign(designSpecification);
+		final ReportDesignGenerator generator = ReportDesignGeneratorFactory.getGeneratorForDesign(designSpecification);
 
 		generator.populateDesign(designSpecification);
 
@@ -75,9 +74,6 @@ public class Preview extends DownloadAction<ReportDesign> {
 					baos);
 		}
 
-
-
 		return new Download(reportName, baos.toByteArray(), MimeType.pdf);
 	}
-
 }

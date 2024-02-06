@@ -245,7 +245,7 @@ public class ContentChecker {
 			if (previousDoubleQuoteIndex >= 0) {
 				String attributeName = fields.substring(previousDoubleQuoteIndex + 1);
 				Customer c = r.getCustomer((String) row[1]);
-				Module m = c.getModule((String) row[2]);
+				Module m = r.getModule(c, (String) row[2]);
 				Document d = m.getDocument(c, (String) row[3]);
 				Attribute a = d.getPolymorphicAttribute(c, attributeName);
 				if (a != null) {

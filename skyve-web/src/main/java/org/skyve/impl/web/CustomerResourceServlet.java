@@ -23,6 +23,7 @@ import org.skyve.impl.metadata.view.DownloadAreaType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
@@ -402,6 +403,12 @@ public class CustomerResourceServlet extends HttpServlet {
 																	module,
 																	document,
 																	binding);
+			Attribute attribute = target.getAttribute();
+			// If binding points nowhere, then deny
+			if (attribute == null) { // should never happen
+				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
+			}
+			
 			// Check that the user has access
 			AttachmentContent content = resource.getContent();
 			if (! user.canAccessContent(content.getBizId(),
@@ -410,7 +417,7 @@ public class CustomerResourceServlet extends HttpServlet {
 											content.getBizCustomer(),
 											content.getBizDataGroupId(),
 											content.getBizUserId(),
-											target.getAttribute().getName())) {
+											attribute.getName())) {
 				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
 			}
 		}

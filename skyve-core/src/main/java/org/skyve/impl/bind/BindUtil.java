@@ -26,8 +26,8 @@ import org.locationtech.jts.io.WKTWriter;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
@@ -64,9 +64,9 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
@@ -74,7 +74,6 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
@@ -85,11 +84,13 @@ public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
 	
-	public static String formatMessage(String message, Bean... beans) {
+	public static @Nonnull String formatMessage(@Nonnull String message, @Nonnull Bean... beans) {
 		return formatMessage(message, null, beans);
 	}
 	
-	public static String formatMessage(String message, Function<String, String> postEvaluateDisplayValue, Bean... beans) {
+	public static @Nonnull String formatMessage(@Nonnull String message, 
+													@Nullable Function<String, String> postEvaluateDisplayValue,
+													@Nonnull Bean... beans) {
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
 		while (openCurlyBraceIndex >= 0) {
@@ -169,7 +170,7 @@ public final class BindUtil {
 		return result.toString().replace("\\}", "}"); // remove any escaped closing curly braces now
 	}
 
-	public static boolean containsSkyveExpressions(String display) {
+	public static boolean containsSkyveExpressions(@Nonnull String display) {
 		boolean result = false;
 		int openCurlyBraceIndex = display.indexOf('{');
 		while ((! result) && (openCurlyBraceIndex >= 0)) {
@@ -182,14 +183,17 @@ public final class BindUtil {
 		return result;
 	}
 	
-	public static boolean isSkyveExpression(String expression) {
+	public static boolean isSkyveExpression(@Nonnull String expression) {
 		int length = expression.length();
 		return ((length > 1) && 
 					(expression.charAt(0) == '{') && 
 					(expression.charAt(length - 1) == '}'));
 	}
 	
-	public static String validateMessageExpressions(String message, Customer customer, Document... documents) {
+	public static @Nonnull String validateMessageExpressions(@Nonnull String message, 
+																// NB Binding Expression evaluators require a customer
+																@Nonnull Customer customer,
+																@Nonnull Document... documents) {
 		String error = null;
 		
 		StringBuilder result = new StringBuilder(message);
@@ -205,26 +209,21 @@ public final class BindUtil {
 				}
 				else {
 					String expression = result.substring(openCurlyBraceIndex, closedCurlyBraceIndex + 1);
-					if (expression.length() == 2) {
-						error = "Expression is empty";
-					}
-					else {
-						boolean success = false;
-						StringBuilder errors = new StringBuilder(128);
-						for (Document document : documents) {
-							Module module = customer.getModule(document.getOwningModuleName());
-							error = ExpressionEvaluator.validate(expression, null, customer, module, document);
-							if (error == null) {
-								success = true;
-								break;
-							}
-							errors.append((errors.length() == 0) ? error : ". " + error);
+					boolean success = false;
+					StringBuilder errors = new StringBuilder(128);
+					for (Document document : documents) {
+						Module module = customer.getModule(document.getOwningModuleName());
+						error = ExpressionEvaluator.validate(expression, null, customer, module, document);
+						if (error == null) {
+							success = true;
+							break;
 						}
-						if (! success) {
-							error = errors.toString();
-						}
-						openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+						errors.append((errors.length() == 0) ? error : ". " + error);
 					}
+					if (! success) {
+						error = errors.toString();
+					}
+					openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
 				}
 			}
 			else { // escaped { found - ie "\{" - remove the escape chars and move on to the next pair of {}
@@ -236,13 +235,69 @@ public final class BindUtil {
 		return error;
 	}
 	
+	public static @Nonnull TargetMetaData validateBinding(@Nonnull Customer customer,
+															@Nonnull Module module,
+															@Nonnull Document document,
+															@Nonnull String binding) {
+		Document contextDocument = document;
+		String ultimateBinding = binding;
+		int lastDotIndex = binding.lastIndexOf('.');
+		if (lastDotIndex > 0) {
+			String penultimateBinding = binding.substring(0, lastDotIndex);
+			ultimateBinding = binding.substring(lastDotIndex + 1);
+			try {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, penultimateBinding);
+				Attribute relation = target.getAttribute();
+				if (relation instanceof Relation) {
+					Module owningModule = customer.getModule(target.getDocument().getOwningModuleName());
+					String contextDocumentName = ((Relation) relation).getDocumentName();
+					contextDocument = owningModule.getDocument(customer, contextDocumentName);
+				}
+				else {
+					if (ChildBean.PARENT_NAME.equals(penultimateBinding) || penultimateBinding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+						contextDocument = target.getDocument();
+						contextDocument = contextDocument.getParentDocument(customer);
+						if (contextDocument == null) {
+							throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a parent document.");
+						}
+					}
+					else {
+						throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a relation.");
+					}
+				}
+			}
+			catch (MetaDataException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				throw new MetaDataException("Binding " + penultimateBinding + " does not resolve to a document attribute.", e);
+			}
+		}
+		
+		if (contextDocument == null) {
+			throw new MetaDataException("Binding " + binding + " does not resolve to a document attribute.");
+		}
+		
+		String testConditionName = ultimateBinding;
+		if (testConditionName.startsWith("not")) {
+			testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
+		}
+
+		if (contextDocument.getCondition(testConditionName) != null) {
+			return new TargetMetaData(contextDocument, null, Boolean.class);
+		}
+
+		Module contextModule = customer.getModule(contextDocument.getOwningModuleName());
+		return BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, ultimateBinding);
+	}
+	
 	/**
 	 * Place the bindingPrefix + '.' + <existing expression> wherever a binding expression - {<expression>} occurs.
 	 * @param message	The message to process. Can be null.
 	 * @param bindingPrefix	The binding prefix to prefix with.
 	 * @return	The prefixed message or null if message argument was null.
 	 */
-	public static String prefixMessageExpressions(String message, String bindingPrefix) {
+	public static @Nullable String prefixMessageExpressions(@Nullable String message, @Nonnull String bindingPrefix) {
 		if (message == null) {
 			return null;
 		}
@@ -271,7 +326,7 @@ public final class BindUtil {
 		return result.toString();
 	}
 
-	public static boolean evaluateCondition(Bean bean, String condition) {
+	public static boolean evaluateCondition(@Nonnull Bean bean, @Nonnull String condition) {
 		boolean result = false;
 
 		if (String.valueOf(true).equals(condition)) {
@@ -320,7 +375,7 @@ public final class BindUtil {
 		return result;
 	}
 
-	public static String negateCondition(String condition) {
+	public static @Nullable String negateCondition(@Nullable String condition) {
         String result = null;
 
         if (condition != null) {
@@ -352,7 +407,7 @@ public final class BindUtil {
 	 * @param value
 	 * @return
 	 */
-	public static Object convert(Class<?> type, Object value) {
+	public static @Nullable Object convert(@Nonnull Class<?> type, @Nullable Object value) {
 		Object result = value;
 
 		if (value != null) {
@@ -470,10 +525,10 @@ public final class BindUtil {
 	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
 	 * Explicit type coercion using the <code>converter</code> if supplied, or by java language coercion.
 	 */
-	public static synchronized Object fromString(Customer customer,
-													Converter<?> converter,
-													Class<?> type,
-													String stringValue) {
+	public static synchronized @Nullable Object fromString(@Nullable Customer customer,
+															@Nullable Converter<?> converter,
+															@Nonnull Class<?> type,
+															@Nonnull String stringValue) {
 		return fromString(customer, converter, type, stringValue, false);
 	}
 
@@ -481,9 +536,9 @@ public final class BindUtil {
 	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
 	 * Explicit type coercion from serialised formats using the <code>converter</code> if supplied, or by java language coercion.
 	 */
-	public static synchronized Object fromSerialised(Converter<?> converter,
-														Class<?> type,
-														String stringValue) {
+	public static synchronized @Nullable Object fromSerialised(@Nullable Converter<?> converter,
+																@Nonnull Class<?> type,
+																@Nonnull String stringValue) {
 		return fromString(null, converter, type, stringValue, true);
 	}
 
@@ -491,14 +546,15 @@ public final class BindUtil {
 	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
 	 * Explicit type coercion from serialised formats using the <code>converter</code> if supplied, or by java language coercion.
 	 */
-	public static synchronized Object fromSerialised(Class<?> type, String stringValue) {
+	public static synchronized @Nullable Object fromSerialised(@Nonnull Class<?> type,
+																@Nonnull String stringValue) {
 		return fromString(null, null, type, stringValue, true);
 	}
 
-	private static Object fromString(Customer customer,
-										Converter<?> converter,
-										Class<?> type,
-										String stringValue,
+	private static Object fromString(@Nullable Customer customer,
+										@Nullable Converter<?> converter,
+										@Nonnull Class<?> type,
+										@Nonnull String stringValue,
 										boolean fromSerializedFormat) {
 		Object result = null;
 
@@ -550,7 +606,7 @@ public final class BindUtil {
 				if (fromSerializedFormat) {
 					result = new DateOnly(stringValue);
 				}
-				else {
+				else if (customer != null) {
 					Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
 					if (date != null) {
 						result = new DateOnly(date.getTime());
@@ -561,7 +617,7 @@ public final class BindUtil {
 				if (fromSerializedFormat) {
 					result = new TimeOnly(stringValue);
 				}
-				else {
+				else if (customer != null) {
 					Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
 					if (date != null) {
 						result = new TimeOnly(date.getTime());
@@ -572,7 +628,7 @@ public final class BindUtil {
 				if (fromSerializedFormat) {
 					result = new DateTime(stringValue);
 				}
-				else {
+				else if (customer != null) {
 					Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
 					if (date != null) {
 						result = new DateTime(date.getTime());
@@ -583,7 +639,7 @@ public final class BindUtil {
 				if (fromSerializedFormat) {
 					result = new Timestamp(stringValue);
 				}
-				else {
+				else if (customer != null) {
 					Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
 					if (date != null) {
 						result = new Timestamp(date.getTime());
@@ -626,10 +682,10 @@ public final class BindUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static synchronized String toDisplay(Customer customer, 
-													@SuppressWarnings("rawtypes") Converter converter, 
-													List<DomainValue> domainValues, 
-													Object value) {
+	public static synchronized @Nonnull String toDisplay(@Nonnull Customer customer, 
+															@Nullable @SuppressWarnings("rawtypes") Converter converter, 
+															@Nullable List<DomainValue> domainValues, 
+															@Nullable Object value) {
 		String result = "";
 		try {
 			if (value == null) {
@@ -694,7 +750,9 @@ public final class BindUtil {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public static Object getSerialized(Customer customer, Bean bean, String binding) {
+	public static @Nullable Object getSerialized(@Nonnull Customer customer,
+													@Nonnull Bean bean,
+													@Nonnull String binding) {
 		Object result = null;
 		try {
 			result = BindUtil.get(bean, binding);
@@ -730,11 +788,16 @@ public final class BindUtil {
 		return result;
 	}
 
-	public static String getDisplay(Customer customer, Bean bean, String binding) {
+	public static @Nonnull String getDisplay(@Nonnull Customer customer,
+												@Nonnull Bean bean,
+												@Nonnull String binding) {
 		return getDisplay(customer, bean, binding, get(bean, binding));
 	}
 	
-	public static String getDisplay(Customer customer, Bean bean, String binding, Object value) {
+	public static @Nonnull String getDisplay(@Nonnull Customer customer,
+												@Nonnull Bean bean,
+												@Nonnull String binding,
+												@Nullable Object value) {
 		if (value instanceof Bean) {
 			return ((Bean) value).getBizKey();
 		}
@@ -807,7 +870,7 @@ public final class BindUtil {
 	 * @param bindings
 	 * @return
 	 */
-	public static String createCompoundBinding(String... bindings) {
+	public static @Nonnull String createCompoundBinding(@Nonnull String... bindings) {
 		StringBuilder result = new StringBuilder(64);
 
 		for (String simpleBinding : bindings) {
@@ -821,7 +884,7 @@ public final class BindUtil {
 	/**
 	 * Given a multiple cardinality binding and an index, create an indexed one. ie binding[index]
 	 */
-	public static String createIndexedBinding(String binding, int index) {
+	public static @Nonnull String createIndexedBinding(@Nonnull String binding, int index) {
 		StringBuilder result = new StringBuilder(64);
 
 		result.append(binding).append('[').append(index).append(']');
@@ -832,7 +895,7 @@ public final class BindUtil {
 	/**
 	 * Given a multiple cardinality binding and a bizId, create an element one. ie bindingElementById(id)
 	 */
-	public static String createIdBinding(String binding, String bizId) {
+	public static @Nonnull String createIdBinding(@Nonnull String binding, @Nonnull String bizId) {
 		StringBuilder result = new StringBuilder(64);
 
 		result.append(binding).append("ElementById(").append(bizId).append(')');
@@ -843,7 +906,7 @@ public final class BindUtil {
 	/**
 	 * Replace '.', '[' & ']' with '_' to make valid client identifiers.
 	 */
-	public static String sanitiseBinding(String binding) {
+	public static @Nullable String sanitiseBinding(@Nullable String binding) {
 		String result = null;
 		if (binding != null) {
 			result = binding.replace('.', '_').replace('[', '_').replace(']', '_');
@@ -854,7 +917,7 @@ public final class BindUtil {
 	/**
 	 * Replace '_' with either '[', ']' or '_' depending on the context to make valid binding expressions from client identifiers.
 	 */
-	public static String unsanitiseBinding(String binding) {
+	public static @Nullable String unsanitiseBinding(@Nullable String binding) {
 		String result = null;
 		if (binding != null) {
 			result = binding.replaceAll("\\_(\\d*)\\_", "\\[$1\\]");
@@ -872,17 +935,21 @@ public final class BindUtil {
 	 * @return	The found or added element.
 	 */
 	@SuppressWarnings("unchecked")
-	public static Bean ensureElementIsInCollection(Bean owner, String binding, Bean element) {
+	public static @Nonnull Bean ensureElementIsInCollection(@Nonnull Bean owner, 
+																@Nonnull String binding,
+																@Nonnull Bean element) {
 		List<Bean> list = (List<Bean>) get(owner, binding);
-		String elementId = element.getBizId();
-
-		// check each bean in the list to see if its ID is the same
-		for (Bean existing : list) {
-			if (elementId.equals(existing.getBizId())) {
-				return existing;
+		if (list != null) {
+			String elementId = element.getBizId();
+	
+			// check each bean in the list to see if its ID is the same
+			for (Bean existing : list) {
+				if (elementId.equals(existing.getBizId())) {
+					return existing;
+				}
 			}
 		}
-
+		
 		BindUtil.addElementToCollection(owner, binding, element);
 		return element;
 	}
@@ -896,12 +963,14 @@ public final class BindUtil {
 	 * @return	The found element or null.
 	 */
 	@SuppressWarnings("unchecked")
-	public static Bean getElementInCollection(Bean owner, String binding, String elementBizId) {
+	public static @Nullable Bean getElementInCollection(@Nonnull Bean owner,
+															@Nonnull String binding,
+															@Nonnull String elementBizId) {
 		List<Bean> list = (List<Bean>) get(owner, binding);
 		return getElementInCollection(list, elementBizId);
 	}
 
-	public static <T extends Bean> T getElementInCollection(List<T> list, String elementBizId) {
+	public static @Nullable <T extends Bean> T getElementInCollection(@Nonnull List<T> list, @Nonnull String elementBizId) {
 		// check each bean in the list to see if its ID is the same
 		for (T existing : list) {
 			if (elementBizId.equals(existing.getBizId())) {
@@ -912,7 +981,7 @@ public final class BindUtil {
 		return null;
 	}
 	
-	public static <T extends Bean> void setElementInCollection(List<T> list, T element) {
+	public static <T extends Bean> void setElementInCollection(@Nonnull List<T> list, @Nonnull T element) {
 		// Set each occurrence in the list where the bizIds are the same
 		String elementBizId = element.getBizId();
 		for (int i = 0, l = list.size(); i < l; i++) {
@@ -922,7 +991,7 @@ public final class BindUtil {
 		}
 	}
 	
-	private static Pair<Bean, String> penultimateBind(Bean bean, String relationBinding) {
+	private static @Nonnull Pair<Bean, String> penultimateBind(@Nonnull Bean bean, @Nonnull String relationBinding) {
 		Bean relationOwner = bean;
 		String relationName = relationBinding;
 		int dotIndex = relationName.lastIndexOf('.');
@@ -933,12 +1002,17 @@ public final class BindUtil {
 		return new ImmutablePair<>(relationOwner, relationName);
 	}
 	
-	private static void setElementParent(Customer c, Module m, Document d, Relation r, Bean element, Bean parent) {
+	private static void setElementParent(@Nonnull Customer customer,
+											@Nonnull Module module,
+											@Nonnull Document document,
+											@Nonnull Relation relation,
+											@Nullable Bean element,
+											@Nonnull Bean parent) {
 		// Set the parent of a child bean, if applicable
 		if (element instanceof ChildBean<?>) {
-			String relatedDocumentName = r.getDocumentName();
-			Document relatedDocument = m.getDocument(c, relatedDocumentName);
-			Document parentDocument = relatedDocument.getParentDocument(c);
+			String relatedDocumentName = relation.getDocumentName();
+			Document relatedDocument = module.getDocument(customer, relatedDocumentName);
+			Document parentDocument = relatedDocument.getParentDocument(customer);
 			if (parentDocument != null) {
 				String parentModuleName = parentDocument.getOwningModuleName();
 				String parentDocumentName = parentDocument.getName();
@@ -946,8 +1020,8 @@ public final class BindUtil {
 				// Check if processBean.setParent() can be called or not.
 				// The processBean may be a child of some other bean and just being added to another collection here.
 				// Or it could be a derived document, so need to check inheritance as well.
-				CustomerImpl internalCustomer = (CustomerImpl) c;
-				Document parentBeanDocument = d;
+				CustomerImpl internalCustomer = (CustomerImpl) customer;
+				Document parentBeanDocument = document;
 				while (parentBeanDocument != null) {
 					if (parentModuleName.equals(parentBeanDocument.getOwningModuleName()) &&
 							parentDocumentName.equals(parentBeanDocument.getName())) {
@@ -963,8 +1037,8 @@ public final class BindUtil {
 	    				}
 	    				else {
 	        				int dotIndex = baseDocumentName.indexOf('.');
-	        				Module baseModule = c.getModule(baseDocumentName.substring(0, dotIndex));
-	        				parentBeanDocument = baseModule.getDocument(c, baseDocumentName.substring(dotIndex + 1));
+	        				Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
+	        				parentBeanDocument = baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
 	    				}
 					}
 				}
@@ -972,16 +1046,22 @@ public final class BindUtil {
 		}
 	}
 	
-	private static void setRelationInverse(Customer c, Document d, Relation r, Bean owner, String relationName, Bean value, boolean remove) {
+	private static void setRelationInverse(@Nonnull Customer customer,
+											@Nonnull Document document,
+											@Nonnull Relation relation,
+											@Nonnull Bean owner,
+											@Nonnull String relationName,
+											@Nonnull Bean value,
+											boolean remove) {
 		String attributeName = null;
-		if (r instanceof Inverse) { // we just set the inverse
-			attributeName = ((Inverse) r).getReferenceName();
+		if (relation instanceof Inverse) { // we just set the inverse
+			attributeName = ((Inverse) relation).getReferenceName();
 		}
 		else { // lets see if there is an inverse on the element side
-			Module elementModule = c.getModule(value.getBizModule());
-			Document elementDocument = elementModule.getDocument(c, value.getBizDocument());
-			String ownerDocumentName = d.getName(); // owner could be null
-			for (Attribute a : elementDocument.getAllAttributes(c)) {
+			Module elementModule = customer.getModule(value.getBizModule());
+			Document elementDocument = elementModule.getDocument(customer, value.getBizDocument());
+			String ownerDocumentName = document.getName(); // owner could be null
+			for (Attribute a : elementDocument.getAllAttributes(customer)) {
 				if (a instanceof Inverse) {
 					Inverse i = (Inverse) a;
 					if (ownerDocumentName.equals(i.getDocumentName()) && relationName.equals(i.getReferenceName())) {
@@ -1016,7 +1096,9 @@ public final class BindUtil {
 	 * @param associationBinding	The binding to the association.
 	 * @param value	The value to set.
 	 */
-	public static void setAssociation(Bean bean, String associationBinding, Bean value) {
+	public static void setAssociation(@Nonnull Bean bean,
+										@Nonnull String associationBinding,
+										@Nullable Bean value) {
 		try {
 			Pair<Bean, String> args = penultimateBind(bean, associationBinding);
 			Bean associationOwner = args.getLeft();
@@ -1057,7 +1139,9 @@ public final class BindUtil {
 	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean addElementToCollection(Bean bean, String collectionBinding, Bean element) {
+	public static boolean addElementToCollection(@Nonnull Bean bean,
+													@Nonnull String collectionBinding,
+													@Nonnull Bean element) {
 		try {
 			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
 			Bean collectionOwner = args.getLeft();
@@ -1075,6 +1159,9 @@ public final class BindUtil {
 				setRelationInverse(c, d, r, collectionOwner, collectionName, element, false);
 				@SuppressWarnings("unchecked")
 				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
+				if (list == null) {
+					return false;
+				}
 				return list.add(element);
 			}
 
@@ -1110,7 +1197,10 @@ public final class BindUtil {
 	 * @param index	The index to add the element at.
 	 * @param element	The element.
 	 */
-	public static void addElementToCollection(Bean bean, String collectionBinding, int index, Bean element) {
+	public static void addElementToCollection(@Nonnull Bean bean,
+												@Nonnull String collectionBinding,
+												int index,
+												@Nonnull Bean element) {
 		try {
 			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
 			Bean collectionOwner = args.getLeft();
@@ -1128,7 +1218,9 @@ public final class BindUtil {
 				setRelationInverse(c, d, r, collectionOwner, collectionName, element, false);
 				@SuppressWarnings("unchecked")
 				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
-				list.add(index, element);
+				if (list != null) {
+					list.add(index, element);
+				}
 				return;
 			}
 
@@ -1163,7 +1255,9 @@ public final class BindUtil {
 	 * @param collectionBinding	The binding to the collection.
 	 * @param element	The element.
 	 */
-	public static boolean removeElementFromCollection(Bean bean, String collectionBinding, Bean element) {
+	public static boolean removeElementFromCollection(@Nonnull Bean bean,
+														@Nonnull String collectionBinding,
+														@Nonnull Bean element) {
 		try {
 			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
 			Bean collectionOwner = args.getLeft();
@@ -1181,6 +1275,9 @@ public final class BindUtil {
 				setRelationInverse(c, d, r, collectionOwner, collectionName, element, true);
 				@SuppressWarnings("unchecked")
 				List<Bean> list = (List<Bean>) BindUtil.get(collectionOwner, collectionName);
+				if (list == null) {
+					return false;
+				}
 				return list.remove(element);
 			}
 
@@ -1220,7 +1317,9 @@ public final class BindUtil {
 	 * @param index	The index to add the element at.
 	 * @return	The removed element.
 	 */
-	public static <T extends Bean> T removeElementFromCollection(Bean bean, String collectionBinding, int index) {
+	public static @Nonnull <T extends Bean> T removeElementFromCollection(@Nonnull Bean bean,
+																			@Nonnull String collectionBinding,
+																			int index) {
 		try {
 			Pair<Bean, String> args = penultimateBind(bean, collectionBinding);
 			Bean collectionOwner = args.getLeft();
@@ -1235,6 +1334,10 @@ public final class BindUtil {
 			if (BindUtil.isDynamic(c, m, d, a)) {
 				@SuppressWarnings("unchecked")
 				List<T> list = (List<T>) BindUtil.get(collectionOwner, collectionName);
+				// This should never happen
+				if (list == null) {
+					throw new IllegalStateException(collectionBinding + " points to a collection that is null");
+				}
 				T element = list.get(index);
 				Relation r = (Relation) a;
 				setElementParent(c, m, d, r, element, null);
@@ -1267,11 +1370,11 @@ public final class BindUtil {
 	 * @param document The document of the owningBean.
 	 * @param collectionBinding The (possibly compound) collection binding (from Document context).
 	 */
-	public static void sortCollectionByMetaData(Bean bean,
-													Customer customer,
-													Module module,
-													Document document,
-													String collectionBinding) {
+	public static void sortCollectionByMetaData(@Nonnull Bean bean,
+													@Nullable Customer customer,
+													@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull String collectionBinding) {
 		// Cater for compound bindings here
 		Bean owningBean = bean;
 		int lastDotIndex = collectionBinding.lastIndexOf('.'); // compound binding
@@ -1294,7 +1397,7 @@ public final class BindUtil {
 	 * 						Use {@link sortCollectionByMetaData(Customer, Module, Document, Bean, String)} for that.
 	 */
 	@SuppressWarnings("unchecked")
-	public static void sortCollectionByMetaData(Bean owningBean, Collection collection) {
+	public static void sortCollectionByMetaData(@Nonnull Bean owningBean, @Nonnull Collection collection) {
 		// We only sort by ordinal if this is a child collection as bizOrdinal is on the elements.
 		// For aggregation/composition, bizOrdinal is on the joining table and handled automatically
 		boolean sortByOrdinal = Boolean.TRUE.equals(collection.getOrdered()) && 
@@ -1314,14 +1417,14 @@ public final class BindUtil {
 	 * @param beans	The list to sort
 	 * @param ordering The sort order
 	 */
-	public static void sortCollectionByOrdering(List<?> beans, Ordering... ordering) {
+	public static void sortCollectionByOrdering(@Nullable List<?> beans, @Nonnull Ordering... ordering) {
 		sortCollectionByOrdering(beans, false, Arrays.asList(ordering));
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static void sortCollectionByOrdering(List<?> beans, 
+	private static void sortCollectionByOrdering(@Nullable List<?> beans, 
 													boolean finallySortByOrdinal, 
-													List<Ordering> ordering) {
+													@Nonnull List<Ordering> ordering) {
 		if (beans != null) {
 			ComparatorChain comparatorChain = new ComparatorChain();
 			if (finallySortByOrdinal) {
@@ -1358,7 +1461,7 @@ public final class BindUtil {
 	 * @param binding The fully qualified name of a bean property, separating components with a '.'. 
 	 * 					Examples would be "identifier" (simple) or "identifier.clientId" (compound).
 	 */
-	public static Object get(Object bean, String binding) {
+	public static @Nullable Object get(@Nonnull Object bean, @Nonnull String binding) {
 		if ((bean instanceof DynamicBean) && ((DynamicBean) bean).isProperty(binding)) {
 			return ((DynamicBean) bean).get(binding);
 		}
@@ -1428,7 +1531,7 @@ public final class BindUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Object get(Map<String, Object> map, String binding) {
+	public static Object get(@Nonnull Map<String, Object> map, @Nonnull String binding) {
 		String alias = sanitiseBinding(binding);
 		Object result = null;
 		if (map.containsKey(binding)) {
@@ -1457,7 +1560,7 @@ public final class BindUtil {
 		return result;
 	}
 	
-	public static void convertAndSet(Object bean, String binding, Object value) {
+	public static void convertAndSet(@Nonnull Object bean, @Nonnull String binding, @Nullable Object value) {
 		Class<?> type = getPropertyType(bean, binding);
 		set(bean, binding, convert(type, value));
 	}
@@ -1470,7 +1573,7 @@ public final class BindUtil {
 	 * @param binding The fully qualified name of a bean property, separating components with a '.'. 
 	 * 					Examples would be "identifier" (simple) or "identifier.clientId" (compound).
 	 */
-	public static void set(Object bean, String binding, Object value) {
+	public static void set(@Nonnull Object bean, @Nonnull String binding, @Nullable Object value) {
 		try {
 			Object valueToSet = value;
 			// empty strings to null
@@ -1593,7 +1696,7 @@ public final class BindUtil {
 		}
 	}
 
-	public static Class<?> getPropertyType(Object bean, String binding) {
+	public static @Nonnull Class<?> getPropertyType(@Nonnull Object bean, @Nonnull String binding) {
 		if (bean instanceof Bean) {
 			Bean b = (Bean) bean;
 
@@ -1677,7 +1780,7 @@ public final class BindUtil {
 		}
 	}
 
-	public static boolean isMutable(Object bean, String simplePropertyName) {
+	public static boolean isMutable(@Nonnull Object bean, @Nonnull String simplePropertyName) {
 		if (bean instanceof Bean) {
 			if (Bean.MODULE_KEY.equals(simplePropertyName) || Bean.DOCUMENT_KEY.equals(simplePropertyName) ||
 					Bean.CREATED_KEY.equals(simplePropertyName) || Bean.NOT_CREATED_KEY.equals(simplePropertyName) ||
@@ -1734,7 +1837,7 @@ public final class BindUtil {
 	 * @param propertyType The <code>Class</code> object that represents the property type
 	 * @return <code>true</code> if propertyType is scalar, otherwise return <code>false</code>.
 	 */
-	public static final boolean isAScalarType(Class<?> propertyType) {
+	public static final boolean isAScalarType(@Nonnull Class<?> propertyType) {
 		boolean found = propertyType.isPrimitive(); // is the property type built-in
 
 		// iterate through scalarTypes looking for a type
@@ -1751,7 +1854,7 @@ public final class BindUtil {
 	 * 
 	 * @param attributeName
 	 */
-	public static final boolean isImplicit(String attributeName) {
+	public static final boolean isImplicit(@Nullable String attributeName) {
 		return (HierarchicalBean.PARENT_ID.equals(attributeName) ||
 					ChildBean.PARENT_NAME.equals(attributeName) ||
 					Bean.DOCUMENT_ID.equals(attributeName) ||
@@ -1777,7 +1880,7 @@ public final class BindUtil {
 	/**
 	 * Return the implicit attribute type if the attributeName given is for an implicit attribute. 
 	 */
-	public static final Class<?> implicitAttributeType(String attributeName) {
+	public static final @Nullable Class<?> implicitAttributeType(@Nonnull String attributeName) {
 		if (HierarchicalBean.PARENT_ID.equals(attributeName) ||
 				Bean.DOCUMENT_ID.equals(attributeName) ||
 				Bean.CUSTOMER_NAME.equals(attributeName) ||
@@ -1815,7 +1918,10 @@ public final class BindUtil {
 	/**
 	 * See Binder.isDynamic().
 	 */
-	public static boolean isDynamic(Customer customer, Module module, Document document, Attribute attribute) {
+	public static boolean isDynamic(@Nullable Customer customer,
+										@Nonnull Module module,
+										@Nonnull Document document,
+										@Nonnull Attribute attribute) {
 		boolean result = document.isDynamic();
 		if (! result) {
 			result = isDynamic(customer, module, attribute);
@@ -1826,7 +1932,9 @@ public final class BindUtil {
 	/**
 	 * See Binder.isDynamic().
 	 */
-	public static boolean isDynamic(Customer customer, Module module, Attribute attribute) {
+	public static boolean isDynamic(@Nullable Customer customer,
+										@Nonnull Module module,
+										@Nonnull Attribute attribute) {
 		if (attribute instanceof Field) {
 			return ((Field) attribute).isDynamic();
 		}
@@ -1839,7 +1947,9 @@ public final class BindUtil {
 	/**
 	 * See Binder.isDynamic().
 	 */
-	public static boolean isDynamic(Customer customer, Module module, Relation relation) {
+	public static boolean isDynamic(@Nullable Customer customer, 
+										@Nonnull Module module,
+										@Nonnull Relation relation) {
 		String dn = relation.getDocumentName();
 		Document rd = module.getDocument(customer, dn);
 		return rd.isDynamic();
@@ -1848,9 +1958,9 @@ public final class BindUtil {
 	// NB properties must be a sorted map to ensure that the shortest properties
 	// are processed first - ie User.contact is populated before User.contact.firstName,
 	// otherwise the firstName new value will be tromped...
-	public static void populateProperties(User user, 
-											Bean bean, 
-											SortedMap<String, Object> properties, 
+	public static void populateProperties(@Nonnull User user, 
+											@Nullable Bean bean, 
+											@Nullable SortedMap<String, Object> properties, 
 											boolean fromSerializedFormat) {
 		ValidationException e = new ValidationException();
 
@@ -1883,10 +1993,10 @@ public final class BindUtil {
 		}
 	}
 
-	public static void populateProperty(User user, 
-											Bean bean, 
-											String bindingName, 
-											Object bindingValue, 
+	public static void populateProperty(@Nonnull User user, 
+											@Nonnull Bean bean, 
+											@Nonnull String bindingName, 
+											@Nullable Object bindingValue, 
 											boolean fromSerializedFormat) {
 		String name = bindingName;
 		Object value = bindingValue;
@@ -2020,7 +2130,7 @@ public final class BindUtil {
 		}
 	}
 
-	private static int findLastNestedIndex(String expression) {
+	private static int findLastNestedIndex(@Nonnull String expression) {
 		// walk back from the end to the start
 		// and find the first index that
 		int bracketCount = 0;
@@ -2052,7 +2162,7 @@ public final class BindUtil {
 		return -1;
 	}
 
-	public static void copy(final Bean from, final Bean to) {
+	public static void copy(@Nonnull final Bean from, @Nonnull final Bean to) {
 		final Customer c = CORE.getUser().getCustomer();
 		final Module m = c.getModule(from.getBizModule());
 		final Document d = m.getDocument(c, from.getBizDocument());
@@ -2073,22 +2183,24 @@ public final class BindUtil {
 				continue;
 			}
 
-			Binder.set(to, attributeName, Binder.get(from, attributeName));
+			BindUtil.set(to, attributeName, BindUtil.get(from, attributeName));
 		}
 	}
 
 	// TODO clearing colTo issues a delete statement in hibernate, this method should process each collection item.
 	@SuppressWarnings("unchecked")
-	private static void copyCollection(final Bean from,
-										final Bean to,
-										final String attributeName,
+	private static void copyCollection(@Nonnull final Bean from,
+										@Nonnull final Bean to,
+										@Nonnull final String attributeName,
 										boolean reparent) {
 		List<Bean> colFrom = (List<Bean>) BindUtil.get(from, attributeName);
 		List<Bean> colTo = (List<Bean>) BindUtil.get(to, attributeName);
-		colTo.clear();
-		colTo.addAll(colFrom);
-		if (reparent) {
-			colTo.forEach(e -> ((ChildBean<Bean>) e).setParent(to));
+		if (colTo != null) {
+			colTo.clear();
+			colTo.addAll(colFrom);
+			if (reparent) {
+				colTo.forEach(e -> ((ChildBean<Bean>) e).setParent(to));
+			}
 		}
 	}
 
@@ -2116,12 +2228,13 @@ public final class BindUtil {
 		Document navigatingDocument = document;
 		Module navigatingModule = module;
 		Attribute attribute = null;
+		Class<?> type = null;
 
 		StringTokenizer tokenizer = new StringTokenizer(binding, ".");
 		while (tokenizer.hasMoreTokens()) {
-			String fieldName = tokenizer.nextToken();
+			String attributeName = tokenizer.nextToken();
 			String parentDocumentName = null;
-			if (fieldName.equals(ChildBean.PARENT_NAME)) {
+			if (attributeName.equals(ChildBean.PARENT_NAME)) {
 				parentDocumentName = navigatingDocument.getParentDocumentName();
 				Extends inherits = navigatingDocument.getExtends();
 				while ((parentDocumentName == null) && (inherits != null)) {
@@ -2136,23 +2249,23 @@ public final class BindUtil {
 							" is not a child document)");
 				}
 			}
-			int openBraceIndex = fieldName.indexOf('[');
+			int openBraceIndex = attributeName.indexOf('[');
 			if (openBraceIndex > -1) {
-				fieldName = fieldName.substring(0, openBraceIndex);
+				attributeName = attributeName.substring(0, openBraceIndex);
 			}
-			int openParenthesisIndex = fieldName.indexOf("ElementById(");
+			int openParenthesisIndex = attributeName.indexOf("ElementById(");
 			if (openParenthesisIndex > -1) {
-				fieldName = fieldName.substring(0, openParenthesisIndex);
+				attributeName = attributeName.substring(0, openParenthesisIndex);
 			}
-			attribute = navigatingDocument.getAttribute(fieldName);
+			attribute = navigatingDocument.getAttribute(attributeName);
 			Extends inherits = navigatingDocument.getExtends();
 			while ((attribute == null) && (inherits != null)) {
 				Document baseDocument = navigatingModule.getDocument(customer, inherits.getDocumentName());
-				attribute = baseDocument.getAttribute(fieldName);
+				attribute = baseDocument.getAttribute(attributeName);
 				inherits = baseDocument.getExtends();
 			}
 			if (tokenizer.hasMoreTokens()) {
-				if (ChildBean.PARENT_NAME.equals(fieldName)) {
+				if (ChildBean.PARENT_NAME.equals(attributeName)) {
 					if (parentDocumentName == null) {
 						throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
 														navigatingDocument.getName() + " @ " + binding + 
@@ -2168,7 +2281,7 @@ public final class BindUtil {
 					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
 													navigatingDocument.getName() + " @ " + binding + 
 													" does not exist (token [" + 
-													fieldName +
+													attributeName +
 													"] doesn't check out)");
 				}
 				navigatingModule = (customer == null) ?
@@ -2176,20 +2289,46 @@ public final class BindUtil {
 										customer.getModule(navigatingDocument.getOwningModuleName());
 			}
 			else {
-				// ignore validating implicit attributes
-				if ((attribute == null) && (! isImplicit(fieldName))) {
-					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
-													navigatingDocument.getName() + " @ " + binding + 
-													" does not exist (last attribute not in document)");
+				if (attribute != null) { // explicit attribute
+					AttributeType attributeType = attribute.getAttributeType();
+					if ((AttributeType.association == attributeType) || (AttributeType.inverseOne == attributeType)) {
+						DocumentImpl d = (DocumentImpl) navigatingModule.getDocument(customer, ((Relation) attribute).getDocumentName());
+						try {
+							type = d.getBeanClass(customer);
+						}
+						catch (ClassNotFoundException e) {
+							throw new MetaDataException("Binding " + binding + " resolves to an attribute of type " + attributeType + 
+															" but the document class for document " + d.getOwningModuleName() +
+															'.' + d.getName() + " cannot be loaded.", e);
+						}
+					}
+					else {
+						type = attributeType.getImplementingType();
+					}
+				}
+				else {
+					Class<?> implicitType = implicitAttributeType(attributeName);
+					if (implicitType != null) { // implicit attribute
+						type = implicitType;
+					}
+					else { // not an explicit or implicit attribute
+						throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
+														navigatingDocument.getName() + " @ " + binding + 
+														" does not exist (last attribute not in document)");
+					}
 				}
 			}
 		}
 
-		return new TargetMetaData(navigatingDocument, attribute);
+		return new TargetMetaData(navigatingDocument, attribute, type);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Object instantiateAndGet(User user, Module module, Document document, Bean bean, String binding) {
+	public static @Nullable Object instantiateAndGet(@Nonnull User user,
+														@Nonnull Module module,
+														@Nonnull Document document,
+														@Nonnull Bean bean,
+														@Nonnull String binding) {
 		Customer customer = user.getCustomer();
 		Document navigatingDocument = document;
 		Attribute attribute = null;
@@ -2246,30 +2385,16 @@ public final class BindUtil {
 						String collectionBinding = bindingPart.substring(0, openBraceIndex);
 						int collectionIndex = Integer.parseInt(bindingPart.substring(openBraceIndex + 1, closedBraceIndex));
 						List<Bean> collection = (List<Bean>) BindUtil.get(owner, collectionBinding);
-	
-						// parameters are ordered alphabetically,
-						// so we should receive the array bindings in ascending order
-						// but they may not be contiguous (some are deleted)
-						while (collection.size() <= collectionIndex) {
-							Bean fillerElement = collectionDocument.newInstance(user);
-							BindUtil.addElementToCollection((Bean) owner, collectionBinding, fillerElement);
-/*
-							if (fillerElement instanceof ChildBean) {
-								try {
-									((ChildBean<Bean>) fillerElement).setParent((Bean) owner);
-								}
-								catch (@SuppressWarnings("unused") ClassCastException cce) {
-									// continue on - this child bean is being linked to
-									// by some other document as an "aggregation"
-									// IE the owner variable above is not the parent document
-									// but some aggregating document
-								}
+						if (collection != null) {
+							// parameters are ordered alphabetically,
+							// so we should receive the array bindings in ascending order
+							// but they may not be contiguous (some are deleted)
+							while (collection.size() <= collectionIndex) {
+								Bean fillerElement = collectionDocument.newInstance(user);
+								BindUtil.addElementToCollection((Bean) owner, collectionBinding, fillerElement);
 							}
-							collection.add(fillerElement);
-*/
+							value = collection.get(collectionIndex);
 						}
-	
-						value = collection.get(collectionIndex);
 					}
 				}
 				if (value == null) {
@@ -2291,7 +2416,7 @@ public final class BindUtil {
 	 * @param string
 	 * @return	A valid java type identifier.  Title case.
 	 */
-	public static String toJavaTypeIdentifier(String string) {
+	public static @Nonnull String toJavaTypeIdentifier(@Nonnull String string) {
 		StringBuilder sb = new StringBuilder(toJavaInstanceIdentifier(string));
 		sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
 		return sb.toString();
@@ -2302,8 +2427,7 @@ public final class BindUtil {
 	 * @param string
 	 * @return	A valid java instance identifier.  Camel case.
 	 */
-	public static String toJavaInstanceIdentifier(String string)
-	{
+	public static @Nonnull String toJavaInstanceIdentifier(@Nonnull String string) {
 		StringBuilder sb = new StringBuilder(string);
 		removeOrReplaceInvalidCharacters(sb);
 		return Introspector.decapitalize(sb.toString());
@@ -2314,15 +2438,15 @@ public final class BindUtil {
 	 * @param methodName	The method name
 	 * @return	"get"/"set"/"is" prefix stripped and the remaining string decapitalised as appropriate.
 	 */
-	public static String toJavaPropertyName(String methodName) {
-		String propertyName = methodName;
+	public static @Nonnull String toJavaPropertyName(@Nonnull String methodName) {
+		String result = methodName;
 		if (methodName.startsWith("get") || methodName.startsWith("set")) {
-			propertyName = Introspector.decapitalize(methodName.substring(3));
+			result = Introspector.decapitalize(methodName.substring(3));
 		}
 		else if (methodName.startsWith("is")) {
-			propertyName = Introspector.decapitalize(methodName.substring(2));
+			result = Introspector.decapitalize(methodName.substring(2));
 		}
-		return propertyName;
+		return result;
 	}
 	
 	/**
@@ -2330,7 +2454,7 @@ public final class BindUtil {
 	 * @param string
 	 * @return A valid java static identifier.  Upper Case with underscores.
 	 */
-	public static String toJavaStaticIdentifier(String string) {
+	public static @Nonnull String toJavaStaticIdentifier(@Nonnull String string) {
 		String javaIdentifierName = toJavaInstanceIdentifier(string);
 		StringBuilder sb = new StringBuilder(javaIdentifierName.length() + 5);
 
@@ -2370,7 +2494,7 @@ public final class BindUtil {
 	 * @param string The string to convert
 	 * @return A title case string. First letter of each word upper cased with spaces between words.
 	 */
-	public static String toTitleCase(String string) {
+	public static @Nonnull String toTitleCase(@Nonnull String string) {
 		String javaIdentifierName = BindUtil.toJavaTypeIdentifier(string);
 		StringBuilder sb = new StringBuilder(javaIdentifierName.length() + 5);
 
@@ -2403,7 +2527,7 @@ public final class BindUtil {
 		return sb.toString();
 	}
 
-	private static void removeOrReplaceInvalidCharacters(StringBuilder sb) {
+	private static void removeOrReplaceInvalidCharacters(@Nonnull StringBuilder sb) {
 		int i = 0;
 		boolean whiteSpaceOrUnderscore = false;
 		while (i < sb.length()) {

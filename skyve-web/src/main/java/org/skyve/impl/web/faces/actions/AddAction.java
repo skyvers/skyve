@@ -69,6 +69,9 @@ public class AddAction extends FacesAction<Void> {
     	// Create a new element
     	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
 		Relation targetRelation = (Relation) target.getAttribute();
+		if (targetRelation == null) {
+			throw new IllegalStateException(newViewBinding + " doesn't resolve to a target relation.");
+		}
 		Document relationDocument = module.getDocument(customer, targetRelation.getDocumentName());
 
     	// check for create privilege if the collection is persistent and the collection document is persistent
@@ -86,7 +89,9 @@ public class AddAction extends FacesAction<Void> {
 				Boolean.TRUE.equals(((Collection) targetRelation).getOrdered())) {
 			@SuppressWarnings("unchecked")
 			List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
-			Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
+			if (beans != null) {
+				Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
+			}
 		}
 
 		// Call the bizlet and interceptors

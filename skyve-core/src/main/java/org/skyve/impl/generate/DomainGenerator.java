@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
@@ -221,6 +222,9 @@ public abstract class DomainGenerator {
 	public void validate(String customerName) throws Exception {
 		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
+		if (customer == null) {
+			throw new MetaDataException(customerName + " does not exist.");
+		}
 		if (debug) System.out.println("Validate customer " + customerName);
 		repository.validateCustomerForGenerateDomain(customer);
 		for (Module module : customer.getModules()) {
@@ -273,6 +277,29 @@ public abstract class DomainGenerator {
 					new OverridableDomainGenerator(write, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
 	}
 	
+	/**
+	 * Validate a customer within a repository.
+	 */
+	public static void validate(ProvidedRepository repository, String customerName) {
+		long millis = System.currentTimeMillis();
+		DomainGenerator jenny = DomainGenerator.newDomainGenerator(false, false, false, repository, DialectOptions.H2_NO_INDEXES, "", "", "", "", "");
+		try {
+			jenny.validate(customerName);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Validation problem encountered: " + e.getLocalizedMessage(), e);
+		}
+		finally {
+			UtilImpl.LOGGER.info("Customer " + customerName + " validated in " + (System.currentTimeMillis() - millis) + " millis");
+		}
+	}
+	
+	/**
+	 * Generate the domain model.
+	 */
 	public static void generate(boolean debug,
 									boolean multiTenant,
 									DialectOptions dialectOptions,

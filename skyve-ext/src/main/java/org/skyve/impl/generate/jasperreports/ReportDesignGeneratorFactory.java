@@ -1,7 +1,7 @@
 package org.skyve.impl.generate.jasperreports;
 
 public class ReportDesignGeneratorFactory {
-    public ReportDesignGenerator getGeneratorForDesign(DesignSpecification designSpecification) {
+    public static ReportDesignGenerator getGeneratorForDesign(DesignSpecification designSpecification) {
         assert(designSpecification.getDefinitionSource() != null);
 
         switch (designSpecification.getDefinitionSource()) {
@@ -13,8 +13,8 @@ public class ReportDesignGeneratorFactory {
                 return new QueryReportDesignGenerator();
             case list:
                 return new ListReportDesignGenerator();
+            default:
+            	throw new IllegalStateException(designSpecification.getDefinitionSource() + " is not catered for");
         }
-
-        throw new IllegalArgumentException("Unknown design definition source.");
     }
 }

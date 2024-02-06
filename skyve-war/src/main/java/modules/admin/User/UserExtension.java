@@ -97,12 +97,14 @@ public class UserExtension extends User {
 		if (isPersisted()) {
 			// Populate the user using the persistence connection since it might have just been inserted and not committed yet
 			result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal((UtilImpl.CUSTOMER == null) ? getBizCustomer() + "/" + getUserName() : getUserName());
-			result.clearAllPermissionsAndMenus();
-			
-			// Use the current persistence connection, so do not close
-			@SuppressWarnings("resource")
-			Connection c = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
-			ProvidedRepositoryFactory.get().populateUser(result, c);
+			if (result != null) {
+				result.clearAllPermissionsAndMenus();
+				
+				// Use the current persistence connection, so do not close
+				@SuppressWarnings("resource")
+				Connection c = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
+				ProvidedRepositoryFactory.get().populateUser(result, c);
+			}
 		}
 
 		return result;

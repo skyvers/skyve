@@ -135,7 +135,10 @@ public class ContentUpload extends AbstractUpload {
 			if (binding != null) {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
-
+			if (bean == null) { // should never happen
+				throw new IllegalStateException("bean is null");
+			}
+			
 			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));
 			String contentId = content.getContentId();
 

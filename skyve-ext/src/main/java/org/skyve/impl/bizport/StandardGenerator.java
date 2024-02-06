@@ -166,7 +166,10 @@ public final class StandardGenerator {
 							}
 							else {
 								String ownerBinding = binding.substring(0, dotIndex);
-								ownerId = ((Bean) BindUtil.get(topBean, ownerBinding)).getBizId();
+								Bean ownerBean = (Bean) BindUtil.get(topBean, ownerBinding);
+								if (ownerBean != null) {
+									ownerId = ownerBean.getBizId();
+								}
 							}
 
 							collectionSheet.addRow(ownerId + bizId);

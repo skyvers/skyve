@@ -12,9 +12,6 @@ import java.util.Set;
 
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.backup.BackupUtil;
-import org.skyve.impl.backup.ForeignKey;
-import org.skyve.impl.backup.Table;
 
 class ForeignKey {
 	private String table;

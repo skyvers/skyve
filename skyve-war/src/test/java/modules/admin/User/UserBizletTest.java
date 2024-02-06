@@ -1,7 +1,7 @@
 package modules.admin.User;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.skyve.util.DataBuilder;
@@ -11,7 +11,6 @@ import modules.admin.domain.User;
 import util.AbstractH2Test;
 
 public class UserBizletTest extends AbstractH2Test {
-
 	@Test
 	@SuppressWarnings("static-method")
 	public void testPreSaveSetsPasswordExpired() throws Exception {

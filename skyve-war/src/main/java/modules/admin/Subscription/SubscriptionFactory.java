@@ -1,6 +1,5 @@
 package modules.admin.Subscription;
 
-import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;

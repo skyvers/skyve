@@ -27,7 +27,7 @@
 			<displayName>admin.user.password.displayName</displayName>
 			<description>admin.user.password.description</description>
 			<!--  The password is checked and populated in the Bizlet -->
-			<length>100</length>
+			<length>255</length>
 		</text>
 		<text name="generatedPassword" audited="false" persistent="false" trackChanges="false" usage="view">
 			<displayName>admin.user.generatedPassword.displayName</displayName>

@@ -24,7 +24,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.DocValuesFieldExistsQuery;
+import org.apache.lucene.search.FieldExistsQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -116,8 +116,10 @@ public class LuceneContentManager extends FileSystemContentManager {
 	
 	@Override
 	public void close() throws Exception {
-		writer.flush();
-		writer.commit();
+		if ((writer != null) && writer.isOpen()) { 
+			writer.flush();
+			writer.commit();
+		}
 	}
 	
 	@Override
@@ -191,7 +193,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 			if (results.length > 1) {
 				throw new ManyResultsException();
 			}
-			Document document = attachmentReader.document(results[0].doc);
+			Document document = attachmentReader.storedFields().document(results[0].doc);
 			if (document == null) {
 				throw new NoResultsException();
 			}
@@ -273,7 +275,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("LuceneContentManager.put(): " + bizId);
 		String contentId = attachment.getContentId();
 		// Even if existing, add the content ID to the document as it could be a re-index
-		document.add(new StringField(CONTENT_ID, contentId, Store.YES));
+		document.add(new TextField(CONTENT_ID, contentId, Store.YES));
 		// delete if exists and re-add
 		writer.updateDocument(new Term(CONTENT_ID, contentId), document);
 	}
@@ -293,7 +295,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 			if (results.length == 0) {
 				return null;
 			}
-			Document document = attachmentReader.document(results[0].doc);
+			Document document = attachmentReader.storedFields().document(results[0].doc);
 			if (document == null) {
 				return null;
 			}
@@ -393,7 +395,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 				// Iterate over found results
 				for (int i = 0, l = hits.scoreDocs.length; i < l; i++) {
 					int docid = hits.scoreDocs[i].doc;
-					Document document = searcher.doc(docid);
+					Document document = searcher.storedFields().document(docid);
 
 					String bizCustomer = document.get(Bean.CUSTOMER_NAME);
 					String bizModule = document.get(Bean.MODULE_KEY);
@@ -413,7 +415,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 						String text = document.get(CONTENT);
 						 
 						// Create token stream
-					    Fields vectors = reader.getTermVectors(docid);
+						Fields vectors = reader.termVectors().get(docid);
 						try (TokenStream stream = TokenSources.getTokenStream(CONTENT, vectors, text, analyzer, -1)) {
 							// Get highlighted text fragments
 							String[] fragments = highlighter.getBestFragments(stream, text, 10);
@@ -463,7 +465,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	public void truncateAttachments(String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
-										.add(new DocValuesFieldExistsQuery(CONTENT_ID), Occur.MUST)
+										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST)
 										.build());
 	}
 	
@@ -471,10 +473,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	public void truncateBeans(String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
-										// NB This "~" term query is sub-optimal but I could not get the following to work - it would delete both attachment and bean content
-										// like it was doing an or even though its a MUST_NOT. I can't explain even though I trawled various documentation sources.
-										// .add(new DocValuesFieldExistsQuery(CONTENT_ID), Occur.MUST_NOT)
-										.add(new TermQuery(new Term(Bean.DOCUMENT_ID, "~")), Occur.MUST)
+										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST_NOT)
 										.build());
 	}
 	

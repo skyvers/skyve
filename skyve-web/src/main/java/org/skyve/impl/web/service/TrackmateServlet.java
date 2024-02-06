@@ -147,11 +147,9 @@ public class TrackmateServlet extends HttpServlet {
 
 				if (sid == null) {
 					// can't get values until we are logged in
-					throw new Exception("Can't retrieve list until you have a valid session.");
+					throw new ServletException("Can't retrieve list until you have a valid session.");
 				}
-				assertLoggedIn(persistence, user, hashedPassword); // throws if
-																	// not
-																	// logged in
+				assertLoggedIn(persistence, user, hashedPassword); // throws if not logged in
 
 				String getType = request.getParameter(GET_TYPE_REQUEST_PARAMETER);
 				
@@ -161,7 +159,7 @@ public class TrackmateServlet extends HttpServlet {
 					String documentName = request.getParameter(DOCUMENT_REQUEST_PARAMETER);
 					StringBuilder sb = new StringBuilder();
 
-					if (moduleName != null && documentName != null) {
+					if ((moduleName != null) && (documentName != null)) {
 						DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 						q.addBoundOrdering(Bean.BIZ_KEY);
 
@@ -177,74 +175,62 @@ public class TrackmateServlet extends HttpServlet {
 						sb.append("]");
 						pw.append(sb.toString());
 					}
-				} else if(GET_TYPE_USER_POSITION_LIST.equals(getType)){
-//					String include = request.getParameter("userIncludeList");
-					
-					/*
-					@SuppressWarnings("unchecked")
-					Map<String, Object> values = (Map<String, Object>) JSONUtil.unmarshall(user, include);
-	
-					if(values.isEmpty()){
-						//get all user status
-					} else {
-						//filter for specific users
-					}
-					*/
-					
+				}
+				else if (GET_TYPE_USER_POSITION_LIST.equals(getType)){
 					DocumentQuery q = persistence.newDocumentQuery(TRACK_MODULE_NAME, TRACK_DOCUMENT_NAME);
 					q.addAggregateProjection(AggregateFunction.Max, TRACK_TIMESTAMP_PROPERTY_NAME, "MaxTimestamp");
 					q.addBoundProjection(TRACK_USER_PROPERTY_NAME);
 					q.addBoundGrouping(TRACK_USER_PROPERTY_NAME);
 					q.addBoundOrdering(Binder.createCompoundBinding(TRACK_USER_PROPERTY_NAME, Bean.BIZ_KEY));
 					
-					//exclude the current user
+					// exclude the current user
 					q.getFilter().addNotEquals(Binder.createCompoundBinding(TRACK_USER_PROPERTY_NAME,  Bean.DOCUMENT_ID), user.getId());
 					
 					//add in filter for user list
 					List<Map<String, Object>> userPositions = new ArrayList<>();
 					
-					//get max timestamp for each user, and then find associated track
+					// get max timestamp for each user, and then find associated track
 					List<Bean> beans = q.projectedResults();
-					for(Bean bean: beans){
-						
+					for (Bean bean: beans) {
 						Bean u = (Bean) Binder.get(bean, TRACK_USER_PROPERTY_NAME);
 						Timestamp t = (Timestamp) Binder.get(bean, "MaxTimestamp");
-						//get the track associated with this timestamp and user
+						// get the track associated with this timestamp and user
 						DocumentQuery uq = persistence.newDocumentQuery(TRACK_MODULE_NAME, TRACK_DOCUMENT_NAME);
 						uq.getFilter().addEquals(TRACK_USER_PROPERTY_NAME, u);
 						uq.getFilter().addEquals(TRACK_TIMESTAMP_PROPERTY_NAME, t);
 						
 						List<Bean> tracks = uq.projectedResults();
-						if(!tracks.isEmpty()){
-							
+						if (! tracks.isEmpty()){
 							//Construct the user position report
 							@SuppressWarnings("unchecked")
-							List<Bean> vertices = (List<Bean>) Binder.get(tracks.get(0),"vertices");
-							Bean vertex = vertices.get(vertices.size()-1); //get last vertex of whatever geometry they laid down - their last position
-							
-							Decimal10 latitudeInDecimalDegrees = (Decimal10) Binder.get(vertex, "latitudeInDecimalDegrees");
-							Decimal10 longitudeInDecimalDegrees = (Decimal10) Binder.get(vertex, "longitudeInDecimalDegrees");
-							Timestamp timestamp = (Timestamp) Binder.get(vertex, "timestamp");
-							String address = (String) Binder.get(vertex, "address");
-							String city = (String) Binder.get(vertex, "city");
-							Integer speedInMetresPerSecond = (Integer) Binder.get(vertex, "speedInMetresPerSecond");
-							Decimal2 trueHeadingInDecimalDegrees = (Decimal2) Binder.get(vertex, "trueHeadingInDecimalDegrees");
-							
-							String userContactName = (String) Binder.get(u, "contact.name");
-							
-							Map<String, Object> userPosition = new TreeMap<>();
-							userPosition.put("userId", u.getBizId());
-							userPosition.put("userContactName", userContactName);
-							userPosition.put("latitudeInDecimalDegrees", latitudeInDecimalDegrees);
-							userPosition.put("longitudeInDecimalDegrees", longitudeInDecimalDegrees);
-							userPosition.put("timestamp", timestamp);
-							userPosition.put("address", address);
-							userPosition.put("city", city);
-							userPosition.put("speedInMetresPerSecond", speedInMetresPerSecond);
-							userPosition.put("trueHeadingInDecimalDegrees", trueHeadingInDecimalDegrees);
-							
-							//add to list of results
-							userPositions.add(userPosition);
+							List<Bean> vertices = (List<Bean>) Binder.get(tracks.get(0), "vertices");
+							if ((vertices != null) && (u != null)) {
+								Bean vertex = vertices.get(vertices.size() - 1); // get last vertex of whatever geometry they laid down - their last position
+								
+								Decimal10 latitudeInDecimalDegrees = (Decimal10) Binder.get(vertex, "latitudeInDecimalDegrees");
+								Decimal10 longitudeInDecimalDegrees = (Decimal10) Binder.get(vertex, "longitudeInDecimalDegrees");
+								Timestamp timestamp = (Timestamp) Binder.get(vertex, "timestamp");
+								String address = (String) Binder.get(vertex, "address");
+								String city = (String) Binder.get(vertex, "city");
+								Integer speedInMetresPerSecond = (Integer) Binder.get(vertex, "speedInMetresPerSecond");
+								Decimal2 trueHeadingInDecimalDegrees = (Decimal2) Binder.get(vertex, "trueHeadingInDecimalDegrees");
+								
+								String userContactName = (String) Binder.get(u, "contact.name");
+								
+								Map<String, Object> userPosition = new TreeMap<>();
+								userPosition.put("userId", u.getBizId());
+								userPosition.put("userContactName", userContactName);
+								userPosition.put("latitudeInDecimalDegrees", latitudeInDecimalDegrees);
+								userPosition.put("longitudeInDecimalDegrees", longitudeInDecimalDegrees);
+								userPosition.put("timestamp", timestamp);
+								userPosition.put("address", address);
+								userPosition.put("city", city);
+								userPosition.put("speedInMetresPerSecond", speedInMetresPerSecond);
+								userPosition.put("trueHeadingInDecimalDegrees", trueHeadingInDecimalDegrees);
+								
+								//add to list of results
+								userPositions.add(userPosition);
+							}
 						}
 					}
 					
@@ -443,8 +429,7 @@ public class TrackmateServlet extends HttpServlet {
 		List<Map<String, Object>> positions = (List<Map<String, Object>>) values.get("positions");
 
 		List<Coordinate> coords = new ArrayList<>();
-		if (positions != null) {
-			
+		if ((vertices != null) && (positions != null)) {
 			for (Map<String, Object> position : positions) {
 				PersistentBean vertex = geoLocationDoc.newInstance(user);
 				Coordinate coordinate = populateVertex(vertex, position);
@@ -460,25 +445,29 @@ public class TrackmateServlet extends HttpServlet {
 		}
 
 		// Create geometry object
-		if(TRACK_TYPE_POINT_VALUE.equals(type)){
+		if (TRACK_TYPE_POINT_VALUE.equals(type)) {
 			geometry = gf.createPoint(coords.get(0));
-		} else if(TRACK_TYPE_POLYGON_VALUE.equals(type)){
+		}
+		else if (TRACK_TYPE_POLYGON_VALUE.equals(type)) {
 			//check for closed and if not, close it
 			Coordinate startCoord = coords.get(0);
 			Coordinate endCoord = (positions == null) ? null : coords.get(positions.size()-1);
-			if(startCoord.equals(endCoord)){
+			if (startCoord.equals(endCoord)){
 				//closed
-			} else {
+			}
+			else {
 				//close the shape
 				coords.add(startCoord);
 			}
 			Coordinate[] arr = coords.toArray(new Coordinate[coords.size()]);
 			geometry = gf.createPolygon(arr);
-		} else if(TRACK_TYPE_POLYLINE_VALUE.equals(type)){
+		}
+		else if (TRACK_TYPE_POLYLINE_VALUE.equals(type)) {
 			Coordinate[] arr = coords.toArray(new Coordinate[coords.size()]);
 			geometry = gf.createLineString(arr);
-		} else {
-			//rob's a bogun
+		}
+		else {
+			// rob's a bogun
 			throw new Exception("Can't resolve the type of geometry");
 		}
 		
@@ -490,7 +479,6 @@ public class TrackmateServlet extends HttpServlet {
 			Binder.set(track, TRACK_INTEGRITY_HASH_PROPERTY_NAME, originalDocumentHash);
 		}
 
-		
 		track = persistence.save(trackDoc, track);
 
 		response.append("{}");
@@ -528,7 +516,6 @@ public class TrackmateServlet extends HttpServlet {
 		if (headingVariant instanceof Map<?, ?>) {
 			heading = (Map<String, Object>) headingVariant;
 		}
-		
 
 		// Note - gps timestamp takes precedence over heading timestamp
 		Number number = null;
@@ -541,6 +528,7 @@ public class TrackmateServlet extends HttpServlet {
 				}
 			}
 		}
+		
 		Object object = position.get("timestamp");
 		if (object instanceof String) {
 			number = Long.valueOf(new Timestamp((String) object).getTime());

@@ -1,7 +1,7 @@
 package modules.test;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -13,7 +13,6 @@ import org.skyve.util.test.TestUtil;
 import modules.test.domain.UniqueConstraintNullable;
 
 public class UniqueConstraintNullableTest extends AbstractSkyveTest {
-
 	private UniqueConstraintNullable uniqueConstraintNullable;
 
 	@Before public void setup() throws Exception {

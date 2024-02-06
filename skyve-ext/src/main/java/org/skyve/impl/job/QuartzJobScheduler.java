@@ -142,7 +142,7 @@ public class QuartzJobScheduler implements JobScheduler {
 
 	private static void scheduleInternalJobs()
 	throws Exception {
-		// Initialise BrowsCap load
+		// Initialise BrowsCap load in a 1 shot immediate job
 		JobDetail detail = JobBuilder.newJob(LoadBrowsCapJob.class)
 										.withIdentity("Load BrowsCap", Scheduler.DEFAULT_GROUP)
 										.storeDurably(false)
@@ -154,22 +154,19 @@ public class QuartzJobScheduler implements JobScheduler {
 							.build();
 		JOB_SCHEDULER.scheduleJob(detail, trigger);
 
-		// Initialise warming metadata if access control is on
-		if (UtilImpl.ACCESS_CONTROL) {
-			detail = JobBuilder.newJob(WarmMetaDataJob.class)
-								.withIdentity("Warm MetaData", Scheduler.DEFAULT_GROUP)
-								.storeDurably(false)
-								.build();
-			trigger = TriggerBuilder.newTrigger()
-										.forJob(detail)
-										.withIdentity("\"Warm MetaData trigger", Scheduler.DEFAULT_GROUP)
-										.startNow()
-										.build();
-			JOB_SCHEDULER.scheduleJob(detail, trigger);
-			
-		}
+		// Initialise validate metadata in a 1 shot immediate job
+		detail = JobBuilder.newJob(ValidateMetaDataJob.class)
+							.withIdentity("Validate MetaData", Scheduler.DEFAULT_GROUP)
+							.storeDurably(false)
+							.build();
+		trigger = TriggerBuilder.newTrigger()
+									.forJob(detail)
+									.withIdentity("Validate MetaData trigger", Scheduler.DEFAULT_GROUP)
+									.startNow()
+									.build();
+		JOB_SCHEDULER.scheduleJob(detail, trigger);
 
-		// initialise the CMS in a 1 shot immediate job
+		// Initialise the CMS in a 1 shot immediate job
 		detail = JobBuilder.newJob(ContentStartupJob.class)
 							.withIdentity("CMS Startup", Scheduler.DEFAULT_GROUP)
 							.storeDurably(false)
@@ -182,6 +179,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		JOB_SCHEDULER.scheduleJob(detail, trigger);
 
 		// Do CMS garbage collection as schedule in the CRON expression in the application properties file
+		// starting in 5 minutes time to ensure the system has settled down
 		detail = JobBuilder.newJob(ContentGarbageCollectionJob.class)
 							.withIdentity("CMS Garbage Collection", Scheduler.DEFAULT_GROUP)
 							.storeDurably()
@@ -190,7 +188,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		trigger = TriggerBuilder.newTrigger()
 									.forJob(detail)
 									.withIdentity("CMS Garbage Collection Trigger", Scheduler.DEFAULT_GROUP)
-									.startAt(in5Minutes) // start in 5 minutes once the CMS has settled down
+									.startAt(in5Minutes) // start in 5 minutes
 									.withSchedule(CronScheduleBuilder.cronSchedule(UtilImpl.CONTENT_GC_CRON))
 									.build();
 		try {
@@ -202,6 +200,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 
 		// Do expired state eviction as schedule in the CRON expression in the application properties file
+		// starting in 5 minutes time to ensure the system has settled down
 		if (UtilImpl.STATE_EVICT_CRON != null) {
 			detail = JobBuilder.newJob(EvictStateJob.class)
 								.withIdentity("Evict Expired State", Scheduler.DEFAULT_GROUP)
@@ -210,7 +209,7 @@ public class QuartzJobScheduler implements JobScheduler {
 			trigger = TriggerBuilder.newTrigger()
 										.forJob(detail)
 										.withIdentity("Evict Expired State Trigger", Scheduler.DEFAULT_GROUP)
-										.startAt(in5Minutes) // start in 5 minutes once everything has settled down
+										.startAt(in5Minutes) // start in 5 minutes
 										.withSchedule(CronScheduleBuilder.cronSchedule(UtilImpl.STATE_EVICT_CRON))
 										.build();
 			try {
@@ -300,6 +299,10 @@ public class QuartzJobScheduler implements JobScheduler {
 	public void scheduleJob(Bean jobSchedule, User user) {
 		String bizId = (String) BindUtil.get(jobSchedule, Bean.DOCUMENT_ID);
 		String jobName = (String) BindUtil.get(jobSchedule, "jobName");
+		if (jobName == null) {
+			throw new MetaDataException("Unnamed Job in the data store (ADM_JobSchedule) cannot be run."); 
+			
+		}
 		
 		int dotIndex = jobName.indexOf('.');
 		String moduleName = jobName.substring(0, dotIndex);

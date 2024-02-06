@@ -10,6 +10,7 @@ import javax.persistence.QueryTimeoutException;
 
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.hql.internal.ast.QuerySyntaxException;
 import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.DynamicBean;
@@ -49,40 +50,51 @@ class HibernateQueryDelegate {
 		drivingModuleName = query.getDrivingModuleName();
 		drivingDocumentName = query.getDrivingDocumentName();
 		
-
-		@SuppressWarnings("resource")
-		Query<T> result = persistence.getSession().createQuery(queryString);
-		if (firstResult >= 0) {
-			result.setFirstResult(firstResult);
+		try {
+			@SuppressWarnings("resource")
+			Query<T> result = persistence.getSession().createQuery(queryString);
+			if (firstResult >= 0) {
+				result.setFirstResult(firstResult);
+			}
+			if (maxResults > 0) {
+				result.setMaxResults(maxResults);
+			}
+			
+			timeoutQuery(result, query.getTimeoutInSeconds(), persistence.isAsyncThread());
+			
+			for (String parameterName : query.getParameterNames()) {
+				Object value = query.getParameter(parameterName);
+				if (value instanceof Collection) {
+					result.setParameterList(parameterName, (Collection<?>) value);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(parameterName, (Object[]) value);
+				}
+				else if (value instanceof Geometry) {
+					result.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
+				}
+				else {
+					result.setParameter(parameterName, value);
+				}
+			}
+			
+			return result;
 		}
-		if (maxResults > 0) {
-			result.setMaxResults(maxResults);
+		catch (QuerySyntaxException e) {
+			if (UtilImpl.DEV_MODE) {
+				String m = e.getMessage();
+				if ((m != null) && m.contains("is not mapped")) {
+					throw new DomainException("Entity is not mapped.  Is domain generation required or are there compile errors?", e);
+				}
+			}
+			throw e;
 		}
-		
-		timeoutQuery(result, query.getTimeoutInSeconds(), persistence.isAsyncThread());
-		
-		for (String parameterName : query.getParameterNames()) {
-			Object value = query.getParameter(parameterName);
-			if (value instanceof Collection) {
-				result.setParameterList(parameterName, (Collection<?>) value);
-			}
-			else if ((value != null) && value.getClass().isArray()) {
-				result.setParameterList(parameterName, (Object[]) value);
-			}
-			else if (value instanceof Geometry) {
-				result.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
-			}
-			else {
-				result.setParameter(parameterName, value);
-			}
-		}
-
-		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
 	<T> List<T> list(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
+			@SuppressWarnings("deprecation") // TODO should use javax.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
 			if ((returnAliases == null) || (returnAliases.length == 0)) {
 				throw new DomainException("There should be at least 1 projected value in the query");
@@ -144,6 +156,7 @@ class HibernateQueryDelegate {
 	@SuppressWarnings("resource")
 	<T> AutoClosingIterable<T> iterate(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
+			@SuppressWarnings("deprecation") // TODO should use javax.persistence.Tuple
 			String[] returnAliases = query.getReturnAliases();
 			if ((returnAliases == null) || (returnAliases.length == 0)) {
 				throw new DomainException("There should be at least 1 projected value in the query");

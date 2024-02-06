@@ -15,6 +15,7 @@ import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
 import org.skyve.impl.backup.ContentChecker;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -22,7 +23,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
@@ -44,7 +45,7 @@ public class ContentGarbageCollectionJob implements Job {
 		Util.LOGGER.info("Start Content Garbage Collection");
 		try {
 			ContentChecker contentChecker = new ContentChecker();
-			Repository r = CORE.getRepository();
+			ProvidedRepository r = ProvidedRepositoryFactory.get();
 			Persistence p = CORE.getPersistence();
 			try {
 				try (ContentManager cm = EXT.newContentManager()) {
@@ -89,7 +90,7 @@ public class ContentGarbageCollectionJob implements Job {
 							}
 							else if ((System.currentTimeMillis() - lastModified.getTime()) > CONTENT_GC_ELIGIBLE_AGE_MILLIS) { // of eligible age
 								Customer customer = r.getCustomer(customerName);
-								Module module = customer.getModule(moduleName);
+								Module module = r.getModule(customer, moduleName);
 								Document document = module.getDocument(customer, documentName);
 								Persistent persistent = document.getPersistent();
 								if (persistent == null) { // was persistent with content but now transient

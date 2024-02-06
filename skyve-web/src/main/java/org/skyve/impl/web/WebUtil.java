@@ -62,8 +62,11 @@ public class WebUtil {
 		// then the session user needs to be reset.
 		if ((user != null) && (userPrincipal != null)) {
 			UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-			if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
-					user.getName().equals(principalUser.getName()))) {
+			if (principalUser == null) {
+				user = null;
+			}
+			else if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
+							user.getName().equals(principalUser.getName()))) {
 				user = null;
 			}
 		}
@@ -92,7 +95,7 @@ public class WebUtil {
 					// credentials = username:password or customer/username:password
 					final String[] values = credentials.split(":", 2);
 					final String username = UtilImpl.processStringValue(values[0]);
-					final String password = UtilImpl.processStringValue(values[1]);
+//					final String password = UtilImpl.processStringValue(values[1]);
 					// TODO check password...
 					user = ProvidedRepositoryFactory.get().retrieveUser(username);
 					AbstractPersistence.get().setUser(user);
@@ -301,8 +304,14 @@ public class WebUtil {
 				Document d = m.getDocument(c, AppConstants.CONFIGURATION_DOCUMENT_NAME);
 				Bean configuration = d.newInstance(u);
 				String subject = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME);
+				if (subject == null) { // should never happen
+					throw new IllegalStateException(AppConstants.ADMIN_MODULE_NAME + '.' + AppConstants.CONFIGURATION_DOCUMENT_NAME + '.' + AppConstants.PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME + " is null.");
+				}
 				subject = Binder.formatMessage(subject, firstUser);
 				String body = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME); 
+				if (body == null) { // should never happen
+					throw new IllegalStateException(AppConstants.ADMIN_MODULE_NAME + '.' + AppConstants.CONFIGURATION_DOCUMENT_NAME + '.' + AppConstants.PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME + " is null.");
+				}
 				
 				body = body.replace("{#resetPasswordUrl}", Util.getResetPasswordUrl());
 				// keeping this for backwards compatibility

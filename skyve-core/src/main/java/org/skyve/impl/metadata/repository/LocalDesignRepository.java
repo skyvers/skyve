@@ -1,11 +1,13 @@
 package org.skyve.impl.metadata.repository;
 
-import java.beans.Introspector;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.formatters.Formatter;
@@ -40,6 +42,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
@@ -73,11 +76,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 		super();
 	}
 
-	public LocalDesignRepository(String absolutePath) {
+	public LocalDesignRepository(@Nonnull String absolutePath) {
 		super(absolutePath);
 	}
 
-	public LocalDesignRepository(String absolutePath, boolean loadClasses) {
+	public LocalDesignRepository(@Nonnull String absolutePath, boolean loadClasses) {
 		super(absolutePath, loadClasses);
 	}
 
@@ -131,7 +134,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
-	private static void removeInaccessibleItems(String moduleName, Menu menu, User user) {
+	private static void removeInaccessibleItems(@Nonnull String moduleName, @Nonnull Menu menu, @Nonnull User user) {
 		// Check all the child items to see if we have access
 		Iterator<MenuItem> i = menu.getItems().iterator();
 		while (i.hasNext()) {
@@ -393,7 +396,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
-	private void checkMenu(List<MenuItem> items, Customer customer, Module module) {
+	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup) {
 				checkMenu(((MenuGroup) item).getItems(), customer, module);
@@ -511,7 +514,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 		}
 	}
-	
+
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
@@ -519,17 +522,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// Check conditions
 		for (String conditionName : document.getConditionNames()) {
-			// Check that conditions do not start with is or not and are a valid java bean property
-			if (conditionName.startsWith("is")) {
-				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'is' - the 'is' prefix is generated in the bean method.");
-			}
-			else if (conditionName.startsWith("not")) {
-				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'not' - not conditions are automatically generated.  Switch the sense of the condition.");
-			}
-			if (! conditionName.equals(Introspector.decapitalize(conditionName))) {
-				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " is not a valid property name - should be camel capitalized unless it's an initialism/acronym.");
-			}
-
 			// Check expression conditions
 			Condition condition = document.getCondition(conditionName);
 			String expression = condition.getExpression();
@@ -582,11 +574,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 			// TODO for all composition collections (ie reference a document that has a parentDocument = to this one) - no queryName is defined on the collection.
 			// TODO for all aggregation collections (ie reference a document that has does not have a parentDocument = to this one {or parentDocument is not defined}) - a queryName must be defined on the collection.
 
-			String name = attribute.getName();
-			if (! name.equals(Introspector.decapitalize(name))) {
-				throw new MetaDataException("Attribute " + name + " in document " + documentIdentifier + " is not a valid property name - should be camel capitalized unless it's an initialism/acronym.");
-			}
-			
 			if (attribute instanceof Field) {
 				// Check the default value expressions, if defined
 				String defaultValue = ((Field) attribute).getDefaultValue();
@@ -660,6 +647,27 @@ public class LocalDesignRepository extends FileSystemRepository {
 														reference.getName() + " in document " + 
 														documentIdentifier + " references a document query for document " + 
 														queryDocumentName + ", not document " + targetDocumentName);
+					}
+				}
+				
+				// Check collection order by bindings are valid
+				if (reference instanceof Collection) {
+					Module targetModule = getModule(customer, targetDocument.getOwningModuleName());
+					Collection collection = (Collection) reference;
+					for (Ordering ordering : collection.getOrdering()) {
+						String by = ordering.getBy();
+						TargetMetaData target = null; 
+						try {
+							target = BindUtil.validateBinding(customer, targetModule, targetDocument, by);
+						}
+						catch (MetaDataException e) {
+							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
+															" in document " +  documentIdentifier + " is invalid", e);
+						}
+						if (! BindUtil.isAScalarType(target.getType())) {
+							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
+															" in document " +  documentIdentifier + " is not scalar.");
+						}
 					}
 				}
 				
@@ -770,7 +778,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 */
 				}
 				else if (access.isPreviousComplete()) {
-					final Module module = customer.getModule(document.getOwningModuleName());
+					final Module module = getModule(customer, document.getOwningModuleName());
 					final String binding = access.getComponent();
 					try {
 						BindUtil.getMetaDataForBinding(customer, module, document, binding);

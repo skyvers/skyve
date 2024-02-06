@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
@@ -32,25 +34,25 @@ import org.skyve.metadata.view.model.map.MapModel;
 public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegate {
 	protected List<ProvidedRepository> delegates;
 	
-	public DelegatingProvidedRepositoryChain(ProvidedRepository... delegates) {
+	public DelegatingProvidedRepositoryChain(@Nonnull ProvidedRepository... delegates) {
 		this.delegates = new ArrayList<>(delegates.length);
 		for (ProvidedRepository delegate : delegates) {
 			addDelegate(delegate);
 		}
 	}
 
-	public synchronized void addDelegate(ProvidedRepository delegate) {
+	public synchronized void addDelegate(@Nonnull ProvidedRepository delegate) {
 		if (delegates.add(delegate)) {
 			delegate.setDelegator(this);
 		}
 	}
 
-	public synchronized void addDelegate(int index, ProvidedRepository delegate) {
+	public synchronized void addDelegate(int index, @Nonnull ProvidedRepository delegate) {
 		delegates.add(index, delegate);
 		delegate.setDelegator(this);
 	}
 
-	public synchronized void removeDelegate(ProvidedRepository delegate) {
+	public synchronized void removeDelegate(@Nonnull ProvidedRepository delegate) {
 		if (delegates.remove(delegate)) {
 			delegate.setDelegator(null);
 		}

@@ -65,6 +65,9 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				bean = (T) webContext.getCurrentBean();
 
 				Bean current = (viewBinding == null) ? bean : (T) BindUtil.get(bean, facesView.getViewBinding());
+				if (current == null) { // should never happen
+					throw new IllegalStateException("current is null");
+				}
 				
 				final String bizModule = current.getBizModule();
 				final String bizDocument = current.getBizDocument();

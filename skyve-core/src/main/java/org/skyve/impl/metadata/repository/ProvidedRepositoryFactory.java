@@ -2,6 +2,9 @@ package org.skyve.impl.metadata.repository;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -26,7 +29,7 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 		return result;
 	}
 
-	public static void set(ProvidedRepository repository) {
+	public static void set(@Nonnull ProvidedRepository repository) {
 		ProvidedRepositoryFactory.repository = repository;
 	}
 
@@ -41,7 +44,7 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	/**
 	 * Return a UserImpl with the customerName and name properties set from the user principal given.
 	 */
-	public static UserImpl setCustomerAndUserFromPrincipal(String userPrincipal) {
+	public static @Nullable UserImpl setCustomerAndUserFromPrincipal(@Nullable String userPrincipal) {
 		UserImpl result = null;
 		if (userPrincipal != null) {
 			result = new UserImpl();

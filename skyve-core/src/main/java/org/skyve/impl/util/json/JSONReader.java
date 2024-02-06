@@ -225,6 +225,9 @@ public class JSONReader {
 					}
 					else if (value instanceof List) {
 						List<Object> children = (List<Object>) BindUtil.get(result, propertyName);
+						if (children == null) { // should never be
+							throw new IllegalStateException(propertyName + " list in " + result + " is null - can't add " + value);
+						}
 						children.addAll((List<Object>) value);
 					}
 					else if (PersistentBean.LOCK_NAME.equals(propertyName)) {
@@ -327,11 +330,17 @@ public class JSONReader {
 					Object value = read();
 					if (value instanceof Collection) {
 						Collection<Object> values = (Collection<Object>) BindUtil.get(result, propertyName);
+						if (values == null) { // should never be
+							throw new IllegalStateException(propertyName + " list in " + result + " is null - can't add " + value);
+						}
 						values.clear();
 						values.addAll((Collection<Object>) value);
 					}
 					else if (value instanceof Map) {
 						Map<Object, Object> values = (Map<Object, Object>) BindUtil.get(result, propertyName);
+						if (values == null) { // should never be
+							throw new IllegalStateException(propertyName + " map in " + result + " is null - can't put " + value);
+						}
 						values.clear();
 						values.putAll((Map<Object, Object>) value);
 					}

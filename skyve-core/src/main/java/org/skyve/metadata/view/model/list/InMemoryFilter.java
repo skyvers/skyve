@@ -617,8 +617,11 @@ public class InMemoryFilter implements Filter {
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
+				if (beanValue == null) {
+					return false;
+				}
 				beanValue = beanValue.toUpperCase();
-				return ((beanValue != null) && (start.toUpperCase().compareTo(beanValue) <= 0) && (end.toUpperCase().compareTo(beanValue) >= 0));
+				return (start.toUpperCase().compareTo(beanValue) <= 0) && (end.toUpperCase().compareTo(beanValue) >= 0);
 			}
 		});
 	}

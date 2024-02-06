@@ -10,6 +10,7 @@ import static org.junit.Assume.assumeTrue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -235,7 +236,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 			TestUtil.updateAttribute(module, document, result, attributeToUpdate);
 			
-			if (Binder.get(result, attributeToUpdate.getName()).equals(originalValue)) {
+			if (Objects.equals(Binder.get(result, attributeToUpdate.getName()), originalValue)) {
 				// skip this test if we couldn't generate a new value to save
 				Util.LOGGER.warning(String.format("Skipping testUpdate() for attribute %s, original and updated values were the same", attributeToUpdate.getName()));
 				return;

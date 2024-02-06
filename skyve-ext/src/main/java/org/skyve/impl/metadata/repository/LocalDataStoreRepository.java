@@ -41,11 +41,12 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 		}
 
 		UserImpl result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-
-		resetUserPermissions(result);
-		
-		if (result.getLanguageTag() == null) {
-			result.setLanguageTag(result.getCustomer().getLanguageTag());
+		if (result != null) {
+			resetUserPermissions(result);
+			
+			if (result.getLanguageTag() == null) {
+				result.setLanguageTag(result.getCustomer().getLanguageTag());
+			}
 		}
 		
 		return result;

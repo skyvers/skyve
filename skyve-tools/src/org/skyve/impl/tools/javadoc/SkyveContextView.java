@@ -1,6 +1,6 @@
 package org.skyve.impl.tools.javadoc;
 
-import java.io.IOException;
+//import java.io.IOException;
 
 //import org.umlgraph.doclet.AccessibleOptions;
 //import org.umlgraph.doclet.ContextView;

@@ -104,6 +104,10 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 						try {
 							target = Binder.getMetaDataForBinding(c, am, ad, binding);
 							Reference reference = (Reference) target.getAttribute();
+							if (reference == null) {
+								throw new MetaDataException("Can't create a new Audit node as binding " + binding + 
+																" does not point to a reference.");
+							}
 							Module targetModule = c.getModule(target.getDocument().getOwningModuleName());
 							Document referenceDocument = (am == null) ? null : targetModule.getDocument(c, reference.getDocumentName());
 							bindingToNodes.put(binding, createNode(c, reference, referenceDocument, compareValues, true));

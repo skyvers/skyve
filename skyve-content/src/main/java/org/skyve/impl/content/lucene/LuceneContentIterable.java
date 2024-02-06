@@ -48,7 +48,7 @@ public class LuceneContentIterable implements ContentIterable {
 			if ((scoreDocs != null) && (scoreDocs.length > index)) {
 				int doc = scoreDocs[index++].doc;
 				try {
-					Document document = reader.document(doc);
+					Document document = reader.storedFields().document(doc);
 					SearchResult result = new SearchResult();
 					result.setAttributeName(document.get(AbstractContentManager.ATTRIBUTE_NAME));
 					result.setBizDataGroupId(document.get(Bean.DATA_GROUP_ID));

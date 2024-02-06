@@ -91,10 +91,10 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					
 					// NB This can be a compound binding but will be reduced to the last component attribute name below
 					String attributeName = UtilImpl.processStringValue(request.getParameter("_attr"));
+					attributeName = BindUtil.unsanitiseBinding(attributeName);
 					if (attributeName == null) {
 						throw new ServletException("Mal-formed URL");
 					}
-					attributeName = BindUtil.unsanitiseBinding(attributeName);
 					final String binding = attributeName;
 					
 					String webId = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME));
@@ -115,6 +115,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 				    	if (formBinding != null) {
 				    		formBinding = BindUtil.unsanitiseBinding(formBinding);
 				    		bean = (Bean) BindUtil.get(bean, formBinding);
+				    	}
+				    	if (bean == null) { // should never happen
+				    		throw new ServletException("Bean is null");
 				    	}
 				    	formModuleName = bean.getBizModule();
 				    	formDocumentName = bean.getBizDocument();

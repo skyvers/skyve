@@ -176,7 +176,8 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		else {
 			summaryBean = summaryQuery.projectedResult();
 		}
-		result.setTotalRows(((Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID)).longValue());
+		Number totalRows = (Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID);
+		result.setTotalRows((totalRows == null) ? 0L : totalRows.longValue());
 		result.setRows(rows);
 		result.setSummary(summaryBean);
 		

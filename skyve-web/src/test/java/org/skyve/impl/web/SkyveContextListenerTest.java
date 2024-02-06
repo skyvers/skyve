@@ -1,13 +1,12 @@
 package org.skyve.impl.web;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.skyve.impl.util.UtilImpl;
 
 public class SkyveContextListenerTest {
-
 	@Test
 	@SuppressWarnings("static-method")
 	public void testCleanupContentDirectoryHandlesEmptyStrings() throws Exception {

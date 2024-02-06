@@ -426,30 +426,32 @@ public class ValidationUtil {
 
 						@SuppressWarnings("unchecked")
 						List<Bean> elements = (List<Bean>) BindUtil.get(bean, referenceName);
-						for (int i = 0, l = elements.size(); i < l; i++) {
-							Bean element = elements.get(i);
-							StringBuilder sb = new StringBuilder(128);
-
-							for (String fieldName : constraint.getFieldNames()) {
-								sb.append(BindUtil.getDisplay(customer, element, fieldName)).append(';');
-							}
-
-							if (! uniqueValues.add(sb.toString())) { // already exists
-								String message = null;
-								try {
-									message = BindUtil.formatMessage(constraint.getMessage(), element);
+						if (elements != null) { // should always be
+							for (int i = 0, l = elements.size(); i < l; i++) {
+								Bean element = elements.get(i);
+								StringBuilder sb = new StringBuilder(128);
+	
+								for (String fieldName : constraint.getFieldNames()) {
+									sb.append(BindUtil.getDisplay(customer, element, fieldName)).append(';');
 								}
-								catch (Exception ex) {
-									ex.printStackTrace();
-									message = "Unique Constraint Violation occurred on collection " + referenceName +
-												" but could not display the unique constraint message for constraint " +
-												constraint.getName();
+	
+								if (! uniqueValues.add(sb.toString())) { // already exists
+									String message = null;
+									try {
+										message = BindUtil.formatMessage(constraint.getMessage(), element);
+									}
+									catch (Exception ex) {
+										ex.printStackTrace();
+										message = "Unique Constraint Violation occurred on collection " + referenceName +
+													" but could not display the unique constraint message for constraint " +
+													constraint.getName();
+									}
+	
+									throw new UniqueConstraintViolationException(document,
+																					constraint.getName(),
+																					referenceName + '[' + i + ']',
+																					message);
 								}
-
-								throw new UniqueConstraintViolationException(document,
-																				constraint.getName(),
-																				referenceName + '[' + i + ']',
-																				message);
 							}
 						}
 					}

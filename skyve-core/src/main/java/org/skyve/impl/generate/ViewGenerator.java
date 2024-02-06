@@ -485,6 +485,10 @@ public class ViewGenerator {
 			for (String propertyName : propertyNames) {
 				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, propertyName);
 				Attribute attribute = target.getAttribute();
+				// Should never happen as property names comes straight from the bound Document.
+				if (attribute == null) {
+					throw new MetaDataException(propertyName + " is not an attribute on document " + document.getName());
+				}
 				DataGridBoundColumn column = new DataGridBoundColumn();
 
 				DomainType domainType = attribute.getDomainType();
@@ -615,6 +619,9 @@ public class ViewGenerator {
 
 		// If the module and/or document was not specified, we will just generate all edit views.
 		if ((moduleName == null) || (documentName == null)) {
+			if (customer == null) {
+				throw new MetaDataException("Customer " + customerName + " does not exist.");
+			}
 			for (Module module : customer.getModules()) {
 				for (Map.Entry<String, Module.DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 					Module.DocumentRef documentRef = entry.getValue();

@@ -101,13 +101,15 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 		Relation relation = (Relation) target.getAttribute();
-		Document gridDocument = module.getDocument(customer, relation.getDocumentName());
-		Module gridModule = customer.getModule(gridDocument.getOwningModuleName());
-		GenerateViewVisitor gridVisitor = new GenerateViewVisitor(customer, gridModule, gridDocument, currentUxUi, breadcrumbs);
-		gridVisitor.visit();
-		populateSteps.addAll(gridVisitor.populateSteps);
+		if (relation != null) { // should always be
+			Document gridDocument = module.getDocument(customer, relation.getDocumentName());
+			Module gridModule = customer.getModule(gridDocument.getOwningModuleName());
+			GenerateViewVisitor gridVisitor = new GenerateViewVisitor(customer, gridModule, gridDocument, currentUxUi, breadcrumbs);
+			gridVisitor.visit();
+			populateSteps.addAll(gridVisitor.populateSteps);
 
-		populateSteps.add(new ZoomOut());
+			populateSteps.add(new ZoomOut());
+		}
 	}
 	
 	@Override

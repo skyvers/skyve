@@ -39,6 +39,8 @@ public class ReportParameterBizlet extends Bizlet<ReportParameterExtension> {
 						e.getMessages()
 								.add(new Message(ReportParameter.textTestValuePropertyName, "Test value is required."));
 						break;
+					default:
+						e.getMessages().add(new Message("Test value is required."));
 				}
 			}
 		}

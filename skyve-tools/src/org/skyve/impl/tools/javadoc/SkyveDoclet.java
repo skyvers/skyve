@@ -1,22 +1,22 @@
 package org.skyve.impl.tools.javadoc;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
+//import java.io.BufferedReader;
+//import java.io.BufferedWriter;
+//import java.io.File;
+//import java.io.FileInputStream;
+//import java.io.FileOutputStream;
+//import java.io.FileReader;
+//import java.io.IOException;
+//import java.io.InputStreamReader;
+//import java.io.OutputStreamWriter;
+//import java.util.Comparator;
+//import java.util.HashSet;
+//import java.util.Set;
+//import java.util.TreeSet;
+//import java.util.regex.Pattern;
 
 //import com.sun.javadoc.RootDoc;
-import org.umlgraph.doclet.AccessibleOptions;
+//import org.umlgraph.doclet.AccessibleOptions;
 //import org.umlgraph.doclet.ContextView;
 //import org.umlgraph.doclet.OptionProvider;
 //import org.umlgraph.doclet.Options;
@@ -29,7 +29,7 @@ import org.umlgraph.doclet.AccessibleOptions;
 //import com.sun.javadoc.PackageDoc;
 //import com.sun.javadoc.RootDoc;
 //DC import com.sun.tools.doclets.standard.Standard;
-import jdk.javadoc.doclet.*;
+//import jdk.javadoc.doclet.*;
 
 
 /**
@@ -41,6 +41,7 @@ public class SkyveDoclet {
 	 * Option check, forwards options to the standard doclet, if that one
 	 * refuses them, they are sent to UmlGraph
 	 */
+	@SuppressWarnings("unused")
 	public static int optionLength(String option) {
 //		int result = Standard.optionLength(option);
 //		if (result != 0) {
@@ -213,26 +214,26 @@ public class SkyveDoclet {
 //	}
 
 	// Format string for the uml image div tag.
-	private static final String UML_DIV_TAG = "<div align=\"center\">"
-			+ "<img src=\"%1$s.png\" alt=\"Package class diagram package %1$s\" usemap=\"#G\" border=0/>"
-			+ "</div>";
+//	private static final String UML_DIV_TAG = "<div align=\"center\">"
+//			+ "<img src=\"%1$s.png\" alt=\"Package class diagram package %1$s\" usemap=\"#G\" border=0/>"
+//			+ "</div>";
 
 	// Format string for the java script tag.
-	private static final String EXPANDABLE_UML = "<script type=\"text/javascript\">\n"
-			+ "function show() {\n"
-			+ "    document.getElementById(\"uml\").innerHTML = \n"
-			+ "        \'<a style=\"font-family:monospace\" href=\"javascript:hide()\">%3$s</a>\' +\n"
-			+ "        \'%1$s\';\n"
-			+ "}\n"
-			+ "function hide() {\n"
-			+ "	document.getElementById(\"uml\").innerHTML = \n"
-			+ "	\'<a style=\"font-family:monospace\" href=\"javascript:show()\">%2$s</a>\' ;\n"
-			+ "}\n"
-			+ "</script>\n"
-			+ "<div id=\"uml\" >\n"
-			+ "	<a href=\"javascript:show()\">\n"
-			+ "	<a style=\"font-family:monospace\" href=\"javascript:show()\">%2$s</a> \n"
-			+ "</div>";
+//	private static final String EXPANDABLE_UML = "<script type=\"text/javascript\">\n"
+//			+ "function show() {\n"
+//			+ "    document.getElementById(\"uml\").innerHTML = \n"
+//			+ "        \'<a style=\"font-family:monospace\" href=\"javascript:hide()\">%3$s</a>\' +\n"
+//			+ "        \'%1$s\';\n"
+//			+ "}\n"
+//			+ "function hide() {\n"
+//			+ "	document.getElementById(\"uml\").innerHTML = \n"
+//			+ "	\'<a style=\"font-family:monospace\" href=\"javascript:show()\">%2$s</a>\' ;\n"
+//			+ "}\n"
+//			+ "</script>\n"
+//			+ "<div id=\"uml\" >\n"
+//			+ "	<a href=\"javascript:show()\">\n"
+//			+ "	<a style=\"font-family:monospace\" href=\"javascript:show()\">%2$s</a> \n"
+//			+ "</div>";
 
 	/**
 	 * Takes an HTML file, looks for the first instance of the specified
@@ -303,25 +304,25 @@ public class SkyveDoclet {
 	 * 
 	 * @throws IOException
 	 */
-	private static void insertClientSideMap(File mapFile, BufferedWriter writer)
-	throws IOException {
-		try (BufferedReader reader = new BufferedReader(new FileReader(mapFile))) {
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				writer.write(line);
-				writer.newLine();
-			}
-		}
-	}
+//	private static void insertClientSideMap(File mapFile, BufferedWriter writer)
+//	throws IOException {
+//		try (BufferedReader reader = new BufferedReader(new FileReader(mapFile))) {
+//			String line = null;
+//			while ((line = reader.readLine()) != null) {
+//				writer.write(line);
+//				writer.newLine();
+//			}
+//		}
+//	}
 
 	/**
 	 * Returns the output path specified on the javadoc options
 	 */
-	private static String findOutputPath(String[][] options) {
-		for (int i = 0; i < options.length; i++) {
-			if (options[i][0].equals("-d"))
-				return options[i][1];
-		}
-		return ".";
-	}
+//	private static String findOutputPath(String[][] options) {
+//		for (int i = 0; i < options.length; i++) {
+//			if (options[i][0].equals("-d"))
+//				return options[i][1];
+//		}
+//		return ".";
+//	}
 }

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -467,6 +468,15 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 							documentQueryImpl.getColumns().add(column);
 						}
 					}
+				}
+			}
+			
+			// Check default query names exist as queries
+			for (Entry<String, DocumentRef> ref : result.getDocumentRefs().entrySet()) {
+				String defaultQueryName = ref.getValue().getDefaultQueryName();
+				if ((defaultQueryName != null) && (! queryNames.contains(defaultQueryName))) {
+					throw new MetaDataException(metaDataName + " : The default query of " + defaultQueryName + 
+													" does not exist for document " + ref.getKey());
 				}
 			}
 		}

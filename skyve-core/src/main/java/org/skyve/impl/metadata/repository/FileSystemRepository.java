@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SkyveException;
@@ -56,7 +59,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * Absolute path constructor
 	 * Prevent external instantiation.
 	 */
-	protected FileSystemRepository(String absolutePath) {
+	protected FileSystemRepository(@Nonnull String absolutePath) {
 		this.absolutePath = absolutePath.replace('\\', '/');
 		if (this.absolutePath.charAt(this.absolutePath.length() - 1) != '/') {
 			this.absolutePath += '/';
@@ -76,7 +79,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * Absolute path and load classes constructor
 	 * Prevent external instantiation.
 	 */
-	protected FileSystemRepository(String absolutePath, boolean loadClasses) {
+	protected FileSystemRepository(@Nonnull String absolutePath, boolean loadClasses) {
 		this(absolutePath);
 		this.loadClasses = loadClasses;
 	}
@@ -128,7 +131,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 	}
 
-	private void populateModuleLocation(String customerName, String moduleName) {
+	private void populateModuleLocation(@Nullable String customerName, @Nonnull String moduleName) {
 		StringBuilder sb = new StringBuilder(256);
 		if (customerName == null) {
 			String key = MODULES_NAMESPACE + moduleName;
@@ -154,7 +157,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 	}
 
-	private void populateDocumentLocations(String key) {
+	private void populateDocumentLocations(@Nonnull String key) {
 		StringBuilder sb = new StringBuilder(256);
 
 		File moduleDirectory = new File(absolutePath + key);
@@ -356,7 +359,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
  		return routersFileInfo.values().stream().max(Comparator.naturalOrder()).get().longValue();
 	}
 	
-	private Map<String, Long> routersFileInfo(boolean includeGlobal, boolean includeModule) {
+	private @Nonnull Map<String, Long> routersFileInfo(boolean includeGlobal, boolean includeModule) {
 		Map<String, Long> result = new LinkedHashMap<>(); // keep the global one first
 		StringBuilder sb = new StringBuilder(256);
 		String s = null;
@@ -377,6 +380,9 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			// Add customer overrides
 			for (String customerName : getAllCustomerNames()) {
 				final Customer customer = getCustomer(customerName);
+				if (customer == null) {
+					throw new MetaDataException("Customer " + customerName + " does not exist.");
+				}
 				for (Module module : customer.getModules()) {
 					sb.append(absolutePath);
 					sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
@@ -470,7 +476,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
-	private String customerPath(String customerName) {
+	private @Nonnull String customerPath(@Nonnull String customerName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		result.append(CUSTOMERS_NAMESPACE);
@@ -510,7 +516,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 	
-	private String modulePath(String customerName, String moduleName) {
+	private @Nonnull String modulePath(@Nullable String customerName, @Nonnull String moduleName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -553,7 +559,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 	
-	private String documentPath(String customerName, String moduleName, String documentName) {
+	private @Nonnull String documentPath(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -597,7 +603,11 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 
-	private String viewPath(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+	private @Nonnull String viewPath(@Nullable String customerName,
+										@Nonnull String moduleName,
+										@Nonnull String documentName,
+										@Nullable String uxui,
+										@Nonnull String viewName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -645,7 +655,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 	
-	private String actionPath(String customerName, String moduleName, String documentName, String actionName) {
+	private @Nonnull String actionPath(@Nullable String customerName,
+										@Nonnull String moduleName,
+										@Nonnull String documentName,
+										@Nonnull String actionName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -711,7 +724,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), false, runtime);
 	}
 
-	private String bizletPath(String customerName, String moduleName, String documentName) {
+	private @Nonnull String bizletPath(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -773,7 +786,8 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
-	protected <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
+	protected @Nonnull <T extends MetaData> T getModel(@Nullable Customer customer, @Nonnull Document document,
+			@Nonnull String modelName, boolean runtime) {
 		// If dynamic, use the models map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -819,7 +833,11 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getModel(customer, document, modelName, runtime);
 	}
 
-	protected <T extends MetaData> T getClassAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
+	protected @Nullable <T extends MetaData> T getClassAction(@Nullable Customer customer,
+																@Nonnull Document document,
+																@Nonnull String actionName,
+																boolean assertExistence,
+																boolean runtime) {
 		// If dynamic, use the actions map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -952,7 +970,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	public Class<?> getJavaClass(Customer customer, String key) {
 		Class<?> result = null;
 		
-		String newKey = vtable(customer.getName(), key);
+		String newKey = vtable((customer == null) ? null : customer.getName(), key);
 		if (newKey != null) {
 			result = classes.computeIfAbsent(newKey, k -> {
 				String className = k.replace('/', '.');
@@ -991,10 +1009,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends MetaData> T getJavaMetaData(Customer customer, 
-															String key,
-															boolean assertExistence,
-															boolean runtime) {
+	public final @Nullable <T extends MetaData> T getJavaMetaData(@Nullable Customer customer,
+																	@Nonnull String key,
+																	boolean assertExistence,
+																	boolean runtime) {
 		T result = null;
 		
 		Class<?> type = getJavaClass(customer, key);
@@ -1027,27 +1045,29 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		path.append(document.getName()).append('/');
 		path.append(REPORTS_NAMESPACE).append(reportName);
 		String key = path.toString() + JASPER_SUFFIX;
-		String result = vtable(customer.getName(), key);
+		String customerName = (customer == null) ? null : customer.getName();
+		String result = vtable(customerName, key);
 		if (result == null) {
 			key = path.toString() + FREEMARKER_SUFFIX;
-			result = vtable(customer.getName(), key);
-			if (result == null) {
-				throw new IllegalArgumentException("Report " + reportName + " for document " + 
-													document.getOwningModuleName() + '.' + document.getName() + " is not defined.");
+			result = vtable(customerName, key);
+			if (result != null) {
+				path.setLength(0);
+				path.append(absolutePath).append(result);
+				path.setLength(path.length() - FREEMARKER_SUFFIX.length()); // remove the suffix
+				path.append(".flth");
+				return path.toString();
 			}
-			path.setLength(0);
-			path.append(absolutePath).append(result);
-			path.setLength(path.length() - FREEMARKER_SUFFIX.length()); // remove the suffix
-			path.append(".flth");
 		}
 		else {
 			path.setLength(0);
 			path.append(absolutePath).append(result);
 			path.setLength(path.length() - JASPER_SUFFIX.length()); // remove the suffix
 			path.append(".jasper");
+			return path.toString();
 		}
 
-		return path.toString();
+		// not found
+		return null;
 	}
 
 	/**
@@ -1120,7 +1140,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	// Ensure that the file path asks for doesn't break out of the project / web root directory
-	private File protect(File file) {
+	private @Nonnull File protect(@Nonnull File file) {
 		// resolve ../ and symbolic links with canonical path
 		String pathToTest = null;
 		try {
