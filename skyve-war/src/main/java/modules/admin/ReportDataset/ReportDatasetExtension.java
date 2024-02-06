@@ -1,6 +1,7 @@
 package modules.admin.ReportDataset;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.ReportParameter.Type;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.DateTime;
 import org.skyve.impl.report.freemarker.BeanReportDataset;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.SQL;
@@ -44,10 +44,9 @@ public class ReportDatasetExtension extends ReportDataset {
 	 */
 	private static final String NAMED_PARAMETER_PATTERN = ":([\\p{L}|_]+)";
 
-	static final String PARAMETER_PREFIX = ":";
-	static final String DATE_PARAMETER_STRING_FORMAT = "d_%s_%d";
-	static final SimpleDateFormat DATE_PARAMETER_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm");
-	static final SimpleDateFormat SQL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	private static final String PARAMETER_PREFIX = ":";
+	private static final String DATE_PARAMETER_STRING_FORMAT = "d_%s_%d";
+	private static final DateTimeFormatter DATE_PARAMETER_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
 
 	/**
 	 * If this is a SQL or BizQL dataset, parse the query and check for any named parameters.
@@ -391,12 +390,11 @@ public class ReportDatasetExtension extends ReportDataset {
 						}
 					}
 
-					// String dateString = String.format("'%s'", SQL_DATE_FORMAT.format(replacementDate));
-					String dateParameterName = String.format(DATE_PARAMETER_STRING_FORMAT,
-							DATE_PARAMETER_DATE_FORMAT.format(new DateTime()), Integer.valueOf(dateCount));
-
 					// check it hasn't already been replaced
 					if (query.contains(dateExpression)) {
+						String dateParameterName = String.format(DATE_PARAMETER_STRING_FORMAT,
+								DATE_PARAMETER_DATE_FORMAT.format(LocalDateTime.now()), Integer.valueOf(dateCount));
+
 						// update the original query string to use the new date parameter name
 						query = query.replace(dateExpression, PARAMETER_PREFIX + dateParameterName);
 						LOGGER.info(String.format("Replaced %s with %s.", dateExpression, replacementDate));
