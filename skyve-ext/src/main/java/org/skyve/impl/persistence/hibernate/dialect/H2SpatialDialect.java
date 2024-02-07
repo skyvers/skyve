@@ -15,14 +15,6 @@ public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 
 	private JTSGeometryType geometryType = new JTSGeometryType(GeoDBGeometryTypeDescriptor.INSTANCE);
 	private UniqueDelegate uniqueDelegate = new H2NoOpUniqueDelegate(this);
-
-	/**
-	 * Set the H2 Geometry SQL type to BLOB.
-	 * It is set to GEOMETRY in the GeoDBDialect but this doesn't allow insert of JTS types.
-	 */
-	public H2SpatialDialect() {
-		registerColumnType(GeoDBGeometryTypeDescriptor.INSTANCE.getSqlType(), "BLOB");
-	}
 	
 	@Override
 	public int getGeometrySqlType() {

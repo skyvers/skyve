@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,6 +13,8 @@ import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.Namespace;
+import org.hibernate.boot.model.relational.SqlStringGenerationContext;
+import org.hibernate.boot.model.relational.internal.SqlStringGenerationContextImpl;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.mapping.Column;
@@ -23,11 +26,10 @@ import org.hibernate.tool.schema.extract.spi.DatabaseInformation;
 import org.hibernate.tool.schema.extract.spi.TableInformation;
 import org.hibernate.tool.schema.internal.Helper;
 import org.hibernate.tool.schema.internal.exec.JdbcContext;
+import org.hibernate.tool.schema.spi.SchemaManagementTool;
 import org.skyve.EXT;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
-
-import geodb.GeoDB;
 
 public class DDLDelegate {
 	public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
@@ -36,11 +38,6 @@ public class DDLDelegate {
 		
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(true);
-
-			// Ensure that a H2 database is spatially enabled
-			if (execute && (skyveDialect instanceof H2SpatialDialect)) {
-				GeoDB.InitGeoDB(connection);
-			}
 
 			final DdlTransactionIsolator ddlTransactionIsolator = new DdlTransactionIsolator() {
 				@Override
@@ -63,11 +60,16 @@ public class DDLDelegate {
 					return connection;
 				}
 			};
-		
-			final DatabaseInformation databaseInformation = Helper.buildDatabaseInformation(
-																		standardRegistry,
-																		ddlTransactionIsolator,
-																		metadata.getDatabase().getDefaultNamespace().getName());
+
+			SqlStringGenerationContext sqlStringGenerationContext = SqlStringGenerationContextImpl.fromConfigurationMap(
+																			standardRegistry.getService(JdbcEnvironment.class),
+																			metadata.getDatabase(),
+																			Collections.emptyMap());
+			final SchemaManagementTool tool = standardRegistry.getService(SchemaManagementTool.class);
+			final DatabaseInformation databaseInformation = Helper.buildDatabaseInformation(standardRegistry,
+																								ddlTransactionIsolator,
+																								sqlStringGenerationContext,
+																								tool);
 			try (Statement statement = connection.createStatement()) {
 				final Database database = metadata.getDatabase();
 				for (Namespace namespace : database.getNamespaces()) {
@@ -75,7 +77,11 @@ public class DDLDelegate {
 						if (table.isPhysicalTable()) {
 							final TableInformation tableInformation = databaseInformation.getTableInformation(table.getQualifiedTableName());
 							if (tableInformation != null && tableInformation.isPhysicalTable()) {
-								for (String ddl : sqlAlterTableDDL(skyveDialect, table, tableInformation, metadata)) {
+								for (String ddl : sqlAlterTableDDL(skyveDialect,
+																	table, 
+																	tableInformation, 
+																	sqlStringGenerationContext,
+																	metadata)) {
 	                        		result.add(ddl);
 	                        		if (execute) {
 		                        		UtilImpl.LOGGER.info(ddl);
@@ -105,15 +111,13 @@ public class DDLDelegate {
 	// from org.hibernate.mapping.Table
 	private static Iterable<String> sqlAlterTableDDL(SkyveDialect skyveDialect, 
 														Table table, 
-														TableInformation tableInfo, 
+														TableInformation tableInfo,
+														SqlStringGenerationContext sqlStringGenerationContext,
 														Metadata metadata) {
 		List<String> result = new ArrayList<>();
 		
 		final Dialect dialect = (Dialect) skyveDialect;
-		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
-
-		final String tableName = jdbcEnvironment.getQualifiedObjectNameFormatter().format(
-																	tableInfo.getName(), dialect);
+		final String tableName = sqlStringGenerationContext.format(tableInfo.getName());
 
 		StringBuilder root = new StringBuilder(dialect.getAlterTableString(tableName));
 		root.append(' ').append(skyveDialect.getModifyColumnString());
