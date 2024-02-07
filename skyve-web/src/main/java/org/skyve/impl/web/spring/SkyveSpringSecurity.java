@@ -63,15 +63,10 @@ public class SkyveSpringSecurity {
 		return result;
 	}
 	
-	private DataSource dataSource = null;
-	
-	/**
-	 * Returns a JNDI DataSource or a no-op DataSource that dishes new connections.
-	 * NB This method does not have to be thread-safe as it is only referenced in Spring Configuration setup.
-	 * @return	The appropriate DataSource
-	 */
-	public DataSource dataSource() {
-		if (dataSource == null) {
+	private static class ThreadSafeSingleton {
+		private static DataSource dataSource;
+		
+		static {
 			try {
 				// Assign a JNDI Data Source, if applicable
 				String jndi = UtilImpl.DATA_STORE.getJndiDataSourceName();
@@ -119,12 +114,15 @@ public class SkyveSpringSecurity {
 						
 						@Override
 						public Connection getConnection(String username, String password) throws SQLException {
-							return EXT.getDataStoreConnection();
+							return getConnection();
 						}
 						
 						@Override
 						public Connection getConnection() throws SQLException {
-							return EXT.getDataStoreConnection();
+							Connection result = EXT.getDataStoreConnection();
+							// Override to be non transactional
+							result.setAutoCommit(true);
+							return result;
 						}
 					};
 				}
@@ -133,7 +131,16 @@ public class SkyveSpringSecurity {
 				throw new DomainException("Cannot obtain the JNDI datasource", e);
 			}
 		}
-		return dataSource;
+	}
+	
+	/**
+	 * Returns a JNDI DataSource or a no-op DataSource that dishes new connections.
+	 * NB This method does not have to be thread-safe as it is only referenced in Spring Configuration setup.
+	 * @return	The appropriate DataSource
+	 */
+	@SuppressWarnings("static-method")
+	public DataSource dataSource() {
+		return ThreadSafeSingleton.dataSource;
 	}
 	
 	@SuppressWarnings("static-method")
