@@ -13,6 +13,8 @@ import org.locationtech.jts.geom.Geometry;
 public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 	private static final long serialVersionUID = 2491505869930720627L;
 
+	static final int TEXT_MAX_LENGTH = 1000000000;
+	
 	private JTSGeometryType geometryType = new JTSGeometryType(GeoDBGeometryTypeDescriptor.INSTANCE);
 	private UniqueDelegate uniqueDelegate = new H2NoOpUniqueDelegate(this);
 	

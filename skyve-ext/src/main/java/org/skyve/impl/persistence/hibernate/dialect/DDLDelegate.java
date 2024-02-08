@@ -164,17 +164,19 @@ public class DDLDelegate {
 	
 	static final boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
 /*
-		System.out.println("" + column.getSqlType() + " : " + 
-							column.getSqlTypeCode() + " : " + 
-							column.getLength() + " : " + 
-							column.getPrecision() + " : " +
-							column.getScale() + " : " + 
-							column.getTypeIndex() + " = " +
-							columnInfo.getColumnSize() + " : " +
-							columnInfo.getDecimalDigits() + " : " + 
-							columnInfo.getTypeCode() + " : " + 
-							columnInfo.getTypeName() + " : " + 
-							columnInfo.getColumnIdentifier());
+		if (columnInfo != null) {
+			System.out.println("" + column.getSqlType() + " : " + 
+								column.getSqlTypeCode() + " : " + 
+								column.getLength() + " : " + 
+								column.getPrecision() + " : " +
+								column.getScale() + " : " + 
+								column.getTypeIndex() + " = " +
+								columnInfo.getColumnSize() + " : " +
+								columnInfo.getDecimalDigits() + " : " + 
+								columnInfo.getTypeCode() + " : " + 
+								columnInfo.getTypeName() + " : " + 
+								columnInfo.getColumnIdentifier());
+		}
 */
 		int typeCode = (columnInfo == null) ? 0 : columnInfo.getTypeCode();
 
@@ -198,7 +200,9 @@ public class DDLDelegate {
 					(column.getTypeIndex() == 0) &&
 					(typeCode == Types.VARCHAR) &&
 					(columnInfo != null) &&
-					(columnInfo.getColumnSize() == Integer.MAX_VALUE) &&
+					((columnInfo.getColumnSize() == Integer.MAX_VALUE) ||
+						// Cater for H2 2.x TEXT fields.
+						(columnInfo.getColumnSize() == H2SpatialDialect.TEXT_MAX_LENGTH)) &&
 					(columnInfo.getDecimalDigits() == 0)) {
 				result = false;
 			}
