@@ -11,15 +11,18 @@ import org.skyve.util.OWASP;
 import jakarta.faces.annotation.ManagedProperty;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 
 public abstract class AbstractUploadView extends LocalisableView {
 	private static final long serialVersionUID = 8618349823087627588L;
 
 	private static long MB_IN_BYTES = 1024 * 1024;
 
+	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
 	private String context;
 
+	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.BINDING_NAME + "}")
 	private String binding;
 
@@ -31,20 +34,18 @@ public abstract class AbstractUploadView extends LocalisableView {
 		maximumSizeInBytes = maximumSizeMB * MB_IN_BYTES;
 	}
 
+	// Call this from extending views
+	protected void postConstruct() {
+		context = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(context));
+		binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(binding));
+	}
+	
 	public String getContext() {
 		return context;
 	}
 
-	public void setContext(String context) {
-		this.context = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(context));
-	}
-
 	public String getBinding() {
 		return binding;
-	}
-
-	public void setBinding(String binding) {
-		this.binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(binding));
 	}
 
 	public String getWhitelistRegex() {
@@ -82,3 +83,4 @@ public abstract class AbstractUploadView extends LocalisableView {
 		return true;
 	}
 }
+

@@ -16,11 +16,13 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.annotation.ManagedProperty;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,6 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ContentUploadView extends AbstractUploadView {
 	private static final long serialVersionUID = -6769960348990922565L;
 
+	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
 	private String contentBinding;
 
@@ -44,12 +47,18 @@ public class ContentUploadView extends AbstractUploadView {
 		super(whitelistRegex, maximumSizeMB);
 	}
 
+	@Override
+	@PostConstruct
+	public void postConstruct() {
+		super.postConstruct();
+		contentBinding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentBinding));
+	}
+	
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
 				initialise();
-
 				return null;
 			}
 		}.execute();
@@ -57,10 +66,6 @@ public class ContentUploadView extends AbstractUploadView {
 
 	public String getContentBinding() {
 		return contentBinding;
-	}
-
-	public void setContentBinding(String contentBinding) {
-		this.contentBinding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentBinding));
 	}
 
 	public String getCroppedDataUrl() {
@@ -107,7 +112,7 @@ public class ContentUploadView extends AbstractUploadView {
 	private void upload(String fileName, byte[] fileContents, FacesContext fc) throws Exception {
 		String context = getContext();
 		if ((context == null) || (contentBinding == null)) {
-			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context, binding, or contentBinding is null");
+			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 			fc.addMessage(null, msg);
 			return;

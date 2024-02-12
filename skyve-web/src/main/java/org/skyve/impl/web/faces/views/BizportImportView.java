@@ -31,11 +31,13 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.annotation.ManagedProperty;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,6 +47,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class BizportImportView extends AbstractUploadView {
 	private static final long serialVersionUID = -8452779436908784172L;
 
+	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
 	private String action;
 
@@ -52,12 +55,18 @@ public class BizportImportView extends AbstractUploadView {
 		super(UtilImpl.UPLOADS_BIZPORT_WHITELIST_REGEX, UtilImpl.UPLOADS_BIZPORT_MAXIMUM_SIZE_IN_MB);
 	}
 
+	@Override
+	@PostConstruct
+	public void postConstruct() {
+		super.postConstruct();
+		action = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(action));
+	}
+	
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
 			public Void callback() throws Exception {
 				initialise();
-
 				return null;
 			}
 		}.execute();
@@ -65,10 +74,6 @@ public class BizportImportView extends AbstractUploadView {
 
 	public String getAction() {
 		return action;
-	}
-
-	public void setAction(String action) {
-		this.action = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(action));
 	}
 
 	private List<Problem> problems = new ArrayList<>();
