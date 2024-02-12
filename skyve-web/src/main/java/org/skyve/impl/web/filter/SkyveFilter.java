@@ -6,15 +6,6 @@ import java.lang.management.OperatingSystemMXBean;
 import java.security.Principal;
 import java.util.Enumeration;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -23,6 +14,15 @@ import org.skyve.impl.web.UserAgent;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+
 public class SkyveFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -30,7 +30,7 @@ public class SkyveFilter implements Filter {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		String requestURI = httpRequest.getRequestURI();
 		// ignore faces resource requests
-		if (requestURI.contains("javax.faces.resource/")) {
+		if (requestURI.contains("jakarta.faces.resource/")) {
 			chain.doFilter(request, response);
 			return;
 		}

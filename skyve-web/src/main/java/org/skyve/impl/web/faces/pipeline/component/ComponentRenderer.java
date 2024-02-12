@@ -6,26 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.el.MethodExpression;
-import javax.el.ValueExpression;
-import javax.faces.component.UICommand;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIComponentBase;
-import javax.faces.component.UIInput;
-import javax.faces.component.UIOutput;
-import javax.faces.component.UIParameter;
-import javax.faces.component.UISelectItems;
-import javax.faces.component.behavior.ClientBehavior;
-import javax.faces.component.html.HtmlForm;
-import javax.faces.component.html.HtmlInputText;
-import javax.faces.component.html.HtmlInputTextarea;
-import javax.faces.component.html.HtmlOutputLabel;
-import javax.faces.component.html.HtmlOutputLink;
-import javax.faces.component.html.HtmlOutputText;
-import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.convert.Converter;
-
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
@@ -67,6 +47,26 @@ import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
+
+import jakarta.el.MethodExpression;
+import jakarta.el.ValueExpression;
+import jakarta.faces.component.UICommand;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.component.UIInput;
+import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.UIParameter;
+import jakarta.faces.component.UISelectItems;
+import jakarta.faces.component.behavior.ClientBehavior;
+import jakarta.faces.component.html.HtmlForm;
+import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlInputTextarea;
+import jakarta.faces.component.html.HtmlOutputLabel;
+import jakarta.faces.component.html.HtmlOutputLink;
+import jakarta.faces.component.html.HtmlOutputText;
+import jakarta.faces.component.html.HtmlPanelGrid;
+import jakarta.faces.component.html.HtmlPanelGroup;
+import jakarta.faces.convert.Converter;
 
 public class ComponentRenderer {
 	private static final char INDENT = '\t';
@@ -559,7 +559,7 @@ public class ComponentRenderer {
 				return;
 			}
 
-			Converter converter = output.getConverter();
+			Converter<?> converter = output.getConverter();
 			if (converter != null) {
 				String converterName = converter.getClass().getSimpleName();
 				if (converterName.endsWith("Converter")) {

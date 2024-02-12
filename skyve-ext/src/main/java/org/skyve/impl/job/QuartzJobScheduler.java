@@ -106,7 +106,10 @@ public class QuartzJobScheduler implements JobScheduler {
 	@Override
 	public void shutdown() {
 		try {
-			JOB_SCHEDULER.shutdown();
+			// NB Could be null if startup failed
+			if (JOB_SCHEDULER != null) {
+				JOB_SCHEDULER.shutdown();
+			}
 		}
 		catch (SchedulerException e) {
 			e.printStackTrace();

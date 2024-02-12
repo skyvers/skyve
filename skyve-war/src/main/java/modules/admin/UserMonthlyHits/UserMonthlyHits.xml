@@ -8,16 +8,16 @@
 	<pluralAlias>User Monthly Hits</pluralAlias>
 	<audited>false</audited>
 	<iconStyleClass>fas fa-bar-chart</iconStyleClass>
-	<bizKey expression="{userName} - {year}/{month} = {numberOfHits}"/>
+	<bizKey expression="{userName} - {hitYear}/{hitMonth} = {numberOfHits}"/>
 	<attributes>
 		<text name="userName" required="true">
 			<displayName>User Name</displayName>
 			<length>254</length>
 		</text>
-		<integer name="year" required="true">
+		<integer name="hitYear" required="true">
 			<displayName>Year</displayName>
 		</integer>
-		<integer name="month" required="true">
+		<integer name="hitMonth" required="true">
 			<displayName>Month</displayName>
 		</integer>
 		<text name="userAgentHeader">

@@ -32,14 +32,6 @@
 			<id>Prime Faces</id>
 			<url>https://repository.primefaces.org/</url>
 		</repository>
-		<repository>
-			<id>osgeo</id>
-			<url>https://download.osgeo.org/webdav/geotools/</url>
-		</repository>
-		<repository>
-			<id>boundlessgeo</id>
-			<url>https://repo.osgeo.org/repository/release/</url>
-		</repository>
 	</repositories>
 
 	<distributionManagement>
@@ -138,13 +130,9 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.squareup</groupId>
@@ -153,8 +141,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld.se</groupId>
-			<artifactId>weld-se</artifactId>
+			<artifactId>weld-se-core</artifactId>
 			<scope>compile</scope>
+		</dependency>
+		<!-- EL implementation for maven tasks -->
+		<dependency>
+		    <groupId>org.glassfish.expressly</groupId>
+		    <artifactId>expressly</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 </project>

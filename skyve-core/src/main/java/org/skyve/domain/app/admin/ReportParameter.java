@@ -3,12 +3,12 @@ package org.skyve.domain.app.admin;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlEnum;
-
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlEnum;
 
 public interface ReportParameter extends PersistentBean {
 	/**

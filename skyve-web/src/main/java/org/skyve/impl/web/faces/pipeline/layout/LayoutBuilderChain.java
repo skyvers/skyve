@@ -2,8 +2,6 @@ package org.skyve.impl.web.faces.pipeline.layout;
 
 import java.util.List;
 
-import javax.faces.component.UIComponent;
-
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Sidebar;
@@ -13,8 +11,10 @@ import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.web.UserAgentType;
+
+import jakarta.faces.component.UIComponent;
 
 public class LayoutBuilderChain extends LayoutBuilder {
 	private LayoutBuilder[] builders;
@@ -34,7 +34,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	}
 	
 	@Override
-	public void setSAILManagedBean(FacesView<?> managedBean) {
+	public void setSAILManagedBean(FacesView managedBean) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setSAILManagedBean(managedBean);
 		// Now set the state on all builders in the chain

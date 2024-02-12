@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<router xmlns="http://www.skyve.org/xml/router"
+			xsi:schemaLocation="http://www.skyve.org/xml/router ../../schemas/router.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<uxui name="external">
+		<route outcome="/external/public.xhtml">
+			<criteria webAction="e" module="admin" document="SelfRegistration" />
+		</route>
+		<route outcome="/external/public.xhtml">
+			<criteria webAction="e" module="admin" document="SelfRegistrationActivation" />
+		</route>
+	</uxui>
+	<unsecured>/unsubscribe.xhtml</unsecured>
+</router>

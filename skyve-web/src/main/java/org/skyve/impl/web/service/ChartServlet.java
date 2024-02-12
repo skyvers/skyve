@@ -7,11 +7,6 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -54,6 +49,11 @@ import org.skyve.metadata.view.model.chart.TextStartsWithBucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Chart Servlet - supplies map data to a map display.

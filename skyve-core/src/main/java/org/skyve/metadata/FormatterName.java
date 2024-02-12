@@ -1,12 +1,12 @@
 package org.skyve.metadata;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.domain.types.formatters.DecimalFormatter;
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.domain.types.formatters.SimpleDateFormatter;
 import org.skyve.domain.types.formatters.TimeDurationFormatter;
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Represents the Skyve built-in formatters that are supported in XML schema.

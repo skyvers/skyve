@@ -1,21 +1,19 @@
 package org.skyve.impl.tools.kickstart;
 
-import geodb.GeoDB;
-
 import java.awt.event.ActionEvent;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.swing.AbstractAction;
 
 import org.apache.commons.codec.binary.Base64;
-import java.util.UUID;
 import org.skyve.domain.types.OptimisticLock;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -70,9 +68,6 @@ class CreateAction extends AbstractAction {
 				// Don't close this connection
 				connection = persistence.getConnection();
 				try (Statement statement = connection.createStatement()) {
-					if ("org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect".equals(UtilImpl.DATA_STORE.getDialectClassName())) {
-						GeoDB.InitGeoDB(connection);
-					}
 System.out.println(createSql());
 					statement.executeUpdate(createSql());
 				}

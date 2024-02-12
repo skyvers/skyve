@@ -6,8 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -26,6 +24,8 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.toolchain.config.NewDocumentConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Nullable;
 
 @Mojo(name = "newDocument")
 public class NewDocumentMojo extends AbstractSkyveMojo {

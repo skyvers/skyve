@@ -2,8 +2,6 @@ package org.skyve.metadata.model;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
@@ -18,6 +16,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * 

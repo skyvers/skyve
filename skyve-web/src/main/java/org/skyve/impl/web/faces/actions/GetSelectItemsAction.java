@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.faces.model.SelectItem;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
@@ -28,6 +26,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import jakarta.faces.model.SelectItem;
 
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	private Bean bean;

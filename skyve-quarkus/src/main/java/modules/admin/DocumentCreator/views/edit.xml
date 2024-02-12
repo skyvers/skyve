@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit" title="admin.documentCreator.edit.title" iconStyleClass="fa fa-pencil-square-o" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+	xmlns="http://www.skyve.org/xml/view" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.skyve.org/xml/common">
+    
+    <tabPane>
+    	<tab title="admin.documentCreator.edit.input.tabTitle">
+    		<form responsiveWidth="12" percentageWidth="100" border="true">
+		        <column percentageWidth="10" responsiveWidth="2"/>
+		        <column/>
+		        <column/>
+		        <row>
+					<item>
+						<spacer/>
+					</item>			        	
+		        	<item colspan="2">
+		        		<blurb>
+		        			<![CDATA[admin.documentCreator.edit.inputBlurb1]]>
+		        		</blurb>
+		        	</item>
+		        </row>
+		        <row>
+		            <item colspan="2">
+		            	<textArea binding="script" minPixelHeight="500">
+		            		<onBlurHandlers>
+		            			<server action="UpdatePreview">
+									<properties>
+										<c:property key="process">@this</c:property>
+										<c:property key="update">markdownPreview,documentPreview</c:property>
+									</properties>
+		            			</server>
+		            		</onBlurHandlers>
+		            	</textArea>
+		            </item>
+		        </row>
+		        <row>
+		        	<item>
+		        		<default binding="outputLocation" />
+		        	</item>
+		        </row>
+				<row>
+					<item>
+						<spacer/>
+					</item>
+					<item>
+						<blurb><![CDATA[admin.documentCreator.edit.inputBlurb2]]></blurb>
+					</item>
+				</row>
+		    </form>
+    	</tab>
+    	<tab title="admin.documentCreator.edit.markdownPreview.tabTitle">
+    		<form widgetId="markdownPreview">
+    			<column />
+    			<row>
+    				<item>
+    					<blurb escape="false" sanitise="none">{markdownPreview}</blurb>
+    				</item>
+    			</row>
+    		</form>
+    		<form border="true" borderTitle="admin.documentCreator.edit.errors.tabTitle" visible="hasErrors">
+    			<column />
+    			<row>
+    				<item>
+    					<blurb>{errors}</blurb>
+    				</item>
+    			</row>
+    		</form>
+    	</tab>
+    	<tab title="admin.documentCreator.edit.documentPreview.tabTitle">
+    		<form widgetId="documentPreview">
+    			<column />
+    			<row>
+    				<item>
+    					<blurb escape="false">
+    						<![CDATA[
+    						<pre>
+{documentPreview}
+    						</pre>
+    						]]>
+   						</blurb>
+    				</item>
+    			</row>
+    		</form>
+    	</tab>
+    	<tab title="admin.documentCreator.edit.help.tabTitle">
+    		<component name="help" />
+    	</tab>
+    </tabPane>
+    <actions>
+        <defaults/>
+        
+        <action className="Submit" clientValidation="true" displayName="admin.documentCreator.actions.submit.displayName" iconStyleClass="fa fa-file-code-o"
+        	confirm="admin.documentCreator.actions.submit.confirm"/>
+        <action className="UpdatePreview" displayName="admin.documentCreator.actions.updatePreview.displayName" clientValidation="true" inActionPanel="false" />
+    </actions>
+    <newParameters/>
+</view>

@@ -5,14 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
@@ -29,6 +21,14 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View.ViewParameter;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "view")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 

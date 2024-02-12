@@ -13,14 +13,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.faces.FacesException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.SessionCookieConfig;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpointConfig;
-
 import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
@@ -53,6 +45,14 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.Util;
+
+import jakarta.faces.FacesException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 public class SkyveContextListener implements ServletContextListener {
 	@Override

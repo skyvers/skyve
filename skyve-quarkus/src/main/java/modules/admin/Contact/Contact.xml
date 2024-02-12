@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Contact"
+				xmlns="http://www.skyve.org/xml/document"
+				xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Contact">
+		<cache>reference</cache>
+	</persistent>
+	<singularAlias>Contact</singularAlias>
+	<pluralAlias>Contacts</pluralAlias>
+	<iconStyleClass>fa fa-address-book</iconStyleClass>
+	<bizKey>
+		<![CDATA[
+		  	return modules.admin.Contact.ContactBizlet.bizKey(this);
+		]]>
+	</bizKey>
+	<implements>
+		<interface>org.skyve.domain.app.admin.Contact</interface>
+	</implements>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>admin.contact.name.displayName</displayName>
+			<index>textual</index>
+			<length>200</length>
+		</text>
+		<enum name="contactType">
+			<displayName>admin.contact.contactType.displayName</displayName>
+			<description>admin.contact.contactType.description</description>
+			<values>
+				<value code="Person"/>
+				<value code="Organisation"/>
+			</values>
+		</enum>
+		<text name="email1">
+			<displayName>admin.contact.email1.displayName</displayName>
+			<length>500</length>
+			<validator type="email" />
+		</text>
+		<text name="mobile" >
+			<displayName>admin.contact.mobile.displayName</displayName>
+			<length>20</length>
+		</text>
+		<image name="image">
+			<displayName>admin.contact.image.displayName</displayName>
+		</image>
+	</attributes>
+</document>

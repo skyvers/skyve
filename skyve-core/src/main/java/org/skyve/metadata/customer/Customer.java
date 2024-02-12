@@ -3,8 +3,6 @@ package org.skyve.metadata.customer;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -17,6 +15,8 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * 

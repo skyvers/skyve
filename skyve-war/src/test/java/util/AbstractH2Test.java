@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.jboss.weld.environment.se.Weld;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -15,8 +14,8 @@ import org.skyve.EXT;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -27,6 +26,8 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.test.SkyveFixture.FixtureType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockServletContext;
 
 import modules.WeldMarker;
 import modules.admin.ModulesUtil;
@@ -53,7 +54,7 @@ public abstract class AbstractH2Test {
 
 	public AbstractH2Test() {
 		// support injected classes in unit tests
-		BeanProvider.injectFields(this);
+		UtilImpl.inject(this);
 	}
 
 	@BeforeClass
@@ -65,9 +66,11 @@ public abstract class AbstractH2Test {
 		
 		// init injection
 		weld = new Weld();
-		weld.addPackage(true, SkyveCDIProducer.class);
-		weld.addPackage(true, WeldMarker.class);
-
+        weld.addPackage(true, SkyveCDIProducer.class); // skyve producer
+        weld.addPackage(true, WeldMarker.class); // domain classes
+        // For omnifaces to be injected
+        weld.addBeanClass(MockHttpServletRequest.class);
+        weld.addBeanClass(MockServletContext.class);
 		weld.initialize();
 	}
 	

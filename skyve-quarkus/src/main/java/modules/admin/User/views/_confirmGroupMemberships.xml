@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Create User" name="_confirmGroupMemberships" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+		<column />
+		<row>
+			<item>
+				<blurb>
+					<![CDATA[
+						<div style="margin-top: 0px" class="ui-messages ui-widget" aria-live="polite">
+							<div style="margin-bottom: 0" class="ui-messages-info ui-corner-all">
+								<span class="ui-messages-info-icon"></span>
+								<ul>
+									<li role="alert" aria-atomic="true">
+										<span class="ui-messages-info-detail">
+											{i18n:admin.user.confirmGroupMembership.label}
+										</span>
+									</li>
+								</ul>
+							</div>
+						</div>				
+					]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+	<vbox border="true">
+		<hbox>
+			<vbox responsiveWidth="8">
+				<form >
+					<column responsiveWidth="4" />
+					<column />
+					<row>
+						<item>
+							<textField disabled="true" binding="contact.name" />
+						</item>
+					</row>
+					<row>
+						<item required="true">
+							<textField binding="contact.email1" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="userName" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<form responsiveWidth="4">
+				<column responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
+					</item>
+				</row>
+			</form>
+		</hbox>
+	</vbox>
+	<vbox border="true">
+		<form responsiveWidth="6">
+			<column/>
+			<column/>
+			<row>
+				<item >
+					<radio enabled="showExistingGroups" binding="groupSelection" vertical="false">
+						<onChangedHandlers><rerender clientValidation="false"/></onChangedHandlers>
+					</radio>
+				</item>
+			</row>
+		</form>
+		<vbox visible="showGroupCreator" borderTitle="admin.user.newUser.confirmGroup.title">
+			<component binding="newGroup" name="_groupCreator" />
+		</vbox>
+		<vbox invisible="showGroupCreator">
+			<listMembership binding="groups" candidatesHeading="admin.group.candidatesHeading.title" membersHeading="admin.group.membersHeading.title"/>
+		</vbox>
+	</vbox>
+	<actions>
+		<action className="Back" displayName="admin.user.newUser.confirmGroupMemberships.action.back.actionName" clientValidation="false" relativeIconFileName="shared/icons/Back.gif" invisible="confirmContact" />
+		<action className="Next" displayName="admin.user.newUser.confirmGroupMemberships.action.next.actionName" clientValidation="false" relativeIconFileName="shared/icons/Next.gif" invisible="notShowNextButton" />
+	</actions>
+</view>

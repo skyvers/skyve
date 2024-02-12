@@ -3,10 +3,6 @@ package org.skyve.impl.metadata;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -35,6 +31,10 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.SerializableMetaData;
+
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlElementRefs;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class Container implements SerializableMetaData {

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.changePassword.edit.title" 
+		name="edit" 
+		xmlns="http://www.skyve.org/xml/view" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" percentageWidth="60" responsiveWidth="12">
+		<column percentageWidth="50" responsiveWidth="4" />
+		<column />
+		<row>
+			<!-- Old password is required in this view (only not required for reset password function) -->
+			<item required="true">
+				<password binding="oldPassword" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<password binding="newPassword" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<password binding="confirmPassword" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item>
+				<button action="MakePasswordChange" pixelWidth="190" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item>
+				<label binding="response" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<action className="MakePasswordChange" displayName="admin.changePassword.actions.makePasswordChange.displayName" toolTip="admin.changePassword.actions.makePasswordChange.toolTip"
+			relativeIconFileName="icons/document/password16.png" iconStyleClass="fa fa-lock" inActionPanel="false" />
+	</actions>
+</view>

@@ -25,7 +25,7 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -47,10 +47,10 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
-public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
+public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private static final long serialVersionUID = -2161288261538038204L;
 
-	private FacesView<? extends Bean> view;
+	private FacesView view;
 	private String moduleName;
 	private String documentName;
 	private String queryName;
@@ -59,7 +59,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	private List<Parameter> parameters;
 	private boolean escape;
 	
-	public SkyveLazyDataModel(FacesView<? extends Bean> view,
+	public SkyveLazyDataModel(FacesView view,
 								String moduleName, 
 								String documentName, 
 								String queryName,
@@ -89,10 +89,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	 * Return a page of filtered and sorted data (and set the rowCount)
 	 */
 	@Override
-	public List<BeanMapAdapter<Bean>> load(int first,
-											int pageSize,
-											Map<String, SortMeta> multiSortMeta,
-											Map<String, FilterMeta> filters) {
+	public List<BeanMapAdapter> load(int first,
+										int pageSize,
+										Map<String, SortMeta> multiSortMeta,
+										Map<String, FilterMeta> filters) {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
@@ -166,7 +166,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		}
 
 		if (view != null) {
-			BeanMapAdapter<?> currentBean = view.getCurrentBean();
+			BeanMapAdapter currentBean = view.getCurrentBean();
 			if (currentBean != null) {
 				model.setBean(currentBean.getBean());
 			}
@@ -205,9 +205,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		
 		List<Bean> beans = page.getRows();
 		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), escape);
-		List<BeanMapAdapter<Bean>> result = new ArrayList<>(beans.size());
+		List<BeanMapAdapter> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
-			result.add(new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext()));
+			result.add(new BeanMapAdapter(bean, (view == null) ? null : view.getWebContext()));
 		}
 		return result;
 	}
@@ -216,7 +216,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	 * Called when encoding the rows of a data table or data list.
 	 */
 	@Override
-	public String getRowKey(BeanMapAdapter<Bean> bean) {
+	public String getRowKey(BeanMapAdapter bean) {
 		Bean row = bean.getBean();
 		return new StringBuilder(128).append(row.getBizId()).append('#').append(row.getBizDocument()).append('.').append(row.getBizModule()).toString();
 	}
@@ -225,7 +225,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	 * Called when a table or list row is selected.
 	 */
 	@Override
-	public BeanMapAdapter<Bean> getRowData(String rowKey) {
+	public BeanMapAdapter getRowData(String rowKey) {
 		Map<String, Object> properties = new TreeMap<>();
 		int hashIndex = rowKey.lastIndexOf('#');
 		int dotIndex = rowKey.lastIndexOf('.');
@@ -233,7 +233,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		String bizDocument = rowKey.substring(hashIndex + 1, dotIndex);
 		String bizModule = rowKey.substring(dotIndex + 1);
 		DynamicBean bean = new DynamicBean(bizModule, bizDocument, properties);
-		return new BeanMapAdapter<>(bean, (view == null) ? null : view.getWebContext());
+		return new BeanMapAdapter(bean, (view == null) ? null : view.getWebContext());
 	}
 	
 	private static void sort(Map<String, SortMeta> multiSortMeta, ListModel<Bean> model) {

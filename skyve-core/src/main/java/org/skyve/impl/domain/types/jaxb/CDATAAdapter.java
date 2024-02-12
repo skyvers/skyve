@@ -1,8 +1,8 @@
 package org.skyve.impl.domain.types.jaxb;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * Handle CDATA sections.

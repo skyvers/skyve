@@ -10,26 +10,26 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
-
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.util.Mail;
 import org.skyve.util.MailAttachment;
+
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.mail.Address;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 public class MailUtil {
 	private MailUtil() {
@@ -227,7 +227,7 @@ public class MailUtil {
 		return result;
 	}
 
-	private static class Authenticator extends javax.mail.Authenticator {
+	private static class Authenticator extends jakarta.mail.Authenticator {
 		private PasswordAuthentication authentication;
 
 		public Authenticator() {

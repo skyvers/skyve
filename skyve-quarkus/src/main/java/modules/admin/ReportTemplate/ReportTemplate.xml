@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ReportTemplate"
+	xmlns="http://www.skyve.org/xml/document"
+	xmlns:v="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			<p>The Report Template document is for report administrator users to create reports using a template.</p>
+			<p>Report Template is persisted to the same table as a Report Configuration, so the template is always
+			linked to the correct configuration record for the report.</p>
+		]]>
+	</documentation>
+	<persistent name="ADM_ReportTemplate"/>
+	<singularAlias>Report Template</singularAlias>
+	<pluralAlias>Report Templates</pluralAlias>
+	<iconStyleClass>fa fa-file-pdf-o</iconStyleClass>
+	<bizKey>
+		return getName() != null ? String.format("Report - %s", getName()) : "New Report Template";
+	</bizKey>
+	<implements>
+		<interface>org.skyve.domain.app.admin.ReportTemplate</interface>
+	</implements>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>Name</displayName>
+			<description>The name of this report</description>
+			<length>50</length>
+		</text>
+		<text name="templateName" required="true" usage="domain">
+			<documentation>
+				The internal name of the template, consists of the template name + the freemarker file 
+				extension suffix so freemarker knows the encoding (should always be HTML).
+			</documentation>
+			<displayName>Template Name</displayName>
+			<length>55</length>
+		</text>
+		<memo name="description">
+			<displayName>Description</displayName>
+			<description>Description of this report. Shown to users to help select which report to run.</description>
+			<index>none</index>
+		</memo>
+		<boolean name="enabled" required="true">
+			<displayName>Enabled</displayName>
+			<description>Whether this report is enabled and able to be run as a report by users.</description>
+			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="includeFragment">
+			<displayName>Include Only/Subreport</displayName>
+			<description>Whether this template is only intended to be included in other templates and is not a standalone report.</description>
+			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<enum name="reportType" required="true">
+			<displayName>Report Type</displayName>
+			<description>Which template engine is being used to create this report?</description>
+			<defaultValue>freemarker</defaultValue>
+			<values>
+				<value code="Jasper"/>
+				<value code="Freemarker"/>
+			</values>
+		</enum>
+		<enum name="outputFormat" required="true">
+			<displayName>Output Format</displayName>
+			<description>What is the output format for this report?</description>
+			<defaultValue>PDF</defaultValue>
+			<values>
+				<value code="CSV"/>
+				<value code="PDF"/>
+			</values>
+		</enum>
+		<markup name="template" audited="false">
+			<documentation>Not audited since template definition contains handlebars which inteferes with auditing.</documentation>
+			<displayName>Template</displayName>
+			<description>The report template markup.</description>
+			<index>none</index>
+		</markup>
+		<text name="moduleName">
+			<displayName>Module Name</displayName>
+			<description>The module where the report is located</description>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+		<text name="documentName">
+			<displayName>Document Name</displayName>
+			<description>The document where the report is located</description>
+			<domain>dynamic</domain>
+			<length>255</length>
+		</text>
+		<text name="reportName">
+			<displayName>Report Name</displayName>
+			<description>The name of the Jasper report</description>
+			<length>255</length>
+		</text>
+		<enum name="mode">
+			<displayName>Mode</displayName>
+			<description>The query mode of the Jasper report</description>
+			<values>
+				<value code="sql" description="SQL"/>
+				<value code="bean" description="Bean"/>
+			</values>
+		</enum>
+		<text name="restrictToRole">
+			<displayName>Restrict to Role</displayName>
+			<description>If this report should only be available to a subset of users with a specific role</description>
+			<domain>variant</domain>
+			<length>60</length>
+		</text>
+		
+		<collection name="datasets" type="child">
+			<displayName>Datasets</displayName>
+			<documentName>ReportDataset</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order sort="ascending" by="datasetName"/>
+			</ordering>
+		</collection>
+		<collection name="parameters" type="child" ordered="true">
+			<displayName>Parameters</displayName>
+			<documentName>ReportParameter</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		
+		<!-- Scheduling attributes -->
+		<boolean name="scheduled" required="true">
+			<documentation>Whether or not this report is scheduled.</documentation>
+			<displayName>Scheduled</displayName>
+			<description>Whether scheduling is enabled for this report or not.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<text name="cronExpression">
+			<displayName>CRON Expression</displayName>
+			<length>128</length>
+		</text>
+		<dateTime name="startTime">
+			<displayName>Start Time</displayName>
+			<description>When to start triggering the report.  May be left blank</description>
+		</dateTime>
+		<dateTime name="endTime">
+			<displayName>End Time</displayName>
+			<description>When to finish triggering the report.  May be left blank</description>
+		</dateTime>
+		<association name="runAs" type="aggregation">
+			<displayName>Run As</displayName>
+			<description>The user to run the report</description>
+			<documentName>UserProxy</documentName>
+			<queryName>qActiveUserProxies</queryName>
+		</association>
+		<collection name="usersToEmail" type="aggregation">
+			<displayName>Users to Email</displayName>
+			<documentName>UserProxy</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		
+		<!-- non-persistent report template attributes -->
+		<memo name="results" audited="false" persistent="false" trackChanges="false" usage="domain">
+			<documentation>Used as temporary storage for the preparation of report downloads.</documentation>			
+			<displayName>Results</displayName>
+		</memo>
+		<enum name="wizardState" audited="false" persistent="false" trackChanges="false" usage="both">
+			<displayName>Wizard State</displayName>
+			<description>
+				<![CDATA[
+					The create template wizard is staged into the following states which roughly follow in order:
+					<ul>
+						<li>Enter basic details
+						<li>Enter template markup
+					</ul>
+				]]>
+			</description>
+			<defaultValue>enterDetails</defaultValue>
+			<values>
+				<value code="enterDetails"/>
+				<value code="enterMarkup"/>
+			</values>
+		</enum>
+		<enum name="generateExisting" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>Generate/Existing</displayName>
+			<description>Do you want to generate a starting report template, or do you have existing 
+				markup to enter directly?</description>
+			<values>
+				<value code="Generate"/>
+				<value code="Existing"/>
+			</values>
+		</enum>
+		<text name="generateModuleName" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>Module</displayName>
+			<description>Module which contains the document to generate the report for</description>
+			<domain>constant</domain>
+			<length>500</length>
+		</text>
+		<text name="generateDocumentName" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>Document</displayName>
+			<description>Document to generate the report for</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+			
+		<!-- non-persistent scheduling attributes -->
+		<text name="scheduleDescription" persistent="false" trackChanges="false" audited="false">
+			<displayName>Schedule</displayName>
+			<length>255</length>
+		</text>
+		<text name="allHours" persistent="false">
+			<displayName>All Hours</displayName>
+			<domain>constant</domain>
+			<length>1</length>
+		</text>
+		<boolean name="hour0" persistent="false">
+			<displayName>00</displayName>
+		</boolean>
+		<boolean name="hour1" persistent="false">
+			<displayName>01</displayName>
+		</boolean>
+		<boolean name="hour2" persistent="false">
+			<displayName>02</displayName>
+		</boolean>
+		<boolean name="hour3" persistent="false">
+			<displayName>03</displayName>
+		</boolean>
+		<boolean name="hour4" persistent="false">
+			<displayName>04</displayName>
+		</boolean>
+		<boolean name="hour5" persistent="false">
+			<displayName>05</displayName>
+		</boolean>
+		<boolean name="hour6" persistent="false">
+			<displayName>06</displayName>
+		</boolean>
+		<boolean name="hour7" persistent="false">
+			<displayName>07</displayName>
+		</boolean>
+		<boolean name="hour8" persistent="false">
+			<displayName>08</displayName>
+		</boolean>
+		<boolean name="hour9" persistent="false">
+			<displayName>09</displayName>
+		</boolean>
+		<boolean name="hour10" persistent="false">
+			<displayName>10</displayName>
+		</boolean>
+		<boolean name="hour11" persistent="false">
+			<displayName>11</displayName>
+		</boolean>
+		<boolean name="hour12" persistent="false">
+			<displayName>12</displayName>
+		</boolean>
+		<boolean name="hour13" persistent="false">
+			<displayName>13</displayName>
+		</boolean>
+		<boolean name="hour14" persistent="false">
+			<displayName>14</displayName>
+		</boolean>
+		<boolean name="hour15" persistent="false">
+			<displayName>15</displayName>
+		</boolean>
+		<boolean name="hour16" persistent="false">
+			<displayName>16</displayName>
+		</boolean>
+		<boolean name="hour17" persistent="false">
+			<displayName>17</displayName>
+		</boolean>
+		<boolean name="hour18" persistent="false">
+			<displayName>18</displayName>
+		</boolean>
+		<boolean name="hour19" persistent="false">
+			<displayName>19</displayName>
+		</boolean>
+		<boolean name="hour20" persistent="false">
+			<displayName>20</displayName>
+		</boolean>
+		<boolean name="hour21" persistent="false">
+			<displayName>21</displayName>
+		</boolean>
+		<boolean name="hour22" persistent="false">
+			<displayName>22</displayName>
+		</boolean>
+		<boolean name="hour23" persistent="false">
+			<displayName>23</displayName>
+		</boolean>
+		<text name="allDays" persistent="false">
+			<displayName>All Days</displayName>
+			<domain>constant</domain>
+			<length>2</length>
+		</text>
+		<boolean name="day1" persistent="false">
+			<displayName>01</displayName>
+		</boolean>
+		<boolean name="day2" persistent="false">
+			<displayName>02</displayName>
+		</boolean>
+		<boolean name="day3" persistent="false">
+			<displayName>03</displayName>
+		</boolean>
+		<boolean name="day4" persistent="false">
+			<displayName>04</displayName>
+		</boolean>
+		<boolean name="day5" persistent="false">
+			<displayName>05</displayName>
+		</boolean>
+		<boolean name="day6" persistent="false">
+			<displayName>06</displayName>
+		</boolean>
+		<boolean name="day7" persistent="false">
+			<displayName>07</displayName>
+		</boolean>
+		<boolean name="day8" persistent="false">
+			<displayName>08</displayName>
+		</boolean>
+		<boolean name="day9" persistent="false">
+			<displayName>09</displayName>
+		</boolean>
+		<boolean name="day10" persistent="false">
+			<displayName>10</displayName>
+		</boolean>
+		<boolean name="day11" persistent="false">
+			<displayName>11</displayName>
+		</boolean>
+		<boolean name="day12" persistent="false">
+			<displayName>12</displayName>
+		</boolean>
+		<boolean name="day13" persistent="false">
+			<displayName>13</displayName>
+		</boolean>
+		<boolean name="day14" persistent="false">
+			<displayName>14</displayName>
+		</boolean>
+		<boolean name="day15" persistent="false">
+			<displayName>15</displayName>
+		</boolean>
+		<boolean name="day16" persistent="false">
+			<displayName>16</displayName>
+		</boolean>
+		<boolean name="day17" persistent="false">
+			<displayName>17</displayName>
+		</boolean>
+		<boolean name="day18" persistent="false">
+			<displayName>18</displayName>
+		</boolean>
+		<boolean name="day19" persistent="false">
+			<displayName>19</displayName>
+		</boolean>
+		<boolean name="day20" persistent="false">
+			<displayName>20</displayName>
+		</boolean>
+		<boolean name="day21" persistent="false">
+			<displayName>21</displayName>
+		</boolean>
+		<boolean name="day22" persistent="false">
+			<displayName>22</displayName>
+		</boolean>
+		<boolean name="day23" persistent="false">
+			<displayName>23</displayName>
+		</boolean>
+		<boolean name="day24" persistent="false">
+			<displayName>24</displayName>
+		</boolean>
+		<boolean name="day25" persistent="false">
+			<displayName>25</displayName>
+		</boolean>
+		<boolean name="day26" persistent="false">
+			<displayName>26</displayName>
+		</boolean>
+		<boolean name="day27" persistent="false">
+			<displayName>27</displayName>
+		</boolean>
+		<boolean name="day28" persistent="false">
+			<displayName>28</displayName>
+		</boolean>
+		<boolean name="day29" persistent="false">
+			<displayName>29</displayName>
+		</boolean>
+		<boolean name="day30" persistent="false">
+			<displayName>30</displayName>
+		</boolean>
+		<boolean name="day31" persistent="false">
+			<displayName>31</displayName>
+		</boolean>
+		<text name="allMonths" persistent="false">
+			<displayName>All Months</displayName>
+			<domain>constant</domain>
+			<length>1</length>
+		</text>
+		<boolean name="month1" persistent="false">
+			<displayName>Jan</displayName>
+		</boolean>
+		<boolean name="month2" persistent="false">
+			<displayName>Feb</displayName>
+		</boolean>
+		<boolean name="month3" persistent="false">
+			<displayName>Mar</displayName>
+		</boolean>
+		<boolean name="month4" persistent="false">
+			<displayName>Apr</displayName>
+		</boolean>
+		<boolean name="month5" persistent="false">
+			<displayName>May</displayName>
+		</boolean>
+		<boolean name="month6" persistent="false">
+			<displayName>Jun</displayName>
+		</boolean>
+		<boolean name="month7" persistent="false">
+			<displayName>Jul</displayName>
+		</boolean>
+		<boolean name="month8" persistent="false">
+			<displayName>Aug</displayName>
+		</boolean>
+		<boolean name="month9" persistent="false">
+			<displayName>Sep</displayName>
+		</boolean>
+		<boolean name="month10" persistent="false">
+			<displayName>Oct</displayName>
+		</boolean>
+		<boolean name="month11" persistent="false">
+			<displayName>Nov</displayName>
+		</boolean>
+		<boolean name="month12" persistent="false">
+			<displayName>Dec</displayName>
+		</boolean>
+		<text name="allWeekdays" persistent="false">
+			<displayName>All Months</displayName>
+			<domain>constant</domain>
+			<length>1</length>
+		</text>
+		<boolean name="weekday1" persistent="false">
+			<displayName>Sun</displayName>
+		</boolean>
+		<boolean name="weekday2" persistent="false">
+			<displayName>Mon</displayName>
+		</boolean>
+		<boolean name="weekday3" persistent="false">
+			<displayName>Tue</displayName>
+		</boolean>
+		<boolean name="weekday4" persistent="false">
+			<displayName>Wed</displayName>
+		</boolean>
+		<boolean name="weekday5" persistent="false">
+			<displayName>Thu</displayName>
+		</boolean>
+		<boolean name="weekday6" persistent="false">
+			<displayName>Fri</displayName>
+		</boolean>
+		<boolean name="weekday7" persistent="false">
+			<displayName>Sat</displayName>
+		</boolean>
+		<association name="newUserToEmail" type="aggregation" persistent="false" trackChanges="false" audited="false">
+			<displayName>New Recipient</displayName>
+			<documentName>UserProxy</documentName>
+		</association>
+	</attributes>
+	<conditions>
+		<condition name="created" usage="view">
+			<description>True when this ReportTemplate has been created, used to determine when to show create vs edit view.</description>
+			<expression>isPersisted()</expression>
+		</condition>
+		<condition name="typeJasper" usage="both">
+			<description>True when this report is a Jasper report</description>
+			<expression>ReportType.jasper == getReportType()</expression>
+		</condition>
+		<condition name="typeFreemarker" usage="both">
+			<description>True when this report is a Freemarker report</description>
+			<expression>ReportType.freemarker == getReportType()</expression>
+		</condition>
+		
+		<!-- running a report conditions -->
+		<condition name="hasParameters" usage="view">
+			<description>True if this report has parameters for the user to input. Used to show the parameter 
+				grid for non-admin users when running a report.</description>
+			<expression><![CDATA[getParameters().size() > 0]]></expression>
+		</condition>
+		
+		<!-- scheduling conditions -->
+		<condition name="canSchedule" usage="view">
+			<description>Shows the Scheduling tab if the user has permissions to save changes to reports.</description>
+			<expression>
+				<![CDATA[
+					isUserInOwningModuleRole("BasicUser") 
+						|| isUserInOwningModuleRole("DevOps")
+						|| isUserInOwningModuleRole("SecurityAdministrator")
+				]]>
+			 </expression>
+		</condition>
+		<condition name="schedulingEnabled" usage="view">
+			<description>True when scheduling is enabled, shows the scheduling fields in the UI.</description>
+			<expression>Boolean.TRUE.equals(getScheduled())</expression>
+		</condition>
+		<condition name="selectedHours" usage="view">
+			<description>True when Selected Hours.</description>
+			<expression>"X".equals(getAllHours())</expression>
+		</condition>
+		<condition name="selectedDays" usage="view">
+			<description>True when Selected Days.</description>
+			<expression>"X".equals(getAllDays())</expression>
+		</condition>
+		<condition name="selectedMonths" usage="view">
+			<description>True when Selected Months.</description>
+			<expression>"X".equals(getAllMonths())</expression>
+		</condition>
+		<condition name="selectedWeekdays" usage="view">
+			<description>True when Selected Weekdays.</description>
+			<expression>"X".equals(getAllWeekdays())</expression>
+		</condition>
+		
+		<!-- wizard state conditions -->
+		<condition name="enterDetails" usage="view">
+			<description>Enter Report Details step</description>
+			<expression>
+				<![CDATA[WizardState.enterDetails == getWizardState()]]>
+			</expression>
+		</condition>
+		<condition name="enterMarkup" usage="view">
+			<description>Enter Report Markup step</description>
+			<expression>
+				<![CDATA[WizardState.enterMarkup == getWizardState()]]>
+			</expression>
+		</condition>
+		<condition name="showNext" usage="view">
+			<description>Show Next Button</description>
+			<expression>
+				<![CDATA[isEnterDetails()]]>
+			</expression>
+		</condition>
+		<condition name="enterExisting" usage="view">
+			<description>True when the user has existing markup to enter</description>
+			<expression>getGenerateExisting() == GenerateExisting.existing</expression>
+		</condition>
+		<condition name="enterGenerate" usage="view">
+			<description>True when the user wants to generate new markup</description>
+			<expression>getGenerateExisting() == GenerateExisting.generate</expression>
+		</condition>
+	</conditions>
+	<uniqueConstraints>
+		<constraint name="UniqueName" scope="customer">
+			<message>The name {name} has already been defined.</message>
+			<fieldReferences>
+				<ref>name</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

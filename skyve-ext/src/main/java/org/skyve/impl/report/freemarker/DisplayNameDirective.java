@@ -5,9 +5,6 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
@@ -25,6 +22,8 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DeepUnwrap;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * FreeMarker user-defined directive that retrieves the display name from the metadata for

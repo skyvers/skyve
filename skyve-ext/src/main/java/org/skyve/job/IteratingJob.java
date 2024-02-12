@@ -2,11 +2,11 @@ package org.skyve.job;
 
 import java.util.Collection;
 
-import javax.inject.Inject;
-
 import org.skyve.persistence.Persistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.inject.Inject;
 
 /**
  * A job that performs an operation over a collection of elements.

@@ -7,11 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Principal;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.Thumbnails.Builder;
 
@@ -27,6 +22,11 @@ import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class DynamicImageServlet extends HttpServlet {
 	/**

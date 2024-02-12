@@ -1,8 +1,8 @@
 package org.skyve.metadata.model.document;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Describes the type of domain values possible on a field

@@ -1,21 +1,20 @@
 package org.skyve.impl.web.faces.actions;
 
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
-public class PreRenderColdHitAction<T extends Bean> extends FacesAction<Void> {
-	private FacesView<T> facesView;
-	public PreRenderColdHitAction(FacesView<T> facesView) {
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
+
+public class PreRenderColdHitAction extends FacesAction<Void> {
+	private FacesView facesView;
+	public PreRenderColdHitAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 
@@ -49,7 +48,7 @@ public class PreRenderColdHitAction<T extends Bean> extends FacesAction<Void> {
 		Util.LOGGER.info(log.toString());
 		switch (webAction) {
 		case e:
-			new EditAction<>(facesView).callback(); // execute without error trapping
+			new EditAction(facesView).callback(); // execute without error trapping
 			new SetTitleAction(facesView).callback(); // execute without error trapping
 			break;
 		case l:

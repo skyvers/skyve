@@ -1,6 +1,5 @@
 package org.skyve.job;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -8,6 +7,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
@@ -68,7 +68,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
             persistence.setAsyncThread(true);
 			persistence.begin();
 			persistence.setUser(user);
-			BeanProvider.injectFields(this);
+			UtilImpl.inject(this);
 			execute(bean);
 		}
 		catch (Throwable t) {

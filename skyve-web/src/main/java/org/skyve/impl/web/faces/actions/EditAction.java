@@ -5,10 +5,6 @@ import java.util.SortedMap;
 import java.util.Stack;
 import java.util.logging.Level;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -24,7 +20,7 @@ import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.FacesWebContext;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.impl.web.service.smartclient.SmartClientEditServlet;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -35,18 +31,21 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.Util;
 
-public class EditAction<T extends Bean> extends FacesAction<Void> {
-	private FacesView<T> facesView = null;
-	public EditAction(FacesView<T> facesView) {
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
+
+public class EditAction extends FacesAction<Void> {
+	private FacesView facesView = null;
+	public EditAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction");
 
-		T bean = null;
+		Bean bean = null;
 		AbstractWebContext webContext = null;
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
@@ -57,14 +56,14 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 			// This is executed from a redirect from a data grid add or zoom in, or from a subsequent zoom out or remove.
 			// See ActionUtil.redirectViewScopedConversation().
 			if (session.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
-				FacesView<? extends Bean> sessionView = (FacesView<? extends Bean>) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
+				FacesView sessionView = (FacesView) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				String viewBinding = sessionView.getViewBinding();
 				facesView.setViewBinding(viewBinding);
 				facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
 				webContext = sessionView.getWebContext();
-				bean = (T) webContext.getCurrentBean();
+				bean = webContext.getCurrentBean();
 
-				Bean current = (viewBinding == null) ? bean : (T) BindUtil.get(bean, facesView.getViewBinding());
+				Bean current = (viewBinding == null) ? bean : (Bean) BindUtil.get(bean, facesView.getViewBinding());
 				if (current == null) { // should never happen
 					throw new IllegalStateException("current is null");
 				}
@@ -137,7 +136,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + bean + ", null, " + ", " + webContext);
-				    			bean = (T) bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
+				    			bean = bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
@@ -151,7 +150,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 					AbstractPersistence persistence = AbstractPersistence.get();
 					try {
 						// NB can throw NoResultsException or SecurityException
-						bean = (T) WebUtil.findReferencedBean(document, bizId, persistence, null, webContext);
+						bean = WebUtil.findReferencedBean(document, bizId, persistence, null, webContext);
 					}
 					finally {
 						webContext = new FacesWebContext();
@@ -173,7 +172,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 							if (bizlet != null) {
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + bean + ", null, " + ", " + webContext);
-				    			bean = (T) bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
+				    			bean = bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
 							}
 							internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
@@ -200,7 +199,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 	 * @param bean
 	 * @param bindingParameter
 	 */
-	private void setupViewForZoomIn(T bean, String bindingParameter) {
+	private void setupViewForZoomIn(Bean bean, String bindingParameter) {
 		// Only set up the view to be zoomed in if we can grab the binding
 		Bean current = null;
 		String viewBinding = bindingParameter.replace(',', '.');

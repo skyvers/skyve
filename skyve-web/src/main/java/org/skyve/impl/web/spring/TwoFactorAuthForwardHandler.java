@@ -2,12 +2,12 @@ package org.skyve.impl.web.spring;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.ForwardAuthenticationFailureHandler;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHandler {
 	public static String TWO_FACTOR_AUTH_ERROR_ATTRIBUTE = "tfaerror";

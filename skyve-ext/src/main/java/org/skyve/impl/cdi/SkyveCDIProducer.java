@@ -3,9 +3,6 @@ package org.skyve.impl.cdi;
 import java.io.Serializable;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-
 import org.skyve.addin.AddInManager;
 import org.skyve.cache.Caching;
 import org.skyve.domain.number.NumberGenerator;
@@ -15,6 +12,9 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
 
 @ApplicationScoped
 public class SkyveCDIProducer implements Serializable {

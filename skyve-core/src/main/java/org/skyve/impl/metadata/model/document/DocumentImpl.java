@@ -13,18 +13,15 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import javax.annotation.Nonnull;
-
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.DynamicChildBean;
 import org.skyve.domain.DynamicHierarchicalBean;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.DynamicPersistentChildBean;
 import org.skyve.domain.DynamicPersistentHierarchicalBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
@@ -73,6 +70,8 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.ExpressionEvaluator;
+
+import jakarta.annotation.Nonnull;
 
 public final class DocumentImpl extends ModelImpl implements Document {
 	private static final long serialVersionUID = 9091172268741052691L;
@@ -151,8 +150,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		T result = newInstance(customer);
 		
 		// Inject any dependencies
-		result = BeanProvider.injectFields(result);
-		
+		UtilImpl.inject(result);
+
 		// Set implicit properties
 		// NB These properties need to be set before the bizlet.newInstance() is called.
 		// For singletons, if we were to set these after the bizlet call, 

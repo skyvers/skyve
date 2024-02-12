@@ -24,7 +24,7 @@ import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.core.spi.service.StatisticsService;
 import org.ehcache.core.statistics.CacheStatistics;
-import org.ehcache.core.statistics.DefaultStatisticsService;
+import org.ehcache.core.internal.statistics.DefaultStatisticsService;
 import org.ehcache.core.statistics.TierStatistics;
 import org.ehcache.jsr107.Eh107Configuration;
 import org.skyve.cache.CacheConfig;
@@ -41,6 +41,7 @@ public class DefaultCaching implements Caching {
 	private static final DefaultCaching INSTANCE = new DefaultCaching();
 
 	private static PersistentCacheManager ehCacheManager;
+	// This is a SPI class but there seems no clear way forward - see https://github.com/ehcache/ehcache3/issues/2951
 	private static StatisticsService statisticsService = new DefaultStatisticsService();
 	private static javax.cache.CacheManager jCacheManager;
 

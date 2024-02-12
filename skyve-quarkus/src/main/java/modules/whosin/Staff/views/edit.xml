@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Staff - {contact.name}" name="edit"
+	xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox>
+		<component name="_details" />
+		<component name="_status" />
+		<component name="_qualifications" />
+	</vbox>
+	<actions>
+		<defaults />
+		<upload className="UploadQualifications" clientValidation="true" displayName="Upload Qualifications"
+			inActionPanel="false" />
+	</actions>
+</view>

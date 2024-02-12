@@ -11,7 +11,7 @@
 .ui-datatable thead th {
 	padding: 4px !important;
 }
-
+/* disable for now as leaflet maps cannot handle the zoom settings
 @media (min-width: 641px) {
 	html {
 		zoom: 95%
@@ -29,7 +29,7 @@
 		zoom: 85%
 	}
 }
-
+*/
 /*
 	Editorial by HTML5 UP
 	html5up.net | @ajlkn

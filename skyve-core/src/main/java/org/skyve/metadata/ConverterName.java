@@ -1,7 +1,5 @@
 package org.skyve.metadata;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.date.DD_MM_YYYY;
@@ -50,6 +48,8 @@ import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum ConverterName {

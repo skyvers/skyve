@@ -2,7 +2,6 @@ package org.skyve.impl.web.faces.actions;
 
 import java.util.logging.Level;
 
-import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -10,7 +9,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -23,16 +22,15 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-public class SaveAction<T extends Bean> extends FacesAction<Void> {
-	private FacesView<T> facesView; 
+public class SaveAction extends FacesAction<Void> {
+	private FacesView facesView; 
 	private boolean ok;
-	public SaveAction(FacesView<T> facesView, boolean ok) {
+	public SaveAction(FacesView facesView, boolean ok) {
 		this.facesView = facesView;
 		this.ok = ok;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SaveAction - ok=" + ok);
 
@@ -75,7 +73,7 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 				}
 		
 				targetBean = persistence.save(targetDocument, targetBean);
-				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, targetBean);
 				
 				// We want to call post render
 				facesView.setPostRender(bizlet, targetBean);

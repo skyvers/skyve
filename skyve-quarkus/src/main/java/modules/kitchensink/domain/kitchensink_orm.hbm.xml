@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<typedef name="OptimisticLock" class="org.skyve.impl.domain.types.OptimisticLockUserType" />
+	<typedef name="Decimal2" class="org.skyve.impl.domain.types.Decimal2UserType" />
+	<typedef name="Decimal5" class="org.skyve.impl.domain.types.Decimal5UserType" />
+	<typedef name="Decimal10" class="org.skyve.impl.domain.types.Decimal10UserType" />
+	<typedef name="DateOnly" class="org.skyve.impl.domain.types.DateOnlyUserType" />
+	<typedef name="DateTime" class="org.skyve.impl.domain.types.DateTimeUserType" />
+	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
+	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
+	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
+	<class name="modules.kitchensink.domain.ListAttributes" table="KS_ListAttributes" entity-name="kitchensinkListAttributes">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="constantEnum" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.kitchensink.domain.ListAttributes$ConstantEnum</param>
+			</type>
+		</property>
+		<property name="constantDomain" length="5" />
+		<property name="variantDomain" length="5" />
+		<property name="dynamicDomain" length="5" />
+		<property name="booleanFlag" />
+		<property name="colour" />
+		<property name="date" type="DateOnly" />
+		<property name="dateTime" type="DateTime" />
+		<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+		<property name="id" length="36" />
+		<property name="normalInteger" />
+		<property name="longInteger" />
+		<property name="markup" type="text" />
+		<property name="memo" type="text" />
+		<property name="text" length="255" />
+		<property name="time" type="TimeOnly" />
+		<property name="timestamp" type="Timestamp" />
+		<filter name="kitchensinkListAttributesNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkListAttributesCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkListAttributesDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkListAttributesUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.kitchensink.domain.LookupDescription" table="KS_LookupDescription" entity-name="kitchensinkLookupDescription">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="description" length="1024" />
+		<filter name="kitchensinkLookupDescriptionNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkLookupDescriptionCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkLookupDescriptionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkLookupDescriptionUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<filter-def name="kitchensinkListAttributesNoneFilter" />
+	<filter-def name="kitchensinkListAttributesCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkListAttributesDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkListAttributesUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkLookupDescriptionNoneFilter" />
+	<filter-def name="kitchensinkLookupDescriptionCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkLookupDescriptionDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkLookupDescriptionUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+</hibernate-mapping>

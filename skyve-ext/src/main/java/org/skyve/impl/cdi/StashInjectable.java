@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.CORE;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.

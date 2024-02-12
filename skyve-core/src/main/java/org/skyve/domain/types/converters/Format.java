@@ -3,10 +3,11 @@ package org.skyve.domain.types.converters;
 import java.text.ParseException;
 
 import javax.swing.text.MaskFormatter;
-import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.text.WordUtils;
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 public class Format<T> {
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)

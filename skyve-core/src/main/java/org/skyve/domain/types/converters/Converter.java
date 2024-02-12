@@ -1,11 +1,11 @@
 package org.skyve.domain.types.converters;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.metadata.model.Attribute.AttributeType;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public interface Converter<T> extends Formatter<T> {
 	/**

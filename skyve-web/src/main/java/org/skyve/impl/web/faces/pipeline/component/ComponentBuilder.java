@@ -3,13 +3,6 @@ package org.skyve.impl.web.faces.pipeline.component;
 import java.util.List;
 import java.util.Map;
 
-import javax.el.MethodExpression;
-import javax.faces.component.UICommand;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIComponentBase;
-import javax.faces.component.UIOutput;
-import javax.faces.component.html.HtmlOutputLink;
-
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.skyve.domain.Bean;
@@ -67,6 +60,13 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+
+import jakarta.el.MethodExpression;
+import jakarta.faces.component.UICommand;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.html.HtmlOutputLink;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
@@ -395,7 +395,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													String title,
 													boolean required,
 													HorizontalAlignment textAlignment,
-													javax.faces.convert.Converter facesConverter);
+													jakarta.faces.convert.Converter<?> facesConverter);
 	
 	public abstract EventSourceComponent text(EventSourceComponent component, 
 												String dataWidgetVar, 
@@ -407,7 +407,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												Integer length,
 												Converter<?> converter,
 												Format<?> format,
-												javax.faces.convert.Converter facesConverter);
+												jakarta.faces.convert.Converter<?> facesConverter);
 
 	public abstract EventSourceComponent textArea(EventSourceComponent component, 
 													String dataWidgetVar,

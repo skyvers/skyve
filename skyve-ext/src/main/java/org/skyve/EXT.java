@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.websocket.Session;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jfree.chart.JFreeChart;
@@ -73,6 +72,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
+
+import jakarta.websocket.Session;
 
 /**
  * The central factory for creating all objects required in skyve ext.
@@ -276,7 +277,7 @@ public class EXT {
 	 * @return a database connection from the container supplied pool.
 	 */
 	@SuppressWarnings("resource")
-	public static Connection getDataStoreConnection(DataStore dataStore) throws IllegalStateException {
+	public static Connection getDataStoreConnection(DataStore dataStore) {
 		Connection result = null;
 		try {
 			String jndiDataSourceName = dataStore.getJndiDataSourceName();
@@ -306,13 +307,13 @@ public class EXT {
 			}
 		}
 		catch (SQLException e) {
-			throw new IllegalStateException("Could not get a database connection", e);
+			throw new DomainException("Could not get a database connection", e);
 		}
 		catch (NamingException e) {
-			throw new IllegalStateException("Could not find the JDBC connection pool", e);
+			throw new DomainException("Could not find the JDBC connection pool", e);
 		} 
 		catch (ReflectiveOperationException e) {
-			throw new IllegalStateException("Could not instantiate the JDBC driver", e);
+			throw new DomainException("Could not instantiate the JDBC driver", e);
 		}
 
 		return result;

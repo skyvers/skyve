@@ -2,8 +2,6 @@ package org.skyve.impl.web.faces.pipeline.layout;
 
 import java.util.List;
 
-import javax.faces.component.UIComponent;
-
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Sidebar;
@@ -14,6 +12,8 @@ import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
+
+import jakarta.faces.component.UIComponent;
 
 public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	/**

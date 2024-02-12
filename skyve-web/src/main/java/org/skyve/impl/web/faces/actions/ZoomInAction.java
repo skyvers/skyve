@@ -9,7 +9,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -20,16 +20,16 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class ZoomInAction extends FacesAction<Void> {
-	private FacesView<? extends Bean> facesView;
+	private FacesView facesView;
 	private String binding;
 	private String bizId;
-	public ZoomInAction(FacesView<? extends Bean> facesView, String dataWidgetBinding, String bizId) {
+	public ZoomInAction(FacesView facesView, String dataWidgetBinding, String bizId) {
 		this.facesView = facesView;
 		this.binding = dataWidgetBinding;
 		this.bizId = bizId;
 	}
 	
-	public ZoomInAction(FacesView<? extends Bean> facesView, String referenceBinding) {
+	public ZoomInAction(FacesView facesView, String referenceBinding) {
 		this.facesView = facesView;
 		this.binding = referenceBinding;
 	}

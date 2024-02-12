@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ReportParameter"
+	xmlns="http://www.skyve.org/xml/document"
+	xmlns:v="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			<p>Report Parameters are used to define a parameter which is injected into a ReportDataset
+			when a report is executed. Report Paramters sit at the template level, so that a single
+			parameter can be reused for multiple datasets, e.g. 'dateFrom'.</p>
+			<p>The test values are used when testing a report from a Report Template, and when running 
+			a report from a Report Configuration, the default value or input values are used.</p>
+		]]>
+	</documentation>
+	<persistent name="ADM_ReportParameter"/>
+	<singularAlias>Report Parameter</singularAlias>
+	<pluralAlias>Report Parameters</pluralAlias>
+	<parentDocument>ReportTemplate</parentDocument>
+	<bizKey expression="Parameter - {name}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.ReportParameter</interface>
+	</implements>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>Parameter Name</displayName>
+			<description>The name of this parameter.</description>
+			<length>50</length>
+		</text>
+		<text name="description" required="true">
+			<displayName>Description</displayName>
+			<description>A description for this parameter which may be presented to the user when 
+				they run the report to assist them in providing a value.</description>
+			<length>100</length>
+		</text>
+		<enum name="type" required="true" implementingEnumClassName="org.skyve.domain.app.admin.ReportParameter$Type">
+			<displayName>Parameter Type</displayName>
+			<description>The data type of this parameter</description>
+		</enum>
+		<boolean name="required" required="true">
+			<displayName>Required</displayName>
+			<description>Is this parameter required to run the report?</description>
+			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<!-- default value -->
+		<date name="dateDefaultValue">
+			<displayName>Default Value</displayName>
+			<description>The default value which will be used if one is not provided</description>
+		</date>
+		<longInteger name="numericalDefaultValue">
+			<displayName>Default Value</displayName>
+			<description>The default value which will be used if one is not provided</description>
+		</longInteger>
+		<text name="textDefaultValue">
+			<displayName>Default Value</displayName>
+			<description>The default value which will be used if one is not provided</description>
+			<length>100</length>
+		</text>
+		<!-- test value -->
+		<date name="dateTestValue">
+			<displayName>Test Value</displayName>
+			<description>The value to use when testing this report</description>
+		</date>
+		<longInteger name="numericalTestValue">
+			<displayName>Test Value</displayName>
+			<description>The value to use when testing this report</description>
+		</longInteger>
+		<text name="textTestValue">
+			<displayName>Test Value</displayName>
+			<description>The value to use when testing this report</description>
+			<length>100</length>
+		</text>
+		
+		<!-- non-persistent report parameter attributes -->
+		<text name="defaultValueString" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Calculated field to show the default value as a String in the ReportTemplate view</documentation>
+			<displayName>Default Value</displayName>
+			<length>100</length>
+		</text>
+		<text name="testValueString" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>Calculated field to show the test value as a String in the ReportTemplate view</documentation>
+			<displayName>Test Value</displayName>
+			<length>100</length>
+		</text>
+		<text name="reportInputValue" persistent="false" usage="view">
+			<documentation>This is the input parameter value passed into the report when it being run from the user interface.</documentation>
+			<displayName>Value</displayName>
+			<description>The parameter value to use for this report</description>
+			<length>100</length>
+		</text>
+		<text name="formattedInputValue" persistent="false" usage="both">
+			<documentation>Calculated field to use in a report to show the formatted value of the parameter 
+				which was supplied, or the default value used if one exists and it was used.</documentation>
+			<displayName>Formatted Value</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="textValue" usage="view">
+			<description>True when the parameter type is text</description>
+			<expression>Type.text == getType()</expression>
+		</condition>
+		<condition name="numericalValue" usage="view">
+			<description>True when the parameter type is number</description>
+			<expression>
+				<![CDATA[
+					Type.integer == getType() || Type.longInteger == getType() 
+				]]>
+			</expression>
+		</condition>
+		<condition name="dateValue" usage="view">
+			<description>True when the parameter type is date</description>
+			<expression>Type.date == getType()</expression>
+		</condition>
+	</conditions>
+	<uniqueConstraints>
+		<constraint name="UniqueParameter" scope="customer">
+			<message>The parameter {name} already exists for this template.</message>
+			<fieldReferences>
+				<ref>parent</ref>
+				<ref>name</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

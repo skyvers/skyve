@@ -2,10 +2,10 @@ package org.skyve.metadata.model.document;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SortDirection;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * 

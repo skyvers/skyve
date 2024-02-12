@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
@@ -22,6 +19,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private static final long serialVersionUID = -9075615768687125545L;

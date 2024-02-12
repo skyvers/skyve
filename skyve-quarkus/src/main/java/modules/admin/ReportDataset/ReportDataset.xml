@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ReportDataset"
+	xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		Report Dataset is used to capture data which is injected into a report template. This 
+		can be a BizQL or SQL query, or a string constant.
+	</documentation>
+	<persistent name="ADM_ReportDataset"/>
+	<singularAlias>Report Dataset</singularAlias>
+	<pluralAlias>Report Datasets</pluralAlias>
+	<iconStyleClass>fa fa-table</iconStyleClass>
+	<parentDocument>ReportTemplate</parentDocument>
+	<bizKey expression="Query - {parent.name} {datasetType}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.ReportDataset</interface>
+	</implements>
+	<attributes>
+		<text name="datasetName" required="true">
+			<displayName>Dataset Name</displayName>
+			<description>The name this dataset will be made available to within the report definition.</description>
+			<length>50</length>
+		</text>
+		<enum name="datasetType" required="true" implementingEnumClassName="org.skyve.domain.app.admin.ReportDataset$DatasetType">
+			<displayName>Dataset Type</displayName>
+			<description>The type of this dataset; if it is a BizQL or SQL query, a fixed constant value or a dataset Class.</description>
+			<defaultValue>bizQL</defaultValue>
+		</enum>
+		<memo name="query" required="true">
+			<displayName>Query</displayName>
+			<description>The query to retrieve this dataset for the report.</description>
+			<index>none</index>
+		</memo>
+		
+		<!-- non-persistent report dataset attributes -->
+		<memo name="results" audited="false" persistent="false" trackChanges="false" usage="view">
+			<displayName>Query Results</displayName>
+			<description>Results of testing the query.</description>
+			<index>none</index>
+		</memo>
+	</attributes>
+	<conditions>
+		<condition name="typeClass" usage="view">
+			<description>True when the dataset type is a class, used to hide the results ouput</description>
+			<expression>
+				<![CDATA[
+					DatasetType.classValue == getDatasetType()
+				]]>
+			</expression>
+		</condition>
+		<condition name="typeConstant" usage="view">
+			<description>True when the dataset type is a constant, used to hide the parameters datagrid</description>
+			<expression>
+				<![CDATA[
+					DatasetType.constant == getDatasetType()
+				]]>
+			</expression>
+		</condition>
+		<condition name="typeQuery" usage="view">
+			<description>True when the dataset type is a BizQL or SQL, used to show the parameters datagrid</description>
+			<expression>
+				<![CDATA[
+					DatasetType.bizQL == getDatasetType() || DatasetType.SQL == getDatasetType()
+				]]>
+			</expression>
+		</condition>
+		<condition name="typeSqlQuery" usage="view">
+			<description>True when the dataset type is SQL, used to show help to the user</description>
+			<expression>
+				<![CDATA[
+					DatasetType.SQL == getDatasetType()
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+	<uniqueConstraints>
+		<constraint name="UniqueDatasetName" scope="customer">
+			<message>The dataset {datasetName} already exists for template {parent.name}.</message>
+			<fieldReferences>
+				<ref>datasetName</ref>
+				<ref>parent</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

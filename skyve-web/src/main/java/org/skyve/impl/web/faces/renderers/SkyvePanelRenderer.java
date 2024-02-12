@@ -2,14 +2,14 @@ package org.skyve.impl.web.faces.renderers;
 
 import java.io.IOException;
 
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIViewRoot;
-import javax.faces.context.FacesContext;
-
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panel.PanelRenderer;
 import org.skyve.impl.web.faces.FacesUtil;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
+
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIViewRoot;
+import jakarta.faces.context.FacesContext;
 
 public class SkyvePanelRenderer extends PanelRenderer {
 	/**
@@ -21,7 +21,7 @@ public class SkyvePanelRenderer extends PanelRenderer {
 		if (uiViewRoot != null) {
 			String managedBeanName = (String) uiViewRoot.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
-				FacesView<?> view	= FacesUtil.getManagedBean(managedBeanName);
+				FacesView view	= FacesUtil.getManagedBean(managedBeanName);
 				if (view != null) {
 					view.setCollapsedFromSession((Panel) component);
 				}

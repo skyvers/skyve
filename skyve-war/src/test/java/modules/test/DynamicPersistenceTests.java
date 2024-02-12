@@ -55,9 +55,14 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
 		test = p.save(test);
 		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
 
-		Assert.assertEquals(Integer.valueOf(0), test.getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedAssociation().getBizVersion());
+		Assert.assertEquals(Integer.valueOf(1), test.getBizVersion());
+		Assert.assertEquals(Integer.valueOf(1), test.getAggregatedAssociation().getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getComposedAssociation().getBizVersion());
 		Assert.assertEquals(null, test.getEmbeddedAssociation().getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getBizVersion());

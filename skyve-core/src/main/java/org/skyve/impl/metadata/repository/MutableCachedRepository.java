@@ -7,9 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.CORE;
 import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.generate.ViewGenerator;
@@ -39,6 +36,9 @@ import org.skyve.metadata.repository.OnDemandRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate implements MutableRepository, OnDemandRepository {
 	/**

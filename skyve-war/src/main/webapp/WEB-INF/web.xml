@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="3.1"
-			xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         metadata-complete="false"
+         version="6.0">
 	<!-- Needs to be first to set up Skyve configuration state for Spring to use -->
 	<listener>
 		<listener-class>org.skyve.impl.web.SkyveContextListener</listener-class>
@@ -45,30 +46,28 @@
 
 	<!-- FACES PARAMS -->
 	<context-param>
-        <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+        <param-name>jakarta.faces.DEFAULT_SUFFIX</param-name>
         <param-value>.xhtml</param-value>
     </context-param>
     <context-param>
-        <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>
+        <param-name>jakarta.faces.FACELETS_SKIP_COMMENTS</param-name>
         <param-value>true</param-value>
     </context-param>
     <context-param>
         <description>State saving method: 'client' or 'server' (=default). See JSF Specification 2.5.2</description>
-        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+        <param-name>jakarta.faces.STATE_SAVING_METHOD</param-name>
         <param-value>server</param-value>
     </context-param>
     <context-param>
-        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-name>jakarta.faces.PROJECT_STAGE</param-name>
         <param-value>Production</param-value>
     </context-param>
 	<context-param>
-		<param-name>
-			javax.faces.WEBAPP_RESOURCES_DIRECTORY
-		</param-name>
+		<param-name>jakarta.faces.WEBAPP_RESOURCES_DIRECTORY</param-name>
 		<param-value>/WEB-INF/resources</param-value>
 	</context-param>
 	<context-param>
-        <param-name>javax.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
+        <param-name>jakarta.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
         <param-value>true</param-value>
     </context-param>
 	<!-- sam, redmond, smoothness, bootstrap -->
@@ -114,7 +113,7 @@
         	<param-name>unsecured</param-name>
         	<param-value>
         		<![CDATA[
-					/javax.faces.resource/
+					/jakarta.faces.resource/
 					/device.xhtml
         		]]>
         	</param-value>
@@ -139,7 +138,6 @@
 		<filter-name>FacesNoCacheFilter</filter-name>
 		<servlet-name>FacesServlet</servlet-name>
 	</filter-mapping>
-
 	<filter>
 		<filter-name>SkyveFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.SkyveFilter</filter-class>
@@ -433,16 +431,14 @@
 		<servlet-name>DownloadServlet</servlet-name>
 		<url-pattern>/download</url-pattern>
 	</servlet-mapping>
-
 	<servlet>
 		<servlet-name>ImageServlet</servlet-name>
-		<servlet-class>net.sf.jasperreports.j2ee.servlets.ImageServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.jasperreports.ImageServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ImageServlet</servlet-name>
 		<url-pattern>/image</url-pattern>
 	</servlet-mapping>
-
 	<servlet>
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.CustomerResourceServlet</servlet-class>
@@ -576,7 +572,7 @@
 
     <servlet>
         <servlet-name>FacesServlet</servlet-name>
-        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>FacesServlet</servlet-name>

@@ -1,9 +1,9 @@
 package org.skyve.impl.web;
 
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
 import org.skyve.impl.cache.StateUtil;
+
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionListener;
 
 /**
  * Used to count the active sessions on a server.

@@ -6,8 +6,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
-import javax.inject.Inject;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -16,6 +14,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.skyve.persistence.Persistence;
+
+import jakarta.inject.Inject;
 
 public class IteratingJobTest {
 

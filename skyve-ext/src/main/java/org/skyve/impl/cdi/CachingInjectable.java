@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import javax.cache.CacheManager;
 import javax.cache.management.CacheStatisticsMXBean;
-import javax.enterprise.inject.Alternative;
 
 import org.ehcache.Cache;
 import org.ehcache.CachePersistenceException;
@@ -16,6 +15,8 @@ import org.skyve.cache.CacheTier;
 import org.skyve.cache.Caching;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.JCacheConfig;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.

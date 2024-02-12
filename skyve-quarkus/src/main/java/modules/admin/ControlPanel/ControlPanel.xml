@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ControlPanel" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Control Panel</singularAlias>
+	<pluralAlias>Control Panels</pluralAlias>
+	<iconStyleClass>fa fa-sliders</iconStyleClass>
+	<attributes>
+		<!-- Instrumentation attributes -->
+		<boolean name="xmlTrace">
+			<displayName>admin.controlPanel.xmlTrace.displayName</displayName>
+			<description>admin.controlPanel.xmlTrace.description</description>
+		</boolean>
+		<boolean name="httpTrace">
+			<displayName>admin.controlPanel.httpTrace.displayName</displayName>
+			<description>admin.controlPanel.httpTrace.description</description>
+		</boolean>
+		<boolean name="queryTrace">
+			<displayName>admin.controlPanel.queryTrace.displayName</displayName>
+			<description>admin.controlPanel.queryTrace.description</description>
+		</boolean>
+		<boolean name="commandTrace">
+			<displayName>admin.controlPanel.commandTrace.displayName</displayName>
+			<description>admin.controlPanel.commandTrace.description</description>
+		</boolean>
+		<boolean name="facesTrace">
+			<displayName>admin.controlPanel.facesTrace.displayName</displayName>
+			<description>admin.controlPanel.facesTrace.description</description>
+		</boolean>
+<!-- Cant influence this setting as it is set in the hibernate session factory
+		<boolean name="sqlTrace">
+			<displayName>SQL</displayName>
+			<description>Log any SQL DML or DDL generated and executed during processing.</description>
+		</boolean>
+-->
+		<boolean name="contentTrace">
+			<displayName>admin.controlPanel.contentTrace.displayName</displayName>
+			<description>admin.controlPanel.contentTrace.description</description>
+		</boolean>
+		<boolean name="securityTrace">
+			<displayName>admin.controlPanel.securityTrace.displayName</displayName>
+			<description>admin.controlPanel.securityTrace.description</description>
+		</boolean>
+		<boolean name="bizletTrace">
+			<displayName>admin.controlPanel.bizletTrace.displayName</displayName>
+			<description>admin.controlPanel.bizletTrace.description</description>
+		</boolean>
+		<boolean name="dirtyTrace">
+			<displayName>admin.controlPanel.dirtyTrace.displayName</displayName>
+			<description>admin.controlPanel.dirtyTrace.description</description>
+		</boolean>
+		<!-- Can't influence this setting as it is set in the hibernate session factory
+		<boolean name="prettySqlOutput">
+			<displayName>Pretty SQL</displayName>
+			<description>Output any SQL logged in a more readable multiline format.</description>
+		</boolean>
+		-->
+		
+		<!-- Design attributes -->
+		<text name="query">
+			<displayName>admin.controlPanel.query.displayName</displayName>
+			<length>2048</length>
+		</text>
+		<text name="customerNameToSwapTo">
+			<displayName>admin.controlPanel.customerNameToSwapTo.displayName</displayName>
+			<domain>variant</domain>
+			<length>50</length>
+		</text>
+		
+		<!-- SAIL Attributes -->
+		<association name="sailUser" type="aggregation">
+			<displayName>admin.controlPanel.association.sailUser.displayName</displayName>
+			<documentName>UserProxy</documentName>
+		</association>
+		<text name="sailModuleName">
+			<displayName>admin.controlPanel.sailModuleName.displayName</displayName>
+			<domain>variant</domain>
+			<length>50</length>
+		</text>
+		<text name="sailUxUi">
+			<displayName>admin.controlPanel.sailUxUi.displayName</displayName>
+			<domain>variant</domain>
+			<length>50</length>
+		</text>
+		<enum name="sailUserAgentType">
+			<displayName>admin.controlPanel.sailUserAgentType.displayName</displayName>
+			<values>
+				<value code="desktop" description="Desktop" />
+				<value code="tablet" description="Tablet" />
+				<value code="phone" description="Phone" />
+				<value code="other" description="Other" />
+			</values>
+		</enum>
+		<enum name="sailTestStrategy">
+			<displayName>admin.controlPanel.sailTestStrategy.displayName</displayName>
+			<description>admin.controlPanel.sailTestStrategy.description</description>
+			<defaultValue>Assert</defaultValue>
+			<values>
+				<value code="Assert" name="Assert" />
+				<value code="Verify" name="Verify" />
+				<value code="None" name="None" />
+			</values>
+		</enum>
+		<enum name="sailExecutor">
+			<displayName>admin.controlPanel.sailExecutor.displayName</displayName>
+			<values>
+				<value code="org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor" description="PrimeFaces Inline Selenese" />
+				<value code="org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor" description="PrimeFaces Inline Web Driver" />
+			</values>
+		</enum>
+		<text name="sailComponentBuilder">
+			<displayName>admin.controlPanel.sailComponentBuilder.displayName</displayName>
+			<defaultValue>org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain</defaultValue>
+			<length>256</length>
+		</text>
+		<text name="sailLayoutBuilder">
+			<displayName>admin.controlPanel.sailLayoutBuilder.displayName</displayName>
+			<defaultValue>org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder</defaultValue>
+			<length>256</length>
+		</text>
+		<memo name="sail">
+			<displayName>admin.controlPanel.sail.displayName</displayName>
+		</memo>
+		<text name="sailLoginCustomer">
+			<displayName>admin.controlPanel.sailLoginCustomer.displayName</displayName>
+			<length>256</length>
+		</text>
+		<text name="sailLoginPassword">
+			<displayName>admin.controlPanel.sailLoginPassword.displayName</displayName>
+			<length>256</length>
+		</text>
+		<text name="sailBaseUrl">
+			<displayName>admin.controlPanel.sailBaseUrl.displayName</displayName>
+			<length>1024</length>
+		</text>
+		<!-- Results -->
+		<memo name="results">
+			<displayName>admin.controlPanel.results.displayName</displayName>
+		</memo>
+		<integer name="tabIndex">
+			 <documentation>
+			 	The index of the tab in the edit view.
+			 	This is set to the results tab when there is results to display.
+			 </documentation>
+			<displayName>admin.controlPanel.tabIndex.displayName</displayName>
+		</integer>
+		
+		<!-- Setup Settings -->
+		<collection type="aggregation" name="startupProperties" persistent="false" audited="false">
+			<displayName>admin.controlPanel.collection.startupProperties.displayName</displayName>
+			<description>admin.controlPanel.collection.startupProperties.description</description>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection type="aggregation" name="originalStartupProperties" persistent="false" audited="false">
+			<displayName>admin.controlPanel.collection.originalStartupProperties.displayName</displayName>
+			<description>admin.controlPanel.collection.originalStartupProperties.description</description>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<association type="aggregation" name="newProperty" persistent="false" audited="false">
+			<displayName>admin.controlPanel.association.newProperty.displayName</displayName>
+			<documentName>Generic</documentName>
+		</association>
+		<boolean name="addKeyNotSupported" persistent="false" audited="false">
+			<displayName>admin.controlPanel.addKeyNotSupported.displayName</displayName>
+			<description>admin.controlPanel.addkeyNotSupported.description</description>
+		</boolean>
+		
+		<!-- Cache and session -->
+		<text name="selectedCache" usage="view" audited="false" trackChanges="false">
+			<displayName>admin.controlPanel.selectedCache.displayName</displayName>
+			<domain>constant</domain>
+			<length>1024</length>
+		</text>
+		<integer name="sessionCount" usage="view" audited="false" trackChanges="false">
+			<displayName>admin.controlPanel.sessionCount.displayName</displayName>
+		</integer>
+		
+		<!-- Demo Data -->
+		<integer name="testNumberToGenerate" required="true" persistent="false" >
+   			<displayName>admin.controlPanel.testNumberToGenerate.displayName</displayName>
+   			<description>admin.controlPanel.testnumberToGenerate.description</description>
+   			<defaultValue>1</defaultValue>
+   			<validator min="1" max="10000"/>
+   		</integer>
+   		<text name="testModuleName" required="false">
+   			<displayName>admin.controlPanel.testModuleName.displayName</displayName>
+   			<description>admin.controlPanel.testModuleName.description</description>
+   			<domain>constant</domain>
+   			<length>200</length>
+   		</text>
+   		<text name="testTagName" required="false">
+   			<displayName>admin.controlPanel.testTagName.displayName</displayName>
+   			<description>admin.controlPanel.testTagName.description</description>
+   			<length>256</length>
+   		</text>
+   		<boolean name="testTagGeneratedData">
+   			<displayName>admin.controlPanel.testTagGeneratedData.displayName</displayName>
+   			<defaultValue>false</defaultValue>
+   		</boolean>
+   		<collection name="testDocumentNames" type="aggregation" usage="both">
+   			<displayName>admin.controlPanel.testDocumentNames.displayName</displayName>
+   			<domain>dynamic</domain>
+   			<documentName>ModuleDocument</documentName>
+   			<minCardinality>0</minCardinality>
+   		</collection>
+	</attributes>
+	<conditions>
+		<condition name="fixedCustomer" usage="view">
+			<description>
+				<![CDATA[
+					If this instance is for 1 fixed customer only.
+				]]>
+			</description>
+			<expression>
+				org.skyve.impl.util.UtilImpl.CUSTOMER != null
+			</expression>
+		</condition>
+		<condition name="productionInstance">
+			<expression>
+				<![CDATA[
+					org.skyve.impl.util.UtilImpl.ENVIRONMENT_IDENTIFIER==null
+				]]>
+			</expression>
+		</condition>	
+		<condition name="allowAddAPIKey">
+			<expression>
+				<![CDATA[
+				Boolean.TRUE.equals(addKeyNotSupported)
+				]]>
+			</expression>
+		</condition>
+		<condition name="taggingGeneratedDataSelected">
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(getTestTagGeneratedData())]]>
+			</expression>
+		</condition>
+		<condition name="resultsNotNull">
+			<expression>
+				<![CDATA[
+					getResults()!=null
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

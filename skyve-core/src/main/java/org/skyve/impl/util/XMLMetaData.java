@@ -1,7 +1,5 @@
 package org.skyve.impl.util;
 
-import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -21,11 +19,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.SchemaOutputResolver;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.XMLConstants;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
@@ -52,6 +46,12 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.util.Util;
 import org.xml.sax.SAXException;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.SchemaOutputResolver;
+import jakarta.xml.bind.Unmarshaller;
 
 /**
  * Marshal and unmarshal XML.
@@ -855,7 +855,7 @@ public class XMLMetaData {
 	 */
 	private static Schema getSchema(String schemaFileName) 
 	throws JAXBException {
-		SchemaFactory sf = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
+		SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		try {
 			return sf.newSchema(new File(schemaFileName));
 		}

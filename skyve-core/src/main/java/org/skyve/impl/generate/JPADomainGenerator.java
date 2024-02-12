@@ -103,8 +103,8 @@ public final class JPADomainGenerator extends DomainGenerator {
 
 		Set<String> imports = new TreeSet<>();
 		if (persistent != null) {
-			imports.add("javax.persistence.Entity");
-			imports.add("javax.persistence.Table");
+			imports.add("jakarta.persistence.Entity");
+			imports.add("jakarta.persistence.Table");
 		}
 
 		StringBuilder statics = new StringBuilder(1024);
@@ -129,30 +129,30 @@ public final class JPADomainGenerator extends DomainGenerator {
 				Collection collection = (Collection) reference;
 
 				if ((persistent != null) && (collection.isPersistent())) {
-					imports.add("javax.persistence.CascadeType");
+					imports.add("jakarta.persistence.CascadeType");
 
 					CollectionType type = collection.getType();
 					if (type == CollectionType.child) {
-						imports.add("javax.persistence.OneToMany");
-						imports.add("javax.persistence.JoinColumn");
+						imports.add("jakarta.persistence.OneToMany");
+						imports.add("jakarta.persistence.JoinColumn");
 
 						attributes.append("\t@OneToMany(cascade = CascadeType.ALL)\n");
 						attributes.append("\t@JoinColumn(name = \"parent_id\")\n");
 						attributes.append("\t@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.DELETE_ORPHAN})\n");
 					}
 					else if (type == CollectionType.composition) {
-						imports.add("javax.persistence.OneToMany");
+						imports.add("jakarta.persistence.OneToMany");
 
 						attributes.append("\t@OneToMany(cascade = CascadeType.ALL)\n");
 						attributes.append("\t@org.hibernate.annotations.Cascade({org.hibernate.annotations.CascadeType.DELETE_ORPHAN})\n");
 					}
 					else if (type == CollectionType.aggregation) {
-						imports.add("javax.persistence.ManyToMany");
+						imports.add("jakarta.persistence.ManyToMany");
 						attributes.append("\t@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})\n");
 					}
 
 					if (! collection.getOrdering().isEmpty()) {
-						imports.add("javax.persistence.OrderBy");
+						imports.add("jakarta.persistence.OrderBy");
 
 						attributes.append("\t@OrderBy(\"");
 						for (Ordering ordering : collection.getOrdering()) {
@@ -169,7 +169,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 					}
 				}
 				else {
-					imports.add("javax.persistence.Transient");
+					imports.add("jakarta.persistence.Transient");
 					attributes.append("\t@Transient\n");
 				}
 
@@ -188,12 +188,12 @@ public final class JPADomainGenerator extends DomainGenerator {
 			{
 				if (AssociationType.aggregation.equals(((Association) reference).getType())) {
 					if (persistent != null) {
-						imports.add("javax.persistence.CascadeType");
-						imports.add("javax.persistence.OneToOne");
+						imports.add("jakarta.persistence.CascadeType");
+						imports.add("jakarta.persistence.OneToOne");
 						attributes.append("\t@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})\n");
 					}
 					else {
-						imports.add("javax.persistence.Transient");
+						imports.add("jakarta.persistence.Transient");
 						attributes.append("\t@Transient\n");
 					}
 
@@ -262,7 +262,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 
 			// Generate attributes, accessors and mutators
 			if ((persistent == null) || (! attributeIsPersistent)) {
-				imports.add("javax.persistence.Transient");
+				imports.add("jakarta.persistence.Transient");
 
 				attributes.append("\t@Transient\n");
 			}
@@ -302,11 +302,11 @@ public final class JPADomainGenerator extends DomainGenerator {
 
 				parentDocument = module.getDocument(customer, parentDocumentName);
 				if (parentDocument.getPersistent() == null) {
-					imports.add("javax.persistence.Transient");
+					imports.add("jakarta.persistence.Transient");
 				}
 				else {
-					imports.add("javax.persistence.ManyToOne");
-					imports.add("javax.persistence.JoinColumn");
+					imports.add("jakarta.persistence.ManyToOne");
+					imports.add("jakarta.persistence.JoinColumn");
 				}
 			}
 		}

@@ -2,9 +2,6 @@ package org.skyve.impl.metadata.view.widget.bound.tabular;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.RelativeSize;
@@ -13,6 +10,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",

@@ -1,7 +1,5 @@
 package org.skyve.metadata.repository;
 
-import javax.annotation.Nonnull;
-
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
@@ -13,6 +11,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View;
+
+import jakarta.annotation.Nonnull;
 
 public interface MutableRepository {
 	/**

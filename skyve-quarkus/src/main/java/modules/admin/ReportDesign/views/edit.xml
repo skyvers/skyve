@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		name="edit" 
+		title="admin.reportDesign.edit.title">
+	<tabPane>
+		<tab title="admin.reportDesign.edit.general.tabTitle">
+			<hbox shrinkWrap="height">
+				<vbox>
+					<form border="true" borderTitle="admin.reportDesign.edit.reportDefinition.borderTitle">
+						<column responsiveWidth="4" />
+						<column />
+						<row>
+							<item>
+								<default binding="name" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="moduleName">
+									<onChangedHandlers>
+										<rerender clientValidation="false" />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="documentName">
+									<onChangedHandlers>
+										<rerender clientValidation="false" />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="queryName">
+									<onChangedHandlers>
+										<rerender clientValidation="false" />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="menuItem">
+									<onChangedHandlers>
+										<rerender clientValidation="false" />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="repositoryPath" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="saveToDocumentPackage" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="reportType" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="mode" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="definitionSource" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox triState="false" binding="dynamicFlow">
+									<onChangedHandlers>
+										<rerender />
+									</onChangedHandlers>
+								</checkBox>
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox triState="false" binding="verticalise" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="bandSplitType" />
+							</item>
+						</row>
+					</form>
+					<form border="true" borderTitle="admin.reportDesign.edit.subreportDefinition.borderTitle">
+						<column responsiveWidth="4" />
+						<column />
+						<column responsiveWidth="4" />
+						<column />
+						<row>
+							<item>
+								<default binding="field" />
+							</item>
+							<item>
+								<default binding="collectionType" />
+							</item>
+						</row>
+					</form>
+				</vbox>
+				<vbox>
+					<form border="true" borderTitle="admin.reportDesign.edit.reportSetup.borderTitle">
+						<column responsiveWidth="4" />
+						<column />
+						<column responsiveWidth="4" />
+						<column />
+
+						<row>
+							<item>
+								<default binding="defaultFontName" />
+							</item>
+							<item>
+								<default binding="defaultFontSize" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<spacer />
+							</item>
+							<item>
+								<spacer />
+							</item>
+							<item>
+								<default binding="titleFontSize" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="renderLabelAsTextFields" />
+							</item>
+							<item>
+								<default binding="labelAlignmentOverride" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox triState="false" binding="boldLabels" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="defaultLineColour" />
+							</item>
+							<item>
+								<default binding="defaultLineWidth" />
+							</item>
+						</row>
+					</form>
+					<form border="true" borderTitle="admin.reportDesign.edit.pageSetup.borderTitle">
+						<column responsiveWidth="4" />
+						<column />
+						<column responsiveWidth="4" />
+						<column />
+						<row>
+							<item>
+								<combo binding="orientation">
+									<onChangedHandlers>
+										<rerender />
+									</onChangedHandlers>
+								</combo>
+							</item>
+							<item>
+								<textField binding="defaultElementHeight">
+									<onBlurHandlers>
+										<rerender />
+									</onBlurHandlers>
+								</textField>
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="width" />
+							</item>
+							<item>
+								<default binding="height" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="leftMargin" />
+							</item>
+							<item>
+								<default binding="rightMargin" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="topMargin" />
+							</item>
+							<item>
+								<default binding="bottomMargin" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="columnWidth" />
+							</item>
+							<item>
+								<default binding="includePageNumbers" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="pixelToTwip" />
+							</item>
+						</row>
+					</form>
+					<form border="true" borderTitle="admin.reportDesign.edit.sectionOverride.borderTitle">
+						<column responsiveWidth="4" />
+						<column />
+						<column responsiveWidth="4" />
+						<column />
+						<row>
+							<item>
+								<default binding="sectionBorderTop" />
+							</item>
+							<item>
+								<default binding="sectionBorderLeft" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="sectionBorderRight" />
+							</item>
+							<item>
+								<default binding="sectionBorderBottom" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="sectionTitleBorderTop" />
+							</item>
+							<item>
+								<default binding="sectionTitleBorderLeft" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="sectionTitleBorderRight" />
+							</item>
+							<item>
+								<default binding="sectionTitleBorderBottom" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="sectionTitleForeground" />
+							</item>
+							<item>
+								<default binding="sectionTitleBackground" />
+							</item>
+						</row>
+					</form>
+					<form border="true" borderTitle="admin.reportDesign.edit.cellSetup.borderTitle">
+						<column responsiveWidth="4" />
+						<column />
+						<column responsiveWidth="4" />
+						<column />
+						<row>
+							<item>
+								<checkBox triState="false" binding="defaultBorder">
+									<onChangedHandlers>
+										<rerender />
+									</onChangedHandlers>
+								</checkBox>
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="defaultBorderTop" />
+							</item>
+							<item>
+								<default binding="defaultBorderLeft" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="defaultBorderBottom" />
+							</item>
+							<item>
+								<default binding="defaultBorderRight" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="defaultCellTopPadding" />
+							</item>
+							<item>
+								<default binding="defaultCellLeftPadding" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="defaultCellBottomPadding" />
+							</item>
+							<item>
+								<default binding="defaultCellRightPadding" />
+							</item>
+						</row>
+					</form>
+					<form border="true" borderTitle="admin.reportDesign.edit.checkboxes.borderTitle">
+						<column />
+						<column />
+						<row>
+							<item>
+								<default binding="checkBoxDisplayExpression" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<default binding="checkBoxFontName" />
+							</item>
+						</row>
+					</form>
+				</vbox>
+			</hbox>
+		</tab>
+		<tab title="admin.reportDesign.edit.jrxml.tabTitle">
+			<form>
+				<column responsiveWidth="2" />
+				<column />
+				<row>
+					<item>
+						<textArea binding="jrxml" minPixelHeight="500" />
+					</item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<action className="GenerateDefault" displayName="admin.reportDesign.actions.generateDefault.displayName" confirm="OK to Generate? All data will be cleared first." iconStyleClass="fa fa-bolt"/>
+		<download className="Preview" displayName="admin.reportDesign.actions.preview.displayName" iconStyleClass="fa fa-print"/>
+	</actions>
+	<newParameters />
+</view>
+

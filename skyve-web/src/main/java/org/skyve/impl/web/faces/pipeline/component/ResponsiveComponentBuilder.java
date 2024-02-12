@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlPanelGroup;
-
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -24,6 +21,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.util.UtilImpl;
+
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlPanelGroup;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	// Overridden to set the grid styling

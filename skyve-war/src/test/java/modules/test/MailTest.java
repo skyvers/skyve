@@ -14,9 +14,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 import org.skyve.util.Util;
 
-import util.AbstractH2Test;
-
-public class MailTest extends AbstractH2Test {
+public class MailTest {
 	public static final String EMAIL1 = "email1@skyve.org";
 	public static final String EMAIL2 = "email2@skyve.org";
 	public static final String EMAIL3 = "email3@skyve.org";

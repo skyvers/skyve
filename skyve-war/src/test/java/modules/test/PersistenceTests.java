@@ -41,10 +41,17 @@ import modules.test.domain.Reachability;
 public class PersistenceTests extends AbstractSkyveTestDispose {
 	@Test
 	public void testPersistenceOfObjectWithReferenceToAnotherObjectWithAggregatedCollectionWithCascadeMergeOn() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
 		test = p.save(test);
 		test = p.save(test);
 
+		Assert.assertEquals(Integer.valueOf(1), test.getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(0).getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(1).getBizVersion());
 	}

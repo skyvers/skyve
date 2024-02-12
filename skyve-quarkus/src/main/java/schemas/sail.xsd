@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/sail" xmlns:tns="http://www.skyve.org/xml/sail" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="abstractAction" type="tns:abstractAction"/>
+
+  <xs:element name="action" type="tns:action"/>
+
+  <xs:element name="automation" type="tns:automation"/>
+
+  <xs:element name="cancel" type="tns:cancel"/>
+
+  <xs:element name="clearContext" type="tns:clearContext"/>
+
+  <xs:element name="comment" type="tns:comment"/>
+
+  <xs:element name="dataEnter" type="tns:dataEnter"/>
+
+  <xs:element name="dataGridEdit" type="tns:dataGridEdit"/>
+
+  <xs:element name="dataGridNew" type="tns:dataGridNew"/>
+
+  <xs:element name="dataGridRemove" type="tns:dataGridRemove"/>
+
+  <xs:element name="dataGridSelect" type="tns:dataGridSelect"/>
+
+  <xs:element name="dataGridZoom" type="tns:dataGridZoom"/>
+
+  <xs:element name="delete" type="tns:delete"/>
+
+  <xs:element name="execute" type="tns:execute"/>
+
+  <xs:element name="interaction" type="tns:interaction"/>
+
+  <xs:element name="listGridNew" type="tns:listGridNew"/>
+
+  <xs:element name="listGridSelect" type="tns:listGridSelect"/>
+
+  <xs:element name="listGridZoom" type="tns:listGridZoom"/>
+
+  <xs:element name="login" type="tns:login"/>
+
+  <xs:element name="logout" type="tns:logout"/>
+
+  <xs:element name="lookupDescriptionAutoComplete" type="tns:lookupDescriptionAutoComplete"/>
+
+  <xs:element name="lookupDescriptionEdit" type="tns:lookupDescriptionEdit"/>
+
+  <xs:element name="lookupDescriptionNew" type="tns:lookupDescriptionNew"/>
+
+  <xs:element name="lookupDescriptionPick" type="tns:lookupDescriptionPick"/>
+
+  <xs:element name="navigateCalendar" type="tns:navigateCalendar"/>
+
+  <xs:element name="navigateEdit" type="tns:navigateEdit"/>
+
+  <xs:element name="navigateLink" type="tns:navigateLink"/>
+
+  <xs:element name="navigateList" type="tns:navigateList"/>
+
+  <xs:element name="navigateMap" type="tns:navigateMap"/>
+
+  <xs:element name="navigateTree" type="tns:navigateTree"/>
+
+  <xs:element name="ok" type="tns:ok"/>
+
+  <xs:element name="popContext" type="tns:popContext"/>
+
+  <xs:element name="procedure" type="tns:procedure"/>
+
+  <xs:element name="pushEditContext" type="tns:pushEditContext"/>
+
+  <xs:element name="pushListContext" type="tns:pushListContext"/>
+
+  <xs:element name="remove" type="tns:remove"/>
+
+  <xs:element name="save" type="tns:save"/>
+
+  <xs:element name="tabSelect" type="tns:tabSelect"/>
+
+  <xs:element name="testDataEnter" type="tns:testDataEnter"/>
+
+  <xs:element name="testFailure" type="tns:testFailure"/>
+
+  <xs:element name="testSuccess" type="tns:testSuccess"/>
+
+  <xs:element name="testValue" type="tns:testValue"/>
+
+  <xs:element name="userAgentType" type="tns:userAgentType"/>
+
+  <xs:element name="zoomIn" type="tns:zoomIn"/>
+
+  <xs:element name="zoomOut" type="tns:zoomOut"/>
+
+  <xs:complexType name="automation">
+    <xs:sequence>
+      <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
+      <xs:element ref="tns:interaction" maxOccurs="unbounded"/>
+      <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="uxui" type="xs:string" use="required"/>
+    <xs:attribute name="userAgentType" type="tns:userAgentType" use="required"/>
+    <xs:attribute name="testStrategy" type="tns:testStrategy"/>
+  </xs:complexType>
+
+  <xs:complexType name="procedure">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:login"/>
+        <xs:element ref="tns:logout"/>
+        <xs:element ref="tns:navigateList"/>
+        <xs:element ref="tns:navigateTree"/>
+        <xs:element ref="tns:navigateMap"/>
+        <xs:element ref="tns:navigateCalendar"/>
+        <xs:element ref="tns:pushListContext"/>
+        <xs:element ref="tns:navigateEdit"/>
+        <xs:element ref="tns:navigateLink"/>
+        <xs:element ref="tns:tabSelect"/>
+        <xs:element ref="tns:testDataEnter"/>
+        <xs:element ref="tns:dataEnter"/>
+        <xs:element ref="tns:ok"/>
+        <xs:element ref="tns:save"/>
+        <xs:element ref="tns:cancel"/>
+        <xs:element ref="tns:delete"/>
+        <xs:element ref="tns:zoomOut"/>
+        <xs:element ref="tns:remove"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:lookupDescriptionAutoComplete"/>
+        <xs:element ref="tns:lookupDescriptionPick"/>
+        <xs:element ref="tns:lookupDescriptionNew"/>
+        <xs:element ref="tns:lookupDescriptionEdit"/>
+        <xs:element ref="tns:zoomIn"/>
+        <xs:element ref="tns:dataGridNew"/>
+        <xs:element ref="tns:dataGridZoom"/>
+        <xs:element ref="tns:dataGridEdit"/>
+        <xs:element ref="tns:dataGridRemove"/>
+        <xs:element ref="tns:dataGridSelect"/>
+        <xs:element ref="tns:listGridNew"/>
+        <xs:element ref="tns:listGridZoom"/>
+        <xs:element ref="tns:listGridSelect"/>
+        <xs:element ref="tns:testValue"/>
+        <xs:element ref="tns:testSuccess"/>
+        <xs:element ref="tns:testFailure"/>
+        <xs:element ref="tns:comment"/>
+        <xs:element ref="tns:execute"/>
+        <xs:element ref="tns:pushEditContext"/>
+        <xs:element ref="tns:popContext"/>
+        <xs:element ref="tns:clearContext"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="login">
+    <xs:sequence/>
+    <xs:attribute name="customer" type="xs:string"/>
+    <xs:attribute name="password" type="xs:string" use="required"/>
+    <xs:attribute name="user" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="logout">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="navigateList">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="query" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="navigateEdit">
+    <xs:sequence/>
+    <xs:attribute name="bizId" type="xs:string"/>
+    <xs:attribute name="document" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="navigateTree">
+    <xs:complexContent>
+      <xs:extension base="tns:navigateList">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="navigateMap">
+    <xs:complexContent>
+      <xs:extension base="tns:navigateList">
+        <xs:sequence/>
+        <xs:attribute name="geometryBinding" type="xs:string"/>
+        <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
+        <xs:attribute name="showRefreshControls" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="navigateCalendar">
+    <xs:complexContent>
+      <xs:extension base="tns:navigateList">
+        <xs:sequence/>
+        <xs:attribute name="endBinding" type="xs:string"/>
+        <xs:attribute name="startBinding" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="navigateLink">
+    <xs:sequence/>
+    <xs:attribute name="href" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="tabSelect">
+    <xs:sequence/>
+    <xs:attribute name="path" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testDataEnter">
+    <xs:sequence/>
+    <xs:attribute name="fixture" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataEnter">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="navigateToWidget" type="xs:boolean"/>
+    <xs:attribute name="value" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ok">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractAction" abstract="true">
+    <xs:sequence/>
+    <xs:attribute name="testSuccess" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="save">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+        <xs:attribute name="createView" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="cancel">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="delete">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="zoomOut">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="remove">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="action">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescriptionAutoComplete">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="search" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescriptionPick">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescriptionNew">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescriptionEdit">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="zoomIn">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridNew">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridZoom">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridEdit">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridRemove">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridSelect">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridNew">
+    <xs:sequence/>
+    <xs:attribute name="createView" type="xs:boolean"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridZoom">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridSelect">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testValue">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testSuccess">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="testFailure">
+    <xs:sequence/>
+    <xs:attribute name="message" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:simpleType name="comment">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="execute">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:complexType name="pushListContext">
+    <xs:complexContent>
+      <xs:extension base="tns:navigateList">
+        <xs:sequence/>
+        <xs:attribute name="userAgentType" type="tns:userAgentType"/>
+        <xs:attribute name="uxui" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="pushEditContext">
+    <xs:sequence/>
+    <xs:attribute name="createView" type="xs:boolean"/>
+    <xs:attribute name="document" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="userAgentType" type="tns:userAgentType"/>
+    <xs:attribute name="uxui" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="popContext">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="clearContext">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="interaction">
+    <xs:sequence>
+      <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
+      <xs:element name="method" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <xs:element ref="tns:login"/>
+              <xs:element ref="tns:logout"/>
+              <xs:element ref="tns:navigateList"/>
+              <xs:element ref="tns:navigateTree"/>
+              <xs:element ref="tns:navigateMap"/>
+              <xs:element ref="tns:navigateCalendar"/>
+              <xs:element ref="tns:pushListContext"/>
+              <xs:element ref="tns:navigateEdit"/>
+              <xs:element ref="tns:navigateLink"/>
+              <xs:element ref="tns:tabSelect"/>
+              <xs:element ref="tns:testDataEnter"/>
+              <xs:element ref="tns:dataEnter"/>
+              <xs:element ref="tns:ok"/>
+              <xs:element ref="tns:save"/>
+              <xs:element ref="tns:cancel"/>
+              <xs:element ref="tns:delete"/>
+              <xs:element ref="tns:zoomOut"/>
+              <xs:element ref="tns:remove"/>
+              <xs:element ref="tns:action"/>
+              <xs:element ref="tns:lookupDescriptionAutoComplete"/>
+              <xs:element ref="tns:lookupDescriptionPick"/>
+              <xs:element ref="tns:lookupDescriptionNew"/>
+              <xs:element ref="tns:lookupDescriptionEdit"/>
+              <xs:element ref="tns:zoomIn"/>
+              <xs:element ref="tns:dataGridNew"/>
+              <xs:element ref="tns:dataGridZoom"/>
+              <xs:element ref="tns:dataGridEdit"/>
+              <xs:element ref="tns:dataGridRemove"/>
+              <xs:element ref="tns:dataGridSelect"/>
+              <xs:element ref="tns:listGridNew"/>
+              <xs:element ref="tns:listGridZoom"/>
+              <xs:element ref="tns:listGridSelect"/>
+              <xs:element ref="tns:testValue"/>
+              <xs:element ref="tns:testSuccess"/>
+              <xs:element ref="tns:testFailure"/>
+              <xs:element ref="tns:comment"/>
+              <xs:element ref="tns:execute"/>
+              <xs:element ref="tns:pushEditContext"/>
+              <xs:element ref="tns:popContext"/>
+              <xs:element ref="tns:clearContext"/>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:simpleType name="userAgentType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="phone"/>
+      <xs:enumeration value="tablet"/>
+      <xs:enumeration value="desktop"/>
+      <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="testStrategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Assert"/>
+      <xs:enumeration value="Verify"/>
+      <xs:enumeration value="None"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

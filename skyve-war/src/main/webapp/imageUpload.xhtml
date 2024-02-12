@@ -71,10 +71,10 @@
 				<!-- Upload the cropped image as a blob emulating an ajax form post -->
 				function uploadCropped(blob) {
 					var formData = new FormData(document.getElementById('form'));
-					formData.append('javax.faces.partial.ajax', 'true');
-					formData.append('javax.faces.partial.execute', 'upload');
-					formData.append('javax.faces.source', 'upload');
-					formData.append('javax.faces.partial.render', 'messages');
+					formData.append('jakarta.faces.partial.ajax', 'true');
+					formData.append('jakarta.faces.partial.execute', 'upload');
+					formData.append('jakarta.faces.source', 'upload');
+					formData.append('jakarta.faces.partial.render', 'messages');
 					formData.append('upload', blob, fileName);
 
 					$.ajax({

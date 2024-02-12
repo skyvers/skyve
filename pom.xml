@@ -22,7 +22,7 @@
 		<skyve.version>${project.version}</skyve.version>
 		<browscap.version>1.4.3</browscap.version>
 		<!-- Keep this in lock step with hibernate (mockito and selenium aren't critical) -->
-		<byte-buddy.version>1.11.12</byte-buddy.version>
+		<byte-buddy.version>1.12.18</byte-buddy.version>
 		<commonmark.version>0.10.0</commonmark.version>
 		<commons-beanutils.version>1.9.4</commons-beanutils.version>
 		<commons-codec.version>1.15</commons-codec.version>
@@ -31,56 +31,53 @@
 		<commons-lang3.version>3.12.0</commons-lang3.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<commons-validator.version>1.7</commons-validator.version>
-		<deltaspike-core.version>1.8.0</deltaspike-core.version>
-		<ehcache.version>3.9.0</ehcache.version>
-		<geodb.version>0.9</geodb.version>
+		<ehcache.version>3.10.0</ehcache.version>
+		<!-- EL test implementation -->
+		<expressly.version>5.0.0</expressly.version>
 		<gson.version>2.8.9</gson.version>
-		<!-- required for >= java 9 and even though geodb 0.9 depends on 1.0.b10, it still works with this version -->
-		<hatbox.version>1.0.b11</hatbox.version>
-		<h2.version>1.3.173</h2.version>
-		<hibernate.version>5.4.33.Final</hibernate.version>
-		<hibernate-entitymanager.version>5.4.33.Final</hibernate-entitymanager.version>
-		<hibernate-spatial.version>5.4.33.Final</hibernate-spatial.version>
+		<h2.version>2.2.220</h2.version>
+		<hibernate.version>5.6.15.Final</hibernate.version>
+		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
+		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
 		<ireport.version>4.7.0</ireport.version>
 		<groovy.version>2.3.2</groovy.version>
 		<jasperreports.version>6.20.5</jasperreports.version>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<javassist.version>3.20.0-GA</javassist.version>
-		<javaee-api.version>7.0</javaee-api.version>
-		<jts.version>1.16.1</jts.version>
+		<jakartaee-api.version>10.0.0</jakartaee-api.version>
+		<jts.version>1.19.0</jts.version>
 		<lucene.version>9.7.0</lucene.version>
-		<omnifaces.version>2.7.1</omnifaces.version>
+		<omnifaces.version>4.3</omnifaces.version>
 		<owasp.encoder.version>1.2.3</owasp.encoder.version>
 		<owasp.html.sanitizer.version>20200713.1</owasp.html.sanitizer.version>
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.10.0</pf4j.version>
 		<poi.version>5.2.3</poi.version>
-		<primefaces.version>13.0.4</primefaces.version>
-		<primefaces-extensions.version>13.0.4</primefaces-extensions.version>
+		<primefaces.version>13.0.5</primefaces.version>
+		<primefaces-extensions.version>13.0.5</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
 		<quartz.version>2.3.2</quartz.version>
-		<slf4j-api.version>1.7.32</slf4j-api.version>
+		<slf4j-api.version>2.0.11</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
 		<super-csv.version>2.4.0</super-csv.version>
 		<thumbnailator.version>0.4.8</thumbnailator.version>
-		<tika.version>2.8.0</tika.version>
+		<tika.version>2.9.1</tika.version>
 		<umlgraph.version>5.6.6</umlgraph.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
 		<generex.version>1.0.2</generex.version>
 		<junidecode.version>0.4.1</junidecode.version>
 		<junit.version>4.13.1</junit.version>
 		<junit-jupiter.version>5.7.1</junit-jupiter.version>
-		<mockito.version>2.28.2</mockito.version>
+		<mockito.version>4.2.0</mockito.version>
 		<hamcrest.version>1.3</hamcrest.version>
-		<weld-se.version>2.4.4.Final</weld-se.version>
-		<spring-security.version>5.8.5</spring-security.version>
-		<spring.version>5.3.29</spring.version>
-		<reactive-streams.version>1.0.2</reactive-streams.version>
+		<weld.version>5.1.2.Final</weld.version>
+		<spring-security.version>6.2.1</spring-security.version>
+		<spring.version>6.1.3</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.1.22</flying-saucer.version>
 		<freemarker.version>2.3.29</freemarker.version>
-		<cronutils.version>9.1.6</cronutils.version>
+		<cronutils.version>9.2.1</cronutils.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -104,7 +101,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <argLine>-Djava.locale.providers=COMPAT,CLDR </argLine>
-                    </configuration>
+                   </configuration>
                 </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -181,10 +178,6 @@
             <id>Prime Faces</id>
             <url>https://repository.primefaces.org</url>
         </repository>
-        <repository>
-            <id>boundlessgeo</id>
-            <url>https://repo.osgeo.org/repository/release/</url>
-        </repository>
 		<repository>
 			<id>skyve</id>
 			<url>https://repo.skyve.org/repository/skyve/</url>
@@ -204,9 +197,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>javax</groupId>
-				<artifactId>javaee-api</artifactId>
-				<version>${javaee-api.version}</version>
+				<groupId>jakarta.platform</groupId>
+				<artifactId>jakarta.jakartaee-api</artifactId>
+				<version>${jakartaee-api.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -254,6 +247,11 @@
 				<version>${ehcache.version}</version>
 			</dependency>
 			<dependency>
+			    <groupId>org.glassfish.expressly</groupId>
+			    <artifactId>expressly</artifactId>
+				<version>${expressly.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
 				<artifactId>commonmark</artifactId>
 				<version>${commonmark.version}</version>
@@ -275,23 +273,36 @@
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-core</artifactId>
+				<artifactId>hibernate-core-jakarta</artifactId>
 				<version>${hibernate.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-entitymanager</artifactId>
-				<version>${hibernate-entitymanager.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jboss</groupId>
+						<artifactId>jandex</artifactId>
+                    </exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-spatial</artifactId>
 				<version>${hibernate-spatial.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-core</artifactId>
+                    </exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-jcache</artifactId>
 				<version>${hibernate.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-core</artifactId>
+                    </exclusion>
+				</exclusions>
 			</dependency>
 			<!-- Set for hibernate use here to stop conflicts in mockito and selenium etc -->
 			<dependency>
@@ -349,11 +360,13 @@
 				<groupId>org.primefaces</groupId>
 				<artifactId>primefaces</artifactId>
 				<version>${primefaces.version}</version>
+				<classifier>jakarta</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.primefaces.extensions</groupId>
 				<artifactId>primefaces-extensions</artifactId>
 				<version>${primefaces-extensions.version}</version>
+				<classifier>jakarta</classifier>
 			</dependency>
 			<dependency>
 				<groupId>org.omnifaces</groupId>
@@ -386,23 +399,12 @@
 				<artifactId>jts-core</artifactId>
 				<version>${jts.version}</version>
 			</dependency>
-			<!-- remove this dependency when geodb depends on at least 1.0.b11 (which is java 9 module friendly) -->
-			<dependency>
-				<groupId>net.sourceforge.hatbox</groupId>
-				<artifactId>hatbox</artifactId>
-				<version>${hatbox.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>${quartz.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.apache.deltaspike.core</groupId>
-				<artifactId>deltaspike-core-api</artifactId>
-				<version>${deltaspike-core.version}</version>
-			</dependency>
-			<dependency>
+    		<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-web</artifactId>
 				<version>${spring-security.version}</version>
@@ -427,6 +429,7 @@
 				<artifactId>spring-jdbc</artifactId>
 				<version>${spring.version}</version>
 			</dependency>
+		
 			<dependency>
 				<groupId>org.pf4j</groupId>
 				<artifactId>pf4j</artifactId>
@@ -453,12 +456,6 @@
 				<groupId>com.cronutils</groupId>
 				<artifactId>cron-utils</artifactId>
 				<version>${cronutils.version}</version>
-			</dependency>
-			<!-- Keep this in lock step with guava lib used in foundry -->
-			<dependency>
-				<groupId>com.google.code.findbugs</groupId>
-				<artifactId>jsr305</artifactId>
-				<version>3.0.2</version>
 			</dependency>
 
 			<!-- Test dependencies -->
@@ -493,9 +490,9 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-	    		<groupId>org.jboss.weld.se</groupId>
-	    		<artifactId>weld-se</artifactId>
-	    		<version>${weld-se.version}</version>
+				<groupId>org.jboss.weld.se</groupId>
+				<artifactId>weld-se-core</artifactId>
+	    		<version>${weld.version}</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -508,22 +505,9 @@
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
+				<artifactId>slf4j-jdk14</artifactId>
 				<version>${slf4j-api.version}</version>
 				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.opengeo</groupId>
-				<artifactId>geodb</artifactId>
-				<version>${geodb.version}</version>
-				<scope>runtime</scope>
-				<!-- Excluded in favour of 1.0.b11 which is java 9 module friendly) -->
-				<exclusions>
-					<exclusion>
-						<groupId>net.sourceforge.hatbox</groupId>
-						<artifactId>hatbox</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.supercsv</groupId>
@@ -570,12 +554,6 @@
 				<groupId>org.tukaani</groupId>
 				<artifactId>xz</artifactId>
 				<version>1.2</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.reactivestreams</groupId>
-				<artifactId>reactive-streams</artifactId>
-				<version>${reactive-streams.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 		</dependencies>
