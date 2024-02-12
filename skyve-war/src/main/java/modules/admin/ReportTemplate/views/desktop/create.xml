@@ -13,8 +13,8 @@
 	<actions>
 		<cancel/>
 		
-		<action className="Back" displayName="Back" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="enterDetails" />
-		<action className="Next" displayName="Next" clientValidation="true" iconStyleClass="fa fa-arrow-right" invisible="notShowNext" />
+		<action className="Back" displayName="Back" clientValidation="false" iconStyleClass="fas fa-arrow-left" invisible="enterDetails" />
+		<action className="Next" displayName="Next" clientValidation="true" iconStyleClass="fas fa-arrow-right" invisible="notShowNext" />
 		<save visible="enterMarkup"/>
 	</actions>
 	<newParameters />

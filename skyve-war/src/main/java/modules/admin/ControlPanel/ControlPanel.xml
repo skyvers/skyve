@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Control Panel</singularAlias>
 	<pluralAlias>Control Panels</pluralAlias>
-	<iconStyleClass>fa fa-sliders</iconStyleClass>
+	<iconStyleClass>fas fa-sliders</iconStyleClass>
 	<attributes>
 		<!-- Instrumentation attributes -->
 		<boolean name="xmlTrace">

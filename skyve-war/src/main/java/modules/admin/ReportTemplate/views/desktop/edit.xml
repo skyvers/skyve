@@ -114,11 +114,11 @@
 	<actions>
 		<defaults />
 
-		<download className="TestReport" displayName="Test Report" iconStyleClass="fa fa-file-pdf-o" visible="typeFreemarker" />
-		<download className="TestJasperReport" displayName="Test Report" iconStyleClass="fa fa-file-pdf-o" visible="typeJasper" />
-		<action className="CopyReport" displayName="Copy Report" iconStyleClass="fa fa-copy" confirm="Ok to copy this report to a new report?" />
-		<download className="ExportReportSpecification" displayName="Export Report Specification" iconStyleClass="fa fa-download" />
-		<download className="DownloadTemplate" displayName="Download Template" iconStyleClass="fa fa-arrow-circle-o-down" />
+		<download className="TestReport" displayName="Test Report" iconStyleClass="fas fa-file-pdf" visible="typeFreemarker" />
+		<download className="TestJasperReport" displayName="Test Report" iconStyleClass="fas fa-file-pdf" visible="typeJasper" />
+		<action className="CopyReport" displayName="Copy Report" iconStyleClass="fas fa-copy" confirm="Ok to copy this report to a new report?" />
+		<download className="ExportReportSpecification" displayName="Export Report Specification" iconStyleClass="fas fa-download" />
+		<download className="DownloadTemplate" displayName="Download Template" iconStyleClass="fas fa-circle-down" />
 	</actions>
 	<newParameters />
 </view>

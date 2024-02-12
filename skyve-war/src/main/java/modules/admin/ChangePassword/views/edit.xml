@@ -42,6 +42,6 @@
 	</form>
 	<actions>
 		<action className="MakePasswordChange" displayName="admin.changePassword.actions.makePasswordChange.displayName" toolTip="admin.changePassword.actions.makePasswordChange.toolTip"
-			relativeIconFileName="icons/document/password16.png" iconStyleClass="fa fa-lock" inActionPanel="false" />
+			relativeIconFileName="icons/document/password16.png" iconStyleClass="fas fa-lock" inActionPanel="false" />
 	</actions>
 </view>

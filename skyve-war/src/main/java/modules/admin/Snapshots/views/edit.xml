@@ -47,6 +47,6 @@
 					inActionPanel="false"
 					clientValidation="false"
 					toolTip="admin.snapshots.actions.reorder.toolTip"
-					iconStyleClass="fa fa-sort" />
+					iconStyleClass="fas fa-sort" />
 	</actions>
 </view>

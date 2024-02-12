@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Document Creator</singularAlias>
 	<pluralAlias>Document Creator</pluralAlias>
-	<iconStyleClass>fa fa-pencil-square-o</iconStyleClass>
+	<iconStyleClass>fas fa-square-pen</iconStyleClass>
 	<bizKey expression="Document Creator"/>
 	<attributes>
 		<text name="outputLocation">

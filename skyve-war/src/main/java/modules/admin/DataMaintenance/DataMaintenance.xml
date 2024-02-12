@@ -9,7 +9,7 @@
 	</persistent>
 	<singularAlias>Data Maintenance</singularAlias>
 	<pluralAlias>Data Maintenance</pluralAlias>
-	<iconStyleClass>fa fa-wrench</iconStyleClass>
+	<iconStyleClass>fas fa-wrench</iconStyleClass>
 	<bizKey expression="Data Maintenance"/>
 	<attributes>
 		<text name="modDocName">

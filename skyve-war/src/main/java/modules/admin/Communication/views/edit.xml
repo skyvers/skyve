@@ -306,27 +306,27 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action clientValidation="true" className="GetResults" displayName="admin.communication.actions.getResults.displayName" inActionPanel="false" iconStyleClass="fa fa-rotate-right" />
+		<action clientValidation="true" className="GetResults" displayName="admin.communication.actions.getResults.displayName" inActionPanel="false" iconStyleClass="fas fa-rotate-right" />
 
-		<action clientValidation="true" className="GetCount" displayName="admin.communication.actions.getCount.displayName" inActionPanel="false" iconStyleClass="fa fa-calculator" />
+		<action clientValidation="true" className="GetCount" displayName="admin.communication.actions.getCount.displayName" inActionPanel="false" iconStyleClass="fas fa-calculator" />
 
-		<action clientValidation="true" className="CreateFiles" displayName="admin.communication.actions.createFiles.displayName" inActionPanel="false" iconStyleClass="fa fa-cogs" confirm="OK to create email files?" />
+		<action clientValidation="true" className="CreateFiles" displayName="admin.communication.actions.createFiles.displayName" inActionPanel="false" iconStyleClass="fas fa-cogs" confirm="OK to create email files?" />
 
-		<action clientValidation="true" className="SendNow" displayName="admin.communication.actions.sendNow.displayName" inActionPanel="false" iconStyleClass="fa fa-envelope" confirm="OK to send emails?" />
+		<action clientValidation="true" className="SendNow" displayName="admin.communication.actions.sendNow.displayName" inActionPanel="false" iconStyleClass="fas fa-envelope" confirm="OK to send emails?" />
 
-		<action clientValidation="true" className="TestSend" displayName="admin.communication.actions.testSend.displayName" inActionPanel="false" iconStyleClass="fa fa-envelope-square" confirm="Send test email to yourself?" />
+		<action clientValidation="true" className="TestSend" displayName="admin.communication.actions.testSend.displayName" inActionPanel="false" iconStyleClass="fas fa-envelope-square" confirm="Send test email to yourself?" />
 
-		<action clientValidation="false" className="AddUnsubscribeLink" displayName="admin.communication.actions.addUnsubscribeLink.displayName" iconStyleClass="fa fa-link" inActionPanel="false" />
+		<action clientValidation="false" className="AddUnsubscribeLink" displayName="admin.communication.actions.addUnsubscribeLink.displayName" iconStyleClass="fas fa-link" inActionPanel="false" />
 
-		<upload className="AddImage" displayName="admin.communication.actions.addImage.displayName" inActionPanel="false" iconStyleClass="fa fa-file-photo-o" />
+		<upload className="AddImage" displayName="admin.communication.actions.addImage.displayName" inActionPanel="false" iconStyleClass="fas fa-image" />
 
 		<action className="BatchSelected" displayName="admin.communication.actions.batchSelected.displayName" inActionPanel="false" />
 
 		<action className="DeleteBatch" displayName="admin.communication.actions.deleteBatch.displayName" inActionPanel="false" disabled="notBatchSelected" confirm="Are you sure you want to delete this batch folder from the server filesystem?"
-			iconStyleClass="fa fa-trash" />
+			iconStyleClass="fas fa-trash-can" />
 
 		<download className="ZipBatch" displayName="admin.communication.actions.zipBatch.displayName" inActionPanel="false" disabled="notBatchSelected"
-			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zip-o" />
+			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fas fa-file-zipper" />
 
 	</actions>
 	<newParameters />

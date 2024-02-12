@@ -343,8 +343,8 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action className="GenerateDefault" displayName="admin.reportDesign.actions.generateDefault.displayName" confirm="OK to Generate? All data will be cleared first." iconStyleClass="fa fa-bolt"/>
-		<download className="Preview" displayName="admin.reportDesign.actions.preview.displayName" iconStyleClass="fa fa-print"/>
+		<action className="GenerateDefault" displayName="admin.reportDesign.actions.generateDefault.displayName" confirm="OK to Generate? All data will be cleared first." iconStyleClass="fas fa-bolt"/>
+		<download className="Preview" displayName="admin.reportDesign.actions.preview.displayName" iconStyleClass="fas fa-print"/>
 	</actions>
 	<newParameters />
 </view>

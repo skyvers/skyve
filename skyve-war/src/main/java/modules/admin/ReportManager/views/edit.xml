@@ -44,8 +44,8 @@
 	</vbox>
 	<actions>
 		<!-- <defaults /> -->
-		<download className="ExportReportSpecifications" displayName="Export Report Specifications" iconStyleClass="fa fa-download" clientValidation="false" inActionPanel="false"/>
-		<upload className="ImportReportSpecifications" displayName="Import Report Specifications" iconStyleClass="fa fa-upload" clientValidation="true" inActionPanel="false"/>
+		<download className="ExportReportSpecifications" displayName="Export Report Specifications" iconStyleClass="fas fa-download" clientValidation="false" inActionPanel="false"/>
+		<upload className="ImportReportSpecifications" displayName="Import Report Specifications" iconStyleClass="fas fa-upload" clientValidation="true" inActionPanel="false"/>
 	</actions>
 	<newParameters />
 </view>

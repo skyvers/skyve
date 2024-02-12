@@ -7,7 +7,7 @@
 	<singularAlias>Audit</singularAlias>
 	<pluralAlias>Audits</pluralAlias>
 	<audited>false</audited>
-	<iconStyleClass>fa fa-check</iconStyleClass>
+	<iconStyleClass>fas fa-check</iconStyleClass>
 	<bizKey expression="{operation} by {userName} at {timestamp}" />
 	<attributes>
 		<text name="auditModuleName" required="true">
