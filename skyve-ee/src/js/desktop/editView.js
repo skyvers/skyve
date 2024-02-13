@@ -764,7 +764,7 @@ isc.EditView.addMethods({
 		var link = '';
 		if (values.persisted) {
 			link = '<a target="_top" href="?a=e&m=' + this._mod + '&d=' + this._doc +
-					'&i=' + values.bizId + '" title="Link" class="dhtmlPageButton"><i class="fa fa-2x fa-thumb-tack"></i></a>';
+					'&i=' + values.bizId + '" title="Link" class="dhtmlPageButton"><i class="fa-solid fa-2x fa-thumbtack"></i></a>';
 		}
 		
 		var header = isc.BizUtil.headerTemplate;

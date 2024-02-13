@@ -69,6 +69,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.util.Icons;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -102,8 +103,6 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"uniqueConstraints"})
 public class DocumentMetaData extends NamedMetaData implements ConvertableMetaData<Document> {
 	private static final long serialVersionUID = 222166383815547958L;
-
-	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
 
 	private Extends inherits;
 	private java.lang.Boolean abstractClass;
@@ -344,7 +343,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 		String icon = getIconStyleClass();
 
 		if ((icon16 == null) && (icon32 == null) && (icon == null)) {
-			icon = DEFAULT_DOCUMENT_ICON_STYLE_CLASS;
+			icon = Icons.FONT_DOCUMENT;
 		}
 		else {
 			if (icon16 == null) {

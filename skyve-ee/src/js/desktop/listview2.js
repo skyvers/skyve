@@ -211,7 +211,7 @@ isc.ListView.addClassProperties({
 //		isc.ListView._map.setDataSource(ds);
 //		isc.ListView._setHeading("MAP", ds.icon, ds.fontIcon, ds.modoc);
 		isc.ListView._map.setDataSource(ID);
-		isc.ListView._setHeading('MAP', 'shared/icons/Home.png', 'fa fa-globe fa-2x', '');
+		isc.ListView._setHeading('MAP', 'shared/icons/Home.png', 'fa-solid fa-globe fa-2x', '');
 	},
 	
 	showPortal: function() {
@@ -229,7 +229,7 @@ isc.ListView.addClassProperties({
 		}
 		isc.ListView.contents.showMember(isc.ListView._portal);
 
-		isc.ListView._setHeading("DASHBOARD", "shared/icons/Home.png", 'fa fa-home fa-2x', '');
+		isc.ListView._setHeading("DASHBOARD", "shared/icons/Home.png", 'fa-solid fa-house fa-2x', '');
 	}
 });
 isc.ListView.contents.addMember(isc.ListView._heading);

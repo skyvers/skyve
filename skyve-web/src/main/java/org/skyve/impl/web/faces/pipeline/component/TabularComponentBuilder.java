@@ -163,6 +163,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Icons;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
@@ -185,7 +186,7 @@ import jakarta.faces.component.html.HtmlSelectOneMenu;
 import jakarta.faces.convert.Converter;
 
 public abstract class TabularComponentBuilder extends ComponentBuilder {
-	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
+	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"" + Icons.FONT_ADD + " skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
 	public static final String SINGLE_ACTION_COLUMN_WIDTH = "60";
 	public static final Integer SINGLE_ACTION_COLUMN_WIDTH_INTEGER = Integer.valueOf(60);
@@ -902,7 +903,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(button, null);
 		button.setValue(null);
 		button.setTitle("Toggle filters");
-		button.setIcon("fa fa-filter");
+		button.setIcon(Icons.FONT_FILTER);
 		button.setOnclick(String.format("SKYVE.PF.toggleFilters('%s'); return false;", dataTableId));
 		return button;
 	}
@@ -917,7 +918,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 		result.setValue(null);
 		result.setTitle("Add a new " + singularDocumentAlias);
-		result.setIcon("fa fa-plus");
+		result.setIcon(Icons.FONT_ADD);
 		action(result, ImplicitActionName.Add, null, dataWidgetBinding, dataWidgetVar, inline, null);
 		result.setProcess(process);
 		// if we are in an inline data grid, update the grid on a new record
@@ -948,7 +949,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 		result.setValue(null);
 		result.setTitle("Remove this " + singularDocumentAlias);
-		result.setIcon("fa fa-minus");
+		result.setIcon(Icons.FONT_REMOVE);
 		result.setProcess(process);
 		// We cannot just update the data table ever when removing a row as
 		// the grid may go invisible if the last row is removed.
@@ -976,7 +977,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 		result.setValue(null);
 		result.setTitle("Edit this " + singularDocumentAlias);
-		result.setIcon("fa fa-chevron-right");
+		result.setIcon(Icons.FONT_ZOOM_IN);
 		result.setProcess(process);
 		result.setUpdate(update);
 		action(result, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
@@ -1154,7 +1155,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton mapButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(mapButton, null);
 		String mapButtonId = mapButton.getId();
-		mapButton.setIcon("fa fa-globe");
+		mapButton.setIcon(Icons.FONT_MAP);
 		mapButton.setTitle("Map");
 		mapButton.setValue(null);
 		mapButton.setType("button"); // no process or update required
@@ -1870,7 +1871,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			setId(button, null);
 			button.setValue(null);
 			button.setTitle("New record");
-			button.setIcon("fa fa-plus");
+			button.setIcon(Icons.FONT_NEW);
 			button.setType("button"); // no process or update required
 			ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
 			if (disabled != null) {
@@ -1913,7 +1914,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(button, null);
 		button.setValue(null);
 		button.setTitle("View Detail");
-		button.setIcon("fa fa-chevron-right");
+		button.setIcon(Icons.FONT_ZOOM_IN);
 		button.setType("button"); // no process or update required
 		if (zoomDisabledConditionName != null) {
 			button.setValueExpression("disabled",
@@ -1951,7 +1952,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// Add Zoom In menu item
 		UIMenuItem item = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
 		item.setValue("View Detail");
-		item.setIcon("fa fa-chevron-right");
+		item.setIcon(Icons.FONT_ZOOM_IN);
 		item.setUrl("#");
 		script.append("var s=PF('").append(listGridId).append("').selection[0];SKYVE.PF.pushHistory('");
 		script.append("?a=").append(WebAction.e.toString()).append("&m='+s.substring(s.indexOf('.') + 1)+");
@@ -1966,7 +1967,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// Add zoom In New Tab menu item
 		item = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
 		item.setValue("Popout Detail");
-		item.setIcon("fa fa-share-square-o");
+		item.setIcon("fa-solid fa-share-from-square");
 		item.setUrl("#");
 		script.setLength(0);
 		script.append("var s=PF('").append(listGridId).append("').selection[0];window.open('");
@@ -2390,7 +2391,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Sign");
-		button.setIcon("fa fa-upload");
+		button.setIcon(Icons.FONT_UPLOAD);
 		button.setTitle("Submit Signature");
 		button.setStyle("width:75px");
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
@@ -2431,7 +2432,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Clear");
-		button.setIcon("fa fa-trash");
+		button.setIcon(Icons.FONT_CLEAR);
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
 		button.setType("button"); // no process or update required
@@ -2451,7 +2452,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Clear");
-		button.setIcon("fa fa-trash");
+		button.setIcon(Icons.FONT_CLEAR);
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
@@ -2502,7 +2503,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
-		uploadButton.setIcon("fa fa-upload");
+		uploadButton.setIcon(Icons.FONT_UPLOAD);
 		uploadButton.setTitle("Upload Content");
 		uploadButton.setValue(null);
 		uploadButton.setType("button"); // no process or update required
@@ -2562,7 +2563,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(clearButton, null);
-		clearButton.setIcon("fa fa-trash");
+		clearButton.setIcon(Icons.FONT_CLEAR);
 		clearButton.setTitle("Clear Content");
 		clearButton.setValue(null);
 		clearButton.setType("button"); // no process or update required
@@ -3747,7 +3748,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// NB yes this is backwards coz its inserted
 		href.insert(0, '?').insert(0, reportFormat).insert(0, '.').insert(0, reportName).insert(0, "report/");
 
-		return linkButton((iconStyleClass == null) ? "fa fa-newspaper-o" : iconStyleClass,
+		return linkButton((iconStyleClass == null) ? Icons.FONT_REPORT : iconStyleClass,
 							null,
 							null,
 							title,
@@ -3836,7 +3837,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
 		uploadButton.setValue(title);
-		uploadButton.setIcon((iconStyleClass == null) ? "fa fa-upload" : iconStyleClass);
+		uploadButton.setIcon((iconStyleClass == null) ? Icons.FONT_UPLOAD : iconStyleClass);
 		uploadButton.setTitle(tooltip);
 		uploadButton.setType("button"); // no process or update required
 		setSizeAndTextAlignStyle(uploadButton, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
@@ -4458,7 +4459,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
             dragHandleColumn.setResponsivePriority(1);
 
             final HtmlPanelGroup dragHandle = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
-			dragHandle.setStyleClass("fa fa-sort");
+			dragHandle.setStyleClass(Icons.FONT_ORDERED);
             dragHandleColumn.getChildren().add(dragHandle);
 
             result.getChildren().add(dragHandleColumn);

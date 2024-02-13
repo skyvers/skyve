@@ -37,6 +37,8 @@ SKYVE.Util = function() {
 		CONTEXT_URL: context,
 		allowedReportFormats: null,
 		
+		
+		
 		loadJS: function(scriptPath, callback) {
 		    var scriptNode = document.createElement('SCRIPT');
 		    scriptNode.type = 'text/javascript';
@@ -437,7 +439,7 @@ SKYVE.GMap = function() {
 				control.style.padding = '5px';
 				control.style.textAlign = 'center';
 				control.title = 'Click to set your current position from your GPS';
-				control.innerHTML = '<i class="fa fa-dot-circle-o"></i>';
+				control.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
 				control.index = 1;
 				control.addEventListener('click', function() {
 					navigator.geolocation.getCurrentPosition(
@@ -1015,7 +1017,7 @@ SKYVE.Leaflet = function() {
 						link = L.DomUtil.create('a', '', container);
 						link.href = '#';
 						link.title = 'Create a new marker';
-						link.innerHTML = '<i class="fa fa-map-marker"></i>';
+						link.innerHTML = '<i class="fa-solid fa-location-dot"></i>';
 						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
 							window.LAYER = display.webmap.editTools.startMarker.call(map.editTools);
 						}, this);
@@ -1027,7 +1029,7 @@ SKYVE.Leaflet = function() {
 						link = L.DomUtil.create('a', '', container);
 						link.href = '#';
 						link.title = 'Create a new line';
-						link.innerHTML = '<i class="fa fa-share-alt"></i>';
+						link.innerHTML = '<i class="fa-solid fa-diagram-project"></i>';
 						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
 							window.LAYER = display.webmap.editTools.startPolyline.call(map.editTools);
 						}, this);
@@ -1039,7 +1041,7 @@ SKYVE.Leaflet = function() {
 						link = L.DomUtil.create('a', '', container);
 						link.href = '#';
 						link.title = 'Create a new rectangle';
-						link.innerHTML = '<i class="fa fa-square-o"></i>';
+						link.innerHTML = '<i class="fa-solid fa-vector-square"></i>';
 						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
 							window.LAYER = display.webmap.editTools.startRectangle.call(map.editTools);
 						}, this);
@@ -1047,7 +1049,7 @@ SKYVE.Leaflet = function() {
 						link = L.DomUtil.create('a', '', container);
 						link.href = '#';
 						link.title = 'Create a new polygon';
-						link.innerHTML = '<i class="fa fa-star-o"></i>';
+						link.innerHTML = '<i class="fa-solid fa-draw-polygon"></i>';
 						L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
 							window.LAYER = display.webmap.editTools.startPolygon.call(map.editTools);
 						}, this);
@@ -1080,7 +1082,7 @@ SKYVE.Leaflet = function() {
     					var link = L.DomUtil.create('a', '', container);
     					link.href = '#';
     					link.title = 'Click to set your current position from your GPS';
-    					link.innerHTML = '<i class="fa fa-dot-circle-o"></i>';
+    					link.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
     					L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', function () {
 					        // Stop drawing
     						if (display.webmap.editTools.drawing()) {

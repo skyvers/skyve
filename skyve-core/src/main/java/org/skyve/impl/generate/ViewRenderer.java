@@ -84,6 +84,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Icons;
 import org.skyve.util.Util;
 
 public abstract class ViewRenderer extends ViewVisitor {
@@ -528,10 +529,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Add.gif";
+						relativeIconFileName = Icons.IMAGE_ADD;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-plus";
+						actionIconStyleClass = Icons.FONT_ADD;
 					}
 					break;
 				case BizExport:
@@ -539,10 +540,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/BizExport.png";
+						relativeIconFileName = Icons.IMAGE_BIZ_EXPORT;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-cloud-upload";
+						actionIconStyleClass = Icons.FONT_BIZ_EXPORT;
 					}
 					actionName = resourceName;
 					break;
@@ -551,10 +552,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/BizImport.png";
+						relativeIconFileName = Icons.IMAGE_BIZ_IMPORT;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-cloud-download";
+						actionIconStyleClass = Icons.FONT_BIZ_IMPORT;
 					}
 					actionName = resourceName;
 					break;
@@ -563,10 +564,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Download.png";
+						relativeIconFileName = Icons.IMAGE_DOWNLOAD;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-download";
+						actionIconStyleClass = Icons.FONT_DOWNLOAD;
 					}
 					actionName = resourceName;
 					break;
@@ -575,19 +576,19 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Upload.png";
+						relativeIconFileName = Icons.IMAGE_UPLOAD;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-upload";
+						actionIconStyleClass = Icons.FONT_UPLOAD;
 					}
 					actionName = resourceName;
 					break;
 				case Cancel:
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Cancel.gif";
+						relativeIconFileName = Icons.IMAGE_CANCEL;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-chevron-left";
+						actionIconStyleClass = Icons.FONT_CANCEL;
 					}
 					break;
 				case Delete:
@@ -595,10 +596,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Delete.gif";
+						relativeIconFileName = Icons.IMAGE_DELETE;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-trash-o";
+						actionIconStyleClass = Icons.FONT_DELETE;
 					}
 					if (actionConfirmationText == null) {
 						actionConfirmationText = "ui.delete.confirmation";
@@ -610,10 +611,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Edit.gif";
+						relativeIconFileName = Icons.IMAGE_EDIT;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-pencil";
+						actionIconStyleClass = Icons.FONT_EDIT;
 					}
 					break;
 				case New:
@@ -621,10 +622,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/New.gif";
+						relativeIconFileName = Icons.IMAGE_NEW;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-plus";
+						actionIconStyleClass = Icons.FONT_NEW;
 					}
 					break;
 				case OK:
@@ -633,10 +634,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/OK.gif";
+						relativeIconFileName = Icons.IMAGE_OK;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-check";
+						actionIconStyleClass = Icons.FONT_OK;
 					}
 					break;
 				case Remove:
@@ -644,10 +645,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Remove.gif";
+						relativeIconFileName = Icons.IMAGE_REMOVE;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-minus";
+						actionIconStyleClass = Icons.FONT_REMOVE;
 					}
 					if (actionConfirmationText == null) {
 						actionConfirmationText = "ui.remove.confirmation";
@@ -655,10 +656,10 @@ public abstract class ViewRenderer extends ViewVisitor {
 					break;
 				case Report:
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Report.gif";
+						relativeIconFileName = Icons.IMAGE_REPORT;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-newspaper-o";
+						actionIconStyleClass = Icons.FONT_REPORT;
 					}
 					break;
 				case Save:
@@ -667,26 +668,26 @@ public abstract class ViewRenderer extends ViewVisitor {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Save.gif";
+						relativeIconFileName = Icons.IMAGE_SAVE;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-save";
+						actionIconStyleClass = Icons.FONT_SAVE;
 					}
 					break;
 				case ZoomOut:
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/ZoomOut.gif";
+						relativeIconFileName = Icons.IMAGE_ZOOM_OUT;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-reply";
+						actionIconStyleClass = Icons.FONT_ZOOM_OUT;
 					}
 					break;
 				case Print:
 					if (relativeIconFileName == null) {
-						relativeIconFileName = "actions/Report.gif";
+						relativeIconFileName = Icons.IMAGE_PRINT;
 					}
 					if (actionIconStyleClass == null) {
-						actionIconStyleClass = "fa fa-newspaper-o";
+						actionIconStyleClass = Icons.FONT_PRINT;
 					}
 					break;
 				default:
@@ -771,7 +772,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String relativeIconFileName = zoomIn.getRelativeIconFileName();
 		String iconStyleClass = zoomIn.getIconStyleClass();
 		if ((relativeIconFileName == null) && (iconStyleClass == null)) {
-			iconStyleClass = "fa fa-chevron-right";
+			iconStyleClass = Icons.FONT_ZOOM_IN;
 		}
 		String toolTip = zoomIn.getLocalisedToolTip();
 		

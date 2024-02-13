@@ -29,6 +29,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Icons;
 import org.skyve.util.OWASP;
 import org.skyve.web.WebAction;
 
@@ -173,11 +174,16 @@ public class DesktopView extends HarnessView {
     	result.append("<td width=\"10%\" align=\"right\">");
 		result.append("<img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:void(setUxUi());\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"fa fa-2x fa-retweet\"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"fa fa-2x fa-search\"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp({help});\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"fa fa-2x fa-info-circle\"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"fa fa-2x fa-home\"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><i class=\"fa fa-2x fa-power-off\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:void(setUxUi());\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"");
+		result.append(Icons.FONT_SWITCH).append(" fa-2x \"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"");
+		result.append(Icons.FONT_SEARCH).append(" fa-2x\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp({help});\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"");
+		result.append(Icons.FONT_HELP).append(" fa-2x\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"");
+		result.append(Icons.FONT_DASHBOARD).append(" fa-2x\"></i></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><i class=\"");
+		result.append(Icons.FONT_LOGOUT).append(" fa-2x\"></i></a></td>");
     	result.append("</tr></table>");
     	result.append("</div>");
     	

@@ -23,8 +23,10 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<!-- 4.7 is disabled by default
 			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
-			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
+			-->
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
 <!--
 			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
 -->
@@ -71,14 +73,14 @@
 									<h:inputHidden value="#{bean.csrfToken}">
 										<p:autoUpdate />
 									</h:inputHidden>
-				            		<p:commandLink class="icon fa fa-retweet fa-2x" style="color:whitesmoke;text-decoration:none" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true" />
+				            		<p:commandLink class="icon fa-solid fa-retweet fa-2x" style="color:whitesmoke;text-decoration:none" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true" />
 								</h:form>
 							</td>
 						</c:if>
 						<c:if test="#{showLogout}">
 							<td width="40px">
 								<a href="loggedOut" title="Logout">
-									<i style="color:whitesmoke" class="fa fa-power-off fa-2x" />
+									<i style="color:whitesmoke" class="fa-solid fa-power-off fa-2x" />
 								</a>
 							</td>
 						</c:if>
@@ -114,13 +116,13 @@
 													type="button"
 													styleClass="ui-confirmdialog-no" 
 													style="float:right;"
-													icon="fa fa-remove" />
+													icon="fa-solid fa-xmark" />
 								<p:commandButton id="confirmOK" 
 													value="OK" 
 													type="button"
 													styleClass="ui-confirmdialog-yes" 
 													style="float:right;"
-													icon="fa fa-check" />
+													icon="fa-solid fa-check" />
 							</p:confirmDialog>
 							
 							<ui:insert name="templateBody" />

@@ -24,8 +24,10 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->	
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<!-- 4.7 is disabled by default
 			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
-			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
+			-->
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
 <!--
 			<link type="text/css" rel="stylesheet" href="css/primeflex.min.css?v=#{bean.webResourceFileVersion}" />
 -->
@@ -95,13 +97,13 @@
 											type="button"
 											styleClass="ui-confirmdialog-no" 
 											style="float:right;"
-											icon="fa fa-remove" />
+											icon="fa-solid fa-xmark" />
 						<p:commandButton id="confirmOK" 
 											value="OK" 
 											type="button"
 											styleClass="ui-confirmdialog-yes" 
 											style="float:right;"
-											icon="fa fa-check" />
+											icon="fa-solid fa-check" />
 					</p:confirmDialog>
 					
 					<div class="layout-content">
@@ -124,7 +126,7 @@
 							        	<span>Version ${project.version}</span>
 							        </div>
 							        <div class="ui-g-12 ui-md-4 ui-lg-3 footer-box">
-							        	<span><i class="fa fa-copyright"></i> All Rights Reserved</span>   
+							        	<span><i class="fa-regular fa-copyright"></i> All Rights Reserved</span>   
 							        </div>
 					            </div>
 							</div>
@@ -135,7 +137,7 @@
 	
 			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
 				<f:facet name="start">
-					<i id="busy" class="fa fa-2x fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+					<i id="busy" class="fa-solid fa-2x fa-circle-notch fa-spin ajax-loader" aria-hidden="true"></i>
 				</f:facet>
 				<f:facet name="complete">
 					<h:outputText value="" />

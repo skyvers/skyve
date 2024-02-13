@@ -23,6 +23,7 @@ import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid.ResponsiveGridStyle;
 import org.skyve.metadata.MetaData;
+import org.skyve.util.Icons;
 
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlOutputLabel;
@@ -355,8 +356,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		if (helpText != null) {
 			HtmlOutputText output = new HtmlOutputText();
 			output.setEscape(false);
-			output.setValue(String.format("<i class=\"fa fa-info-circle help\" data-tooltip=\"%s\"></i>",
-											helpText));
+			output.setValue(String.format("<i class=\"%s help\" data-tooltip=\"%s\"></i>", Icons.FONT_HELP, helpText));
 			flexChildren.add(output);
 		}
 		
