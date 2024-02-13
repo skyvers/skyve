@@ -37,7 +37,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 	private static final long serialVersionUID = -6841455574804123970L;
 
-	private static final String DEFAULT_ICON_CLASS = "fa fa-file-o";
+	private static final String DEFAULT_ICON_CLASS = "fa-regular fa-file";
 	private static final int TILE_COUNT_LIMIT = 6;
 	private final Set<Tile> tiles = new HashSet<>();
 	

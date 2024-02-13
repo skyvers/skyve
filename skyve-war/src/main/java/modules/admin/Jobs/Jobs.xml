@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Jobs</singularAlias>
 	<pluralAlias>Jobs</pluralAlias>
-	<iconStyleClass>fas fa-cogs</iconStyleClass>
+	<iconStyleClass>fa-solid fa-cogs</iconStyleClass>
 	<attributes>
 		<collection name="runningJobs" type="aggregation">
 			<displayName>Running Jobs</displayName>

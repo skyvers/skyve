@@ -6,7 +6,7 @@
 	<persistent name="ADM_Communication" />
 	<singularAlias>Communication</singularAlias>
 	<pluralAlias>Communications</pluralAlias>
-	<iconStyleClass>fas fa-envelope</iconStyleClass>
+	<iconStyleClass>fa-solid fa-envelope</iconStyleClass>
 	<bizKey expression="{description}" />
 	<implements>
 		<interface>org.skyve.domain.app.admin.Communication</interface>

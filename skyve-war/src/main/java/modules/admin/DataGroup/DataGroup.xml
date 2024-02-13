@@ -6,7 +6,7 @@
 	<persistent name="ADM_DataGroup" />
 	<singularAlias>Data Group</singularAlias>
 	<pluralAlias>Data Groups</pluralAlias>
-	<iconStyleClass>fas fa-users</iconStyleClass>
+	<iconStyleClass>fa-solid fa-users</iconStyleClass>
 	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" required="true">

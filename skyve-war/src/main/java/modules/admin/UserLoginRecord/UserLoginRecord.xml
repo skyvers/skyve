@@ -7,7 +7,7 @@
 	<singularAlias>User Login Record</singularAlias>
 	<pluralAlias>User Login Records</pluralAlias>
 	<audited>false</audited>
-	<iconStyleClass>fas fa-history</iconStyleClass>
+	<iconStyleClass>fa-solid fa-history</iconStyleClass>
 	<bizKey expression="{userName} @ {loginDateTime}"/>
 	<attributes>
 		<text name="userName" required="true" usage="domain">

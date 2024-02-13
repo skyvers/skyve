@@ -47,7 +47,7 @@
 	
 	<actions>
 		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downloadClientSail.toolTip" />
-		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fas fa-plus" clientValidation="false"/>
-		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fas fa-trash-can" clientValidation="false"/>
+		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-plus" clientValidation="false"/>
+		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-trash-can" clientValidation="false"/>
 	</actions>
 </view>

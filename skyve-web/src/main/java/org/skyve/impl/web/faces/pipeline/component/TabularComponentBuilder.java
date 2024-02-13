@@ -1136,7 +1136,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Add the buttons and overlays etc
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
-	 *				<p:commandButton id="s03" icon="fa fa-globe" title="Map" type="button" />
+	 *				<p:commandButton id="s03" icon="fa-solid fa-globe" title="Map" type="button" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="false" showCloseIcon="true" modal="true" style="width:50%;height:300px" onShow="SKYVE.PF.gmap({elementId:'poo',geometryBinding:'boundry',disabled:false})">
 	 *					<h:panelGroup layout="block" style="height:280px">
 	 *						<h:panelGroup id="poo" layout="block" style="margin:0;padding:0;height:100%;width:100%">
@@ -2304,9 +2304,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *					<p:signature id="one_signature" style="width:400px;height:200px" rendered="#{empty skyve.currentBean['image']}" />
 	 *					<p:graphicImage id="one_image" style="width:400px;height:200px;border:1px gray" rendered="#{not empty skyve.currentBean['image']}" />
 	 *					<h:panelGrid columns="1">
-	 *						<p:commandButton id="one_sign" value="Sign" icon="fa fa-upload" title="Submit Signature" style="width:75px" action="#{skyve.sign('one', 'image')}" process="@this" update="one" rendered="#{empty skyve.currentBean['image']}" />
-	 *						<p:commandButton id="one_client" value="Clear" icon="fa fa-trash" title="Clear Signature" style="width:75px"  type="button" onclick="SKYVE.PF.getById('one_signature').signature('clear')" rendered="#{empty skyve.currentBean['image']}" />
-	 *						<p:commandButton id="one_server" value="Clear" icon="fa fa-trash" title="Clear Signature" style="width:75px" action="#{skyve.clear('image')}" process="@this" update="one" rendered="#{not empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_sign" value="Sign" icon="fa-solid fa-upload" title="Submit Signature" style="width:75px" action="#{skyve.sign('one', 'image')}" process="@this" update="one" rendered="#{empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_client" value="Clear" icon="fa-solid fa-trash" title="Clear Signature" style="width:75px"  type="button" onclick="SKYVE.PF.getById('one_signature').signature('clear')" rendered="#{empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_server" value="Clear" icon="fa-solid fa-trash" title="Clear Signature" style="width:75px" action="#{skyve.clear('image')}" process="@this" update="one" rendered="#{not empty skyve.currentBean['image']}" />
 	 *					</h:panelGrid>
 	 *				</h:panelGrid>
 	 * See LayoutBuilder.contentSignatureLayout() for the outer panel grid.
@@ -2478,11 +2478,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
 	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
-	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
+	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
 	 *					<iframe id="s01_iframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
-	 *				<p:commandButton id="s05" icon="fa fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
+	 *				<p:commandButton id="s05" icon="fa-solid fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
 	 *				...
 	 *			</h:panelGrid>
 	 *
@@ -3802,7 +3802,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	/**
 	 * Add the buttons and overlay
-	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
+	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
 	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>

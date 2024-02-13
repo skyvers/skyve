@@ -55,7 +55,7 @@
 	<actions>
 		<cancel />
 		<zoomOut />
-		<action className="CancelJob" displayName="Cancel Job" iconStyleClass="fas fa-ban" confirm="Are you sure you want to cancel this job?" visible="cancellable"/>
-		<action className="RerunJob" displayName="Re-run Job" iconStyleClass="fas fa-refresh" confirm="Are you sure you want to re-run this job?" visible="rerunnabble"/>
+		<action className="CancelJob" displayName="Cancel Job" iconStyleClass="fa-solid fa-ban" confirm="Are you sure you want to cancel this job?" visible="cancellable"/>
+		<action className="RerunJob" displayName="Re-run Job" iconStyleClass="fa-solid fa-refresh" confirm="Are you sure you want to re-run this job?" visible="rerunnabble"/>
 	</actions>
 </view>

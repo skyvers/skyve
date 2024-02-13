@@ -6,7 +6,7 @@
 	<persistent name="ADM_JobSchedule" />
 	<singularAlias>Job Schedule Entry</singularAlias>
 	<pluralAlias>Job Schedule</pluralAlias>
-	<iconStyleClass>fas fa-cogs</iconStyleClass>
+	<iconStyleClass>fa-solid fa-cogs</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
 	<bizKey>

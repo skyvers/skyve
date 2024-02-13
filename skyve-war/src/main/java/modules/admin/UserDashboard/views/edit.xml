@@ -59,7 +59,7 @@
 	</vbox>			
 	<actions>
 		<action className="UpdateMyDetails" displayName="admin.userDashboard.actions.save.displayName" toolTip="admin.userDashboard.actions.save.toolTip" relativeIconFileName="actions/Save.gif"
-			iconStyleClass="fas fa-save"
+			iconStyleClass="fa-solid fa-save"
 			inActionPanel="false" />
 	</actions>
 </view>

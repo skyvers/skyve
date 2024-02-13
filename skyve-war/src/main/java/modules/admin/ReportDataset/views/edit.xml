@@ -99,7 +99,7 @@
     <actions>
         <defaults/>
         
-        <action className="TestQuery" displayName="Test Query" iconStyleClass="fas fa-cog" visible="notTypeConstant"/>
+        <action className="TestQuery" displayName="Test Query" iconStyleClass="fa-solid fa-cog" visible="notTypeConstant"/>
     </actions>
     <newParameters/>
 </view>

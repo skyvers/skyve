@@ -3,7 +3,7 @@
     <persistent name="ADM_CommunicationTemplate"/>
     <singularAlias>Communication Template</singularAlias>
     <pluralAlias>Communication Templates</pluralAlias>
-    <iconStyleClass>fas fa-envelope-open</iconStyleClass>
+    <iconStyleClass>fa-solid fa-envelope-open</iconStyleClass>
     <bizKey expression="{name}"/>
 	<implements>
 		<interface>org.skyve.domain.app.admin.CommunicationTemplate</interface>

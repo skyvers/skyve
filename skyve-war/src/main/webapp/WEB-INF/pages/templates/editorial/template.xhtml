@@ -66,14 +66,14 @@
 											<h:inputHidden value="#{bean.csrfToken}">
 												<p:autoUpdate />
 											</h:inputHidden>
-						            		<p:commandLink class="icon fa fa-retweet" style="text-decoration:none" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true" />
+						            		<p:commandLink class="icon fa-solid fa-retweet" style="text-decoration:none" title="Switch Mode" action="#{bean.setUxUi('desktop')}" onsuccess="location.reload()" process="@form" update="@none" ignoreAutoUpdate="true" />
 										</h:form>
 									</li>
 								</c:if>
 								<c:if test="#{showLogout}">
 									<li>
 										<a href="loggedOut" title="Logout">
-											<i class="icon fa fa-power-off" />
+											<i class="icon fa-solid fa-power-off" />
 										</a>
 									</li>
 								</c:if>
@@ -97,19 +97,19 @@
 													type="button"
 													styleClass="ui-confirmdialog-no" 
 													style="float:right;"
-													icon="fa fa-remove" />
+													icon="fa-solid fa-xmark" />
 								<p:commandButton id="confirmOK" 
 													value="OK" 
 													type="button"
 													styleClass="ui-confirmdialog-yes" 
 													style="float:right;"
-													icon="fa fa-check" />
+													icon="fa-solid fa-check" />
 							</p:confirmDialog>
 							<ui:insert name="templateBody" />
 						</section>
 						<!-- Footer -->
 						<footer id="footer">
-				        	<p class="copyright"><i class="fa fa-copyright"></i> All Rights Reserved</p>   
+				        	<p class="copyright"><i class="fa-solid fa-copyright"></i> All Rights Reserved</p>   
 						</footer>
 					</div>
 				</div>

@@ -300,23 +300,23 @@
 	<actions>
 		<defaults />
 		<action className="PrepareExplanation" displayName="admin.tag.actions.prepareExplanation" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif"
-			clientValidation="false" iconStyleClass="fa fa-search"/>
+			clientValidation="false" iconStyleClass="fa-solid fa-magnifying-glass"/>
 		<action className="PerformCombination" displayName="admin.tag.actions.performCombination.displayName" inActionPanel="false"
 			clientValidation="false" toolTip="admin.tag.actions.performCombination.toolTip" confirm="Ok to perform the combination?"
-			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs" enabled="allowCombination"/>
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa-solid fa-gears" enabled="allowCombination"/>
 		<action className="CopyTagToUser" displayName="admin.tag.actions.copyTagToUser.displayName" inActionPanel="false" clientValidation="false"
-			toolTip="admin.tag.actions.copyTagToUser.toolTip" confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
+			toolTip="admin.tag.actions.copyTagToUser.toolTip" confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa-solid fa-copy"/>
 
 		<action className="Clear" displayName="admin.tag.actions.clear.displayName" inActionPanel="false" toolTip="admin.tag.actions.clear.toolTip"
-			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-delete" />
+			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa-solid fa-trash-can" />
 		<action className="TagAll" displayName="admin.tag.actions.tagAll.displayName" inActionPanel="false" toolTip="admin.tag.actions.tagAll.toolTip"
-			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" iconStyleClass="fa fa-step-forward"/>
+			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" iconStyleClass="fa-solid fa-forward-step"/>
 		<upload className="UploadTagCriteria" displayName="admin.tag.actions.uploadTagCriteria.displayName" inActionPanel="false"
 			toolTip="admin.tag.actions.uploadTagCriteria.toolTip" disabled="notAttributeSet" />
 
 		<action className="BulkDocumentAction" displayName="admin.tag.actions.bulkDocumentAction.displayName" inActionPanel="false"
 			toolTip="admin.tag.actions.bulkDocumentAction.toolTip" confirm="Ok to perform the action for this document type?"
-			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-delete"/>
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa-solid fa-gear"/>
 
 	</actions>
 </view>

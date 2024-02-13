@@ -4,7 +4,7 @@
 	<persistent name="ADM_ImportExport" />
 	<singularAlias>Import Export</singularAlias>
 	<pluralAlias>Imports Exports</pluralAlias>
-	<iconStyleClass>fas fa-cloud-upload</iconStyleClass>
+	<iconStyleClass>fa-solid fa-cloud-upload</iconStyleClass>
 	<bizKey expression="{moduleName}.{documentName}" />
 	<attributes>
 		<enum name="mode" required="true">

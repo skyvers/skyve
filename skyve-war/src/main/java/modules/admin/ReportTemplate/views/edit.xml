@@ -520,11 +520,11 @@
 		<defaults/>
 
 		<action className="AddUserToEmail" displayName="Add User to Email" inActionPanel="false"
-				  iconStyleClass="fa fa-plus"/>
+				  iconStyleClass="fa-solid fa-plus"/>
 		<download className="DownloadReport" displayName="Download Report" inActionPanel="false"
-				  iconStyleClass="fas fa-file-pdf" visible="typeFreemarker"/>
+				  iconStyleClass="fa-solid fa-file-pdf" visible="typeFreemarker"/>
 		<download className="DownloadJasperReport" displayName="Download Report" inActionPanel="false"
-				  iconStyleClass="fas fa-file-pdf" visible="typeJasper"/>
+				  iconStyleClass="fa-solid fa-file-pdf" visible="typeJasper"/>
 	</actions>
 	<newParameters/>
 </view>

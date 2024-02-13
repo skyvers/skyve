@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>User Dashboard</singularAlias>
 	<pluralAlias>User Dashboards</pluralAlias>
-	<iconStyleClass>fas fa-area-chart</iconStyleClass>
+	<iconStyleClass>fa-solid fa-area-chart</iconStyleClass>
 	<bizKey expression="User Dashboard"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" >

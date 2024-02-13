@@ -14,7 +14,7 @@
 	<persistent name="ADM_ReportTemplate"/>
 	<singularAlias>Report Template</singularAlias>
 	<pluralAlias>Report Templates</pluralAlias>
-	<iconStyleClass>fas fa-file-pdf</iconStyleClass>
+	<iconStyleClass>fa-solid fa-file-pdf</iconStyleClass>
 	<bizKey>
 		return getName() != null ? String.format("Report - %s", getName()) : "New Report Template";
 	</bizKey>

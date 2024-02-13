@@ -10,7 +10,7 @@
 	<persistent name="ADM_ReportDataset"/>
 	<singularAlias>Report Dataset</singularAlias>
 	<pluralAlias>Report Datasets</pluralAlias>
-	<iconStyleClass>fa fa-table</iconStyleClass>
+	<iconStyleClass>fa-solid fa-table</iconStyleClass>
 	<parentDocument>ReportTemplate</parentDocument>
 	<bizKey expression="Query - {parent.name} {datasetType}" />
 	<implements>

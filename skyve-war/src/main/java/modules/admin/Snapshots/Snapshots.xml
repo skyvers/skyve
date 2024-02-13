@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Snapshots</singularAlias>
 	<pluralAlias>Snapshots</pluralAlias>
-	<iconStyleClass>fas fa-camera</iconStyleClass>
+	<iconStyleClass>fa-solid fa-camera</iconStyleClass>
 	<attributes>
 		<text name="moduleName">
 			<displayName>admin.snapshots.moduleName.displayName</displayName>

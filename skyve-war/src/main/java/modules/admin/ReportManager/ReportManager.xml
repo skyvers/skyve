@@ -8,7 +8,7 @@
 	</documentation>
 	<singularAlias>Report Manager</singularAlias>
 	<pluralAlias>Report Manager</pluralAlias>
-	<iconStyleClass>fas fa-file-pdf</iconStyleClass>
+	<iconStyleClass>fa-solid fa-file-pdf</iconStyleClass>
 	<attributes>
 		<text name="pathToZip">
 			<documentation>The path of the zip of report configurations for download</documentation>

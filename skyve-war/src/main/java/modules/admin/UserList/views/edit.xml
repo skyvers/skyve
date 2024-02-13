@@ -75,9 +75,9 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="InviteUsers" displayName="admin.userList.actions.inviteUsers.displayName" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+		<action className="InviteUsers" displayName="admin.userList.actions.inviteUsers.displayName" iconStyleClass="fa-solid fa-user-plus" inActionPanel="false" 
 			confirm="Ok to create users and send each user an invitation?" />
-		<action className="CreateUsers" displayName="admin.userList.actions.createUsers.displayName" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+		<action className="CreateUsers" displayName="admin.userList.actions.createUsers.displayName" iconStyleClass="fa-solid fa-user-plus" inActionPanel="false" 
 			confirm="Ok to create the users (no invitation email will be sent)?" />
 	</actions>
 </view>

@@ -277,27 +277,27 @@
 	</tabPane>
 	<actions>
 		<defaults />
-		<action clientValidation="true" className="GetResults" displayName="Run Result Check Job" inActionPanel="false" iconStyleClass="fas fa-rotate-right" />
+		<action clientValidation="true" className="GetResults" displayName="Run Result Check Job" inActionPanel="false" iconStyleClass="fa-solid fa-rotate-right" />
 
-		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false" iconStyleClass="fas fa-calculator" />
+		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false" iconStyleClass="fa-solid fa-calculator" />
 
-		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false" iconStyleClass="fas fa-cogs" confirm="OK to create email files?" />
+		<action clientValidation="true" className="CreateFiles" displayName="Generate File Batch" inActionPanel="false" iconStyleClass="fa-solid fa-cogs" confirm="OK to create email files?" />
 
-		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false" iconStyleClass="fas fa-envelope" confirm="OK to send emails?" />
+		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false" iconStyleClass="fa-solid fa-envelope" confirm="OK to send emails?" />
 
-		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false" iconStyleClass="fas fa-envelope-square" confirm="Send test email to yourself?" />
+		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false" iconStyleClass="fa-solid fa-envelope-square" confirm="Send test email to yourself?" />
 
-		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link" iconStyleClass="fas fa-link" inActionPanel="false" />
+		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link" iconStyleClass="fa-solid fa-link" inActionPanel="false" />
 
-		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" iconStyleClass="fas fa-image" />
+		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" iconStyleClass="fa-solid fa-image" />
 
 		<action className="BatchSelected" displayName="BatchSelected" inActionPanel="false" />
 
 		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected" confirm="Are you sure you want to delete this batch folder from the server filesystem?"
-			iconStyleClass="fas fa-trash-can" />
+			iconStyleClass="fa-solid fa-trash-can" />
 
 		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected"
-			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fas fa-file-zipper" />
+			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa-solid fa-file-zipper" />
 
 	</actions>
 	<newParameters />

@@ -256,7 +256,7 @@
 
     <actions widgetId="actionPanel">
         <!-- <defaults/> -->
-        <action className="Dismiss" displayName="Dismiss" clientValidation="false" iconStyleClass="fas fa-angle-left" />
-        <action className="SaveChanges" displayName="Save Changes" clientValidation="true" iconStyleClass="fas fa-floppy-disk" inActionPanel="true"/>
+        <action className="Dismiss" displayName="Dismiss" clientValidation="false" iconStyleClass="fa-solid fa-angle-left" />
+        <action className="SaveChanges" displayName="Save Changes" clientValidation="true" iconStyleClass="fa-solid fa-floppy-disk" inActionPanel="true"/>
     </actions>
 </view>
