@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.backup.ExternalBackup;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.metadata.SortDirection;
 import org.skyve.util.FileUtil;
@@ -74,10 +75,12 @@ public class BackupJob extends Job {
 			if (ExternalBackup.areExternalBackupsEnabled()) {
 				try {
 					ExternalBackup.getInstance().moveBackup(backupZip.getName(), dailyZip.getName());
-				} catch (@SuppressWarnings("unused") Exception e) {
-					trace = String.format("Failed to move external backup from %s to %s", backupZip.getName(), dailyZip.getName());
+				} catch (Exception e) {
+					trace = String.format("Failed to move external backup for %s from %s to %s",
+							UtilImpl.ARCHIVE_NAME, backupZip.getName(), dailyZip.getName());
 					log.add(trace);
 					Util.LOGGER.warning(trace);
+					e.printStackTrace();
 					org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 				}
 			} else {
@@ -97,10 +100,12 @@ public class BackupJob extends Job {
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (@SuppressWarnings("unused") Exception e) {
-						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup for %s from %s to %s",
+								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
+						e.printStackTrace();
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
@@ -122,10 +127,12 @@ public class BackupJob extends Job {
 				if (ExternalBackup.areExternalBackupsEnabled()) {
 					try {
 						ExternalBackup.getInstance().copyBackup(dailyZip.getName(), copy.getName());
-					} catch (@SuppressWarnings("unused") Exception e) {
-						trace = String.format("Failed to copy external backup from %s to %s", dailyZip.getName(), copy.getName());
+					} catch (Exception e) {
+						trace = String.format("Failed to copy external backup for %s from %s to %s",
+								UtilImpl.ARCHIVE_NAME, dailyZip.getName(), copy.getName());
 						log.add(trace);
 						Util.LOGGER.warning(trace);
+						e.printStackTrace();
 						org.skyve.impl.backup.BackupJob.emailProblem(log, trace);
 					}
 				} else {
