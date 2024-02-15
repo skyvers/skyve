@@ -53,7 +53,7 @@ class CreateAction extends AbstractAction {
 													panel.getDBPassword(),
 													panel.getDBDialect());
 			UtilImpl.DDL_SYNC = true;
-//			UtilImpl.APPS_JAR_DIRECTORY = "/C:/_/skyve/skyve-ee/javaee/skyve.ear/apps.jar/";
+//			UtilImpl.APPS_JAR_DIRECTORY = "/C:/_/skyve/skyve-war/deployments/skyve.war/WEB-INF/classes/";
 			
 			ProvidedRepositoryFactory.set(new LocalDesignRepository());
 			SuperUser user = new SuperUser();

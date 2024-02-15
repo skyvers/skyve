@@ -41,7 +41,7 @@ public class Generator {
 			System.exit(1);
 		}
 
-		UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/dtf/skyve/skyve-ee/javaee/skyve.ear/apps.jar/";
+		UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/_/skyve/skyve-war/deployments/skyve.war/WEB-INF/classes/";
 		AbstractRepository.set(new LocalDesignRepository());
 		Customer customer = AbstractRepository.get().getCustomer(customerName);
 

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="Compress" default="compressJavascript" basedir=".">
+	<target name="concatSkyveJavascript">
+		<concat destfile="src/js/desktop/skyve.js" append="false" >
+			<filelist dir="src/js/common/">
+				<!-- static utility functions -->
+				<file name="util.js" />				
+			</filelist>
+			<filelist dir="src/js/desktop/">
+				<!-- static utility functions -->
+				<file name="util2.js" />
+				<!-- basic bizhub types and their editors -->
+				<file name="types.js" />
+				<!-- bizhub modal windows -->
+				<file name="windowStack.js" />
+				<!-- bizhub reporting -->
+				<file name="reporting.js" />
+				<!-- bizhub charting -->
+				<file name="charting.js" />
+				<!-- bizhub advanced filter builder -->
+				<file name="advancedFilter.js" />
+				<!-- bizhub grid implementations -->
+				<file name="grids.js" />
+				<!-- listview2.js must be first as it is used by harness -->
+				<file name="listview2.js" />
+				<!-- bizhub edit view -->
+				<file name="editView.js" />
+				<!-- bootstrap the bizhub environment -->
+				<file name="harness.js" />
+			</filelist>
+		</concat>
+		<concat destfile="src/js/prime/skyve.js" append="false" >
+			<filelist dir="src/js/common/">
+				<!-- static utility functions -->
+				<file name="util.js" />				
+			</filelist>
+			<filelist dir="src/js/prime/">
+				<!-- static utility functions -->
+				<file name="pf.js" />
+			</filelist>
+		</concat>
+	</target>
+	<target name="copyJavascript" depends="concatSkyveJavascript">
+		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
+		<delete file="src/js/desktop/skyve.js" />
+		<copy tofile="../skyve-war/deployments/skyve.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-min.js" file="src/js/prime/skyve.js" overwrite="true"/>
+		<delete file="src/js/prime/skyve.js" />
+
+		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-gmap-min.js" file="src/js/desktop/skyve-gmap.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-leaflet-min.js" file="src/js/desktop/skyve-leaflet.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-gmap-min.js" file="src/js/prime/skyve-gmap.js" overwrite="true"/>
+		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-leaflet-min.js" file="src/js/prime/skyve-leaflet.js" overwrite="true"/>
+	</target>
+	<target name="compressJavascript" depends="concatSkyveJavascript">
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-min.js src/js/desktop/skyve.js"/>
+		</java>
+		<delete file="src/js/desktop/skyve.js" />
+		
+		<!-- minify css files -->
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/basic-min.css src/css/basic.css"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/prime-min.css src/css/prime.css"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/simple-grid-min.css src/css/simple-grid.css"/>
+		</java>
+
+		<!-- minify js files -->
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/prime/skyve-min.js src/js/prime/skyve.js"/>
+		</java>
+		<delete file="src/js/prime/skyve.js" />
+
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-gmap-min.js src/js/desktop/skyve-gmap.js"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-leaflet-min.js src/js/desktop/skyve-leaflet.js"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/prime/skyve-gmap-min.js src/js/prime/skyve-gmap.js"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/prime/skyve-leaflet-min.js src/js/prime/skyve-leaflet.js"/>
+		</java>
+	</target>
+</project>

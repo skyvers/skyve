@@ -102,7 +102,7 @@ public class ImageUtil {
 	 * @return	A byte[] to stream to a client.
 	 * @throws IOException
 	 */
-	// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-ee/src/skyve/resources/files/
+	// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-war/src/main/java/resources/files/
 	public static byte[] svg(String fileName, int imageWidth, int imageHeight) throws IOException {
 		String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
 		Repository repository = CORE.getRepository();

@@ -196,7 +196,7 @@ public class MavenSkyveProject {
 	}
 
 	/**
-	 * Copies all skyve-ee files into the relevant project directories.
+	 * Copies all skyve files into the relevant project directories.
 	 */
 	public void assemble() throws IOException {
 		assemble(true, true, true, true);
@@ -311,7 +311,6 @@ public class MavenSkyveProject {
 
 		// If we are copying from a project, we should copy the entire modules directory
 		// as there will be an arbitrary number of modules.
-		// skyve-ee only provides the admin module.
 		if (copyFromProject) {
 			skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}
@@ -358,7 +357,7 @@ public class MavenSkyveProject {
 
 		// If we are copying from a project, we should copy the entire modules directory
 		// as there will be an arbitrary number of modules.
-		// skyve-ee only provides the admin module.
+		// skyve-war should only provide the admin module.
 		if (copyFromProject) {
 			skyveGeneratedFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}
@@ -415,7 +414,7 @@ public class MavenSkyveProject {
 
 		// If we are copying from a project, we should copy the entire modules directory
 		// as there will be an arbitrary number of modules.
-		// skyve-ee only provides the admin module.
+		// skyve-war should only provide the admin module.
 		if (copyFromProject) {
 			skyveGeneratedTestFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}

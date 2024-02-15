@@ -213,7 +213,7 @@ public class ElasticUtil {
 
 	public static void main(String[] args) 
 	throws Exception {
-		UtilImpl.CONTENT_DIRECTORY = "/C:/_/skyve/skyve-ee/content/";
+		UtilImpl.CONTENT_DIRECTORY = "/C:/_/content/skyve/";
 		try (Node n = localNode()) {
 			try (Client c = localClient(n)) {
 				ElasticUtil.prepareIndex(c, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);
