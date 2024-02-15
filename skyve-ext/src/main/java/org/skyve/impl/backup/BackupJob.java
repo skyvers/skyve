@@ -345,7 +345,7 @@ public class BackupJob extends CancellableJob {
 			}
 			catch (Throwable t) {
 				problem = true;
-				trace = "A problem backing up was encountered : " + t.getLocalizedMessage();
+				trace = "A problem backing up " + UtilImpl.ARCHIVE_NAME + " was encountered : " + t.getLocalizedMessage();
 				causation = trace;
 				log.add(trace);
 				Util.LOGGER.info(trace);
@@ -380,7 +380,7 @@ public class BackupJob extends CancellableJob {
 					}
 					catch (Throwable t) {
 						problem = true;
-						trace = "A problem backing up was encountered : " + t.getLocalizedMessage();
+						trace = "A problem backing up " + UtilImpl.ARCHIVE_NAME + " was encountered : " + t.getLocalizedMessage();
 						if (causation == null) {
 							causation = trace;
 						}
