@@ -273,6 +273,7 @@
 					<action name="Submit" />
 					<action name="UpdatePreview" />
 				</document>
+				<document name="DownloadFolder" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="ImportExport" permission="CRUDC">
 					<action name="ClearImport"/>
