@@ -14,9 +14,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import jakarta.inject.Inject;
 import modules.admin.domain.Startup;
-import util.AbstractH2TestForJUnit5;
+import util.AbstractH2Test;
 
-public class StartupBizletH2Test extends AbstractH2TestForJUnit5 {
+public class StartupBizletH2Test extends AbstractH2Test {
 
 	@Inject
 	private StartupBizlet bizlet;

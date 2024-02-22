@@ -1,20 +1,26 @@
 package org.skyve.domain.types.converters.datetime;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
 public class YYYY_MM_DDTest {
+
 	private YYYY_MM_DD converter = new YYYY_MM_DD();
 
-	@Test(expected = ConversionException.class)
+	@Test
 	public void testFromDisplayValueInvalidFormat() throws Exception {
-		// call the method under test
-		converter.fromDisplayValue("01-03-2020");
+		ConversionException ce = assertThrows(ConversionException.class, () -> {
+			// call the method under test
+			converter.fromDisplayValue("01-03-2020");
+		});
 
-		Assert.fail("ConversionException should be thrown");
+		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test

@@ -3,8 +3,8 @@ package org.skyve.domain.types.converters.datetime;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
@@ -12,7 +12,7 @@ public class MM_DD_YYYY_HH24_MITest {
 
 	private MM_DD_YYYY_HH24_MI formatter;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		formatter = new MM_DD_YYYY_HH24_MI();
 	}

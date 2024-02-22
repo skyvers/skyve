@@ -24,9 +24,9 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 import modules.admin.domain.User;
-import util.AbstractH2TestForJUnit5;
+import util.AbstractH2Test;
 
-public class ModulesUtilTest extends AbstractH2TestForJUnit5 {
+public class ModulesUtilTest extends AbstractH2Test {
 
 	private DataBuilder db;
 	private Contact contact = null;

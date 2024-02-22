@@ -11,9 +11,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.User;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class UserExtensionTest extends AbstractH2Test {
+public class UserExtensionTest extends AbstractH2TestForJUnit4 {
 	@Test
 	@SuppressWarnings("static-method")
 	public void testToUserProxy() throws Exception {

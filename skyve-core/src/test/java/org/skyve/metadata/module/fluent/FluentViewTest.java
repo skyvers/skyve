@@ -6,8 +6,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.metadata.view.fluent.FluentView;
 import org.skyve.metadata.view.fluent.FluentViewDocumentAggregateAccess;
@@ -20,7 +20,7 @@ public class FluentViewTest {
 
 	private FluentView fluent;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		fluent = new FluentView();
 		fluent.get().setAccesses(new ViewUserAccessesMetaData());

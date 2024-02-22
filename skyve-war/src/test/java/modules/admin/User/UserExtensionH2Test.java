@@ -12,9 +12,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.User;
-import util.AbstractH2TestForJUnit5;
+import util.AbstractH2Test;
 
-public class UserExtensionH2Test extends AbstractH2TestForJUnit5 {
+public class UserExtensionH2Test extends AbstractH2Test {
 
 	private UserExtension bean;
 

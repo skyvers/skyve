@@ -1,6 +1,6 @@
 package util;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.skyve.CORE;
 import org.skyve.impl.backup.Truncate;
 import org.skyve.persistence.Persistence;
@@ -19,7 +19,7 @@ public abstract class AbstractH2TestTruncate extends AbstractH2Test {
 
 	private static final String SCHEMA = "PUBLIC";
 
-	@After
+	@AfterEach
 	@SuppressWarnings("static-method")
 	public void after() throws Exception {
 		Persistence p = CORE.getPersistence();

@@ -2,10 +2,11 @@ package org.skyve.domain.types.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
@@ -14,17 +15,19 @@ public class DD_MM_YYYYTest {
 
 	private DD_MM_YYYY formatter;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		formatter = new DD_MM_YYYY();
 	}
 
-	@Test(expected = ConversionException.class)
+	@Test
 	public void testFromDisplayValueInvalidFormat() throws Exception {
-		// call the method under test
-		formatter.fromDisplayValue("03-01-2020");
+		ConversionException ce = assertThrows(ConversionException.class, () -> {
+			// call the method under test
+			formatter.fromDisplayValue("03-01-2020");
+		});
 
-		fail("Should throw exception before this line.");
+		assertTrue(ce.getMessages().size() > 0);
 	}
 
 	@Test

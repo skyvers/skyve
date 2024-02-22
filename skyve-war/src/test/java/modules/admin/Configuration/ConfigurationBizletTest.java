@@ -9,9 +9,9 @@ import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.ModulesUtil;
 import modules.admin.domain.Configuration;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class ConfigurationBizletTest extends AbstractH2Test {
+public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 
 	private ConfigurationBizlet bizlet;
 	private ConfigurationExtension configuration;

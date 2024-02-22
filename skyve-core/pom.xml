@@ -9,10 +9,6 @@
 	</parent>
 	<artifactId>skyve-core</artifactId>
 
-	<build>
-		<sourceDirectory>src/main/java</sourceDirectory>
-	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>jakarta.platform</groupId>
@@ -92,13 +88,13 @@
 
 		<!-- Test dependencies -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

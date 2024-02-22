@@ -8,9 +8,9 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.User;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class UserBizletTest extends AbstractH2Test {
+public class UserBizletTest extends AbstractH2TestForJUnit4 {
 	@Test
 	@SuppressWarnings("static-method")
 	public void testPreSaveSetsPasswordExpired() throws Exception {

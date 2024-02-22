@@ -1,14 +1,15 @@
 package org.skyve.impl.util;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.InputStream;
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class UtilImplTest {
 	
@@ -16,7 +17,7 @@ public class UtilImplTest {
 	private Map<String, Object> api;
 	private Map<String, String> twilio;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		classLoader = getClass().getClassLoader();
 	}

@@ -2,8 +2,8 @@ package org.skyve.impl.metadata.model.document.field.validator;
 
 import static org.junit.Assert.fail;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -13,7 +13,7 @@ public class TextValidatorTest {
 	private TextValidator validator;
 	private SuperUser user;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		validator = new TextValidator();
 		user = new SuperUser();

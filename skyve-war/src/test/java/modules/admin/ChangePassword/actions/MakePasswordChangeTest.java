@@ -7,9 +7,9 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.domain.ChangePassword;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class MakePasswordChangeTest extends AbstractH2Test {
+public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 	@Test(expected = ValidationException.class)
 	@SuppressWarnings("static-method")
 	public void testNewAndConfirmPasswordNotTheSame() throws Exception {

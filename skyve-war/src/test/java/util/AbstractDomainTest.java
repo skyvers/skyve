@@ -29,7 +29,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.util.test.TestUtil;
 
-public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2TestForJUnit5 {
+public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
 
 	protected abstract T getBean() throws Exception;
 
