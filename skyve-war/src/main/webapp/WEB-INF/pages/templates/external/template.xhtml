@@ -45,10 +45,15 @@
 		<h:body id="body">
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<p:ajaxStatus onstart="$('#busy').css({display:'block',top:$(window).scrollTop()+($(window).height()/2)-25});" oncomplete="$('#busy').css({display:'none'})"/>
-			<div id="busy" class="wheelOfDeath">
-				<p:graphicImage style="padding-top: 8px;" value="images/busy.gif" />
-			</div>
+			<div id="glassPane" class="glassPane" />
+			<p:ajaxStatus id="wheelOfDeath" styleClass="wheelOfDeath" onstart="$('#glassPane').css({display:'block'})" oncomplete="$('#glassPane').css({display:'none'})">
+				<f:facet name="start">
+					<i class="fa-solid fa-2x fa-circle-notch fa-spin ajax-loader" aria-hidden="true"></i>
+				</f:facet>
+				<f:facet name="complete">
+					<h:outputText value="" />
+				</f:facet>
+			</p:ajaxStatus>
 			<table style="height:100%;width:100%;table-layout:fixed;border-collapse:collapse">
 				<tbody>
 					<tr style="height:46px;background:url(images/skyve_bar.png) repeat-x 0 0;">

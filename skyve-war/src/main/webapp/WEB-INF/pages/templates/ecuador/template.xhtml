@@ -135,9 +135,10 @@
 				</div>
 			</div>
 	
-			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+			<div id="glassPane" class="glassPane" />
+			<p:ajaxStatus id="wheelOfDeath" styleClass="wheelOfDeath" onstart="$('#glassPane').css({display:'block'})" oncomplete="$('#glassPane').css({display:'none'})">
 				<f:facet name="start">
-					<i id="busy" class="fa-solid fa-2x fa-circle-notch fa-spin ajax-loader" aria-hidden="true"></i>
+					<i class="fa-solid fa-2x fa-circle-notch fa-spin ajax-loader" aria-hidden="true"></i>
 				</f:facet>
 				<f:facet name="complete">
 					<h:outputText value="" />
