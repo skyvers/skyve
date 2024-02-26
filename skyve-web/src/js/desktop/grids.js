@@ -66,7 +66,7 @@ isc.BizGrid.addMethods({
 
 		me.deleteSelectionItem = {
 			title: "Delete/Remove Selected", 
-			icon: "../images/icons/delete.png",
+			icon: "icons/delete.png",
 			enableIf: function(target, menu, item) {
 				return ((! me._disabled) && me.canDelete && me.canRemove && me.grid.anySelected());
 			},
@@ -125,7 +125,7 @@ isc.BizGrid.addMethods({
 		
 		me.clearSelectionItem = {
 			title: "Deselect all", 
-			icon: "../images/icons/clearSelection.png",
+			icon: "icons/clearSelection.png",
 			click: function() {
 				me.grid.deselectAllRecords(); // event data set null by selectionChanged
 				me._eventRowNum = null;
@@ -236,7 +236,7 @@ isc.BizListGrid.addMethods({
 			shadowSoftness: 10,
 			shadowOffset: 0,
 			title: 'Flag',
-			headerIconDefaults: {src: '../images/flag.gif', width:22, height: 22},
+			headerIconDefaults: {src: 'flag.gif', width:22, height: 22},
 			showMaximizeButton: false,
 			showMinimizeButton: false,
 			showHeaderIcon: true,
@@ -273,7 +273,7 @@ isc.BizListGrid.addMethods({
 		// action items
 		var newItem = {
 			title: "New", 
-			icon: "../images/icons/new.png",
+			icon: "icons/new.png",
 			enableIf: function(target, menu, item) {
 				return ((! me._disabled) && me.canCreate && me.canAdd);
 			},
@@ -312,7 +312,7 @@ isc.BizListGrid.addMethods({
 		};
 		me._zoomItem = {
 			title: "Zoom", 
-			icon: "../images/icons/zoom.gif",
+			icon: "icons/zoom.gif",
 			enableIf: function(target, menu, item) {
 				return (me.canZoom && (! me.aggregate) && me.grid.anySelected());
 			},
@@ -337,7 +337,7 @@ isc.BizListGrid.addMethods({
 		};
 		var popoutItem = {
 			title: "Popout", 
-			icon: "../images/icons/popout.png",
+			icon: "icons/popout.png",
 			enableIf: function(target, menu, item) {
 				return (me.canZoom && (! me.aggregate) && (! (config && config.contConv)) && me.grid.anySelected());
 			},
@@ -350,7 +350,7 @@ isc.BizListGrid.addMethods({
 		};
 		var editItem = {
 			title: "Edit", 
-			icon: "../images/icons/edit.png", 
+			icon: "icons/edit.png", 
 			enableIf: function(target, menu, item) {
 				return ((! me._disabled) && me.canUpdate && me.canEdit && me.grid.anySelected());
 			},
@@ -392,7 +392,7 @@ isc.BizListGrid.addMethods({
 		};
 		var pickItem = {
 			title: "Pick", 
-			icon: "../images/icons/select.png", 
+			icon: "icons/select.png", 
 			enableIf: function(target, menu, item) {
 				return ! me._disabled;
 			},
@@ -429,7 +429,7 @@ isc.BizListGrid.addMethods({
 
 		var clearFilterItem = {
 			title: "Clear Filter", 
-			icon: "../images/icons/filter_delete.png",
+			icon: "icons/filter_delete.png",
 			click: function() {
 				me.grid.setFilterEditorCriteria({});
 				me._advancedFilter.clearCriteria();
@@ -438,7 +438,7 @@ isc.BizListGrid.addMethods({
 		};
 		var refreshItem = {
 			title: "Refresh", 
-			icon: "../images/icons/refresh.png",
+			icon: "icons/refresh.png",
 			click: function() {
 				me.refresh();
 			}
@@ -492,7 +492,7 @@ isc.BizListGrid.addMethods({
 		};
 		var exportItem = {
 			title: "Export Data...", 
-			icon: "../images/icons/export.png",
+			icon: "icons/export.png",
 			click: function() {
 				var count = me.grid.getTotalRows();
 				if (count > 10000) {
@@ -530,7 +530,7 @@ isc.BizListGrid.addMethods({
 		};
 		var chartItem = {
 			title: "Chart Data...", 
-			icon: "../images/icons/chart.png",
+			icon: "icons/chart.png",
 			enableIf: function(target, menu, item) {
 				// enable chart if we have a non-model data source and its not a tree
 				return me._dataSource &&
@@ -1988,7 +1988,7 @@ isc.BizDataGrid.addMethods({
 
 		var newItem = {
 			title: "New", 
-			icon: "../images/icons/new.png",
+			icon: "icons/new.png",
 			enableIf: function(target, menu, item) {
 				return ((! me._disabled) && me.canCreate && me.canAdd);
 			},
@@ -2003,7 +2003,7 @@ isc.BizDataGrid.addMethods({
 		};
 		me._zoomItem = {
 			title: "Zoom", 
-			icon: "../images/icons/zoom.gif",
+			icon: "icons/zoom.gif",
 			click: function() {
 				me.zoom(false);
 			},
@@ -2013,7 +2013,7 @@ isc.BizDataGrid.addMethods({
 		};
 		var editItem = {
 			title: "Edit", 
-			icon: "../images/icons/edit.png", 
+			icon: "icons/edit.png", 
 			enableIf: function(target, menu, item) {
 				return ((! me._disabled) && me.canUpdate && me.canEdit && me.grid.anySelected());
 			},
@@ -2296,13 +2296,13 @@ isc.BizDataGrid.addMethods({
 				width:40,
 				members:[
 					{_constructor:"Button", 
-						icon: "../images/zoom.gif",
+						icon: "zoom.gif",
 	             		click:"isc.say('Zoom record:' + this.echo(this.parentElement.record))", 
 	             		height:20, 
 	             		width:20
              		},
 					{_constructor:"Button",
-						icon: "../images/delete.gif",
+						icon: "delete.gif",
 						click:"isc.say('Delete record:' + this.echo(this.parentElement.record))",
 						height:20,
 						width:20

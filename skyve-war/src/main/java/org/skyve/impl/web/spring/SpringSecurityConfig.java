@@ -1,6 +1,7 @@
 package org.skyve.impl.web.spring;
 
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.LoginServlet;
 import org.skyve.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -40,9 +41,9 @@ public class SpringSecurityConfig {
 				// Enable access to all rest endpoints as these will have Servlet Filters to secure.
 				.requestMatchers("/rest/**").permitAll()
 				// Permit the login servlet resource
-				.requestMatchers(HttpMethod.GET, "/login", "/loggedOut").permitAll()
-				// Permit the spring login mechanism and the SC JS login mechanism
-				.requestMatchers(HttpMethod.POST, "/loginAttempt", "/smartClientJavascriptLogin").permitAll()
+				.requestMatchers(HttpMethod.GET, LoginServlet.LOGIN_PATH, LoginServlet.LOGGED_OUT_PATH).permitAll()
+				// Permit the spring login mechanism
+				.requestMatchers(HttpMethod.POST, SkyveSpringSecurity.LOGIN_ATTEMPT_PATH).permitAll()
 				// Permit the reset resources
 				.requestMatchers("/pages/requestPasswordReset.jsp", "/pages/resetPassword.jsp").permitAll()
 				// Permit home.jsp as it controls access to public and private pages itself
@@ -53,14 +54,16 @@ public class SpringSecurityConfig {
 				.requestMatchers("/health").permitAll()
 				// Secure the loggedIn.jsp so that redirect occurs after login
 				.requestMatchers("/loggedIn.jsp").authenticated()
-				// Secure the system JSPs and HTMLs
-				.requestMatchers("/pages/changePassword.jsp", "/pages/htmlEdit/browseImages.jsp", "/pages/map/geolocate.jsp").authenticated()
+				// Secure the changePassword JSP
+				.requestMatchers("/pages/changePassword.jsp").authenticated()
+				// Secure the CKEditor JSPs
+				.requestMatchers("/pages/htmlEdit/browseImages.jsp", "/pages/htmlEdit/browseDocuments.jsp").authenticated()
 				// Do not secure the home servlet as this ensures the right login page is displayed
 				.requestMatchers("/home").permitAll()
 				// Do not secure faces pages as they are secured by a FacesSecurityFilter
 				.requestMatchers("/**/*.xhtml").permitAll()
 				// Secure dynamic image URLs
-				.requestMatchers("/images/dynamic.*").authenticated()
+				.requestMatchers("/dynamic.*").authenticated()
 				// Secure all report URLs
 				.requestMatchers("/report", "/export").authenticated()
 				// Secure chart servlet
@@ -85,8 +88,6 @@ public class SpringSecurityConfig {
 				.requestMatchers("/smartcomplete").authenticated()
 				// Secure SC text search servlet
 				.requestMatchers("/smartsearch").authenticated()
-				// Secure Prime initialisation servlet
-				.requestMatchers("/primeinit").authenticated()
 				// Secure map servlet
 				.requestMatchers("/map").authenticated()
 				// Secure the Bizport Export Servlet
@@ -95,8 +96,6 @@ public class SpringSecurityConfig {
 				.requestMatchers("/download").authenticated()
 				// Secure the Push endpoint
 				.requestMatchers("/omnifaces.push/**").authenticated()
-				// Do not Secure trackmate servlet - it handles authentication itself
-				.requestMatchers("/tracks").permitAll()
 				// Permit all GET requests by default
 				.requestMatchers(HttpMethod.GET, "/**").permitAll()
 				//  Secure all POST requests by default
@@ -116,7 +115,7 @@ public class SpringSecurityConfig {
 		.formLogin(c -> 
 			c.defaultSuccessUrl(Util.getHomeUrl())
 				.loginPage(Util.getLoginUrl())
-				.loginProcessingUrl("/loginAttempt")
+				.loginProcessingUrl(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH)
 				.failureUrl(Util.getLoginUrl() + "?error")
 				.successHandler(new SkyveAuthenticationSuccessHandler(userDetailsManager()))
 		)

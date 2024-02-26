@@ -28,7 +28,7 @@ html, body, input, select, textArea, button, a, fieldset, legend, pre, table {
 
 .bizhubBorderLabel {
 	color: #888888;
-	background: transparent url(../images/background.png);
+	background: transparent url(../../images/background.png);
 	font-weight: bold;
 }
 

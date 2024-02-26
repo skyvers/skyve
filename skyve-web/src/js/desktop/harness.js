@@ -310,10 +310,10 @@ var eventData = [
 		isc.DynamicForm.create({
 			ID:'textSearchForm',
 			margin: 2,
-			width: 500,
+			width: 550,
 			height: 40,
 			numCols: 3,
-			colWidths: [300, 100, 100],
+			colWidths: [250, '*', 100],
 			items: [
 				{name: "query",
 					title: "Type and press search or enter",

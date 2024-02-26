@@ -17,7 +17,6 @@ public class FluentLoginResources {
 	public FluentLoginResources from(@SuppressWarnings("hiding") LoginResources resources) {
 		loginPageURL(resources.getLoginPageURL());
 		loggedOutPageURL(resources.getLoggedOutPageURL());
-		smartClientJavascriptURL(resources.getSmartClientJavascriptURL());
 		return this;
 	}
 	
@@ -28,11 +27,6 @@ public class FluentLoginResources {
 
 	public FluentLoginResources loggedOutPageURL(String url) {
 		resources.setLoggedOutPageURL(url);
-		return this;
-	}
-
-	public FluentLoginResources smartClientJavascriptURL(String url) {
-		resources.setSmartClientJavascriptURL(url);
 		return this;
 	}
 

@@ -329,7 +329,7 @@ isc.BizUtil.addClassMethods({
 	},
 	
 	// returns an ToolStripButton
-	createImageButton: function(icon, // src relative to isomorphic directory - use ../images/ etc
+	createImageButton: function(icon, // src relative to /images directory
 								hasDisabledIcon, // true to look for disabled icon ie icon_Disabled
 								tooltip, // the tooltip to add to the button
 								click) { // function to call when clicked
@@ -398,7 +398,7 @@ isc.BizUtil.addClassMethods({
 	
 	// returns a HLayout that represents a split button
 	createSplitButton: function(buttonTitle, // title of main action button
-									buttonIcon, // src relative to isomorphic directory - use ../images/ etc
+									buttonIcon, // src relative to /images directory
 									buttonHasDisabledIcon, // true to look for disabled icon ie icon_Disabled
 									buttonTooltip, // the tooltip to add to the button
 									buttonClick, // function to call when clicked

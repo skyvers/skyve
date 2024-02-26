@@ -17,10 +17,4 @@ public interface LoginResources extends SerializableMetaData {
 	 * @return
 	 */
 	public String getLoggedOutPageURL();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getSmartClientJavascriptURL();
 }

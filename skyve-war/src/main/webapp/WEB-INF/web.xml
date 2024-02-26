@@ -44,6 +44,42 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+	<!-- Ensure logging and stats on everything (the filter determines what not to log) -->
+	<filter>
+		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
+		<filter-class>org.skyve.impl.web.filter.RequestLoggingAndStatisticsFilter</filter-class>
+        <init-param>
+        	<param-name>excluded</param-name>
+        	<param-value>
+        		<![CDATA[
+					/jakarta.faces.resource/
+					/omnifaces.push/
+					/resources
+					/app/assets/
+					/app/canvaskit/
+					/app/icons/
+					/pages/css/
+					/ckeditor/
+					/codemirror/
+					/croppie/
+					/fontawesome-4.7.0/
+					/fontawesome-6.5.1/
+					/images/
+					/isomorphic130/
+					/leaflet/
+					/primevue-3.12.6/
+					/semantic24/
+					/skyve/
+					/wicket/
+        		]]>
+        	</param-value>
+        </init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>RequestLoggingAndStatisticsFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<!-- FACES PARAMS -->
 	<context-param>
         <param-name>jakarta.faces.DEFAULT_SUFFIX</param-name>
@@ -138,83 +174,7 @@
 		<filter-name>FacesNoCacheFilter</filter-name>
 		<servlet-name>FacesServlet</servlet-name>
 	</filter-mapping>
-	<filter>
-		<filter-name>SkyveFilter</filter-name>
-		<filter-class>org.skyve.impl.web.filter.SkyveFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<url-pattern>*.xhtml</url-pattern>  <!-- just filter xhtml resources, not other resources served by faces servlet -->
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<url-pattern>*.jsp</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>DynamicImageServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>ReportServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientGeneratorServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientListServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientSnapServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientTagServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientCompleteServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientEditServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>SmartClientTextSearchServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>PrimeInitialiseServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>MapServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>ChartServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>MetaDataServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>BizportExportServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>HealthServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>TrackmateServlet</servlet-name>
-	</filter-mapping>
-
+	
 	<filter>
 		<filter-name>NeverExpiresFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
@@ -339,7 +299,8 @@
     </filter-mapping>
 
     <!-- API documentation servlet -->
-	<!-- <servlet>
+	<!--
+	<servlet>
 		<servlet-name>DocsServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.DocsServlet</servlet-class>
 		<init-param>
@@ -350,17 +311,20 @@
 	<servlet-mapping>
 		<servlet-name>DocsServlet</servlet-name>
 		<url-pattern>/docs</url-pattern>
-	</servlet-mapping> -->
-
+	</servlet-mapping>
+	-->
+	
 	<!-- Uncomment the following to allow access to the H2 web console. -->
-	<!--<servlet>
+	<!--
+	<servlet>
 		<servlet-name>H2Console</servlet-name>
 		<servlet-class>org.h2.server.web.JakartaWebServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>H2Console</servlet-name>
 		<url-pattern>/h2/*</url-pattern>
-	</servlet-mapping>-->
+	</servlet-mapping>
+	-->
 
 	<servlet>
 		<servlet-name>LoginServlet</servlet-name>
@@ -369,15 +333,10 @@
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
 		<url-pattern>/login</url-pattern>
-		
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
 		<url-pattern>/loggedOut</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>LoginServlet</servlet-name>
-		<url-pattern>/smartClientJavascriptLogin</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -386,15 +345,15 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DynamicImageServlet</servlet-name>
-		<url-pattern>/images/dynamic.png</url-pattern>
+		<url-pattern>/dynamic.png</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>DynamicImageServlet</servlet-name>
-		<url-pattern>/images/dynamic.gif</url-pattern>
+		<url-pattern>/dynamic.gif</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>DynamicImageServlet</servlet-name>
-		<url-pattern>/images/dynamic.jpeg</url-pattern>
+		<url-pattern>/dynamic.jpeg</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -431,6 +390,7 @@
 		<servlet-name>DownloadServlet</servlet-name>
 		<url-pattern>/download</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>ImageServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.jasperreports.ImageServlet</servlet-class>
@@ -439,18 +399,19 @@
 		<servlet-name>ImageServlet</servlet-name>
 		<url-pattern>/image</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.CustomerResourceServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>CustomerResourceServlet</servlet-name>
-		<url-pattern>/resources/*</url-pattern>
+		<url-pattern>/resources</url-pattern>
 	</servlet-mapping>
 	<!-- for smart client widgets which always look in the images directory -->
 	<servlet-mapping>
 		<servlet-name>CustomerResourceServlet</servlet-name>
-		<url-pattern>/images/resources/*</url-pattern>
+		<url-pattern>/images/resources</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CustomerResourceServlet</servlet-name>
@@ -521,15 +482,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>PrimeInitialiseServlet</servlet-name>
-		<servlet-class>org.skyve.impl.web.service.prime.InitialiseServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>PrimeInitialiseServlet</servlet-name>
-		<url-pattern>/primeinit</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>MetaDataServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.MetaDataServlet</servlet-class>
 	</servlet>
@@ -560,14 +512,6 @@
 	<servlet-mapping>
 		<servlet-name>HealthServlet</servlet-name>
 		<url-pattern>/health</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>TrackmateServlet</servlet-name>
-		<servlet-class>org.skyve.impl.web.service.TrackmateServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>TrackmateServlet</servlet-name>
-		<url-pattern>/tracks</url-pattern>
 	</servlet-mapping>
 
     <servlet>

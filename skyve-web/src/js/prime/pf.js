@@ -319,7 +319,7 @@ SKYVE.PF = function() {
 							url += '&key=' + SKYVE.Util.googleMapsV3ApiKey;
 						}
 						SKYVE.Util.loadJS(url, function() {
-							SKYVE.Util.loadJS('prime/skyve-gmap-min.js?v=' + SKYVE.Util.v, function() {
+							SKYVE.Util.loadJS('skyve/prime/skyve-gmap-min.js?v=' + SKYVE.Util.v, function() {
 								loadingMap = false;
 								if (options.queryName || options.modelName) {
 									return SKYVE.BizMap.create(options);
@@ -351,7 +351,7 @@ SKYVE.PF = function() {
 							SKYVE.Util.loadJS('leaflet/Leaflet.Editable.js?v=' + SKYVE.Util.v, function() {
 								SKYVE.Util.loadCSS('leaflet/leaflet.fullscreen.css?v=' + SKYVE.Util.v, function() {
 									SKYVE.Util.loadJS('leaflet/Leaflet.fullscreen.min.js?v=' + SKYVE.Util.v, function() {
-										SKYVE.Util.loadJS('prime/skyve-leaflet-min.js?v=' + SKYVE.Util.v, function() {
+										SKYVE.Util.loadJS('skyve/prime/skyve-leaflet-min.js?v=' + SKYVE.Util.v, function() {
 											loadingMap = false;
 											if (options.queryName || options.modelName) {
 												return SKYVE.BizMap.create(options);

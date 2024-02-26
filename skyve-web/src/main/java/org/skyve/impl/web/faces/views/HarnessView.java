@@ -207,7 +207,7 @@ public abstract class HarnessView extends LocalisableView {
 		}
 		else {
 			sb.setLength(0);
-			sb.append("css/basic-min.css?v=").append(UtilImpl.WEB_RESOURCE_FILE_VERSION);
+			sb.append("skyve/css/basic-min.css?v=").append(UtilImpl.WEB_RESOURCE_FILE_VERSION);
 			cssRelativeFileNameUrl = sb.toString();
 		}
 		

@@ -11,6 +11,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
@@ -23,19 +24,44 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-public class SkyveFilter implements Filter {
+public class RequestLoggingAndStatisticsFilter implements Filter {
+    // A list of all excluded URL prefixes
+    private String[] excludedURLPrefixes;
+
 	@Override
+	public void init(FilterConfig config) throws ServletException {
+		String urls = Util.processStringValue(config.getInitParameter("excluded"));
+		if (urls != null) {
+			excludedURLPrefixes = urls.split("\n");
+			for (int i = 0, l = excludedURLPrefixes.length; i < l; i++) {
+				excludedURLPrefixes[i] = Util.processStringValue(excludedURLPrefixes[i]);
+			}
+		}
+	}
+
+	@Override
+	public void destroy() {
+		excludedURLPrefixes = null;
+	}
+
+    @Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		String requestURI = httpRequest.getRequestURI();
-		// ignore faces resource requests
-		if (requestURI.contains("jakarta.faces.resource/")) {
-			chain.doFilter(request, response);
-			return;
-		}
-		
-		if (UtilImpl.HTTP_TRACE) {
+		String servletPath = httpRequest.getServletPath();
+
+        // Test if this URL is unsecured in the web.xml, and bug out if so
+        // NB can't use queryString here as there could be AJAX posts etc in faces so not good practice
+        if (excludedURLPrefixes != null) {
+	        for (String excludedURLPrefix : excludedURLPrefixes) {
+	        	if ((excludedURLPrefix != null) && servletPath.startsWith(excludedURLPrefix)) {
+        			chain.doFilter(request, response);
+	        		return;
+	        	}
+	        }
+        }
+ 
+        if (UtilImpl.HTTP_TRACE) {
 			UtilImpl.LOGGER.info("*********************************** REQUEST ************************************");
 			UtilImpl.LOGGER.info("ContextPath=" + httpRequest.getContextPath());
 			UtilImpl.LOGGER.info("LocalAddr=" + request.getLocalAddr());
@@ -51,12 +77,12 @@ public class SkyveFilter implements Filter {
 			UtilImpl.LOGGER.info("RemotePort=" + request.getRemotePort());
 			UtilImpl.LOGGER.info("RemoteUser=" + httpRequest.getRemoteUser());
 			UtilImpl.LOGGER.info("RequestedSessionId=" + httpRequest.getRequestedSessionId());
-			UtilImpl.LOGGER.info("RequestURI=" + requestURI);
+			UtilImpl.LOGGER.info("RequestURI=" + httpRequest.getRequestURI());
 			UtilImpl.LOGGER.info("RequestURL=" + httpRequest.getRequestURL().toString());
 			UtilImpl.LOGGER.info("Scheme=" + request.getScheme());
 			UtilImpl.LOGGER.info("ServerName=" + request.getServerName());
 			UtilImpl.LOGGER.info("ServerPort=" + request.getServerPort());
-			UtilImpl.LOGGER.info("ServletPath=" + httpRequest.getServletPath());
+			UtilImpl.LOGGER.info("ServletPath=" + servletPath);
 			Principal principal = httpRequest.getUserPrincipal();
 			UtilImpl.LOGGER.info("UserPrincipal=" + ((principal == null) ? "<null>" : principal.getName()));
 			UtilImpl.LOGGER.info("********************************** PARAMETERS **********************************");
@@ -141,15 +167,5 @@ public class SkyveFilter implements Filter {
 													Double.valueOf(memPctPre), Double.valueOf(memPctPost), Double.valueOf(memPctPost - memPctPre)));
 			if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("********************************************************************************");
 		}
-	}
-
-	@Override
-	public synchronized void init(FilterConfig config) throws ServletException {
-		// nothing to do here
-	}
-
-	@Override
-	public synchronized void destroy() {
-		// nothing to do here
 	}
 }

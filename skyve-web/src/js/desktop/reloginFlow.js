@@ -72,7 +72,7 @@ isc.RPCManager.addClassMethods({
 	            fields : fields
 	        });
 	        this.loginWindow = isc.LoginWindow.create({
-				headerIconDefaults: {src: "../images/window/skyve_fav.png", width: 16, height: 16},
+				headerIconDefaults: {src: "window/skyve_fav.png", width: 16, height: 16},
 	            title: "Session expired - please sign in",
 	            autoCenter: true,
 	            autoSize: true,

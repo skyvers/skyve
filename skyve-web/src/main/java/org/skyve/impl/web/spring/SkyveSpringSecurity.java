@@ -50,6 +50,8 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 public class SkyveSpringSecurity {
+	public static final String LOGIN_ATTEMPT_PATH = "/loginAttempt";
+	
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
 		DelegatingPasswordEncoder result = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();

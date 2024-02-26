@@ -42,52 +42,49 @@
 		</concat>
 	</target>
 	<target name="copyJavascript" depends="concatSkyveJavascript">
-		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
 		<delete file="src/js/desktop/skyve.js" />
-		<copy tofile="../skyve-war/deployments/skyve.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
-		<copy tofile="../skyve-war/deployments/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
-		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-min.js" file="src/js/prime/skyve.js" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/prime/skyve-min.js" file="src/js/prime/skyve.js" overwrite="true"/>
 		<delete file="src/js/prime/skyve.js" />
 
-		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-gmap-min.js" file="src/js/desktop/skyve-gmap.js" overwrite="true"/>
-		<copy tofile="../skyve-war/deployments/skyve.war/desktop/skyve-leaflet-min.js" file="src/js/desktop/skyve-leaflet.js" overwrite="true"/>
-		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-gmap-min.js" file="src/js/prime/skyve-gmap.js" overwrite="true"/>
-		<copy tofile="../skyve-war/deployments/skyve.war/prime/skyve-leaflet-min.js" file="src/js/prime/skyve-leaflet.js" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/desktop/skyve-gmap-min.js" file="src/js/desktop/skyve-gmap.js" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/desktop/skyve-leaflet-min.js" file="src/js/desktop/skyve-leaflet.js" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/prime/skyve-gmap-min.js" file="src/js/prime/skyve-gmap.js" overwrite="true"/>
+		<copy tofile="../skyve-war/src/main/webapp/skyve/prime/skyve-leaflet-min.js" file="src/js/prime/skyve-leaflet.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-min.js src/js/desktop/skyve.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js src/js/desktop/skyve.js"/>
 		</java>
 		<delete file="src/js/desktop/skyve.js" />
 		
 		<!-- minify css files -->
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/basic-min.css src/css/basic.css"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/prime-min.css src/css/prime.css"/>
-		</java>
-		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/simple-grid-min.css src/css/simple-grid.css"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
 		</java>
 
 		<!-- minify js files -->
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/prime/skyve-min.js src/js/prime/skyve.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-min.js src/js/prime/skyve.js"/>
 		</java>
 		<delete file="src/js/prime/skyve.js" />
 
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-gmap-min.js src/js/desktop/skyve-gmap.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-gmap-min.js src/js/desktop/skyve-gmap.js"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-leaflet-min.js src/js/desktop/skyve-leaflet.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-leaflet-min.js src/js/desktop/skyve-leaflet.js"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/prime/skyve-gmap-min.js src/js/prime/skyve-gmap.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-gmap-min.js src/js/prime/skyve-gmap.js"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/prime/skyve-leaflet-min.js src/js/prime/skyve-leaflet.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/skyve/prime/skyve-leaflet-min.js src/js/prime/skyve-leaflet.js"/>
 		</java>
 	</target>
 </project>

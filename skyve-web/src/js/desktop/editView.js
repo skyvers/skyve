@@ -2119,7 +2119,7 @@ isc.BizComparison.addMethods({
 			fields: []
 		});
 
-		SKYVE.Util.loadJS('desktop/diff_match_patch.js?v=' + SKYVE.Util.v, function() {
+		SKYVE.Util.loadJS('skyve/desktop/diff_match_patch.js?v=' + SKYVE.Util.v, function() {
 			me._comparisonForm.diff_match_patch = new diff_match_patch();
 			me._comparisonForm.diff_match_patch.Diff_EditCost = 4;
 		});
@@ -2538,6 +2538,7 @@ isc.BizDynamicImage.addMethods({
 			doubleClick: function() {
 				me._open();
 			},
+			appImgDir: '../',
 			src: src
 		});
 		if (this.members) {
@@ -2593,8 +2594,8 @@ isc.BizChart.addClassMethods({
 		}
 		else if (! window.Chart) {
 			isc.BizChart.loadingChartJS = true;
-			SKYVE.Util.loadJS('javax.faces.resource/moment/moment.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
-				SKYVE.Util.loadJS('javax.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
+			SKYVE.Util.loadJS('jakarta.faces.resource/moment/moment.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
+				SKYVE.Util.loadJS('jakarta.faces.resource/chartjs/chartjs.js.xhtml?ln=primefaces&v=' + SKYVE.Util.v, function() {
 					isc.BizChart.loadingChartJS = false;
 				});
 			});

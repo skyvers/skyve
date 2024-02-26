@@ -24,13 +24,13 @@ isc.AdvancedFilter.addMethods({
     		_constructor: isc.IButton,
     		autoFit: true,
     		title: "Filter",
-    		icon: "../images/icons/filter_add.png"
+    		icon: "icons/filter_add.png"
     	};
 
 		this.Super("initWidget", arguments);
     	
 		this.toggleButton = isc.ToolStripButton.create({
-		    icon: "../images/icons/filter_add.png",
+		    icon: "icons/filter_add.png",
 		    actionType: "checkbox",
 		    showFocused: false,
 		    showDown: false,

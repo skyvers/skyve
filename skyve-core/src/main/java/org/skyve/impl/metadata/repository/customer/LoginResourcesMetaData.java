@@ -13,7 +13,6 @@ public class LoginResourcesMetaData implements LoginResources {
 
 	private String loginPageURL;
 	private String loggedOutPageURL;
-	private String smartClientJavascriptURL;
 
 	@Override
 	public String getLoginPageURL() {
@@ -33,15 +32,5 @@ public class LoginResourcesMetaData implements LoginResources {
 	@XmlAttribute(name = "loggedOutPage")
 	public void setLoggedOutPageURL(String loggedOutPageURL) {
 		this.loggedOutPageURL = UtilImpl.processStringValue(loggedOutPageURL);
-	}
-	
-	@Override
-	public String getSmartClientJavascriptURL() {
-		return smartClientJavascriptURL;
-	}
-	
-	@XmlAttribute(name = "smartClientJavascript")
-	public void setSmartClientJavascriptURL(String smartClientJavascriptURL) {
-		this.smartClientJavascriptURL = UtilImpl.processStringValue(smartClientJavascriptURL);
 	}
 }

@@ -30,9 +30,8 @@ public class LoginServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final String LOGIN_PATH = "/login";
-	private static final String LOGGED_OUT_PATH = "/loggedOut";
-	private static final String SMART_CLIENT_JAVASCRIPT_LOGIN = "/smartClientJavascriptLogin";
+	public static final String LOGIN_PATH = "/login";
+	public static final String LOGGED_OUT_PATH = "/loggedOut";
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -92,22 +91,6 @@ public class LoginServlet extends HttpServlet {
 					Customer customer = repository.getCustomer(customerName);
 					if (customer != null) {
 						String value = customer.getLoginResources().getLoggedOutPageURL();
-						if (value != null) {
-							url = value;
-						}
-					}
-				}
-
-				// forward to jsp
-				RequestDispatcher rd = request.getRequestDispatcher(url);
-				rd.forward(request, response);
-			}
-			else if (SMART_CLIENT_JAVASCRIPT_LOGIN.equals(servletPath)) {
-				String url = "/desktop/reloginFlow.js";
-				if (customerName != null) {
-					Customer customer = repository.getCustomer(customerName);
-					if (customer != null) {
-						String value = customer.getLoginResources().getSmartClientJavascriptURL();
 						if (value != null) {
 							url = value;
 						}

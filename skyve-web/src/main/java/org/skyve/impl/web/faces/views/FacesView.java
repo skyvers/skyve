@@ -655,7 +655,7 @@ public class FacesView extends HarnessView {
  										Integer initialPixelWidth, 
  										Integer initialPixelHeight) {
 		StringBuilder result = new StringBuilder(128);
-		result.append("/images/dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
+		result.append("/dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
 		result.append(moduleName).append('.').append(documentName);
 		result.append('&').append(DynamicImageServlet.IMAGE_NAME).append('=').append(name);
 		if (pixelWidth != null) {
