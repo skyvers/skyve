@@ -2,22 +2,20 @@
 <%@page import="java.security.Principal"%>
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.domain.messages.SkyveException"%>
-<%@page import="org.skyve.metadata.user.User"%>
-<%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.impl.util.UtilImpl"%>						
 <%@page import="org.skyve.impl.web.UserAgent"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
+<%@page import="org.skyve.metadata.user.User"%>
+<%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.web.WebContext"%>
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = WebUtil.getRefererHeader(request);
-	Principal p = request.getUserPrincipal();
 	User user = null;
-	try {
-		user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
-	}
-	catch (SkyveException e) {
-		// User principal not found in DB - continue, the principal will gone by the end of this JSP
+	HttpSession session = request.getSession(false); // don't make a new one
+	if (session != null) {
+		user = (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 	}
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
 %>
