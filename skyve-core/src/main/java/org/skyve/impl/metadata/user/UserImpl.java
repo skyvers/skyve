@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
@@ -22,10 +21,10 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
-import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.Persistence;
 
 public class UserImpl implements User {
@@ -730,7 +729,7 @@ public class UserImpl implements User {
 	private boolean canAccessWithDevMode(UserAccess access, String uxui) {
 		// Create the ACL if not already created
 		if (accesses.isEmpty()) {
-			new AccessProcessor((CustomerImpl) getCustomer(), moduleMenuMap, accesses).process();
+			new AccessProcessor(this, moduleMenuMap, accesses).process();
 		}
 
 		// Check access exists by key

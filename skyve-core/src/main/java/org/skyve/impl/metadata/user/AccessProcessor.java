@@ -23,6 +23,7 @@ import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.Role;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -30,13 +31,15 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 class AccessProcessor {
+	private User user;
 	private CustomerImpl customer;
 	private Map<String, Menu> moduleMenuMap;
 	private Map<String, Set<String>> accesses;
 	private Router router;
 
-	AccessProcessor(CustomerImpl customer, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
-		this.customer = customer;
+	AccessProcessor(User user, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
+		this.user = user;
+		this.customer = (CustomerImpl) user.getCustomer(); 
 		this.moduleMenuMap = moduleMenuMap;
 		this.accesses = accesses;
 		router = CORE.getRepository().getRouter();
@@ -47,14 +50,15 @@ class AccessProcessor {
 	 */
 	void process() {
 		for (Entry<String, Menu> entry : moduleMenuMap.entrySet()) {
-			final String moduleName = entry.getKey();
-			final Module module = customer.getModule(moduleName);
-			processModuleHome(module, moduleName);
-			
 			final Menu menu = entry.getValue();
-			processMenuItems(menu.getItems(), module, moduleName);
-			
-			processRoles(module);
+			final List<MenuItem> menuItems = menu.getItems();
+			if (! menuItems.isEmpty()) {
+				final String moduleName = entry.getKey();
+				final Module module = customer.getModule(moduleName);
+				processModuleHome(module, moduleName);
+				processMenuItems(menuItems, module, moduleName);
+				processRoles(module, moduleName);
+			}
 		}
 		processedUxUiViews.clear();
 //for (String a : accesses.keySet()) {
@@ -164,11 +168,13 @@ class AccessProcessor {
 		}
 	}
 	
-	private void processRoles(final Module module) {
+	private void processRoles(final Module module, final String moduleName) {
 		for (Role role : module.getRoles()) {
-			Map<UserAccess, Set<String>> roleAccesses = ((RoleImpl) role).getAccesses();
-			for (Entry<UserAccess, Set<String>> entry : roleAccesses.entrySet()) {
-				addAccessForUxUis(entry.getKey(), entry.getValue());
+			if (user.isInRole(moduleName, role.getName())) {
+				Map<UserAccess, Set<String>> roleAccesses = ((RoleImpl) role).getAccesses();
+				for (Entry<UserAccess, Set<String>> entry : roleAccesses.entrySet()) {
+					addAccessForUxUis(entry.getKey(), entry.getValue());
+				}
 			}
 		}
 	}
