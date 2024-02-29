@@ -1,13 +1,14 @@
 package modules.test;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.Util;
 
 import modules.test.InjectedDocument.InjectedDocumentExtension;
 import modules.test.domain.InjectedDocument;
 
 public class InjectionTest extends AbstractSkyveTest {
+
 	@Test
 	public void testInjectedOnCreateAfterSaveAndAfterLoad() throws Exception {
 		InjectedDocumentExtension test = Util.constructRandomInstance(u, m, id, 1);

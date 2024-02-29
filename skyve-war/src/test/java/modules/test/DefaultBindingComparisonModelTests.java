@@ -1,12 +1,13 @@
 package modules.test;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.model.comparison.DefaultBindingComparisonModel;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 
 public class DefaultBindingComparisonModelTests extends AbstractSkyveTest {
+
 	@Test
 	public void testSimpleGeneration() throws Exception {
 		AllAttributesPersistent now = Util.constructRandomInstance(u, m, aapd, 1);

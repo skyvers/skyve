@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.EXT;
@@ -28,11 +28,11 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
 public class SQLDataAccessTests extends AbstractSkyveTestDispose {
+
 	private String persistentIdentifier;
 	
-	@Before
+	@BeforeEach
 	@Override
-	@SuppressWarnings("null")
 	public void before() {
 		super.before();
 		persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();

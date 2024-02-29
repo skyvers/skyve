@@ -1,7 +1,9 @@
 package modules.test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.util.BeanValidator;
@@ -11,17 +13,22 @@ import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.MappedExtensionSingleStrategy;
 
 public class BeanValidatorTests extends AbstractSkyveTest {
+
 	@Test
 	public void testValidateBeanAgainstDocument() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		BeanValidator.validateBeanAgainstDocument(messd, test);
 	}
 
-	@Test(expected = ValidationException.class)
+	@Test
 	public void testValidateBeanAgainstBaseDocument() throws Exception {
-		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
-		test.setColour(null);
-		BeanValidator.validateBeanAgainstDocument(messd, test);
+		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
+			MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
+			test.setColour(null);
+			BeanValidator.validateBeanAgainstDocument(messd, test);
+		});
+
+		assertTrue(ve.getMessages().size() > 0);
 	}
 
 	@Test
@@ -30,11 +37,15 @@ public class BeanValidatorTests extends AbstractSkyveTest {
 		BeanValidator.validateBeanAgainstDocument(aarpd, test);
 	}
 
-	@Test(expected = ValidationException.class)
+	@Test
 	public void testValidateBeanAgainstDocumentFail() throws Exception {
-		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
-		test.setColour(null);
-		BeanValidator.validateBeanAgainstDocument(aarpd, test);
+		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
+			AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
+			test.setColour(null);
+			BeanValidator.validateBeanAgainstDocument(aarpd, test);
+		});
+
+		assertTrue(ve.getMessages().size() > 0);
 	}
 
 	@Test
@@ -43,11 +54,15 @@ public class BeanValidatorTests extends AbstractSkyveTest {
 		BeanValidator.validateBeanAgainstDocument(test);
 	}
 
-	@Test(expected = ValidationException.class)
+	@Test
 	public void testValidateBeanAgainstDocumentNamecFail() throws Exception {
-		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
-		test.setColour(null);
-		BeanValidator.validateBeanAgainstDocument(test);
+		ValidationException ve = Assert.assertThrows(ValidationException.class, () -> {
+			AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
+			test.setColour(null);
+			BeanValidator.validateBeanAgainstDocument(test);
+		});
+
+		assertTrue(ve.getMessages().size() > 0);
 	}
 
 	@Test

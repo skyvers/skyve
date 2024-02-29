@@ -1,8 +1,13 @@
 package modules.test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
@@ -19,26 +24,35 @@ import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNonNullable.Enum3;
 
 public class DatabaseIsolationTests extends AbstractSkyveTestDispose {
+
 	// insert a duplicate where the duplicate exists in the database
-	@Test(expected = DomainException.class)
+	@Test
 	public void testCommittedDuplicateDetectedOnStatement() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
-		((AbstractPersistentBean) test1).setBizId(test.getBizId());
-		p.upsertBeanTuple(test);
-		p.commit(false);
-		p.upsertBeanTuple(test1);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+			AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+			((AbstractPersistentBean) test1).setBizId(test.getBizId());
+			p.upsertBeanTuple(test);
+			p.commit(false);
+			p.upsertBeanTuple(test1);
+		});
+
+		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	// insert a duplicate where the duplicate was first inserted in this transaction
-	@Test(expected = DomainException.class)
+	@Test
 	public void testUncommittedDuplicateDetectedInSameTransactionOnStatement() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
-		((AbstractPersistentBean) test1).setBizId(test.getBizId());
-		p.upsertBeanTuple(test);
-		p.commit(false);
-		p.upsertBeanTuple(test1);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+			AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+			((AbstractPersistentBean) test1).setBizId(test.getBizId());
+			p.upsertBeanTuple(test);
+			p.commit(false);
+			p.upsertBeanTuple(test1);
+		});
+
+		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	// insert a duplicate where the duplicate was first inserted in another transaction

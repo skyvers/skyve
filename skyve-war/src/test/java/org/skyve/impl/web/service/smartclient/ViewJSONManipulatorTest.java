@@ -1,7 +1,7 @@
 package org.skyve.impl.web.service.smartclient;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
@@ -16,6 +16,7 @@ import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
 public class ViewJSONManipulatorTest extends AbstractSkyveTest {
+
 	private static final String TEST_UXUI = "external";
 	
 	@Test

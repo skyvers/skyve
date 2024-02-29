@@ -1,7 +1,7 @@
 package modules.test;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
@@ -18,6 +18,7 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class DocumentQueryTest extends AbstractSkyveTest {
+
 	@Test
 	public void testDefaultHierarchical() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, hd.getName()).constructDocumentQuery(null, null);

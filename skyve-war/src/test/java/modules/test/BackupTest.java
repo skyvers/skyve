@@ -3,7 +3,7 @@ package modules.test;
 import java.io.File;
 
 import org.junit.AfterClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.backup.BackupJob;
 import org.skyve.impl.backup.RestoreJob;
 import org.skyve.util.Util;
@@ -18,6 +18,7 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class BackupTest extends AbstractSkyveTestDispose {
+
 	private static File backupZip;
 	
 	@Test

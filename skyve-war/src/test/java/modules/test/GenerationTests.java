@@ -1,7 +1,7 @@
 package modules.test;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.PolymorphicPersistentBean;
@@ -20,6 +20,7 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class GenerationTests extends AbstractSkyveTest {
+
 	/**
 	 * Test the generated domain for the various extension hierarchies modelled in the test module.
 	 */

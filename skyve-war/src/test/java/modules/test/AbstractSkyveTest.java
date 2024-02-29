@@ -1,6 +1,6 @@
 package modules.test;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -32,6 +32,7 @@ import modules.test.domain.UniqueConstraintOptimisation;
 import util.AbstractH2TestTruncate;
 
 public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
+
 	public static final String ALL_ATTRIBUTES_DYNAMIC_PERSISTENT_DOCUMENT_NAME = "AllAttributesDynamicPersistent";
 	public static final String DYNAMIC_MAPPED_EXTENSION_DOCUMENT_NAME = "DynamicMappedExtension";
 	public static final String DYNAMIC_MAPPED_SUBCLASSED_DOCUMENT_NAME = "DynamicMappedSubclassed";
@@ -66,7 +67,7 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 
 	protected Persistence p;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		p = CORE.getPersistence();
 		u = p.getUser();

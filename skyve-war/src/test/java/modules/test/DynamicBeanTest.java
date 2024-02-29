@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -187,7 +187,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		// Id collection to scalar
 		@SuppressWarnings("unchecked")
 		List<? extends Bean> elements = (List<? extends Bean>) Binder.get(bean, collectionPropertyName);
-		@SuppressWarnings("null") // its a test - let in NPE
+		// its a test - let in NPE
 		String bizId = elements.get(1).getBizId();
 		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);

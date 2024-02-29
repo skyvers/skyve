@@ -1,11 +1,15 @@
 package modules.test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -40,6 +44,7 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
 public class BindTests extends AbstractSkyveTest {
+
 	@Test
 	@SuppressWarnings("static-method")
 	public void testSanitizeBinding() throws Exception {
@@ -235,10 +240,14 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("{text}{text}", Binder.formatMessage("{text}{text}", aap));
 	}
 	
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testDanglingMessageFormat() throws Exception {
-		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
-		Assert.assertEquals("{text", Binder.formatMessage("{text", aap));
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+			Assert.assertEquals("{text", Binder.formatMessage("{text", aap));
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 	
 	@Test
@@ -668,19 +677,32 @@ public class BindTests extends AbstractSkyveTest {
 								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
 	}
 
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testGetMetaDataForBindingThrowsOnParentBindingOfNonChildDocument() {
-		BindUtil.getMetaDataForBinding(c, m, aapd, ChildBean.PARENT_NAME);
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			BindUtil.getMetaDataForBinding(c, m, aapd, ChildBean.PARENT_NAME);
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testGetMetaDataForBindingThrowsOnCompoundParentBindingOfNonChildDocument() {
-		BindUtil.getMetaDataForBinding(c, m, aapd, AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			BindUtil.getMetaDataForBinding(c, m, aapd,
+					AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 	
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testGetMetaDataForBindingThrowsOnCompoundBinding() {
-		BindUtil.getMetaDataForBinding(c, m, aapd, "bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			BindUtil.getMetaDataForBinding(c, m, aapd, "bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 
 	@Test

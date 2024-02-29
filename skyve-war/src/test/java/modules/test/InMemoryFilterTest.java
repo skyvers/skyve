@@ -6,12 +6,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
 public class InMemoryFilterTest extends AbstractSkyveTest {
+
 	@Test
 	@SuppressWarnings("static-method")
 	public void testFilterStrings() throws Exception {

@@ -3,7 +3,7 @@ package modules.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
@@ -15,6 +15,7 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 
 public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
+
 	@Test
 	public void testQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);

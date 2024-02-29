@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
@@ -20,6 +20,7 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.InverseOneToOnePersistent;
 
 public class BeanVisitorTests extends AbstractSkyveTest {
+
 	@Test
 	public void testStandard() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
