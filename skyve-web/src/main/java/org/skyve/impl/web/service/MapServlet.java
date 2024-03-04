@@ -15,11 +15,10 @@ import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
@@ -135,32 +134,30 @@ public class MapServlet extends HttpServlet {
 		String documentOrQueryName = request.getParameter(AbstractWebContext.QUERY_NAME);
 		String geometryBinding = request.getParameter(GEOMETRY_BINDING_NAME);
 		
-		// Run the query map model and convert to JSON
+		// Check access control
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryName);
 		UxUi uxui = UserAgent.getUxUi(request);
 		if (query == null) {
-			if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName())) {
-				final String userName = user.getName();
-				UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
-				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-				throw new AccessException("this data", userName);
-			}
+			user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 		}
 		else {
-			if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName())) {
-				final String userName = user.getName();
-				UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
-				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-				throw new AccessException("this data", userName);
-			}
+			user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 		}
 		if (query == null) {
 			throw new ServletException(documentOrQueryName + " does not reference a valid query");
 		}
+
+		// Check document permissions
+		Document drivingDocument = module.getDocument(customer, query.getDocumentName());
+		if (! user.canReadDocument(drivingDocument)) {
+			throw new SecurityException("read this data", user.getName());
+		}
+
+		// Run the query map model and convert to JSON
 		DocumentQueryMapModel<Bean> model = new DocumentQueryMapModel<>(query);
 		model.setGeometryBinding(geometryBinding);
 		return JSON.marshall(customer, model.getResult(mapBounds(request)));
@@ -196,12 +193,7 @@ public class MapServlet extends HttpServlet {
 		final String documentName = bean.getBizDocument();
 		final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 		UxUi uxui = UserAgent.getUxUi(request);
-		if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
-			final String userName = user.getName();
-			UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
-			UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-			throw new AccessException("this data", userName);
-		}
+		user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 
 		// Invoke the model
 		Customer customer = user.getCustomer();

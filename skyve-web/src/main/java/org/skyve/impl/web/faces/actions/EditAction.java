@@ -8,9 +8,8 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -71,12 +70,7 @@ public class EditAction extends FacesAction<Void> {
 				final String bizModule = current.getBizModule();
 				final String bizDocument = current.getBizDocument();
 
-				if (! user.canAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName())) {
-					final String userName = user.getName();
-					UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
-					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-					throw new AccessException("this page", userName);
-				}
+				user.checkAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
 				
 				facesView.setBizModuleParameter(bizModule);
 				facesView.setBizDocumentParameter(bizDocument);
@@ -91,12 +85,7 @@ public class EditAction extends FacesAction<Void> {
 					throw new IllegalStateException("bizDocument is required");
 				}
 
-				if (! user.canAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName())) {
-					final String userName = user.getName();
-					UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + bizModule + '.' + bizDocument);
-					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-					throw new AccessException("this page", userName);
-				}
+				user.checkAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
 
 				Module module = customer.getModule(bizModule);
 				Document document = module.getDocument(customer, bizDocument);

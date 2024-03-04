@@ -2,7 +2,7 @@ package org.skyve.impl.web.faces.actions;
 
 import org.primefaces.PrimeFaces;
 import org.skyve.domain.Bean;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;

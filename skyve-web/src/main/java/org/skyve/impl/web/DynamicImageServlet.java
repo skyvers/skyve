@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Principal;
 
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.Thumbnails.Builder;
-
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -21,12 +18,16 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.Thumbnails.Builder;
 
 public class DynamicImageServlet extends HttpServlet {
 	/**
@@ -51,41 +52,41 @@ public class DynamicImageServlet extends HttpServlet {
 		ImageFormat format = null;
 		try (OutputStream out = response.getOutputStream()) {
 			try {
-				String moduleDotDocumentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
+				String moduleDotDocumentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 				if (moduleDotDocumentName == null) {
 					throw new ServletException("No module.document name in the URL");
 				}
 	
-				String imageName = request.getParameter(IMAGE_NAME);
+				String imageName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_NAME)));
 				if (imageName == null) {
 					throw new ServletException("No image name in the URL");
 				}
 				
-				String widthParam = request.getParameter(IMAGE_WIDTH_NAME);
+				String widthParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_WIDTH_NAME)));
 				if (widthParam == null) {
 					throw new ServletException("No image width in the URL");
 				}
 				int width = Integer.parseInt(widthParam);
 	
-				String heightParam = request.getParameter(IMAGE_HEIGHT_NAME);
+				String heightParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_HEIGHT_NAME)));
 				if (heightParam == null) {
 					throw new ServletException("No image height in the URL");
 				}
 				int height = Integer.parseInt(heightParam);
 	
 				int widthZoom = 100;
-				String widthZoomParam = request.getParameter(IMAGE_WIDTH_ZOOM_NAME);
+				String widthZoomParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_WIDTH_ZOOM_NAME)));
 				if (widthZoomParam != null) {
 					widthZoom = Integer.parseInt(widthZoomParam);
 				}
 	
 				int heightZoom = 100;
-				String heightZoomParam = request.getParameter(IMAGE_HEIGHT_ZOOM_NAME);
+				String heightZoomParam = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(IMAGE_HEIGHT_ZOOM_NAME)));
 				if (heightZoomParam != null) {
 					heightZoom = Integer.parseInt(heightZoomParam);
 				}
 		        
-				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+				String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 	        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 	        	if (webContext == null) {
 	        		throw new ConversationEndedException(request.getLocale());

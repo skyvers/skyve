@@ -28,14 +28,13 @@ import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -181,17 +180,12 @@ public class SmartClientListServlet extends HttpServlet {
 						String moduleName = tokens[0];
 			        	module = customer.getModule(moduleName);
 						
-						// model type of request
 						UxUi uxui = UserAgent.getUxUi(request);
+						// model type of request
 						if (dataSource.contains("__")) {
 							final String documentName = tokens[1];
 							final String modelName = tokens[3];
-							if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
-								final String userName = user.getName();
-								UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
-								UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-								throw new AccessException("this data", userName);
-							}
+							user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 							
 							drivingDocument = module.getDocument(customer, documentName);
 							model = drivingDocument.getListModel(customer, modelName, true);
@@ -207,21 +201,11 @@ public class SmartClientListServlet extends HttpServlet {
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
-								if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName())) {
-									final String userName = user.getName();
-									UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
-									UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-									throw new AccessException("this data", userName);
-								}
+								user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 							}
 							else {
-								if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName())) {
-									final String userName = user.getName();
-									UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
-									UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-									throw new AccessException("this data", userName);
-								}
+								user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);

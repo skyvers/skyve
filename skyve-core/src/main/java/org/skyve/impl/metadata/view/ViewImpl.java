@@ -358,36 +358,17 @@ public class ViewImpl extends Container implements View {
 			
 			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+				String modelName = chart.getModelName();
+
 				// Add any inlined models to the view
 				ChartBuilderMetaData metaDataModel = chart.getModel();
 				if (metaDataModel != null) {
-					inlineModels.put(metaDataModel.getModelName(), metaDataModel);
+					modelName = metaDataModel.getModelName();
+					inlineModels.put(modelName, metaDataModel);
 				}
 
 				if (determineAccesses) {
-					if (metaDataModel != null) {
-						String modelModuleName = metaDataModel.getModuleName();
-						String modelQueryName = metaDataModel.getQueryName();
-						if (modelQueryName != null) {
-							accesses.add(UserAccess.queryAggregate(modelModuleName, modelQueryName));
-						}
-						else {
-							Module modelModule = customer.getModule(modelModuleName);
-							String moduleDocumentName = metaDataModel.getDocumentName();
-							DocumentRef ref = modelModule.getDocumentRefs().get(documentName);
-							modelQueryName = ref.getDefaultQueryName();
-							if (modelQueryName != null) {
-								accesses.add(UserAccess.queryAggregate(modelModuleName, modelQueryName));
-							}
-							else {
-								accesses.add(UserAccess.documentAggregate(modelModuleName, moduleDocumentName));
-							}
-						}
-					}
-					else {
-						String modelName = chart.getModelName();
-						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
-					}
+					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 				}
 			}
 
@@ -578,7 +559,8 @@ public class ViewImpl extends Container implements View {
 			@Override
 			public void visitReportAction(ActionImpl action) {
 				ProvidedRepository r = (optionalRepositoryToUse == null) ? ProvidedRepositoryFactory.get() : optionalRepositoryToUse;
-				String fileName = r.getReportFileName(customer, document, action.getResourceName());
+				String resourceName = action.getResourceName();
+				String fileName = r.getReportFileName(customer, document, resourceName);
 				if (fileName != null) {
 					List<Parameter> reportParameters = action.getParameters();
 					
@@ -591,11 +573,15 @@ public class ViewImpl extends Container implements View {
 						parameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
 					}
 					else {
-						throw new MetaDataException("Report Action for report " + action.getResourceName() + 
+						throw new MetaDataException("Report Action for report " + resourceName + 
 														" in view " + name + " for module " + moduleName + " and document " + documentName + 
 														" does not reference a Jasper or Freemarker resource");
 					}
 					reportParameters.add(parameter);
+				}
+				
+				if (determineAccesses) {
+					accesses.add(UserAccess.report(moduleName, documentName, resourceName));
 				}
 			}
 		}.visit();

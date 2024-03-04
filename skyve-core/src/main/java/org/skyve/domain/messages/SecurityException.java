@@ -1,6 +1,4 @@
-package org.skyve.impl.domain.messages;
-
-import org.skyve.domain.messages.DomainException;
+package org.skyve.domain.messages;
 
 /**
  * Thrown when the current user does not have privileges to 

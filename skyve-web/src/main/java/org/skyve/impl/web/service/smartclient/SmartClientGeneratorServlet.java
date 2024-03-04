@@ -8,7 +8,6 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
-import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -112,12 +111,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				String uxuiName = uxui.getName();
 				UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
 
-				if (! user.canAccess(UserAccess.singular(moduleName, documentName), uxuiName)) {
-					final String userName = user.getName();
-					UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + moduleName + '.' + documentName);
-					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-					throw new AccessException("this page", userName);
-				}
+				user.checkAccess(UserAccess.singular(moduleName, documentName), uxuiName);
 
 				Module module = customer.getModule(moduleName);
 				Document document = module.getDocument(customer, documentName);

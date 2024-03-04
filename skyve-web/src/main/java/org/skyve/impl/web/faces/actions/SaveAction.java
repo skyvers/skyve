@@ -3,7 +3,7 @@ package org.skyve.impl.web.faces.actions;
 import java.util.logging.Level;
 
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;

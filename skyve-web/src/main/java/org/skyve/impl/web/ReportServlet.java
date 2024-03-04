@@ -12,11 +12,10 @@ import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.generate.jasperreports.DesignSpecification;
 import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
 import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
@@ -44,10 +43,12 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.servlet.ServletException;
@@ -114,41 +115,41 @@ public class ReportServlet extends HttpServlet {
 
 	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
 		try (OutputStream out = response.getOutputStream()) {
-			String moduleName = request.getParameter(AbstractWebContext.MODULE_NAME);
+			String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 			if (moduleName == null) {
 				throw new ServletException("No module name in the URL");
 			}
-			String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
+			String documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 			if (documentName == null) {
 				throw new ServletException("No document name in the URL");
 			}
-			// If report name is not specified, generate the report.
-			String reportName = request.getParameter(AbstractWebContext.REPORT_NAME);
-			boolean generatedReport = false;
-			if (reportName == null) {
-				generatedReport = true;
-			}
-			String formatString = request.getParameter(AbstractWebContext.REPORT_FORMAT);
+			String formatString = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.REPORT_FORMAT)));
 			if (formatString == null) {
 				throw new ServletException("No report format in the URL");
 			}
 			ReportFormat format = ReportFormat.valueOf(formatString);
 
+			// Report name can be null if this is a print action - the report is generated.
+			String reportName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.REPORT_NAME)));
+
 			User user = AbstractPersistence.get().getUser();
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
+			UxUi uxui = UserAgent.getUxUi(request);
 
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
-			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+			String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
-
+			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final JasperPrint jasperPrint;
-			if (generatedReport) {
-				reportName = String.format("%s - %s", moduleName, documentName);
+			if (reportName == null) { // need to generate the report
+				user.checkAccess(UserAccess.singular(moduleName, documentName), uxui.getName());
+				
+				reportName = moduleName + " - " + documentName;
 
 				final DesignSpecification designSpecification = new DesignSpecification();
 				designSpecification.setName("EditView");
@@ -168,19 +169,25 @@ public class ReportServlet extends HttpServlet {
 				jasperPrint = JasperReportUtil.runReport(reportRenderer.getReport(), user, document, parameters, bean, format, baos);
 			}
 			else {
+				user.checkAccess(UserAccess.report(moduleName, documentName, reportName), uxui.getName());
+
 				final String isList = request.getParameter(AbstractWebContext.IS_LIST);
 				if (isList != null && Boolean.parseBoolean(isList)) {
-					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
-					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
+					final String queryName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.QUERY_NAME)));
+					final String modelName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODEL_NAME)));
 					final String documentOrQueryOrModelName = (modelName != null) ? modelName : ((queryName != null) ? queryName : documentName);
-					final ListModel<Bean> listModel = JasperReportUtil.getQueryListModel(module, documentOrQueryOrModelName);
+					// Note this method checks user access and read permission.
+					final ListModel<Bean> listModel = JasperReportUtil.getQueryListModel(module, documentOrQueryOrModelName, uxui.getName());
 					jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), listModel, format, baos);
 				}
 				else {
 					// Manually load the bean if an id is specified but there is no appropriate bean to load from the conversation.
-					final String id = request.getParameter(AbstractWebContext.ID_NAME);
+					final String id = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.ID_NAME)));
 					if ((id != null) && ((bean == null) || ((contextKey != null) && (! contextKey.endsWith(id))))) {
 						bean = AbstractPersistence.get().retrieve(document, id);
+						if (! user.canReadBean(id, bean.getBizModule(), bean.getBizDocument(), bean.getBizCustomer(), bean.getBizDataGroupId(), bean.getBizUserId())) {
+							throw new SecurityException("read this data", user.getName());
+						}
 					}
 
 					jasperPrint = JasperReportUtil.runReport(user, document, reportName, getParameters(request), bean, format, baos);
@@ -207,7 +214,7 @@ public class ReportServlet extends HttpServlet {
 					AbstractWebContext.MODULE_NAME.equals(paramName) ||
 					AbstractWebContext.DOCUMENT_NAME.equals(paramName) ||
 					AbstractWebContext.REPORT_NAME.equals(paramName))) {
-				params.put(paramName, paramValue);
+				params.put(paramName, OWASP.sanitise(Sanitisation.text, Util.processStringValue(paramValue)));
 				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("ReportServlet: Report Parameter " + paramName + " = " + paramValue);
 			}
 		}
@@ -338,19 +345,14 @@ public class ReportServlet extends HttpServlet {
 					String documentName = documentOrQueryOrModelName.substring(0, __Index);
 					String modelName = documentOrQueryOrModelName.substring(__Index + 2);
 
-					if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
-						final String userName = user.getName();
-						UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
-						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-						throw new AccessException("this data", userName);
-					}
+					user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 
 					Document document = module.getDocument(customer, documentName);
 					model = document.getListModel(customer, modelName, true);
 
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
-					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+					String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 					AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
@@ -359,21 +361,11 @@ public class ReportServlet extends HttpServlet {
 				else {
 					MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 					if (query == null) {
-						if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName())) {
-							final String userName = user.getName();
-							UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryOrModelName);
-							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-							throw new AccessException("this data", userName);
-						}
+						user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 						query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 					}
 					else {
-						if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName())) {
-							final String userName = user.getName();
-							UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryOrModelName);
-							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-							throw new AccessException("this data", userName);
-						}
+						user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 					}
 					if (query == null) {
 						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);

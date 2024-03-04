@@ -1,4 +1,4 @@
-package org.skyve.impl.domain.messages;
+package org.skyve.domain.messages;
 
 /**
  * Thrown when a page or resource is requested from a user agent (browser, mobile device, API client)

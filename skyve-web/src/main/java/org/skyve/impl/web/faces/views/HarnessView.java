@@ -3,7 +3,7 @@ package org.skyve.impl.web.faces.views;
 import java.util.Set;
 
 import org.skyve.CORE;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;

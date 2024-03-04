@@ -16,6 +16,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.RoleImpl;
@@ -214,7 +215,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 						}
 					}
 					if (firstRow) { // no data for this user
-						throw new org.skyve.impl.domain.messages.SecurityException("the system", "The user " + user.getName());
+						throw new SecurityException("the system", "The user " + user.getName());
 					}
 				}
 			}

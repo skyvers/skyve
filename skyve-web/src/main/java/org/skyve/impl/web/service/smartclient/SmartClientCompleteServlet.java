@@ -11,11 +11,10 @@ import java.util.logging.Level;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
@@ -173,11 +172,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					if (complete == CompleteType.previous) {
 						final String userName = user.getName();
 						final UxUi uxui = UserAgent.getUxUi(request);
-						if (! user.canAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName())) {
-							UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + formModuleName + '.' + formDocumentName + " for " + binding);
-							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-							throw new AccessException("the previous data", userName);
-						}
+						user.checkAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName());
 
 						if (! user.canReadDocument(document)) {
 							throw new SecurityException("read this data", userName);

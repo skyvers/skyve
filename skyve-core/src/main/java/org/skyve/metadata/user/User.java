@@ -4,9 +4,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.skyve.domain.messages.AccessException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * 
@@ -16,10 +20,10 @@ public interface User extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getId();
-	public void setId(String id);
+	String getId();
+	void setId(String id);
 	
-	public String getLanguageTag();
+	String getLanguageTag();
 	
 	/**
 	 * Determine the user's locale in the following way.
@@ -29,12 +33,12 @@ public interface User extends NamedMetaData {
 	 * 
 	 * @return	The appropriate locale.
 	 */
-	public Locale getLocale();
+	Locale getLocale();
 	
 	/**
 	 * @return	The hashed password value as stored in the data store.
 	 */
-	public String getPasswordHash();
+	String getPasswordHash();
 
 	/**
 	 * Does the password need to be changed before accessing the system.
@@ -42,63 +46,63 @@ public interface User extends NamedMetaData {
 	 * @return <code>true</code> if a change of password is required, 
 	 * 			otherwise <code>false</code>.
 	 */
-	public boolean isPasswordChangeRequired();
+	boolean isPasswordChangeRequired();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getContactId();
+	String getContactId();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getContactName();
+	String getContactName();
 	
 	/**
 	 * The content ID of the contant image or null if there is no image
 	 */
-	public String getContactImageId();
+	String getContactImageId();
 	
 	/**
 	 * The URL to use to get a thumbnail of the image from the resource servlet.
 	 */
-	public String getContactImageUrl(int width, int height);
+	String getContactImageUrl(int width, int height);
 	
 	/**
 	 * Returns a 2 Upper Case initials for the contact name if possible.
 	 * @return	Avatar Initials
 	 */
-	public String getContactAvatarInitials();
+	String getContactAvatarInitials();
 
 	/**
 	 * 
 	 * @return
 	 */
-	public Customer getCustomer();
+	Customer getCustomer();
 	
-	public String getCustomerName();
-	public void setCustomerName(String customerName);
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getDataGroupId();
-	public void setDataGroupId(String dataGroupId);
+	String getCustomerName();
+	void setCustomerName(String customerName);
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getHomeModuleName();
+	String getDataGroupId();
+	void setDataGroupId(String dataGroupId);
+	
+	/**
+	 * 
+	 * @return
+	 */
+	String getHomeModuleName();
 
 	/**
 	 * 
 	 * @return
 	 */
-	public Set<String> getAccessibleModuleNames();
+	Set<String> getAccessibleModuleNames();
 
 	/**
 	 * 
@@ -106,7 +110,7 @@ public interface User extends NamedMetaData {
 	 * @param roleName
 	 * @return
 	 */
-	public boolean isInRole(String moduleName, String roleName);
+	boolean isInRole(String moduleName, String roleName);
 	
 	/**
 	 * 
@@ -114,7 +118,7 @@ public interface User extends NamedMetaData {
 	 * @param documentName
 	 * @return
 	 */
-	public DocumentPermissionScope getScope(String moduleName, String documentName);
+	DocumentPermissionScope getScope(String moduleName, String documentName);
 	
 	/**
 	 * Determine if we can read the document bean given the document scope etc. 
@@ -128,60 +132,60 @@ public interface User extends NamedMetaData {
 	 * @param beanBizUserId
 	 * @return
 	 */
-	public boolean canReadBean(String beanBizId,
-								String beanBizModule,
-								String beanBizDocument,
-								String beanBizCustomer,
-								String beanBizDataGroupId,
-								String beanBizUserId);
+	boolean canReadBean(String beanBizId,
+							String beanBizModule,
+							String beanBizDocument,
+							String beanBizCustomer,
+							String beanBizDataGroupId,
+							String beanBizUserId);
 	
 	/**
 	 * Indicates if the user is able to search or view the content
 	 * 
 	 * @return <code>true</code> if access is allowed, otherwise <code>false</code>.
 	 */
-	public boolean canAccessContent(String bizId,
-										String bizModule,
-										String bizDocument,
-										String bizCustomer,
-										String bizDataGroupId,
-										String bizUserId,
-										String attributeName);
+	boolean canAccessContent(String bizId,
+								String bizModule,
+								String bizDocument,
+								String bizCustomer,
+								String bizDataGroupId,
+								String bizUserId,
+								String attributeName);
 	
 	/**
 	 * 
 	 * @param document
 	 * @return
 	 */
-	public boolean canAccessDocument(Document document);
+	boolean canAccessDocument(Document document);
 	
 	/**
 	 * 
 	 * @param document
 	 * @return
 	 */
-	public boolean canCreateDocument(Document document);
+	boolean canCreateDocument(Document document);
 	
 	/**
 	 * 
 	 * @param document
 	 * @return
 	 */
-	public boolean canReadDocument(Document document);
+	boolean canReadDocument(Document document);
 	
 	/**
 	 * 
 	 * @param document
 	 * @return
 	 */
-	public boolean canUpdateDocument(Document document);
+	boolean canUpdateDocument(Document document);
 	
 	/**
 	 * 
 	 * @param document
 	 * @return
 	 */
-	public boolean canDeleteDocument(Document document);
+	boolean canDeleteDocument(Document document);
 	
 	/**
 	 * 
@@ -189,7 +193,7 @@ public interface User extends NamedMetaData {
 	 * @param actionName
 	 * @return
 	 */
-	public boolean canExecuteAction(Document document, String actionName);
+	boolean canExecuteAction(Document document, String actionName);
 	
 	/**
 	 * Does the given router UX/UI have access to the given UserAccess.
@@ -198,7 +202,73 @@ public interface User extends NamedMetaData {
 	 * 
 	 * @return	true if the user is able to access the application in this way.
 	 */
-	public boolean canAccess(UserAccess access, String uxui);
+	boolean canAccess(@Nonnull UserAccess access, @Nonnull String uxui);
+	
+	default void checkAccess(@Nonnull UserAccess access, @Nonnull String uxui) {
+		if (! canAccess(access, uxui)) {
+			final String userName = getName();
+			final String moduleName = access.getModuleName();
+			final String documentName = access.getDocumentName();
+			final String component = access.getComponent();
+			final StringBuilder warning = new StringBuilder(256);
+			final String resource;
+			warning.append("User ").append(userName).append(" cannot access ");
+			if (access.isContent()) {
+				warning.append("content for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" with binding ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this content";
+			}
+			else if (access.isDocumentAggregate()) {
+				warning.append("default query for document ").append(moduleName).append('.').append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this query";
+			}
+			else if (access.isDynamicImage()) {
+				warning.append("dynamic image for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" with binding ").append(component);
+				warning.append(" and UX/UI ").append(uxui);
+				resource = "this dynamic image";
+			}
+			else if (access.isModelAggregate()) {
+				warning.append("model for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this model";
+			}
+			else if (access.isPreviousComplete()) {
+				warning.append("previous complete for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" with binding ").append(component);
+				warning.append(" and UX/UI ").append(uxui);
+				resource = "this previous data";
+			}
+			else if (access.isQueryAggregate()) {
+				warning.append("query for module ").append(moduleName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this query";
+			}
+			else if (access.isReport()) {
+				warning.append("report for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this report";
+			}
+			else if (access.isSingular()) {
+				warning.append("view for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this view";
+			}
+			else {
+				throw new IllegalStateException(access.toString() + " not catered for");
+			}
+
+			UtilImpl.LOGGER.warning(warning.toString());
+			UtilImpl.LOGGER.info("If this user already has a document or action privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+			throw new AccessException(resource, userName);
+		}
+	}
 	
 	/**
 	 * User (session) attributes. Keep this small since the user is in the web session.

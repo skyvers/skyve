@@ -44,9 +44,21 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	}
 
 	public static UserAccess previousComplete(String moduleName, String documentName, String binding) {
+		return new UserAccess('P', moduleName, documentName, binding);
+	}
+
+	public static UserAccess report(String moduleName, String documentName, String reportName) {
+		return new UserAccess('R', moduleName, documentName, reportName);
+	}
+
+	public static UserAccess dynamicImage(String moduleName, String documentName, String dynamicImageName) {
+		return new UserAccess('I', moduleName, documentName, dynamicImageName);
+	}
+
+	public static UserAccess content(String moduleName, String documentName, String binding) {
 		return new UserAccess('C', moduleName, documentName, binding);
 	}
-	
+
 	public boolean isSingular() {
 		return (type == 'S');
 	}
@@ -64,6 +76,18 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	}
 
 	public boolean isPreviousComplete() {
+		return (type == 'P');
+	}
+
+	public boolean isReport() {
+		return (type == 'R');
+	}
+
+	public boolean isDynamicImage() {
+		return (type == 'I');
+	}
+
+	public boolean isContent() {
 		return (type == 'C');
 	}
 

@@ -12,7 +12,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.primefaces.component.datatable.DataTable;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;

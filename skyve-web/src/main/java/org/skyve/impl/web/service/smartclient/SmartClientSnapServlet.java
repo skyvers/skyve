@@ -10,17 +10,22 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
@@ -87,23 +92,50 @@ public class SmartClientSnapServlet extends HttpServlet {
 					String menuButtonId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("ID")));
 					String snapId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("i")));
 					String snapName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("n")));
-					// Dont sanitise this one as it is JSON - TODO should use a JSON sanitiser on it.
+					// Don't sanitise this one as it is JSON - TODO should use a JSON sanitiser on it.
 					String snapshot = Util.processStringValue(request.getParameter("s"));
 					String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
 
 					String moduleName = null;
-					String queryName = null;
+					String documentOrQueryOrModelName = null;
 					if (dataSource != null) {
-			        	// use first 2 tokens of '_' split - could be a pick list which means extra '_' in it
-			        	String[] tokens = dataSource.split("_");
-						moduleName = tokens[0];
-						queryName = tokens[1];
+						int _Index = dataSource.indexOf('_');
+						moduleName = dataSource.substring(0, _Index);
+						Customer customer = user.getCustomer();
+						Module module = customer.getModule(moduleName);
+						documentOrQueryOrModelName = dataSource.substring(_Index + 1);
+						
+						UxUi uxui = UserAgent.getUxUi(request);
+
+						int __Index = documentOrQueryOrModelName.indexOf("__");
+						// model type of request
+						if (__Index >= 0) {
+							String documentName = documentOrQueryOrModelName.substring(0, __Index);
+							String modelName = documentOrQueryOrModelName.substring(__Index + 2);
+
+							user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+						}
+						// query type of request
+						else {
+							MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
+							// not a query, must be a document
+							if (query == null) {
+								user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+								query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+							}
+							else {
+								user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+							}
+							if (query == null) {
+								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
+							}
+						}
 					}
 
 					HttpSession session = request.getSession();
 
 					if ("L".equals(action)) {
-						list(snapId, menuButtonId, moduleName, queryName, sb);
+						list(snapId, menuButtonId, moduleName, documentOrQueryOrModelName, sb);
 					}
 					else if ("U".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
@@ -113,7 +145,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 
-						snapId = create(moduleName, queryName, snapName, snapshot);
+						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot);
 						sb.append("{bizId:'");
 						sb.append(snapId);
 						sb.append("'}");
@@ -241,6 +273,11 @@ public class SmartClientSnapServlet extends HttpServlet {
 	throws Exception {
 		Persistence p = CORE.getPersistence();
 		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME, snapId);
+		// Check the snapshot is for the current user
+		User u = p.getUser();
+		if (! u.getId().equals(snap.getBizUserId())) {
+			throw new SecurityException("update this Snapshot", u.getName());
+		}
 		BindUtil.set(snap, AppConstants.SNAPSHOT_ATTRIBUTE_NAME, snapshot);
 		p.save(snap);
 	}
@@ -249,6 +286,11 @@ public class SmartClientSnapServlet extends HttpServlet {
 	throws Exception {
 		Persistence p = CORE.getPersistence();
 		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME, snapId);
+		// Check the snapshot is for the current user
+		User u = p.getUser();
+		if (! u.getId().equals(snap.getBizUserId())) {
+			throw new SecurityException("delete this Snapshot", u.getName());
+		}
 		p.delete(snap);
 	}
 }

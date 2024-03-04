@@ -15,13 +15,16 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
@@ -108,12 +111,14 @@ public class SmartClientTagServlet extends HttpServlet {
 			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
+						UxUi uxui = UserAgent.getUxUi(request);
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
 																			dataSourceName,
 																			criteria,
 																			bean,
 																			user,
-																			customer)) {
+																			customer,
+																			uxui)) {
 							tm.tag(tagId, iterable);
 						}
 					}
@@ -125,12 +130,14 @@ public class SmartClientTagServlet extends HttpServlet {
 			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
+						UxUi uxui = UserAgent.getUxUi(request);
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
 																			dataSourceName,
 																			criteria,
 																			bean,
 																			user,
-																			customer)) {
+																			customer,
+																			uxui)) {
 							tm.untag(tagId, iterable);
 						}
 					}
@@ -246,27 +253,38 @@ public class SmartClientTagServlet extends HttpServlet {
 														String criteriaJSON,
 														Bean bean,
 														User user,
-														Customer customer)
+														Customer customer,
+														UxUi uxui)
 	throws Exception {
 		// Determine
 		int _Index = dataSourceName.indexOf('_');
-		Module module = customer.getModule(dataSourceName.substring(0, _Index));
+		String moduleName = dataSourceName.substring(0, _Index);
+		Module module = customer.getModule(moduleName);
 		String documentOrQueryOrModelName = dataSourceName.substring(_Index + 1);
 		Document drivingDocument = null;
 		ListModel<Bean> model = null;
 		int __Index = documentOrQueryOrModelName.indexOf("__");
+		// model type of request
 		if (__Index >= 0) {
 			String documentName = documentOrQueryOrModelName.substring(0, __Index);
 			Document document = module.getDocument(customer, documentName);
 			String modelName = documentOrQueryOrModelName.substring(__Index + 2);
+			user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+
 			model = document.getListModel(customer, modelName, true);
 			model.setBean(bean);
 			drivingDocument = model.getDrivingDocument();
 		}
+		// query type of request
 		else {
 			MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
+			// not a query, must be a document
 			if (query == null) {
+				user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 				query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+			}
+			else {
+				user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 			}
 			if (query == null) {
 				throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
@@ -274,6 +292,8 @@ public class SmartClientTagServlet extends HttpServlet {
 			drivingDocument = module.getDocument(customer, query.getDocumentName());
 			model = EXT.newListModel(query);
 		}
+
+		// Note:- No need to check read on the driving document here as we are tagging, not reading the target document
 		
 		// add filter criteria
 		@SuppressWarnings("unchecked")

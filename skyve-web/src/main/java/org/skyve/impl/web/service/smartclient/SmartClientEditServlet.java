@@ -19,14 +19,13 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
@@ -256,12 +255,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			processBean = formBean;
 		    		}
 			    	
-					if (! user.canAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName())) {
-						final String userName = user.getName();
-						UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + processModule.getName() + '.' + processDocument.getName());
-						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-						throw new AccessException("this page", userName);
-					}
+					user.checkAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName());
 
 					if (! user.canAccessDocument(processDocument)) {
 						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(), user.getName());

@@ -5,7 +5,7 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
