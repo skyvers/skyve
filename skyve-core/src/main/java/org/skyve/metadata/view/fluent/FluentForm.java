@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormItem;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.widget.bound.Bound;
@@ -29,6 +31,8 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		relativeSize(form, this);
 
 		labelDefaultHorizontalAlignment(form.getLabelDefaultHorizontalAlignment());
+		collapsible(form.getCollapsible());
+		labelLayout(form.getLabelLayout());
 
 		disabledConditionName(form.getDisabledConditionName());
 		invisibleConditionName(form.getInvisibleConditionName());
@@ -138,6 +142,16 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		return this;
 	}
 
+	public FluentForm collapsible(Collapsible collapsible) {
+		form.setCollapsible(collapsible);
+		return this;
+	}
+
+	public FluentForm labelLayout(FormLabelLayout layout) {
+		form.setLabelLayout(layout);
+		return this;
+	}
+	
 	public FluentForm disabledConditionName(String disabledConditionName) {
 		form.setDisabledConditionName(disabledConditionName);
 		return this;

@@ -9,6 +9,7 @@ import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
+import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
@@ -35,6 +36,7 @@ public class FluentModule {
 		title(module.getTitle());
 		documentation(module.getDocumentation());
 		prototype(module.isPrototype());
+		formLabelLayout(module.getFormLabelLayout());
 		homeRef(module.getHomeRef());
 		homeDocument(module.getHomeDocumentName());
 
@@ -92,6 +94,11 @@ public class FluentModule {
 		return this;
 	}
 
+	public FluentModule formLabelLayout(FormLabelLayout layout) {
+		module.setFormLabelLayout(layout);
+		return this;
+	}
+	
 	public FluentModule homeRef(ViewType homeRef) {
 		module.setHomeRef(homeRef);
 		return this;
