@@ -37,9 +37,6 @@ public class SpringSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(c -> {
 			if (UtilImpl.DEV_LOGIN_FILTER_USED) {
-				UtilImpl.LOGGER.warning("**************************************************************************************************");
-				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve is opening services that should not be open in a legit deployment");
-				UtilImpl.LOGGER.warning("**************************************************************************************************");
 				// Open SC list view servlet
 				c.requestMatchers("/smartlist").permitAll()
 					// Open SC snap servlet

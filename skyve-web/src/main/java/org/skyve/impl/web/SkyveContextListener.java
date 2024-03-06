@@ -183,6 +183,9 @@ public class SkyveContextListener implements ServletContextListener {
 		for (Entry<String, ? extends FilterRegistration> entry : ctx.getFilterRegistrations().entrySet()) {
 			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(entry.getValue().getClassName())) {
 				UtilImpl.DEV_LOGIN_FILTER_USED = true;
+				UtilImpl.LOGGER.warning("****************************************************************************************************");
+				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
+				UtilImpl.LOGGER.warning("****************************************************************************************************");
 				break;
 			}
 		}
