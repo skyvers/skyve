@@ -35,7 +35,31 @@ public class SpringSecurityConfig {
 	
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(c ->
+		http.authorizeHttpRequests(c -> {
+			if (UtilImpl.DEV_LOGIN_FILTER_USED) {
+				UtilImpl.LOGGER.warning("**************************************************************************************************");
+				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve is opening services that should not be open in a legit deployment");
+				UtilImpl.LOGGER.warning("**************************************************************************************************");
+				// Open SC list view servlet
+				c.requestMatchers("/smartlist").permitAll()
+					// Open SC snap servlet
+					.requestMatchers("/smartsnap").permitAll()
+					// Open SC tag servlet
+					.requestMatchers("/smarttag").permitAll()
+					// Open export URL
+					.requestMatchers("/export").permitAll();
+			}
+			else {
+				// Secure SC list view servlet
+				c.requestMatchers("/smartlist").authenticated()
+					// Secure SC snap servlet
+					.requestMatchers("/smartsnap").authenticated()
+					// Secure SC tag servlet
+					.requestMatchers("/smarttag").authenticated()
+					// Secure export URL
+					.requestMatchers("/export").authenticated();
+			}
+			
 			// Permit H2 servlet if enabled
 			c.requestMatchers("/h2/**").permitAll()
 				// Enable access to all rest endpoints as these will have Servlet Filters to secure.
@@ -64,8 +88,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/**/*.xhtml").permitAll()
 				// Secure dynamic image URLs
 				.requestMatchers("/dynamic.*").authenticated()
-				// Secure all report URLs
-				.requestMatchers("/report", "/export").authenticated()
+				// Secure report URL
+				.requestMatchers("/report").authenticated()
 				// Secure chart servlet
 				.requestMatchers("/chart").authenticated()
 				// Secure Image Servlet for HTML reporting through Jasper
@@ -76,14 +100,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/meta").authenticated()
 				// Secure SC edit view servlet
 				.requestMatchers("/smartedit").authenticated()
-				// Secure SC list view servlet
-				.requestMatchers("/smartlist").authenticated()
 				// Secure SC view generation servlet
 				.requestMatchers("/smartgen").authenticated()
-				// Secure SC snap servlet
-				.requestMatchers("/smartsnap").authenticated()
-				// Secure SC tag servlet
-				.requestMatchers("/smarttag").authenticated()
 				// Secure SC complete servlet
 				.requestMatchers("/smartcomplete").authenticated()
 				// Secure SC text search servlet
@@ -101,7 +119,8 @@ public class SpringSecurityConfig {
 				//  Secure all POST requests by default
 				.requestMatchers(HttpMethod.POST, "/**").authenticated()
 				// Only allow get and post methods by default
-				.anyRequest().denyAll()
+				.anyRequest().denyAll();
+			}
 		)
 		.sessionManagement(c -> c.sessionFixation().changeSessionId())
 		.rememberMe(c ->

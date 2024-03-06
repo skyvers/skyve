@@ -103,10 +103,9 @@ public class SmartClientListServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 	
-	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
     private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
-        response.setContentType(MimeType.json.toString());
+    	response.setContentType(MimeType.json.toString());
         response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never

@@ -91,7 +91,10 @@ public class UtilImpl {
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
-
+	
+	// whether the DevLoginFilter is turned on or not
+	public static boolean DEV_LOGIN_FILTER_USED = false;
+	
 	// This is set in the web.xml but defaults to windows
 	// as a dev environment for design time and generation gear
 	public static String CONTENT_DIRECTORY = "/_/Apps/content/";
