@@ -265,6 +265,81 @@
 		</attribute>
 	</tag>
 	<tag>
+		<tag-name>vueListGrid</tag-name>
+		<component>
+			<component-type>org.skyve.impl.web.faces.components.VueListGrid</component-type>
+			<renderer-type>jakarta.faces.Text</renderer-type>
+		</component>
+		<attribute>
+			<description>Unique identifier of the component in a namingContainer.</description>
+			<name>id</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<name>module</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>query</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>document</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>model</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should render creation of a new document bean (New Button).</description>
+			<name>createRendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should disable creation of a new document bean (New Button).</description>
+			<name>createDisabled</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should render zooming to a document bean (> button or click).</description>
+			<name>zoomRendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should disable zooming of a document bean (> button or click).</description>
+			<name>zoomDisabled</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should render the filter header.</description>
+			<name>filterRendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify that each rendering of the listGrid will be from scratch - dynamically rendered each time.</description>
+			<name>dynamic</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+	</tag>
+	<tag>
 		<tag-name>map</tag-name>
 		<component>
 			<component-type>org.skyve.impl.web.faces.components.Map</component-type>
