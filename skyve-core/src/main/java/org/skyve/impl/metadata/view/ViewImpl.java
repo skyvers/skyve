@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
@@ -394,7 +395,7 @@ public class ViewImpl extends Container implements View {
 			// NB DataRepeater cannot zoom in
 			
 			@Override
-			public void visitDynamicImage(org.skyve.impl.metadata.view.widget.DynamicImage image, boolean parentVisible, boolean parentEnabled) {
+			public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					String imageName = image.getName();
 					accesses.add(UserAccess.dynamicImage(moduleName, documentName, imageName));
