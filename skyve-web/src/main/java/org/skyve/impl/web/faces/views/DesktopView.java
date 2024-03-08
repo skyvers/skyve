@@ -176,8 +176,12 @@ public class DesktopView extends HarnessView {
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:void(setUxUi());\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"");
 		result.append(Icons.FONT_SWITCH).append(" fa-2x \"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"");
-		result.append(Icons.FONT_SEARCH).append(" fa-2x\"></i></a></td>");
+		
+		if (CORE.getUser().canTextSearch()) {
+			result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"");
+			result.append(Icons.FONT_SEARCH).append(" fa-2x\"></i></a></td>");
+		}
+		
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp({help});\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"");
 		result.append(Icons.FONT_HELP).append(" fa-2x\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"");

@@ -69,6 +69,11 @@ public class SuperUser extends UserImpl {
 	public boolean canReadDocument(Document document) {
 		return true;
 	}
+	
+	@Override
+	public boolean canTextSearch() {
+		return true;
+	}
 
 	@Override
 	public boolean canUpdateDocument(Document document) {

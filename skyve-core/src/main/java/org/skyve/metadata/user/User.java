@@ -175,6 +175,12 @@ public interface User extends NamedMetaData {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	boolean canTextSearch();
+	
+	/**
+	 * 
 	 * @param document
 	 * @return
 	 */

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.customer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,6 +45,7 @@ import jakarta.xml.bind.annotation.XmlType;
 							"defaultTimestampConverter", 
 							"modules", 
 							"roles",
+							"textSearchRoles",
 							"interceptors",
 							"observers",
 							"JFreeChartPostProcessorClassName",
@@ -61,6 +63,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 	private ConverterName defaultTimestampConverter;
 	private CustomerModulesMetaData modules;
 	private CustomerRolesMetaData roles;
+	private List<CustomerFeatureRoleMetaData> textSearchRoles = new ArrayList<>();
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private List<ObserverMetaDataImpl> observers = new ArrayList<>();
 	private String fullyQualifiedJFreeChartPostProcessorClassName;
@@ -157,6 +160,12 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		this.roles = roles;
 	}
 
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "textSearchRoles")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
+	public List<CustomerFeatureRoleMetaData> getTextSearchRoles() {
+		return textSearchRoles;
+	}
+	
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
 	public List<InterceptorMetaDataImpl> getInterceptors() {
@@ -274,8 +283,8 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		}
 		
 		// Populate Roles
+		Set<String> roleNames = new TreeSet<>();
 		if (roles != null) {
-			Set<String> roleNames = new TreeSet<>();
 			for (CustomerRoleMetaData role : roles.getRoles()) {
 				value = role.getName();
 				if (value == null) {
@@ -301,6 +310,39 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 			result.setAllowModuleRoles(roles.isAllowModuleRoles());
 		}
 
+		// Populate Text Search Roles
+		Set<String> textSearchModuleRoles = result.getTextSearchRoles();
+		if (textSearchRoles != null) {
+			for (CustomerFeatureRoleMetaData textSearchRole : textSearchRoles) {
+				String textSearchRoleName = textSearchRole.getName();
+				if (textSearchRoleName == null) {
+					throw new MetaDataException(metaDataName + " : The [name] for a text search role is required");
+				}
+				String moduleName = textSearchRole.getModuleName();
+				if (moduleName == null) {
+					Optional<CustomerRoleMetaData> customerRole = roles.getRoles().stream().filter(r -> r.getName().equals(textSearchRoleName)).findAny();
+					if (customerRole.isEmpty()) {
+						throw new MetaDataException(metaDataName + " : The [name] of text search role " + textSearchRoleName +
+								" is not a valid customer role");
+					}
+					CustomerRoleMetaData role = customerRole.get();
+					for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
+						moduleName = moduleRole.getModuleName();
+						value = moduleRole.getName();
+						textSearchModuleRoles.add(moduleName + "." + value);
+					}
+				}
+				else {
+					if (! moduleEntries.containsKey(moduleName)) {
+						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
+					}
+					if (! textSearchModuleRoles.add(moduleName + "." + textSearchRoleName)) {
+						throw new MetaDataException(metaDataName + " : Duplicate role " + textSearchRoleName);
+					}
+				}
+			}
+		}		
+		
 		// Populate Interceptors
 		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();
 		if (repositoryInterceptors != null) {

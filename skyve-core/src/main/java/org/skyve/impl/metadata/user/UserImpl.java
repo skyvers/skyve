@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
@@ -658,6 +659,17 @@ public class UserImpl implements User {
 			if (permission != null) {
 				result = permission.canRead();
 			}
+		}
+
+		return result;
+	}
+	
+	@Override
+	public boolean canTextSearch() {
+		boolean result = roleNames.contains(SUPER_ROLE);
+
+		if (! result) {
+			result = ((CustomerImpl) getCustomer()).getTextSearchRoles().stream().anyMatch(roleNames::contains);
 		}
 
 		return result;

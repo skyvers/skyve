@@ -6,7 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 import org.skyve.bizport.BizPortWorkbook;
@@ -30,12 +32,12 @@ import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.controller.Upload;
-import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.HTMLResources;
 import org.skyve.metadata.customer.InterceptorMetaData;
 import org.skyve.metadata.customer.LoginResources;
+import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.UIResources;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -108,6 +110,7 @@ public class CustomerImpl implements Customer {
 	private LinkedHashMap<String, FormLabelLayout> moduleEntries = new LinkedHashMap<>();
 	private String homeModuleName;
 	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
+	private Set<String> textSearchRoles = new TreeSet<>();
 	private boolean allowModuleRoles = true;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
@@ -913,6 +916,14 @@ public class CustomerImpl implements Customer {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPostRender(result, webContext);
 		}
+	}
+
+	public Set<String> getTextSearchRoles() {
+		return textSearchRoles;
+	}
+
+	public void setTextSearchRoles(Set<String> textSearchRoles) {
+		this.textSearchRoles = textSearchRoles;
 	}
 }
        

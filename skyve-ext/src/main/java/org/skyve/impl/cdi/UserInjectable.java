@@ -173,6 +173,11 @@ public class UserInjectable implements User {
 	public boolean canReadDocument(Document document) {
 		return CORE.getUser().canReadDocument(document);
 	}
+	
+	@Override
+	public boolean canTextSearch() {
+		return CORE.getUser().canTextSearch();
+	}
 
 	@Override
 	public boolean canUpdateDocument(Document document) {

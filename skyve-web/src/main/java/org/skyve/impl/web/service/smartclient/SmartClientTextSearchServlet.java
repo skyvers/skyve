@@ -58,8 +58,13 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 				if (user == null) {
 					throw new SessionEndedException(request.getLocale());
 				}
+				if (! user.canTextSearch()) {
+					throw new SecurityException(user.getName() + " does not have permission to text search");
+				}
 				persistence.setUser(user);
 				Customer customer = user.getCustomer();
+				
+				
 
 				SearchResults results = cm.google(criteria, 100);
 
