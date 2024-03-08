@@ -22,28 +22,28 @@ public class UserActivityModel extends ChartModel<UserDashboard> {
 
 	@Override
 	public ChartData getChartData() {
-		
-		Persistence pers= CORE.getPersistence();
-		
-		// temporarily elevate user to be able to see Audit records in case they don't usually have access
-		pers.setDocumentPermissionScopes(DocumentPermissionScope.global);
-		
-		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-		q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
-		q.getFilter().addEquals(Audit.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
 
-		ChartBuilder cb = new ChartBuilder();
-		cb.with(q);
-		cb.category(Audit.timestampPropertyName, new TemporalBucket(TemporalBucketType.dayMonthYear));
-		cb.value(Audit.userNamePropertyName, AggregateFunction.Count);
-		cb.top(14, OrderBy.category, SortDirection.descending, false);
-		cb.orderBy(OrderBy.category, SortDirection.ascending);
-		
-		ChartData chartData = cb.build("My activity - last 14 days","Activity");
-		
-		pers.resetDocumentPermissionScopes();
-		
-		return chartData;
+		Persistence pers = CORE.getPersistence();
+
+		try {
+			// temporarily elevate user to be able to see Audit records in case they don't usually have access
+			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+
+			DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+			q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
+			q.getFilter().addEquals(Audit.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
+
+			ChartBuilder cb = new ChartBuilder();
+			cb.with(q);
+			cb.category(Audit.timestampPropertyName, new TemporalBucket(TemporalBucketType.dayMonthYear));
+			cb.value(Audit.userNamePropertyName, AggregateFunction.Count);
+			cb.top(14, OrderBy.category, SortDirection.descending, false);
+			cb.orderBy(OrderBy.category, SortDirection.ascending);
+
+			return cb.build("My activity - last 14 days", "Activity");
+		} finally {
+
+			pers.resetDocumentPermissionScopes();
+		}
 	}
-
 }

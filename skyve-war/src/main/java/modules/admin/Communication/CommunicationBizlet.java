@@ -164,25 +164,25 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	 * @return
 	 */
 	public static boolean anonymouslyCommunicationExists(Persistence p, String bizCustomer, String communicationId) {
-		boolean result = false;
 		try {
-			p.setDocumentPermissionScopes(DocumentPermissionScope.global);
+			// temporarily elevate user to be able to see Communication records in case they don't usually have access
+			p.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+
 			DocumentQuery q = p.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 			q.addBoundProjection(Bean.DOCUMENT_ID);
 			DocumentFilter f = q.getFilter();
 			f.addEquals(Bean.CUSTOMER_NAME, bizCustomer);
 			f.addEquals(Bean.DOCUMENT_ID, communicationId);
-			result = q.scalarResult(String.class) != null;
+			return q.scalarResult(String.class) != null;
 		} finally {
 			p.resetDocumentPermissionScopes();
 		}
-		return result;
 	}
 
 	public static Communication setLinks(Communication communication) {
 		Communication bean = communication;
 
-		//construct UnsubscribeUrl
+		// construct the unsubscribe URL
 		StringBuilder url = new StringBuilder(256);
 		url.append(Util.getSkyveContextUrl());
 		url.append("/");

@@ -25,7 +25,7 @@ public class ActivityModel extends ChartModel<SystemDashboard> {
 		Persistence pers= CORE.getPersistence();
 		
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access
-		pers.setDocumentPermissionScopes(DocumentPermissionScope.global);
+		pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
 		
 		DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 		q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
