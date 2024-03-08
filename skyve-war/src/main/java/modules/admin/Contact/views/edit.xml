@@ -40,7 +40,6 @@
 			</row>
 		</form>
 	</hbox>
-	<dynamicImage name="Testical"></dynamicImage>
 	<actions>
 		<defaults />
 	</actions>
