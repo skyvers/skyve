@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
+import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -54,13 +55,12 @@ public class SmartClientSnapServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
-	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
-	private static void processRequest(HttpServletRequest request, 
+	private static void processRequest(HttpServletRequest request,
 										HttpServletResponse response)
 	throws IOException {
 		StringBuilder sb = new StringBuilder(256);
 
-    	// Send CSRF Token as a response header (must be done before getting the writer)
+		// Send CSRF Token as a response header (must be done before getting the writer)
 		String currentCsrfTokenString = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CSRF_TOKEN_NAME));
 		Integer currentCsrfToken = (currentCsrfTokenString == null) ? null : Integer.valueOf(currentCsrfTokenString);
 		Integer newCsrfToken = currentCsrfToken;
@@ -74,7 +74,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 		else {
 			newCsrfToken = StateUtil.createToken();
 		}
-    	response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
+		response.setIntHeader("X-CSRF-TOKEN", newCsrfToken.intValue());
 
 		try (PrintWriter pw = response.getWriter()) {
 			AbstractPersistence persistence = AbstractPersistence.get();
@@ -82,14 +82,13 @@ public class SmartClientSnapServlet extends HttpServlet {
 				try {
 					persistence.begin();
 					Principal userPrincipal = request.getUserPrincipal();
-					User user = WebUtil.processUserPrincipalForRequest(request, 
+					User user = WebUtil.processUserPrincipalForRequest(request,
 																		(userPrincipal == null) ? null : userPrincipal.getName(),
 																		true);
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
-	
-					String menuButtonId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("ID")));
+
 					String snapId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("i")));
 					String snapName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("n")));
 					// Don't sanitise this one as it is JSON - TODO should use a JSON sanitiser on it.
@@ -104,7 +103,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 						Customer customer = user.getCustomer();
 						Module module = customer.getModule(moduleName);
 						documentOrQueryOrModelName = dataSource.substring(_Index + 1);
-						
+
 						UxUi uxui = UserAgent.getUxUi(request);
 
 						int __Index = documentOrQueryOrModelName.indexOf("__");
@@ -135,16 +134,14 @@ public class SmartClientSnapServlet extends HttpServlet {
 					HttpSession session = request.getSession();
 
 					if ("L".equals(action)) {
-						list(snapId, menuButtonId, moduleName, documentOrQueryOrModelName, sb);
+						list(moduleName, documentOrQueryOrModelName, sb);
 					}
 					else if ("U".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
-						
 						update(snapId, snapshot);
 					}
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
-
 						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot);
 						sb.append("{bizId:'");
 						sb.append(snapId);
@@ -152,13 +149,12 @@ public class SmartClientSnapServlet extends HttpServlet {
 					}
 					else if ("D".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
-
 						delete(snapId);
 					}
 
 					pw.append(sb);
 					pw.flush();
-					
+
 					// Replace CSRF token
 					StateUtil.replaceToken(session, currentCsrfToken, newCsrfToken);
 				}
@@ -167,23 +163,23 @@ public class SmartClientSnapServlet extends HttpServlet {
 				}
 			}
 			catch (Throwable t) {
-			    t.printStackTrace();
-		    	if (persistence != null) {
-		    		persistence.rollback();
-		    	}
-	
-		    	pw.append("isc.warn('");
-		    	if (t instanceof MessageException) {
-		    		SmartClientEditServlet.appendErrorText("The Snapshot operation was unsuccessful", 
-		    												((MessageException) t).getMessages(),
-		    												pw);
-		    	}
-		    	else {
-			    	pw.append("The Snapshot operation was unsuccessful: ");
-			    	pw.append(OWASP.escapeJsString(t.getMessage()));
-		    	}
-		    	pw.append("');");
-		    	pw.flush();
+				t.printStackTrace();
+				if (persistence != null) {
+					persistence.rollback();
+				}
+
+				pw.append("isc.warn('");
+				if (t instanceof MessageException) {
+					SmartClientEditServlet.appendErrorText("The Snapshot operation was unsuccessful",
+															((MessageException) t).getMessages(),
+															pw);
+				}
+				else {
+					pw.append("The Snapshot operation was unsuccessful: ");
+					pw.append(OWASP.escapeJsString(t.getMessage()));
+				}
+				pw.append("');");
+				pw.flush();
 			}
 			finally {
 				if (persistence != null) {
@@ -193,58 +189,37 @@ public class SmartClientSnapServlet extends HttpServlet {
 		}
 	}
 
-	private static void list(String snapId, 
-								String menuButtonId,
-								String moduleName,
+	private static void list(String moduleName,
 								String queryName,
 								StringBuilder sb)
 	throws Exception {
-	    sb.append("[{title:'New Snapshot',icon:'icons/snap_add.png',click:'");
-	    sb.append(menuButtonId).append(".newSnap()'},");
-	    sb.append("{isSeparator:true},");
-	    sb.append("{title:'No Snapshot',click:\"").append(menuButtonId).append(".setSnap(null,'No Snapshot',null)\"},");
-	    sb.append("{isSeparator:true}");
+		Persistence p = CORE.getPersistence();
+		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME);
+		q.addBoundProjection(Bean.DOCUMENT_ID);
+		q.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME);
+		q.addBoundProjection(AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
+		DocumentFilter f = q.getFilter();
+		f.addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
+		f.addEquals(AppConstants.QUERY_NAME_ATTRIBUTE_NAME, queryName);
+		q.addBoundOrdering(AppConstants.ORDINAL_ATTRIBUTE_NAME);
+		q.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
 
-	    Persistence p = CORE.getPersistence();
-	    DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME);
-	    q.addBoundProjection(Bean.DOCUMENT_ID);
-	    q.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME);
-	    q.addBoundProjection(AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
-	    DocumentFilter f = q.getFilter();
-	    f.addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
-	    f.addEquals(AppConstants.QUERY_NAME_ATTRIBUTE_NAME, queryName);
-	    q.addBoundOrdering(AppConstants.ORDINAL_ATTRIBUTE_NAME);
-	    q.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
+		// Snapshots array
+		sb.append('[');
+		List<Bean> results = q.projectedResults();
+		for (Bean bean : results) {
+			String escapedCode = OWASP.escapeJsString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
+			String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
+			String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
 
-	    for (Bean bean : q.projectedResults()) {
-        	String escapedCode = OWASP.escapeJsString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
-        	String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
-        	String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
-
-        	// snap select menu
-            sb.append(",{title:'").append(escapedDescription).append("',icon:'icons/snap.png',click:function(){");
-            sb.append(menuButtonId).append(".setSnap('").append(escapedCode).append("','");
-            sb.append(escapedDescription).append("',");
-            sb.append(snapshot).append(")},submenu:[");
-
-            boolean disabled = (snapId == null) || (! snapId.equals(escapedCode));
-
-            // Note - javascript escapes (like \') don't work in string methods
-            // update snap
-            sb.append("{title:'Update Snapshot");
-            if (disabled) {
-            	sb.append(" (Select a Snapshot first)',enabled:false,");
-            } else {
-            	sb.append("',");
-            }
-            sb.append("icon:'icons/snap_edit.png',click:function(){").append(menuButtonId).append(".updateSnap('");
-            sb.append(escapedCode).append("')}},");
-
-            // delete snap
-            sb.append("{title:'Delete Snapshot',icon:'icons/snap_delete.png',click:function(){").append(menuButtonId).append(".deleteSnap('");
-            sb.append(escapedCode).append("')}}]}");
-	    }
-        sb.append("]");
+			sb.append('{').append(Bean.DOCUMENT_ID).append(":'").append(escapedCode);
+			sb.append("',").append(AppConstants.NAME_ATTRIBUTE_NAME).append(":'").append(escapedDescription);
+			sb.append("',").append(AppConstants.SNAPSHOT_ATTRIBUTE_NAME).append(':').append(snapshot).append("},");
+		}
+		if (! results.isEmpty()) {
+			sb.setLength(sb.length() - 1); // remove last comma
+		}
+		sb.append(']');
 	}
 
 	private static String create(String snapModuleName,
@@ -269,10 +244,12 @@ public class SmartClientSnapServlet extends HttpServlet {
 		return snap.getBizId();
 	}
 
-	private static void update(String snapId, String snapshot) 
+	private static void update(String snapId, String snapshot)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME, snapId);
+		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME,
+													AppConstants.SNAPSHOT_DOCUMENT_NAME,
+													snapId);
 		// Check the snapshot is for the current user
 		User u = p.getUser();
 		if (! u.getId().equals(snap.getBizUserId())) {
@@ -282,10 +259,12 @@ public class SmartClientSnapServlet extends HttpServlet {
 		p.save(snap);
 	}
 
-	private static void delete(String snapId) 
+	private static void delete(String snapId)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME, snapId);
+		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME,
+													AppConstants.SNAPSHOT_DOCUMENT_NAME,
+													snapId);
 		// Check the snapshot is for the current user
 		User u = p.getUser();
 		if (! u.getId().equals(snap.getBizUserId())) {
