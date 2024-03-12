@@ -283,8 +283,8 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		}
 		
 		// Populate Roles
-		Set<String> roleNames = new TreeSet<>();
 		if (roles != null) {
+			Set<String> roleNames = new TreeSet<>();
 			for (CustomerRoleMetaData role : roles.getRoles()) {
 				value = role.getName();
 				if (value == null) {

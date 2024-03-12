@@ -15,6 +15,7 @@ import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -59,7 +60,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 					throw new SessionEndedException(request.getLocale());
 				}
 				if (! user.canTextSearch()) {
-					throw new SecurityException(user.getName() + " does not have permission to text search");
+					throw new SecurityException("text search", user.getName());
 				}
 				persistence.setUser(user);
 				Customer customer = user.getCustomer();

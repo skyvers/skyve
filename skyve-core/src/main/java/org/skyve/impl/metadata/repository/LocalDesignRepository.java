@@ -235,9 +235,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// NB We don't need to check the module name of the role as this is checked when the metadata
 		// is converted and we know all module names are correct from the validation performed above.
 		for (String textSearchModuleRole : ((CustomerImpl) customer).getTextSearchRoles()) {
-			String moduleName = textSearchModuleRole.split("\\.")[0];
+			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
+			String moduleName = moduleAndRoleName[0];
 			Module module = getModule(customer, moduleName);
-			String roleName = textSearchModuleRole.split("\\.")[1];
+			String roleName = moduleAndRoleName[1];
 			if (module.getRole(roleName) == null) {
 				throw new MetaDataException("Module role " + roleName + 
 						" for module " + moduleName +

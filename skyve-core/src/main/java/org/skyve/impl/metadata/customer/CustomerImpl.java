@@ -921,9 +921,5 @@ public class CustomerImpl implements Customer {
 	public Set<String> getTextSearchRoles() {
 		return textSearchRoles;
 	}
-
-	public void setTextSearchRoles(Set<String> textSearchRoles) {
-		this.textSearchRoles = textSearchRoles;
-	}
 }
        

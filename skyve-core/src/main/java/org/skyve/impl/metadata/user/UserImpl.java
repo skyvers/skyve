@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.user;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -669,7 +670,7 @@ public class UserImpl implements User {
 		boolean result = roleNames.contains(SUPER_ROLE);
 
 		if (! result) {
-			result = ((CustomerImpl) getCustomer()).getTextSearchRoles().stream().anyMatch(roleNames::contains);
+			result = ! Collections.disjoint(((CustomerImpl) getCustomer()).getTextSearchRoles(), roleNames);
 		}
 
 		return result;
