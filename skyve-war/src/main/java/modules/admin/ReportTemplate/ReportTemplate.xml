@@ -529,6 +529,17 @@
 			<description>True when the user wants to generate new markup</description>
 			<expression>getGenerateExisting() == GenerateExisting.generate</expression>
 		</condition>
+		<condition name="validAccess" usage="view">
+            <description>
+                Controls whether this report template should be accessible and visible to the 
+                current user, specifically if the user has the DevOps role.
+            </description>
+            <expression>
+                <![CDATA[
+					isUserInOwningModuleRole("DevOps")
+				]]>
+            </expression>
+        </condition>
 	</conditions>
 	<uniqueConstraints>
 		<constraint name="UniqueName" scope="customer">

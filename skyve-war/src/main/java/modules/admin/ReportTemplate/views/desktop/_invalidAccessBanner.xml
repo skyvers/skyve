@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="_invalidAccessBanner" title="Invalid access"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd">
+	<form>
+		<column />
+		<row>
+			<item>
+				<blurb escape="false">
+					<![CDATA[<h2>Invalid access</h2>You do not have sufficient privileges to access this page.]]>
+				</blurb>
+			</item>
+		</row>
+	</form>
+</view>

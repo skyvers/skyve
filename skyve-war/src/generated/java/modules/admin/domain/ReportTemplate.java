@@ -3702,4 +3702,24 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	public boolean isNotTypeJasper() {
 		return (! isTypeJasper());
 	}
+
+	/**
+	 * Controls whether this report template should be accessible and visible to the 
+                current user, specifically if the user has the DevOps role.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isValidAccess() {
+		return (isUserInOwningModuleRole("DevOps"));
+	}
+
+	/**
+	 * {@link #isValidAccess} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotValidAccess() {
+		return (! isValidAccess());
+	}
 }
