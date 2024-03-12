@@ -72,8 +72,8 @@
 		<spring-security.version>6.2.1</spring-security.version>
 		<spring.version>6.1.3</spring.version>
 		<!-- freemarker report versions -->
-		<flying-saucer.version>9.1.22</flying-saucer.version>
-		<freemarker.version>2.3.29</freemarker.version>
+		<flying-saucer.version>9.6.1</flying-saucer.version>
+		<freemarker.version>2.3.32</freemarker.version>
 		<cronutils.version>9.2.1</cronutils.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -440,7 +440,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xhtmlrenderer</groupId>
-				<artifactId>flying-saucer-pdf-openpdf</artifactId>
+				<artifactId>flying-saucer-pdf</artifactId>
 				<version>${flying-saucer.version}</version>
 				<exclusions>
 					<exclusion>
