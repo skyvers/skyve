@@ -9,21 +9,18 @@
   const totalRecords = ref(0);
   const filters = ref({name: {operator: FilterOperator.AND, constraints: [{value: null, matchMode: FilterMatchMode.STARTS_WITH}]}});
 
-  const _load = async (first) => {
+  const _load = async (firstRow) => {
+
     loading.value = true;
-    let response = await fetch('../smartlist?_operationType=fetch&_dataSource=' + config.m + '_' + config.q + '&_startRow=' + first + '&_endRow=' + (first + 50));
+
+    const endRow = firstRow + 50;
+    const url = `../smartlist?_operationType=fetch&_dataSource=${props.module}_${props.query}&_startRow=${firstRow}&_endRow=${endRow}`;
+
+    let response = await fetch(url);
     let payload = await response.json();
     totalRecords.value = payload.response.totalRows;
     value.value = payload.response.data;
     loading.value = false;
-  };
-
-  var config = window.SKYVE.listGridConfig;
-  delete window.listGridConfig;
-
-  const configure = (c) => {
-    console.log(this);
-    config = c;
   };
 
   onMounted(() => {
@@ -36,7 +33,18 @@
 
   // Try to expose the configure method on for main.js
   defineExpose({
-    configure
+  });
+
+  const props = defineProps({
+    module: String,
+    query: String,
+    title: String,
+    columns: {
+      type: Object,
+      default(rawColumns) {
+        return rawColumns;
+      }
+    }
   });
 </script>
 <template>
@@ -50,12 +58,12 @@
                 @page="_onPage($event)"
                 v-model:filters="filters"
                 filterDisplay="menu">
-    <template #header v-if="config.t">
-      {{config.t}}
+    <template #header v-if="title">
+      {{title}}
     </template>
     <template #empty> No data found.</template>
     <template #loading> Loading data. Please wait.</template>
-    <Column v-for="col of config.c" :key="col.field" :field="col.field" :header="col.header" :sortable="col.sortable" :maxConstraints="20">
+    <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header" :sortable="col.sortable" :maxConstraints="20">
       <template #filter="{filterModel}" v-if="col.filterable">
         <InputText v-model="filterModel.value" type="text" class="p-column-filter" :placeholder="'Search by ' + col.header" />
       </template>
