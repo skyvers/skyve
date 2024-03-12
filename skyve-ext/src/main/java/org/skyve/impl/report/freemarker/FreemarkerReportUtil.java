@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
@@ -301,17 +303,15 @@ public final class FreemarkerReportUtil {
 	public static void generatePDFFromHTML(InputStream in, OutputStream outputStream)
 	throws Exception {
 		ITextRenderer renderer = new ITextRenderer();
-		ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice());
-		callback.setSharedContext(renderer.getSharedContext());
+		ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice(),
+				renderer.getSharedContext().getDotsPerPixel());
 		renderer.getSharedContext().setUserAgentCallback(callback);
 
 		loadFonts(renderer);
 
 		org.w3c.dom.Document doc = XMLResource.load(in).getDocument();
 
-		renderer.setDocument(doc, "/");
-		renderer.layout();
-		renderer.createPDF(outputStream);
+		renderer.createPDF(doc, outputStream);
 	}
 
 	/**
@@ -325,17 +325,15 @@ public final class FreemarkerReportUtil {
 	throws Exception {
 		try (OutputStream os = new FileOutputStream(outputFile)) {
 			ITextRenderer renderer = new ITextRenderer();
-			ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice());
-			callback.setSharedContext(renderer.getSharedContext());
+			ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice(),
+					renderer.getSharedContext().getDotsPerPixel());
 			renderer.getSharedContext().setUserAgentCallback(callback);
 
 			loadFonts(renderer);
 
 			org.w3c.dom.Document doc = XMLResource.load(new InputSource(url)).getDocument();
 
-			renderer.setDocument(doc, url);
-			renderer.layout();
-			renderer.createPDF(os);
+			renderer.createPDF(doc, os);
 		}
 	}
 
@@ -556,9 +554,10 @@ public final class FreemarkerReportUtil {
 		return template;
 	}
 
+	@ParametersAreNonnullByDefault
 	private static class ResourceLoaderUserAgent extends ITextUserAgent {
-		public ResourceLoaderUserAgent(ITextOutputDevice outputDevice) {
-			super(outputDevice);
+		private ResourceLoaderUserAgent(ITextOutputDevice outputDevice, int dotsPerPixel) {
+			super(outputDevice, dotsPerPixel);
 		}
 
 		@Override
