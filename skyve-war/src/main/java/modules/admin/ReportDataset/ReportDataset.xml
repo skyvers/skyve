@@ -26,6 +26,7 @@
 			<displayName>Dataset Type</displayName>
 			<description>The type of this dataset; if it is a BizQL or SQL query, a fixed constant value or a dataset Class.</description>
 			<defaultValue>bizQL</defaultValue>
+			<domain>variant</domain>
 		</enum>
 		<memo name="query" required="true">
 			<displayName>Query</displayName>
