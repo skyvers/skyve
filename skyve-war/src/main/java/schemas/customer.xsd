@@ -25,7 +25,7 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
-           <xs:element name="flagRoles" form="qualified" minOccurs="0">
+          <xs:element name="flagRoles" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
                 <xs:element name="role" type="tns:customerFeature" form="qualified" maxOccurs="unbounded"/>
