@@ -66,7 +66,7 @@ public abstract class AbstractRestFilter implements Filter {
 	}
 	
 	public static void error(HttpServletResponse response, String message) {
-			error(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
+		error(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
 	}
 
 	public static void error(Persistence persistence, 

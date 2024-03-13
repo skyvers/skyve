@@ -630,15 +630,12 @@ isc.BizListGrid.addMethods({
 		    title: "No Snapshot",
 		    menu: me._snapMenu,
 		    click: function() {
-		    	var params = {a: 'L', ID: me._snapMenuButton.ID, d: me._dataSource.ID, _csrf: me._csrf};
-		    	if (me.snapId) {
-		    		params.i = me.snapId;
-		    	} 
+		    	var params = {a: 'L', d: me._dataSource.ID, _csrf: me._csrf};
 		    	isc.RPCManager.sendRequest({
 					showPrompt: false,
 					evalResult: true,
 					useSimpleHttp: true,
-					httpMethod: 'POST',
+					httpMethod: 'GET',
 					params: params,
 					actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 					callback: function(rpcResponse, data, rpcRequest) {
@@ -646,7 +643,45 @@ isc.BizListGrid.addMethods({
 							// Assign the CSRF Token from the response header
 							me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
-							me._snapMenu.setData(data);
+							var menu = [
+									{title: 'New Snapshot', icon: 'icons/snap_add.png', click: function() {me._snapMenuButton._newSnap()}},
+									{isSeparator: true},
+									{title: 'No Snapshot', click: function() {me._snapMenuButton._setSnap(null)}}
+							];
+							
+							if (data) {
+								for (var i = 0, l = data.length; i < l; i++) {
+									menu.add({isSeparator: true});
+									var snap = data[i];
+									var enabled = (me.snapId == snap.bizId);
+									var entry = {
+											title: snap.name,
+											icon: 'icons/snap.png',
+											click: me._snapMenuButton.ID + '._setSnap(\'' + 
+														snap.bizId + '\',\'' + 
+														snap.name + '\',\'' + 
+														JSON.stringify(snap.snapshot.criteria) + '\',\'' +
+														snap.snapshot.advancedCriteriaStyle + '\',\'' +
+														snap.snapshot.fieldState + '\',\'' +
+														snap.snapshot.sortState + '\',\'' +
+														snap.snapshot.groupState + '\',\'' +
+														snap.snapshot.summaryType + '\')',
+											submenu: [
+												{title: 'Update Snapshot' + (enabled ? '' : ' (Select the Snapshot first)'),
+													icon: 'icons/snap_edit.png',
+													click: me._snapMenuButton.ID + '._updateSnap(\'' + snap.bizId + '\')',
+													enabled: enabled
+												},
+												{title: 'Delete Snapshot',
+													icon: 'icons/snap_delete.png',
+													click: me._snapMenuButton.ID + '._deleteSnap(\'' + snap.bizId + '\')'
+												},
+											]
+									};
+									menu.add(entry);
+								}
+							}
+							me._snapMenu.setData(menu);
 						}
 					}
 				});
@@ -655,7 +690,7 @@ isc.BizListGrid.addMethods({
 		    }
 		});
 
-		me._snapMenuButton.newSnap = function() {
+		me._snapMenuButton._newSnap = function() {
 			isc.askForValue(
 				'Enter the new Snapshot name', 
 				function(value) {
@@ -693,52 +728,41 @@ isc.BizListGrid.addMethods({
 				{width: 300});
 		};
 
-		// called from server
-		me._snapMenuButton.setSnap = function(snapId, title, snapshot) {
+		me._snapMenuButton._setSnap = function(snapId, title, criteria, advancedCriteriaStyle, fieldState, sortState, groupState, summaryType) {
 			me.snapId = snapId;
-			me._snapMenuButton.setTitle(title);
+			me._snapMenuButton.setTitle(title ? title : 'No Snapshot');
 
-			if (snapshot) {
-				if (snapshot.criteria) {
-					if (snapshot.criteria.operator) { // advanced criteria
-						me._advancedFilter.toggleButton.select();
-						me._advancedFilter.toggleButtonClick();
-						me._advancedFilter.setStyle(snapshot.advancedCriteriaStyle);
-						
-						me.grid.setFilterEditorCriteria({});
-						me._advancedFilter.setCriteria(snapshot.criteria);
-					}
-					else {
-						me._advancedFilter.clearCriteria();
-						me._advancedFilter.toggleButton.deselect();
-						me._advancedFilter.toggleButtonClick();
-
-						// Switching advanced to header filtering would set random fields to 'equals' operator, so I added the below to lines to work around it
-						me.grid.setFilterEditorCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
-						me.grid.setFilterEditorCriteria(snapshot.criteria);
-						me.grid.setCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
-						me.grid.setFilterEditorCriteria(snapshot.criteria);
-					}
-				}
-				if (snapshot.fieldState) {
-					me.grid.setFieldState(snapshot.fieldState);
-				}
-				if (snapshot.sortState) {
-					me.grid.setSortState(snapshot.sortState);
-				}
-				if (snapshot.groupState) {
-					me.grid.setGroupState(snapshot.groupState);
-				}
-				if (snapshot.summaryType) {
-					me.summaryType = snapshot.summaryType;
-					me._summaryGrid.data[0].bizFlagComment = snapshot.summaryType;
-				}
+			criteria = criteria ? JSON.parse(criteria) : {}; // NB could be undefined
+			if (criteria.operator) { // advanced criteria
+				me._advancedFilter.toggleButton.select();
+				me._advancedFilter.toggleButtonClick();
+				me._advancedFilter.setStyle(advancedCriteriaStyle ? advancedCriteriaStyle : 'radio');
+				
+				me.grid.setFilterEditorCriteria({});
+				me._advancedFilter.setCriteria(criteria);
 			}
+			else {
+				me._advancedFilter.clearCriteria();
+				me._advancedFilter.toggleButton.deselect();
+				me._advancedFilter.toggleButtonClick();
+
+				// Switching advanced to header filtering would set random fields to 'equals' operator, so I added the below four lines to work around it
+				me.grid.setFilterEditorCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
+				me.grid.setFilterEditorCriteria(criteria);
+				me.grid.setCriteria({}); // without this switching from advanced to simple filter criteria snapshots did not work
+				me.grid.setFilterEditorCriteria(criteria);
+			}
+			
+			me.grid.setFieldState(fieldState ? fieldState : null); // NB could be undefined
+			me.grid.setSortState(sortState ? sortState : null); // NB could be undefined
+			me.grid.setGroupState(groupState ? sortState : null); // NB could be undefined
+			me.summaryType = summaryType ? summaryType : ''; // NB could be undefined
+			me._summaryGrid.data[0].bizFlagComment = me.summaryType;
+
 			me.refresh();
 		};
 		
-		// called from server
-		me._snapMenuButton.updateSnap = function(snapId) {
+		me._snapMenuButton._updateSnap = function(snapId) {
 			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
@@ -765,8 +789,7 @@ isc.BizListGrid.addMethods({
 			});
 		};
 
-		// called from server
-		me._snapMenuButton.deleteSnap = function(snapId) {
+		me._snapMenuButton._deleteSnap = function(snapId) {
 			isc.ask('Do you want to delete this Snapshot?',
 						function(value) {
 							if (value) {
@@ -782,10 +805,9 @@ isc.BizListGrid.addMethods({
 											// Assign the CSRF Token from the response header
 											me._csrf = rpcResponse.httpHeaders['x-csrf-token'];
 
-
 											// Reset selected snapshot (if it was selected before deletion)
 											if (me.snapId == snapId) {
-												me._snapMenuButton.setSnap(null, 'No Snapshot', null);
+												me._snapMenuButton._setSnap(null);
 											}
 										}
 									}

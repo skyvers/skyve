@@ -7,15 +7,13 @@ import java.util.TreeSet;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
 public class SuperUser extends UserImpl {
 	private static final long serialVersionUID = -6233814867322594601L;
 
 	public SuperUser() {
-		RoleImpl superRole = new RoleImpl();
-		superRole.setName(SUPER_ROLE);
-		addRole(superRole);
 		setWebLocale(Locale.ENGLISH);
 	}
 	
@@ -35,6 +33,21 @@ public class SuperUser extends UserImpl {
     	setWebLocale((locale == null) ? Locale.ENGLISH : locale);
 	}
 
+	@Override
+	public boolean isInRole(String moduleName, String roleName) {
+		return true;
+	}
+	
+	@Override
+	public DocumentPermissionScope getScope(String moduleName, String documentName) {
+		DocumentPermissionScope result = super.getScope(moduleName, documentName);
+		if (DocumentPermissionScope.none.equals(result)) {
+			result = DocumentPermissionScope.customer;
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public boolean canReadBean(String beanBizId,
 								String beanBizModule,

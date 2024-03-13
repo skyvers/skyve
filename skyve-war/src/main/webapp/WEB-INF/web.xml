@@ -288,6 +288,7 @@
 		<filter-name>SecurityHeadersFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+ 
     <filter>
         <display-name>RestFilter</display-name>
         <filter-name>RestFilter</filter-name>
@@ -297,6 +298,42 @@
         <filter-name>RestFilter</filter-name>
 		<url-pattern>/rest/*</url-pattern>
     </filter-mapping>
+
+    <!-- Uncomment to enable Dev Login Filter for doing skyve-vue development -->
+	<!--
+	<filter>                                                                                  
+		<filter-name>DevLoginFilter</filter-name>                                  
+		<filter-class>org.skyve.impl.web.filter.DevLoginFilter</filter-class>     
+		<init-param>
+			<param-name>customer</param-name>
+			<param-value>bizhub</param-value>
+		</init-param>
+		<init-param>
+			<param-name>user</param-name>
+			<param-value>admin</param-value>
+		</init-param>
+		<init-param>
+			<param-name>password</param-name>
+			<param-value>admin</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>DevLoginFilter</filter-name>
+		<servlet-name>SmartClientListServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>DevLoginFilter</filter-name>
+		<servlet-name>SmartClientSnapServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>DevLoginFilter</filter-name>
+		<servlet-name>SmartClientTagServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>DevLoginFilter</filter-name>
+		<url-pattern>/export</url-pattern>
+	</filter-mapping>
+	-->
 
     <!-- API documentation servlet -->
 	<!--

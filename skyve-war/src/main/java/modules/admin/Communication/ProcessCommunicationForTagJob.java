@@ -34,9 +34,11 @@ public class ProcessCommunicationForTagJob extends Job {
 			// get relevant document to action
 			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
 			StringBuilder sb = new StringBuilder();
-			sb.append("Started Processing Communication for Tagged Items Job at ");
-			sb.append(new Date());
-			sb.append(" expected ").append(beans.size()).append(" matching documents.");
+			sb.append("Started Processing Communication for Tagged Items Job at ")
+					.append(new Date())
+					.append("\nSending communication ").append(communication.getDescription()).append(".")
+					.append("\nUsing ").append(beans.size()).append(" tagged ").append(communication.getDocumentName())
+					.append(" documents.\n");
 			log.add(sb.toString());
 
 			int size = beans.size();

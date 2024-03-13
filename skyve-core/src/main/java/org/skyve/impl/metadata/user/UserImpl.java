@@ -32,7 +32,6 @@ import org.skyve.persistence.Persistence;
 public class UserImpl implements User {
 	private static final long serialVersionUID = -8485741818564437957L;
 
-	protected static final String SUPER_ROLE = "design.BizHubDesigner";
 	private static final String SECURITY_ADMINISTRATOR_ROLE = "admin.SecurityAdministrator";
 
 	/**
@@ -200,12 +199,14 @@ public class UserImpl implements User {
 	}
 
 	@Override
-	@SuppressWarnings("boxing")
 	public String getContactImageUrl(int width, int height) {
 		if (contactImageId == null) {
 			return "images/blank.gif";
 		}
-		return String.format("content?_n=%s&_doc=admin.Contact&_b=image&_w=%d&_h=%d", contactImageId, width, height);
+		StringBuilder result = new StringBuilder(256);
+		result.append("\"content?_n=").append(contactImageId).append("&_doc=admin.Contact&_b=image&_w=");
+		result.append(width).append("&_h=").append(height);
+		return result.toString();
 	}
 
 	@Override
@@ -271,19 +272,10 @@ public class UserImpl implements User {
 	}
 
 	public void addRole(RoleImpl role) {
-		// If role is super user, add an early exit
-		if (SUPER_ROLE.equals(role.getName())) {
-			roleNames.add(SUPER_ROLE);
-			return;
-		}
-		
-		StringBuilder sb = new StringBuilder(64);
-		sb.append(role.getOwningModule().getName()).append('.').append(role.getName());
+		String roleName = new StringBuilder(128).append(role.getOwningModule().getName()).append('.').append(role.getName()).toString();
 		
 		// Only continue if role hasn't been added already
-		if (! roleNames.contains(sb.toString())) {
-			roleNames.add(sb.toString());
-			
+		if (roleNames.add(roleName)) {
 			for (Privilege privilege : role.getPrivileges()) {
 				if (privilege instanceof DocumentPrivilege) {
 					DocumentPermission permission = ((DocumentPrivilege) privilege).getPermission();
@@ -328,7 +320,7 @@ public class UserImpl implements User {
 	protected void putDocumentPermission(String moduleName, String documentName, DocumentPermission documentPermission) {
 		DocumentPermission mergedPermission = documentPermission;
 		
-		String fullyQualifiedDocumentName = new StringBuilder(32).append(moduleName).append('.').append(documentName).toString();
+		String fullyQualifiedDocumentName = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
 		DocumentPermission existingDocumentPermission = documentPermissions.get(fullyQualifiedDocumentName);
 		if (existingDocumentPermission != null) {
 			mergedPermission = existingDocumentPermission.mergePermission(mergedPermission);
@@ -345,11 +337,11 @@ public class UserImpl implements User {
 	 */
 	protected void addContentRestriction(String moduleName, ContentRestriction contentRestriction) {
 		// will add to set if not already present
-		StringBuilder sb = new StringBuilder();
-		sb.append(moduleName).append('.');
-		sb.append(contentRestriction.getDocumentName()).append('.');
-		sb.append(contentRestriction.getAttributeName());
-		contentRestrictions.add(sb.toString());
+		StringBuilder key = new StringBuilder(196);
+		key.append(moduleName).append('.');
+		key.append(contentRestriction.getDocumentName()).append('.');
+		key.append(contentRestriction.getAttributeName());
+		contentRestrictions.add(key.toString());
 	}
 	
 	
@@ -360,11 +352,11 @@ public class UserImpl implements User {
 	 */
 	protected void addContentPermission(String moduleName, ContentPermission contentPermission) {
 		// will add to set if not already present
-		StringBuilder sb = new StringBuilder();
-		sb.append(moduleName).append('.');
-		sb.append(contentPermission.getDocumentName()).append('.');
-		sb.append(contentPermission.getAttributeName());
-		contentPermissions.add(sb.toString());
+		StringBuilder key = new StringBuilder(196);
+		key.append(moduleName).append('.');
+		key.append(contentPermission.getDocumentName()).append('.');
+		key.append(contentPermission.getAttributeName());
+		contentPermissions.add(key.toString());
 	}
 
 	public Set<String> getFullyQualifiedDocumentNames() {
@@ -414,22 +406,20 @@ public class UserImpl implements User {
 
 	@Override
 	public boolean isInRole(String moduleName, String roleName) {
-		String fullyQualifiedRoleName = new StringBuilder(32).append(moduleName).append('.').append(roleName).toString();
-		return (roleNames.contains(fullyQualifiedRoleName) || // user has the role
-					roleNames.contains(SUPER_ROLE) || // user has the SUPER role
+		String fullyQualifiedRoleName = new StringBuilder(128).append(moduleName).append('.').append(roleName).toString();
+		return roleNames.contains(fullyQualifiedRoleName) || // user has the role
 		// looking for data administrator role,
 		// and user has no data group and has security admin role
 		(DATA_ADMINISTRATOR_ROLE.equals(fullyQualifiedRoleName) && 
 			(dataGroupId == null) && 
-			roleNames.contains(SECURITY_ADMINISTRATOR_ROLE)));
+			roleNames.contains(SECURITY_ADMINISTRATOR_ROLE));
 	}
 
 	@Override
 	public DocumentPermissionScope getScope(String moduleName, String documentName) {
-		DocumentPermissionScope result = roleNames.contains(SUPER_ROLE) ? 
-											DocumentPermissionScope.customer :
-											DocumentPermissionScope.none;
-		DocumentPermission permission = documentPermissions.get(String.format("%s.%s", moduleName, documentName));
+		DocumentPermissionScope result = DocumentPermissionScope.none;
+		String key = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
+		DocumentPermission permission = documentPermissions.get(key);
 		if (permission != null) {
 			result = permission.getScope();
 		}
@@ -457,114 +447,113 @@ public class UserImpl implements User {
 								String beanBizCustomer,
 								String beanBizDataGroupId,
 								String beanBizUserId) {
-		boolean result = roleNames.contains(SUPER_ROLE);
-
-		if (! result) {
-			DocumentPermission permission = documentPermissions.get(String.format("%s.%s", beanBizModule, beanBizDocument));
-			if (permission != null) {
-				if (permission.canRead()) {
-					switch (permission.getScope()) {
-					case global:
-						result = true;
-						break;
-					case customer:
-						result = customerName.equals(beanBizCustomer);
-						break;
-					case dataGroup:
-						result = customerName.equals(beanBizCustomer);
-						if (result && (dataGroupId != null)) {
-							result = dataGroupId.equals(beanBizDataGroupId);
-						}
-						break;
-					case user:
-						result = customerName.equals(beanBizCustomer);
-						if (result && (dataGroupId != null)) {
-							result = dataGroupId.equals(beanBizDataGroupId);
-						}
-						if (result) {
-							result = id.equals(beanBizUserId);
-						}
+		boolean result = false;
+		
+		String key = new StringBuilder(128).append(beanBizModule).append('.').append(beanBizDocument).toString();
+		DocumentPermission permission = documentPermissions.get(key);
+		if (permission != null) {
+			if (permission.canRead()) {
+				switch (permission.getScope()) {
+				case global:
+					result = true;
+					break;
+				case customer:
+					result = customerName.equals(beanBizCustomer);
+					break;
+				case dataGroup:
+					result = customerName.equals(beanBizCustomer);
+					if (result && (dataGroupId != null)) {
+						result = dataGroupId.equals(beanBizDataGroupId);
 					}
-					if ((! result) && UtilImpl.SECURITY_TRACE) {
-						StringBuilder trace = new StringBuilder(64);
-						trace.append("Security - ");
-						trace.append(beanBizModule).append('.');
-						trace.append(beanBizDocument).append('.');
-						trace.append(beanBizId).append(" denied - not in scope");
-						UtilImpl.LOGGER.info(trace.toString());
+					break;
+				case user:
+					result = customerName.equals(beanBizCustomer);
+					if (result && (dataGroupId != null)) {
+						result = dataGroupId.equals(beanBizDataGroupId);
+					}
+					if (result) {
+						result = id.equals(beanBizUserId);
 					}
 				}
-				else {
-					result = false;
-					if (UtilImpl.SECURITY_TRACE) {
-						StringBuilder trace = new StringBuilder(64);
-						trace.append("Security - ");
-						trace.append(beanBizModule).append('.');
-						trace.append(beanBizDocument).append('.');
-						trace.append(beanBizId).append(" denied - no read permission");
-						UtilImpl.LOGGER.info(trace.toString());
-					}
+				if ((! result) && UtilImpl.SECURITY_TRACE) {
+					StringBuilder trace = new StringBuilder(256);
+					trace.append("Security - ");
+					trace.append(beanBizModule).append('.');
+					trace.append(beanBizDocument).append('.');
+					trace.append(beanBizId).append(" denied - not in scope");
+					UtilImpl.LOGGER.info(trace.toString());
 				}
 			}
-			else { // no permission defined
-				// if document is a child document, get the parent
-				// if the parent bean can be read then allow
-				Customer customer = getCustomer();
-				Module module = customer.getModule(beanBizModule);
-				Document document = module.getDocument(customer, beanBizDocument);
-				Document parentDocument = document.getParentDocument(customer);
-				if (parentDocument == null) { // document has no parent
-					result = false;
-					if (UtilImpl.SECURITY_TRACE) {
-						StringBuilder trace = new StringBuilder(64);
-						trace.append("Security - ");
-						trace.append(beanBizModule).append('.');
-						trace.append(beanBizDocument).append('.');
-						trace.append(beanBizId).append(" denied - no permission");
-						UtilImpl.LOGGER.info(trace.toString());
-					}
+			else {
+				result = false;
+				if (UtilImpl.SECURITY_TRACE) {
+					StringBuilder trace = new StringBuilder(256);
+					trace.append("Security - ");
+					trace.append(beanBizModule).append('.');
+					trace.append(beanBizDocument).append('.');
+					trace.append(beanBizId).append(" denied - no read permission");
+					UtilImpl.LOGGER.info(trace.toString());
 				}
-				else { // found a parent document
-					if (! beanBizDocument.equals(parentDocument.getName())) { // exclude hierarchical documents
-						if (document.isPersistable() && parentDocument.isPersistable()) {
-							StringBuilder sb = new StringBuilder(256);
-							sb.append("select p.").append(Bean.DOCUMENT_ID).append(", p.");
-							sb.append(Bean.CUSTOMER_NAME).append(", p.");
-							sb.append(Bean.DATA_GROUP_ID).append(", p.");
-							sb.append(Bean.USER_ID);
-							sb.append(" from ");
-							Persistent persistent = parentDocument.getPersistent();
-							sb.append((persistent == null) ? "N/A" : persistent.getPersistentIdentifier()); // work around compiler
-							sb.append(" as p inner join ");
-							persistent = document.getPersistent();
-							sb.append((persistent == null) ? "N/A" : persistent.getPersistentIdentifier()); // work around compiler
-							sb.append(" as c on p.").append(Bean.DOCUMENT_ID);
-							sb.append(" = c.").append(ChildBean.PARENT_NAME);
-							sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
-							sb.append(Bean.DOCUMENT_ID);
-							Persistence p = AbstractPersistence.get();
-							List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId, false).tupleResults();
-							if (rows.isEmpty()) { // bean is still transient - user hasn't saved
-								result = true;
-							}
-							else {
-								Object[] values = rows.get(0);
-		
-								// deny if user can't read parent document
-								result = canReadBean((String) values[0], 
-														parentDocument.getOwningModuleName(), 
-														parentDocument.getName(),
-														(String) values[1], 
-														(String) values[2], 
-														(String) values[3]);
-								if ((! result) && (UtilImpl.SECURITY_TRACE)) {
-									StringBuilder trace = new StringBuilder(64);
-									trace.append("Security - ");
-									trace.append(beanBizModule).append('.');
-									trace.append(beanBizDocument).append('.');
-									trace.append(beanBizId).append(" denied - no read on parent");
-									UtilImpl.LOGGER.info(trace.toString());
-								}
+			}
+		}
+		else { // no permission defined
+			// if document is a child document, get the parent
+			// if the parent bean can be read then allow
+			Customer customer = getCustomer();
+			Module module = customer.getModule(beanBizModule);
+			Document document = module.getDocument(customer, beanBizDocument);
+			Document parentDocument = document.getParentDocument(customer);
+			if (parentDocument == null) { // document has no parent
+				result = false;
+				if (UtilImpl.SECURITY_TRACE) {
+					StringBuilder trace = new StringBuilder(256);
+					trace.append("Security - ");
+					trace.append(beanBizModule).append('.');
+					trace.append(beanBizDocument).append('.');
+					trace.append(beanBizId).append(" denied - no permission");
+					UtilImpl.LOGGER.info(trace.toString());
+				}
+			}
+			else { // found a parent document
+				if (! beanBizDocument.equals(parentDocument.getName())) { // exclude hierarchical documents
+					if (document.isPersistable() && parentDocument.isPersistable()) {
+						StringBuilder sb = new StringBuilder(256);
+						sb.append("select p.").append(Bean.DOCUMENT_ID).append(", p.");
+						sb.append(Bean.CUSTOMER_NAME).append(", p.");
+						sb.append(Bean.DATA_GROUP_ID).append(", p.");
+						sb.append(Bean.USER_ID);
+						sb.append(" from ");
+						Persistent persistent = parentDocument.getPersistent();
+						sb.append((persistent == null) ? "N/A" : persistent.getPersistentIdentifier()); // work around compiler
+						sb.append(" as p inner join ");
+						persistent = document.getPersistent();
+						sb.append((persistent == null) ? "N/A" : persistent.getPersistentIdentifier()); // work around compiler
+						sb.append(" as c on p.").append(Bean.DOCUMENT_ID);
+						sb.append(" = c.").append(ChildBean.PARENT_NAME);
+						sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
+						sb.append(Bean.DOCUMENT_ID);
+						Persistence p = AbstractPersistence.get();
+						List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId, false).tupleResults();
+						if (rows.isEmpty()) { // bean is still transient - user hasn't saved
+							result = true;
+						}
+						else {
+							Object[] values = rows.get(0);
+	
+							// deny if user can't read parent document
+							result = canReadBean((String) values[0], 
+													parentDocument.getOwningModuleName(), 
+													parentDocument.getName(),
+													(String) values[1], 
+													(String) values[2], 
+													(String) values[3]);
+							if ((! result) && (UtilImpl.SECURITY_TRACE)) {
+								StringBuilder trace = new StringBuilder(256);
+								trace.append("Security - ");
+								trace.append(beanBizModule).append('.');
+								trace.append(beanBizDocument).append('.');
+								trace.append(beanBizId).append(" denied - no read on parent");
+								UtilImpl.LOGGER.info(trace.toString());
 							}
 						}
 					}
@@ -588,35 +577,31 @@ public class UserImpl implements User {
 										String bizDataGroupId,
 										String bizUserId,
 										String attributeName) {
-		boolean result = roleNames.contains(SUPER_ROLE);
-
-		if (! result) {
-			String modocAndAttr = bizModule + '.' + bizDocument + '.' + attributeName;
-			result = (! contentRestrictions.contains(modocAndAttr));
-			if (result) {
-				result = (contentPermissions.contains(modocAndAttr));
-				if (! result) {
-					// deny if user cant read parent document
-					result = canReadBean(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId);
-					if ((! result) && (UtilImpl.SECURITY_TRACE)) {
-						StringBuilder trace = new StringBuilder(64);
-						trace.append("Security - ");
-						trace.append(bizModule).append('.');
-						trace.append(bizDocument).append('.');
-						trace.append(bizId).append(" denied - no read");
-						UtilImpl.LOGGER.info(trace.toString());
-					}
-				}
-			}
-			else {
-				if (UtilImpl.SECURITY_TRACE) {
-					StringBuilder trace = new StringBuilder(64);
+		String modocAndAttr = new StringBuilder(192).append(bizModule).append('.').append(bizDocument).append('.').append(attributeName).toString();
+		boolean result = (! contentRestrictions.contains(modocAndAttr));
+		if (result) {
+			result = (contentPermissions.contains(modocAndAttr));
+			if (! result) {
+				// deny if user can't read owning document
+				result = canReadBean(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId);
+				if ((! result) && (UtilImpl.SECURITY_TRACE)) {
+					StringBuilder trace = new StringBuilder(256);
 					trace.append("Security - ");
 					trace.append(bizModule).append('.');
 					trace.append(bizDocument).append('.');
-					trace.append(attributeName).append(" denied - restricted content");
+					trace.append(bizId).append(" denied - no read");
 					UtilImpl.LOGGER.info(trace.toString());
 				}
+			}
+		}
+		else {
+			if (UtilImpl.SECURITY_TRACE) {
+				StringBuilder trace = new StringBuilder(256);
+				trace.append("Security - ");
+				trace.append(bizModule).append('.');
+				trace.append(bizDocument).append('.');
+				trace.append(attributeName).append(" denied - restricted content");
+				UtilImpl.LOGGER.info(trace.toString());
 			}
 		}
 
@@ -625,26 +610,18 @@ public class UserImpl implements User {
 
 	@Override
 	public boolean canAccessDocument(Document document) {
-		boolean result = roleNames.contains(SUPER_ROLE);
-
-		if (! result) {
-			String modoc = new StringBuilder(64).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
-			result = (documentPermissions.get(modoc) != null);
-		}
-
-		return result;
+		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
+		return (documentPermissions.get(modoc) != null);
 	}
 
 	@Override
 	public boolean canCreateDocument(Document document) {
-		boolean result = roleNames.contains(SUPER_ROLE);
-
-		if (! result) {
-			String modoc = new StringBuilder(64).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
-			DocumentPermission permission = documentPermissions.get(modoc);
-			if (permission != null) {
-				result = permission.canCreate();
-			}
+		boolean result = false;
+		
+		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
+		DocumentPermission permission = documentPermissions.get(modoc);
+		if (permission != null) {
+			result = permission.canCreate();
 		}
 
 		return result;
@@ -663,14 +640,12 @@ public class UserImpl implements User {
 
 	@Override
 	public boolean canReadDocument(Document document) {
-		boolean result = roleNames.contains(SUPER_ROLE);
+		boolean result = false;
 
-		if (! result) {
-			String modoc = new StringBuilder(64).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
-			DocumentPermission permission = documentPermissions.get(modoc);
-			if (permission != null) {
-				result = permission.canRead();
-			}
+		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
+		DocumentPermission permission = documentPermissions.get(modoc);
+		if (permission != null) {
+			result = permission.canRead();
 		}
 
 		return result;
@@ -689,14 +664,12 @@ public class UserImpl implements User {
 
 	@Override
 	public boolean canUpdateDocument(Document document) {
-		boolean result = roleNames.contains(SUPER_ROLE);
+		boolean result = false;
 
-		if (! result) {
-			String modoc = new StringBuilder(64).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
-			DocumentPermission permission = documentPermissions.get(modoc);
-			if (permission != null) {
-				result = permission.canUpdate();
-			}
+		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
+		DocumentPermission permission = documentPermissions.get(modoc);
+		if (permission != null) {
+			result = permission.canUpdate();
 		}
 
 		return result;
@@ -704,14 +677,12 @@ public class UserImpl implements User {
 
 	@Override
 	public boolean canDeleteDocument(Document document) {
-		boolean result = roleNames.contains(SUPER_ROLE);
+		boolean result = false;
 
-		if (! result) {
-			String modoc = new StringBuilder(64).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
-			DocumentPermission permission = documentPermissions.get(modoc);
-			if (permission != null) {
-				result = permission.canDelete();
-			}
+		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
+		DocumentPermission permission = documentPermissions.get(modoc);
+		if (permission != null) {
+			result = permission.canDelete();
 		}
 
 		return result;
@@ -719,10 +690,10 @@ public class UserImpl implements User {
 
 	@Override
 	public boolean canExecuteAction(Document document, String actionName) {
-		StringBuilder sb = new StringBuilder(128);
+		StringBuilder sb = new StringBuilder(192);
 		sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 		String fullyQualifiedActionName = sb.append('.').append(actionName).toString();
-		return (roleNames.contains(SUPER_ROLE) || actions.contains(fullyQualifiedActionName));
+		return actions.contains(fullyQualifiedActionName);
 	}
 
 	/**

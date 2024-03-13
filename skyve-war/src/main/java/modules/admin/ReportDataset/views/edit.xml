@@ -12,11 +12,11 @@
 	        </row>
 	        <row>
 	            <item>
-	                <radio binding="datasetType" vertical="false">
+	                <combo binding="datasetType">
 	                	<onChangedHandlers>
 	                		<rerender clientValidation="false" />
 	                	</onChangedHandlers>
-	                </radio>
+	                </combo>
 	            </item>
 	        </row>
 	        <row>

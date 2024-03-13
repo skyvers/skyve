@@ -40,6 +40,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
+import org.skyve.impl.web.filter.DevLoginFilter;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
@@ -47,6 +48,7 @@ import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.Util;
 
 import jakarta.faces.FacesException;
+import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -55,10 +57,11 @@ import jakarta.websocket.server.ServerContainer;
 import jakarta.websocket.server.ServerEndpointConfig;
 
 public class SkyveContextListener implements ServletContextListener {
+	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
+
 	@Override
 	public void contextInitialized(ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
-
 		populateUtilImpl(ctx);
 
 		final Caching caching = EXT.getCaching();
@@ -175,6 +178,17 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.PROPERTIES_FILE_PATH = archive.getParent() + '/' + archiveName + ".json";
 		}
 		UtilImpl.ARCHIVE_NAME = archiveName;
+
+		// Determine if the DevLoginFilter is in the web.xml, this is used to influence the SpringSecurityConfig
+		for (Entry<String, ? extends FilterRegistration> entry : ctx.getFilterRegistrations().entrySet()) {
+			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(entry.getValue().getClassName())) {
+				UtilImpl.DEV_LOGIN_FILTER_USED = true;
+				UtilImpl.LOGGER.warning("****************************************************************************************************");
+				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
+				UtilImpl.LOGGER.warning("****************************************************************************************************");
+				break;
+			}
+		}
 
 		Map<String, Object> properties = null;
 		try (FileInputStream fis = new FileInputStream(UtilImpl.PROPERTIES_FILE_PATH)) {
