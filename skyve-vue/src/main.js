@@ -13,7 +13,6 @@ if (!window.SKYVE) window.SKYVE = {};
 
 // JS create method
 window.SKYVE.listgrid = function (config) {
-    // filthy hack to pass state into Vue ListGrid
 
     const grid = createApp(ListGrid, {
         'module': config.m,
