@@ -15,7 +15,7 @@ export default {
             loading: true,
             value: [],
             totalRecords: 0,
-            filters: { name: { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] } },
+            filters: { },
             firstRow: 0,
             pageSize: 5
         };
@@ -43,13 +43,19 @@ export default {
     },
     mounted() {
         this.load();
+
+        for (let col of this.columns) {
+            if (col.filterable && !this.filters[col.field]) {
+                this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] };
+            }
+        }
     }
 }
 </script>
 <template>
     <DataTable :lazy="true" dataKey="bizId" :value="value" :loading="loading" :totalRecords="totalRecords"
         :paginator="true" :rows="pageSize" @page="onPage($event)" v-model:filters="filters" filterDisplay="menu"
-        :reorderableColumns="true" stateStorage="session" :stateKey="query">
+        :reorderableColumns="true" :resizableColumns="true" stateStorage="session" :stateKey="query">
         <template #header v-if="title">
             {{ title }}
         </template>
