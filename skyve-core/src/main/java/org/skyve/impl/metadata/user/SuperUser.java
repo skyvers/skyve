@@ -64,6 +64,11 @@ public class SuperUser extends UserImpl {
 	public boolean canExecuteAction(Document document, String actionName) {
 		return true;
 	}
+	
+	@Override
+	public boolean canFlag() {
+		return true;
+	}
 
 	@Override
 	public boolean canReadDocument(Document document) {

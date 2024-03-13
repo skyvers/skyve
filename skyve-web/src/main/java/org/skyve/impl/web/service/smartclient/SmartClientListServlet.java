@@ -338,13 +338,24 @@ public class SmartClientListServlet extends HttpServlet {
 						break;
 					case update:
 						checkCsrfToken(session, request, response, currentCsrfToken);
-
+						
+						String flag = OWASP.sanitise(Sanitisation.basic, Util.processStringValue(request.getParameter(PersistentBean.FLAG_COMMENT_NAME)));
 						String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 						if ("TAG".equals(bizTagged)) {
-							tag(customer, module, model, tagId, parameters, pw);
+							tag(user, customer, module, model, tagId, parameters, pw);
 						}
 						else if ("UNTAG".equals(bizTagged)) {
-							untag(customer, module, model, tagId, parameters, pw);
+							untag(user, customer, module, model, tagId, parameters, pw);
+						}
+						else if (flag != null) {
+				    		if (! user.canUpdateDocument(drivingDocument)) {
+				    			throw new SecurityException("update this data", user.getName());
+				    		}
+				    		if (! user.canFlag()) {
+				    			throw new SecurityException("obtain flag permissions", user.getName());
+				    			
+				    		}
+				    		upsertFlag(drivingDocument, bean, flag);
 						}
 						else {
 							if (! user.canUpdateDocument(drivingDocument)) {
@@ -435,6 +446,13 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
+
+		// Nullify flag comments if not given permissions
+		if (! user.canFlag()) {
+			for (Bean bean : beans) {
+				BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+			}
+		}
 		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
@@ -1561,10 +1579,11 @@ public class SmartClientListServlet extends HttpServlet {
 		Bean bean = model.update(bizId, properties);
 
 		// return the updated row
-		pw.append(returnUpdatedMessage(customer, module, document, model, bean, rowIsTagged));
+		pw.append(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged));
     }
 
-	private static void tag(Customer customer,
+	private static void tag(User user,
+								Customer customer,
 								Module module,
 								ListModel<Bean> model, 
 								String tagId,
@@ -1575,14 +1594,16 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
-		pw.append(returnTagUpdateMessage(customer,
+		pw.append(returnTagUpdateMessage(user,
+											customer,
 											parameters, 
 											module, 
 											model,
 											true));
 	}
 
-	private static void untag(Customer customer,
+	private static void untag(User user,
+								Customer customer,
 								Module module,
 								ListModel<Bean> model,
 								String tagId,
@@ -1593,14 +1614,16 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
-		pw.append(returnTagUpdateMessage(customer, 
+		pw.append(returnTagUpdateMessage(user,
+											customer, 
 											parameters,
 											module,
 											model,
 											false));
 	}
 
-	private static String returnUpdatedMessage(Customer customer,
+	private static String returnUpdatedMessage(User user,
+												Customer customer,
 												Module module,
 												Document document,
 												ListModel<Bean> model, 
@@ -1610,6 +1633,11 @@ public class SmartClientListServlet extends HttpServlet {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
+		// Nullify flag comment if not given permissions
+		if (! user.canFlag()) {
+			BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+		}
+		
 		Set<String> projections = processRows(Collections.singletonList(bean), model, customer, module, document);
 		String json = JSON.marshall(customer, bean, projections);
 
@@ -1624,7 +1652,8 @@ public class SmartClientListServlet extends HttpServlet {
 		return message.toString();
 	}
 	
-	private static String returnTagUpdateMessage(Customer customer,
+	private static String returnTagUpdateMessage(User user,
+													Customer customer,
 													Map<String, Object> parameters,
 													Module module,
 													ListModel<Bean> model,
@@ -1633,11 +1662,20 @@ public class SmartClientListServlet extends HttpServlet {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
 
+		boolean canFlag = false;
+		if (user.canFlag()) {
+			canFlag = true;
+		}
+		
 		Set<String> projections = model.getProjections();
 		Map<String, Object> properties = new TreeMap<>();
 		for (String projection : projections) {
 			if (PersistentBean.TAGGED_NAME.equals(projection)) {
 				properties.put(projection, Boolean.valueOf(tagging));
+			}
+			else if (! canFlag && PersistentBean.FLAG_COMMENT_NAME.equals(projection)) {
+				// Nullify flag comments
+				properties.put(projection, null);
 			}
 			else {
 				properties.put(projection, parameters.get(projection));
@@ -1660,5 +1698,16 @@ public class SmartClientListServlet extends HttpServlet {
 	throws Exception {
 		model.remove((String) parameters.get(Bean.DOCUMENT_ID));
 		pw.append("{\"response\":{\"status\":0}}");
+	}
+	
+	public static void upsertFlag(Document drivingDocument, Bean bean, String flag) {
+		StringBuilder sql = new StringBuilder(64);
+		sql.append("update ").append(drivingDocument.getPersistent()
+				.getPersistentIdentifier()).append(" set ").append(PersistentBean.FLAG_COMMENT_NAME)
+				.append("= :").append(PersistentBean.FLAG_COMMENT_NAME).append(" where ").append(Bean.DOCUMENT_ID)
+				.append("= :").append(Bean.DOCUMENT_ID);
+		CORE.getPersistence().newSQL(sql.toString())
+				.putParameter(PersistentBean.FLAG_COMMENT_NAME, flag, false)
+				.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).execute();
 	}
 }

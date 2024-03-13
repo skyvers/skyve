@@ -649,6 +649,17 @@ public class UserImpl implements User {
 
 		return result;
 	}
+	
+	@Override
+	public boolean canFlag() {
+		boolean result = roleNames.contains(SUPER_ROLE);
+
+		if (! result) {
+			result = ! Collections.disjoint(((CustomerImpl) getCustomer()).getFlagRoles(), roleNames);
+		}
+
+		return result;
+	}
 
 	@Override
 	public boolean canReadDocument(Document document) {

@@ -46,6 +46,7 @@ import jakarta.xml.bind.annotation.XmlType;
 							"modules", 
 							"roles",
 							"textSearchRoles",
+							"flagRoles",
 							"interceptors",
 							"observers",
 							"JFreeChartPostProcessorClassName",
@@ -64,6 +65,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 	private CustomerModulesMetaData modules;
 	private CustomerRolesMetaData roles;
 	private List<CustomerFeatureRoleMetaData> textSearchRoles = new ArrayList<>();
+	private List<CustomerFeatureRoleMetaData> flagRoles = new ArrayList<>();
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private List<ObserverMetaDataImpl> observers = new ArrayList<>();
 	private String fullyQualifiedJFreeChartPostProcessorClassName;
@@ -164,6 +166,12 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
 	public List<CustomerFeatureRoleMetaData> getTextSearchRoles() {
 		return textSearchRoles;
+	}
+	
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "flagRoles")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
+	public List<CustomerFeatureRoleMetaData> getFlagRoles() {
+		return flagRoles;
 	}
 	
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
@@ -311,8 +319,8 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		}
 
 		// Populate Text Search Roles
-		Set<String> textSearchModuleRoles = result.getTextSearchRoles();
 		if (textSearchRoles != null) {
+			Set<String> textSearchModuleRoles = result.getTextSearchRoles();
 			for (CustomerFeatureRoleMetaData textSearchRole : textSearchRoles) {
 				String textSearchRoleName = textSearchRole.getName();
 				if (textSearchRoleName == null) {
@@ -342,6 +350,39 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 				}
 			}
 		}		
+		
+		// Populate Flag Roles
+		if (flagRoles != null) {
+			Set<String> flagModuleRoles = result.getFlagRoles();
+			for (CustomerFeatureRoleMetaData flagRole : flagRoles) {
+				String flagRoleName = flagRole.getName();
+				if (flagRoleName == null) {
+					throw new MetaDataException(metaDataName + " : The [name] for a flag role is required");
+				}
+				String moduleName = flagRole.getModuleName();
+				if (moduleName == null) {
+					Optional<CustomerRoleMetaData> customerRole = roles.getRoles().stream().filter(r -> r.getName().equals(flagRoleName)).findAny();
+					if (customerRole.isEmpty()) {
+						throw new MetaDataException(metaDataName + " : The [name] of flag role " + flagRoleName +
+								" is not a valid customer role");
+					}
+					CustomerRoleMetaData role = customerRole.get();
+					for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
+						moduleName = moduleRole.getModuleName();
+						value = moduleRole.getName();
+						flagModuleRoles.add(moduleName + "." + value);
+					}
+				}
+				else {
+					if (! moduleEntries.containsKey(moduleName)) {
+						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
+					}
+					if (! flagModuleRoles.add(moduleName + "." + flagRoleName)) {
+						throw new MetaDataException(metaDataName + " : Duplicate role " + flagRoleName);
+					}
+				}
+			}
+		}	
 		
 		// Populate Interceptors
 		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();

@@ -168,6 +168,12 @@ public interface User extends NamedMetaData {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	boolean canFlag();
+	
+	/**
+	 * 
 	 * @param document
 	 * @return
 	 */
