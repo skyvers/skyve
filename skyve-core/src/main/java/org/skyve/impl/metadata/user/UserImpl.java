@@ -629,13 +629,7 @@ public class UserImpl implements User {
 	
 	@Override
 	public boolean canFlag() {
-		boolean result = roleNames.contains(SUPER_ROLE);
-
-		if (! result) {
-			result = ! Collections.disjoint(((CustomerImpl) getCustomer()).getFlagRoles(), roleNames);
-		}
-
-		return result;
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getFlagRoles(), roleNames);
 	}
 
 	@Override
@@ -653,13 +647,7 @@ public class UserImpl implements User {
 	
 	@Override
 	public boolean canTextSearch() {
-		boolean result = roleNames.contains(SUPER_ROLE);
-
-		if (! result) {
-			result = ! Collections.disjoint(((CustomerImpl) getCustomer()).getTextSearchRoles(), roleNames);
-		}
-
-		return result;
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getTextSearchRoles(), roleNames);
 	}
 
 	@Override
