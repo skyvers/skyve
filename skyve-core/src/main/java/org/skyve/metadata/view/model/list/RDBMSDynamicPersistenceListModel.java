@@ -175,10 +175,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					}
 				}
 				
-				boolean canFlag = false;
-				if (user.canFlag()) {
-					canFlag = true;
-				}
+				boolean canFlag = user.canFlag();
 				
 				// Now extract the values out of the tuple.
 				Map<String, Object> values = new TreeMap<>();

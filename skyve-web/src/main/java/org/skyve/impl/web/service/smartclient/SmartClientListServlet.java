@@ -1661,10 +1661,7 @@ public class SmartClientListServlet extends HttpServlet {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
 
-		boolean canFlag = false;
-		if (user.canFlag()) {
-			canFlag = true;
-		}
+		boolean canFlag = user.canFlag();
 		
 		Set<String> projections = model.getProjections();
 		Map<String, Object> properties = new TreeMap<>();
