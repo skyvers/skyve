@@ -818,6 +818,9 @@ public class TestUtil {
 		}
 	}
 
+	// Used by findRandomDocumentQueryResult().
+	private static Random random = new Random();
+	
 	/**
 	 * <p>
 	 * Returns a random bean tuple from the specified document query
@@ -844,7 +847,7 @@ public class TestUtil {
 			return null;
 		}
 
-		int randomIndex = new Random().nextInt((int) count - 1);
+		int randomIndex = random.nextInt((int) count - 1);
 
 		// get the random record
 		aq.clearProjections();

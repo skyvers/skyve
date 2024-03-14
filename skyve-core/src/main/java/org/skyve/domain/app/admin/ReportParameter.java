@@ -1,7 +1,8 @@
 package org.skyve.domain.app.admin;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Enumeration;
@@ -30,7 +31,7 @@ public interface ReportParameter extends PersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Type::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private Type(String code, String description) {
 			this.code = code;
@@ -80,14 +81,6 @@ public interface ReportParameter extends PersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				Type[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (Type value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

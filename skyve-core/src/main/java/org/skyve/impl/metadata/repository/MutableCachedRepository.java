@@ -430,7 +430,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate
 				if (o == null) { // key absent
 					result = scaffoldView(customer, document, name, uxui);
 					if (result != null) {
-						cache.put(viewKey, Optional.of(result));
+						cache.putIfAbsent(viewKey, Optional.of(result));
 					}
 				}
 			}

@@ -36,9 +36,9 @@ public class Decimal5IntegerPercentage implements Converter<Decimal5> {
 		try {
 			DecimalFormat df = CORE.getDecimalFormat(PATTERN);
 			df.setParseBigDecimal(true);
-			displayValue.replace("%", "");
+			String noPercentage = displayValue.replace("%", "");
 
-			return new Decimal5(((BigDecimal) df.parse(displayValue)).divide(new BigDecimal(100)));
+			return new Decimal5(((BigDecimal) df.parse(noPercentage)).divide(new BigDecimal(100)));
 		}
 		catch (Exception e) {
 			throw new ConversionException(ConversionException.DECIMAL_5_INTEGER_PERCENTAGE_KEY, e);

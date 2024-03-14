@@ -284,11 +284,15 @@ public class Util {
 		return ((UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS);
 	}
 
-	private static Boolean secureUrl = null;
+	private static volatile Boolean secureUrl = null;
 	
 	public static boolean isSecureUrl() {
 		if (secureUrl == null) {
-			secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://"));
+			synchronized (Util.class) {
+				if (secureUrl == null) {
+					secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://"));
+				}
+			}
 		}
 		return secureUrl.booleanValue();
 	}

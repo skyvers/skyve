@@ -2195,9 +2195,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// Accessor method
 			accessorJavadoc(reference, methods, false);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2208,9 +2205,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// Mapped Accessor method
 			accessorJavadoc(reference, methods, true);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2220,9 +2214,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// Mapped Mutator method
 			mutatorJavadoc(reference, methods, true);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2234,9 +2225,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// collection add
 			collectionJavadoc(name, methods, true, false);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2277,9 +2265,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			
 			// collection indexed add
 			collectionJavadoc(name, methods, true, true);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2304,9 +2289,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			
 			// collection remove
 			collectionJavadoc(name, methods, false, false);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2333,9 +2315,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			
 			// collection indexed remove
 			collectionJavadoc(name, methods, false, true);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2370,9 +2349,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// Accessor method
 			accessorJavadoc(reference, methods, false);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -2382,9 +2358,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// Mutator method
 			mutatorJavadoc(reference, methods, false);
-			if (overriddenReference) { // method in base class
-				methods.append("\t@Override\n");
-			}
 			if (deprecated) {
 				methods.append("\t@Deprecated\n");
 			}
@@ -4060,8 +4033,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (moduleNames.contains(childName)) {
 						final Path packagePath = generatedDirectory.resolve(childName).resolve(ProvidedRepository.DOMAIN_NAME);
 						if (Files.exists(packagePath)) {
-							for (File domainFile : packagePath.toFile().listFiles()) {
-								domainFile.delete();
+							File[] domainFiles = packagePath.toFile().listFiles();
+							if (domainFiles != null) {
+								for (File domainFile : domainFiles) {
+									domainFile.delete();
+								}
 							}
 						}
 						else {
@@ -4088,7 +4064,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		while (i.hasNext()) {
 			Map.Entry<Path, CharSequence> entry = i.next();
 			Path path = entry.getKey();
-			Files.createDirectories(path.getParent());
+			Path parent = path.getParent();
+			if (parent != null) {
+				Files.createDirectories(parent);
+			}
 			try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
 				bw.append(entry.getValue());
 			}

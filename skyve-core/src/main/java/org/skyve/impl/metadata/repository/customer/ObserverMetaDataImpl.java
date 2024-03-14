@@ -17,7 +17,7 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	 * The fully qualified classname of the observer implementation.
 	 */
 	private String className;
-	private Observer observer;
+	private volatile Observer observer;
 
 	@Override
 	public String getClassName() {

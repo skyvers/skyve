@@ -826,38 +826,32 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
-	private static Text bizKeyField;
+	private static Text bizKeyField = new Text();
+	static {
+		bizKeyField.setAttributeType(AttributeType.text);
+		bizKeyField.setDisplayName("Business Key");
+		bizKeyField.setName(Bean.BIZ_KEY);
+		bizKeyField.setPersistent(false);
+		bizKeyField.setRequired(false);
+		bizKeyField.setDescription(null);
+		bizKeyField.setDomainType(null);
+		bizKeyField.setLength(1024);
+	}
 	public static Text getBizKeyAttribute() {
-		if (bizKeyField == null) {
-			bizKeyField = new Text();
-			
-			bizKeyField.setAttributeType(AttributeType.text);
-			bizKeyField.setDisplayName("Business Key");
-			bizKeyField.setName(Bean.BIZ_KEY);
-			bizKeyField.setPersistent(false);
-			bizKeyField.setRequired(false);
-			bizKeyField.setDescription(null);
-			bizKeyField.setDomainType(null);
-			bizKeyField.setLength(1024);
-		}
-		
 		return bizKeyField;
 	}
 	
-	private static org.skyve.impl.metadata.model.document.field.Integer bizOrdinalField;
+	private static org.skyve.impl.metadata.model.document.field.Integer bizOrdinalField = new org.skyve.impl.metadata.model.document.field.Integer();
+	static {
+		bizOrdinalField.setAttributeType(AttributeType.integer);
+		bizOrdinalField.setDisplayName("Order");
+		bizOrdinalField.setName(Bean.ORDINAL_NAME);
+		bizOrdinalField.setPersistent(true);
+		bizOrdinalField.setRequired(false);
+		bizOrdinalField.setDescription(null);
+		bizOrdinalField.setDomainType(null);
+	}
 	public static org.skyve.impl.metadata.model.document.field.Integer getBizOrdinalAttribute() {
-		if (bizOrdinalField == null) {
-			bizOrdinalField = new org.skyve.impl.metadata.model.document.field.Integer();
-			
-			bizOrdinalField.setAttributeType(AttributeType.integer);
-			bizOrdinalField.setDisplayName("Order");
-			bizOrdinalField.setName(Bean.ORDINAL_NAME);
-			bizOrdinalField.setPersistent(true);
-			bizOrdinalField.setRequired(false);
-			bizOrdinalField.setDescription(null);
-			bizOrdinalField.setDomainType(null);
-		}
-		
 		return bizOrdinalField;
 	}
 }

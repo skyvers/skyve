@@ -32,10 +32,10 @@ public class JSONReader {
 		object; // make java beans
 	}
 
-	private static final Object OBJECT_END = "}";
-	private static final Object ARRAY_END = "]";
-	private static final Object COLON = ":";
-	private static final Object COMMA = ",";
+	private static final String OBJECT_END = "}";
+	private static final String ARRAY_END = "]";
+	private static final String COLON = ":";
+	private static final String COMMA = ",";
 
 	private static Map<Character, Character> escapes = new HashMap<>();
 	static {
@@ -176,13 +176,13 @@ public class JSONReader {
 	private Object object() throws Exception {
 		Object key = read();
 		if (Bean.MODULE_KEY.equals(key)) {
-			this.mode = JSONMode.bean;
+			mode = JSONMode.bean;
 		}
 		else if ("class".equals(key)) {
-			this.mode = JSONMode.object;
+			mode = JSONMode.object;
 		}
 		else {
-			this.mode = JSONMode.dynamic;
+			mode = JSONMode.dynamic;
 		}
 
 		if (mode == JSONMode.bean) {
@@ -210,9 +210,9 @@ public class JSONReader {
 
 			String propertyName = (String) read();
 			int i = 0;
-			while (token != OBJECT_END) {
+			while (! OBJECT_END.equals(token)) {
 				read(); // should be a colon
-				if (token != OBJECT_END) {
+				if (! OBJECT_END.equals(token)) {
 					Object value = read();
 					if (Bean.DOCUMENT_ID.equals(propertyName)) {
 						try {
@@ -273,7 +273,7 @@ public class JSONReader {
 						}
 					}
 
-					if (read() == COMMA) {
+					if (COMMA.equals(read())) {
 						propertyName = (String) read();
 					}
 				}
@@ -296,11 +296,11 @@ public class JSONReader {
 			// Order can be important - like in constant range map expression
 			Map<Object, Object> result = new LinkedHashMap<>();
 			int i = 0;
-			while (token != OBJECT_END) {
+			while (! OBJECT_END.equals(token)) {
 				read(); // should be a colon
-				if (token != OBJECT_END) {
+				if (! OBJECT_END.equals(token)) {
 					result.put(key, read());
-					if (read() == COMMA) {
+					if (COMMA.equals(read())) {
 						key = read();
 					}
 				}
@@ -323,9 +323,9 @@ public class JSONReader {
 
 			String propertyName = (String) read();
 			int i = 0;
-			while (token != OBJECT_END) {
+			while (! OBJECT_END.equals(token)) {
 				read(); // should be a colon
-				if (token != OBJECT_END) {
+				if (! OBJECT_END.equals(token)) {
 					// Util.LOGGER.info(result + " : " + propertyName);
 					Object value = read();
 					if (value instanceof Collection) {
@@ -349,7 +349,7 @@ public class JSONReader {
 					}
 				}
 
-				if (read() == COMMA) {
+				if (COMMA.equals(read())) {
 					propertyName = (String) read();
 				}
 				// Defend infinite loop
@@ -369,9 +369,9 @@ public class JSONReader {
 		List<Object> result = new ArrayList<>();
 		Object value = read();
 		int i = 0;
-		while (token != ARRAY_END) {
+		while (! ARRAY_END.equals(token)) {
 			result.add(value);
-			if (read() == COMMA) {
+			if (COMMA.equals(read())) {
 				value = read();
 			}
 			// Defend infinite loop

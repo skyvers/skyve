@@ -411,7 +411,7 @@ public class UtilImpl {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
 				if (element instanceof AbstractPersistentBean) {
-					populateFully((AbstractPersistentBean) object);
+					populateFully((AbstractPersistentBean) element);
 				}
 			}
 		}

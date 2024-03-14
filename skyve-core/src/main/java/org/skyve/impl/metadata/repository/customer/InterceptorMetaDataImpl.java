@@ -17,7 +17,7 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	 * The fully qualified classname of the interceptor implementation.
 	 */
 	private String className;
-	private Interceptor interceptor;
+	private volatile Interceptor interceptor;
 
 	@Override
 	public String getClassName() {

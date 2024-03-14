@@ -1,7 +1,8 @@
 package org.skyve.domain.app.admin;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.DateTime;
@@ -26,7 +27,7 @@ public interface Communication extends PersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(FormatType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private FormatType(String code, String description) {
 			this.code = code;
@@ -76,14 +77,6 @@ public interface Communication extends PersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				FormatType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (FormatType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}
@@ -101,7 +94,7 @@ public interface Communication extends PersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(ActionType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private ActionType(String code, String description) {
 			this.code = code;
@@ -151,14 +144,6 @@ public interface Communication extends PersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				ActionType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (ActionType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

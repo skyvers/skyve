@@ -161,161 +161,185 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 		File moduleDirectory = new File(absolutePath + key);
 		if (moduleDirectory.exists() && moduleDirectory.isDirectory()) {
-			for (File moduleFile : moduleDirectory.listFiles()) {
-				String moduleFileName = moduleFile.getName();
-				if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module file name = " + moduleFileName);
-
-				// we have found some modules
-				if (moduleFile.isDirectory()) {
-					for (File documentFile : moduleFile.listFiles()) {
-						String documentFileName = documentFile.getName();
-						// found the document actions directory
-						if (documentFileName.equals(ACTIONS_NAME) && documentFile.isDirectory()) {
-							for (File actionFile : documentFile.listFiles()) {
-								String actionFileName = actionFile.getName();
-								if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java") || actionFileName.endsWith(".xml")) {
-									String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
-
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(ACTIONS_NAMESPACE).append(actionName);
-									if (actionFileName.endsWith(".xml")) {
-										sb.append(META_DATA_SUFFIX);
-									}
-									String actionLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
-									addKey(actionLocation);
-								}
-							}
-						}
-						// found the document images directory
-						else if (documentFileName.equals(IMAGES_NAME) && documentFile.isDirectory()) {
-							for (File imageFile : documentFile.listFiles()) {
-								String imageFileName = imageFile.getName();
-								if (imageFileName.endsWith(".class") || imageFileName.endsWith(".java")) {
-									String imageName = imageFileName.substring(0, imageFileName.lastIndexOf('.'));
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(IMAGES_NAMESPACE).append(imageName);
-									String imageLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(" -> ").append(imageLocation).toString());
-									addKey(imageLocation);
-								}
-							}
-						}
-						// found the document models directory
-						else if (documentFileName.equals(MODELS_NAME) && documentFile.isDirectory()) {
-							for (File modelFile : documentFile.listFiles()) {
-								String modelFileName = modelFile.getName();
-								if (modelFileName.endsWith(".class") || modelFileName.endsWith(".java")) {
-									String modelName = modelFileName.substring(0, modelFileName.lastIndexOf('.'));
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(MODELS_NAMESPACE).append(modelName);
-									String modelLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(" -> ").append(modelLocation).toString());
-									addKey(modelLocation);
-								}
-							}
-						}
-						// found the document reports directory
-						else if (documentFileName.equals(REPORTS_NAME) && documentFile.isDirectory()) {
-							for (File reportFile : documentFile.listFiles()) {
-								String reportFileName = reportFile.getName();
-								if (reportFileName.endsWith(".jasper")) {
-									String reportName = reportFileName.substring(0, reportFileName.length() - 7);
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(REPORTS_NAMESPACE).append(reportName).append(JASPER_SUFFIX);
-									String reportLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
-									addKey(reportLocation);
-								}
-								else if (reportFileName.endsWith(".ftlh")) {
-									String reportName = reportFileName.substring(0, reportFileName.length() - 5);
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(REPORTS_NAMESPACE).append(reportName).append(FREEMARKER_SUFFIX);
-									String reportLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
-									addKey(reportLocation);
-								}
-							}
-						}
-						// found the document views directory
-						else if (documentFileName.equals(VIEWS_NAME) && documentFile.isDirectory()) {
-							for (File viewFile : documentFile.listFiles()) {
-								String viewFileName = viewFile.getName();
-								if (viewFileName.endsWith(".xml")) { // found a view file
-									String viewType = viewFileName.substring(0, viewFileName.length() - 4);
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(VIEWS_NAMESPACE).append(viewType);
-									String viewLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
-									addKey(viewLocation);
-								}
-								else if (viewFile.isDirectory()) {
-									for (File uxuiViewFile : viewFile.listFiles()) {
-										String uxuiViewFileName = uxuiViewFile.getName();
-										if (uxuiViewFileName.endsWith(".xml")) { // found a view file
-											String viewType = uxuiViewFileName.substring(0, uxuiViewFileName.length() - 4);
-											sb.setLength(0);
-											sb.append(key).append(moduleFileName).append('/');
-											sb.append(VIEWS_NAMESPACE).append(viewFileName).append('/').append(viewType);
-											String viewLocation = sb.toString();
-											if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
-											addKey(viewLocation);
+			File[] moduleFiles = moduleDirectory.listFiles();
+			if (moduleFiles != null) {
+				for (File moduleFile : moduleFiles) {
+					String moduleFileName = moduleFile.getName();
+					if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module file name = " + moduleFileName);
+	
+					// we have found some modules
+					if (moduleFile.isDirectory()) {
+						File[] documentFiles = moduleFile.listFiles();
+						if (documentFiles != null) {
+							for (File documentFile : documentFiles) {
+								String documentFileName = documentFile.getName();
+								// found the document actions directory
+								if (documentFileName.equals(ACTIONS_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File actionFile : files) {
+											String actionFileName = actionFile.getName();
+											if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java") || actionFileName.endsWith(".xml")) {
+												String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
+			
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(ACTIONS_NAMESPACE).append(actionName);
+												if (actionFileName.endsWith(".xml")) {
+													sb.append(META_DATA_SUFFIX);
+												}
+												String actionLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
+												addKey(actionLocation);
+											}
 										}
 									}
 								}
-							}
+								// found the document images directory
+								else if (documentFileName.equals(IMAGES_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File imageFile : files) {
+											String imageFileName = imageFile.getName();
+											if (imageFileName.endsWith(".class") || imageFileName.endsWith(".java")) {
+												String imageName = imageFileName.substring(0, imageFileName.lastIndexOf('.'));
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(IMAGES_NAMESPACE).append(imageName);
+												String imageLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(" -> ").append(imageLocation).toString());
+												addKey(imageLocation);
+											}
+										}
+									}
+								}
+								// found the document models directory
+								else if (documentFileName.equals(MODELS_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File modelFile : files) {
+											String modelFileName = modelFile.getName();
+											if (modelFileName.endsWith(".class") || modelFileName.endsWith(".java")) {
+												String modelName = modelFileName.substring(0, modelFileName.lastIndexOf('.'));
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(MODELS_NAMESPACE).append(modelName);
+												String modelLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(" -> ").append(modelLocation).toString());
+												addKey(modelLocation);
+											}
+										}
+									}
+								}
+								// found the document reports directory
+								else if (documentFileName.equals(REPORTS_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File reportFile : files) {
+											String reportFileName = reportFile.getName();
+											if (reportFileName.endsWith(".jasper")) {
+												String reportName = reportFileName.substring(0, reportFileName.length() - 7);
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(REPORTS_NAMESPACE).append(reportName).append(JASPER_SUFFIX);
+												String reportLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												addKey(reportLocation);
+											}
+											else if (reportFileName.endsWith(".ftlh")) {
+												String reportName = reportFileName.substring(0, reportFileName.length() - 5);
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(REPORTS_NAMESPACE).append(reportName).append(FREEMARKER_SUFFIX);
+												String reportLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												addKey(reportLocation);
+											}
+										}
+									}
+								}
+								// found the document views directory
+								else if (documentFileName.equals(VIEWS_NAME) && documentFile.isDirectory()) {
+									File[] viewFiles = documentFile.listFiles();
+									if (viewFiles != null) {
+										for (File viewFile : viewFiles) {
+											String viewFileName = viewFile.getName();
+											if (viewFileName.endsWith(".xml")) { // found a view file
+												String viewType = viewFileName.substring(0, viewFileName.length() - 4);
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(VIEWS_NAMESPACE).append(viewType);
+												String viewLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+												addKey(viewLocation);
+											}
+											else if (viewFile.isDirectory()) {
+												File[] uxuiViewFiles = viewFile.listFiles();
+												if (uxuiViewFiles != null) {
+													for (File uxuiViewFile : uxuiViewFiles) {
+														String uxuiViewFileName = uxuiViewFile.getName();
+														if (uxuiViewFileName.endsWith(".xml")) { // found a view file
+															String viewType = uxuiViewFileName.substring(0, uxuiViewFileName.length() - 4);
+															sb.setLength(0);
+															sb.append(key).append(moduleFileName).append('/');
+															sb.append(VIEWS_NAMESPACE).append(viewFileName).append('/').append(viewType);
+															String viewLocation = sb.toString();
+															if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+															addKey(viewLocation);
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+								// found the bizlet class file
+								else if (documentFileName.equals(moduleFileName + "Bizlet.class")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append(BIZLET_SUFFIX);
+									String bizletLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									addKey(bizletLocation);
+								}
+								// found the bizlet metadata file
+								else if (documentFileName.equals(moduleFileName + "Bizlet.xml")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+									String bizletLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									addKey(bizletLocation);
+								}
+								// found the extension class file
+								else if (documentFileName.equals(moduleFileName + "Extension.class")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append("Extension");
+									String extensionLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(" -> ").append(extensionLocation).toString());
+									addKey(extensionLocation);
+								}
+								// found the factory class file
+								else if (documentFileName.equals(moduleFileName + "Factory.class")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append("Factory");
+									String factoryLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(" -> ").append(factoryLocation).toString());
+									addKey(factoryLocation);
+								}
+								// found the document definition file
+								else if (documentFileName.equals(moduleFileName + ".xml")) {
+									String documentLocation = key + moduleFileName;
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(" -> ").append(documentLocation).toString());
+									addKey(documentLocation);
+								}
+							} // for (all document files)
 						}
-						// found the bizlet class file
-						else if (documentFileName.equals(moduleFileName + "Bizlet.class")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append(BIZLET_SUFFIX);
-							String bizletLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
-							addKey(bizletLocation);
-						}
-						// found the bizlet metadata file
-						else if (documentFileName.equals(moduleFileName + "Bizlet.xml")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
-							String bizletLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
-							addKey(bizletLocation);
-						}
-						// found the extension class file
-						else if (documentFileName.equals(moduleFileName + "Extension.class")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append("Extension");
-							String extensionLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(" -> ").append(extensionLocation).toString());
-							addKey(extensionLocation);
-						}
-						// found the factory class file
-						else if (documentFileName.equals(moduleFileName + "Factory.class")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append("Factory");
-							String factoryLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(" -> ").append(factoryLocation).toString());
-							addKey(factoryLocation);
-						}
-						// found the document definition file
-						else if (documentFileName.equals(moduleFileName + ".xml")) {
-							String documentLocation = key + moduleFileName;
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(" -> ").append(documentLocation).toString());
-							addKey(documentLocation);
-						}
-					} // for (all document files)
-				} // if (moduleFile is a directory)
-			} // for (all module files)
+					} // if (moduleFile is a directory)
+				} // for (all module files)
+			}
 		} // if (module directory exists)
 	}
 
@@ -443,9 +467,12 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		
 		File customersDirectory = new File(absolutePath + CUSTOMERS_NAMESPACE);
 		if (customersDirectory.exists() && customersDirectory.isDirectory()) {
-			for (File customerDirectory : customersDirectory.listFiles()) {
-				if (customerDirectory.isDirectory() && (customerDirectory.getName().charAt(0) != '.')) {
-					result.add(customerDirectory.getName());
+			File[] files = customersDirectory.listFiles();
+			if (files != null) {
+				for (File customerDirectory : files) {
+					if (customerDirectory.isDirectory() && (customerDirectory.getName().charAt(0) != '.')) {
+						result.add(customerDirectory.getName());
+					}
 				}
 			}
 		}
@@ -459,13 +486,19 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 		File modulesDirectory = new File(absolutePath + MODULES_NAMESPACE);
 		if (modulesDirectory.exists() && modulesDirectory.isDirectory()) {
-			for (File moduleDirectory : modulesDirectory.listFiles()) {
-				if (moduleDirectory.isDirectory() && (moduleDirectory.getName().charAt(0) != '.')) {
-					// make sure there is a module.xml with the same name as the module directory to cater for deleted modules
-					for (File moduleChild : moduleDirectory.listFiles()) {
-						if (moduleChild.getName().equals(moduleDirectory.getName() + ".xml")) {
-							result.add(moduleDirectory.getName());
-							break;
+			File[] moduleDirectories = modulesDirectory.listFiles();
+			if (moduleDirectories != null) {
+				for (File moduleDirectory : moduleDirectories) {
+					if (moduleDirectory.isDirectory() && (moduleDirectory.getName().charAt(0) != '.')) {
+						// make sure there is a module.xml with the same name as the module directory to cater for deleted modules
+						File[] moduleChildren = moduleDirectory.listFiles();
+						if (moduleChildren != null) {
+							for (File moduleChild : moduleChildren) {
+								if (moduleChild.getName().equals(moduleDirectory.getName() + ".xml")) {
+									result.add(moduleDirectory.getName());
+									break;
+								}
+							}
 						}
 					}
 				}

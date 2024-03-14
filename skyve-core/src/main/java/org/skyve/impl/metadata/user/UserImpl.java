@@ -135,7 +135,7 @@ public class UserImpl implements User {
     /**
      * Reinstate the transient locale value from the language tag after Serialization.
      */
-    private Object readResolve() {
+    protected Object readResolve() {
         setLanguageTag(languageTag);
         return this;
     }
