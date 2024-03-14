@@ -338,37 +338,44 @@ public class SmartClientListServlet extends HttpServlet {
 					case update:
 						checkCsrfToken(session, request, response, currentCsrfToken);
 						
-						String flag = OWASP.sanitise(Sanitisation.basic, Util.processStringValue(request.getParameter(PersistentBean.FLAG_COMMENT_NAME)));
 						String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
+						String bizFlagComment = request.getParameter(PersistentBean.FLAG_COMMENT_NAME);
 						if ("TAG".equals(bizTagged)) {
 							tag(user, customer, module, model, tagId, parameters, pw);
 						}
 						else if ("UNTAG".equals(bizTagged)) {
 							untag(user, customer, module, model, tagId, parameters, pw);
 						}
-						else if (flag != null) {
+						else if (bizFlagComment != null) {
+							bizFlagComment = OWASP.sanitise(Sanitisation.basic, Util.processStringValue(bizFlagComment));
+							
 				    		if (! user.canUpdateDocument(drivingDocument)) {
 				    			throw new SecurityException("update this data", user.getName());
 				    		}
 				    		if (! user.canFlag()) {
-				    			throw new SecurityException("obtain flag permissions", user.getName());
+				    			throw new SecurityException("flag this data", user.getName());
 				    			
 				    		}
-				    		upsertFlag(drivingDocument, bean, flag);
+				    		if (drivingDocument.getPersistent() == null) {
+				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
+				    		}
+				    		
+				    		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
+				    		bean = persistence.retrieve(drivingDocument, bizId);
+				    		
+				    		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
+				    		upsertFlag(drivingDocument, bean, bizFlagComment);			    		
+							
+				    		pw.append(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)));
 						}
 						else {
 							if (! user.canUpdateDocument(drivingDocument)) {
 								throw new SecurityException("update this data", user.getName());
 							}
-		
-							boolean rowIsTagged = false;
-							String oldValuesJSON = request.getParameter(OLD_VALUES);
-							if (oldValuesJSON != null) {
-								rowIsTagged = oldValuesJSON.contains(PersistentBean.TAGGED_NAME + "\":true");
-							}
+							
 							update(module, 
 									model, 
-									rowIsTagged,
+									isRowTagged(request),
 									parameters, 
 									persistence, 
 									pw);
@@ -1705,5 +1712,15 @@ public class SmartClientListServlet extends HttpServlet {
 		CORE.getPersistence().newSQL(sql.toString())
 				.putParameter(PersistentBean.FLAG_COMMENT_NAME, flag, false)
 				.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).execute();
+	}
+	
+	public static boolean isRowTagged(HttpServletRequest request) {
+		boolean rowIsTagged = false;
+		String oldValuesJSON = request.getParameter(OLD_VALUES);
+		if (oldValuesJSON != null) {
+			rowIsTagged = oldValuesJSON.contains(PersistentBean.TAGGED_NAME + "\":true");
+		}
+		
+		return rowIsTagged;
 	}
 }
