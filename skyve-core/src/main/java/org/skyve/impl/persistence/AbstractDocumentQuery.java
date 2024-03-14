@@ -426,9 +426,8 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		}
 		result.append(projectionClause);
 		result.append(" FROM ").append(fromClause);
-		String filterClause = filter.toString();
-		if (! filterClause.isEmpty()) {
-			result.append(" WHERE ").append(filterClause);
+		if (! filter.isEmpty()) {
+			result.append(" WHERE ").append(filter.toString());
 		}
 		if (! groupClause.isEmpty()) {
 			result.append(" GROUP BY ").append(groupClause);
