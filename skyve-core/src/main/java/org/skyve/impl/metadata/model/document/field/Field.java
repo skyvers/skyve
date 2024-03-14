@@ -35,6 +35,11 @@ public abstract class Field extends AbstractAttribute {
 	 */
 	private String defaultValue;
 
+	@Override
+	public boolean isScalar() {
+		return true;
+	}
+	
 	public IndexType getIndex() {
 		return index;
 	}

@@ -79,9 +79,9 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getDisplayName();
+	String getDisplayName();
 	
-	public default String getLocalisedDisplayName() {
+	default String getLocalisedDisplayName() {
 		return Util.i18n(getDisplayName());
 	}
 	
@@ -89,9 +89,9 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getDescription();
+	String getDescription();
 	
-	public default String getLocalisedDescription() {
+	default String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 
@@ -99,51 +99,57 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public AttributeType getAttributeType();
+	AttributeType getAttributeType();
+	
+	/**
+	 * Fields are scalar (a single value), Relations are not.
+	 * @return	whether scalar.
+	 */
+	boolean isScalar();
 
 	/**
 	 * Informs the Skyve framework when to include and exclude the attributes.
 	 * @return	the usage.
 	 */
-	public UsageType getUsage();
+	UsageType getUsage();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public boolean isPersistent();
+	boolean isPersistent();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public boolean isRequired();
+	boolean isRequired();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public DomainType getDomainType();
+	DomainType getDomainType();
 
 	/**
 	 * 
 	 * @return
 	 */
-	public boolean isDeprecated();
+	boolean isDeprecated();
 	
 	/**
 	 * Should mutations to this attribute be tracked and make the object "changed".
 	 * 
 	 * @return
 	 */
-	public boolean isTrackChanges();
+	boolean isTrackChanges();
 
 	/**
 	 * Should this attribute be audited.
 	 * 
 	 * @return
 	 */
-	public boolean isAudited();
+	boolean isAudited();
 
 	/**
 	 * Should the attribute have the transient java modifier added to its definition.
@@ -151,17 +157,17 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public boolean isTransient();
+	boolean isTransient();
 
 	/**
 	 * 
 	 * @return
 	 */
-	public InputWidget getDefaultInputWidget();
+	InputWidget getDefaultInputWidget();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getDocumentation();
+	String getDocumentation();
 }
