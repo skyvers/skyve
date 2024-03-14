@@ -2,44 +2,44 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <link href="https://unpkg.com/primevue/resources/themes/saga-blue/theme.css" rel="stylesheet">
-  <link href="https://unpkg.com/primevue/resources/primevue.min.css" rel="stylesheet">
-  <link href="https://unpkg.com/primeflex/primeflex.css" rel="stylesheet">
-  <link href="https://unpkg.com/primeicons/primeicons.css" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ListGrid</title>
+    <meta charset="UTF-8">
+    <link href="https://unpkg.com/primevue/resources/themes/saga-blue/theme.css" rel="stylesheet">
+    <link href="https://unpkg.com/primevue/resources/primevue.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/primeflex/primeflex.css" rel="stylesheet">
+    <link href="https://unpkg.com/primeicons/primeicons.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ListGrid</title>
 </head>
 
 <body>
-  <div id="grid"></div>
-  <div id="grid1"></div>
-  <script type="module" src="/src/main.js"></script>
+    <div id="grid"></div>
+    <div id="grid1"></div>
+    <script type="module" src="/src/main.js"></script>
 
-  <script>
-    window.onload = function () {
-      SKYVE.listgrid({
-        e: '#grid',
-        m: 'admin',
-        q: 'qContacts',
-        t: 'All Contacts',
-        c: [
-          { field: 'name', header: 'Name', sortable: true, filterable: true },
-          { field: 'email1', header: 'Email', sortable: true, filterable: true }
-        ]
-      });
-      SKYVE.listgrid({
-        e: '#grid1',
-        m: 'kitchensink',
-        q: 'ListAttributes',
-        c: [
-          { field: 'bizKey', header: 'Biz Key', sortable: false, filterable: true },
-          { field: 'decimal2', header: 'Decimal 2', sortable: false, filterable: true },
-          { field: 'booleanFlag', header: 'Boolean Flag', sortable: false, filterable: true },
-        ]
-      });
-    }
-  </script>
+    <script>
+        window.onload = function () {
+            SKYVE.listgrid({
+                e: '#grid',
+                m: 'admin',
+                q: 'qContacts',
+                t: 'All Contacts',
+                c: [
+                    { field: 'name', header: 'Name', sortable: true, filterable: true },
+                    { field: 'email1', header: 'Email', sortable: true, filterable: true }
+                ]
+            });
+            SKYVE.listgrid({
+                e: '#grid1',
+                m: 'kitchensink',
+                q: 'ListAttributes',
+                c: [
+                    { field: 'bizKey', header: 'Biz Key', sortable: false, filterable: true },
+                    { field: 'decimal2', header: 'Decimal 2', sortable: false, filterable: true },
+                    { field: 'booleanFlag', header: 'Boolean Flag', sortable: false, filterable: true },
+                ]
+            });
+        }
+    </script>
 </body>
 
 </html>

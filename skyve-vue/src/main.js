@@ -7,6 +7,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import MultiSelect from 'primevue/multiselect';
 
 // SKYVE name space definition
 if (!window.SKYVE) window.SKYVE = {};
@@ -25,6 +26,7 @@ window.SKYVE.listgrid = function (config) {
     grid.component('Column', Column);
     grid.component('DataTable', DataTable);
     grid.component('InputText', InputText);
+    grid.component('MultiSelect', MultiSelect);
 
     //    grid.configure(config); - can't call the method exposed here
     grid.mount(config.e);
