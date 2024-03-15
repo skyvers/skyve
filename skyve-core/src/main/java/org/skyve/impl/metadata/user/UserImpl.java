@@ -649,6 +649,11 @@ public class UserImpl implements User {
 	public boolean canTextSearch() {
 		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getTextSearchRoles(), roleNames);
 	}
+	
+	@Override
+	public boolean canSwitchMode() {
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getSwitchModeRoles(), roleNames);
+	}
 
 	@Override
 	public boolean canUpdateDocument(Document document) {

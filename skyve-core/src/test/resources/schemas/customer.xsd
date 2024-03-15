@@ -32,6 +32,13 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="switchModeRoles" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="role" type="tns:customerFeature" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
           <xs:element name="interceptors" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>

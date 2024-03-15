@@ -112,6 +112,7 @@ public class CustomerImpl implements Customer {
 	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
 	private Set<String> textSearchRoles = new TreeSet<>();
 	private Set<String> flagRoles = new TreeSet<>();
+	private Set<String> switchModeRoles = new TreeSet<>();
 	private boolean allowModuleRoles = true;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
@@ -925,6 +926,10 @@ public class CustomerImpl implements Customer {
 	
 	public Set<String> getFlagRoles() {
 		return flagRoles;
+	}
+
+	public Set<String> getSwitchModeRoles() {
+		return switchModeRoles;
 	}
 }
        

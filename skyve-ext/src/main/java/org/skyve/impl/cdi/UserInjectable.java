@@ -185,6 +185,11 @@ public class UserInjectable implements User {
 	}
 
 	@Override
+	public boolean canSwitchMode() {
+		return CORE.getUser().canSwitchMode();
+	}
+	
+	@Override
 	public boolean canUpdateDocument(Document document) {
 		return CORE.getUser().canUpdateDocument(document);
 	}

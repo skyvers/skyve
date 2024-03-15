@@ -187,6 +187,12 @@ public interface User extends NamedMetaData {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	boolean canSwitchMode();
+	
+	/**
+	 * 
 	 * @param document
 	 * @return
 	 */

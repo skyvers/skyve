@@ -47,6 +47,7 @@ import jakarta.xml.bind.annotation.XmlType;
 							"roles",
 							"textSearchRoles",
 							"flagRoles",
+							"switchModeRoles",
 							"interceptors",
 							"observers",
 							"JFreeChartPostProcessorClassName",
@@ -66,6 +67,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 	private CustomerRolesMetaData roles;
 	private List<CustomerFeatureRoleMetaData> textSearchRoles = new ArrayList<>();
 	private List<CustomerFeatureRoleMetaData> flagRoles = new ArrayList<>();
+	private List<CustomerFeatureRoleMetaData> switchModeRoles = new ArrayList<>();
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private List<ObserverMetaDataImpl> observers = new ArrayList<>();
 	private String fullyQualifiedJFreeChartPostProcessorClassName;
@@ -172,6 +174,12 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
 	public List<CustomerFeatureRoleMetaData> getFlagRoles() {
 		return flagRoles;
+	}
+	
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "switchModeRoles")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
+	public List<CustomerFeatureRoleMetaData> getSwitchModeRoles() {
+		return switchModeRoles;
 	}
 	
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
@@ -382,7 +390,40 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 					}
 				}
 			}
-		}	
+		}
+		
+		// Populate Switch Mode Roles
+		if (switchModeRoles != null) {
+			Set<String> switchModeModuleRoles = result.getSwitchModeRoles();
+			for (CustomerFeatureRoleMetaData switchModeRole : switchModeRoles) {
+				String switchModeRoleName = switchModeRole.getName();
+				if (switchModeRoleName == null) {
+					throw new MetaDataException(metaDataName + " : The [name] for a switch mode role is required");
+				}
+				String moduleName = switchModeRole.getModuleName();
+				if (moduleName == null) {
+					Optional<CustomerRoleMetaData> customerRole = roles.getRoles().stream().filter(r -> r.getName().equals(switchModeRoleName)).findAny();
+					if (customerRole.isEmpty()) {
+						throw new MetaDataException(metaDataName + " : The [name] of switch mode role " + switchModeRoleName +
+								" is not a valid customer role");
+					}
+					CustomerRoleMetaData role = customerRole.get();
+					for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
+						moduleName = moduleRole.getModuleName();
+						value = moduleRole.getName();
+						switchModeModuleRoles.add(moduleName + "." + value);
+					}
+				}
+				else {
+					if (! moduleEntries.containsKey(moduleName)) {
+						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
+					}
+					if (! switchModeModuleRoles.add(moduleName + "." + switchModeRoleName)) {
+						throw new MetaDataException(metaDataName + " : Duplicate role " + switchModeRoleName);
+					}
+				}
+			}
+		}
 		
 		// Populate Interceptors
 		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();

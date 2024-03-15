@@ -263,12 +263,23 @@ public abstract class HarnessView extends LocalisableView {
 		persistence.setUser(user);
 	}
 	
+	public boolean canTextSearch() {
+		return getUser().canTextSearch();
+	}
+	
+	public boolean canSwitchMode() {
+		return getUser().canSwitchMode();
+	}
+	
 	/**
 	 * Sets the UX/UI preference in the session.
 	 * @param uxui	The UX/UI name.
 	 */
-	@SuppressWarnings("static-method")
 	public void setUxUi(String uxui) {
+		if (! canSwitchMode()) {
+			throw new SecurityException("switch modes", getUser().getName());
+		}
+		
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		if (uxui == null) {
 			ec.getSessionMap().remove(AbstractWebContext.UXUI);
