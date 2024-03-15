@@ -188,8 +188,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 			throw new MetaDataException("Home Module reference does not reference a module in customer " + customer.getName(), e);
 		}
 
+		CustomerImpl customerImpl = (CustomerImpl) customer;
+		
 		// NB Module entry names (keys) are in defined order
-		for (Entry<String, FormLabelLayout> moduleEntry : ((CustomerImpl) customer).getModuleEntries().entrySet()) {
+		for (Entry<String, FormLabelLayout> moduleEntry : customerImpl.getModuleEntries().entrySet()) {
 			String moduleName = moduleEntry.getKey();
 			FormLabelLayout formLabelLayout = moduleEntry.getValue();
 
@@ -234,7 +236,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// Validate text search roles point to valid module roles
 		// NB We don't need to check the module name of the role as this is checked when the metadata
 		// is converted and we know all module names are correct from the validation performed above.
-		for (String textSearchModuleRole : ((CustomerImpl) customer).getTextSearchRoles()) {
+		for (String textSearchModuleRole : customerImpl.getTextSearchRoles()) {
 			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
 			String moduleName = moduleAndRoleName[0];
 			Module module = getModule(customer, moduleName);
@@ -249,7 +251,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// Validate flag roles point to valid module roles
 		// NB We don't need to check the module name of the role as this is checked when the metadata
 		// is converted and we know all module names are correct from the validation performed above.
-		for (String flagModuleRole : ((CustomerImpl) customer).getFlagRoles()) {
+		for (String flagModuleRole : customerImpl.getFlagRoles()) {
 			String[] moduleAndRoleName = flagModuleRole.split("\\.");
 			String moduleName = moduleAndRoleName[0];
 			Module module = getModule(customer, moduleName);
@@ -264,7 +266,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		// Validate switch mode roles point to valid module roles
 		// NB We don't need to check the module name of the role as this is checked when the metadata
 		// is converted and we know all module names are correct from the validation performed above.
-		for (String switchModeModuleRole : ((CustomerImpl) customer).getSwitchModeRoles()) {
+		for (String switchModeModuleRole : customerImpl.getSwitchModeRoles()) {
 			String[] moduleAndRoleName = switchModeModuleRole.split("\\.");
 			String moduleName = moduleAndRoleName[0];
 			Module module = getModule(customer, moduleName);
