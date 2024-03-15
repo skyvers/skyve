@@ -1,5 +1,6 @@
 package modules.test.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -22,6 +23,7 @@ import org.skyve.persistence.Persistence;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public class Hierarchical extends AbstractPersistentBean implements HierarchicalBean<Hierarchical> {
 	/**
 	 * For Serialization

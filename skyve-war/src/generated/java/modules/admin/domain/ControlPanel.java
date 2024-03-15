@@ -1,5 +1,6 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -33,6 +34,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -158,6 +160,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * User Agent Type
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum SailUserAgentType implements Enumeration {
 		desktop("desktop", "Desktop"),
 		tablet("tablet", "Tablet"),
@@ -231,6 +234,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum SailTestStrategy implements Enumeration {
 		Assert("Assert", "Assert"),
 		Verify("Verify", "Verify"),
@@ -301,6 +305,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * Executor
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum SailExecutor implements Enumeration {
 		primeFacesInlineSelenese("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor", "PrimeFaces Inline Selenese"),
 		primeFacesInlineWebDriver("org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor", "PrimeFaces Inline Web Driver");

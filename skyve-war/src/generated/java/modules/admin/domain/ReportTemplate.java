@@ -1,5 +1,6 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -45,6 +46,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public abstract class ReportTemplate extends AbstractPersistentBean implements org.skyve.domain.app.admin.ReportTemplate {
 	/**
 	 * For Serialization
@@ -382,6 +384,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * Which template engine is being used to create this report?
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum ReportType implements Enumeration {
 		jasper("Jasper", "Jasper"),
 		freemarker("Freemarker", "Freemarker");
@@ -453,6 +456,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * What is the output format for this report?
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum OutputFormat implements Enumeration {
 		CSV("CSV", "CSV"),
 		PDF("PDF", "PDF");
@@ -524,6 +528,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * The query mode of the Jasper report
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum Mode implements Enumeration {
 		SQL("sql", "SQL"),
 		bean("bean", "Bean");
@@ -599,6 +604,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 					</ul>
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum WizardState implements Enumeration {
 		enterDetails("enterDetails", "enterDetails"),
 		enterMarkup("enterMarkup", "enterMarkup");
@@ -671,6 +677,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 				markup to enter directly?
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum GenerateExisting implements Enumeration {
 		generate("Generate", "Generate"),
 		existing("Existing", "Existing");

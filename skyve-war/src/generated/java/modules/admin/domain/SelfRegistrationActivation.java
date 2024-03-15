@@ -1,5 +1,6 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -26,6 +27,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -67,6 +69,7 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	 * Activation Result
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum Result implements Enumeration {
 		SUCCESS("SUCCESS", "SUCCESS"),
 		ALREADYACTIVATED("ALREADY_ACTIVATED", "ALREADY_ACTIVATED"),
