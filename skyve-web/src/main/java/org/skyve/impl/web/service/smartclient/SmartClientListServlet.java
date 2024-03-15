@@ -48,6 +48,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -356,17 +357,14 @@ public class SmartClientListServlet extends HttpServlet {
 				    			throw new SecurityException("flag this data", user.getName());
 				    			
 				    		}
-				    		if (drivingDocument.getPersistent() == null) {
+				    		
+				    		Persistent documentPersistence = drivingDocument.getPersistent();
+				    		if (documentPersistence == null || documentPersistence.getPersistentIdentifier() == null) {
 				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
 				    		}
 				    		
-				    		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-				    		bean = persistence.retrieve(drivingDocument, bizId);
-				    		
-				    		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
-				    		upsertFlag(drivingDocument, bean, bizFlagComment);			    		
-							
-				    		pw.append(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)));
+				    		flag(request, pw, persistence, user, customer, module,
+				    				drivingDocument, model, parameters, bizFlagComment);
 						}
 						else {
 							if (! user.canUpdateDocument(drivingDocument)) {
@@ -1628,6 +1626,18 @@ public class SmartClientListServlet extends HttpServlet {
 											false));
 	}
 
+	private static void flag(HttpServletRequest request, PrintWriter pw, AbstractPersistence persistence, User user,
+			Customer customer, Module module, Document drivingDocument, ListModel<Bean> model,
+			SortedMap<String, Object> parameters, String bizFlagComment) throws Exception {
+		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
+		Bean bean = persistence.retrieve(drivingDocument, bizId);
+		
+		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
+		upsertFlag(drivingDocument, bean, bizFlagComment);			    		
+		
+		pw.append(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)));
+	}
+	
 	private static String returnUpdatedMessage(User user,
 												Customer customer,
 												Module module,
@@ -1703,7 +1713,7 @@ public class SmartClientListServlet extends HttpServlet {
 		pw.append("{\"response\":{\"status\":0}}");
 	}
 	
-	public static void upsertFlag(Document drivingDocument, Bean bean, String flag) {
+	private static void upsertFlag(Document drivingDocument, Bean bean, String flag) {
 		StringBuilder sql = new StringBuilder(64);
 		sql.append("update ").append(drivingDocument.getPersistent()
 				.getPersistentIdentifier()).append(" set ").append(PersistentBean.FLAG_COMMENT_NAME)
@@ -1714,7 +1724,7 @@ public class SmartClientListServlet extends HttpServlet {
 				.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).execute();
 	}
 	
-	public static boolean isRowTagged(HttpServletRequest request) {
+	private static boolean isRowTagged(HttpServletRequest request) {
 		boolean rowIsTagged = false;
 		String oldValuesJSON = request.getParameter(OLD_VALUES);
 		if (oldValuesJSON != null) {
