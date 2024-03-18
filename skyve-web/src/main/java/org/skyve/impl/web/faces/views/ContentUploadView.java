@@ -7,11 +7,14 @@ import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
@@ -144,7 +147,30 @@ public class ContentUploadView extends AbstractUploadView {
 				throw new IllegalStateException("bean is null");
 			}
 			
-			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));
+			User user = persistence.getUser();
+			String username = user.getName();
+			Document document = bean.getDocumentMetaData();
+			if (! user.canAccessDocument(document)) {
+				throw new SecurityException("view this document", username);
+			}
+			if (document.isPersistable() && bean.isNotPersisted() && ! user.canCreateDocument(document)) {
+				throw new SecurityException("create this document", username);
+			}
+			if (document.isPersistable() && bean.isPersisted() && ! user.canUpdateDocument(document)) {
+				throw new SecurityException("update this document", username);
+			}
+			
+			String bizId = bean.getBizId();
+			String bizModule = bean.getBizModule();
+			String bizDocument = bean.getBizDocument();
+			String bizCustomer = bean.getBizCustomer();
+			String bizDataGroupId = bean.getBizDataGroupId();
+			String bizUserId = bean.getBizUserId();
+			if (! user.canAccessContent(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId, contentBinding)) {
+				throw new SecurityException("upload this content", username);
+			}
+			
+			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));		
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing

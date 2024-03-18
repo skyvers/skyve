@@ -31,6 +31,9 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
@@ -358,9 +361,42 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitContentImage(org.skyve.impl.metadata.view.widget.bound.input.ContentImage image, boolean parentVisible, boolean parentEnabled) {
-				
+			public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = image.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
 			
+			@Override
+			public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = link.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
+			public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = signature.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
 			}
 			
 			@Override

@@ -48,7 +48,6 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -358,8 +357,7 @@ public class SmartClientListServlet extends HttpServlet {
 				    			
 				    		}
 				    		
-				    		Persistent documentPersistence = drivingDocument.getPersistent();
-				    		if (documentPersistence == null || documentPersistence.getPersistentIdentifier() == null) {
+				    		if (drivingDocument.isPersistable()) {
 				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
 				    		}
 				    		

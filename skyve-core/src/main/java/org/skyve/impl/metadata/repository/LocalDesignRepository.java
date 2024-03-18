@@ -234,49 +234,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 		
 		// Validate text search roles point to valid module roles
-		// NB We don't need to check the module name of the role as this is checked when the metadata
-		// is converted and we know all module names are correct from the validation performed above.
-		for (String textSearchModuleRole : customerImpl.getTextSearchRoles()) {
-			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
-			String moduleName = moduleAndRoleName[0];
-			Module module = getModule(customer, moduleName);
-			String roleName = moduleAndRoleName[1];
-			if (module.getRole(roleName) == null) {
-				throw new MetaDataException("Module role " + roleName + 
-						" for module " + moduleName +
-						" does not reference a valid module role");
-			}
-		}
+		validateFeatureRoles(customer, customerImpl.getTextSearchRoles());
 		
 		// Validate flag roles point to valid module roles
-		// NB We don't need to check the module name of the role as this is checked when the metadata
-		// is converted and we know all module names are correct from the validation performed above.
-		for (String flagModuleRole : customerImpl.getFlagRoles()) {
-			String[] moduleAndRoleName = flagModuleRole.split("\\.");
-			String moduleName = moduleAndRoleName[0];
-			Module module = getModule(customer, moduleName);
-			String roleName = moduleAndRoleName[1];
-			if (module.getRole(roleName) == null) {
-				throw new MetaDataException("Module role " + roleName + 
-						" for module " + moduleName +
-						" does not reference a valid module role");
-			}
-		}
+		validateFeatureRoles(customer, customerImpl.getFlagRoles());
 		
 		// Validate switch mode roles point to valid module roles
-		// NB We don't need to check the module name of the role as this is checked when the metadata
-		// is converted and we know all module names are correct from the validation performed above.
-		for (String switchModeModuleRole : customerImpl.getSwitchModeRoles()) {
-			String[] moduleAndRoleName = switchModeModuleRole.split("\\.");
-			String moduleName = moduleAndRoleName[0];
-			Module module = getModule(customer, moduleName);
-			String roleName = moduleAndRoleName[1];
-			if (module.getRole(roleName) == null) {
-				throw new MetaDataException("Module role " + roleName + 
-						" for module " + moduleName +
-						" does not reference a valid module role");
-			}
-		}
+		validateFeatureRoles(customer, customerImpl.getSwitchModeRoles());
 		
 		// TODO check the converter type corresponds to the type required.
 	}
@@ -838,6 +802,29 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" is not a valid binding.", e);
 					}
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Validates feature roles point to valid module roles.
+	 * 
+	 * We don't need to check the module name of the role as this is checked when the metadata 
+	 * is converted and we know all module names are correct from the validation performed prior.
+	 * 
+	 * @param customer
+	 * @param featureRoles
+	 */
+	private void validateFeatureRoles(Customer customer, Set<String> featureRoles) {
+		for (String textSearchModuleRole : featureRoles) {
+			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
+			String moduleName = moduleAndRoleName[0];
+			Module module = getModule(customer, moduleName);
+			String roleName = moduleAndRoleName[1];
+			if (module.getRole(roleName) == null) {
+				throw new MetaDataException("Module role " + roleName + 
+						" for module " + moduleName +
+						" does not reference a valid module role");
 			}
 		}
 	}
