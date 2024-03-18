@@ -16,12 +16,12 @@ export default {
             totalRecords: 0,
             filters: {},
             firstRow: 0,
-            pageSize: 5,
+            pageSize: 25,
 
             sortColumn: '',
-            sortOrder: '',
+            sortOrder: 0,
 
-            selectedColumns: null
+            selectedColumns: null,
         };
     },
     computed: {
@@ -38,14 +38,34 @@ export default {
             return this.columns.filter(col => shownColumns.includes(col.field));
         },
         fetchUrl() {
-            let url = `../smartlist?_operationType=fetch&_dataSource=${this.module}_${this.query}&_startRow=${this.firstRow}&_endRow=${this.endRow}`;
+
+            const paramMap = new Map();
+            paramMap.set('_operationType', 'fetch');
+            paramMap.set('_dataSource', `${this.module}_${this.query}`);
+            paramMap.set('_startRow', this.firstRow);
+            paramMap.set('_endRow', this.endRow);
 
             // If sortColumn is provided append it to the URL
             if ((this.sortColumn ?? '').trim() != '') {
-                url += `&_sortBy=${this.sortOrder}${this.sortColumn}`;
+                const sortPrefix = this.sortOrder == 1 ? '' : '-';
+                paramMap.set('_sortBy', sortPrefix + this.sortColumn);
             }
 
-            return url;
+            // TODO filter stuff
+            if (false) {
+                const filter = { "fieldName": "text", "operator": "iContains", "value": "66" };
+                const filterStr = encodeURIComponent(JSON.stringify(filter));
+                paramMap.set('criteria', filterStr);
+                paramMap.set('_constructor', 'AdvancedCriteria');
+                paramMap.set('operator', 'and');
+            }
+
+            let url = '../smartlist?';
+            const params = Array.from(paramMap)
+                .map(entry => `${entry[0]}=${entry[1]}`)
+                .join('&');
+
+            return url + params;
         }
     },
     methods: {
@@ -58,17 +78,19 @@ export default {
             this.value = payload.response.data;
             this.loading = false;
         },
-        onPage(event) {
+        stateRestore(event) {
+            // Triggered when the primevue datatable restores its own state
+            // copy out the props 
             this.firstRow = event.first;
-        },
-        onSortField(sortColumn) {
-            this.sortColumn = sortColumn;
-        },
-        onSortOrder(sortOrder) {
-            this.sortOrder = sortOrder == 1 ? '' : '-';;
+            this.pageSize = event.rows;
+            this.sortColumn = event.sortField;
+            this.sortOrder = event.sortOrder;
+            this.filters = event.filters;
         }
     },
     mounted() {
+        // FIXME Getting two loads when mounting sometimes if the 
+        // fetchUrl changes as a result of restoring its state
         this.load();
 
         // Create a default entry in 'filters' for each column
@@ -87,10 +109,29 @@ export default {
 }
 </script>
 <template>
-    <DataTable :lazy="true" dataKey="bizId" :value="value" :loading="loading" :totalRecords="totalRecords"
-        :paginator="true" :rows="pageSize" @page="onPage" v-model:filters="filters" filterDisplay="menu"
-        :reorderableColumns="true" :resizableColumns="true" stateStorage="session" :stateKey="query"
-        @update:sortField="onSortField" @update:sortOrder="onSortOrder">
+    <a :href="fetchUrl">{{fetchUrl}}</a>
+    <div>filters='{{ filters }}'</div>
+    <DataTable 
+        :lazy="true" 
+        dataKey="bizId" 
+        :value="value" 
+        :loading="loading" 
+        :totalRecords="totalRecords"
+        :paginator="true" 
+        filterDisplay="menu"
+        :reorderableColumns="true" 
+        :resizableColumns="true" 
+        stateStorage="session" 
+        :stateKey="query"
+        v-model:first="firstRow" 
+        v-model:rows="pageSize" 
+        :rowsPerPageOptions="[5, 25, 50, 75, 100]"
+        v-model:filters="filters" 
+        v-model:sortField="sortColumn" 
+        v-model:sortOrder="sortOrder"
+
+        @state-restore="stateRestore"
+    >
         <template #header>
             <div v-if="title">
                 {{ title }}
