@@ -111,20 +111,12 @@ public class FacesView extends HarnessView {
 	// model name for aggregate views (list, tree, map & calendar) - ie m=admin&d=DataMaintenance&q=ContentModel
 	// parameter q becomes the model name; this is not a parameter
 	private String modelName;
-	
-	// called in view.xhtml, evaluating switch mode permissions
-	@SuppressWarnings("unused")
-	private boolean canSwitchMode;
 
 	public String getModelName() {
 		return modelName;
 	}
 	public void setModelName(String modelName) {
 		this.modelName = modelName;
-	}
-	
-	public boolean isCanSwitchMode() {
-		return canSwitchMode();
 	}
 	
 	// This parameter is used on GET requests to render a zoomed in view corresponding to the binding.

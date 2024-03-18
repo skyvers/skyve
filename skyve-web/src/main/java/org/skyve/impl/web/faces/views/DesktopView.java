@@ -174,11 +174,11 @@ public class DesktopView extends HarnessView {
 		result.append("<img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
     	
-    	if (canSwitchMode()) {
+    	if (isCanSwitchMode()) {
     		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:void(setUxUi());\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"");
     		result.append(Icons.FONT_SWITCH).append(" fa-2x \"></i></a></td>");
     	}
-		if (canTextSearch()) {
+		if (isCanTextSearch()) {
 			result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"");
 			result.append(Icons.FONT_SEARCH).append(" fa-2x\"></i></a></td>");
 		}

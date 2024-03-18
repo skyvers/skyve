@@ -263,11 +263,11 @@ public abstract class HarnessView extends LocalisableView {
 		persistence.setUser(user);
 	}
 	
-	public boolean canTextSearch() {
+	public boolean isCanTextSearch() {
 		return getUser().canTextSearch();
 	}
 	
-	public boolean canSwitchMode() {
+	public boolean isCanSwitchMode() {
 		return getUser().canSwitchMode();
 	}
 	
@@ -276,7 +276,7 @@ public abstract class HarnessView extends LocalisableView {
 	 * @param uxui	The UX/UI name.
 	 */
 	public void setUxUi(String uxui) {
-		if (! canSwitchMode()) {
+		if (! isCanSwitchMode()) {
 			throw new SecurityException("switch modes", getUser().getName());
 		}
 		

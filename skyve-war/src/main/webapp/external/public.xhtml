@@ -21,7 +21,7 @@
 			<ui:param name="bean" value="#{skyvePublic}" />
 			<ui:param name="showMenu" value="false" />
 			<ui:param name="resetMenu" value="false" />
-			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
+			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.isCanSwitchMode()}" />
 			<ui:param name="showLogout" value="false" />
 			<ui:define name="body">
 				<s:conversation managedBean="skyvePublic" />

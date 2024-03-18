@@ -329,100 +329,19 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		// Populate Text Search Roles
 		if (textSearchRoles != null) {
 			Set<String> textSearchModuleRoles = result.getTextSearchRoles();
-			for (CustomerFeatureRoleMetaData textSearchRole : textSearchRoles) {
-				String textSearchRoleName = textSearchRole.getName();
-				if (textSearchRoleName == null) {
-					throw new MetaDataException(metaDataName + " : The [name] for a text search role is required");
-				}
-				String moduleName = textSearchRole.getModuleName();
-				if (moduleName == null) {
-					Optional<CustomerRoleMetaData> customerRole = roles.getRoles().stream().filter(r -> r.getName().equals(textSearchRoleName)).findAny();
-					if (customerRole.isEmpty()) {
-						throw new MetaDataException(metaDataName + " : The [name] of text search role " + textSearchRoleName +
-								" is not a valid customer role");
-					}
-					CustomerRoleMetaData role = customerRole.get();
-					for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
-						moduleName = moduleRole.getModuleName();
-						value = moduleRole.getName();
-						textSearchModuleRoles.add(moduleName + "." + value);
-					}
-				}
-				else {
-					if (! moduleEntries.containsKey(moduleName)) {
-						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
-					}
-					if (! textSearchModuleRoles.add(moduleName + "." + textSearchRoleName)) {
-						throw new MetaDataException(metaDataName + " : Duplicate role " + textSearchRoleName);
-					}
-				}
-			}
+			populateFeatureRoles(textSearchRoles, textSearchModuleRoles, metaDataName, roles, moduleEntries);
 		}		
 		
 		// Populate Flag Roles
 		if (flagRoles != null) {
 			Set<String> flagModuleRoles = result.getFlagRoles();
-			for (CustomerFeatureRoleMetaData flagRole : flagRoles) {
-				String flagRoleName = flagRole.getName();
-				if (flagRoleName == null) {
-					throw new MetaDataException(metaDataName + " : The [name] for a flag role is required");
-				}
-				String moduleName = flagRole.getModuleName();
-				if (moduleName == null) {
-					Optional<CustomerRoleMetaData> customerRole = roles.getRoles().stream().filter(r -> r.getName().equals(flagRoleName)).findAny();
-					if (customerRole.isEmpty()) {
-						throw new MetaDataException(metaDataName + " : The [name] of flag role " + flagRoleName +
-								" is not a valid customer role");
-					}
-					CustomerRoleMetaData role = customerRole.get();
-					for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
-						moduleName = moduleRole.getModuleName();
-						value = moduleRole.getName();
-						flagModuleRoles.add(moduleName + "." + value);
-					}
-				}
-				else {
-					if (! moduleEntries.containsKey(moduleName)) {
-						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
-					}
-					if (! flagModuleRoles.add(moduleName + "." + flagRoleName)) {
-						throw new MetaDataException(metaDataName + " : Duplicate role " + flagRoleName);
-					}
-				}
-			}
+			populateFeatureRoles(flagRoles, flagModuleRoles, metaDataName, roles, moduleEntries);
 		}
 		
 		// Populate Switch Mode Roles
 		if (switchModeRoles != null) {
 			Set<String> switchModeModuleRoles = result.getSwitchModeRoles();
-			for (CustomerFeatureRoleMetaData switchModeRole : switchModeRoles) {
-				String switchModeRoleName = switchModeRole.getName();
-				if (switchModeRoleName == null) {
-					throw new MetaDataException(metaDataName + " : The [name] for a switch mode role is required");
-				}
-				String moduleName = switchModeRole.getModuleName();
-				if (moduleName == null) {
-					Optional<CustomerRoleMetaData> customerRole = roles.getRoles().stream().filter(r -> r.getName().equals(switchModeRoleName)).findAny();
-					if (customerRole.isEmpty()) {
-						throw new MetaDataException(metaDataName + " : The [name] of switch mode role " + switchModeRoleName +
-								" is not a valid customer role");
-					}
-					CustomerRoleMetaData role = customerRole.get();
-					for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
-						moduleName = moduleRole.getModuleName();
-						value = moduleRole.getName();
-						switchModeModuleRoles.add(moduleName + "." + value);
-					}
-				}
-				else {
-					if (! moduleEntries.containsKey(moduleName)) {
-						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
-					}
-					if (! switchModeModuleRoles.add(moduleName + "." + switchModeRoleName)) {
-						throw new MetaDataException(metaDataName + " : Duplicate role " + switchModeRoleName);
-					}
-				}
-			}
+			populateFeatureRoles(switchModeRoles, switchModeModuleRoles, metaDataName, roles, moduleEntries);
 		}
 		
 		// Populate Interceptors
@@ -459,5 +378,46 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		result.determineDependencies();
 		
 		return result;
+	}
+	
+	/**
+	 * Populates and flattens feature roles to module roles. 
+	 * Feature roles include text search, flag and switch mode.
+	 * 
+	 * @param featureRoles
+	 * @param featureModuleRoles
+	 * @param metaDataName
+	 * @param roles
+	 * @param moduleEntries
+	 */
+	private static void populateFeatureRoles(List<CustomerFeatureRoleMetaData> featureRoles, Set<String> featureModuleRoles,
+			String metaDataName, CustomerRolesMetaData roles, Map<String, FormLabelLayout> moduleEntries) {
+		for (CustomerFeatureRoleMetaData featureRole : featureRoles) {
+			String roleName = featureRole.getName();
+			if (roleName == null) {
+				throw new MetaDataException(metaDataName + " : The [name] for a feature role is required");
+			}
+			String moduleName = featureRole.getModuleName();
+			if (moduleName == null) {
+				Optional<CustomerRoleMetaData> oCustomerRole = roles.getRoles().stream().filter(r -> r.getName().equals(roleName)).findAny();
+				if (oCustomerRole.isEmpty()) {
+					throw new MetaDataException(metaDataName + " : The [name] of feature role " + roleName + " is not a valid customer role");
+				}
+				CustomerRoleMetaData customerRole = oCustomerRole.get();
+				for (CustomerModuleRoleMetaData moduleRole : customerRole.getRoles()) {
+					moduleName = moduleRole.getModuleName();
+					String value = moduleRole.getName();
+					featureModuleRoles.add(moduleName + "." + value);
+				}
+			}
+			else {
+				if (! moduleEntries.containsKey(moduleName)) {
+					throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
+				}
+				if (! featureModuleRoles.add(moduleName + "." + roleName)) {
+					throw new MetaDataException(metaDataName + " : Duplicate role " + roleName);
+				}
+			}
+		}
 	}
 }

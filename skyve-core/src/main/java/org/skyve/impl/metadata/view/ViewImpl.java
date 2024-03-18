@@ -358,6 +358,12 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
+			public void visitContentImage(org.skyve.impl.metadata.view.widget.bound.input.ContentImage image, boolean parentVisible, boolean parentEnabled) {
+				
+			
+			}
+			
+			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 				String modelName = chart.getModelName();
 
