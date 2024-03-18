@@ -52,13 +52,18 @@ class AccessProcessor {
 		for (Entry<String, Menu> entry : moduleMenuMap.entrySet()) {
 			final Menu menu = entry.getValue();
 			final List<MenuItem> menuItems = menu.getItems();
+
+			final String moduleName = entry.getKey();
+			final Module module = customer.getModule(moduleName);
+			
+			// Determine the home URL and fan out from the menu items only if the user has menu access
 			if (! menuItems.isEmpty()) {
-				final String moduleName = entry.getKey();
-				final Module module = customer.getModule(moduleName);
 				processModuleHome(module, moduleName);
 				processMenuItems(menuItems, module, moduleName);
-				processRoles(module, moduleName);
 			}
+
+			// Process the roles in each module so that any role based accesses are added 
+			processRoles(module, moduleName);
 		}
 		processedUxUiViews.clear();
 //for (String a : accesses.keySet()) {

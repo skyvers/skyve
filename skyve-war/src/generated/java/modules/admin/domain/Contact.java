@@ -1,5 +1,6 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -23,6 +24,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public class Contact extends AbstractPersistentBean implements org.skyve.domain.app.admin.Contact {
 	/**
 	 * For Serialization
@@ -57,6 +59,7 @@ public class Contact extends AbstractPersistentBean implements org.skyve.domain.
 	 * Whether this contact is a person or an organisation.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum ContactType implements Enumeration {
 		person("Person", "Person"),
 		organisation("Organisation", "Organisation");

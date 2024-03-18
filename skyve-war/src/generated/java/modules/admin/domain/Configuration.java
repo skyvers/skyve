@@ -1,5 +1,6 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -32,6 +33,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public abstract class Configuration extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -146,6 +148,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 				in a future version of Skyve. Here for backwards compatibility during Restore.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum PasswordComplexityModel implements Enumeration {
 		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
 		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
@@ -219,6 +222,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * The type of two factor authentication to be used for all users.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum TwoFactorType implements Enumeration {
 		off("OFF", "Off"),
 		email("EMAIL", "Email");

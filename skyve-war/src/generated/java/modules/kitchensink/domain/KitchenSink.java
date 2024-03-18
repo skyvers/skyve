@@ -1,5 +1,6 @@
 package modules.kitchensink.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -48,6 +49,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public class KitchenSink extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -152,6 +154,7 @@ public class KitchenSink extends AbstractTransientBean {
 	 * Combo
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum Combo implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),
@@ -222,6 +225,7 @@ public class KitchenSink extends AbstractTransientBean {
 	 * Radio
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum Radio implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),

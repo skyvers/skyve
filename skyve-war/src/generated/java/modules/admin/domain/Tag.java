@@ -1,5 +1,6 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -31,6 +32,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public abstract class Tag extends AbstractPersistentBean implements org.skyve.domain.app.admin.Tag {
 	/**
 	 * For Serialization
@@ -129,6 +131,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 * Operator
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum CombinationsOperator implements Enumeration {
 		union("Union", "Union"),
 		except("Except", "Except"),
@@ -199,6 +202,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 * Filter Operator
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum FilterOperator implements Enumeration {
 		equals("equals", "Equals"),
 		like("like", "Like"),
@@ -269,6 +273,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 * Filter Action
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum FilterAction implements Enumeration {
 		tagRecordsThatMatch("tag", "Tag records that match"),
 		unTagRecordsThatMatch("unTag", "UnTag records that match");

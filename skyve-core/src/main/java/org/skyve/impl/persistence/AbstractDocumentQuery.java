@@ -421,16 +421,15 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		StringBuilder result = new StringBuilder(256);
 
 		result.append("SELECT ").append(distinct ? "DISTINCT " : "");
-		if (projectionClause.length() == 0) {
+		if (projectionClause.isEmpty()) {
 			addThisProjection();
 		}
 		result.append(projectionClause);
 		result.append(" FROM ").append(fromClause);
-		String filterClause = filter.toString();
-		if (filterClause != null) {
-			result.append(" WHERE ").append(filterClause);
+		if (! filter.isEmpty()) {
+			result.append(" WHERE ").append(filter.toString());
 		}
-		if (groupClause.length() > 0) {
+		if (! groupClause.isEmpty()) {
 			result.append(" GROUP BY ").append(groupClause);
 		}
 

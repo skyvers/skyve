@@ -1,5 +1,6 @@
 package modules.test.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -52,6 +53,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public class AllAttributesPersistent extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -138,6 +140,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * Enum 3
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum Enum3 implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),

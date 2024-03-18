@@ -1,5 +1,6 @@
 package modules.whosin.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -31,6 +32,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 public class StaffQualification extends AbstractPersistentBean implements ChildBean<Staff> {
 	/**
 	 * For Serialization
@@ -66,6 +68,7 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 	 * Type
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
 	public static enum Type implements Enumeration {
 		skill("Skill", "Skill"),
 		experience("Experience", "Experience"),
