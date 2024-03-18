@@ -18,6 +18,9 @@ export default {
             firstRow: 0,
             pageSize: 5,
 
+            sortColumn: '',
+            sortOrder: '',
+
             selectedColumns: null
         };
     },
@@ -32,17 +35,23 @@ export default {
             }
 
             const shownColumns = this.selectedColumns.map(sc => sc.field);
-            console.log('shownColumns', shownColumns);
-            const result = this.columns.filter(col => shownColumns.includes(col.field));
+            return this.columns.filter(col => shownColumns.includes(col.field));
+        },
+        fetchUrl() {
+            let url = `../smartlist?_operationType=fetch&_dataSource=${this.module}_${this.query}&_startRow=${this.firstRow}&_endRow=${this.endRow}`;
 
-            return result;
+            // If sortColumn is provided append it to the URL
+            if ((this.sortColumn ?? '').trim() != '') {
+                url += `&_sortBy=${this.sortOrder}${this.sortColumn}`;
+            }
+
+            return url;
         }
     },
     methods: {
         async load() {
             this.loading = true;
-            const url = `../smartlist?_operationType=fetch&_dataSource=${this.module}_${this.query}&_startRow=${this.firstRow}&_endRow=${this.endRow}`;
-            const response = await fetch(url);
+            const response = await fetch(this.fetchUrl);
             let payload = await response.json();
 
             this.totalRecords = payload.response.totalRows;
@@ -51,7 +60,12 @@ export default {
         },
         onPage(event) {
             this.firstRow = event.first;
-            this.load();
+        },
+        onSortField(sortColumn) {
+            this.sortColumn = sortColumn;
+        },
+        onSortOrder(sortOrder) {
+            this.sortOrder = sortOrder == 1 ? '' : '-';;
         }
     },
     mounted() {
@@ -63,13 +77,20 @@ export default {
                 this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] };
             }
         }
+    },
+    watch: {
+        fetchUrl(newUrl, oldUrl) {
+            // Whenever fetchUrl changes call to server
+            this.load();
+        }
     }
 }
 </script>
 <template>
     <DataTable :lazy="true" dataKey="bizId" :value="value" :loading="loading" :totalRecords="totalRecords"
-        :paginator="true" :rows="pageSize" @page="onPage($event)" v-model:filters="filters" filterDisplay="menu"
-        :reorderableColumns="true" :resizableColumns="true" stateStorage="session" :stateKey="query">
+        :paginator="true" :rows="pageSize" @page="onPage" v-model:filters="filters" filterDisplay="menu"
+        :reorderableColumns="true" :resizableColumns="true" stateStorage="session" :stateKey="query"
+        @update:sortField="onSortField" @update:sortOrder="onSortOrder">
         <template #header>
             <div v-if="title">
                 {{ title }}
