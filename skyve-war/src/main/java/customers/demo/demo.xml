@@ -11,9 +11,6 @@
 		<module name="whosin" />
 		<module name="kitchensink" />
 	</modules>
-	<switchModeRoles>
-		<role module="admin" name="AppUser" />
-	</switchModeRoles>
 	<interceptors>
 		<interceptor className="modules.admin.RDBMSAuditInterceptor" />
 	</interceptors>
