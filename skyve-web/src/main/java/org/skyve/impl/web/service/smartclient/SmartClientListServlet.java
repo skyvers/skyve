@@ -1713,8 +1713,9 @@ public class SmartClientListServlet extends HttpServlet {
 	
 	private static void upsertFlag(Document drivingDocument, Bean bean, String flag) {
 		StringBuilder sql = new StringBuilder(64);
-		sql.append("update ").append(drivingDocument.getPersistent()
-				.getPersistentIdentifier()).append(" set ").append(PersistentBean.FLAG_COMMENT_NAME)
+		@SuppressWarnings("null")
+		String persistentIdentifier = drivingDocument.getPersistent().getPersistentIdentifier();
+		sql.append("update ").append(persistentIdentifier).append(" set ").append(PersistentBean.FLAG_COMMENT_NAME)
 				.append("= :").append(PersistentBean.FLAG_COMMENT_NAME).append(" where ").append(Bean.DOCUMENT_ID)
 				.append("= :").append(Bean.DOCUMENT_ID);
 		CORE.getPersistence().newSQL(sql.toString())

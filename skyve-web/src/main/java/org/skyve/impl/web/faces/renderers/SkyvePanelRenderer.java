@@ -16,6 +16,7 @@ public class SkyvePanelRenderer extends PanelRenderer {
 	 * Set the collapsed state from the session attribute (if set) and then call super.
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public void encodeBegin(FacesContext context, UIComponent component) throws IOException {
 		UIViewRoot uiViewRoot = context.getViewRoot();
 		if (uiViewRoot != null) {
