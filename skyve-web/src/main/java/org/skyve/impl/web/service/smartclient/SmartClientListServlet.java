@@ -357,7 +357,7 @@ public class SmartClientListServlet extends HttpServlet {
 				    			
 				    		}
 				    		
-				    		if (drivingDocument.isPersistable()) {
+				    		if (! drivingDocument.isPersistable()) {
 				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
 				    		}
 				    		
