@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
@@ -250,7 +251,7 @@ public class CustomerResourceServlet extends HttpServlet {
 				else {
 					throw new IllegalStateException("Unsupported resource area " + resourceArea);
 				}
-				CustomerResourceServlet.this.secure(this, moduleName, documentName, binding, resourceFileName, user);
+				CustomerResourceServlet.this.secure(this, moduleName, documentName, binding, resourceFileName, user, UserAgent.getUxUi(request).getName());
 			}
 		}
 	}
@@ -378,6 +379,7 @@ public class CustomerResourceServlet extends HttpServlet {
 	 * @param resourceFileName	The file/content identifier - never null.
 	 * @param user	The logged in user or null if not logged in
 	 * @param intendedCustomerName	The customer name from a customer cookie (if no principal).
+	 * @param uxui UxUi For access checking
 	 * @throws SecurityException
 	 */
 	@SuppressWarnings({"static-method"})
@@ -386,7 +388,8 @@ public class CustomerResourceServlet extends HttpServlet {
 							String documentName, 
 							String binding, 
 							String resourceFileName,
-							User user)
+							User user,
+							String uxui)
 	throws SecurityException {
 		// Content can only be accessed if we have an authenticated user that has access
 		if (resource.isContent()) {
@@ -413,16 +416,21 @@ public class CustomerResourceServlet extends HttpServlet {
 			// Check that the user has access
 			// NB If you can text search you should already be able to see anything you have access to
 			if (! user.canTextSearch()) {
-				AttachmentContent content = resource.getContent();
-				if (! user.canAccessContent(content.getBizId(),
-												content.getBizModule(),
-												content.getBizDocument(),
-												content.getBizCustomer(),
-												content.getBizDataGroupId(),
-												content.getBizUserId(),
-												attribute.getName())) {
+				if (! user.canAccess(UserAccess.content(moduleName, documentName, binding), uxui)) {
 					throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
 				}
+			}
+			
+			// Check that user has content access
+			AttachmentContent content = resource.getContent();
+			if (! user.canAccessContent(content.getBizId(),
+											content.getBizModule(),
+											content.getBizDocument(),
+											content.getBizCustomer(),
+											content.getBizDataGroupId(),
+											content.getBizUserId(),
+											attribute.getName())) {
+				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
 			}
 		}
 	}
