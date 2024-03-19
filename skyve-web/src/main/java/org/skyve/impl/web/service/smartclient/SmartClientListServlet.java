@@ -354,10 +354,9 @@ public class SmartClientListServlet extends HttpServlet {
 				    		}
 				    		if (! user.canFlag()) {
 				    			throw new SecurityException("flag this data", user.getName());
-				    			
 				    		}
 				    		
-				    		if (drivingDocument.isPersistable()) {
+				    		if (! drivingDocument.isPersistable()) {
 				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
 				    		}
 				    		
