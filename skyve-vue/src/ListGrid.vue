@@ -37,41 +37,77 @@ export default {
             const shownColumns = this.selectedColumns.map(sc => sc.field);
             return this.columns.filter(col => shownColumns.includes(col.field));
         },
-        fetchUrl() {
+        fetchFormData() {
 
-            const paramMap = new Map();
-            paramMap.set('_operationType', 'fetch');
-            paramMap.set('_dataSource', `${this.module}_${this.query}`);
-            paramMap.set('_startRow', this.firstRow);
-            paramMap.set('_endRow', this.endRow);
+            const fd = new FormData();
+            fd.append('_operationType', 'fetch');
+            fd.append('_dataSource', `${this.module}_${this.query}`);
+            fd.append('_startRow', this.firstRow);
+            fd.append('_endRow', this.endRow);
 
-            // If sortColumn is provided append it to the URL
+            // Sort column and direction
             if ((this.sortColumn ?? '').trim() != '') {
                 const sortPrefix = this.sortOrder == 1 ? '' : '-';
-                paramMap.set('_sortBy', sortPrefix + this.sortColumn);
+                fd.append('_sortBy', sortPrefix + this.sortColumn);
             }
 
-            // TODO filter stuff
-            if (false) {
-                const filter = { "fieldName": "text", "operator": "iContains", "value": "66" };
-                const filterStr = encodeURIComponent(JSON.stringify(filter));
-                paramMap.set('criteria', filterStr);
-                paramMap.set('_constructor', 'AdvancedCriteria');
-                paramMap.set('operator', 'and');
+            if (this.skyveCriteria.length > 0) {
+                fd.append('_constructor', 'AdvancedCriteria');
+                fd.append('operator', 'and');
+
+                for (let crit of this.skyveCriteria) {
+                    fd.append('criteria', JSON.stringify(crit));
+                }
             }
 
-            let url = '../smartlist?';
-            const params = Array.from(paramMap)
-                .map(entry => `${entry[0]}=${entry[1]}`)
-                .join('&');
+            // FIXME remove this
+            console.table([...fd.entries()]);
+            console.debug(fd);
 
-            return url + params;
+            return fd;
+        },
+        skyveCriteria() {
+            // Convert from the datatables 'filter' object
+            // to something we can send to Skyve
+
+            let criteria = [];
+
+            for (let columnFilter of Object.entries(this.filters)) {
+
+                const colName = columnFilter[0];
+                const { operator, constraints } = columnFilter[1];
+
+                // Ignore contstraints with value == null
+                const nonNullConstraints = constraints.filter(con => con.value != null);
+
+                // TODO multiple constraints for one column
+                if (nonNullConstraints.length > 0) {
+                    const x = nonNullConstraints[0];
+                    const crit = {
+                        'fieldName': colName,
+                        'value': x.value,
+                        'operator': 'iContains' // TODO map operators properly
+                    };
+
+                    criteria.push(crit);
+                }
+            }
+
+            return criteria;
         }
     },
     methods: {
         async load() {
             this.loading = true;
-            const response = await fetch(this.fetchUrl);
+
+            const listRequest = new Request('../smartlist', {
+                method: 'POST',
+                body: new URLSearchParams(this.fetchFormData),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                }
+            });
+            const response = await fetch(listRequest);
             let payload = await response.json();
 
             this.totalRecords = payload.response.totalRows;
@@ -86,6 +122,17 @@ export default {
             this.sortColumn = event.sortField;
             this.sortOrder = event.sortOrder;
             this.filters = event.filters;
+        },
+        initFilters() {
+
+            this.filters ??= {};
+
+            // Create a default entry in 'filters' for each column
+            for (let col of this.columns) {
+                if (col.filterable && !this.filters[col.field]) {
+                    this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] };
+                }
+            }
         }
     },
     mounted() {
@@ -93,43 +140,36 @@ export default {
         // fetchUrl changes as a result of restoring its state
         this.load();
 
-        // Create a default entry in 'filters' for each column
-        for (let col of this.columns) {
-            if (col.filterable && !this.filters[col.field]) {
-                this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] };
-            }
-        }
+        this.initFilters();
     },
     watch: {
-        fetchUrl(newUrl, oldUrl) {
-            // Whenever fetchUrl changes call to server
+        fetchFormData(newUrl, oldUrl) {
+            // Whenever fetchFormData changes call to server
             this.load();
         }
     }
 }
 </script>
 <template>
-    <a :href="fetchUrl">{{fetchUrl}}</a>
-    <div>filters='{{ filters }}'</div>
+    <div>skyveFilters='{{ filters }}'</div>
     <DataTable 
-        :lazy="true" 
         dataKey="bizId" 
+        filterDisplay="menu" 
+        stateStorage="session" 
+        :rowsPerPageOptions="[5, 25, 50, 75, 100]"
+        :lazy="true" 
         :value="value" 
         :loading="loading" 
-        :totalRecords="totalRecords"
-        :paginator="true" 
-        filterDisplay="menu"
+        :totalRecords="totalRecords" 
+        :paginator="true"
         :reorderableColumns="true" 
         :resizableColumns="true" 
-        stateStorage="session" 
-        :stateKey="query"
-        v-model:first="firstRow" 
+        :stateKey="query" 
+        v-model:first="firstRow"
         v-model:rows="pageSize" 
-        :rowsPerPageOptions="[5, 25, 50, 75, 100]"
         v-model:filters="filters" 
         v-model:sortField="sortColumn" 
         v-model:sortOrder="sortOrder"
-
         @state-restore="stateRestore"
     >
         <template #header>
