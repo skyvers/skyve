@@ -354,7 +354,6 @@ public class SmartClientListServlet extends HttpServlet {
 				    		}
 				    		if (! user.canFlag()) {
 				    			throw new SecurityException("flag this data", user.getName());
-				    			
 				    		}
 				    		
 				    		if (! drivingDocument.isPersistable()) {

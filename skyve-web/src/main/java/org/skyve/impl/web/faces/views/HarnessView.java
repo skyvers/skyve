@@ -214,7 +214,7 @@ public abstract class HarnessView extends LocalisableView {
 		sb.setLength(0);
 		sb.append("var u=SKYVE.Util;u.setTouchCookie();u.customer='").append(customer.getName()).append("';");
 		sb.append("u.v='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
-		sb.append("u.canFlag=").append(getUser().canFlag()).append(";");
+		sb.append("u.canFlag=").append(user.canFlag()).append(";");
 		if (UtilImpl.GOOGLE_MAPS_V3_API_KEY == null) {
 			sb.append("u.googleMapsV3ApiKey=null;");
 		}
