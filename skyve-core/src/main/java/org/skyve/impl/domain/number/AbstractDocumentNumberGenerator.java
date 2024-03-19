@@ -36,21 +36,14 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 
 		DocumentNumber dN = null;
 		try {
-			DocumentQuery qN = pers.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.DOCUMENT_NUMBER_DOCUMENT_NAME);
-			qN.getFilter().addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
-			qN.getFilter().addEquals(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, documentName);
-			qN.getFilter().addEquals(AppConstants.SEQUENCE_NAME_ATTRIBUTE_NAME, fieldName);
-
 			// temporarily escalate access to the Document Number sequences
-			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			// bean or the interface
-			List<DocumentNumber> num = null;
-			try {
-				num = qN.beanResults();
-			}
-			finally {
-				pers.resetDocumentPermissionScopes();
-			}
+			List<DocumentNumber> num = pers.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+				DocumentQuery qN = pers.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.DOCUMENT_NUMBER_DOCUMENT_NAME);
+				qN.getFilter().addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
+				qN.getFilter().addEquals(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, documentName);
+				qN.getFilter().addEquals(AppConstants.SEQUENCE_NAME_ATTRIBUTE_NAME, fieldName);
+				return qN.beanResults();
+			});
 
 			if (num.isEmpty()) {
 				// Check if sequence name is a field in that table

@@ -153,11 +153,18 @@ public class ContentUploadView extends AbstractUploadView {
 			if (! user.canAccessDocument(document)) {
 				throw new SecurityException("view this document", username);
 			}
-			if (document.isPersistable() && bean.isNotPersisted() && ! user.canCreateDocument(document)) {
-				throw new SecurityException("create this document", username);
-			}
-			if (document.isPersistable() && bean.isPersisted() && ! user.canUpdateDocument(document)) {
-				throw new SecurityException("update this document", username);
+			
+			if (document.isPersistable()) {
+				if (bean.isPersisted()) {
+					if (! user.canUpdateDocument(document)) {
+						throw new SecurityException("update this document", username);
+					}
+				}
+				else {
+					if (! user.canCreateDocument(document)) {
+						throw new SecurityException("create this document", username);
+					}
+				}
 			}
 			
 			String bizId = bean.getBizId();

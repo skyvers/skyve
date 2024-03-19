@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.views;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,9 +64,18 @@ public class AbstractUploadTest {
 	@Mock
 	private FacesContext fc;
 
+	private AutoCloseable mocks;
+	
 	@Before
 	public void before() throws Exception {
-		MockitoAnnotations.initMocks(this);
+		mocks = MockitoAnnotations.openMocks(this);
+	}
+	
+	@After
+	public void after() throws Exception {
+		if (mocks != null) {
+			mocks.close();
+		}
 	}
 	
 	@Test
