@@ -163,20 +163,17 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	 * @param communicationId
 	 * @return
 	 */
-	public static boolean anonymouslyCommunicationExists(Persistence p, String bizCustomer, String communicationId) {
-		try {
-			// temporarily elevate user to be able to see Communication records in case they don't usually have access
-			p.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-
+	@SuppressWarnings("boxing")
+	public static boolean anonymouslyCommunicationExists(Persistence persistence, String bizCustomer, String communicationId) {
+		// temporarily elevate user to be able to see Communication records in case they don't usually have access
+		return persistence.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery q = p.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 			q.addBoundProjection(Bean.DOCUMENT_ID);
 			DocumentFilter f = q.getFilter();
 			f.addEquals(Bean.CUSTOMER_NAME, bizCustomer);
 			f.addEquals(Bean.DOCUMENT_ID, communicationId);
 			return q.scalarResult(String.class) != null;
-		} finally {
-			p.resetDocumentPermissionScopes();
-		}
+		});
 	}
 
 	public static Communication setLinks(Communication communication) {

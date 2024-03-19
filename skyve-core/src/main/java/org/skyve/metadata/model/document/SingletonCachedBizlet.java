@@ -5,8 +5,11 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * A Thread-safe cached singleton Bizlet implementation that memoises the bizId from the super.newInstance() call
@@ -25,6 +28,10 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	 */
 	@Override
 	public T newInstance(T bean) throws Exception {
+		return monomorphicNewInstance(bean);
+	}
+	
+	private @Nonnull T monomorphicNewInstance(@Nonnull T bean) throws Exception {
 		String bizModule = bean.getBizModule();
 		String bizDocument = bean.getBizDocument();
 		User u = CORE.getUser();
@@ -58,9 +65,28 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	}
 	
 	/**
+	 * Call {@link #newInstance(PersistentBean)} with the given scope.
+	 * @param bean	The bean
+	 * @param scope	The scope
+	 * @return	The singleton bean
+	 * @throws Exception
+	 */
+	@Override
+	public @Nonnull T newInstance(@Nonnull T bean, @Nonnull DocumentPermissionScope scope) throws Exception {
+		return CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
+			try {
+				return monomorphicNewInstance(bean);
+			}
+			catch (Exception e) {
+				throw new DomainException(e);
+			}
+		});
+	}
+
+	/**
 	 * Clear the cached details of the singleton document instance. 
 	 */
-	public static void clear(String moduleName, String documentName) {
+	public static void clear(@Nonnull String moduleName, @Nonnull String documentName) {
 		String key = new StringBuilder(128).append(moduleName).append('.').append(documentName).append(CORE.getCustomer().getName()).append('.').toString();
 		INSTANCES.remove(key);
 		key = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();

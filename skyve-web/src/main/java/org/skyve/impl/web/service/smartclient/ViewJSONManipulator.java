@@ -422,7 +422,6 @@ public class ViewJSONManipulator extends ViewVisitor {
 					// not an attribute
 				}
 				if ((attribute != null) && (attribute.getDomainType() != null)) {
-					@SuppressWarnings("null") // value can't null if it is an instance of boolean or number
 					String newValue = value.toString();
 					value = newValue;
 				}
@@ -678,7 +677,6 @@ public class ViewJSONManipulator extends ViewVisitor {
 																	binding);
 			Attribute attribute = target.getAttribute();
 			if ((attribute instanceof Association) || (attribute instanceof InverseOne)) {
-				@SuppressWarnings("null") // suppress as its either an Association or an InverseOne - WTF
 				String documentName = ((Relation) attribute).getDocumentName();
 				Document relatedDocument = module.getDocument(customer, documentName);
 

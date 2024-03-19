@@ -60,6 +60,7 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 public final class FreemarkerReportUtil {
@@ -345,10 +346,14 @@ public final class FreemarkerReportUtil {
 
 	public static Template getTemplate(final String templateName)
 	throws Exception {
-		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-		Template t = cfg.getTemplate(templateName);
-		CORE.getPersistence().resetDocumentPermissionScopes();
-		return t;
+		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			try {
+				return cfg.getTemplate(templateName);
+			}
+			catch (IOException e) {
+				throw new DomainException(e);
+			}
+		});
 	}
 
 	/**
@@ -437,10 +442,15 @@ public final class FreemarkerReportUtil {
 		Template template = getTemplate(reportName);
 
 		try (StringWriter sw = new StringWriter()) {
-			CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			template.process(root, sw);
-			CORE.getPersistence().resetDocumentPermissionScopes();
-			return sw.toString();
+			return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+				try {
+					template.process(root, sw);
+				}
+				catch (TemplateException | IOException e) {
+					throw new DomainException(e);
+				}
+				return sw.toString();
+			});
 		}
 	}
 
@@ -541,17 +551,16 @@ public final class FreemarkerReportUtil {
 	 * @return The ReportTemplate, if one is found
 	 */
 	private static ReportTemplate retrieveReportTemplate(final String templateName) {
-		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
-		q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, templateName);
-		ReportTemplate template = q.beanResult();
-		CORE.getPersistence().resetDocumentPermissionScopes();
+		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
+			q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, templateName);
+			ReportTemplate template = q.beanResult();
+			if (template == null) {
+				throw new DomainException(String.format("No report template with the name '%s' could be found", templateName));
+			}
 
-		if (template == null) {
-			throw new DomainException(String.format("No report template with the name '%s' could be found", templateName));
-		}
-
-		return template;
+			return template;
+		});
 	}
 
 	@ParametersAreNonnullByDefault

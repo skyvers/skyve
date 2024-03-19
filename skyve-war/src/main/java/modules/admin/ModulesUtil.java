@@ -3,7 +3,6 @@ package modules.admin;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -287,7 +286,7 @@ public class ModulesUtil {
 			}
 
 			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = new GregorianCalendar();
+			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(newDate);
 			calendar.setLenient(false);
 
@@ -331,7 +330,7 @@ public class ModulesUtil {
 	public static DateOnly lastDayOfMonth(DateOnly date) {
 		if (date != null) {
 			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = new GregorianCalendar();
+			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(newDate);
 			calendar.setLenient(false);
 
@@ -364,7 +363,7 @@ public class ModulesUtil {
 	public static DateOnly lastDayOfYear(DateOnly date) {
 		if (date != null) {
 			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = new GregorianCalendar();
+			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(newDate);
 			calendar.setLenient(false);
 
@@ -397,7 +396,7 @@ public class ModulesUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static DateOnly firstDayOfMonth(DateOnly date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -423,7 +422,7 @@ public class ModulesUtil {
 	 * @return - the date of the first day of that year
 	 */
 	public static DateOnly firstDayOfYear(DateOnly date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -451,7 +450,7 @@ public class ModulesUtil {
 	 * @return - the resulting date
 	 */
 	public static DateOnly addDaysDateOnly(DateOnly date, int daysToAdd) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 

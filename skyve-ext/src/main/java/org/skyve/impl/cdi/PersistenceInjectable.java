@@ -1,6 +1,8 @@
 package org.skyve.impl.cdi;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -249,15 +251,15 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope) {
-		CORE.getPersistence().setDocumentPermissionScopes(scope);
+	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
+		return CORE.getPersistence().withDocumentPermissionScopes(scope, function);
 	}
 
 	@Override
-	public void resetDocumentPermissionScopes() {
-		CORE.getPersistence().resetDocumentPermissionScopes();
+	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
+		CORE.getPersistence().withDocumentPermissionScopes(scope, consumer);
 	}
-
+	
 	@Override
 	public SQL newSQL(String query) {
 		return CORE.getPersistence().newSQL(query);
