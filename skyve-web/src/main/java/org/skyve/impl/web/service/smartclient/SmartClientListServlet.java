@@ -494,6 +494,11 @@ public class SmartClientListServlet extends HttpServlet {
 													ListModel<Bean> model) 
     throws Exception {
     	SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
+    	
+    	if (mutableParameters.containsKey(PersistentBean.FLAG_COMMENT_NAME) && ! user.canFlag()) {
+    		throw new SecurityException("filter by flag", user.getName());
+    	}
+    	
     	CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
     	String operatorParameter = (String) mutableParameters.get("operator");
     	if (operatorParameter != null) { // advanced criteria
