@@ -411,6 +411,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			}
 			
 			// Check that the user has access
+			// NB If you can text search you should already be able to see anything you have access to
 			if (! user.canTextSearch()) {
 				AttachmentContent content = resource.getContent();
 				if (! user.canAccessContent(content.getBizId(),
