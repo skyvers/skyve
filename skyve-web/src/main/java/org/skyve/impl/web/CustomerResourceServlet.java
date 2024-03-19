@@ -396,6 +396,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			else if ((moduleName == null) || (documentName == null) || (binding == null)) {
 				throw new DomainException("Module name, document name & binding are required to secure a content resource");
 			}
+			
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
@@ -410,15 +411,17 @@ public class CustomerResourceServlet extends HttpServlet {
 			}
 			
 			// Check that the user has access
-			AttachmentContent content = resource.getContent();
-			if (! user.canAccessContent(content.getBizId(),
-											content.getBizModule(),
-											content.getBizDocument(),
-											content.getBizCustomer(),
-											content.getBizDataGroupId(),
-											content.getBizUserId(),
-											attribute.getName())) {
-				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
+			if (! user.canTextSearch()) {
+				AttachmentContent content = resource.getContent();
+				if (! user.canAccessContent(content.getBizId(),
+												content.getBizModule(),
+												content.getBizDocument(),
+												content.getBizCustomer(),
+												content.getBizDataGroupId(),
+												content.getBizUserId(),
+												attribute.getName())) {
+					throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
+				}
 			}
 		}
 	}

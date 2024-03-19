@@ -494,14 +494,9 @@ public class SmartClientListServlet extends HttpServlet {
 													ListModel<Bean> model) 
     throws Exception {
     	SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
-    	
-    	if (mutableParameters.containsKey(PersistentBean.FLAG_COMMENT_NAME) && ! user.canFlag()) {
-    		throw new SecurityException("filter by flag", user.getName());
-    	}
-    	
     	CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
     	String operatorParameter = (String) mutableParameters.get("operator");
-    	if (operatorParameter != null) { // advanced criteria
+    	if (operatorParameter != null) { // advanced criteria    		
     		try {
     			compoundFilterOperator = CompoundFilterOperator.valueOf(operatorParameter);
     		}
@@ -518,6 +513,11 @@ public class SmartClientListServlet extends HttpServlet {
     		else {
     			advancedCriteria = new ArrayList<>(criteria.length);
         		for (String jsonCriteria : criteria) {
+        			// Check for filter by flag permissions
+        			if (jsonCriteria.contains(PersistentBean.FLAG_COMMENT_NAME) && ! user.canFlag()) {
+        				throw new SecurityException("filter by flag", user.getName());
+        			}
+        			
     				// Get each criterium name, operator and operands
 					@SuppressWarnings("unchecked")
 					Map<String, Object> criterium = (Map<String, Object>) JSON.unmarshall(user, jsonCriteria);
@@ -536,6 +536,11 @@ public class SmartClientListServlet extends HttpServlet {
     		mutableParameters.remove("criteria");
     	}
 
+    	// check for filter by flag permissions
+    	if (mutableParameters.containsKey(PersistentBean.FLAG_COMMENT_NAME) && ! user.canFlag()) {
+    		throw new SecurityException("filter by flag", user.getName());
+    	}
+    	
     	// simple criteria or extra criteria from grid filter parameters
     	addSimpleFilterCriteriaToQuery(module,
 										document,
