@@ -134,17 +134,11 @@ export default {
             }
         }
     },
-    mounted() {
-        // FIXME Getting two loads when mounting sometimes if the 
-        // fetchUrl changes as a result of restoring its state
-        // need to debounce?
-        this.load();
-    },
     beforeMount() {
         // Calling init filters from mounted() was
         // triggering this issue: https://github.com/primefaces/primevue/issues/4291
         // Seems like the DataTable will reset its filters to whatever
-        // was set when it was mounted
+        // was set when it was mounted so we need to set the defaults earlier
         this.initFilters();
     },
     watch: {
