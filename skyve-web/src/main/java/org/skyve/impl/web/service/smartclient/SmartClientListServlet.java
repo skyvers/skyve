@@ -512,14 +512,15 @@ public class SmartClientListServlet extends HttpServlet {
     		else {
     			advancedCriteria = new ArrayList<>(criteria.length);
         		for (String jsonCriteria : criteria) {
-        			// Check for filter by flag permissions
-        			if (jsonCriteria.contains(PersistentBean.FLAG_COMMENT_NAME) && ! user.canFlag()) {
-        				throw new SecurityException("filter by flag", user.getName());
-        			}
-        			
     				// Get each criterium name, operator and operands
 					@SuppressWarnings("unchecked")
 					Map<String, Object> criterium = (Map<String, Object>) JSON.unmarshall(user, jsonCriteria);
+					
+					// Check for filter by flag permissions
+					if (((String) criterium.get("fieldName")).equals(PersistentBean.FLAG_COMMENT_NAME)) {
+						throw new SecurityException("filter by flag", user.getName());
+					}
+					
     				advancedCriteria.add(criterium);
         		}
     		}
