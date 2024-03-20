@@ -62,7 +62,6 @@ export default {
 
             // FIXME remove this
             console.table([...fd.entries()]);
-            console.debug(fd);
 
             return fd;
         },
@@ -78,7 +77,7 @@ export default {
                 const { operator, constraints } = columnFilter[1];
 
                 // Ignore contstraints with value == null
-                const nonNullConstraints = constraints.filter(con => con.value != null);
+                const nonNullConstraints = constraints.filter(con => con.value ?? '' != '');
 
                 // TODO multiple constraints for one column
                 if (nonNullConstraints.length > 0) {
@@ -138,8 +137,14 @@ export default {
     mounted() {
         // FIXME Getting two loads when mounting sometimes if the 
         // fetchUrl changes as a result of restoring its state
+        // need to debounce?
         this.load();
-
+    },
+    beforeMount() {
+        // Calling init filters from mounted() was
+        // triggering this issue: https://github.com/primefaces/primevue/issues/4291
+        // Seems like the DataTable will reset its filters to whatever
+        // was set when it was mounted
         this.initFilters();
     },
     watch: {
