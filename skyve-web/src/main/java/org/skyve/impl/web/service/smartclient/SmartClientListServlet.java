@@ -518,7 +518,9 @@ public class SmartClientListServlet extends HttpServlet {
 					
 					// Check for filter by flag permissions
 					if (((String) criterium.get("fieldName")).equals(PersistentBean.FLAG_COMMENT_NAME)) {
-						throw new SecurityException("filter by flag", user.getName());
+						if (! user.canFlag()) {					
+							throw new SecurityException("filter by flag", user.getName());
+						}
 					}
 					
     				advancedCriteria.add(criterium);
