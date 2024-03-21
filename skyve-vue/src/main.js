@@ -1,3 +1,5 @@
+import "primevue/resources/themes/lara-light-teal/theme.css";
+
 import { createApp } from 'vue'
 import ListGrid from './ListGrid.vue'
 
