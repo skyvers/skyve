@@ -102,7 +102,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 
 		try {
-			return (ViewJSONManipulator) MANIPULATOR_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, bean, Integer.valueOf(editIdCounter), Integer.valueOf(createIdCounter), Boolean.valueOf(forApply));
+			return (ViewJSONManipulator) MANIPULATOR_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, bean, uxui, Integer.valueOf(editIdCounter), Integer.valueOf(createIdCounter), Boolean.valueOf(forApply));
 		}
 		catch (Exception e) {
 			throw new DomainException("Cannot instantiate SmartClient JSON manipulator " + MANIPULATOR_CLASS, e);

@@ -165,7 +165,7 @@ isc.BizUtil.addClassProperties({
 			item.fields.add({name: 'bizId', primaryKey: true, hidden: true});
 			item.fields.add({name:'bizLock', hidden: true});
 			item.fields.addAt({name: 'bizTagged', title:'Tag', type: 'boolean', validOperators: ['equals']}, 0);
-			item.fields.addAt({name: 'bizFlagComment', title:'Flag'}, 1);//,length:1024}, 0); long length makes filter builder use a text area
+			item.fields.addAt({name: 'bizFlagComment', title:'Flag', canFilter:SKYVE.Util.canFlag}, 1);//,length:1024}, 0); long length makes filter builder use a text area
 
 			isc.RestDataSource.create({ID: item.ID,
 										dataFormat: 'json',

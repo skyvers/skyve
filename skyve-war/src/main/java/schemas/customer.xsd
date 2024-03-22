@@ -18,6 +18,27 @@
           <xs:element name="defaultTimestampConverter" type="ns1:converterName" form="qualified"/>
           <xs:element name="modules" type="tns:modules" form="qualified"/>
           <xs:element name="roles" type="tns:roles" form="qualified" minOccurs="0"/>
+          <xs:element name="textSearchRoles" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="role" type="tns:customerFeature" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="flagRoles" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="role" type="tns:customerFeature" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="switchModeRoles" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="role" type="tns:customerFeature" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
           <xs:element name="interceptors" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -102,6 +123,15 @@
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence/>
         <xs:attribute name="module" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="customerFeature">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence/>
+        <xs:attribute name="module" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

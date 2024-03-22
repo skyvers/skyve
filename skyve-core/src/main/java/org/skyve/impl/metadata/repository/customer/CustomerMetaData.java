@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.customer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,6 +45,9 @@ import jakarta.xml.bind.annotation.XmlType;
 							"defaultTimestampConverter", 
 							"modules", 
 							"roles",
+							"textSearchRoles",
+							"flagRoles",
+							"switchModeRoles",
 							"interceptors",
 							"observers",
 							"JFreeChartPostProcessorClassName",
@@ -61,6 +65,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 	private ConverterName defaultTimestampConverter;
 	private CustomerModulesMetaData modules;
 	private CustomerRolesMetaData roles;
+	private List<CustomerFeatureRoleMetaData> textSearchRoles = new ArrayList<>();
+	private List<CustomerFeatureRoleMetaData> flagRoles = new ArrayList<>();
+	private List<CustomerFeatureRoleMetaData> switchModeRoles = new ArrayList<>();
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private List<ObserverMetaDataImpl> observers = new ArrayList<>();
 	private String fullyQualifiedJFreeChartPostProcessorClassName;
@@ -157,6 +164,24 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		this.roles = roles;
 	}
 
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "textSearchRoles")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
+	public List<CustomerFeatureRoleMetaData> getTextSearchRoles() {
+		return textSearchRoles;
+	}
+	
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "flagRoles")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
+	public List<CustomerFeatureRoleMetaData> getFlagRoles() {
+		return flagRoles;
+	}
+	
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "switchModeRoles")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
+	public List<CustomerFeatureRoleMetaData> getSwitchModeRoles() {
+		return switchModeRoles;
+	}
+	
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
 	public List<InterceptorMetaDataImpl> getInterceptors() {
@@ -301,6 +326,24 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 			result.setAllowModuleRoles(roles.isAllowModuleRoles());
 		}
 
+		// Populate Text Search Roles
+		if (textSearchRoles != null) {
+			Set<String> textSearchModuleRoles = result.getTextSearchRoles();
+			populateFeatureRoles(textSearchRoles, textSearchModuleRoles, metaDataName, roles, moduleEntries);
+		}		
+		
+		// Populate Flag Roles
+		if (flagRoles != null) {
+			Set<String> flagModuleRoles = result.getFlagRoles();
+			populateFeatureRoles(flagRoles, flagModuleRoles, metaDataName, roles, moduleEntries);
+		}
+		
+		// Populate Switch Mode Roles
+		if (switchModeRoles != null) {
+			Set<String> switchModeModuleRoles = result.getSwitchModeRoles();
+			populateFeatureRoles(switchModeRoles, switchModeModuleRoles, metaDataName, roles, moduleEntries);
+		}
+		
 		// Populate Interceptors
 		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();
 		if (repositoryInterceptors != null) {
@@ -335,5 +378,46 @@ public class CustomerMetaData extends NamedMetaData implements ConvertableMetaDa
 		result.determineDependencies();
 		
 		return result;
+	}
+	
+	/**
+	 * Populates and flattens feature roles to module roles. 
+	 * Feature roles include text search, flag and switch mode.
+	 * 
+	 * @param featureRoles
+	 * @param featureModuleRoles
+	 * @param metaDataName
+	 * @param roles
+	 * @param moduleEntries
+	 */
+	private static void populateFeatureRoles(List<CustomerFeatureRoleMetaData> featureRoles, Set<String> featureModuleRoles,
+			String metaDataName, CustomerRolesMetaData roles, Map<String, FormLabelLayout> moduleEntries) {
+		for (CustomerFeatureRoleMetaData featureRole : featureRoles) {
+			String roleName = featureRole.getName();
+			if (roleName == null) {
+				throw new MetaDataException(metaDataName + " : The [name] for a feature role is required");
+			}
+			String moduleName = featureRole.getModuleName();
+			if (moduleName == null) {
+				Optional<CustomerRoleMetaData> oCustomerRole = roles.getRoles().stream().filter(r -> r.getName().equals(roleName)).findAny();
+				if (oCustomerRole.isEmpty()) {
+					throw new MetaDataException(metaDataName + " : The [name] of feature role " + roleName + " is not a valid customer role");
+				}
+				CustomerRoleMetaData customerRole = oCustomerRole.get();
+				for (CustomerModuleRoleMetaData moduleRole : customerRole.getRoles()) {
+					moduleName = moduleRole.getModuleName();
+					String value = moduleRole.getName();
+					featureModuleRoles.add(moduleName + "." + value);
+				}
+			}
+			else {
+				if (! moduleEntries.containsKey(moduleName)) {
+					throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleName + " is not a valid module");
+				}
+				if (! featureModuleRoles.add(moduleName + "." + roleName)) {
+					throw new MetaDataException(metaDataName + " : Duplicate role " + roleName);
+				}
+			}
+		}
 	}
 }

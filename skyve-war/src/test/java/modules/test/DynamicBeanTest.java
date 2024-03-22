@@ -188,6 +188,7 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		@SuppressWarnings("unchecked")
 		List<? extends Bean> elements = (List<? extends Bean>) Binder.get(bean, collectionPropertyName);
 		// its a test - let in NPE
+		@SuppressWarnings("null")
 		String bizId = elements.get(1).getBizId();
 		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);

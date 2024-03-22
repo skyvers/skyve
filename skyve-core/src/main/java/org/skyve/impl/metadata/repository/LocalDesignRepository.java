@@ -188,8 +188,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 			throw new MetaDataException("Home Module reference does not reference a module in customer " + customer.getName(), e);
 		}
 
+		CustomerImpl customerImpl = (CustomerImpl) customer;
+		
 		// NB Module entry names (keys) are in defined order
-		for (Entry<String, FormLabelLayout> moduleEntry : ((CustomerImpl) customer).getModuleEntries().entrySet()) {
+		for (Entry<String, FormLabelLayout> moduleEntry : customerImpl.getModuleEntries().entrySet()) {
 			String moduleName = moduleEntry.getKey();
 			FormLabelLayout formLabelLayout = moduleEntry.getValue();
 
@@ -230,6 +232,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 			}
 		}
+		
+		// Validate text search roles point to valid module roles
+		validateFeatureRoles(customer, customerImpl.getTextSearchRoles());
+		
+		// Validate flag roles point to valid module roles
+		validateFeatureRoles(customer, customerImpl.getFlagRoles());
+		
+		// Validate switch mode roles point to valid module roles
+		validateFeatureRoles(customer, customerImpl.getSwitchModeRoles());
 		
 		// TODO check the converter type corresponds to the type required.
 	}
@@ -791,6 +802,29 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" is not a valid binding.", e);
 					}
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Validates feature roles point to valid module roles.
+	 * 
+	 * We don't need to check the module name of the role as this is checked when the metadata 
+	 * is converted and we know all module names are correct from the validation performed prior.
+	 * 
+	 * @param customer
+	 * @param featureRoles
+	 */
+	private void validateFeatureRoles(Customer customer, Set<String> featureRoles) {
+		for (String textSearchModuleRole : featureRoles) {
+			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
+			String moduleName = moduleAndRoleName[0];
+			Module module = getModule(customer, moduleName);
+			String roleName = moduleAndRoleName[1];
+			if (module.getRole(roleName) == null) {
+				throw new MetaDataException("Module role " + roleName + 
+						" for module " + moduleName +
+						" does not reference a valid module role");
 			}
 		}
 	}

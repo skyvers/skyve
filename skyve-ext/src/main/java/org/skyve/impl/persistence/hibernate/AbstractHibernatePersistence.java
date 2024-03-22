@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 import javax.cache.management.CacheStatisticsMXBean;
@@ -124,6 +126,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DynamicPersistence;
+import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
@@ -543,7 +546,28 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope) {
+	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
+		try {
+			setDocumentPermissionScopes(scope);
+			return function.apply(this);
+		}
+		finally {
+			resetDocumentPermissionScopes();
+		}
+	}
+
+	@Override
+	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
+		try {
+			setDocumentPermissionScopes(scope);
+			consumer.accept(this);
+		}
+		finally {
+			resetDocumentPermissionScopes();
+		}
+	}
+	
+	private void setDocumentPermissionScopes(DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
@@ -563,9 +587,8 @@ t.printStackTrace();
 			}
 		}
 	}
-
-	@Override
-	public void resetDocumentPermissionScopes() {
+	
+	private void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 

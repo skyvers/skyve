@@ -886,6 +886,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 			test = p.save(test);
 
+			@SuppressWarnings("null")
 			String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 			SQL sql = p.newSQL(String.format("update %s set %s = :%s, %s = :%s",
 					persistentIdentifier,
@@ -1097,6 +1098,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 
 	@Test
 	public void testSQLDyna() throws Exception {
+		@SuppressWarnings("null")
 		String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
 		p.newSQL("delete from " + persistentIdentifier).execute();
 		

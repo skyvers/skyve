@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -173,17 +174,16 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
                     // this should play a bit nicer while having the project
                     // open in another editor.
                     debug("Deleting contents of: " + root);
-                    List<Path> dirContents = Files.list(root)
-                                                  .collect(toList());
-
-                    for (Path path : dirContents) {
-                        debug("Deleting: " + path);
-                        File file = path.toFile();
-                        if (file.isDirectory()) {
-                            FileUtils.deleteDirectory(path.toFile());
-                        } else {
-                            file.delete();
-                        }
+                    try (Stream<Path> dirContents = Files.list(root)) {
+	                    for (Path path : dirContents.collect(toList())) {
+	                        debug("Deleting: " + path);
+	                        File file = path.toFile();
+	                        if (file.isDirectory()) {
+	                            FileUtils.deleteDirectory(path.toFile());
+	                        } else {
+	                            file.delete();
+	                        }
+	                    }
                     }
                 } catch (IOException e) {
                     getLog().error(e);
