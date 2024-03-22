@@ -33,12 +33,14 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.SensitivityType;
 import org.skyve.util.Binder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
@@ -87,7 +89,15 @@ public class BackupJob extends CancellableJob {
 		String causation = null;
 		log.add(trace);
 		UtilImpl.LOGGER.info(trace);
-
+		
+		Bean bean = getBean();
+		if (bean != null) {
+			SensitivityType sensitivity = SensitivityType.valueOf((BindUtil.get(bean, "dataSensitivity")).toString());
+			if (sensitivity != null && !SensitivityType.none.equals(sensitivity)) {
+				BackupUtil.redactSensitiveData(sensitivity);
+			}
+		}
+		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
 		p.generateDDL(new File(backupDir, "drop.sql").getAbsolutePath(),

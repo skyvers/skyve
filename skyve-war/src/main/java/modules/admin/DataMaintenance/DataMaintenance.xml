@@ -171,6 +171,21 @@
 			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
 			<defaultValue>false</defaultValue>
 		</boolean>
+		
+		<!-- Data Sensitivity -->
+		<enum name="dataSensitivity">
+			<documentation><![CDATA[Determines which attributes are redacted in backup job.]]></documentation>
+			<displayName>Sensitivity</displayName>
+			<description>Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.</description>
+			<values>
+				<value code="none" name="none" description="None" />
+				<value code="internal" name="internal" description="Internal" />
+				<value code="confidential" name="confidential" description="Confidential" />
+				<value code="restricted" name="restricted" description="Restricted" />
+				<value code="personal" name="personal" description="Personal" />
+				<value code="secret" name="secret" description="Secret" />
+			</values>
+		</enum>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">

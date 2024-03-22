@@ -75,6 +75,57 @@ public interface Attribute extends NamedMetaData {
 		domain, view, both
 	}
 	
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public enum SensitivityType {	
+		/**
+		 * Data is freely available and does not require any special security measures. 
+		 * This data can be openly shared with anyone without the need for additional precautions.
+		 */
+		none,
+		
+		/**
+		 * Internal data is only intended for use within an organisation, and can include things
+		 * like the employee handbook, company policies, and certain company-wide communications.
+		 * Though it should remain private, if this type of information were to be public, the
+		 * repercussions would be minimal.
+		 */
+		internal, 
+		
+		/**
+		 * Confidential data must be kept within the organisation and should only be accessed by
+		 * authorised personnel. It can include information like pricing details, promotional
+		 * materials, or contact information. If this type of data were to be disclosed, it could
+		 * damage the company or brand.
+		 */
+		confidential,
+		
+		/**
+		 * Restricted data requires the highest level of protection and access must be limited to
+		 * necessary personnel. Often protected by a Non-Disclosure-Agreement (NDA), restricted
+		 * data can include trade secrets and medical records - which is especially important in
+		 * the context of privacy.
+		 */
+		restricted, 
+		
+		/**
+		 * `Personally Identifiable Information' (PII) means any information relating to an identified
+		 * or identifiable natural person. Under this definition, personal data includes phone number,
+		 * physical address, driver's license number, license plate number, social security number,
+		 * IP address, bank account, location data, utility records, work hours/performance, biometric
+		 * data. Personal data can include information like someone's name (a direct identifier) or
+		 * physical characteristics (an indirect identifier). Ultimately, personal data is any
+		 * information that can identify an individual - whether it is used independantly or in tandem
+		 * with other data.
+		 */
+		personal,
+		
+		/**
+		 * Applies when compromise might reasonably cause serious injury e.g., passwords, credit card
+		 * details.
+		 */
+		secret
+	}
+	
 	/**
 	 * 
 	 * @return
@@ -112,6 +163,12 @@ public interface Attribute extends NamedMetaData {
 	 * @return	the usage.
 	 */
 	UsageType getUsage();
+	
+	/**
+	 * Informs the Skyve framework when to redact information when performing backups.
+	 * @return	the data sensitivity.
+	 */
+	SensitivityType getSensitivity();
 	
 	/**
 	 * 
