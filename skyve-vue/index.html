@@ -18,25 +18,36 @@
 
     <script>
         window.onload = function () {
-            SKYVE.listgrid({
-                e: '#grid',
-                m: 'admin',
-                q: 'qContacts',
-                t: 'All Contacts',
-                c: [
-                    { field: 'name', header: 'Name', sortable: true, filterable: true },
-                    { field: 'email1', header: 'Email', sortable: true, filterable: true }
-                ]
-            });
+            // SKYVE.listgrid({
+            //     e: '#grid',
+            //     m: 'admin',
+            //     q: 'qContacts',
+            //     t: 'All Contacts',
+            //     c: [
+            //         { field: 'name', header: 'Name', sortable: true, filterable: true },
+            //         { field: 'email1', header: 'Email', sortable: true, filterable: true }
+            //     ]
+            // });
             SKYVE.listgrid({
                 e: '#grid1',
                 m: 'kitchensink',
                 q: 'ListAttributes',
                 c: [
-                    { field: 'bizKey', header: 'Biz Key', sortable: true, filterable: true },
-                    { field: 'decimal2', header: 'Decimal 2', sortable: true, filterable: true },
-                    { field: 'booleanFlag', header: 'Boolean Flag', sortable: true, filterable: true },
+                    { field: 'decimal2', header: 'Decimal 2', sortable: true, filterable: true, type: 'numeric' },
+                    { field: 'normalInteger', header: 'Integer', sortable: true, filterable: true, type: 'numeric' },
+                    { field: 'booleanFlag', header: 'Boolean Flag', sortable: true, filterable: true, type: 'boolean' },
                     { field: 'text', header: 'Text', sortable: true, filterable: true },
+                    {
+                        field: 'constantEnum', header: 'Constant Enum', sortable: true, filterable: true,
+                        type: 'enum',
+                        enumValues: [
+                            { value: 'one', label: 'One (1)!' },
+                            { value: 'two', label: 'Two (2)!' },
+                            { value: 'three', label: 'Three (3)!' }]
+                    },
+                    { field: 'constantDomain', header: 'Constant Domain', sortable: true, filterable: true, type: 'enum' },
+                    { field: 'variantDomain', header: 'Variant Domain', sortable: true, filterable: true, type: 'text' },
+                    { field: 'timestamp', header: 'Timestamp', sortable: true, filterable: true, type: 'date' },
                 ]
             });
         }

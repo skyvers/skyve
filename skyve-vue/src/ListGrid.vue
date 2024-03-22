@@ -28,14 +28,47 @@ export default {
         endRow() {
             return this.firstRow + this.pageSize;
         },
+        columnsMap() {
+            const dtls = new Map();
+            for (let column of this.columns) {
+                dtls.set(column.field, column);
+            }
+            return dtls;
+        },
         visibleColumns() {
-
+            
+            // Calculate which columns are visible
+            let showPredicate;
             if (this.selectedColumns == null || this.selectedColumns.length == 0) {
-                return this.columns;
+                // All columns if nothing is chosen
+                showPredicate = (col) => true;
+            } else {
+                // Or only the selected column
+                const shownColumns = this.selectedColumns.map(sc => sc.field);
+                showPredicate = (col) => shownColumns.includes(col.field);
             }
 
-            const shownColumns = this.selectedColumns.map(sc => sc.field);
-            return this.columns.filter(col => shownColumns.includes(col.field));
+            // Map from the type to 'dataType'
+            // LHS: skyve type, possibly should be a larger
+            // range (eg, integer/bizDecimal2/HH24_MI/etc)
+            // RHS: the dataType value on the Column, determines the 
+            // comparison operators available
+            const columnDataTypesMap = {
+                boolean: 'boolean',
+                numeric: 'numeric',
+                date: 'date',
+                enum: 'text'
+            };
+
+            // Mutate the columns prop, removing hidden columns
+            // And modifying properties as needed
+            return this.columns
+                .filter(showPredicate)
+                .map(colDefn => {
+                    const newType = columnDataTypesMap[colDefn.type] ?? 'text'
+                    colDefn.dataType = newType;
+                    return colDefn
+                });
         },
         fetchFormData() {
 
@@ -60,9 +93,6 @@ export default {
                 }
             }
 
-            // FIXME remove this
-            console.table([...fd.entries()]);
-
             return fd;
         },
         skyveCriteria() {
@@ -79,13 +109,39 @@ export default {
                 // Ignore contstraints with value == null
                 const nonNullConstraints = constraints.filter(con => con.value ?? '' != '');
 
+                // TODO move this somewhere else
+                const operatorMap = {
+                    // 'text': [
+                    'startsWith': 'iStartsWith',
+                    'contains': 'iContains',
+                    'notContains': 'iNotContains',
+                    'endsWith': 'iEndsWith',
+                    'equals': 'iEquals',
+                    'notEquals': 'iNotEqual',
+                    // 'numeric': [
+                    // These two shadow some text operators
+                    // do we need to send different values to skyve?
+                    // 'equals': 'XXXXXX', 
+                    // 'notEquals': 'XXXXXX',
+                    'lt': 'lessThan',
+                    'lte': 'lessOrEqual',
+                    'gt': 'greaterThan',
+                    'gte': 'greaterOrEqual',
+                    //'date': [
+                    'dateIs': 'XXXXXX',
+                    'dateIsNot': 'XXXXXX',
+                    'dateBefore': 'XXXXXX',
+                    'dateAfter': 'XXXXXX'
+                    // TODO boolean ops?, seems to always be 'contains'
+                };
+
                 // TODO multiple constraints for one column
                 if (nonNullConstraints.length > 0) {
                     const x = nonNullConstraints[0];
                     const crit = {
                         'fieldName': colName,
                         'value': x.value,
-                        'operator': 'iContains' // TODO map operators properly
+                        'operator': operatorMap[x.matchMode]
                     };
 
                     criteria.push(crit);
@@ -150,7 +206,7 @@ export default {
 }
 </script>
 <template>
-    <div>skyveFilters='{{ filters }}'</div>
+    <div>{{ filters }}</div>
     <DataTable 
         dataKey="bizId" 
         filterDisplay="menu" 
@@ -182,13 +238,38 @@ export default {
         </template>
         <template #empty> No data found.</template>
         <template #loading> Loading data. Please wait.</template>
-        <Column v-for="col of visibleColumns" :key="col.field" :field="col.field" :header="col.header"
-            :sortable="col.sortable" :maxConstraints="20">
-            <template #filter="{ filterModel }" v-if="col.filterable">
-                <InputText v-model="filterModel.value" type="text" class="p-column-filter"
+        <Column v-for="col of visibleColumns" 
+            :key="col.field" 
+            :field="col.field" 
+            :header="col.header"
+            :sortable="col.sortable" 
+            :maxConstraints="20"
+            :dataType="col.dataType"
+            >
+            <template 
+                #filter="{ filterModel }" 
+                v-if="col.filterable">
+
+                <!-- TODO probably need a label for the booleans -->
+                <TriStateCheckbox 
+                    v-if="col.type == 'boolean'"
+                    v-model="filterModel.value" />
+                <MultiSelect 
+                    v-else-if="col.type == 'enum'"
+                    v-model="filterModel.value" 
+                    :options="col.enumValues" 
+                    optionLabel="label"
+                    optionValue="value" >
+                </MultiSelect>
+                <InputText 
+                    v-else
+                    v-model="filterModel.value" 
+                    type="text" 
+                    class="p-column-filter"
                     :placeholder="'Search by ' + col.header" />
             </template>
         </Column>
     </DataTable>
+
 </template>
 <style scoped></style>
