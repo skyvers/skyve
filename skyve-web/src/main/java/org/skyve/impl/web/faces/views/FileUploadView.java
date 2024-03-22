@@ -84,6 +84,8 @@ public class FileUploadView extends AbstractUploadView {
 
 	/**
 	 * Process the file upload
+	 * This method does not use FacesAction because it should show errors/growls under all circumstances
+	 * since the upload pages are embedded in iframes.
 	 * 
 	 * @param event
 	 */

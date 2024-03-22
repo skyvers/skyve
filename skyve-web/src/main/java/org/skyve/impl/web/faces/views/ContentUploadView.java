@@ -112,6 +112,11 @@ public class ContentUploadView extends AbstractUploadView {
 		upload(croppedFileName, base64Codec.decode(base64), fc);
 	}
 
+	/**
+	 * Does the upload work.
+	 * This method does not use FacesAction because it should show errors/growls under all circumstances
+	 * since the upload pages are embedded in iframes.
+	 */
 	private void upload(String fileName, byte[] fileContents, FacesContext fc) throws Exception {
 		String context = getContext();
 		if ((context == null) || (contentBinding == null)) {
