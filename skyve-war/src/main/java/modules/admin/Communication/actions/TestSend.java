@@ -36,12 +36,15 @@ public class TestSend implements ServerSideAction<Communication> {
 		String previousSendToOverride = communication.getSendToOverride();
 
 		// override the recipient to the current logged in user's email address
-		communication.setSendToOverride(me.getEmail1());
-		CommunicationUtil.send(webContext, communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
-
-		// revert the recipient if there was one
-		communication.setSendToOverride(previousSendToOverride);
-
+		try {
+			communication.setSendToOverride(me.getEmail1());
+			CommunicationUtil.send(webContext, communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
+		}
+		finally {
+			// revert the recipient if there was one
+			communication.setSendToOverride(previousSendToOverride);
+		}
+		
 		return new ServerSideActionResult<>(communication);
 	}
 }
