@@ -40,7 +40,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -154,7 +154,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Pre-Process
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RestorePreProcess implements Enumeration {
 		noProcessing("noProcessing", "No Processing"),
 		dropTablesUsingMetadataRecreateTablesFromBackupCreatesql("dropUsingMetadataAndCreateUsingBackup", "Drop tables using metadata & recreate tables from backup create.sql"),
@@ -230,7 +230,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Content Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum ContentRestoreOption implements Enumeration {
 		clearOrphanedContentIDs("clearOrphanedContentIds", "Clear Orphaned Content IDs"),
 		saveOrphanedContentIDs("saveOrphanedContentIds", "Save Orphaned Content IDs"),
@@ -301,7 +301,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Indexing Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RestoreIndexingOption implements Enumeration {
 		data("data", "Data"),
 		content("content", "Content"),
@@ -373,7 +373,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RefreshOption implements Enumeration {
 		upsert("Upsert", "Upsert"),
 		save("Save", "Save");
@@ -446,7 +446,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 <p>Evicting beans will free memory for large data jobs, however there may be impacts if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum EvictOption implements Enumeration {
 		bean("Bean", "Bean"),
 		none("None", "None"),
@@ -521,7 +521,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Determines which attributes are redacted in backup job.
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum DataSensitivity implements Enumeration {
 		none("none", "None"),
 		internal("internal", "Internal"),

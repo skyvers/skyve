@@ -33,7 +33,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
@@ -110,8 +109,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * Set of moduleName.documentName documents that should be overridden
 	 */
 	private Set<String> overriddenORMDocumentsPerCustomer = new TreeSet<>();
-
-	private final String generationIsoDate = new Timestamp().toString();
 
 	OverridableDomainGenerator(boolean write,
 								boolean debug,
@@ -2019,7 +2016,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		
 		attributeJavadoc(enumeration, enums);
 		enums.append("\t@XmlEnum\n");
-		enums.append("\t@Generated(value = \"").append(getClass().getName()).append("\", date = \"").append(generationIsoDate).append("\")\n");
+		enums.append("\t@Generated(value = \"").append(getClass().getName()).append("\")\n");
 		enums.append("\tpublic static enum ").append(typeName).append(" implements Enumeration {\n");
 		for (EnumeratedValue value : enumeration.getValues()) {
 			String code = value.getCode();
@@ -3676,7 +3673,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate class body
 		contents.append("@XmlType");
 		contents.append("\n@XmlRootElement");
-		contents.append("\n@Generated(value = \"").append(getClass().getName()).append("\", date = \"").append(generationIsoDate).append("\")");
+		contents.append("\n@Generated(value = \"").append(getClass().getName()).append("\")");
 		if (polymorphic) {
 			contents.append("\n@PolymorphicPersistentBean");
 		}

@@ -29,7 +29,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class ImportExport extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -91,7 +91,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 * Mode
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Mode implements Enumeration {
 		importData("importData", "Import Data"),
 		exportData("exportData", "Export Data");
@@ -161,7 +161,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 * Error handling
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RollbackErrors implements Enumeration {
 		rollbackErrors("rollbackErrors", "admin.importExport.rollbackErrors.rollbackErrors.description"),
 		noRollbackErrors("noRollbackErrors", "admin.importExport.rollbackErrors.noRollbackErrors.description");
@@ -239,7 +239,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 <i>With this option, new records will always be created</i></p>
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum LoadType implements Enumeration {
 		createFind("createFind", "admin.importExport.loadType.createFind.description"),
 		createAll("createAll", "admin.importExport.loadType.createAll.description");

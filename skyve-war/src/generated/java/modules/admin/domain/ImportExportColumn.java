@@ -27,7 +27,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public class ImportExportColumn extends AbstractPersistentBean implements ChildBean<ImportExportExtension> {
 	/**
 	 * For Serialization
@@ -57,7 +57,7 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 	 * Action
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum LoadAction implements Enumeration {
 		setValue("set", "admin.importExportColumn.loadAction.set.description"),
 		lookupEquals("equals", "admin.importExportColumn.loadAction.equals.description"),

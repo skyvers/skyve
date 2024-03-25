@@ -24,7 +24,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public class UserMonthlyHits extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -60,7 +60,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	 * Device
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Device implements Enumeration {
 		phone("P", "Phone"),
 		tablet("T", "Tablet"),
