@@ -2,6 +2,7 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.SensitivityType;
 import org.skyve.metadata.model.Attribute.UsageType;
 
 abstract class FluentAttribute<T extends FluentAttribute<T>> {
@@ -22,6 +23,7 @@ abstract class FluentAttribute<T extends FluentAttribute<T>> {
 		trackChanges(attribute.isTrackChanges());
 		transientAttribute(attribute.isTransient());
 		usage(attribute.getUsage());
+		sensitivity(attribute.getSensitivity());
 		return (T) this;
 	}
 	
@@ -79,6 +81,12 @@ abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	@SuppressWarnings("unchecked")
 	public T usage(UsageType usage) {
 		get().setUsage(usage);
+		return (T) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public T sensitivity(SensitivityType sensitivity) {
+		get().setSensitivity(sensitivity);
 		return (T) this;
 	}
 
