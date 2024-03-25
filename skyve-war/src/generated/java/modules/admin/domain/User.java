@@ -42,7 +42,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 public abstract class User extends AbstractPersistentBean implements org.skyve.domain.app.admin.User {
 	/**
 	 * For Serialization
@@ -172,7 +172,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 			to confirm the new user name and password and membership of groups.
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum WizardState implements Enumeration {
 		confirmContact("confirmContact", "confirmContact"),
 		createContact("createContact", "createContact"),
@@ -244,7 +244,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Groups
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum GroupSelection implements Enumeration {
 		existingGroups("existingGroups", "Existing groups"),
 		newGroup("newGroup", "New group");

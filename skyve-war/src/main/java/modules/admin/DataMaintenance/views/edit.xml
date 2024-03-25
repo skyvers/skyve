@@ -41,11 +41,10 @@
 					</onSelectedHandlers>
 				</listGrid>
 				<form>
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
+					<column responsiveWidth="2" />
+					<column responsiveWidth="2" />
+					<column pixelWidth="250" />
+					<column responsiveWidth="2"  />
 					<row>
 						<item>
 							<button action="RefreshBackupList">
@@ -55,14 +54,14 @@
 							</button> 
 						</item>
 						<item>
-							<button action="Backup" >
+							<button action="DeleteBackup"  >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button action="DownloadBackup" >
+							<button action="DownloadBackup" pixelWidth="400" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
@@ -75,8 +74,17 @@
 								</properties>							
 							</button>
 						</item>
+					</row>
+				</form>
+				<form>
+					<column responsiveWidth="2" />
+					<column responsiveWidth="2" />
+					<row>
 						<item>
-							<button action="DeleteBackup"  >
+							<combo binding="dataSensitivity" />
+						</item>
+						<item>
+							<button action="Backup" >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							

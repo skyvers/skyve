@@ -16,7 +16,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 public class DocumentNumber extends AbstractPersistentBean implements org.skyve.domain.app.admin.DocumentNumber {
 	/**
 	 * For Serialization

@@ -26,7 +26,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 public class UniqueConstraintNonNullable extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -53,7 +53,7 @@ public class UniqueConstraintNonNullable extends AbstractPersistentBean {
 	 * Enum 3
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum Enum3 implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),

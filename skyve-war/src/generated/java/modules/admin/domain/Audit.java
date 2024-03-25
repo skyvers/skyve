@@ -31,7 +31,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 public class Audit extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -85,7 +85,7 @@ public class Audit extends AbstractPersistentBean {
 	 * Operation
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum Operation implements Enumeration {
 		insert("I", "Insert"),
 		update("U", "Update"),

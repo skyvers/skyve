@@ -229,6 +229,11 @@
 		<property name="auditTimestampStart" type="Timestamp" />
 		<property name="auditTimestampEnd" type="Timestamp" />
 		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser"/>
+		<property name="dataSensitivity" length="12">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.DataMaintenance$DataSensitivity</param>
+			</type>
+		</property>
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

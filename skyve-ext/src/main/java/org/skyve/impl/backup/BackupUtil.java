@@ -9,25 +9,37 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
@@ -35,6 +47,9 @@ import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.SensitivityType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
@@ -47,6 +62,9 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 
 final class BackupUtil {
+
+	private static final String DATA_SENSITIVITY_PROPERTY_NAME = "dataSensitivity";
+	
 	private BackupUtil() {
 		// nothing to see here
 	}
@@ -349,5 +367,308 @@ final class BackupUtil {
 				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 		}
+	}
+	
+	/**
+	 * Fetch sensitivity index, calculated from ordinal value of {@link SensitivityType} selected in UI.
+	 * 
+	 * Returns 0 if no sensitivity level is selected.
+	 * 
+	 * @param bean DataMaintenance bean
+	 */
+	static int getSensitivityIndex(Bean bean) {
+		if (bean != null) {
+			Object sensitivityInput = BindUtil.get(bean, DATA_SENSITIVITY_PROPERTY_NAME);
+			if (sensitivityInput != null) {
+				return SensitivityType.valueOf(sensitivityInput.toString()).ordinal();
+			}
+		}
+		
+		return 0;
+	}
+	
+	/**
+	 * Constructs and returns a set of attributes (table.column) to redact.
+	 * 
+	 * @param sensitivityIndex Sensitivity benchmark. If any attribute has a greater than or equal to sensitivity score, it is redacted.
+	 */
+	static Set<String> getAttributesToRedact(int sensitivityIndex) {
+		Customer customer = CORE.getPersistence().getUser().getCustomer();
+		Set<String> attributesToRedact = new HashSet<>();
+		
+		if (sensitivityIndex == 0) {
+			// Nothing to redact
+			return attributesToRedact;
+		}
+		
+		// Construct map of attributes to redact
+		for (Module module : customer.getModules()) {
+			for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {
+				DocumentRef documentRef = entry.getValue();
+				if (documentRef.getOwningModuleName().equals(module.getName())) {
+					Document document = module.getDocument(customer, entry.getKey());
+					if (document.isPersistable()) {
+						String tableName = document.getPersistent().getPersistentIdentifier();
+						for (Attribute a : document.getAllAttributes(customer)) {
+							int sensitivityScore = a.getSensitivity() != null ? a.getSensitivity().ordinal() : 0;
+							if (sensitivityScore >= sensitivityIndex) {
+								attributesToRedact.add(tableName + "." + a.getName());					}
+						}
+					}
+				}
+			}
+		}
+		
+		return attributesToRedact;
+	}
+	
+	/**
+	 * Redacts data depending on type for most scalar types.
+	 * 
+	 * Returns value unchanged if redaction for this type is not (yet) supported.
+	 *  
+	 * @param value The Skyve record to be obfuscated
+	 * 
+	 * @author Simeon Solomou
+	 */
+	static Object redactData(AttributeType attributeType, Object value) {
+		if (value != null) {
+			switch (attributeType) {
+			case association:
+				// Nothing to see here
+				break;
+			case bool:
+				// Nothing to see here
+				break;
+			case collection:
+				// Nothing to see here
+				break;
+			case colour:
+				// Nothing to see here
+				break;
+			case content:
+				return null; // Nullify content fields
+			case date:
+				return redactDate((Date) value);
+			case dateTime:
+				return redactTimestamp((java.sql.Timestamp) value);
+			case decimal10:
+				return redactNumeric((BigDecimal) value);
+			case decimal2:
+				return redactNumeric((BigDecimal) value);
+			case decimal5:
+				return redactNumeric((BigDecimal) value);
+			case enumeration:
+				// Nothing to see here
+				break;
+			case geometry:
+				return redactGeometry((Geometry) value);
+			case id:
+				return redactString((String) value);
+			case image:
+				return null; // Nullify content fields
+			case integer:
+				return redactNumeric((Integer) value);
+			case inverseMany:
+				// Nothing to see here
+				break;
+			case inverseOne:
+				// Nothing to see here
+				break;
+			case longInteger:
+				return redactNumeric((Long) value);
+			case markup:
+				return redactString((String) value);
+			case memo:
+				return redactString((String) value);
+			case text:
+				return redactString((String) value);
+			case time:
+				return redactTime((Time) value);
+			case timestamp:
+				return redactTimestamp((java.sql.Timestamp) value);
+			default:
+				break;
+			}
+		}
+		return value;
+	}
+	
+	/**
+	 * Redacts a string by masking its middle part with asterisks.
+	 *
+	 * @param data The string to be redacted
+	 * @return The redacted string
+	 * 
+	 * @author Ben Petito
+	 */
+	public static String redactString(String data) {
+		if (data == null) {
+			return null;
+		}
+
+		// check if the data is an email address
+		if (data.contains("@")) {
+			int atIndex = data.indexOf("@");
+			String beforeAt = redactSegment(data.substring(0, atIndex));
+			String afterAt = redactSegment(data.substring(atIndex + 1));
+			return beforeAt + "@" + afterAt;
+		}
+
+		return redactSegment(data);
+	}
+	
+	/**
+	 * Redacts a segment of a string, only displaying a fixed number of chars at beginning & end.
+	 * 
+	 * @param data The segment to be redacted
+	 * @return The redacted segment 
+	 * 
+	 * @author Ben Petito
+	 */
+	private static String redactSegment(String data) {
+		// Define the number of characters to keep at the beginning and end based on data length.
+		int charsToShowAtStart = 2;
+		int charsToShowAtEnd = 2;
+
+		if (data.length() == 0) {
+			return "";
+		} else if (data.length() <= 1) {
+			charsToShowAtStart = 0;
+			charsToShowAtEnd = 0;
+		} else if (data.length() <= 2) {
+			charsToShowAtStart = 1;
+			charsToShowAtEnd = 0;
+		} else if (data.length() <= 4) {
+			charsToShowAtStart = 1;
+			charsToShowAtEnd = 1;
+		}
+
+		String start = data.substring(0, charsToShowAtStart);
+		String end = data.substring(data.length() - charsToShowAtEnd);
+
+		// calculate the number of asterisks to be used
+		int asteriskCount = data.length() - charsToShowAtStart - charsToShowAtEnd;
+
+		// set the max asterisk count to 10
+		if (asteriskCount > 10) {
+			asteriskCount = 10;
+		}
+
+		StringBuilder maskedSection = new StringBuilder();
+		for (int i = 0; i < asteriskCount; i++) {
+			maskedSection.append('*');
+		}
+
+		// remove any whitespace and re-assemble the redacted string
+		return start.trim() + maskedSection + end.trim();
+	}
+	
+	/**
+	 * Redacts skyve numeric attributes by rounding to the nearest 10.
+	 *
+	 * @param data The numeric to be redacted
+	 * @return The redacted numeric
+	 * 
+	 * @author Simeon Solomou
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Number> T redactNumeric(T data) {
+		if (data == null) {
+			return null;
+		}
+		
+		double doubleValue = data.doubleValue();
+		double dividedByTen = Math.round(doubleValue / 10.0f);
+		double result = dividedByTen * 10;
+		
+		if (data instanceof Integer) {
+			int intValue = (int) Math.round(result);
+			return (T) Integer.valueOf(intValue);
+		}
+		else if (data instanceof Long) {
+			long longValue = (long) result;
+			return (T) Long.valueOf(longValue);
+		}
+		else if (data instanceof BigDecimal) {
+			return (T) BigDecimal.valueOf(result);
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Redacts {@link DateOnly} attribute by rounding it's value to the first day of the month.
+	 * 
+	 * @param data The date to be redacted
+	 * @return The redacted date
+	 * 
+	 * @author Simeon Solomou
+	 */
+	public static Date redactDate(Date data) {
+		
+		return Date.valueOf(data.toLocalDate()
+				.withDayOfMonth(1));
+	}
+	
+	/**
+	 * Redacts {@link TimeOnly} attribute by rounding it's value to the nearest hour.
+	 * 
+	 * @param data The time to be redacted
+	 * @return The redacted time
+	 * 
+	 * @author Simeon Solomou
+	 */
+	public static Time redactTime(Time data) {
+		
+		return Time.valueOf(data.toLocalTime()
+				.withMinute(0).withSecond(0).withNano(0));
+	}
+	
+	/**
+	 * Redacts {@link DateTime} attribute by rounding it's value to the first day of the month.
+	 * 
+	 * @param data The date-time to be redacted
+	 * @return The redacted date
+	 * 
+	 * @author Simeon Solomou
+	 */
+	public static java.sql.Timestamp redactTimestamp(java.sql.Timestamp data) {
+		
+		return java.sql.Timestamp.valueOf(data.toLocalDateTime()
+				.withDayOfMonth(1).withHour(0).withMinute(0));
+	}
+	
+	/**
+	 * Redacts {@link Geometry} attribute by rounding its latitude/longitude to the nearest whole number.
+	 * 
+	 * @param data The geometry to be redacted
+	 * @return The redacted geometry
+	 * 
+	 * @author Simeon Solomou
+	 */
+	public static Geometry redactGeometry(Geometry data) {
+		
+		Coordinate[] existingCoordinates = data.getCoordinates();
+		
+		Coordinate[] modifiedCoordinates = new Coordinate[existingCoordinates.length];
+		for (int i = 0; i < existingCoordinates.length; i++) {
+			double modifiedLongitude = Math.round(existingCoordinates[i].x);
+			double modifiedLatitude = Math.round(existingCoordinates[i].y);
+			modifiedCoordinates[i] = new Coordinate(modifiedLongitude, modifiedLatitude);
+		}
+		
+		if (data.getGeometryType().equals("Point")) {
+			return new GeometryFactory().createPoint(modifiedCoordinates[0]);
+		}
+		else if (data.getGeometryType().equals("LineString")) {
+			return new GeometryFactory().createLineString(modifiedCoordinates);
+		}
+		else if (data.getGeometryType().equals("Polygon")) {
+			return new GeometryFactory().createPolygon(modifiedCoordinates);
+		}
+		
+		// Should never reach - other geometry types are deprecated
+		return data;
 	}
 }

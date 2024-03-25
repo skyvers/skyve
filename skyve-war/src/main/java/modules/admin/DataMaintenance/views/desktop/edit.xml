@@ -105,10 +105,19 @@
 						</row>
 					</form>
 					<vbox pixelMemberPadding="5">
-						<button action="Backup" pixelWidth="150" />
-						<button action="DownloadBackup" pixelWidth="150" />
-						<button action="UploadBackup" pixelWidth="150" />
-						<button action="DeleteBackup" pixelWidth="150" />
+						<form pixelWidth="225">
+							<column pixelWidth="75" />
+							<column pixelWidth="150" />
+							<row>
+								<item>
+									<combo binding="dataSensitivity" />
+								</item>
+							</row>
+						</form>
+						<button action="Backup" pixelWidth="225" />
+						<button action="DownloadBackup" pixelWidth="225" />
+						<button action="UploadBackup" pixelWidth="225" />
+						<button action="DeleteBackup" pixelWidth="225" />
 					</vbox>
 				</hbox>
 			</vbox>
