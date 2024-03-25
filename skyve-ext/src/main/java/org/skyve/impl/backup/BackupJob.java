@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.hibernate.engine.spi.SessionImplementor;
@@ -33,14 +34,12 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Attribute.SensitivityType;
 import org.skyve.util.Binder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
@@ -90,13 +89,10 @@ public class BackupJob extends CancellableJob {
 		log.add(trace);
 		UtilImpl.LOGGER.info(trace);
 		
-		Bean bean = getBean();
-		if (bean != null) {
-			SensitivityType sensitivity = SensitivityType.valueOf((BindUtil.get(bean, "dataSensitivity")).toString());
-			if (sensitivity != null && !SensitivityType.none.equals(sensitivity)) {
-				BackupUtil.redactSensitiveData(sensitivity);
-			}
-		}
+		// Fetch sensitivity index & create map of attributes to redact
+		int sensitivityIndex = BackupUtil.getSensitivityIndex(getBean());
+		Set<String> attributesToRedact = BackupUtil.getAttributesToRedact(sensitivityIndex);
+		
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
@@ -182,6 +178,11 @@ public class BackupJob extends CancellableJob {
 																				" is missing a " + Bean.USER_ID + " value.");
 																	}
 																}
+																// Respect sensitivity
+																if (attributesToRedact.contains(table.name + "." + name)) {
+																	// Redact value
+																	value = BackupUtil.redactData(attributeType, value);
+																}
 															}
 															else if (AttributeType.geometry.equals(attributeType)) {
 																@SuppressWarnings("resource")
@@ -191,6 +192,11 @@ public class BackupJob extends CancellableJob {
 																	value = "";
 																}
 																else {
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		geometry = (Geometry) BackupUtil.redactData(attributeType, geometry);
+																	}
 																	value = new WKTWriter().write(geometry);
 																}
 															}
@@ -201,6 +207,11 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	value = Boolean.valueOf(booleanValue);
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		value = BackupUtil.redactData(attributeType, value);
+																	}
 																}
 															}
 															else if (AttributeType.date.equals(attributeType)) {
@@ -209,6 +220,11 @@ public class BackupJob extends CancellableJob {
 																	value = "";
 																}
 																else {
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		date = (Date) BackupUtil.redactData(attributeType, date);
+																	}
 																	value = Long.valueOf(date.getTime());
 																}
 															}
@@ -218,6 +234,11 @@ public class BackupJob extends CancellableJob {
 																	value = "";
 																}
 																else {
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		time = (Time) BackupUtil.redactData(attributeType, time);
+																	}
 																	value = Long.valueOf(time.getTime());
 																}
 															}
@@ -228,6 +249,11 @@ public class BackupJob extends CancellableJob {
 																	value = "";
 																}
 																else {
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		timestamp = (Timestamp) BackupUtil.redactData(attributeType, timestamp);
+																	}
 																	value = Long.valueOf(timestamp.getTime());
 																}
 															}
@@ -239,6 +265,11 @@ public class BackupJob extends CancellableJob {
 																	value = "";
 																}
 																else {
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		bigDecimal = (BigDecimal) BackupUtil.redactData(attributeType, bigDecimal);
+																	}
 																	value = bigDecimal;
 																}
 															}
@@ -249,6 +280,11 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	value = Integer.valueOf(intValue);
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		value = BackupUtil.redactData(attributeType, value);
+																	}
 																}
 																// bizVersion is mandatory
 																if ("".equals(value) &&
@@ -266,12 +302,18 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	value = Long.valueOf(longValue);
+																	// Respect sensitivity
+																	if (attributesToRedact.contains(table.name + "." + name)) {
+																		// Redact value
+																		value = BackupUtil.redactData(attributeType, value);
+																	}
 																}
 															}
 															else if (AttributeType.content.equals(attributeType) ||
 																	AttributeType.image.equals(attributeType)) {
 																String stringValue = resultSet.getString(name);
-																if (resultSet.wasNull()) {
+																if (resultSet.wasNull() || attributesToRedact.contains(table.name + "." + name)) {
+																	// Nullify sensitive content fields & do not include content in backup
 																	value = "";
 																}
 																else {

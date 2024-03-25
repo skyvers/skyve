@@ -3,29 +3,24 @@ package org.skyve.impl.backup;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.skyve.impl.backup.BackupUtil.redactDateOnly;
-import static org.skyve.impl.backup.BackupUtil.redactDateTime;
+import static org.skyve.impl.backup.BackupUtil.redactDate;
 import static org.skyve.impl.backup.BackupUtil.redactGeometry;
 import static org.skyve.impl.backup.BackupUtil.redactNumeric;
 import static org.skyve.impl.backup.BackupUtil.redactString;
-import static org.skyve.impl.backup.BackupUtil.redactTimeOnly;
+import static org.skyve.impl.backup.BackupUtil.redactTime;
 import static org.skyve.impl.backup.BackupUtil.redactTimestamp;
 
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.junit.Test;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.skyve.domain.types.DateOnly;
-import org.skyve.domain.types.DateTime;
-import org.skyve.domain.types.Decimal10;
-import org.skyve.domain.types.Decimal2;
-import org.skyve.domain.types.Decimal5;
-import org.skyve.domain.types.TimeOnly;
-import org.skyve.domain.types.Timestamp;
 
 public class BackupUtilTest {
 
@@ -55,14 +50,14 @@ public class BackupUtilTest {
 		
 		// verify the result
 		assertThat(result1, is("Cl****1"));
-		assertThat(result2, is("C****2"));
-		assertThat(result3, is("C****3"));
-		assertThat(result4, is("C****"));
-		assertThat(result5, is("****"));
+		assertThat(result2, is("C**2"));
+		assertThat(result3, is("C*3"));
+		assertThat(result4, is("C*"));
+		assertThat(result5, is("*"));
 		assertThat(result6, is(""));
 		assertThat(result7, is(nullValue()));
 		assertThat(result8, is("Re**********me"));
-		assertThat(result9, is("cl****t1@em*****rg"));
+		assertThat(result9, is("cl***t1@em*****rg"));
 	}
 	
 	@Test
@@ -144,276 +139,159 @@ public class BackupUtilTest {
 	}
 	
 	@Test
-	public void testRedactDecimal2() {
+	public void testRedactBigDecimal() {
 		// setup the test data
-		Decimal2 input1 = new Decimal2("0.21");
-		Decimal2 input2 = new Decimal2("12.61");
-		Decimal2 input3 = new Decimal2("0.49");
-		Decimal2 input4 = new Decimal2("4.51");
-		Decimal2 input5 = new Decimal2("-0.21");
-		Decimal2 input6 = new Decimal2("-9.471");
-		Decimal2 input7 = new Decimal2("0.11");
-		Decimal2 input8 = new Decimal2("91.91");
-		Decimal2 input9 = new Decimal2("0.01");
-		Decimal2 input10 = new Decimal2("843454.1");
+		BigDecimal input1 = new BigDecimal("0.212342342345254");
+		BigDecimal input2 = new BigDecimal("12342.6123234223");
+		BigDecimal input3 = new BigDecimal("2345.123234123");
+		BigDecimal input4 = new BigDecimal("23141.5523234426423423432");
+		BigDecimal input5 = new BigDecimal("-1230.2123423342");
+		BigDecimal input6 = new BigDecimal("12340.2123");
+		BigDecimal input7 = new BigDecimal("-234234.143543");
+		BigDecimal input8 = new BigDecimal("94531.9123121231");
+		BigDecimal input9 = new BigDecimal("-0454.012312312");
+		BigDecimal input10 = new BigDecimal("8445454.12123131");
 		
 		// call the method under test
-		Decimal2 result1 = redactNumeric(input1);
-		Decimal2 result2 = redactNumeric(input2);
-		Decimal2 result3 = redactNumeric(input3);
-		Decimal2 result4 = redactNumeric(input4);
-		Decimal2 result5 = redactNumeric(input5);
-		Decimal2 result6 = redactNumeric(input6);
-		Decimal2 result7 = redactNumeric(input7);
-		Decimal2 result8 = redactNumeric(input8);
-		Decimal2 result9 = redactNumeric(input9);
-		Decimal2 result10 = redactNumeric(input10);
+		BigDecimal result1 = redactNumeric(input1);
+		BigDecimal result2 = redactNumeric(input2);
+		BigDecimal result3 = redactNumeric(input3);
+		BigDecimal result4 = redactNumeric(input4);
+		BigDecimal result5 = redactNumeric(input5);
+		BigDecimal result6 = redactNumeric(input6);
+		BigDecimal result7 = redactNumeric(input7);
+		BigDecimal result8 = redactNumeric(input8);
+		BigDecimal result9 = redactNumeric(input9);
+		BigDecimal result10 = redactNumeric(input10);
 		
 		// verify the result
-		assertThat(result1, is(new Decimal2("0")));
-		assertThat(result2, is(new Decimal2("10")));
-		assertThat(result3, is(new Decimal2("0")));
-		assertThat(result4, is(new Decimal2("0")));
-		assertThat(result5, is(new Decimal2("0")));
-		assertThat(result6, is(new Decimal2("-10")));
-		assertThat(result7, is(new Decimal2("0")));
-		assertThat(result8, is(new Decimal2("90")));
-		assertThat(result9, is(new Decimal2("0")));
-		assertThat(result10, is(new Decimal2("843450")));
+		assertThat(result1, is(new BigDecimal("0.0")));
+		assertThat(result2, is(new BigDecimal("12340.0")));
+		assertThat(result3, is(new BigDecimal("2350.0")));
+		assertThat(result4, is(new BigDecimal("23140.0")));
+		assertThat(result5, is(new BigDecimal("-1230.0")));
+		assertThat(result6, is(new BigDecimal("12340.0")));
+		assertThat(result7, is(new BigDecimal("-234230.0")));
+		assertThat(result8, is(new BigDecimal("94530.0")));
+		assertThat(result9, is(new BigDecimal("-0450.0")));
+		assertThat(result10, is(new BigDecimal("8445450.0")));
 	}
 	
 	@Test
-	public void testRedactDecimal5() {
+	public void testRedactDate() {
 		// setup the test data
-		Decimal5 input1 = new Decimal5("0.212345254");
-		Decimal5 input2 = new Decimal5("112.6123123");
-		Decimal5 input3 = new Decimal5("5.123123");
-		Decimal5 input4 = new Decimal5("41.556423423432");
-		Decimal5 input5 = new Decimal5("-0.2123423342");
-		Decimal5 input6 = new Decimal5("-129.4745324531");
-		Decimal5 input7 = new Decimal5("023.11123123");
-		Decimal5 input8 = new Decimal5("94531.9123121");
-		Decimal5 input9 = new Decimal5("0454.01231231");
-		Decimal5 input10 = new Decimal5("8445454.12131");
+		Date input1 =  Date.valueOf(LocalDate.of(2000, 1, 15));
+		Date input2 =  Date.valueOf(LocalDate.of(1989, 6, 11));
+		Date input3 =  Date.valueOf(LocalDate.of(2000, 6, 23));
+		Date input4 =  Date.valueOf(LocalDate.of(2010, 4, 15));
+		Date input5 =  Date.valueOf(LocalDate.of(2020, 3, 2));
+		Date input6 =  Date.valueOf(LocalDate.of(2000, 11, 28));
+		Date input7 =  Date.valueOf(LocalDate.of(1990, 10, 25));
+		Date input8 =  Date.valueOf(LocalDate.of(1991, 10, 19));
+		Date input9 =  Date.valueOf(LocalDate.of(1972, 9, 6));
+		Date input10 = Date.valueOf(LocalDate.of(1892, 11, 3));
 		
 		// call the method under test
-		Decimal5 result1 = redactNumeric(input1);
-		Decimal5 result2 = redactNumeric(input2);
-		Decimal5 result3 = redactNumeric(input3);
-		Decimal5 result4 = redactNumeric(input4);
-		Decimal5 result5 = redactNumeric(input5);
-		Decimal5 result6 = redactNumeric(input6);
-		Decimal5 result7 = redactNumeric(input7);
-		Decimal5 result8 = redactNumeric(input8);
-		Decimal5 result9 = redactNumeric(input9);
-		Decimal5 result10 = redactNumeric(input10);
+		Date result1 = redactDate(input1);
+		Date result2 = redactDate(input2);
+		Date result3 = redactDate(input3);
+		Date result4 = redactDate(input4);
+		Date result5 = redactDate(input5);
+		Date result6 = redactDate(input6);
+		Date result7 = redactDate(input7);
+		Date result8 = redactDate(input8);
+		Date result9 = redactDate(input9);
+		Date result10 = redactDate(input10);
 		
 		// verify the result
-		assertThat(result1, is(new Decimal5("0")));
-		assertThat(result2, is(new Decimal5("110")));
-		assertThat(result3, is(new Decimal5("10")));
-		assertThat(result4, is(new Decimal5("40")));
-		assertThat(result5, is(new Decimal5("0")));
-		assertThat(result6, is(new Decimal5("-130")));
-		assertThat(result7, is(new Decimal5("20")));
-		assertThat(result8, is(new Decimal5("94530")));
-		assertThat(result9, is(new Decimal5("450")));
-		assertThat(result10, is(new Decimal5("8445450")));
-	}
-	
-	@Test
-	public void testRedactDecimal10() {
-		// setup the test data
-		Decimal10 input1 = new Decimal10("0.212342342345254");
-		Decimal10 input2 = new Decimal10("12342.6123234223");
-		Decimal10 input3 = new Decimal10("2345.123234123");
-		Decimal10 input4 = new Decimal10("23141.5523234426423423432");
-		Decimal10 input5 = new Decimal10("-1230.2123423342");
-		Decimal10 input6 = new Decimal10("-123411230.2123423342");
-		Decimal10 input7 = new Decimal10("-234234.143543");
-		Decimal10 input8 = new Decimal10("94531.9123121231");
-		Decimal10 input9 = new Decimal10("-0454.012312312");
-		Decimal10 input10 = new Decimal10("8445454.12123131");
-		
-		// call the method under test
-		Decimal10 result1 = redactNumeric(input1);
-		Decimal10 result2 = redactNumeric(input2);
-		Decimal10 result3 = redactNumeric(input3);
-		Decimal10 result4 = redactNumeric(input4);
-		Decimal10 result5 = redactNumeric(input5);
-		Decimal10 result6 = redactNumeric(input6);
-		Decimal10 result7 = redactNumeric(input7);
-		Decimal10 result8 = redactNumeric(input8);
-		Decimal10 result9 = redactNumeric(input9);
-		Decimal10 result10 = redactNumeric(input10);
-		
-		// verify the result
-		assertThat(result1, is(new Decimal10("0")));
-		assertThat(result2, is(new Decimal10("12340")));
-		assertThat(result3, is(new Decimal10("2350")));
-		assertThat(result4, is(new Decimal10("23140")));
-		assertThat(result5, is(new Decimal10("-1230")));
-		assertThat(result6, is(new Decimal10("-123411230")));
-		assertThat(result7, is(new Decimal10("-234230")));
-		assertThat(result8, is(new Decimal10("94530")));
-		assertThat(result9, is(new Decimal10("-0450")));
-		assertThat(result10, is(new Decimal10("8445450")));
-	}
-	
-	@Test
-	public void testRedactDateOnly() {
-		// setup the test data
-		DateOnly input1 = new DateOnly(LocalDate.of(2000, 1, 15));
-		DateOnly input2 = new DateOnly(LocalDate.of(1989, 6, 11));
-		DateOnly input3 = new DateOnly(LocalDate.of(2000, 6, 23));
-		DateOnly input4 = new DateOnly(LocalDate.of(2010, 4, 15));
-		DateOnly input5 = new DateOnly(LocalDate.of(2020, 3, 2));
-		DateOnly input6 = new DateOnly(LocalDate.of(2000, 11, 28));
-		DateOnly input7 = new DateOnly(LocalDate.of(1990, 10, 25));
-		DateOnly input8 = new DateOnly(LocalDate.of(1991, 10, 19));
-		DateOnly input9 = new DateOnly(LocalDate.of(1972, 9, 6));
-		DateOnly input10 = new DateOnly(LocalDate.of(1892, 11, 3));
-		
-		// call the method under test
-		DateOnly result1 = redactDateOnly(input1);
-		DateOnly result2 = redactDateOnly(input2);
-		DateOnly result3 = redactDateOnly(input3);
-		DateOnly result4 = redactDateOnly(input4);
-		DateOnly result5 = redactDateOnly(input5);
-		DateOnly result6 = redactDateOnly(input6);
-		DateOnly result7 = redactDateOnly(input7);
-		DateOnly result8 = redactDateOnly(input8);
-		DateOnly result9 = redactDateOnly(input9);
-		DateOnly result10 = redactDateOnly(input10);
-		
-		// verify the result
-		assertThat(result1, is(new DateOnly(LocalDate.of(2000, 1, 1))));
-		assertThat(result2, is(new DateOnly(LocalDate.of(1989, 6, 1))));
-		assertThat(result3, is(new DateOnly(LocalDate.of(2000, 6, 1))));
-		assertThat(result4, is(new DateOnly(LocalDate.of(2010, 4, 1))));
-		assertThat(result5, is(new DateOnly(LocalDate.of(2020, 3, 1))));
-		assertThat(result6, is(new DateOnly(LocalDate.of(2000, 11, 1))));
-		assertThat(result7, is(new DateOnly(LocalDate.of(1990, 10, 1))));
-		assertThat(result8, is(new DateOnly(LocalDate.of(1991, 10, 1))));
-		assertThat(result9, is(new DateOnly(LocalDate.of(1972, 9, 1))));
-		assertThat(result10, is(new DateOnly(LocalDate.of(1892, 11, 1))));
-	}
-	
-	@Test
-	public void testRedactDateTime() {
-		// setup the test data
-		DateTime input1 = new DateTime(LocalDateTime.of(2000, 1, 15, 23, 58));
-		DateTime input2 = new DateTime(LocalDateTime.of(1989, 5, 11, 21, 45));
-		DateTime input3 = new DateTime(LocalDateTime.of(2000, 8, 8, 18, 45));
-		DateTime input4 = new DateTime(LocalDateTime.of(2010, 2, 1, 14, 19));
-		DateTime input5 = new DateTime(LocalDateTime.of(2020, 9, 18, 11, 59));
-		DateTime input6 = new DateTime(LocalDateTime.of(2000, 11, 23, 17, 22));
-		DateTime input7 = new DateTime(LocalDateTime.of(1990, 12, 11, 19, 11));
-		DateTime input8 = new DateTime(LocalDateTime.of(1991, 2, 12, 23, 36));
-		DateTime input9 = new DateTime(LocalDateTime.of(1972, 3, 15, 18, 8));
-		DateTime input10 = new DateTime(LocalDateTime.of(1892, 1, 14, 21, 5));
-		
-		// call the method under test
-		DateTime result1 = redactDateTime(input1);
-		DateTime result2 = redactDateTime(input2);
-		DateTime result3 = redactDateTime(input3);
-		DateTime result4 = redactDateTime(input4);
-		DateTime result5 = redactDateTime(input5);
-		DateTime result6 = redactDateTime(input6);
-		DateTime result7 = redactDateTime(input7);
-		DateTime result8 = redactDateTime(input8);
-		DateTime result9 = redactDateTime(input9);
-		DateTime result10 = redactDateTime(input10);
-		
-		// verify the result
-		assertThat(result1, is(new DateTime(LocalDateTime.of(2000, 1, 1, 0, 0))));
-		assertThat(result2, is(new DateTime(LocalDateTime.of(1989, 5, 1, 0, 0))));
-		assertThat(result3, is(new DateTime(LocalDateTime.of(2000, 8, 1, 0, 0))));
-		assertThat(result4, is(new DateTime(LocalDateTime.of(2010, 2, 1, 0, 0))));
-		assertThat(result5, is(new DateTime(LocalDateTime.of(2020, 9, 1, 0, 0))));
-		assertThat(result6, is(new DateTime(LocalDateTime.of(2000, 11, 1, 0, 0))));
-		assertThat(result7, is(new DateTime(LocalDateTime.of(1990, 12, 1, 0, 0))));
-		assertThat(result8, is(new DateTime(LocalDateTime.of(1991, 2, 1, 0, 0))));
-		assertThat(result9, is(new DateTime(LocalDateTime.of(1972, 3, 1, 0, 0))));
-		assertThat(result10, is(new DateTime(LocalDateTime.of(1892, 1, 1, 0, 0))));
-	}
-	
-	@Test
-	public void testRedactTimeOnly() {
-		// setup the test data
-		TimeOnly input1 = new TimeOnly(LocalTime.of(1, 2, 3, 4));
-		TimeOnly input2 = new TimeOnly(LocalTime.of(23, 58, 56, 6));
-		TimeOnly input3 = new TimeOnly(LocalTime.of(11, 34, 34, 99));
-		TimeOnly input4 = new TimeOnly(LocalTime.of(17, 56, 23, 14));
-		TimeOnly input5 = new TimeOnly(LocalTime.of(9, 21, 13, 44));
-		TimeOnly input6 = new TimeOnly(LocalTime.of(4, 12, 43, 43));
-		TimeOnly input7 = new TimeOnly(LocalTime.of(22, 2, 3, 42));
-		TimeOnly input8 = new TimeOnly(LocalTime.of(19, 42, 31, 23));
-		TimeOnly input9 = new TimeOnly(LocalTime.of(12, 28, 10, 23));
-		TimeOnly input10 = new TimeOnly(LocalTime.of(7, 18, 3, 92));
-		
-		// call the method under test
-		TimeOnly result1 = redactTimeOnly(input1);
-		TimeOnly result2 = redactTimeOnly(input2);
-		TimeOnly result3 = redactTimeOnly(input3);
-		TimeOnly result4 = redactTimeOnly(input4);
-		TimeOnly result5 = redactTimeOnly(input5);
-		TimeOnly result6 = redactTimeOnly(input6);
-		TimeOnly result7 = redactTimeOnly(input7);
-		TimeOnly result8 = redactTimeOnly(input8);
-		TimeOnly result9 = redactTimeOnly(input9);
-		TimeOnly result10 = redactTimeOnly(input10);
-		
-		// verify the result
-		assertThat(result1, is(new TimeOnly(LocalTime.of(1, 0, 0, 0))));
-		assertThat(result2, is(new TimeOnly(LocalTime.of(23, 0, 0, 0))));
-		assertThat(result3, is(new TimeOnly(LocalTime.of(11, 0, 0, 0))));
-		assertThat(result4, is(new TimeOnly(LocalTime.of(17, 0, 0, 0))));
-		assertThat(result5, is(new TimeOnly(LocalTime.of(9, 0, 0, 0))));
-		assertThat(result6, is(new TimeOnly(LocalTime.of(4, 0, 0, 0))));
-		assertThat(result7, is(new TimeOnly(LocalTime.of(22, 0, 0, 0))));
-		assertThat(result8, is(new TimeOnly(LocalTime.of(19, 0, 0, 0))));
-		assertThat(result9, is(new TimeOnly(LocalTime.of(12, 0, 0, 0))));
-		assertThat(result10, is(new TimeOnly(LocalTime.of(7, 0, 0, 0))));
+		assertThat(result1, is(Date.valueOf(LocalDate.of(2000, 1, 1))));
+		assertThat(result2, is(Date.valueOf(LocalDate.of(1989, 6, 1))));
+		assertThat(result3, is(Date.valueOf(LocalDate.of(2000, 6, 1))));
+		assertThat(result4, is(Date.valueOf(LocalDate.of(2010, 4, 1))));
+		assertThat(result5, is(Date.valueOf(LocalDate.of(2020, 3, 1))));
+		assertThat(result6, is(Date.valueOf(LocalDate.of(2000, 11, 1))));
+		assertThat(result7, is(Date.valueOf(LocalDate.of(1990, 10, 1))));
+		assertThat(result8, is(Date.valueOf(LocalDate.of(1991, 10, 1))));
+		assertThat(result9, is(Date.valueOf(LocalDate.of(1972, 9, 1))));
+		assertThat(result10, is(Date.valueOf(LocalDate.of(1892, 11, 1))));
 	}
 	
 	@Test
 	public void testRedactTimestamp() {
 		// setup the test data
-		Timestamp input1 = new Timestamp(LocalDateTime.of(2000, 1, 15, 23, 58));
-		Timestamp input2 = new Timestamp(LocalDateTime.of(1989, 5, 11, 21, 45));
-		Timestamp input3 = new Timestamp(LocalDateTime.of(2000, 8, 8, 18, 45));
-		Timestamp input4 = new Timestamp(LocalDateTime.of(2010, 2, 1, 14, 19));
-		Timestamp input5 = new Timestamp(LocalDateTime.of(2020, 9, 18, 11, 59));
-		Timestamp input6 = new Timestamp(LocalDateTime.of(2000, 11, 23, 17, 22));
-		Timestamp input7 = new Timestamp(LocalDateTime.of(1990, 12, 11, 19, 11));
-		Timestamp input8 = new Timestamp(LocalDateTime.of(1991, 2, 12, 23, 36));
-		Timestamp input9 = new Timestamp(LocalDateTime.of(1972, 3, 15, 18, 8));
-		Timestamp input10 = new Timestamp(LocalDateTime.of(1892, 1, 14, 21, 5));
+		java.sql.Timestamp input1 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 15, 23, 58));
+		java.sql.Timestamp input2 = java.sql.Timestamp.valueOf(LocalDateTime.of(1989, 5, 11, 21, 45));
+		java.sql.Timestamp input3 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 8, 8, 18, 45));
+		java.sql.Timestamp input4 = java.sql.Timestamp.valueOf(LocalDateTime.of(2010, 2, 1, 14, 19));
+		java.sql.Timestamp input5 = java.sql.Timestamp.valueOf(LocalDateTime.of(2020, 9, 18, 11, 59));
+		java.sql.Timestamp input6 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 11, 23, 17, 22));
+		java.sql.Timestamp input7 = java.sql.Timestamp.valueOf(LocalDateTime.of(1990, 12, 11, 19, 11));
+		java.sql.Timestamp input8 = java.sql.Timestamp.valueOf(LocalDateTime.of(1991, 2, 12, 23, 36));
+		java.sql.Timestamp input9 = java.sql.Timestamp.valueOf(LocalDateTime.of(1972, 3, 15, 18, 8));
+		java.sql.Timestamp input10 = java.sql.Timestamp.valueOf(LocalDateTime.of(1892, 1, 14, 21, 5));
 		
 		// call the method under test
-		Timestamp result1 = redactTimestamp(input1);
-		Timestamp result2 = redactTimestamp(input2);
-		Timestamp result3 = redactTimestamp(input3);
-		Timestamp result4 = redactTimestamp(input4);
-		Timestamp result5 = redactTimestamp(input5);
-		Timestamp result6 = redactTimestamp(input6);
-		Timestamp result7 = redactTimestamp(input7);
-		Timestamp result8 = redactTimestamp(input8);
-		Timestamp result9 = redactTimestamp(input9);
-		Timestamp result10 = redactTimestamp(input10);
+		java.sql.Timestamp result1 = redactTimestamp(input1);
+		java.sql.Timestamp result2 = redactTimestamp(input2);
+		java.sql.Timestamp result3 = redactTimestamp(input3);
+		java.sql.Timestamp result4 = redactTimestamp(input4);
+		java.sql.Timestamp result5 = redactTimestamp(input5);
+		java.sql.Timestamp result6 = redactTimestamp(input6);
+		java.sql.Timestamp result7 = redactTimestamp(input7);
+		java.sql.Timestamp result8 = redactTimestamp(input8);
+		java.sql.Timestamp result9 = redactTimestamp(input9);
+		java.sql.Timestamp result10 = redactTimestamp(input10);
 		
 		// verify the result
-		assertThat(result1, is(new Timestamp(LocalDateTime.of(2000, 1, 1, 0, 0))));
-		assertThat(result2, is(new Timestamp(LocalDateTime.of(1989, 5, 1, 0, 0))));
-		assertThat(result3, is(new Timestamp(LocalDateTime.of(2000, 8, 1, 0, 0))));
-		assertThat(result4, is(new Timestamp(LocalDateTime.of(2010, 2, 1, 0, 0))));
-		assertThat(result5, is(new Timestamp(LocalDateTime.of(2020, 9, 1, 0, 0))));
-		assertThat(result6, is(new Timestamp(LocalDateTime.of(2000, 11, 1, 0, 0))));
-		assertThat(result7, is(new Timestamp(LocalDateTime.of(1990, 12, 1, 0, 0))));
-		assertThat(result8, is(new Timestamp(LocalDateTime.of(1991, 2, 1, 0, 0))));
-		assertThat(result9, is(new Timestamp(LocalDateTime.of(1972, 3, 1, 0, 0))));
-		assertThat(result10, is(new Timestamp(LocalDateTime.of(1892, 1, 1, 0, 0))));
+		assertThat(result1, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 0))));
+		assertThat(result2, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1989, 5, 1, 0, 0))));
+		assertThat(result3, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 8, 1, 0, 0))));
+		assertThat(result4, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2010, 2, 1, 0, 0))));
+		assertThat(result5, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2020, 9, 1, 0, 0))));
+		assertThat(result6, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 11, 1, 0, 0))));
+		assertThat(result7, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1990, 12, 1, 0, 0))));
+		assertThat(result8, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1991, 2, 1, 0, 0))));
+		assertThat(result9, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1972, 3, 1, 0, 0))));
+		assertThat(result10, is(java.sql.Timestamp.valueOf(LocalDateTime.of(1892, 1, 1, 0, 0))));
+	}
+	
+	@Test
+	public void testRedactTime() {
+		// setup the test data
+		Time input1 = Time.valueOf(LocalTime.of(1, 2, 3, 4));
+		Time input2 = Time.valueOf(LocalTime.of(23, 58, 56, 6));
+		Time input3 = Time.valueOf(LocalTime.of(11, 34, 34, 99));
+		Time input4 = Time.valueOf(LocalTime.of(17, 56, 23, 14));
+		Time input5 = Time.valueOf(LocalTime.of(9, 21, 13, 44));
+		Time input6 = Time.valueOf(LocalTime.of(4, 12, 43, 43));
+		Time input7 = Time.valueOf(LocalTime.of(22, 2, 3, 42));
+		Time input8 = Time.valueOf(LocalTime.of(19, 42, 31, 23));
+		Time input9 = Time.valueOf(LocalTime.of(12, 28, 10, 23));
+		Time input10 = Time.valueOf(LocalTime.of(7, 18, 3, 92));
+		
+		// call the method under test
+		Time result1 = redactTime(input1);
+		Time result2 = redactTime(input2);
+		Time result3 = redactTime(input3);
+		Time result4 = redactTime(input4);
+		Time result5 = redactTime(input5);
+		Time result6 = redactTime(input6);
+		Time result7 = redactTime(input7);
+		Time result8 = redactTime(input8);
+		Time result9 = redactTime(input9);
+		Time result10 = redactTime(input10);
+		
+		// verify the result
+		assertThat(result1, is(Time.valueOf(LocalTime.of(1, 0, 0, 0))));
+		assertThat(result2, is(Time.valueOf(LocalTime.of(23, 0, 0, 0))));
+		assertThat(result3, is(Time.valueOf(LocalTime.of(11, 0, 0, 0))));
+		assertThat(result4, is(Time.valueOf(LocalTime.of(17, 0, 0, 0))));
+		assertThat(result5, is(Time.valueOf(LocalTime.of(9, 0, 0, 0))));
+		assertThat(result6, is(Time.valueOf(LocalTime.of(4, 0, 0, 0))));
+		assertThat(result7, is(Time.valueOf(LocalTime.of(22, 0, 0, 0))));
+		assertThat(result8, is(Time.valueOf(LocalTime.of(19, 0, 0, 0))));
+		assertThat(result9, is(Time.valueOf(LocalTime.of(12, 0, 0, 0))));
+		assertThat(result10, is(Time.valueOf(LocalTime.of(7, 0, 0, 0))));
 	}
 	
 	@Test

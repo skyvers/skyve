@@ -9,13 +9,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
@@ -29,11 +33,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
-import org.skyve.domain.types.Decimal10;
-import org.skyve.domain.types.Decimal2;
-import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
-import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
@@ -47,6 +48,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.SensitivityType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
@@ -57,10 +59,12 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
-import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 final class BackupUtil {
+
+	private static final String DATA_SENSITIVITY_PROPERTY_NAME = "dataSensitivity";
+	
 	private BackupUtil() {
 		// nothing to see here
 	}
@@ -366,116 +370,128 @@ final class BackupUtil {
 	}
 	
 	/**
-	 * Performs a redaction of data depending on sensitivity level parsed.
+	 * Fetch sensitivity index, calculated from ordinal value of {@link SensitivityType} selected in UI.
 	 * 
-	 * Sensitivity is defined at attribute level in document XML.
+	 * Returns 0 if no sensitivity level is selected.
 	 * 
-	 * Any attribute at the parsed sensitivity level or above is redacted.
-	 * 
-	 * @param sensitivity Redaction sensitivity level
-	 * 
-	 * @author Simeon Solomou
+	 * @param bean DataMaintenance bean
 	 */
-	static void redactSensitiveData(SensitivityType sensitivity) {
-		int sensitivityBenchmark = sensitivity.ordinal();
-		AbstractPersistence persistence = AbstractPersistence.get();
-		Customer customer = persistence.getUser().getCustomer();
+	static int getSensitivityIndex(Bean bean) {
+		if (bean != null) {
+			Object sensitivityInput = BindUtil.get(bean, DATA_SENSITIVITY_PROPERTY_NAME);
+			if (sensitivityInput != null) {
+				return SensitivityType.valueOf(sensitivityInput.toString()).ordinal();
+			}
+		}
+		
+		return 0;
+	}
+	
+	/**
+	 * Constructs and returns a set of attributes (table.column) to redact.
+	 * 
+	 * @param sensitivityIndex Sensitivity benchmark. If any attribute has a greater than or equal to sensitivity score, it is redacted.
+	 */
+	static Set<String> getAttributesToRedact(int sensitivityIndex) {
+		Customer customer = CORE.getPersistence().getUser().getCustomer();
+		Set<String> attributesToRedact = new HashSet<>();
+		
+		if (sensitivityIndex == 0) {
+			// Nothing to redact
+			return attributesToRedact;
+		}
 		
 		// Construct map of attributes to redact
-		Map<Document, List<String>> attributesToRedact = new HashMap<>();
 		for (Module module : customer.getModules()) {
 			for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 				DocumentRef documentRef = entry.getValue();
 				if (documentRef.getOwningModuleName().equals(module.getName())) {
 					Document document = module.getDocument(customer, entry.getKey());
-					for (Attribute a : document.getAllAttributes(customer)) {
-						int sensitivityScore = a.getSensitivity() != null ? a.getSensitivity().ordinal() : -1;
-						if (sensitivityScore >= sensitivityBenchmark) {
-							List<String> documentAttributesToRedact = attributesToRedact.get(document);
-							if (documentAttributesToRedact == null) {
-								documentAttributesToRedact = new ArrayList<>();
-							}
-							documentAttributesToRedact.add(a.getName());
-							attributesToRedact.put(document, documentAttributesToRedact);
+					if (document.isPersistable()) {
+						String tableName = document.getPersistent().getPersistentIdentifier();
+						for (Attribute a : document.getAllAttributes(customer)) {
+							int sensitivityScore = a.getSensitivity() != null ? a.getSensitivity().ordinal() : 0;
+							if (sensitivityScore >= sensitivityIndex) {
+								attributesToRedact.add(tableName + "." + a.getName());					}
 						}
 					}
 				}
 			}
 		}
 		
-		// Perform redaction
-		for (Document document : attributesToRedact.keySet()) {
-			List<String> attributeNames = attributesToRedact.get(document);
-			
-			String moduleName = document.getOwningModuleName();
-			String documentName = document.getName();
-			List<PersistentBean> beans = persistence.newDocumentQuery(moduleName, documentName).beanResults();
-			for (PersistentBean bean : beans) {
-				for (String attributeBinding : attributeNames) {
-					redactData(bean, attributeBinding);
-				}
-				persistence.upsertBeanTuple(bean);
-			}
-		}
+		return attributesToRedact;
 	}
 	
 	/**
-	 * Redacts data by masking its middle section with asterisks,
-	 * replacing with sample data, or nullifying.
+	 * Redacts data depending on type for most scalar types.
 	 * 
-	 * Only for scalar attributes (excluding Enum).
+	 * Returns value unchanged if redaction for this type is not (yet) supported.
+	 *  
+	 * @param value The Skyve record to be obfuscated
 	 * 
-	 * @param bean The Skyve record to be obfuscated
-	 * @param propertyName The attribute of the Skyve record to be obfuscated
+	 * @author Simeon Solomou
 	 */
-	private static void redactData(Bean bean, String propertyName) {
-		Object value = Binder.get(bean, propertyName);
+	static Object redactData(AttributeType attributeType, Object value) {
 		if (value != null) {
-			if (value instanceof String) {
-				String redactedValue = redactString((String) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof Integer) {
-				Integer redactedValue = redactNumeric((Integer) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof Long) {
-				Long redactedValue = redactNumeric((Long) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof Decimal2) {
-				Decimal2 redactedValue = redactNumeric((Decimal2) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof Decimal5) {
-				Decimal5 redactedValue = redactNumeric((Decimal5) value);
-				Binder.set(bean, propertyName, redactedValue);	
-			}
-			else if (value instanceof Decimal10) {
-				Decimal10 redactedValue = redactNumeric((Decimal10) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof DateOnly) {
-				DateOnly redactedValue = redactDateOnly((DateOnly) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof DateTime) {
-				DateTime redactedValue = redactDateTime((DateTime) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof TimeOnly) {
-				TimeOnly redactedValue = redactTimeOnly((TimeOnly) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof Timestamp) {
-				Timestamp redactedValue = redactTimestamp((Timestamp) value);
-				Binder.set(bean, propertyName, redactedValue);
-			}
-			else if (value instanceof Geometry) {
-				Geometry redactedValue = redactGeometry((Geometry) value);
-				Binder.set(bean, propertyName, redactedValue);
+			switch (attributeType) {
+			case association:
+				// Nothing to see here
+				break;
+			case bool:
+				// Nothing to see here
+				break;
+			case collection:
+				// Nothing to see here
+				break;
+			case colour:
+				// Nothing to see here
+				break;
+			case content:
+				return null; // Nullify content fields
+			case date:
+				return redactDate((Date) value);
+			case dateTime:
+				return redactTimestamp((java.sql.Timestamp) value);
+			case decimal10:
+				return redactNumeric((BigDecimal) value);
+			case decimal2:
+				return redactNumeric((BigDecimal) value);
+			case decimal5:
+				return redactNumeric((BigDecimal) value);
+			case enumeration:
+				// Nothing to see here
+				break;
+			case geometry:
+				return redactGeometry((Geometry) value);
+			case id:
+				return redactString((String) value);
+			case image:
+				return null; // Nullify content fields
+			case integer:
+				return redactNumeric((Integer) value);
+			case inverseMany:
+				// Nothing to see here
+				break;
+			case inverseOne:
+				// Nothing to see here
+				break;
+			case longInteger:
+				return redactNumeric((Long) value);
+			case markup:
+				return redactString((String) value);
+			case memo:
+				return redactString((String) value);
+			case text:
+				return redactString((String) value);
+			case time:
+				return redactTime((Time) value);
+			case timestamp:
+				return redactTimestamp((java.sql.Timestamp) value);
+			default:
+				break;
 			}
 		}
+		return value;
 	}
 	
 	/**
@@ -534,11 +550,6 @@ final class BackupUtil {
 		// calculate the number of asterisks to be used
 		int asteriskCount = data.length() - charsToShowAtStart - charsToShowAtEnd;
 
-		// set the min asterisk count to 4
-		if (asteriskCount < 5) {
-			asteriskCount = 4;
-		}
-
 		// set the max asterisk count to 10
 		if (asteriskCount > 10) {
 			asteriskCount = 10;
@@ -579,14 +590,8 @@ final class BackupUtil {
 			long longValue = (long) result;
 			return (T) Long.valueOf(longValue);
 		}
-		else if (data instanceof Decimal2) {
-			return (T) new Decimal2(result);
-		}
-		else if (data instanceof Decimal5) {
-			return (T) new Decimal5(result);
-		}
-		else if (data instanceof Decimal10) {
-			return (T) new Decimal10(result);
+		else if (data instanceof BigDecimal) {
+			return (T) BigDecimal.valueOf(result);
 		}
 		
 		return null;
@@ -597,23 +602,13 @@ final class BackupUtil {
 	 * 
 	 * @param data The date to be redacted
 	 * @return The redacted date
-	 */
-	public static DateOnly redactDateOnly(DateOnly data) {
-		
-		return new DateOnly(data.toLocalDate()
-				.withDayOfMonth(1));
-	}
-	
-	/**
-	 * Redacts {@link DateTime} attribute by rounding it's value to the first day of the month.
 	 * 
-	 * @param data The date-time to be redacted
-	 * @return The redacted date
+	 * @author Simeon Solomou
 	 */
-	public static DateTime redactDateTime(DateTime data) {
+	public static Date redactDate(Date data) {
 		
-		return new DateTime(data.toLocalDateTime()
-				.withDayOfMonth(1).withHour(0).withMinute(0));
+		return Date.valueOf(data.toLocalDate()
+				.withDayOfMonth(1));
 	}
 	
 	/**
@@ -621,23 +616,27 @@ final class BackupUtil {
 	 * 
 	 * @param data The time to be redacted
 	 * @return The redacted time
+	 * 
+	 * @author Simeon Solomou
 	 */
-	public static TimeOnly redactTimeOnly(TimeOnly data) {
+	public static Time redactTime(Time data) {
 		
-		return new TimeOnly(data.toLocalTime()
+		return Time.valueOf(data.toLocalTime()
 				.withMinute(0).withSecond(0).withNano(0));
 	}
 	
 	/**
-	 * Redacts {@link Timestamp} attribute by rounding it's value to the first day of the month.
+	 * Redacts {@link DateTime} attribute by rounding it's value to the first day of the month.
 	 * 
-	 * @param data The time stamp to be redacted
-	 * @return The redacted time
+	 * @param data The date-time to be redacted
+	 * @return The redacted date
+	 * 
+	 * @author Simeon Solomou
 	 */
-	public static Timestamp redactTimestamp(Timestamp data) {
+	public static java.sql.Timestamp redactTimestamp(java.sql.Timestamp data) {
 		
-		return new Timestamp(data.toLocalDateTime()
-				.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0));
+		return java.sql.Timestamp.valueOf(data.toLocalDateTime()
+				.withDayOfMonth(1).withHour(0).withMinute(0));
 	}
 	
 	/**
@@ -645,6 +644,8 @@ final class BackupUtil {
 	 * 
 	 * @param data The geometry to be redacted
 	 * @return The redacted geometry
+	 * 
+	 * @author Simeon Solomou
 	 */
 	public static Geometry redactGeometry(Geometry data) {
 		
