@@ -26,10 +26,14 @@ import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
@@ -357,6 +361,45 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
+			public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = image.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
+			public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = link.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
+			public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = signature.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
 				String modelName = chart.getModelName();
 
@@ -392,6 +435,14 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			// NB DataRepeater cannot zoom in
+			
+			@Override
+			public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String imageName = image.getName();
+					accesses.add(UserAccess.dynamicImage(moduleName, documentName, imageName));
+				}
+			}
 
 			@Override
 			public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {

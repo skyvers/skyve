@@ -323,6 +323,14 @@ public class RestService {
 			}
 	        
 	        List<Bean> beans = qm.fetch().getRows();
+	        
+	        // Nullify flag comment if not given permissions
+	        if (! u.canFlag()) {
+	        	for (Bean bean : beans) {
+	        		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+	        	}
+	        }
+	        
 	        result = JSON.marshall(c, beans, qm.getProjections());
 		}
 		catch (Throwable t) {

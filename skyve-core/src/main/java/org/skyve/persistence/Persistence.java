@@ -2,6 +2,8 @@ package org.skyve.persistence;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -247,16 +249,21 @@ public interface Persistence extends Serializable {
 	public void reindex(PersistentBean beanToReindex) throws Exception;
 
 	/**
-	 * Sets all document scopes for this persistence instance.
+	 * Sets all document scopes for this persistence instance and applies the function.
+	 * It is guaranteed that the document scopes are reset at the end of the method call.
 	 * @param scope	The scope to use for ALL documents.
+	 * @param function	The function to apply.
 	 */
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope);
+	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function);
 
 	/**
-	 * Resets ALL the document scopes to what the user is allowed to access.
+	 * Sets all document scopes for this persistence instance and accepts the consumer.
+	 * It is guaranteed that the document scopes are reset at the end of the method call.
+	 * @param scope	The scope to use for ALL documents.
+	 * @param function	The function to apply.
 	 */
-	public void resetDocumentPermissionScopes();
-	
+	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer);
+
 	/**
 	 * 
 	 * @param query

@@ -18,7 +18,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
-import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.web.WebContext;
@@ -36,15 +35,7 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 	@Override
 	public ConfigurationExtension newInstance(ConfigurationExtension bean) throws Exception {
 		// temporarily elevate access to find existing configuration regardless of user
-		final Persistence p = CORE.getPersistence();
-		ConfigurationExtension result = null;
-		try {
-			p.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			result = super.newInstance(bean);
-		}
-		finally {
-			p.resetDocumentPermissionScopes();
-		}
+		ConfigurationExtension result = newInstance(bean, DocumentPermissionScope.customer);
 
 		// Set the startup and set the emailFrom to the startup mailsender
 		if (result.getStartup() == null) {

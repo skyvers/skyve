@@ -21,6 +21,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
@@ -59,7 +60,9 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -891,6 +894,36 @@ public class FacesView extends HarnessView {
 					throw new ValidationException("Signature was not found");
 				}
 				Bean bean = getCurrentBean().getBean();
+				
+				User user = getUser();
+				String username = user.getName();
+				Document document = bean.getDocumentMetaData();
+				if (! user.canAccessDocument(document)) {
+					throw new SecurityException("view this document", username);
+				}
+				if (document.isPersistable()) {
+					if (bean.isPersisted()) {
+						if (! user.canUpdateDocument(document)) {
+							throw new SecurityException("update this document", username);
+						}
+					}
+					else {
+						if (! user.canCreateDocument(document)) {
+							throw new SecurityException("create this document", username);
+						}
+					}
+				}
+				
+				String bizId = bean.getBizId();
+				String bizModule = bean.getBizModule();
+				String bizDocument = bean.getBizDocument();
+				String bizCustomer = bean.getBizCustomer();
+				String bizDataGroupId = bean.getBizDataGroupId();
+				String bizUserId = bean.getBizUserId();
+				if (! user.canAccessContent(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId, binding)) {
+					throw new SecurityException("sign this content", username);
+				}
+				
 				try (ContentManager cm = EXT.newContentManager()) {
 					byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
 					final AttachmentContent ac = new AttachmentContent(bean.getBizCustomer(),

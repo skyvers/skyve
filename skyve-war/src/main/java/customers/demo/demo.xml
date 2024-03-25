@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<customer name="demo"
-			xmlns="http://www.skyve.org/xml/customer"
-			xsi:schemaLocation="http://www.skyve.org/xml/customer ../../schemas/customer.xsd"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<customer name="demo" xmlns="http://www.skyve.org/xml/customer" xsi:schemaLocation="http://www.skyve.org/xml/customer ../../schemas/customer.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<uiResources logo="skyve-logo-black.png" />
 	<defaultDateConverter>DD_MMM_YYYY</defaultDateConverter>
 	<defaultTimeConverter>HH24_MI</defaultTimeConverter>
@@ -13,6 +11,15 @@
 		<module name="whosin" />
 		<module name="kitchensink" />
 	</modules>
+	<textSearchRoles>
+		<role module="admin" name="BasicUser" />
+	</textSearchRoles>
+	<flagRoles>
+		<role module="admin" name="BasicUser" />
+	</flagRoles>
+	<switchModeRoles>
+		<role module="admin" name="BasicUser" />
+	</switchModeRoles>
 	<interceptors>
 		<interceptor className="modules.admin.RDBMSAuditInterceptor" />
 	</interceptors>

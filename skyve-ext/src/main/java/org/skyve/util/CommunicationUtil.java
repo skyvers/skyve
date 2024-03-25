@@ -12,11 +12,12 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.domain.app.admin.CommunicationTemplate;
-import org.skyve.domain.app.admin.Subscription;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Communication;
 import org.skyve.domain.app.admin.Communication.FormatType;
+import org.skyve.domain.app.admin.CommunicationTemplate;
+import org.skyve.domain.app.admin.Subscription;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
@@ -287,14 +288,11 @@ public class CommunicationUtil {
 			String[] addresses = addressList.split(EMAIL_ADDRESS_DELIMETERS);
 
 			for (int i = 0; i < addresses.length; i++) {
-
-				String address = addresses[i].trim();
-
-				try {
-					// handle Subscription redirect for messages of the same format
-					CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-					DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME);
-					q.getFilter().addEquals(AppConstants.RECEIVER_IDENTIFIER_ATTRIBUTE_NAME, address);
+				// handle Subscription redirect for messages of the same format
+				final String trimmedAddress = addresses[i].trim();
+				String address = CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+					DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SUBSCRIPTION_DOCUMENT_NAME);
+					q.getFilter().addEquals(AppConstants.RECEIVER_IDENTIFIER_ATTRIBUTE_NAME, trimmedAddress);
 					Subscription subscription = q.beanResult();
 
 					if (subscription != null) {
@@ -302,20 +300,20 @@ public class CommunicationUtil {
 						if (Boolean.TRUE.equals(subscription.getDeclined())) {
 							StringBuilder msg = new StringBuilder(128);
 							msg.append(communicationDoc.getLocalisedSingularAlias()).append(" prevented because the recipient ");
-							msg.append(address).append(" has a ").append(subscriptionDoc.getLocalisedSingularAlias());
+							msg.append(trimmedAddress).append(" has a ").append(subscriptionDoc.getLocalisedSingularAlias());
 							msg.append(" set ").append(AppConstants.DECLINED_ATTRIBUTE_NAME);
 
 							// block the communication if explicit mode
 							if (ResponseMode.EXPLICIT.equals(responseMode)) {
-								throw new Exception(msg.toString());
+								throw new DomainException(msg.toString());
 							}
-						} else {
-							address = subscription.getPreferredReceiverIdentifier();
+						}
+						else {
+							return subscription.getPreferredReceiverIdentifier();
 						}
 					}
-				} finally {
-					CORE.getPersistence().resetDocumentPermissionScopes();
-				}
+					return trimmedAddress;
+				});
 
 				// validate the resulting email address
 				ValidationException ve = new ValidationException();
@@ -404,19 +402,11 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	public static Communication getSystemCommunicationByDescription(String description) throws Exception {
-		Persistence pers = CORE.getPersistence();
-		Communication result = null;
-		try {
-			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			DocumentQuery query = pers.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME);
+		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			DocumentQuery query = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME);
 			query.getFilter().addEquals(AppConstants.DESCRIPTION_ATTRIBUTE_NAME, description);
-
-			result = query.beanResult();
-		} finally {
-			pers.resetDocumentPermissionScopes();
-		}
-
-		return result;
+			return query.beanResult();
+		});
 	}
 
 	/**

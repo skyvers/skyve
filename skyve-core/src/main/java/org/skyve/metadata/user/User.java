@@ -168,10 +168,28 @@ public interface User extends NamedMetaData {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	boolean canFlag();
+	
+	/**
+	 * 
 	 * @param document
 	 * @return
 	 */
 	boolean canReadDocument(Document document);
+	
+	/**
+	 * 
+	 * @return
+	 */
+	boolean canTextSearch();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	boolean canSwitchMode();
 	
 	/**
 	 * 

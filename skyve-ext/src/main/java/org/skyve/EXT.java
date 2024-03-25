@@ -276,7 +276,6 @@ public class EXT {
 	 * 
 	 * @return a database connection from the container supplied pool.
 	 */
-	@SuppressWarnings("resource")
 	public static Connection getDataStoreConnection(DataStore dataStore) {
 		Connection result = null;
 		try {

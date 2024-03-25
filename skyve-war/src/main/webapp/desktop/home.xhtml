@@ -78,11 +78,10 @@
 				<script type="text/javascript" src="skyve/desktop/skyve-leaflet-min.js?v=#{desktop.webResourceFileVersion}"></script>
 			</c:if>
 			<script type="text/javascript">
-				SKYVE.Util.setTouchCookie();
 				isc.Canvas.resizeControls(4);
 				isc.Canvas.resizeFonts(2);
-				#{desktop.menuScript} #{desktop.dataSourceScript}
 				#{desktop.apiScript}
+				#{desktop.menuScript} #{desktop.dataSourceScript}
 				#{desktop.uiScript}
 				#{desktop.bannerScript}
 			</script>

@@ -175,12 +175,19 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					}
 				}
 				
+				boolean canFlag = user.canFlag();
+				
 				// Now extract the values out of the tuple.
 				Map<String, Object> values = new TreeMap<>();
 				for (Entry<String, FieldInfo> entry : projectionBindingToFieldInfo.entrySet()) {
 					String projection = entry.getKey();
 					// NB Set bizTagged null always
 					Object value = PersistentBean.TAGGED_NAME.equals(projection) ? null : tuple[entry.getValue().fieldIndex];
+					
+					// Nullify flag comments if not given permissions
+					if (! canFlag) {
+						value = PersistentBean.FLAG_COMMENT_NAME.equals(projection) ? null : tuple[entry.getValue().fieldIndex];
+					}
 
 					// If we have a map we know we need to get the binding out of that map (its a "fields" field)
 					if (value instanceof Map) {
@@ -201,7 +208,6 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 							e.printStackTrace();
 						}
 					}
-
 					values.put(projection, value);
 				}
 				result.add(new DynamicBean(module.getName(), document.getName(), values));

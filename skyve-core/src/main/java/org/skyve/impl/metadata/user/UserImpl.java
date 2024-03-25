@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.user;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
@@ -624,6 +626,11 @@ public class UserImpl implements User {
 
 		return result;
 	}
+	
+	@Override
+	public boolean canFlag() {
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getFlagRoles(), roleNames);
+	}
 
 	@Override
 	public boolean canReadDocument(Document document) {
@@ -636,6 +643,16 @@ public class UserImpl implements User {
 		}
 
 		return result;
+	}
+	
+	@Override
+	public boolean canTextSearch() {
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getTextSearchRoles(), roleNames);
+	}
+	
+	@Override
+	public boolean canSwitchMode() {
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getSwitchModeRoles(), roleNames);
 	}
 
 	@Override

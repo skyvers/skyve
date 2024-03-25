@@ -5,7 +5,6 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 
 import modules.admin.User.UserExtension;
@@ -17,58 +16,51 @@ public class SelfRegistrationActivationExtension extends SelfRegistrationActivat
 	private static final long serialVersionUID = -852587779096146278L;
 
 	public UserExtension activateUser(String activationCode) {
-		Persistence p = CORE.getPersistence();
-		DocumentQuery userQuery = p.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
-		userQuery.getFilter().addEquals(User.activationCodePropertyName, activationCode);
-
 		// temporarily escalate access to query and save users
-		p.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-		UserExtension user = null;
-		try {
-			user = userQuery.beanResult();
+		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			DocumentQuery userQuery = p.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
+			userQuery.getFilter().addEquals(User.activationCodePropertyName, activationCode);
 
-			try {
-				if (user == null) {
-					Util.LOGGER.warning("No user exists for activation code=" + activationCode);
-					setResult(Result.FAILURE);
-				} else if (Boolean.TRUE.equals(user.getActivated())) {
-					// User already activated, prompt them to login
-					Util.LOGGER.warning("User=" + user.getUserName() + " already activated");
-					setUser(user);
-					setResult(Result.ALREADYACTIVATED);
-				} else {
-
-					boolean expired = false;
-					// check for expiry of activation code
-					Configuration configuration = Configuration.newInstance();
-					if (configuration.getSelfRegistrationActivationExpiryHours() != null) {
-						DateTime expiryDateTime = user.getActivationCodeCreationDateTime();
-						DateTime now = new DateTime();
-						if (expiryDateTime != null) {
-							TimeUtil.addHours(expiryDateTime, configuration.getSelfRegistrationActivationExpiryHours().intValue());
-							if (now.after(expiryDateTime)) {
-								expired = true;
-							}
-
+			UserExtension result = userQuery.beanResult();
+			if (result == null) {
+				Util.LOGGER.warning("No user exists for activation code=" + activationCode);
+				setResult(Result.FAILURE);
+			}
+			else if (Boolean.TRUE.equals(result.getActivated())) {
+				// User already activated, prompt them to login
+				Util.LOGGER.warning("User=" + result.getUserName() + " already activated");
+				setUser(result);
+				setResult(Result.ALREADYACTIVATED);
+			}
+			else {
+				boolean expired = false;
+				// check for expiry of activation code
+				Configuration configuration = Configuration.newInstance();
+				if (configuration.getSelfRegistrationActivationExpiryHours() != null) {
+					DateTime expiryDateTime = result.getActivationCodeCreationDateTime();
+					DateTime now = new DateTime();
+					if (expiryDateTime != null) {
+						TimeUtil.addHours(expiryDateTime, configuration.getSelfRegistrationActivationExpiryHours().intValue());
+						if (now.after(expiryDateTime)) {
+							expired = true;
 						}
-					}
-					if (!expired) {
-						user.setActivated(Boolean.TRUE);
-						user = p.save(user);
 
-						setUser(user);
-						setResult(Result.SUCCESS);
-					} else {
-						setResult(Result.EXPIRED);
 					}
 				}
-				return user;
-			} catch (Exception e) {
-				throw e;
+				if (!expired) {
+					result.setActivated(Boolean.TRUE);
+					result = p.save(result);
+
+					setUser(result);
+					setResult(Result.SUCCESS);
+				}
+				else {
+					setResult(Result.EXPIRED);
+				}
 			}
-		} finally {
-			p.resetDocumentPermissionScopes();
-		}
+			
+			return result;
+		});
 	}
 
 	@Override
