@@ -21,7 +21,7 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
 public class Office extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -61,6 +61,9 @@ public class Office extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String demoDataPropertyName = "demoData";
+
+	/** @hidden */
+	public static final String testerPropertyName = "tester";
 
 	/**
 	 * Level/Unit
@@ -110,6 +113,11 @@ public class Office extends AbstractPersistentBean {
 	 * If this is set, the data was created by the <em>demo data job</em> and can safely be deleted.
 	 **/
 	private Boolean demoData;
+
+	/**
+	 * Tester
+	 **/
+	private Integer tester;
 
 	@Override
 	@XmlTransient
@@ -313,6 +321,24 @@ public class Office extends AbstractPersistentBean {
 	public void setDemoData(Boolean demoData) {
 		preset(demoDataPropertyName, demoData);
 		this.demoData = demoData;
+	}
+
+	/**
+	 * {@link #tester} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getTester() {
+		return tester;
+	}
+
+	/**
+	 * {@link #tester} mutator.
+	 * @param tester	The new value.
+	 **/
+	@XmlElement
+	public void setTester(Integer tester) {
+		preset(testerPropertyName, tester);
+		this.tester = tester;
 	}
 
 	/**

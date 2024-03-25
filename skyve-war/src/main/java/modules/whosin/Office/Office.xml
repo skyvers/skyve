@@ -12,44 +12,48 @@
 	<iconStyleClass>fa-regular fa-building</iconStyleClass>
 	<bizKey expression="{buildingName} {streetAddress} {suburb}"/>
 	<attributes>
-		<text name="levelUnit">
+		<text name="levelUnit" sensitivity="confidential">
 			<displayName>Level/Unit</displayName>
 			<length>200</length>
 		</text>
-		<text name="buildingName">
+		<text name="buildingName" sensitivity="internal">
 			<displayName>Building Name</displayName>
 			<length>200</length>
 		</text>
-		<text name="streetAddress">
+		<text name="streetAddress" sensitivity="confidential">
 			<displayName>Street Address</displayName>
 			<length>200</length>
 		</text>
-		<text name="suburb">
+		<text name="suburb" sensitivity="confidential">
 			<displayName>Suburb</displayName>
 			<length>200</length>
 		</text>
-		<text name="postCode">
+		<text name="postCode" sensitivity="confidential">
 			<displayName>Post Code</displayName>
 			<length>4</length>
 			<format mask="####" />
 		</text>
-		<text name="phone">
+		<text name="phone" sensitivity="confidential">
 			<displayName>Phone</displayName>
 			<length>14</length>
 		</text>
-		<memo name="description">
+		<memo name="description" sensitivity="confidential">
 			<displayName>Description</displayName>
 		</memo>
-		<geometry name="boundary">
+		<geometry name="boundary" sensitivity="confidential">
 			<displayName>Boundary</displayName>
 			<description>The boundary around the office.</description>
 		</geometry>
-		<boolean name="demoData">
+		<boolean name="demoData" sensitivity="confidential">
 			<displayName>Demonstration Data</displayName>
 			<description><![CDATA[
 			If this is set, the data was created by the <em>demo data job</em> and can safely be deleted.
 			]]></description>
 		</boolean>
+		<integer name="tester" sensitivity="internal" >
+			<displayName>Tester</displayName>
+			<validator min="6" max="8" />
+		</integer>
 	</attributes>
 	<conditions>
 		<condition name="manager">

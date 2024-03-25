@@ -27,7 +27,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
 public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -69,7 +69,7 @@ public abstract class SelfRegistrationActivation extends AbstractTransientBean {
 	 * Activation Result
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
 	public static enum Result implements Enumeration {
 		SUCCESS("SUCCESS", "SUCCESS"),
 		ALREADYACTIVATED("ALREADY_ACTIVATED", "ALREADY_ACTIVATED"),
