@@ -58,7 +58,7 @@ export default {
             return this.firstRow + this.pageSize;
         },
         visibleColumns() {
-            
+
             // Calculate which columns are visible
             let showPredicate;
             if (this.selectedColumns == null || this.selectedColumns.length == 0) {
@@ -231,23 +231,23 @@ export default {
 </script>
 <template>
     <div>{{ filters }}</div>
-    <DataTable 
-        dataKey="bizId" 
-        filterDisplay="menu" 
-        stateStorage="session" 
+    <DataTable
+        dataKey="bizId"
+        filterDisplay="menu"
+        stateStorage="session"
         :rowsPerPageOptions="[5, 25, 50, 75, 100]"
-        :lazy="true" 
-        :value="value" 
-        :loading="loading" 
-        :totalRecords="totalRecords" 
+        :lazy="true"
+        :value="value"
+        :loading="loading"
+        :totalRecords="totalRecords"
         :paginator="true"
-        :reorderableColumns="true" 
-        :resizableColumns="true" 
-        :stateKey="query" 
+        :reorderableColumns="true"
+        :resizableColumns="true"
+        :stateKey="query"
         v-model:first="firstRow"
-        v-model:rows="pageSize" 
-        v-model:filters="filters" 
-        v-model:sortField="sortColumn" 
+        v-model:rows="pageSize"
+        v-model:filters="filters"
+        v-model:sortField="sortColumn"
         v-model:sortOrder="sortOrder"
         @state-restore="stateRestore"
     >
@@ -256,68 +256,80 @@ export default {
                 {{ title }}
             </div>
             <div style="text-align:left">
-                <MultiSelect v-model="selectedColumns" :options="columns" optionLabel="header" display="chip"
-                    placeholder="Select Columns" :showToggleAll="false" />
+                <MultiSelect
+                    v-model="selectedColumns"
+                    :options="columns"
+                    optionLabel="header"
+                    display="chip"
+                    placeholder="Select Columns"
+                    :showToggleAll="false"
+                />
             </div>
         </template>
         <template #empty> No data found.</template>
         <template #loading> Loading data. Please wait.</template>
-        <Column v-for="col of visibleColumns" 
-            :key="col.field" 
-            :field="col.field" 
+        <Column
+            v-for="col of visibleColumns"
+            :key="col.field"
+            :field="col.field"
             :header="col.header"
-            :sortable="col.sortable" 
+            :sortable="col.sortable"
             :maxConstraints="20"
             :dataType="col.dataType"
+        >
+            <template
+                #filter="{ filterModel }"
+                v-if="col.filterable"
             >
-            <template 
-                #filter="{ filterModel }" 
-                v-if="col.filterable">
 
                 <!-- TODO probably need a label for the booleans -->
-                <TriStateCheckbox 
+                <TriStateCheckbox
                     v-if="col.type == 'boolean'"
-                    v-model="filterModel.value" />
-                <MultiSelect 
+                    v-model="filterModel.value"
+                />
+                <MultiSelect
                     v-else-if="col.type == 'enum'"
-                    v-model="filterModel.value" 
-                    :options="col.enumValues" 
+                    v-model="filterModel.value"
+                    :options="col.enumValues"
                     optionLabel="label"
-                    optionValue="value" >
+                    optionValue="value"
+                >
                 </MultiSelect>
-                <Calendar 
+                <Calendar
                     v-else-if="col.type == 'date'"
-                    v-model="filterModel.value" 
-                    :dateFormat="dateFormat" />
-                <Calendar 
+                    v-model="filterModel.value"
+                    :dateFormat="dateFormat"
+                />
+                <Calendar
                     v-else-if="col.type == 'dateTime'"
-                    v-model="filterModel.value" 
-                    :dateFormat="dateFormat" 
+                    v-model="filterModel.value"
+                    :dateFormat="dateFormat"
                     showTime
                     :hourFormat="hourFormat"
-                    />
-                <Calendar 
+                />
+                <Calendar
                     v-else-if="col.type == 'timestamp'"
-                    v-model="filterModel.value" 
-                    :dateFormat="dateFormat" 
-                    showTime 
+                    v-model="filterModel.value"
+                    :dateFormat="dateFormat"
+                    showTime
                     :hourFormat="hourFormat"
                     showSeconds
                     :stepSecond="5"
-                    />
-                <Calendar 
+                />
+                <Calendar
                     v-else-if="col.type == 'time'"
-                    v-model="filterModel.value" 
+                    v-model="filterModel.value"
                     timeOnly
-                    showTime 
+                    showTime
                     :hourFormat="hourFormat"
-                    />
-                <InputText 
+                />
+                <InputText
                     v-else-if="['text', 'numeric'].includes(col.type)"
-                    v-model="filterModel.value" 
-                    type="text" 
+                    v-model="filterModel.value"
+                    type="text"
                     class="p-column-filter"
-                    :placeholder="'Search by ' + col.header" />
+                    :placeholder="'Search by ' + col.header"
+                />
                 <div v-else>
                     Unknown type: {{ col.type }}
                 </div>
