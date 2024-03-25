@@ -32,6 +32,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.content.AbstractContentManager;
@@ -71,6 +72,7 @@ public class BackupJob extends CancellableJob {
 
 	@Override
 	public void execute() throws Exception {
+		Bean bean = getBean();
 		List<String> log = getLog();
 		Collection<Table> tables = BackupUtil.getTables();
 		AbstractPersistence p = AbstractPersistence.get();
@@ -89,8 +91,17 @@ public class BackupJob extends CancellableJob {
 		log.add(trace);
 		UtilImpl.LOGGER.info(trace);
 		
-		// Fetch sensitivity index & create set of attributes to redact
-		int sensitivityIndex = BackupUtil.getSensitivityIndex(getBean());
+		// Are we including audits in this backup?
+		boolean includeAuditLog = BackupUtil.getIncludeAuditLog(bean);
+		if (! includeAuditLog) {
+			tables.removeIf(t -> t.name.equals(AppConstants.ADMIN_AUDIT_PERSISTENT_IDENTIFIER));
+		}
+		
+		// Are we including content in this backup?
+		boolean includeContent = BackupUtil.getIncludeContent(bean);
+		
+		// Create set of attributes to redact
+		int sensitivityIndex = BackupUtil.getSensitivityIndex(bean);
 		Set<String> attributesToRedact = BackupUtil.getAttributesToRedact(sensitivityIndex);
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
@@ -311,7 +322,7 @@ public class BackupJob extends CancellableJob {
 															else if (AttributeType.content.equals(attributeType) ||
 																	AttributeType.image.equals(attributeType)) {
 																String stringValue = resultSet.getString(name);
-																if (resultSet.wasNull() || attributesToRedact.contains(table.name + "." + name)) {
+																if (resultSet.wasNull() || ! includeContent || attributesToRedact.contains(table.name + "." + name)) {
 																	// Nullify sensitive content fields & do not include content in backup
 																	value = "";
 																}

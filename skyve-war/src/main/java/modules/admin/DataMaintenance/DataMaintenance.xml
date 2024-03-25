@@ -186,6 +186,18 @@
 				<value code="secret" name="secret" description="Secret" />
 			</values>
 		</enum>
+		<boolean name="includeContent">
+			<documentation><![CDATA[Determines if content is to be included in the generated backup.]]></documentation>
+			<displayName>Content</displayName>
+			<description>Determines if content is included in the backup file.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="includeAuditLog">
+			<documentation><![CDATA[Determines if the audit log is to be included in the generated backup.]]></documentation>
+			<displayName>Audit Log</displayName>
+			<description>Determines if the audit log is to be included in the backup file.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">

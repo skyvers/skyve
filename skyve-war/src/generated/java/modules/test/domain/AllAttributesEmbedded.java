@@ -50,7 +50,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 public class AllAttributesEmbedded extends AbstractPersistentBean implements ChildBean<AllAttributesPersistent> {
 	/**
 	 * For Serialization
@@ -128,7 +128,7 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	 * Enum 3
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum Enum3 implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),

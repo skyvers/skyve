@@ -234,6 +234,8 @@
 				<param name="enumClass">modules.admin.domain.DataMaintenance$DataSensitivity</param>
 			</type>
 		</property>
+		<property name="includeContent" />
+		<property name="includeAuditLog" />
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

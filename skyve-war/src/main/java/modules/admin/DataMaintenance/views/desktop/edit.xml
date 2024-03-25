@@ -106,11 +106,25 @@
 					</form>
 					<vbox pixelMemberPadding="5">
 						<form pixelWidth="225">
-							<column pixelWidth="75" />
-							<column pixelWidth="150" />
+							<column responsiveWidth="2"  />
+							<column responsiveWidth="4"  />
 							<row>
 								<item>
 									<combo binding="dataSensitivity" />
+								</item>
+							</row>
+						</form>
+						<form pixelWidth="225">
+							<column responsiveWidth="1"  />
+							<column responsiveWidth="1"  />
+							<column responsiveWidth="1"  />
+							<column responsiveWidth="1"  />
+							<row>
+								<item>
+									<checkBox binding="includeContent" triState="false" />
+								</item>
+								<item>
+									<checkBox binding="includeAuditLog" triState="false" />
 								</item>
 							</row>
 						</form>
