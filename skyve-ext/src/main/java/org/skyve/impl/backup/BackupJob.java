@@ -94,7 +94,7 @@ public class BackupJob extends CancellableJob {
 		// Are we including audits in this backup?
 		boolean includeAuditLog = BackupUtil.getIncludeAuditLog(bean);
 		if (! includeAuditLog) {
-			tables.removeIf(t -> t.name.equals(AppConstants.ADMIN_AUDIT_PERSISTENT_IDENTIFIER));
+			tables.removeIf(t -> AppConstants.ADMIN_AUDIT_PERSISTENT_IDENTIFIER.equals(t.name));
 		}
 		
 		// Are we including content in this backup?
