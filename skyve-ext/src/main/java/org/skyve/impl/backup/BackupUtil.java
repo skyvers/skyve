@@ -396,10 +396,10 @@ final class BackupUtil {
 	static boolean getIncludeContent(Bean bean) {
 		if (bean != null) {
 			Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
-			return Boolean.TRUE.equals(includeContent) ? true : false;
+			return Boolean.TRUE.equals(includeContent);
 		}
 		
-		return false;
+		return true; // content included by default
 	}
 	
 	/**
@@ -410,10 +410,10 @@ final class BackupUtil {
 	static boolean getIncludeAuditLog(Bean bean) {
 		if (bean != null) {
 			Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
-			return Boolean.TRUE.equals(includeAudits) ? true : false;
+			return Boolean.TRUE.equals(includeAudits);
 		}
 		
-		return false;
+		return true; // audits included by default
 	}
 	
 	/**
