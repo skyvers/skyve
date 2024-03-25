@@ -89,10 +89,9 @@ public class BackupJob extends CancellableJob {
 		log.add(trace);
 		UtilImpl.LOGGER.info(trace);
 		
-		// Fetch sensitivity index & create map of attributes to redact
+		// Fetch sensitivity index & create set of attributes to redact
 		int sensitivityIndex = BackupUtil.getSensitivityIndex(getBean());
 		Set<String> attributesToRedact = BackupUtil.getAttributesToRedact(sensitivityIndex);
-		
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 

@@ -33,6 +33,7 @@ public final class AppConstants {
 	public static final String CONFIRM_PASSWORD_ATTRIBUTE_NAME = "confirmPassword";
 	public static final String CONTACT_ATTRIBUTE_NAME = "contact";
 	public static final String CONTACT_TYPE_ATTRIBUTE_NAME = "contactType";
+	public static final String DATA_SENSITIVITY_ATTRIBUTE_NAME = "dataSensitivity";
 	public static final String DECLINED_ATTRIBUTE_NAME = "declined";
 	public static final String DESCRIPTION_ATTRIBUTE_NAME = "description";
 	public static final String DISPLAY_NAME_ATTRIBUTE_NAME = "displayName";
@@ -72,6 +73,7 @@ public final class AppConstants {
 	public static final String TEMPLATE_NAME_ATTRIBUTE_NAME = "templateName";
 	public static final String USER_ATTRIBUTE_NAME = "user";
 	public static final String USER_NAME_ATTRIBUTE_NAME = "userName";
+	
 	
 	// Actions
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";

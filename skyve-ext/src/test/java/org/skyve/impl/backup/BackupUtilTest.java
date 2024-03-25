@@ -3,16 +3,12 @@ package org.skyve.impl.backup;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.skyve.impl.backup.BackupUtil.redactDate;
-import static org.skyve.impl.backup.BackupUtil.redactGeometry;
-import static org.skyve.impl.backup.BackupUtil.redactNumeric;
-import static org.skyve.impl.backup.BackupUtil.redactString;
-import static org.skyve.impl.backup.BackupUtil.redactTime;
-import static org.skyve.impl.backup.BackupUtil.redactTimestamp;
+import static org.skyve.impl.backup.BackupUtil.redactData;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -21,10 +17,11 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.skyve.metadata.model.Attribute.AttributeType;
 
 public class BackupUtilTest {
-
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactSensitiveData() {
 		// setup the test data
 		String input1 = "Client 1",
@@ -38,15 +35,15 @@ public class BackupUtilTest {
 				input9 = "client1@email.org";
 
 		// call the method under test
-		String result1 = redactString(input1);
-		String result2 = redactString(input2);
-		String result3 = redactString(input3);
-		String result4 = redactString(input4);
-		String result5 = redactString(input5);
-		String result6 = redactString(input6);
-		String result7 = redactString(input7);
-		String result8 = redactString(input8);
-		String result9 = redactString(input9);
+		String result1 = (String) redactData(AttributeType.text, input1);
+		String result2 = (String) redactData(AttributeType.markup, input2);
+		String result3 = (String) redactData(AttributeType.memo, input3);
+		String result4 = (String) redactData(AttributeType.id, input4);
+		String result5 = (String) redactData(AttributeType.text, input5);
+		String result6 = (String) redactData(AttributeType.markup, input6);
+		String result7 = (String) redactData(AttributeType.memo, input7);
+		String result8 = (String) redactData(AttributeType.id, input8);
+		String result9 = (String) redactData(AttributeType.text, input9);
 		
 		// verify the result
 		assertThat(result1, is("Cl****1"));
@@ -61,6 +58,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactInteger() {
 		// setup the test data
 		Integer input1 = Integer.valueOf(0);
@@ -75,16 +73,16 @@ public class BackupUtilTest {
 		Integer input10 = Integer.valueOf(-1);
 		
 		// call the method under test
-		Integer result1 = redactNumeric(input1);
-		Integer result2 = redactNumeric(input2);
-		Integer result3 = redactNumeric(input3);
-		Integer result4 = redactNumeric(input4);
-		Integer result5 = redactNumeric(input5);
-		Integer result6 = redactNumeric(input6);
-		Integer result7 = redactNumeric(input7);
-		Integer result8 = redactNumeric(input8);
-		Integer result9 = redactNumeric(input9);
-		Integer result10 = redactNumeric(input10);
+		Integer result1 = (Integer) redactData(AttributeType.integer, input1);
+		Integer result2 = (Integer) redactData(AttributeType.integer, input2);
+		Integer result3 = (Integer) redactData(AttributeType.integer, input3);
+		Integer result4 = (Integer) redactData(AttributeType.integer, input4);
+		Integer result5 = (Integer) redactData(AttributeType.integer, input5);
+		Integer result6 = (Integer) redactData(AttributeType.integer, input6);
+		Integer result7 = (Integer) redactData(AttributeType.integer, input7);
+		Integer result8 = (Integer) redactData(AttributeType.integer, input8);
+		Integer result9 = (Integer) redactData(AttributeType.integer, input9);
+		Integer result10 = (Integer) redactData(AttributeType.integer, input10);
 		
 		// verify the result
 		assertThat(result1, is(Integer.valueOf(0)));
@@ -100,6 +98,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactLong() {
 		// setup the test data
 		Long input1 = Long.valueOf("30000000000");
@@ -114,16 +113,16 @@ public class BackupUtilTest {
 		Long input10 = Long.valueOf("-8");
 		
 		// call the method under test
-		Long result1 = redactNumeric(input1);
-		Long result2 = redactNumeric(input2);
-		Long result3 = redactNumeric(input3);
-		Long result4 = redactNumeric(input4);
-		Long result5 = redactNumeric(input5);
-		Long result6 = redactNumeric(input6);
-		Long result7 = redactNumeric(input7);
-		Long result8 = redactNumeric(input8);
-		Long result9 = redactNumeric(input9);
-		Long result10 = redactNumeric(input10);
+		Long result1 = (Long) redactData(AttributeType.longInteger, input1);
+		Long result2 = (Long) redactData(AttributeType.longInteger, input2);
+		Long result3 = (Long) redactData(AttributeType.longInteger, input3);
+		Long result4 = (Long) redactData(AttributeType.longInteger, input4);
+		Long result5 = (Long) redactData(AttributeType.longInteger, input5);
+		Long result6 = (Long) redactData(AttributeType.longInteger, input6);
+		Long result7 = (Long) redactData(AttributeType.longInteger, input7);
+		Long result8 = (Long) redactData(AttributeType.longInteger, input8);
+		Long result9 = (Long) redactData(AttributeType.longInteger, input9);
+		Long result10 = (Long) redactData(AttributeType.longInteger, input10);
 		
 		// verify the result
 		assertThat(result1, is(Long.valueOf("30000000000")));
@@ -139,6 +138,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactBigDecimal() {
 		// setup the test data
 		BigDecimal input1 = new BigDecimal("0.212342342345254");
@@ -153,16 +153,16 @@ public class BackupUtilTest {
 		BigDecimal input10 = new BigDecimal("8445454.12123131");
 		
 		// call the method under test
-		BigDecimal result1 = redactNumeric(input1);
-		BigDecimal result2 = redactNumeric(input2);
-		BigDecimal result3 = redactNumeric(input3);
-		BigDecimal result4 = redactNumeric(input4);
-		BigDecimal result5 = redactNumeric(input5);
-		BigDecimal result6 = redactNumeric(input6);
-		BigDecimal result7 = redactNumeric(input7);
-		BigDecimal result8 = redactNumeric(input8);
-		BigDecimal result9 = redactNumeric(input9);
-		BigDecimal result10 = redactNumeric(input10);
+		BigDecimal result1 = (BigDecimal) redactData(AttributeType.decimal2, input1);
+		BigDecimal result2 = (BigDecimal) redactData(AttributeType.decimal5, input2);
+		BigDecimal result3 = (BigDecimal) redactData(AttributeType.decimal10, input3);
+		BigDecimal result4 = (BigDecimal) redactData(AttributeType.decimal2, input4);
+		BigDecimal result5 = (BigDecimal) redactData(AttributeType.decimal5, input5);
+		BigDecimal result6 = (BigDecimal) redactData(AttributeType.decimal10, input6);
+		BigDecimal result7 = (BigDecimal) redactData(AttributeType.decimal2, input7);
+		BigDecimal result8 = (BigDecimal) redactData(AttributeType.decimal5, input8);
+		BigDecimal result9 = (BigDecimal) redactData(AttributeType.decimal10, input9);
+		BigDecimal result10 = (BigDecimal) redactData(AttributeType.decimal2, input10);
 		
 		// verify the result
 		assertThat(result1, is(new BigDecimal("0.0")));
@@ -178,6 +178,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactDate() {
 		// setup the test data
 		Date input1 =  Date.valueOf(LocalDate.of(2000, 1, 15));
@@ -192,16 +193,16 @@ public class BackupUtilTest {
 		Date input10 = Date.valueOf(LocalDate.of(1892, 11, 3));
 		
 		// call the method under test
-		Date result1 = redactDate(input1);
-		Date result2 = redactDate(input2);
-		Date result3 = redactDate(input3);
-		Date result4 = redactDate(input4);
-		Date result5 = redactDate(input5);
-		Date result6 = redactDate(input6);
-		Date result7 = redactDate(input7);
-		Date result8 = redactDate(input8);
-		Date result9 = redactDate(input9);
-		Date result10 = redactDate(input10);
+		Date result1 = (Date) redactData(AttributeType.date, input1);
+		Date result2 = (Date) redactData(AttributeType.date, input2);
+		Date result3 = (Date) redactData(AttributeType.date, input3);
+		Date result4 = (Date) redactData(AttributeType.date, input4);
+		Date result5 = (Date) redactData(AttributeType.date, input5);
+		Date result6 = (Date) redactData(AttributeType.date, input6);
+		Date result7 = (Date) redactData(AttributeType.date, input7);
+		Date result8 = (Date) redactData(AttributeType.date, input8);
+		Date result9 = (Date) redactData(AttributeType.date, input9);
+		Date result10 = (Date) redactData(AttributeType.date, input10);
 		
 		// verify the result
 		assertThat(result1, is(Date.valueOf(LocalDate.of(2000, 1, 1))));
@@ -217,6 +218,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactTimestamp() {
 		// setup the test data
 		java.sql.Timestamp input1 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 15, 23, 58));
@@ -231,16 +233,16 @@ public class BackupUtilTest {
 		java.sql.Timestamp input10 = java.sql.Timestamp.valueOf(LocalDateTime.of(1892, 1, 14, 21, 5));
 		
 		// call the method under test
-		java.sql.Timestamp result1 = redactTimestamp(input1);
-		java.sql.Timestamp result2 = redactTimestamp(input2);
-		java.sql.Timestamp result3 = redactTimestamp(input3);
-		java.sql.Timestamp result4 = redactTimestamp(input4);
-		java.sql.Timestamp result5 = redactTimestamp(input5);
-		java.sql.Timestamp result6 = redactTimestamp(input6);
-		java.sql.Timestamp result7 = redactTimestamp(input7);
-		java.sql.Timestamp result8 = redactTimestamp(input8);
-		java.sql.Timestamp result9 = redactTimestamp(input9);
-		java.sql.Timestamp result10 = redactTimestamp(input10);
+		java.sql.Timestamp result1 = (Timestamp) redactData(AttributeType.dateTime, input1);
+		java.sql.Timestamp result2 = (Timestamp) redactData(AttributeType.timestamp, input2);
+		java.sql.Timestamp result3 = (Timestamp) redactData(AttributeType.dateTime, input3);
+		java.sql.Timestamp result4 = (Timestamp) redactData(AttributeType.timestamp, input4);
+		java.sql.Timestamp result5 = (Timestamp) redactData(AttributeType.dateTime, input5);
+		java.sql.Timestamp result6 = (Timestamp) redactData(AttributeType.timestamp, input6);
+		java.sql.Timestamp result7 = (Timestamp) redactData(AttributeType.dateTime, input7);
+		java.sql.Timestamp result8 = (Timestamp) redactData(AttributeType.timestamp, input8);
+		java.sql.Timestamp result9 = (Timestamp) redactData(AttributeType.dateTime, input9);
+		java.sql.Timestamp result10 = (Timestamp) redactData(AttributeType.timestamp, input10);
 		
 		// verify the result
 		assertThat(result1, is(java.sql.Timestamp.valueOf(LocalDateTime.of(2000, 1, 1, 0, 0))));
@@ -256,6 +258,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactTime() {
 		// setup the test data
 		Time input1 = Time.valueOf(LocalTime.of(1, 2, 3, 4));
@@ -270,16 +273,16 @@ public class BackupUtilTest {
 		Time input10 = Time.valueOf(LocalTime.of(7, 18, 3, 92));
 		
 		// call the method under test
-		Time result1 = redactTime(input1);
-		Time result2 = redactTime(input2);
-		Time result3 = redactTime(input3);
-		Time result4 = redactTime(input4);
-		Time result5 = redactTime(input5);
-		Time result6 = redactTime(input6);
-		Time result7 = redactTime(input7);
-		Time result8 = redactTime(input8);
-		Time result9 = redactTime(input9);
-		Time result10 = redactTime(input10);
+		Time result1 = (Time) redactData(AttributeType.time, input1);
+		Time result2 = (Time) redactData(AttributeType.time, input2);
+		Time result3 = (Time) redactData(AttributeType.time, input3);
+		Time result4 = (Time) redactData(AttributeType.time, input4);
+		Time result5 = (Time) redactData(AttributeType.time, input5);
+		Time result6 = (Time) redactData(AttributeType.time, input6);
+		Time result7 = (Time) redactData(AttributeType.time, input7);
+		Time result8 = (Time) redactData(AttributeType.time, input8);
+		Time result9 = (Time) redactData(AttributeType.time, input9);
+		Time result10 = (Time) redactData(AttributeType.time, input10);
 		
 		// verify the result
 		assertThat(result1, is(Time.valueOf(LocalTime.of(1, 0, 0, 0))));
@@ -295,6 +298,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
+	@SuppressWarnings("static-method")
 	public void testRedactGeometry() {
 		// setup the test data
 		GeometryFactory geometryFactory = new GeometryFactory();
@@ -307,9 +311,9 @@ public class BackupUtilTest {
         Geometry originalPolygonGeometry = geometryFactory.createPolygon(polygonCoords);
         
 		// call the method under test
-        Geometry result1 = redactGeometry(originalPointGeometry);
-        Geometry result2 = redactGeometry(originalPolylineGeometry);
-        Geometry result3 = redactGeometry(originalPolygonGeometry);
+        Geometry result1 = (Geometry) redactData(AttributeType.geometry, originalPointGeometry);
+        Geometry result2 = (Geometry) redactData(AttributeType.geometry, originalPolylineGeometry);
+        Geometry result3 = (Geometry) redactData(AttributeType.geometry, originalPolygonGeometry);
         		
 		// verify the result
         Coordinate[] modifiedPointCoords = new Coordinate[] { new Coordinate(23, -91) };

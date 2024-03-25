@@ -26,11 +26,15 @@ import java.util.TreeMap;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
@@ -62,9 +66,6 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.Util;
 
 final class BackupUtil {
-
-	private static final String DATA_SENSITIVITY_PROPERTY_NAME = "dataSensitivity";
-	
 	private BackupUtil() {
 		// nothing to see here
 	}
@@ -236,7 +237,7 @@ final class BackupUtil {
 		}
 	}
 
-	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
+	private static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
 			@SuppressWarnings("null") // test above
@@ -378,7 +379,7 @@ final class BackupUtil {
 	 */
 	static int getSensitivityIndex(Bean bean) {
 		if (bean != null) {
-			Object sensitivityInput = BindUtil.get(bean, DATA_SENSITIVITY_PROPERTY_NAME);
+			Object sensitivityInput = BindUtil.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
 			if (sensitivityInput != null) {
 				return SensitivityType.valueOf(sensitivityInput.toString()).ordinal();
 			}
@@ -408,9 +409,11 @@ final class BackupUtil {
 				if (documentRef.getOwningModuleName().equals(module.getName())) {
 					Document document = module.getDocument(customer, entry.getKey());
 					if (document.isPersistable()) {
+						@SuppressWarnings("null")
 						String tableName = document.getPersistent().getPersistentIdentifier();
 						for (Attribute a : document.getAllAttributes(customer)) {
-							int sensitivityScore = a.getSensitivity() != null ? a.getSensitivity().ordinal() : 0;
+							SensitivityType sensitivity = a.getSensitivity();
+							int sensitivityScore = sensitivity != null ? sensitivity.ordinal() : 0;
 							if (sensitivityScore >= sensitivityIndex) {
 								attributesToRedact.add(tableName + "." + a.getName());					}
 						}
@@ -502,7 +505,7 @@ final class BackupUtil {
 	 * 
 	 * @author Ben Petito
 	 */
-	public static String redactString(String data) {
+	private static String redactString(String data) {
 		if (data == null) {
 			return null;
 		}
@@ -572,26 +575,31 @@ final class BackupUtil {
 	 * 
 	 * @author Simeon Solomou
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends Number> T redactNumeric(T data) {
+	private static <T extends Number> T redactNumeric(T data) {
 		if (data == null) {
 			return null;
 		}
 		
 		double doubleValue = data.doubleValue();
 		double dividedByTen = Math.round(doubleValue / 10.0f);
-		double result = dividedByTen * 10;
+		double div10 = dividedByTen * 10;
 		
 		if (data instanceof Integer) {
-			int intValue = (int) Math.round(result);
-			return (T) Integer.valueOf(intValue);
+			int intValue = (int) Math.round(div10);
+			@SuppressWarnings("unchecked")
+			T result = (T) Integer.valueOf(intValue);
+			return result;
 		}
 		else if (data instanceof Long) {
-			long longValue = (long) result;
-			return (T) Long.valueOf(longValue);
+			long longValue = (long) div10;
+			@SuppressWarnings("unchecked")
+			T result = (T) Long.valueOf(longValue);
+			return result;
 		}
 		else if (data instanceof BigDecimal) {
-			return (T) BigDecimal.valueOf(result);
+			@SuppressWarnings("unchecked")
+			T result = (T) BigDecimal.valueOf(div10);
+			return result;
 		}
 		
 		return null;
@@ -605,10 +613,8 @@ final class BackupUtil {
 	 * 
 	 * @author Simeon Solomou
 	 */
-	public static Date redactDate(Date data) {
-		
-		return Date.valueOf(data.toLocalDate()
-				.withDayOfMonth(1));
+	private static Date redactDate(Date data) {
+		return Date.valueOf(data.toLocalDate().withDayOfMonth(1));
 	}
 	
 	/**
@@ -619,10 +625,8 @@ final class BackupUtil {
 	 * 
 	 * @author Simeon Solomou
 	 */
-	public static Time redactTime(Time data) {
-		
-		return Time.valueOf(data.toLocalTime()
-				.withMinute(0).withSecond(0).withNano(0));
+	private static Time redactTime(Time data) {
+		return Time.valueOf(data.toLocalTime().withMinute(0).withSecond(0).withNano(0));
 	}
 	
 	/**
@@ -633,8 +637,7 @@ final class BackupUtil {
 	 * 
 	 * @author Simeon Solomou
 	 */
-	public static java.sql.Timestamp redactTimestamp(java.sql.Timestamp data) {
-		
+	private static java.sql.Timestamp redactTimestamp(java.sql.Timestamp data) {
 		return java.sql.Timestamp.valueOf(data.toLocalDateTime()
 				.withDayOfMonth(1).withHour(0).withMinute(0));
 	}
@@ -647,8 +650,7 @@ final class BackupUtil {
 	 * 
 	 * @author Simeon Solomou
 	 */
-	public static Geometry redactGeometry(Geometry data) {
-		
+	private static Geometry redactGeometry(Geometry data) {
 		Coordinate[] existingCoordinates = data.getCoordinates();
 		
 		Coordinate[] modifiedCoordinates = new Coordinate[existingCoordinates.length];
@@ -658,13 +660,13 @@ final class BackupUtil {
 			modifiedCoordinates[i] = new Coordinate(modifiedLongitude, modifiedLatitude);
 		}
 		
-		if (data.getGeometryType().equals("Point")) {
+		if (data instanceof Point) {
 			return new GeometryFactory().createPoint(modifiedCoordinates[0]);
 		}
-		else if (data.getGeometryType().equals("LineString")) {
+		else if (data instanceof LineString) {
 			return new GeometryFactory().createLineString(modifiedCoordinates);
 		}
-		else if (data.getGeometryType().equals("Polygon")) {
+		else if (data instanceof Polygon) {
 			return new GeometryFactory().createPolygon(modifiedCoordinates);
 		}
 		
