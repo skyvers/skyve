@@ -29,7 +29,6 @@
 		<property name="description" type="text" />
 		<property name="boundary" />
 		<property name="demoData" />
-		<property name="tester" />
 		<filter name="whosinOfficeNoneFilter" condition="1=0"/>
 		<filter name="whosinOfficeCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="whosinOfficeDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

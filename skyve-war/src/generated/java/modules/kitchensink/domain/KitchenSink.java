@@ -49,7 +49,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 public class KitchenSink extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -154,7 +154,7 @@ public class KitchenSink extends AbstractTransientBean {
 	 * Combo
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum Combo implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),
@@ -225,7 +225,7 @@ public class KitchenSink extends AbstractTransientBean {
 	 * Radio
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum Radio implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),

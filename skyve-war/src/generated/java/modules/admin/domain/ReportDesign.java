@@ -33,7 +33,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 public class ReportDesign extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -222,7 +222,7 @@ public class ReportDesign extends AbstractTransientBean {
 	 * Mode
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum Mode implements Enumeration {
 		sql("sql", "sql"),
 		bean("bean", "bean");
@@ -292,7 +292,7 @@ public class ReportDesign extends AbstractTransientBean {
 	 * Definition Source
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum DefinitionSource implements Enumeration {
 		document("document", "document"),
 		view("view", "view"),
@@ -364,7 +364,7 @@ public class ReportDesign extends AbstractTransientBean {
 	 * Type
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum ReportType implements Enumeration {
 		report("Report", "Report"),
 		subreport("Subreport", "Subreport");
@@ -434,7 +434,7 @@ public class ReportDesign extends AbstractTransientBean {
 	 * Orientation
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum Orientation implements Enumeration {
 		portrait("Portrait", "Portrait"),
 		landscape("Landscape", "Landscape");
@@ -504,7 +504,7 @@ public class ReportDesign extends AbstractTransientBean {
 	 * Collection Type
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum CollectionType implements Enumeration {
 		child("child", "child"),
 		aggregation("aggregation", "aggregation"),

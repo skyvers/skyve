@@ -30,7 +30,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 public abstract class ReportManager extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -57,7 +57,7 @@ public abstract class ReportManager extends AbstractTransientBean {
 	 * Import action
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:04:55.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T03:13:15.000Z")
 	public static enum ImportActionType implements Enumeration {
 		validateOnlyReportConfigurationsAndTemplates("validate", "Validate only report configurations and templates"),
 		validateThenImportReportConfigurationsAndTemplates("import", "Validate then import report configurations and templates");
