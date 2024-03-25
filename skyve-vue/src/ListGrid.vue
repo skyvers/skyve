@@ -7,7 +7,19 @@ export default {
         module: String,
         query: String,
         title: String,
-        columns: Object
+        columns: Object,
+        dateFormat: {
+            type: String,
+            default: 'dd/mm/yy'
+        },
+        dateTimeFormat: {
+            type: String,
+            default: 'dd/mm/yy'
+        },
+        hourFormat: {
+            type: String,
+            default: '24'
+        }
     },
     data() {
         return {
@@ -28,13 +40,6 @@ export default {
         endRow() {
             return this.firstRow + this.pageSize;
         },
-        columnsMap() {
-            const dtls = new Map();
-            for (let column of this.columns) {
-                dtls.set(column.field, column);
-            }
-            return dtls;
-        },
         visibleColumns() {
             
             // Calculate which columns are visible
@@ -49,19 +54,22 @@ export default {
             }
 
             // Map from the type to 'dataType'
-            // LHS: skyve type, possibly should be a larger
-            // range (eg, integer/bizDecimal2/HH24_MI/etc)
+            // LHS: skyve attribute type
             // RHS: the dataType value on the Column, determines the 
             // comparison operators available
             const columnDataTypesMap = {
                 boolean: 'boolean',
                 numeric: 'numeric',
                 date: 'date',
+                dateTime: 'date',
+                timestamp: 'date',
+                time: 'date',
                 enum: 'text'
             };
 
             // Mutate the columns prop, removing hidden columns
             // And modifying properties as needed
+            // Default type to 'text' if not mapped above
             return this.columns
                 .filter(showPredicate)
                 .map(colDefn => {
@@ -106,7 +114,7 @@ export default {
                 const colName = columnFilter[0];
                 const { operator, constraints } = columnFilter[1];
 
-                // Ignore contstraints with value == null
+                // Ignore contstraints with empty/nullish value
                 const nonNullConstraints = constraints.filter(con => con.value ?? '' != '');
 
                 // TODO move this somewhere else
@@ -119,19 +127,15 @@ export default {
                     'equals': 'iEquals',
                     'notEquals': 'iNotEqual',
                     // 'numeric': [
-                    // These two shadow some text operators
-                    // do we need to send different values to skyve?
-                    // 'equals': 'XXXXXX', 
-                    // 'notEquals': 'XXXXXX',
                     'lt': 'lessThan',
                     'lte': 'lessOrEqual',
                     'gt': 'greaterThan',
                     'gte': 'greaterOrEqual',
                     //'date': [
-                    'dateIs': 'XXXXXX',
-                    'dateIsNot': 'XXXXXX',
-                    'dateBefore': 'XXXXXX',
-                    'dateAfter': 'XXXXXX'
+                    'dateIs': 'equals',
+                    'dateIsNot': 'notEqual',
+                    'dateBefore': 'lessThan',
+                    'dateAfter': 'greaterThan'
                     // TODO boolean ops?, seems to always be 'contains'
                 };
 
@@ -177,6 +181,9 @@ export default {
             this.sortColumn = event.sortField;
             this.sortOrder = event.sortOrder;
             this.filters = event.filters;
+            // TODO restoring filters blats the defaults
+            // created by initFilters(), we should probably
+            // do a merge here
         },
         initFilters() {
 
@@ -261,12 +268,42 @@ export default {
                     optionLabel="label"
                     optionValue="value" >
                 </MultiSelect>
+                <Calendar 
+                    v-else-if="col.type == 'date'"
+                    v-model="filterModel.value" 
+                    :dateFormat="dateFormat" />
+                <Calendar 
+                    v-else-if="col.type == 'dateTime'"
+                    v-model="filterModel.value" 
+                    :dateFormat="dateFormat" 
+                    showTime
+                    :hourFormat="hourFormat"
+                    />
+                <Calendar 
+                    v-else-if="col.type == 'timestamp'"
+                    v-model="filterModel.value" 
+                    :dateFormat="dateFormat" 
+                    showTime 
+                    :hourFormat="hourFormat"
+                    showSeconds
+                    :stepSecond="5"
+                    />
+                <Calendar 
+                    v-else-if="col.type == 'time'"
+                    v-model="filterModel.value" 
+                    timeOnly
+                    showTime 
+                    :hourFormat="hourFormat"
+                    />
                 <InputText 
-                    v-else
+                    v-else-if="['text', 'numeric'].includes(col.type)"
                     v-model="filterModel.value" 
                     type="text" 
                     class="p-column-filter"
                     :placeholder="'Search by ' + col.header" />
+                <div v-else>
+                    Unknown type: {{ col.type }}
+                </div>
             </template>
         </Column>
     </DataTable>
