@@ -30,7 +30,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 public class Subscription extends AbstractPersistentBean implements org.skyve.domain.app.admin.Subscription {
 	/**
 	 * For Serialization

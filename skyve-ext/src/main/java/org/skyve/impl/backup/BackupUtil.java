@@ -389,6 +389,34 @@ final class BackupUtil {
 	}
 	
 	/**
+	 * Fetch 'include content' value selected in UI.
+	 * 
+	 * @param bean DataMaintenance bean
+	 */
+	static boolean getIncludeContent(Bean bean) {
+		if (bean != null) {
+			Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
+			return Boolean.TRUE.equals(includeContent) ? true : false;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Fetch 'include audits' value selected in UI.
+	 * 
+	 * @param bean DataMaintenance bean
+	 */
+	static boolean getIncludeAuditLog(Bean bean) {
+		if (bean != null) {
+			Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
+			return Boolean.TRUE.equals(includeAudits) ? true : false;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * Constructs and returns a set of attributes (table.column) to redact.
 	 * 
 	 * @param sensitivityIndex Sensitivity benchmark. If any attribute has a greater than or equal to sensitivity score, it is redacted.

@@ -42,7 +42,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 public class ListAttributes extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -117,7 +117,7 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * ConstantEnum
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum ConstantEnum implements Enumeration {
 		one1("one", "One (1)!"),
 		two2("two", "Two (2)!"),

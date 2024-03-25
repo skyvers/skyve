@@ -40,7 +40,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 public abstract class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -150,11 +150,17 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String dataSensitivityPropertyName = "dataSensitivity";
 
+	/** @hidden */
+	public static final String includeContentPropertyName = "includeContent";
+
+	/** @hidden */
+	public static final String includeAuditLogPropertyName = "includeAuditLog";
+
 	/**
 	 * Pre-Process
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum RestorePreProcess implements Enumeration {
 		noProcessing("noProcessing", "No Processing"),
 		dropTablesUsingMetadataRecreateTablesFromBackupCreatesql("dropUsingMetadataAndCreateUsingBackup", "Drop tables using metadata & recreate tables from backup create.sql"),
@@ -230,7 +236,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Content Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum ContentRestoreOption implements Enumeration {
 		clearOrphanedContentIDs("clearOrphanedContentIds", "Clear Orphaned Content IDs"),
 		saveOrphanedContentIDs("saveOrphanedContentIds", "Save Orphaned Content IDs"),
@@ -301,7 +307,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Indexing Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum RestoreIndexingOption implements Enumeration {
 		data("data", "Data"),
 		content("content", "Content"),
@@ -373,7 +379,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum RefreshOption implements Enumeration {
 		upsert("Upsert", "Upsert"),
 		save("Save", "Save");
@@ -446,7 +452,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 <p>Evicting beans will free memory for large data jobs, however there may be impacts if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum EvictOption implements Enumeration {
 		bean("Bean", "Bean"),
 		none("None", "None"),
@@ -521,7 +527,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Determines which attributes are redacted in backup job.
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
 	public static enum DataSensitivity implements Enumeration {
 		none("none", "None"),
 		internal("internal", "Internal"),
@@ -759,6 +765,24 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Determines which attributes are redacted in backup job.
 	 **/
 	private DataSensitivity dataSensitivity;
+
+	/**
+	 * Content
+	 * <br/>
+	 * Determines if content is included in the backup file.
+	 * <br/>
+	 * Determines if content is to be included in the generated backup.
+	 **/
+	private Boolean includeContent = Boolean.valueOf(true);
+
+	/**
+	 * Audits
+	 * <br/>
+	 * Determines if the audit log is to be included in the backup file.
+	 * <br/>
+	 * Determines if the audit log is to be included in the generated backup.
+	 **/
+	private Boolean includeAuditLog = Boolean.valueOf(true);
 
 	@Override
 	@XmlTransient
@@ -1410,6 +1434,42 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	public void setDataSensitivity(DataSensitivity dataSensitivity) {
 		preset(dataSensitivityPropertyName, dataSensitivity);
 		this.dataSensitivity = dataSensitivity;
+	}
+
+	/**
+	 * {@link #includeContent} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getIncludeContent() {
+		return includeContent;
+	}
+
+	/**
+	 * {@link #includeContent} mutator.
+	 * @param includeContent	The new value.
+	 **/
+	@XmlElement
+	public void setIncludeContent(Boolean includeContent) {
+		preset(includeContentPropertyName, includeContent);
+		this.includeContent = includeContent;
+	}
+
+	/**
+	 * {@link #includeAuditLog} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getIncludeAuditLog() {
+		return includeAuditLog;
+	}
+
+	/**
+	 * {@link #includeAuditLog} mutator.
+	 * @param includeAuditLog	The new value.
+	 **/
+	@XmlElement
+	public void setIncludeAuditLog(Boolean includeAuditLog) {
+		preset(includeAuditLogPropertyName, includeAuditLog);
+		this.includeAuditLog = includeAuditLog;
 	}
 
 	/**

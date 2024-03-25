@@ -43,8 +43,6 @@
 				<form>
 					<column responsiveWidth="2" />
 					<column responsiveWidth="2" />
-					<column pixelWidth="250" />
-					<column responsiveWidth="2"  />
 					<row>
 						<item>
 							<button action="RefreshBackupList">
@@ -54,21 +52,21 @@
 							</button> 
 						</item>
 						<item>
-							<button action="DeleteBackup"  >
+							<button action="DeleteBackup">
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button action="DownloadBackup" pixelWidth="400" >
+							<button action="DownloadBackup" pixelWidth="250">
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
 							</button>
 						</item>
 						<item>
-							<button action="UploadBackup" >
+							<button action="UploadBackup" pixelWidth="250">
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							
@@ -77,9 +75,20 @@
 					</row>
 				</form>
 				<form>
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
 					<column responsiveWidth="2" />
 					<column responsiveWidth="2" />
 					<row>
+						<item>
+							<checkBox binding="includeContent" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="includeAuditLog" triState="false" />
+						</item>
 						<item>
 							<combo binding="dataSensitivity" />
 						</item>

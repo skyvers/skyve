@@ -44,6 +44,8 @@ public final class AppConstants {
 	public static final String END_TIME_ATTRIBUTE_NAME = "endTime";
 	public static final String FROM_EMAIL_ATTRIBUTE_NAME = "fromEmail";
 	public static final String GROUPS_ATTRIBUTE_NAME = "groups";
+	public static final String INCLUDE_CONTENT_ATTRIBUTE_NAME = "includeContent";
+	public static final String INCLUDE_AUDITS_ATTRIBUTE_NAME = "includeAuditLog";
 	public static final String LOG_ATTRIBUTE_NAME = "log";
 	public static final String MEMO_1_ATTRIBUTE_NAME = "memo1";
 	public static final String MODULE_NAME_ATTRIBUTE_NAME = "moduleName";
@@ -74,6 +76,8 @@ public final class AppConstants {
 	public static final String USER_ATTRIBUTE_NAME = "user";
 	public static final String USER_NAME_ATTRIBUTE_NAME = "userName";
 	
+	// Persistent Identifiers
+	public static final String ADMIN_AUDIT_PERSISTENT_IDENTIFIER = "ADM_Audit";
 	
 	// Actions
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
