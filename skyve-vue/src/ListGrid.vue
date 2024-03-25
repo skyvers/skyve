@@ -115,7 +115,7 @@ export default {
                 const { operator, constraints } = columnFilter[1];
 
                 // Ignore contstraints with empty/nullish value
-                const nonNullConstraints = constraints.filter(con => con.value ?? '' != '');
+                const nonNullConstraints = constraints.filter(con => (con.value ?? '') !== '');
 
                 // TODO move this somewhere else
                 const operatorMap = {
