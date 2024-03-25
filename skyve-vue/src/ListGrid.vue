@@ -2,6 +2,23 @@
 import Column from 'primevue/column';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 
+// Map from the skyve attribute type to
+// the default filter operator to use for
+// that column
+function defaultMatchMode(columnType) {
+
+    const mappings = {
+        'numeric': FilterMatchMode.EQUALS,
+        'text': FilterMatchMode.CONTAINS,
+        'time': FilterMatchMode.DATE_BEFORE,
+        'timestamp': FilterMatchMode.DATE_BEFORE,
+        'date': FilterMatchMode.DATE_BEFORE,
+        'dateTime': FilterMatchMode.DATE_BEFORE
+    };
+
+    return (mappings[columnType]) ?? FilterMatchMode.EQUALS;
+}
+
 export default {
     props: {
         module: String,
@@ -192,7 +209,7 @@ export default {
             // Create a default entry in 'filters' for each column
             for (let col of this.columns) {
                 if (col.filterable && !this.filters[col.field]) {
-                    this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: FilterMatchMode.CONTAINS }] };
+                    this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: defaultMatchMode(col.type) }] };
                 }
             }
         }
