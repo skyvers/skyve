@@ -230,7 +230,16 @@ export default {
 }
 </script>
 <template>
-    <div>{{ filters }}</div>
+    <!-- debugging stuff -->
+    <h3>filters:</h3>
+    <ul>
+        <li v-for="f in Object.keys(filters)">{{ f }}: {{ filters[f] }}</li>
+    </ul>
+    <h3>skyveCriteria:</h3>
+    <ul>
+        <li v-for="f in skyveCriteria">{{ JSON.stringify(f) }}</li>
+    </ul>
+    <!-- debugging stuff -->
     <DataTable
         dataKey="bizId"
         filterDisplay="menu"
@@ -316,11 +325,9 @@ export default {
                     showSeconds
                     :stepSecond="5"
                 />
-                <Calendar
+                <TimeCalendar
                     v-else-if="col.type == 'time'"
                     v-model="filterModel.value"
-                    timeOnly
-                    showTime
                     :hourFormat="hourFormat"
                 />
                 <InputText
