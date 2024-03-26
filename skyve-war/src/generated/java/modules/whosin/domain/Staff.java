@@ -50,7 +50,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public class Staff extends AbstractPersistentBean implements HierarchicalBean<Staff> {
 	/**
 	 * For Serialization
@@ -101,7 +101,7 @@ public class Staff extends AbstractPersistentBean implements HierarchicalBean<St
 	 * Status
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Status implements Enumeration {
 		inTheOffice("inOffice", "In the Office"),
 		outOfTheOffice("outOffice", "Out of the Office"),

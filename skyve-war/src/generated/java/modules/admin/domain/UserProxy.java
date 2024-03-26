@@ -24,7 +24,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-25T06:44:58.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class UserProxy extends AbstractPersistentBean {
 	/**
 	 * For Serialization
