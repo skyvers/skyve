@@ -241,7 +241,7 @@ public class CommunicationUtil {
 				fos.flush();
 			} catch (Exception e) {
 				if (ResponseMode.SILENT.equals(responseMode)) {
-					Util.LOGGER.log(Level.WARNING, e.getStackTrace().toString());
+					Util.LOGGER.log(Level.WARNING, e.toString());
 				} else {
 					throw e;
 				}

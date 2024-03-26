@@ -19,7 +19,6 @@ import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datepicker.DatePicker;
-import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.fieldset.Fieldset;
 import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.component.graphicimage.GraphicImage;
@@ -45,6 +44,7 @@ import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
+import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 
@@ -375,14 +375,17 @@ public class ComponentRenderer {
 			putValue(attributes, "styleClass", panel.getStyleClass());
 		}
 		else if (component instanceof HtmlPanelGrid) {
-			if (component instanceof PanelGrid) {
-				tagName = "p:panelGrid";
-			}
-			else {
-				tagName = "h:panelGrid";
-			}
-			
+			tagName = "h:panelGrid";
+
 			HtmlPanelGrid grid = (HtmlPanelGrid) component;
+			putValue(attributes, "columns", Integer.valueOf(grid.getColumns()));
+			putValue(attributes, "style", grid.getStyle());
+			putValue(attributes, "styleClass", grid.getStyleClass());
+		}
+		else if (component instanceof PanelGrid) {
+			tagName = "p:panelGrid";
+			
+			PanelGrid grid = (PanelGrid) component;
 			putValue(attributes, "columns", Integer.valueOf(grid.getColumns()));
 			putValue(attributes, "style", grid.getStyle());
 			putValue(attributes, "styleClass", grid.getStyleClass());

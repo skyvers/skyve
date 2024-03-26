@@ -211,7 +211,7 @@ public abstract class AbstractDataFileLoader {
 	}
 
 	public void setException(UploadException exception) {
-		this.setException(exception);
+		this.exception = exception;
 	}
 
 	public void setActivityType(LoaderActivityType activityType) {

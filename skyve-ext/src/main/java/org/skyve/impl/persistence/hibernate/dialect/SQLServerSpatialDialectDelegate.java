@@ -19,7 +19,8 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	private static final long serialVersionUID = 880936968913130868L;
 
 	private JTSGeometryType geometryType = new JTSGeometryType(SqlServer2008GeometryTypeDescriptor.INSTANCE);
-	private UniqueDelegate uniqueDelegate;
+	// This is used at startup (hopefully before any Serialization)
+	private transient UniqueDelegate uniqueDelegate;
 
 	public SQLServerSpatialDialectDelegate(Dialect actualDialect) {
 		uniqueDelegate = new SQLServer2008NullTolerantUniqueDelegate(actualDialect);

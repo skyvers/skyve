@@ -18,8 +18,8 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	private static final long serialVersionUID = 8418711259919061318L;
 
 	private Class<? extends Enum<?>> enumClass;
-	private Method toCodeMethod;
-	private Method fromCodeMethod;
+	private transient Method toCodeMethod;
+	private transient Method fromCodeMethod;
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -31,8 +31,12 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
         catch (ClassNotFoundException cfne) {
             throw new HibernateException("Enum class not found", cfne);
         }
+        
+        readResolve();
+	}
 
-        try {
+	private Object readResolve() {
+		try {
             toCodeMethod = enumClass.getMethod(Enumeration.TO_CODE_METHOD_NAME);
         }
         catch (Exception e) {
@@ -45,8 +49,10 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
         catch (Exception e) {
             throw new HibernateException("Failed to obtain fromCode method", e);
         }
+        
+        return this;
 	}
-
+	
 	@Override
 	public Object assemble(Serializable cached, Object owner)
 	throws HibernateException {

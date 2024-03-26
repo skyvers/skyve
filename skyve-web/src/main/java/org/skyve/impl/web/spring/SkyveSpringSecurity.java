@@ -26,6 +26,7 @@ import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.AuthenticatedPrincipal;
@@ -249,7 +250,11 @@ public class SkyveSpringSecurity {
 				final String customerName = tempCustomerName;
 				final String userName = tempUserName;
 				
-				return getJdbcTemplate().query(
+				JdbcTemplate t = getJdbcTemplate();
+				if (t == null) {
+					throw new IllegalStateException("getJdbcTemplate() is null");
+				}
+				return t.query(
 						skyveUserQuery,
 						new RowMapper<UserDetails>() {
 							@Override
@@ -334,7 +339,11 @@ public class SkyveSpringSecurity {
 				
 				Timestamp codeGenTS = tfa.getTfaCodeGeneratedTimestamp() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedTimestamp().getTime());
 				
-				getJdbcTemplate().update(this.skyveUserTFAUpdate, (ps) -> {
+				JdbcTemplate t = getJdbcTemplate();
+				if (t == null) {
+					throw new IllegalStateException("getJdbcTemplate() is null");
+				}
+				t.update(this.skyveUserTFAUpdate, ps -> {
 					ps.setString(1, tfa.getTfaCode());
 					ps.setString(2, tfa.getTfaToken());
 					ps.setTimestamp(3, codeGenTS);

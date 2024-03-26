@@ -263,10 +263,12 @@ public class FileUtil {
 	 */
 	private static void getAllFiles(File dir, List<File> fileList) {
 		File[] files = dir.listFiles();
-		for (File file : files) {
-			fileList.add(file);
-			if (file.isDirectory()) {
-				getAllFiles(file, fileList);
+		if (files != null) {
+			for (File file : files) {
+				fileList.add(file);
+				if (file.isDirectory()) {
+					getAllFiles(file, fileList);
+				}
 			}
 		}
 	}
@@ -373,8 +375,11 @@ public class FileUtil {
 	 */
 	public static void delete(File f) throws IOException {
 		if (f.isDirectory()) {
-			for (File c : f.listFiles()) {
-				delete(c);
+			File[] cs = f.listFiles();
+			if (cs != null) {
+				for (File c : cs) {
+					delete(c);
+				}
 			}
 		}
 		

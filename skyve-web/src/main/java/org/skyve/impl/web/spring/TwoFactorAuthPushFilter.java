@@ -300,15 +300,18 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	protected String generateTFAPushId(Timestamp generatedTS) {
 		return UUID.randomUUID().toString() + "-" + Long.toString(generatedTS.getTime());
 	}
-	
+
+	// This is thread-safe
+	private static final SecureRandom RANDOM = new SecureRandom();
+    // Get 128 random bytes - move past first seed sequence
+    static {
+		byte[] randomBytes = new byte[128];
+	    RANDOM.nextBytes(randomBytes);
+    }
+    
 	@SuppressWarnings("static-method")
 	protected String generateTFACode() {
-	    // Get 128 random bytes - move past first seed sequence
-		SecureRandom random = new SecureRandom();
-	    byte[] randomBytes = new byte[128];
-	    random.nextBytes(randomBytes);
-	    
-		return new DecimalFormat("000000").format(random.nextDouble() * 1000000d);
+		return new DecimalFormat("000000").format(RANDOM.nextDouble() * 1000000d);
 	}
 	
 	/**
