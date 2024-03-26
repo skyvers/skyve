@@ -213,7 +213,7 @@ public class FluentCustomer {
 	}
 
 	public @Nonnull FluentCustomer clearSwitchModeRoles() {
-		customer.getTextSearchRoles().clear();
+		customer.getSwitchModeRoles().clear();
 		return this;
 	}
 	
