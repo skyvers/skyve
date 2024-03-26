@@ -19,6 +19,15 @@ function defaultMatchMode(columnType) {
     return (mappings[columnType]) ?? FilterMatchMode.EQUALS;
 }
 
+function arraysEqual(a, b) {
+
+    if (a.length != b.length) {
+        return false;
+    }
+
+    return a.every((val, index) => val == b[index])
+}
+
 export default {
     props: {
         module: String,
@@ -51,6 +60,12 @@ export default {
             sortOrder: 0,
 
             selectedColumns: null,
+            columnOrder: [],
+            columnWidths: [],
+
+            summarySelection: '',
+            summaryOpts: ['', 'Count', 'Avg', 'Sum', 'Min', 'Max'],
+            summaryRow: {}
         };
     },
     computed: {
@@ -87,13 +102,19 @@ export default {
             // Mutate the columns prop, removing hidden columns
             // And modifying properties as needed
             // Default type to 'text' if not mapped above
-            return this.columns
+            const visCols = this.columns
                 .filter(showPredicate)
                 .map(colDefn => {
                     const newType = columnDataTypesMap[colDefn.type] ?? 'text'
                     colDefn.dataType = newType;
                     return colDefn
                 });
+
+            if (this.columnOrder.length > 0) {
+                visCols.sort((a, b) => this.columnOrder.indexOf(a.field) - this.columnOrder.indexOf(b.field));
+            }
+
+            return visCols;
         },
         fetchFormData() {
 
@@ -102,6 +123,10 @@ export default {
             fd.append('_dataSource', `${this.module}_${this.query}`);
             fd.append('_startRow', this.firstRow);
             fd.append('_endRow', this.endRow);
+
+            if (!!this.summarySelection) {
+                fd.append('_summary', this.summarySelection);
+            }
 
             // Sort column and direction
             if ((this.sortColumn ?? '').trim() != '') {
@@ -170,7 +195,7 @@ export default {
             }
 
             return criteria;
-        }
+        },
     },
     methods: {
         async load() {
@@ -187,7 +212,16 @@ export default {
             let payload = await response.json();
 
             this.totalRecords = payload.response.totalRows;
-            this.value = payload.response.data;
+
+            const rows = payload.response.data;
+
+            if (!!this.summarySelection) {
+                this.summaryRow = rows.pop();
+            } else {
+                this.summaryRow = {};
+            }
+
+            this.value = rows;
             this.loading = false;
         },
         stateRestore(event) {
@@ -212,6 +246,20 @@ export default {
                     this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: defaultMatchMode(col.type) }] };
                 }
             }
+        },
+        stateSave(event) {
+            // There doesn't appear to be any way to grab
+            // these values except when the state is saved
+            this.columnOrder = event.columnOrder;
+
+            // Doco is lying about type of columnWidths
+            const newWidths = event.columnWidths.split(',').map(s => Number.parseInt(s));
+
+            // Datatable's state-save may be triggered when our columnWidths change
+            // causing reactive recursion here if we aren't careful
+            if (!arraysEqual(newWidths, this.columnWidths)) {
+                this.columnWidths = newWidths;
+            }
         }
     },
     beforeMount() {
@@ -230,16 +278,6 @@ export default {
 }
 </script>
 <template>
-    <!-- debugging stuff -->
-    <h3>filters:</h3>
-    <ul>
-        <li v-for="f in Object.keys(filters)">{{ f }}: {{ filters[f] }}</li>
-    </ul>
-    <h3>skyveCriteria:</h3>
-    <ul>
-        <li v-for="f in skyveCriteria">{{ JSON.stringify(f) }}</li>
-    </ul>
-    <!-- debugging stuff -->
     <DataTable
         dataKey="bizId"
         filterDisplay="menu"
@@ -259,6 +297,7 @@ export default {
         v-model:sortField="sortColumn"
         v-model:sortOrder="sortOrder"
         @state-restore="stateRestore"
+        @state-save="stateSave"
     >
         <template #header>
             <div v-if="title">
@@ -285,6 +324,7 @@ export default {
             :sortable="col.sortable"
             :maxConstraints="20"
             :dataType="col.dataType"
+            :footer="summaryRow[col.field]"
         >
             <template
                 #filter="{ filterModel }"
@@ -342,7 +382,12 @@ export default {
                 </div>
             </template>
         </Column>
+        <template #footer>
+            <Dropdown
+                v-model="summarySelection"
+                :options="summaryOpts"
+            />
+        </template>
     </DataTable>
-
 </template>
 <style scoped></style>

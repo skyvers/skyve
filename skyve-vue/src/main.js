@@ -13,6 +13,7 @@ import InputText from 'primevue/inputtext'
 import MultiSelect from 'primevue/multiselect';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import Calendar from 'primevue/calendar';
+import Dropdown from 'primevue/dropdown';
 
 // SKYVE name space definition
 if (!window.SKYVE) window.SKYVE = {};
@@ -34,6 +35,7 @@ window.SKYVE.listgrid = function (config) {
     grid.component('MultiSelect', MultiSelect);
     grid.component('TriStateCheckbox', TriStateCheckbox);
     grid.component('Calendar', Calendar);
+    grid.component('Dropdown', Dropdown);
     grid.component('TimeCalendar', TimeCalendar);
 
     //    grid.configure(config); - can't call the method exposed here
