@@ -2,9 +2,11 @@
 import Column from 'primevue/column';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
 
-// Map from the skyve attribute type to
-// the default filter operator to use for
-// that column
+/**
+ * Map from the skyve attribute type to
+ * the default filter operator to use for 
+ * that column.
+ */
 function defaultMatchMode(columnType) {
 
     const mappings = {
@@ -19,6 +21,11 @@ function defaultMatchMode(columnType) {
     return (mappings[columnType]) ?? FilterMatchMode.EQUALS;
 }
 
+/**
+ * Compare the two provided arrays for equality;
+ * ie: same length, and contents are equal 
+ * accoring to ==.
+ */
 function arraysEqual(a, b) {
 
     if (a.length != b.length) {
@@ -27,6 +34,31 @@ function arraysEqual(a, b) {
 
     return a.every((val, index) => val == b[index])
 }
+
+/**
+ * Maps from the DataTable comparison operators
+ * to the operator strings used by Skyve
+ */
+const operatorMap = {
+    // 'text': [
+    'startsWith': 'iStartsWith',
+    'contains': 'iContains',
+    'notContains': 'iNotContains',
+    'endsWith': 'iEndsWith',
+    'equals': 'iEquals',
+    'notEquals': 'iNotEqual',
+    // 'numeric': [
+    'lt': 'lessThan',
+    'lte': 'lessOrEqual',
+    'gt': 'greaterThan',
+    'gte': 'greaterOrEqual',
+    //'date': [
+    'dateIs': 'equals',
+    'dateIsNot': 'notEqual',
+    'dateBefore': 'lessThan',
+    'dateAfter': 'greaterThan'
+    // boolean ops?, seems to always be 'contains'
+};
 
 export default {
     props: {
@@ -117,6 +149,7 @@ export default {
             return visCols;
         },
         fetchFormData() {
+            // Constuct the FormData object that will be POSTed
 
             const fd = new FormData();
             fd.append('_operationType', 'fetch');
@@ -136,6 +169,7 @@ export default {
 
             if (this.skyveCriteria.length > 0) {
                 fd.append('_constructor', 'AdvancedCriteria');
+                // FIXME allow changing this top-level operator?
                 fd.append('operator', 'and');
 
                 for (let crit of this.skyveCriteria) {
@@ -146,51 +180,45 @@ export default {
             return fd;
         },
         skyveCriteria() {
-            // Convert from the datatables 'filter' object
+            // Convert from the DataTable's 'filter' property
             // to something we can send to Skyve
 
             let criteria = [];
 
             for (let columnFilter of Object.entries(this.filters)) {
 
-                const colName = columnFilter[0];
+                const columnName = columnFilter[0];
                 const { operator, constraints } = columnFilter[1];
 
                 // Ignore contstraints with empty/nullish value
                 const nonNullConstraints = constraints.filter(con => (con.value ?? '') !== '');
 
-                // TODO move this somewhere else
-                const operatorMap = {
-                    // 'text': [
-                    'startsWith': 'iStartsWith',
-                    'contains': 'iContains',
-                    'notContains': 'iNotContains',
-                    'endsWith': 'iEndsWith',
-                    'equals': 'iEquals',
-                    'notEquals': 'iNotEqual',
-                    // 'numeric': [
-                    'lt': 'lessThan',
-                    'lte': 'lessOrEqual',
-                    'gt': 'greaterThan',
-                    'gte': 'greaterOrEqual',
-                    //'date': [
-                    'dateIs': 'equals',
-                    'dateIsNot': 'notEqual',
-                    'dateBefore': 'lessThan',
-                    'dateAfter': 'greaterThan'
-                    // TODO boolean ops?, seems to always be 'contains'
-                };
+                const createCriteria = (constraint) => ({
+                    'fieldName': columnName,
+                    'value': constraint.value,
+                    'operator': operatorMap[constraint.matchMode]
+                });
 
-                // TODO multiple constraints for one column
-                if (nonNullConstraints.length > 0) {
-                    const x = nonNullConstraints[0];
-                    const crit = {
-                        'fieldName': colName,
-                        'value': x.value,
-                        'operator': operatorMap[x.matchMode]
+                if (nonNullConstraints.length == 1) {
+                    // One constraint for this column
+                    const crit = createCriteria(nonNullConstraints[0])
+                    criteria.push(crit);
+                } else if (nonNullConstraints.length > 1) {
+                    // Multiple constraints for this column
+
+                    const groupCriteria = {
+                        "_constructor": "AdvancedCriteria",
+                        "operator": operator,
+                        "criteria": []
                     };
 
-                    criteria.push(crit);
+                    // Create one criteria for each the user entered
+                    // and smush them together into `groupCriteria`
+                    nonNullConstraints
+                        .map(createCriteria)
+                        .forEach(c => groupCriteria.criteria.push(c));
+
+                    criteria.push(groupCriteria);
                 }
             }
 
@@ -216,8 +244,10 @@ export default {
             const rows = payload.response.data;
 
             if (!!this.summarySelection) {
+                // Summary row will be the last one, set it aside
                 this.summaryRow = rows.pop();
             } else {
+                // Clear the summary row
                 this.summaryRow = {};
             }
 
@@ -243,7 +273,10 @@ export default {
             // Create a default entry in 'filters' for each column
             for (let col of this.columns) {
                 if (col.filterable && !this.filters[col.field]) {
-                    this.filters[col.field] = { operator: FilterOperator.AND, constraints: [{ value: null, matchMode: defaultMatchMode(col.type) }] };
+                    this.filters[col.field] = {
+                        operator: FilterOperator.AND,
+                        constraints: [{ value: null, matchMode: defaultMatchMode(col.type) }]
+                    };
                 }
             }
         },
