@@ -60,6 +60,67 @@ const operatorMap = {
     // boolean ops?, seems to always be 'contains'
 };
 
+/**
+ * Replace values with their `_display` value, if present
+ * 
+ * @param {*} row Row to be updated
+ */
+function updateDisplayValues(row) {
+    const targetKeys = Object
+        .keys(row)
+        .filter(colName => colName.startsWith('_display_'))
+        .map(colName => ({
+            columnKey: colName.replace('_display_', ''),
+            displayKey: colName
+        }));
+
+    for (let key of targetKeys) {
+        row[key.columnKey] = row[key.displayKey]
+    }
+};
+
+function createRowMutator(columnDefns) {
+
+    const valueMutators = {
+        'dateTime': (val) => new Date(val).toLocaleString(),
+        'date': (val) => new Date(val).toLocaleDateString(),
+        'timestamp': (val) => new Date(val).toLocaleString(),
+        'enum': (val, colDefn) => {
+            const newLabel = colDefn?.enumValues?.find(entry => entry.value == val)?.label;
+
+            if (!newLabel) {
+                // No matching enum value found, use the original value
+                // and emit a warning message
+                console.warn(`No enum label found for '${val}';`, colDefn);
+                return val;
+            }
+
+            return newLabel;
+        },
+    };
+
+    // Index the column definitions on `field`
+    // TODO move this back to a computed value
+    // roll in any other junk too?
+    const columnMap = new Map();
+    columnDefns.forEach(def => columnMap.set(def.field, def));
+
+    return (row) => {
+
+        for (let field in row) {
+            const columnDef = columnMap.get(field);
+            if (!columnDef) continue;
+            const type = columnDef.type;
+
+            const valMutator = valueMutators[type] ?? ((v) => v);
+            row[field] = valMutator(row[field], columnDef);
+        }
+
+        updateDisplayValues(row);
+        return row;
+    };
+}
+
 export default {
     props: {
         module: String,
@@ -251,6 +312,11 @@ export default {
                 this.summaryRow = {};
             }
 
+            if (rows.length > 0) {
+                const rowMutator = createRowMutator(this.columns);
+                rows.forEach(rowMutator);
+            }
+
             this.value = rows;
             this.loading = false;
         },
@@ -283,13 +349,18 @@ export default {
         stateSave(event) {
             // There doesn't appear to be any way to grab
             // these values except when the state is saved
-            this.columnOrder = event.columnOrder;
+
+            // Datatable's state-save may be triggered as a result 
+            // of either of these changes causing reactive recursion 
+            // here; using arraysEqual to avoid assigning if nothing
+            // has changed.
+            const newColumnOrder = event.columnOrder ?? [];
+            if (!arraysEqual(this.columnOrder, this.columnOrder)) {
+                this.columnOrder = newColumnOrder;
+            }
 
             // Doco is lying about type of columnWidths
             const newWidths = event.columnWidths.split(',').map(s => Number.parseInt(s));
-
-            // Datatable's state-save may be triggered when our columnWidths change
-            // causing reactive recursion here if we aren't careful
             if (!arraysEqual(newWidths, this.columnWidths)) {
                 this.columnWidths = newWidths;
             }

@@ -45,7 +45,13 @@
                             { value: 'two', label: 'Two (2)!' },
                             { value: 'three', label: 'Three (3)!' }]
                     },
-                    { field: 'constantDomain', header: 'Constant Domain', sortable: true, filterable: true, type: 'enum' },
+                    { field: 'constantDomain', header: 'Constant Domain', sortable: true, filterable: true, 
+                        type: 'enum',
+                        enumValues: [
+                            { value: 'one', label: 'One (1)!' },
+                            { value: 'two', label: 'Two (2)!' },
+                            { value: 'three', label: 'Three (3)!' }]
+                    },
                     { field: 'variantDomain', header: 'Variant Domain', sortable: true, filterable: true, type: 'text' },
                     { field: 'time', header: 'Time', sortable: true, filterable: true, type: 'time' },
                     { field: 'timestamp', header: 'Timestamp', sortable: true, filterable: true, type: 'timestamp' },
