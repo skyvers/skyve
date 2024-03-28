@@ -79,25 +79,64 @@ function updateDisplayValues(row) {
     }
 };
 
+
+// Wrap a mutator lambda, skipping execution of that lambda 
+// if the provided value is a Number (ie, the aggregate row)
+// returning the original value instead
+// Used to avoid feeding aggregate row date (eg, count) into
+// the date formatter lambda
+const skipNumberValues = (mutatorFn) => {
+    return (val, colDefn) => {
+        if (Number.isInteger(val)) {
+            return val;
+        } else {
+            return mutatorFn(val, colDefn);
+        }
+    };
+};
+
+// Wrap the provied lambda, skipping it for nullish/blank values
+// and returning the original value instead
+const skipBlankValues = (mutatorFn) => {
+    return (val, colDefn) => {
+        if ((val ?? '') == '') {
+            return val;
+        } else {
+            return mutatorFn(val, colDefn);
+        }
+    };
+};
+
+/**
+ * Create and return a lambda. The returned lambda takes one
+ * row object (as returned by skyve) at a time and modifies
+ * that row (formatting dates, replacing enum labels, etc)
+ * 
+ * @param {*} columnDefns Column definition data
+ */
 function createRowMutator(columnDefns) {
 
     const valueMutators = {
-        'dateTime': (val) => new Date(val).toLocaleString(),
-        'date': (val) => new Date(val).toLocaleDateString(),
-        'timestamp': (val) => new Date(val).toLocaleString(),
+        'dateTime': skipNumberValues((val) => new Date(val).toLocaleString()),
+        'date': skipNumberValues((val) => new Date(val).toLocaleDateString()),
+        'timestamp': skipNumberValues((val) => new Date(val).toLocaleString()),
         'enum': (val, colDefn) => {
             const newLabel = colDefn?.enumValues?.find(entry => entry.value == val)?.label;
 
             if (!newLabel) {
                 // No matching enum value found, use the original value
-                // and emit a warning message
-                console.warn(`No enum label found for '${val}';`, colDefn);
+                // probably the aggregate row
                 return val;
             }
 
             return newLabel;
         },
     };
+
+    // Wrap every mutator in the skipNullValues lambda
+    for (let key in valueMutators) {
+        valueMutators[key] = skipBlankValues(valueMutators[key]);
+    }
 
     // Index the column definitions on `field`
     // TODO move this back to a computed value
@@ -112,6 +151,8 @@ function createRowMutator(columnDefns) {
             if (!columnDef) continue;
             const type = columnDef.type;
 
+            // Grab the value mutator matching the column type
+            // or an identity func if nothing specified
             const valMutator = valueMutators[type] ?? ((v) => v);
             row[field] = valMutator(row[field], columnDef);
         }
@@ -314,17 +355,17 @@ export default {
 
             const rows = payload.response.data;
 
+            if (rows.length > 0) {
+                const rowMutator = createRowMutator(this.columns);
+                rows.forEach(rowMutator);
+            }
+
             if (!!this.summarySelection) {
                 // Summary row will be the last one, set it aside
                 this.summaryRow = rows.pop();
             } else {
                 // Clear the summary row
                 this.summaryRow = {};
-            }
-
-            if (rows.length > 0) {
-                const rowMutator = createRowMutator(this.columns);
-                rows.forEach(rowMutator);
             }
 
             this.value = rows;
