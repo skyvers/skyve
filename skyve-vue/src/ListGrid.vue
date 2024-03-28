@@ -458,7 +458,7 @@ export default {
                     optionValue="value"
                 >
                 </MultiSelect>
-                <Calendar
+                <DateOnlyCalendar
                     v-else-if="col.type == 'date'"
                     v-model="filterModel.value"
                     :dateFormat="dateFormat"

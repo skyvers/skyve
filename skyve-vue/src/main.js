@@ -3,6 +3,7 @@ import "primevue/resources/themes/lara-light-teal/theme.css";
 import { createApp } from 'vue'
 import ListGrid from './ListGrid.vue'
 import TimeCalendar from './TimeCalendar.vue'
+import DateOnlyCalendar from './DateOnlyCalendar.vue'
 
 import PrimeVue from 'primevue/config'
 
@@ -37,6 +38,7 @@ window.SKYVE.listgrid = function (config) {
     grid.component('Calendar', Calendar);
     grid.component('Dropdown', Dropdown);
     grid.component('TimeCalendar', TimeCalendar);
+    grid.component('DateOnlyCalendar', DateOnlyCalendar);
 
     //    grid.configure(config); - can't call the method exposed here
     grid.mount(config.e);

@@ -3,8 +3,7 @@
 export default {
     props: {
         modelValue: {
-            type: String,
-            default: '12:00'
+            type: String
         },
         hourFormat: {
             type: String,
@@ -45,6 +44,7 @@ export default {
 
             const newDate = new Date();
             newDate.setHours(hrs, mins);
+            this.date = newDate;
         }
     }
 }
