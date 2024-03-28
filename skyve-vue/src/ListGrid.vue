@@ -101,7 +101,7 @@ function createRowMutator(columnDefns) {
 
     // Index the column definitions on `field`
     // TODO move this back to a computed value
-    // roll in any other junk too?
+    // roll in any other junk too? -> see `columnDefinitionsMap`
     const columnMap = new Map();
     columnDefns.forEach(def => columnMap.set(def.field, def));
 
@@ -165,18 +165,7 @@ export default {
         endRow() {
             return this.firstRow + this.pageSize;
         },
-        visibleColumns() {
-
-            // Calculate which columns are visible
-            let showPredicate;
-            if (this.selectedColumns == null || this.selectedColumns.length == 0) {
-                // All columns if nothing is chosen
-                showPredicate = (col) => true;
-            } else {
-                // Or only the selected column
-                const shownColumns = this.selectedColumns.map(sc => sc.field);
-                showPredicate = (col) => shownColumns.includes(col.field);
-            }
+        columnDefinitionsMap() {
 
             // Map from the type to 'dataType'
             // LHS: skyve attribute type
@@ -192,20 +181,41 @@ export default {
                 enum: 'text'
             };
 
-            // Mutate the columns prop, removing hidden columns
-            // And modifying properties as needed
-            // Default type to 'text' if not mapped above
-            const visCols = this.columns
-                .filter(showPredicate)
-                .map(colDefn => {
-                    const newType = columnDataTypesMap[colDefn.type] ?? 'text'
-                    colDefn.dataType = newType;
-                    return colDefn
-                });
+            const columnMap = new Map();
+            this.columns.forEach(columnDefinition => {
 
-            if (this.columnOrder.length > 0) {
-                visCols.sort((a, b) => this.columnOrder.indexOf(a.field) - this.columnOrder.indexOf(b.field));
+                const defCopy = Object.assign({}, columnDefinition);
+
+                // Modify properties as needed
+                // Default type to 'text' if not mapped above
+                const dataType = columnDataTypesMap[defCopy.type] ?? 'text'
+                defCopy.dataType = dataType;
+
+                columnMap.set(defCopy.field, defCopy);
+            });
+
+            return columnMap;
+        },
+        visibleColumns() {
+
+            // Calculate which columns are visible
+            let showPredicate;
+            if (this.selectedColumns == null || this.selectedColumns.length == 0) {
+                // All columns if nothing is chosen
+                showPredicate = (col) => true;
+            } else {
+                // Or only the selected column
+                const shownColumns = this.selectedColumns.map(sc => sc.field);
+                showPredicate = (col) => shownColumns.includes(col.field);
             }
+
+            // Removing hidden columns
+            const visCols = [...this.columnDefinitionsMap.values()].filter(showPredicate);
+
+            // No longer need to sort the columns, let DataTable handle it?
+            // if (this.columnOrder.length > 0) {
+            //     visCols.sort((a, b) => this.columnOrder.indexOf(a.field) - this.columnOrder.indexOf(b.field));
+            // }
 
             return visCols;
         },
