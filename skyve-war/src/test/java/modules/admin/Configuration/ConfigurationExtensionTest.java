@@ -4,89 +4,117 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 public class ConfigurationExtensionTest {
-
 	@Spy
 	private ConfigurationExtension bean;
 
+	private AutoCloseable closeable;
+	
 	@Before
 	public void setup() throws Exception {
-		MockitoAnnotations.initMocks(this);
+		closeable = MockitoAnnotations.openMocks(this);
 	}
 
+	@After
+	public void tearDown() throws Exception {
+		if (closeable != null) {
+			closeable.close();
+		}
+	}
+	
 	@Test
 	public void testGetPasswordRuleDescriptionLenghtOnly() {
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
+
 		// call the method under test
 		String result = bean.getPasswordRuleDescription();
 
 		// verify the result
-		assertThat(result, is("Passwords must be 10 characters or more."));
+		assertThat(result, is("Passwords must be 12 characters or more."));
 	}
 
 	@Test
 	public void testGetPasswordRuleDescriptionMustContainNumeric() {
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.TRUE);
-
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
+		
 		// call the method under test
 		String result = bean.getPasswordRuleDescription();
 
 		// verify the result
-		assertThat(result, is("Passwords must be 10 characters or more and contain at least one numeric character."));
+		assertThat(result, is("Passwords must be 12 characters or more and contain at least one numeric character."));
 	}
 
 	@Test
 	public void testGetPasswordRuleDescriptionMustContainLowercase() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		String result = bean.getPasswordRuleDescription();
 
 		// verify the result
-		assertThat(result, is("Passwords must be 10 characters or more and contain at least one lowercase character."));
+		assertThat(result, is("Passwords must be 12 characters or more and contain at least one lowercase character."));
 	}
 
 	@Test
 	public void testGetPasswordRuleDescriptionMustContainSpecial() {
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		String result = bean.getPasswordRuleDescription();
 
 		// verify the result
-		assertThat(result, is("Passwords must be 10 characters or more and contain at least one special character."));
+		assertThat(result, is("Passwords must be 12 characters or more and contain at least one special character."));
 	}
 
 	@Test
 	public void testGetPasswordRuleDescriptionMustContainUppercase() {
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.TRUE);
 
 		// call the method under test
 		String result = bean.getPasswordRuleDescription();
 
 		// verify the result
-		assertThat(result, is("Passwords must be 10 characters or more and contain at least one uppercase character."));
+		assertThat(result, is("Passwords must be 12 characters or more and contain at least one uppercase character."));
 	}
 
 	@Test
 	public void testGetPasswordRuleDescriptionTwoRules() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.TRUE);
 
 		// call the method under test
 		String result = bean.getPasswordRuleDescription();
 
 		// verify the result
-		assertThat(result, is("Passwords must be 10 characters or more and contain lowercase and uppercase characters."));
+		assertThat(result, is("Passwords must be 12 characters or more and contain lowercase and uppercase characters."));
 	}
 
 	@Test
@@ -94,6 +122,7 @@ public class ConfigurationExtensionTest {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.TRUE);
 
 		// call the method under test
@@ -101,7 +130,7 @@ public class ConfigurationExtensionTest {
 
 		// verify the result
 		assertThat(result,
-				is("Passwords must be 10 characters or more and contain lowercase, uppercase and numeric characters."));
+				is("Passwords must be 12 characters or more and contain lowercase, uppercase and numeric characters."));
 	}
 
 	@Test
@@ -117,7 +146,7 @@ public class ConfigurationExtensionTest {
 
 		// verify the result
 		assertThat(result,
-				is("Passwords must be 10 characters or more and contain lowercase, uppercase, numeric and special characters."));
+				is("Passwords must be 12 characters or more and contain lowercase, uppercase, numeric and special characters."));
 	}
 
 	@Test
@@ -137,6 +166,11 @@ public class ConfigurationExtensionTest {
 		// setup test data
 		String cleartext = "not too short";
 
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
+
 		// call the method under test
 		Boolean result = Boolean.valueOf(bean.meetsComplexity(cleartext));
 
@@ -150,7 +184,10 @@ public class ConfigurationExtensionTest {
 		String cleartext = "does not contain numeric";
 
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		Boolean result = Boolean.valueOf(bean.meetsComplexity(cleartext));
@@ -164,10 +201,13 @@ public class ConfigurationExtensionTest {
 		// setup test data
 		String cleartext1 = "contains one numera1";
 		String cleartext2 = "3ontains one numeral";
-		String cleartext3 = "12345678910";
+		String cleartext3 = "123456789101234567890";
 
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		Boolean result1 = Boolean.valueOf(bean.meetsComplexity(cleartext1));
@@ -187,6 +227,9 @@ public class ConfigurationExtensionTest {
 
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		Boolean result = Boolean.valueOf(bean.meetsComplexity(cleartext));
@@ -204,6 +247,9 @@ public class ConfigurationExtensionTest {
 
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		Boolean result1 = Boolean.valueOf(bean.meetsComplexity(cleartext1));
@@ -222,7 +268,10 @@ public class ConfigurationExtensionTest {
 		String cleartext = "doesNotContainSp3cial";
 
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		Boolean result = Boolean.valueOf(bean.meetsComplexity(cleartext));
@@ -239,7 +288,10 @@ public class ConfigurationExtensionTest {
 		String cleartext3 = "!@#$%^&*+-./";
 
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.TRUE);
+		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.FALSE);
 
 		// call the method under test
 		Boolean result1 = Boolean.valueOf(bean.meetsComplexity(cleartext1));
@@ -258,6 +310,9 @@ public class ConfigurationExtensionTest {
 		String cleartext = "does not contain uppercase";
 
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.TRUE);
 
 		// call the method under test
@@ -275,6 +330,9 @@ public class ConfigurationExtensionTest {
 		String cleartext3 = "CONTAINSONLYUPPERCASE";
 
 		// setup mocks
+		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
+		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireUppercase()).thenReturn(Boolean.TRUE);
 
 		// call the method under test

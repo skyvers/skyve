@@ -28,7 +28,7 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 0;
 
 		// change password
-		changePassword("Password0!");
+		changePassword("Password0!0!");
 		// change password back
 		changePassword(PASSWORD);
 	}
@@ -39,7 +39,7 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 1;
 
 		// change password
-		changePassword("Password0!"); // sets the password history
+		changePassword("Password0!0!"); // sets the password history
 
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 		
@@ -49,7 +49,7 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 
 		// change password
-		changePassword("Password0!");
+		changePassword("Password0!0!");
 
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 	}
@@ -60,7 +60,7 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 2;
 
 		// change password
-		changePassword("Password0!"); // sets the password history
+		changePassword("Password0!0!"); // sets the password history
 
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 		
@@ -70,7 +70,7 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		Assert.assertEquals(2, getPasswordHistory(false).length);
 
 		// change password
-		changePassword("Password0!");
+		changePassword("Password0!0!");
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 2;
 
 		// change password
-		changePassword("Password0!"); // sets the password history
+		changePassword("Password0!0!"); // sets the password history
 
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 		
@@ -89,7 +89,7 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		Assert.assertEquals(2, getPasswordHistory(false).length);
 
 		// change password
-		changePassword("Password0@");
+		changePassword("Password0@0@");
 
 		Assert.assertEquals(2, getPasswordHistory(false).length);
 	}
@@ -100,15 +100,15 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 5;
 
 		// Set some password history
-		changePassword("Password0!");
-		changePassword("Password0@");
-		changePassword("Password0#");
-		changePassword("Password0$");
-		changePassword("Password0%");
+		changePassword("Password0!0!");
+		changePassword("Password0@0@");
+		changePassword("Password0#0#");
+		changePassword("Password0$0$");
+		changePassword("Password0%0%");
 
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 0;
 
-		changePassword("Password0^");
+		changePassword("Password0^0^");
 		Assert.assertEquals(0, getPasswordHistory(false).length);
 	}
 
@@ -118,18 +118,18 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 5;
 
 		// Set some password history
-		changePassword("Password0!");
-		changePassword("Password0@");
-		changePassword("Password0#");
-		changePassword("Password0$");
-		changePassword("Password0%");
+		changePassword("Password0!0!");
+		changePassword("Password0@0@");
+		changePassword("Password0#0#");
+		changePassword("Password0$0$");
+		changePassword("Password0%0%");
 
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 1;
 
-		changePassword("Password0^");
+		changePassword("Password0^0^");
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 
-		changePassword("Password0&");
+		changePassword("Password0&0&");
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 	}
 
@@ -139,18 +139,18 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 5;
 
 		// Set some password history
-		changePassword("Password0!");
-		changePassword("Password0@");
-		changePassword("Password0#");
-		changePassword("Password0$");
-		changePassword("Password0%");
+		changePassword("Password0!0!");
+		changePassword("Password0@0@");
+		changePassword("Password0#0#");
+		changePassword("Password0$0$");
+		changePassword("Password0%0%");
 
 		UtilImpl.PASSWORD_HISTORY_RETENTION = 2;
 
-		changePassword("Password0^");
+		changePassword("Password0^0^");
 		Assert.assertEquals(2, getPasswordHistory(false).length);
 
-		changePassword("Password0!");
+		changePassword("Password0!0!");
 		Assert.assertEquals(2, getPasswordHistory(false).length);
 	}
 	
