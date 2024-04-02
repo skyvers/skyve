@@ -14,7 +14,7 @@
 		<interface>org.skyve.domain.app.admin.User</interface>
 	</implements>
 	<attributes>
-		<text name="userName" required="true">
+		<text name="userName" required="true" sensitivity="internal">
 			<documentation>
 				<![CDATA[
 					Length is derived from the maximum email address length from RFC 5321

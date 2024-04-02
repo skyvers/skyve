@@ -41,7 +41,7 @@
 			<displayName>admin.audit.millis.displayName</displayName>
 			<index>database</index>
 		</longInteger>
-		<text name="userName" required="true">
+		<text name="userName" required="true" sensitivity="internal">
 			<displayName>admin.audit.userName.displayName</displayName>
 			<length>254</length>
 		</text>
