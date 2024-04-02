@@ -9,7 +9,7 @@
 	<audited>false</audited>
 	<bizKey expression="{userName}" />
 	<attributes>
-		<text name="userName" required="true" sensitivity="internal">
+		<text name="userName" required="true" sensitivity="personal">
 			<documentation>
 				<![CDATA[
 					Length is derived User.userName length + bizCustomer length + 1

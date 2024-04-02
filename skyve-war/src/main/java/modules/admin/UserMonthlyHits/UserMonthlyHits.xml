@@ -10,7 +10,7 @@
 	<iconStyleClass>fa-solid fa-bar-chart</iconStyleClass>
 	<bizKey expression="{userName} - {hitYear}/{hitMonth} = {numberOfHits}"/>
 	<attributes>
-		<text name="userName" required="true" sensitivity="internal">
+		<text name="userName" required="true" sensitivity="personal">
 			<displayName>User Name</displayName>
 			<length>254</length>
 		</text>

@@ -17,7 +17,7 @@
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{userName} - {contact.bizKey}" />
 	<attributes>
-		<text name="userName" required="true" sensitivity="internal">
+		<text name="userName" required="true" sensitivity="personal">
 			<documentation>
 				<![CDATA[
 					Length is derived from the maximum email address length from RFC 5321

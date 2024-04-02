@@ -18,7 +18,7 @@
 		<interface>org.skyve.domain.app.admin.Contact</interface>
 	</implements>
 	<attributes>
-		<text name="name" required="true" sensitivity="internal">
+		<text name="name" required="true" sensitivity="personal">
 			<displayName>admin.contact.name.displayName</displayName>
 			<index>textual</index>
 			<length>200</length>
@@ -31,12 +31,12 @@
 				<value code="Organisation"/>
 			</values>
 		</enum>
-		<text name="email1" sensitivity="internal">
+		<text name="email1" sensitivity="personal">
 			<displayName>admin.contact.email1.displayName</displayName>
 			<length>500</length>
 			<validator type="email" />
 		</text>
-		<text name="mobile" sensitivity="internal">
+		<text name="mobile" sensitivity="personal">
 			<displayName>admin.contact.mobile.displayName</displayName>
 			<length>20</length>
 		</text>
