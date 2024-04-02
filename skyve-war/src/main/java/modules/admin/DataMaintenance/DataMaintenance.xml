@@ -19,7 +19,7 @@
 		</text>
 
 		<!-- Schema Truncation -->
-		<text name="confirmPassword" persistent="false" trackChanges="false" >
+		<text name="confirmPassword" persistent="false" trackChanges="false" sensitivity="secret" >
 			<displayName>admin.dataMaintenance.confirmPassword.displayName</displayName>
 			<length>50</length>
 		</text>
