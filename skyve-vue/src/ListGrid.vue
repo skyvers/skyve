@@ -79,6 +79,36 @@ function updateDisplayValues(row) {
     }
 };
 
+/**
+ * Undefined for the first param means the default
+ * locale is used.
+ * 
+ * TODO potentially this should probably be injected
+ * from somewhere
+ */
+const dateTimeFormats = {
+    date: new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+    }),
+    dateTime: new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    }),
+    timestamp: new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    })
+}
+
 
 // Wrap a mutator lambda, skipping execution of that lambda 
 // if the provided value is a Number (ie, the aggregate row)
@@ -117,9 +147,9 @@ const skipBlankValues = (mutatorFn) => {
 function createRowMutator(columnDefns) {
 
     const valueMutators = {
-        'dateTime': skipNumberValues((val) => new Date(val).toLocaleString()),
-        'date': skipNumberValues((val) => new Date(val).toLocaleDateString()),
-        'timestamp': skipNumberValues((val) => new Date(val).toLocaleString()),
+        'dateTime': skipNumberValues((val) => dateTimeFormats.dateTime.format(new Date(val))),
+        'date': skipNumberValues((val) => dateTimeFormats.date.format(new Date(val))),
+        'timestamp': skipNumberValues((val) => dateTimeFormats.timestamp.format(new Date(val))),
         'enum': (val, colDefn) => {
             const newLabel = colDefn?.enumValues?.find(entry => entry.value == val)?.label;
 
