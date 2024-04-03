@@ -436,7 +436,7 @@ export default {
             // here; using arraysEqual to avoid assigning if nothing
             // has changed.
             const newColumnOrder = event.columnOrder ?? [];
-            if (!arraysEqual(this.columnOrder, this.columnOrder)) {
+            if (!arraysEqual(newColumnOrder, this.columnOrder)) {
                 this.columnOrder = newColumnOrder;
             }
 
