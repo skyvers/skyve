@@ -10,8 +10,10 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
@@ -62,6 +64,10 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	private Customer customer;
 	private Module module;
 	private Document document;
+	
+	// The 2 cannot be static as it is technically possible that they are overridden per customer
+	private String dynamicEntityPersistentIdentifier;
+	private String dynamicRelationPersistentIdentifier;
 
 	public void setQuery(MetaDataQueryDefinition query) throws Exception {
 		description = query.getDescription();
@@ -72,6 +78,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		module = query.getDocumentModule(customer);
 		document = module.getDocument(customer, query.getDocumentName());
 
+		determinePersistenceIdentifiers();
+		
 		setDrivingDocument(module, document);
 	}
 	
@@ -84,7 +92,19 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		document = drivingDocument;
 		module = customer.getModule(document.getOwningModuleName());
 
+		determinePersistenceIdentifiers();
+
 		setDrivingDocument(module, document);
+	}
+	
+	private void determinePersistenceIdentifiers() {
+		Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+		@SuppressWarnings("null")
+		String de = admin.getDocument(customer, AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+		dynamicEntityPersistentIdentifier = de;
+		@SuppressWarnings("null")
+		String dr = admin.getDocument(customer, AppConstants.DYNAMIC_RELATION_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+		dynamicRelationPersistentIdentifier = dr;
 	}
 	
 	@Override
@@ -148,8 +168,12 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		Persistence p = CORE.getPersistence();
 		StringBuilder sql = new StringBuilder(projectedColumns.length() + joinedTables.length() + 90);
 		sql.append("select ").append(projectedColumns).append(" from ").append(joinedTables);
-		sql.append(" where t0.moduleName = :moduleName and t0.documentName = :documentName");
-		return p.newSQL(sql.toString()).putParameter("moduleName", module.getName(), false).putParameter("documentName", document.getName(), false).tupleIterable();
+		sql.append(" where t0.").append(AppConstants.MODULE_NAME_ATTRIBUTE_NAME).append(" = :").append(AppConstants.MODULE_NAME_ATTRIBUTE_NAME);
+		sql.append(" and t0.").append(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME).append(" = :").append(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME);
+		return p.newSQL(sql.toString())
+					.putParameter(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, module.getName(), false)
+					.putParameter(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, document.getName(), false)
+					.tupleIterable();
 	}
 	
 	@Override
@@ -230,8 +254,11 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		info.dynamicEntityTableAliasNumber = Integer.valueOf(0);
 		referenceBindingToTableInfo.put("", info);
 		// First 4 fields are the implicit fields required by any data model
-		projectedColumns.append("t0.bizId, t0.bizLock, t0.bizFlagComment, t0.bizKey");
-		joinedTables.append("ADM_DynamicEntity t0");
+		projectedColumns.append("t0.").append(Bean.DOCUMENT_ID);
+		projectedColumns.append(", t0.").append(PersistentBean.LOCK_NAME);
+		projectedColumns.append(", t0.").append(PersistentBean.FLAG_COMMENT_NAME);
+		projectedColumns.append(", t0.").append(Bean.BIZ_KEY);
+		joinedTables.append(dynamicEntityPersistentIdentifier).append(" t0");
 		
 		// Now process each projection
 		Set<String> projections = getProjections();
@@ -278,7 +305,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 							info = referenceBindingToTableInfo.get("");
 							if (info.fieldsIndex == null) {
 								info.fieldsIndex = Integer.valueOf(fieldIndex++);
-								projectedColumns.append(", t0.fields as f").append(fieldAliasNumber++);
+								projectedColumns.append(", t0.").append(AppConstants.FIELDS_ATTRIBUTE_NAME).append(" as f").append(fieldAliasNumber++);
 							}
 							addField(a, projection, info.fieldsIndex.intValue());
 						}
@@ -337,16 +364,17 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					// Add dynamic relation left join, if applicable
 					if (Binder.isDynamic(customer, simpleBindingModule, simpleBindingDocument, a)) {
 						info.dynamicRelationTableAliasNumber = Integer.valueOf(tableAliasNumber);
-						joinedTables.append("\nleft join ADM_DynamicRelation t").append(tableAliasNumber);
-						joinedTables.append(" on t").append(tableAliasNumber).append(".parent_id = t").append(ownerInfo.dynamicEntityTableAliasNumber.intValue()).append(".bizId and t");
-						joinedTables.append(tableAliasNumber).append(".attributeName = '").append(simpleBinding);
+						joinedTables.append("\nleft join ").append(dynamicRelationPersistentIdentifier).append(" t").append(tableAliasNumber);
+						joinedTables.append(" on t").append(tableAliasNumber).append('.').append(ChildBean.CHILD_PARENT_ID).append(" = t").append(ownerInfo.dynamicEntityTableAliasNumber.intValue()).append('.').append(Bean.DOCUMENT_ID);
+						joinedTables.append(" and t").append(tableAliasNumber).append('.').append(AppConstants.ATTRIBUTE_NAME_ATTRIBUTE_NAME).append(" = '").append(simpleBinding);
 						tableAliasNumber++;
 
 						// If relation target document is dynamic join ADM_DynamicEntity
 						if (relatedDocument.isDynamic()) {
 							// Add entity left join
-							joinedTables.append("'\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
-							joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(tableAliasNumber - 1).append(".relatedId");
+							joinedTables.append("'\nleft join ").append(dynamicEntityPersistentIdentifier).append(" t").append(tableAliasNumber);
+							joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+							joinedTables.append(tableAliasNumber - 1).append('.').append(AppConstants.RELATED_ID_ATTRIBUTE_NAME);
 	
 							info.dynamicEntityTableAliasNumber = Integer.valueOf(tableAliasNumber);
 						}
@@ -354,7 +382,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 						else {
 							// Add entity left join
 							joinedTables.append("'\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
-							joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.dynamicRelationTableAliasNumber).append(".relatedId");
+							joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+							joinedTables.append(info.dynamicRelationTableAliasNumber).append('.').append(AppConstants.RELATED_ID_ATTRIBUTE_NAME);
 							info.staticTableAliasNumber = Integer.valueOf(tableAliasNumber);
 						}
 						
@@ -370,7 +399,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					else {
 						// Add entity left join
 						joinedTables.append("\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
-						joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(ownerInfo.staticTableAliasNumber.intValue()).append('.').append(simpleBinding).append("_id");
+						joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+						joinedTables.append(ownerInfo.staticTableAliasNumber.intValue()).append('.').append(simpleBinding).append("_id");
 						info.staticTableAliasNumber = Integer.valueOf(tableAliasNumber);
 
 						tableAliasNumber++;
@@ -417,7 +447,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 			if (dynamicAttribute || (info.relatedDocument.isDynamic())) {
 				if (info.fieldsIndex == null) {
 					info.fieldsIndex = Integer.valueOf(fieldIndex++);
-					projectedColumns.append(", t").append(info.dynamicEntityTableAliasNumber).append(".fields as f").append(fieldAliasNumber++);
+					projectedColumns.append(", t").append(info.dynamicEntityTableAliasNumber).append('.').append(AppConstants.FIELDS_ATTRIBUTE_NAME).append(" as f").append(fieldAliasNumber++);
 				}
 				addField(a, projection, info.fieldsIndex.intValue());
 			}
@@ -463,8 +493,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		if (dynamicAttribute) {
 			if ((info.staticTableAliasNumber != null) && (info.dynamicEntityTableAliasNumber == null)) {
 				// Add dynamic entity left join from static table
-				joinedTables.append("\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
-				joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.staticTableAliasNumber).append(".bizId");
+				joinedTables.append("\nleft join ").append(dynamicEntityPersistentIdentifier).append(" t").append(tableAliasNumber);
+				joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+				joinedTables.append(info.staticTableAliasNumber).append('.').append(Bean.DOCUMENT_ID);
 
 				info.dynamicEntityTableAliasNumber = Integer.valueOf(tableAliasNumber);
 				tableAliasNumber++;

@@ -2630,7 +2630,6 @@ public void doWorkOnConnection(Session session) {
 	}
 	
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
-	private static final String CHILD_PARENT_ID = ChildBean.PARENT_NAME + "_id";
 	
 	@Override
 	public void upsertBeanTuple(PersistentBean bean) {
@@ -2680,7 +2679,7 @@ public void doWorkOnConnection(Session session) {
 					query.append(',').append(HierarchicalBean.PARENT_ID).append("=:").append(HierarchicalBean.PARENT_ID);
 				}
 				else {
-					query.append(',').append(CHILD_PARENT_ID).append("=:").append(CHILD_PARENT_ID);
+					query.append(',').append(ChildBean.CHILD_PARENT_ID).append("=:").append(ChildBean.CHILD_PARENT_ID);
 				}
 			}
 
@@ -2733,8 +2732,8 @@ public void doWorkOnConnection(Session session) {
 					values.append(",:").append(HierarchicalBean.PARENT_ID);
 				}
 				else {
-					columns.append(',').append(CHILD_PARENT_ID);
-					values.append(",:").append(CHILD_PARENT_ID);
+					columns.append(',').append(ChildBean.CHILD_PARENT_ID);
+					values.append(",:").append(ChildBean.CHILD_PARENT_ID);
 				}
 			}
 			
@@ -2810,7 +2809,7 @@ public void doWorkOnConnection(Session session) {
 			}
 			else {
 				Bean parent = ((ChildBean<?>) bean).getParent();
-				sql.putParameter(CHILD_PARENT_ID, (parent == null) ? null : parent.getBizId(), false);
+				sql.putParameter(ChildBean.CHILD_PARENT_ID, (parent == null) ? null : parent.getBizId(), false);
 			}
 		}
 

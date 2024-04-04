@@ -11,6 +11,8 @@ public final class AppConstants {
 	public static final String COMMNICATION_TEMPLATE_DOCUMENT_NAME = "CommunicationTemplate";
 	public static final String CONFIGURATION_DOCUMENT_NAME = "Configuration";
 	public static final String DOCUMENT_NUMBER_DOCUMENT_NAME = "DocumentNumber";
+	public static final String DYNAMIC_ENTITY_DOCUMENT_NAME = "DynamicEntity";
+	public static final String DYNAMIC_RELATION_DOCUMENT_NAME = "DynamicRelation";
 	public static final String GENERIC_DOCUMENT_NAME = "Generic";
 	public static final String GROUP_DOCUMENT_NAME = "Group";
 	public static final String GROUP_ROLE_DOCUMENT_NAME = "GroupRole";
@@ -27,6 +29,7 @@ public final class AppConstants {
 	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
 
 	// Attributes
+	public static final String ATTRIBUTE_NAME_ATTRIBUTE_NAME = "attributeName";
 	public static final String BEAN_BIZID_ATTRIBUTE_NAME = "beanBizId";
 	public static final String BEAN_DOCUMENT_NAME_ATTRIBUTE_NAME = "beanDocumentName";
 	public static final String BEAN_MODULE_NAME_ATTRIBUTE_NAME = "beanModuleName";
@@ -43,6 +46,7 @@ public final class AppConstants {
 	public static final String ENABLED_ATTRIBUTE_NAME = "enabled";
 	public static final String END_TIME_ATTRIBUTE_NAME = "endTime";
 	public static final String FROM_EMAIL_ATTRIBUTE_NAME = "fromEmail";
+	public static final String FIELDS_ATTRIBUTE_NAME = "fields";
 	public static final String GROUPS_ATTRIBUTE_NAME = "groups";
 	public static final String INCLUDE_CONTENT_ATTRIBUTE_NAME = "includeContent";
 	public static final String INCLUDE_AUDITS_ATTRIBUTE_NAME = "includeAuditLog";
@@ -61,6 +65,7 @@ public final class AppConstants {
 	public static final String PERCENTAGE_COMPLETE_ATTRIBUTE_NAME = "percentComplete";
 	public static final String QUERY_NAME_ATTRIBUTE_NAME = "queryName";
 	public static final String RECEIVER_IDENTIFIER_ATTRIBUTE_NAME = "receiverIdentifier";
+	public static final String RELATED_ID_ATTRIBUTE_NAME = "relatedId";
 	public static final String RESULTS_ATTRIBUTE_NAME = "results";
 	public static final String ROLE_NAME_ATTRIBUTE_NAME = "roleName";
 	public static final String ROLES_ATTRIBUTE_NAME = "roles";
