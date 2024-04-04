@@ -1,8 +1,6 @@
 package org.skyve.impl.web.filter;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.security.Principal;
 import java.util.Enumeration;
 
@@ -11,6 +9,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.util.Monitoring;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
@@ -143,28 +142,22 @@ public class RequestLoggingAndStatisticsFilter implements Filter {
 		}
 		finally {
 			// Determine CPU and MEM before
-			OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-			Runtime runtime = Runtime.getRuntime();
-			double loadPre = os.getSystemLoadAverage();
-			long total = runtime.totalMemory();
-			long free = runtime.freeMemory();
-			double memPctPre  = (double) (total - free) / total * 100d;
+			double loadPre = Monitoring.systemLoadAverage();
+			int memPctPre = Monitoring.percentageUsedMomory();
 			long millis = System.currentTimeMillis();
 			
 			// pass the request/response on
 			chain.doFilter(request, response);
 
 			// Determine CPU and MEM after
-			double loadPost = os.getSystemLoadAverage();
-			total = runtime.totalMemory();
-			free = runtime.freeMemory();
-			double memPctPost = (double) (total - free) / total * 100d;
+			double loadPost = Monitoring.systemLoadAverage();
+			int memPctPost = Monitoring.percentageUsedMomory();
 
 			UtilImpl.LOGGER.info("******************************* TIMING/RESOURCES *******************************");
-			UtilImpl.LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%.2f%%/%.2f%%(%.2f%%)",
+			UtilImpl.LOGGER.info(String.format("TIME=%,d PRE/POST(DELTA) CPU=%.2f/%.2f(%.2f) MEM=%d%%/%d%%(%d%%)",
 													Long.valueOf(System.currentTimeMillis() - millis),
 													Double.valueOf(loadPre), Double.valueOf(loadPost), Double.valueOf(loadPost - loadPre),
-													Double.valueOf(memPctPre), Double.valueOf(memPctPost), Double.valueOf(memPctPost - memPctPre)));
+													Integer.valueOf(memPctPre), Integer.valueOf(memPctPost), Integer.valueOf(memPctPost - memPctPre)));
 			if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("********************************************************************************");
 		}
 	}

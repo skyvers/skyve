@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
+import org.skyve.util.Monitoring;
 import org.skyve.util.Util;
 
 import jakarta.servlet.ServletException;
@@ -209,7 +210,14 @@ public class HealthServlet extends HttpServlet {
 			result.append("error");
 		}
 
-		result.append("\"}");
+		// Resources
+		result.append("\",\"systemLoadAverage\":").append(Monitoring.systemLoadAverage());
+		result.append(",\"percentageUsedMemory\":").append(Monitoring.percentageUsedMomory());
+		result.append(",\"totalMemoryInMiB\":").append(Monitoring.totalMemoryInMiB());
+		result.append(",\"freeMemoryInMiB\":").append(Monitoring.freeMemoryInMiB());
+		result.append(",\"maxMemoryInMiB\":").append(Monitoring.maxMemoryInMiB());
+
+		result.append('}');
 		
 		return result.toString();
 	}
