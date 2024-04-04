@@ -41,7 +41,7 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	private String displayName;
 	private AttributeType attributeType;
 	private UsageType usage;
-	private SensitivityType sensitivity;
+	private Sensitivity sensitivity;
 	private String description;
 	protected DomainType domainType;
 	private InputWidget defaultInputWidget;
@@ -96,12 +96,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	}
 	
 	@Override
-	public SensitivityType getSensitivity() {
+	public Sensitivity getSensitivity() {
 		return sensitivity;
 	}
 	
 	@XmlAttribute
-	public void setSensitivity(SensitivityType sensitivity) {
+	public void setSensitivity(Sensitivity sensitivity) {
 		this.sensitivity = sensitivity;
 	}
 	

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -25,8 +26,7 @@ import modules.admin.domain.Startup.BackupType;
 import modules.admin.domain.Startup.MapType;
 
 public class StartupExtensionTest {
-
-	Map<String, Object> overrideProperties;
+	private Map<String, Object> overrideProperties;
 
 	@Mock
 	private Customer customer;
@@ -35,9 +35,11 @@ public class StartupExtensionTest {
 	@Spy
 	private StartupExtension bean;
 
+	private AutoCloseable closeable;
+	
 	@Before
 	public void before() throws Exception {
-		MockitoAnnotations.initMocks(this);
+		closeable = MockitoAnnotations.openMocks(this);
 
 		Map<String, Object> properties = new HashMap<>();
 		UtilImpl.CONFIGURATION = properties;
@@ -58,6 +60,13 @@ public class StartupExtensionTest {
 		Mockito.when(bean.getMapLayer()).thenReturn(UtilImpl.MAP_LAYERS);
 	}
 
+	@After
+	public void tearDown() throws Exception {
+		if (closeable != null) {
+			closeable.close();
+		}
+	}
+	
 	@Test
 	public void testSaveConfigurationEmptyPropertiesWritesNulls() throws Exception {
 		// setup mocks

@@ -60,7 +60,7 @@ public class ContentChecker {
 
 							while (resultSet.next()) {
 								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name);
+									AttributeType attributeType = table.fields.get(name).getLeft();
 									if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 										String stringValue = resultSet.getString(name);
 										if (! resultSet.wasNull()) {
@@ -145,8 +145,13 @@ public class ContentChecker {
 			}
 			else {
 				String attributeName = content.getAttributeName();
-				if (! fieldName.equals(attributeName)) {
-					UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Attribute Name " + attributeName + " does not match content field name " + fieldName);
+				String noEmbeddedPrefixFieldName = fieldName;
+				int embeddedPrefixHyphenIndex = fieldName.lastIndexOf('_');
+				if (embeddedPrefixHyphenIndex >= 0) {
+					noEmbeddedPrefixFieldName = fieldName.substring(embeddedPrefixHyphenIndex + 1);
+				}
+				if (! noEmbeddedPrefixFieldName.equals(attributeName)) {
+					UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Attribute Name " + attributeName + " does not match content field name " + noEmbeddedPrefixFieldName);
 					erroneousContentCount++;
 				}
 				else {
@@ -160,7 +165,8 @@ public class ContentChecker {
 							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Document " + bizModule + "." + bizDocument + " is not persistent");
 							erroneousContentCount++;
 						}
-						else if (! tableName.equals(RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME) && 
+						else if ((embeddedPrefixHyphenIndex < 0) && // not content through an embedded association
+									(! tableName.equals(RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME)) && // not a dynamic entity
 									(! tableName.equals(p.getPersistentIdentifier()))) {
 							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Document " + bizModule + "." + bizDocument + " has a persistent identifier of " + p.getPersistentIdentifier());
 							erroneousContentCount++;
@@ -208,7 +214,7 @@ public class ContentChecker {
 			sql.setLength(0);
 
 			for (String name : table.fields.keySet()) {
-				AttributeType attributeType = table.fields.get(name);
+				AttributeType attributeType = table.fields.get(name).getLeft();
 				if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 					if (sql.length() == 0) {
 						sql.append("select bizId from ").append(table.name).append(" where ");
@@ -262,7 +268,7 @@ public class ContentChecker {
 	
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
-			AttributeType attributeType = table.fields.get(name);
+			AttributeType attributeType = table.fields.get(name).getLeft();
 			if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 				return true;
 			}

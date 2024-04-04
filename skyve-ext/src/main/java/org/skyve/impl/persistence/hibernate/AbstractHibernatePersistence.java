@@ -744,6 +744,12 @@ t.printStackTrace();
 	// So we have to ensure its robust as all fuck
 	@Override
 	public final void commit(boolean close) {
+		commit(close, true);
+	}
+	
+	// this variant is used by BackupUtil.executeScript() where the ADM_)Uniqueness table 
+	// may not exist after a script - eg drop script
+	public final void commit(boolean close, boolean removeUniqueHashes) {
 		boolean rollbackOnly = false;
 		try {
 			if (em != null) { // can be null after a relogin
@@ -758,20 +764,22 @@ t.printStackTrace();
 					}
 					else {
 						try {
-							// remove all inserted unique hashes (can only do if we have an em)
-							try {
-								final Persistent persistent = new Persistent();
-								persistent.setName(UniquenessEntity.TABLE_NAME);
-								final String persistentIdentifier = persistent.getPersistentIdentifier();
-								for (String hash : uniqueHashes) {
-									StringBuilder query = new StringBuilder(64);
-									query.append("delete from ").append(persistentIdentifier).append(" where ");
-									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
-									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+							// remove all inserted unique hashes if we were told to (can only do if we have an em)
+							if (removeUniqueHashes) {
+								try {
+									final Persistent persistent = new Persistent();
+									persistent.setName(UniquenessEntity.TABLE_NAME);
+									final String persistentIdentifier = persistent.getPersistentIdentifier();
+									for (String hash : uniqueHashes) {
+										StringBuilder query = new StringBuilder(64);
+										query.append("delete from ").append(persistentIdentifier).append(" where ");
+										query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+										newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+									}
 								}
-							}
-							finally {
-								uniqueHashes.clear();
+								finally {
+									uniqueHashes.clear();
+								}
 							}
 						}
 						finally {
@@ -1988,7 +1996,8 @@ if (document.isDynamic()) return;
 				// Need to check aggregation FKs
 				// Need to check collection joining table element_id FKs
 				// but do NOT need to check child collection parent_ids as they point back
-				if (! CollectionType.child.equals(type)) {
+				// and do NOT need to check embedded associations as they have no *_id FKs
+				if (! (CollectionType.child.equals(type) || AssociationType.embedded.equals(type))) {
 					// Check composed collections if we are deleting a composed collection element
 					// directly using p.delete(), otherwise,
 					// if preRemove() is being fired, we should NOT check composed collections or associations

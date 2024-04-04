@@ -2,7 +2,6 @@ package org.skyve.impl.backup;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.metadata.model.Attribute.AttributeType;
 
 class JoinTable extends Table {
 	String ownerTableName;
@@ -13,10 +12,10 @@ class JoinTable extends Table {
 		this.ownerTableName = ownerTableName;
 		this.ordered = ordered;
 		
-		fields.put(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text);
-		fields.put(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text);
+		fields.put(PersistentBean.OWNER_COLUMN_NAME, Table.TEXT);
+		fields.put(PersistentBean.ELEMENT_COLUMN_NAME, Table.TEXT);
 		if (ordered) {
-			fields.put(Bean.ORDINAL_NAME, AttributeType.integer);
+			fields.put(Bean.ORDINAL_NAME, Table.INTEGER);
 		}
 	}
 }

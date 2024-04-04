@@ -24,14 +24,9 @@
 		<many-to-one name="composedAssociation" entity-name="testAllAttributesPersistent" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllAttributesPersistent_composedAssociation"/>
 		<component name="embeddedAssociation">
 			<parent name="parent" />
-			<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="embedded_aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedAssociation"/>
-			<many-to-one name="composedAssociation" entity-name="testAllAttributesPersistent" column="embedded_composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllAttributesPersistent_composedAssociation"/>
 			<property name="booleanFlag" column="embedded_booleanFlag" />
-			<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-				<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />
-				<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
-			</bag>
 			<property name="colour" column="embedded_colour" />
+			<property name="content" length="36" column="embedded_content" />
 			<property name="date" type="DateOnly" column="embedded_date" />
 			<property name="dateTime" type="DateTime" column="embedded_dateTime" />
 			<property name="decimal10" type="Decimal10" precision="28" scale="10" column="embedded_decimal10" />
@@ -148,14 +143,9 @@
 		<many-to-one name="aggregatedAssociation" entity-name="testAllDynamicAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedAssociation"/>
 		<many-to-one name="composedAssociation" entity-name="testAllDynamicAttributesPersistent" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllDynamicAttributesPersistent_composedAssociation"/>
 		<component name="embeddedAssociation">
-			<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="embedded_aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedAssociation"/>
-			<many-to-one name="composedAssociation" entity-name="testAllAttributesPersistent" column="embedded_composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllDynamicAttributesPersistent_composedAssociation"/>
 			<property name="booleanFlag" column="embedded_booleanFlag" />
-			<bag name="aggregatedCollection" table="TEST_AllDynamicAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-				<key column="owner_id" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedCollection_owner_id" />
-				<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllDynamicAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
-			</bag>
 			<property name="colour" column="embedded_colour" />
+			<property name="content" length="36" column="embedded_content" />
 			<property name="date" type="DateOnly" column="embedded_date" />
 			<property name="dateTime" type="DateTime" column="embedded_dateTime" />
 			<property name="decimal10" type="Decimal10" precision="28" scale="10" column="embedded_decimal10" />
@@ -235,12 +225,12 @@
 		<property name="bizUserId" length="36" not-null="true" />
 		<bag name="arcs" table="TEST_ArcOneToMany_arcs" cascade="persist,save-update,refresh,merge">
 			<key column="owner_id" foreign-key="FK_TEST_ArcOneToMany_arcs_owner_id" />
-		<many-to-any meta-type="string" id-type="string">
-			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
-			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
-			<column name="arcs_type" index="IDX_element_id" />
-			<column name="arcs_id" length="36" index="IDX_element_id" />
-		</many-to-any>
+			<many-to-any meta-type="string" id-type="string">
+				<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
+				<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
+				<column name="arcs_type" index="IDX_element_id" />
+				<column name="arcs_id" length="36" index="IDX_element_id" />
+			</many-to-any>
 		</bag>
 		<filter name="testArcOneToManyNoneFilter" condition="1=0"/>
 		<filter name="testArcOneToManyCustomerFilter" condition="bizCustomer=:customerParam"/>

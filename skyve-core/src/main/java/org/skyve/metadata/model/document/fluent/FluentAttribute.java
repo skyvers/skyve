@@ -2,7 +2,7 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.SensitivityType;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Attribute.UsageType;
 
 abstract class FluentAttribute<T extends FluentAttribute<T>> {
@@ -85,7 +85,7 @@ abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public T sensitivity(SensitivityType sensitivity) {
+	public T sensitivity(Sensitivity sensitivity) {
 		get().setSensitivity(sensitivity);
 		return (T) this;
 	}

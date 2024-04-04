@@ -8,31 +8,21 @@
 			All persistent attributes in a value object.
 		]]>
 	</documentation>
-	<persistent strategy="mapped" />
+	<persistent />
 	<singularAlias>All Value</singularAlias>
 	<pluralAlias>All Value</pluralAlias>
 	<parentDocument>AllAttributesPersistent</parentDocument>
 	<bizKey expression="{text}" />
 	<attributes>
-		<association name="aggregatedAssociation" type="aggregation">
-			<displayName>Aggregated Association</displayName>
-			<documentName>AllAttributesPersistent</documentName>
-		</association>
-		<association name="composedAssociation" type="composition">
-			<displayName>Composed Association</displayName>
-			<documentName>AllAttributesPersistent</documentName>
-		</association>
 		<boolean name="booleanFlag">
 			<displayName>Boolean Flag</displayName>
 		</boolean>
-		<collection name="aggregatedCollection" type="aggregation">
-			<displayName>Aggregated Collection</displayName>
-			<documentName>AllAttributesPersistent</documentName>
-			<minCardinality>0</minCardinality>
-		</collection>
 		<colour name="colour">
 			<displayName>Colour</displayName>
 		</colour>
+		<content name="content">
+			<displayName>Content</displayName>
+		</content>
 		<date name="date">
 			<displayName>Date</displayName>
 		</date>

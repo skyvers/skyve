@@ -15,11 +15,9 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
@@ -34,11 +32,9 @@ import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
@@ -47,13 +43,12 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Attribute.SensitivityType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
@@ -233,7 +228,8 @@ final class BackupUtil {
 			}
 		}
 		finally {
-			persistence.commit(false);
+			// Use this form of commit method because ADM_Uniqueness may not exist here
+			((AbstractHibernatePersistence) persistence).commit(false, false);
 		}
 	}
 
@@ -368,89 +364,6 @@ final class BackupUtil {
 				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 		}
-	}
-	
-	/**
-	 * Fetch sensitivity index, calculated from ordinal value of {@link SensitivityType} selected in UI.
-	 * 
-	 * Returns 0 if no sensitivity level is selected.
-	 * 
-	 * @param bean DataMaintenance bean
-	 */
-	static int getSensitivityIndex(Bean bean) {
-		if (bean != null) {
-			Object sensitivityInput = BindUtil.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
-			if (sensitivityInput != null) {
-				return SensitivityType.valueOf(sensitivityInput.toString()).ordinal();
-			}
-		}
-		
-		return 0;
-	}
-	
-	/**
-	 * Fetch 'include content' value selected in UI.
-	 * 
-	 * @param bean DataMaintenance bean
-	 */
-	static boolean getIncludeContent(Bean bean) {
-		if (bean != null) {
-			Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
-			return Boolean.TRUE.equals(includeContent);
-		}
-		
-		return true; // content included by default
-	}
-	
-	/**
-	 * Fetch 'include audits' value selected in UI.
-	 * 
-	 * @param bean DataMaintenance bean
-	 */
-	static boolean getIncludeAuditLog(Bean bean) {
-		if (bean != null) {
-			Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
-			return Boolean.TRUE.equals(includeAudits);
-		}
-		
-		return true; // audits included by default
-	}
-	
-	/**
-	 * Constructs and returns a set of attributes (table.column) to redact.
-	 * 
-	 * @param sensitivityIndex Sensitivity benchmark. If any attribute has a greater than or equal to sensitivity score, it is redacted.
-	 */
-	static Set<String> getAttributesToRedact(int sensitivityIndex) {
-		Customer customer = CORE.getPersistence().getUser().getCustomer();
-		Set<String> attributesToRedact = new HashSet<>();
-		
-		if (sensitivityIndex == 0) {
-			// Nothing to redact
-			return attributesToRedact;
-		}
-		
-		// Construct map of attributes to redact
-		for (Module module : customer.getModules()) {
-			for (Entry<String, DocumentRef> entry : module.getDocumentRefs().entrySet()) {
-				DocumentRef documentRef = entry.getValue();
-				if (documentRef.getOwningModuleName().equals(module.getName())) {
-					Document document = module.getDocument(customer, entry.getKey());
-					if (document.isPersistable()) {
-						@SuppressWarnings("null")
-						String tableName = document.getPersistent().getPersistentIdentifier();
-						for (Attribute a : document.getAllAttributes(customer)) {
-							SensitivityType sensitivity = a.getSensitivity();
-							int sensitivityScore = sensitivity != null ? sensitivity.ordinal() : 0;
-							if (sensitivityScore >= sensitivityIndex) {
-								attributesToRedact.add(tableName + "." + a.getName());					}
-						}
-					}
-				}
-			}
-		}
-		
-		return attributesToRedact;
 	}
 	
 	/**

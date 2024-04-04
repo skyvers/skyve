@@ -76,7 +76,7 @@ public interface Attribute extends NamedMetaData {
 	}
 	
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public enum SensitivityType {	
+	public enum Sensitivity {	
 		/**
 		 * Data is freely available and does not require any special security measures. 
 		 * This data can be openly shared with anyone without the need for additional precautions.
@@ -168,7 +168,7 @@ public interface Attribute extends NamedMetaData {
 	 * Informs the Skyve framework when to redact information when performing backups.
 	 * @return	the data sensitivity.
 	 */
-	SensitivityType getSensitivity();
+	Sensitivity getSensitivity();
 	
 	/**
 	 * 

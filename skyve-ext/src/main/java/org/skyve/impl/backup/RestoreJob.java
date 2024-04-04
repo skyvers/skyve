@@ -18,6 +18,7 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
@@ -38,6 +39,7 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.util.FileUtil;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
@@ -334,12 +336,8 @@ public class RestoreJob extends CancellableJob {
 										continue;
 									}
 
-									AttributeType attributeType = table.fields.get(header);
-
-									// replace any 2 CR or LF combinations in the string with 1
-									// Super CSV place 2 ox0A into the string when it comes across a '\n'
-									// in a quoted string field value.
-									stringValue = stringValue.replaceAll("[\\n\\r]{2}", "\n");
+									Pair<AttributeType, Sensitivity> field = table.fields.get(header);
+									AttributeType attributeType = (field == null) ? null : field.getLeft();
 
 									// foreign keys
 									if (header.endsWith("_id")) {

@@ -20,9 +20,9 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
@@ -35,12 +35,14 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.util.Binder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
@@ -92,17 +94,16 @@ public class BackupJob extends CancellableJob {
 		UtilImpl.LOGGER.info(trace);
 		
 		// Are we including audits in this backup?
-		boolean includeAuditLog = BackupUtil.getIncludeAuditLog(bean);
+		boolean includeAuditLog = getIncludeAuditLog(bean);
 		if (! includeAuditLog) {
 			tables.removeIf(t -> AppConstants.ADMIN_AUDIT_PERSISTENT_IDENTIFIER.equals(t.name));
 		}
 		
 		// Are we including content in this backup?
-		boolean includeContent = BackupUtil.getIncludeContent(bean);
+		boolean includeContent = getIncludeContent(bean);
 		
-		// Create set of attributes to redact
-		int sensitivityIndex = BackupUtil.getSensitivityIndex(bean);
-		Set<String> attributesToRedact = BackupUtil.getAttributesToRedact(sensitivityIndex);
+		// Determine level of redaction
+		int sensitivityLevel = getSensitivityLevel(bean);
 		
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
@@ -144,7 +145,10 @@ public class BackupJob extends CancellableJob {
 														values.clear();
 	
 														for (String name : table.fields.keySet()) {
-															AttributeType attributeType = table.fields.get(name);
+															Pair<AttributeType, Sensitivity> field = table.fields.get(name);
+															AttributeType attributeType = field.getLeft();
+															Sensitivity sensitivity = field.getRight();
+															boolean redact = (sensitivityLevel > 0) && (sensitivity.ordinal() >= sensitivityLevel);
 															Object value = null;
 	
 															if (AttributeType.association.equals(attributeType) ||
@@ -173,23 +177,23 @@ public class BackupJob extends CancellableJob {
 																	if (name.equalsIgnoreCase(Bean.BIZ_KEY)) {
 																		throw new IllegalStateException(table.name + " with " +
 																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																				" is missing a " + Bean.BIZ_KEY + " value.");
+																											" is missing a " + Bean.BIZ_KEY + " value.");
 																	}
 																	// bizCustomer is mandatory
 																	if (name.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
 																		throw new IllegalStateException(table.name + " with " +
 																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																				" is missing a " + Bean.CUSTOMER_NAME + " value.");
+																											" is missing a " + Bean.CUSTOMER_NAME + " value.");
 																	}
 																	// bizUserId is mandatory
 																	if (name.equalsIgnoreCase(Bean.USER_ID)) {
 																		throw new IllegalStateException(table.name + " with " +
 																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
-																				" is missing a " + Bean.USER_ID + " value.");
+																											" is missing a " + Bean.USER_ID + " value.");
 																	}
 																}
 																// Respect sensitivity
-																if (attributesToRedact.contains(table.name + "." + name)) {
+																if (redact) {
 																	// Redact value
 																	value = BackupUtil.redactData(attributeType, value);
 																}
@@ -203,7 +207,7 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		geometry = (Geometry) BackupUtil.redactData(attributeType, geometry);
 																	}
@@ -218,7 +222,7 @@ public class BackupJob extends CancellableJob {
 																else {
 																	value = Boolean.valueOf(booleanValue);
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		value = BackupUtil.redactData(attributeType, value);
 																	}
@@ -231,7 +235,7 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		date = (Date) BackupUtil.redactData(attributeType, date);
 																	}
@@ -245,7 +249,7 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		time = (Time) BackupUtil.redactData(attributeType, time);
 																	}
@@ -260,7 +264,7 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		timestamp = (Timestamp) BackupUtil.redactData(attributeType, timestamp);
 																	}
@@ -276,7 +280,7 @@ public class BackupJob extends CancellableJob {
 																}
 																else {
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		bigDecimal = (BigDecimal) BackupUtil.redactData(attributeType, bigDecimal);
 																	}
@@ -291,7 +295,7 @@ public class BackupJob extends CancellableJob {
 																else {
 																	value = Integer.valueOf(intValue);
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		value = BackupUtil.redactData(attributeType, value);
 																	}
@@ -313,7 +317,7 @@ public class BackupJob extends CancellableJob {
 																else {
 																	value = Long.valueOf(longValue);
 																	// Respect sensitivity
-																	if (attributesToRedact.contains(table.name + "." + name)) {
+																	if (redact) {
 																		// Redact value
 																		value = BackupUtil.redactData(attributeType, value);
 																	}
@@ -322,7 +326,7 @@ public class BackupJob extends CancellableJob {
 															else if (AttributeType.content.equals(attributeType) ||
 																	AttributeType.image.equals(attributeType)) {
 																String stringValue = resultSet.getString(name);
-																if (resultSet.wasNull() || ! includeContent || attributesToRedact.contains(table.name + "." + name)) {
+																if (resultSet.wasNull() || redact || (! includeContent) ) {
 																	// Nullify sensitive content fields & do not include content in backup
 																	value = "";
 																}
@@ -491,5 +495,51 @@ public class BackupJob extends CancellableJob {
 			jobLog.add(trace);
 			Util.LOGGER.info(trace);
 		}
+	}
+
+	/**
+	 * Fetch sensitivity level, calculated from ordinal value of {@link SensitivityType} selected in UI.
+	 * 
+	 * Returns 0 if no sensitivity level is selected.
+	 * 
+	 * @param bean DataMaintenance bean
+	 */
+	private static int getSensitivityLevel(Bean bean) {
+		if (bean != null) {
+			Object sensitivityInput = BindUtil.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
+			if (sensitivityInput != null) {
+				return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
+			}
+		}
+		
+		return 0;
+	}
+	
+	/**
+	 * Fetch 'include content' value selected in UI.
+	 * 
+	 * @param bean DataMaintenance bean
+	 */
+	private static boolean getIncludeContent(Bean bean) {
+		if (bean != null) {
+			Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
+			return Boolean.TRUE.equals(includeContent);
+		}
+		
+		return true; // content included by default
+	}
+	
+	/**
+	 * Fetch 'include audits' value selected in UI.
+	 * 
+	 * @param bean DataMaintenance bean
+	 */
+	private static boolean getIncludeAuditLog(Bean bean) {
+		if (bean != null) {
+			Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
+			return Boolean.TRUE.equals(includeAudits);
+		}
+		
+		return true; // audits included by default
 	}
 }

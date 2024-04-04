@@ -266,7 +266,7 @@
         <xs:attribute name="deprecated" type="xs:boolean"/>
         <xs:attribute name="trackChanges" type="xs:boolean"/>
         <xs:attribute name="audited" type="xs:boolean"/>
-        <xs:attribute name="sensitivity" type="tns:sensitivityType"/>
+        <xs:attribute name="sensitivity" type="tns:sensitivity"/>
         <xs:attribute name="usage" type="tns:usageType"/>
       </xs:extension>
     </xs:complexContent>
@@ -704,7 +704,7 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="sensitivityType">
+  <xs:simpleType name="sensitivity">
     <xs:restriction base="xs:string">
       <xs:enumeration value="none"/>
       <xs:enumeration value="internal"/>
