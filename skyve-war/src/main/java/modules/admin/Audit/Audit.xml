@@ -8,7 +8,7 @@
 	<pluralAlias>Audits</pluralAlias>
 	<audited>false</audited>
 	<iconStyleClass>fa-solid fa-check</iconStyleClass>
-	<bizKey expression="{operation} by {userName} at {timestamp}" />
+	<bizKey expression="{operation} by {userName} at {timestamp}" sensitivity="personal" />
 	<attributes>
 		<text name="auditModuleName" required="true">
 			<displayName>admin.audit.auditModuleName.displayName</displayName>

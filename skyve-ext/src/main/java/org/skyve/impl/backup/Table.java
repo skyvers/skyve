@@ -74,7 +74,13 @@ class Table {
 		if (! joinedExtension) { 
 			fields.put(PersistentBean.VERSION_NAME, INTEGER);
 			fields.put(PersistentBean.LOCK_NAME, TEXT);
-			fields.put(Bean.BIZ_KEY, TEXT);
+			Sensitivity sensitivity = document.getBizKeySensitity();
+			if ((sensitivity == null) || (sensitivity == Sensitivity.none)) {
+				fields.put(Bean.BIZ_KEY, TEXT);
+			}
+			else {
+				fields.put(Bean.BIZ_KEY, ImmutablePair.of(AttributeType.text, sensitivity));
+			}
 			fields.put(Bean.CUSTOMER_NAME, TEXT);
 			fields.put(PersistentBean.FLAG_COMMENT_NAME, TEXT);
 			fields.put(Bean.DATA_GROUP_ID, TEXT);

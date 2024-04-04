@@ -15,7 +15,7 @@
 	<pluralAlias>Users</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
-	<bizKey expression="{userName} - {contact.bizKey}" />
+	<bizKey expression="{userName} - {contact.bizKey}" sensitivity="personal" />
 	<attributes>
 		<text name="userName" required="true" sensitivity="personal">
 			<documentation>

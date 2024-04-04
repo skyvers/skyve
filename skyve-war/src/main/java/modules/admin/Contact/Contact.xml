@@ -9,7 +9,7 @@
 	<singularAlias>Contact</singularAlias>
 	<pluralAlias>Contacts</pluralAlias>
 	<iconStyleClass>fa-solid fa-address-book</iconStyleClass>
-	<bizKey>
+	<bizKey sensitivity="personal">
 		<![CDATA[
 		  	return modules.admin.Contact.ContactBizlet.bizKey(this);
 		]]>

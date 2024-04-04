@@ -7,7 +7,7 @@
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
 	<iconStyleClass>fa-solid fa-user</iconStyleClass>
-	<bizKey >
+	<bizKey sensitivity="personal">
 		<![CDATA[return modules.admin.User.UserBizlet.bizKey(this);]]>
 	</bizKey>
 	<implements>

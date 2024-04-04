@@ -7,7 +7,7 @@
 	<singularAlias>User Token</singularAlias>
 	<pluralAlias>User Tokens</pluralAlias>
 	<audited>false</audited>
-	<bizKey expression="{userName}" />
+	<bizKey expression="{userName}" sensitivity="personal" />
 	<attributes>
 		<text name="userName" required="true" sensitivity="personal">
 			<documentation>
@@ -18,11 +18,11 @@
 			<displayName>User Name</displayName>
 			<length>305</length>
 		</text>
-		<text name="series" required="true">
+		<text name="series" required="true" sensitivity="secret">
 			<displayName>Series</displayName>
 			<length>64</length>
 		</text>
-		<text name="token" required="true">
+		<text name="token" required="true" sensitivity="secret">
 			<displayName>Token</displayName>
 			<length>64</length>
 		</text>

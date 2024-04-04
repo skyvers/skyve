@@ -199,6 +199,7 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="expression" type="xs:string"/>
+        <xs:attribute name="sensitivity" type="tns:sensitivity"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -662,6 +663,17 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="sensitivity">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="internal"/>
+      <xs:enumeration value="confidential"/>
+      <xs:enumeration value="restricted"/>
+      <xs:enumeration value="personal"/>
+      <xs:enumeration value="secret"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
       <xs:enumeration value="upper"/>
@@ -701,17 +713,6 @@
       <xs:enumeration value="textual"/>
       <xs:enumeration value="both"/>
       <xs:enumeration value="none"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="sensitivity">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="none"/>
-      <xs:enumeration value="internal"/>
-      <xs:enumeration value="confidential"/>
-      <xs:enumeration value="restricted"/>
-      <xs:enumeration value="personal"/>
-      <xs:enumeration value="secret"/>
     </xs:restriction>
   </xs:simpleType>
 

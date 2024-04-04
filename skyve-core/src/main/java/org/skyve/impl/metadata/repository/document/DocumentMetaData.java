@@ -374,6 +374,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 		if (bizKey != null) {
 			bizKeyExpression = bizKey.getExpression();
 			bizKeyCode = bizKey.getCode();
+			result.setBizKeySensitity(bizKey.getSensitivity());
 		}
 
 		Persistent resultPersistent = result.getPersistent();
