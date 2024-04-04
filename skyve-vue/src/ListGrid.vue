@@ -28,6 +28,10 @@ function defaultMatchMode(columnType) {
  */
 function arraysEqual(a, b) {
 
+    if (!Array.isArray(a) || !Array.isArray(b)) {
+        return false;
+    }
+
     if (a.length != b.length) {
         return false;
     }
@@ -223,7 +227,7 @@ export default {
             sortColumn: '',
             sortOrder: 0,
 
-            selectedColumns: null,
+            selectedColumns: [],
             columnOrder: [],
             columnWidths: [],
 
@@ -236,6 +240,14 @@ export default {
         endRow() {
             return this.firstRow + this.pageSize;
         },
+        /**
+         * A map of the column definitions keyed 
+         * on the 'field' property.
+         * 
+         * Additionally calculate a dataType property
+         * used to determine which filter operators
+         * are shown.
+         */
         columnDefinitionsMap() {
 
             // Map from the type to 'dataType'
@@ -409,9 +421,14 @@ export default {
             this.sortColumn = event.sortField;
             this.sortOrder = event.sortOrder;
             this.filters = event.filters;
-            // TODO restoring filters blats the defaults
-            // created by initFilters(), we should probably
-            // do a merge here
+
+            // Using the DataTable's columnOrder property
+            // to work backwards to the selectedColumns doesn't
+            // really work as columnOrder appears to be
+            // updated only when columns are reordered
+            // if ((event.columnOrder ?? []).length > 0) {
+            //     this.selectedColumns = this.columns.filter((col) => event.columnOrder.includes(col.field));
+            // }
         },
         initFilters() {
 
