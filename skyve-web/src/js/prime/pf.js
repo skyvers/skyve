@@ -1,4 +1,3 @@
-
 SKYVE.PF = function() {
 	// block multiple load attempts of google/leaflet maps JS libs.
 	var loadingMap = false;
