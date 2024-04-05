@@ -383,7 +383,7 @@ export default {
         async load() {
             this.loading = true;
 
-            const listRequest = new Request('../smartlist', {
+            const listRequest = new Request('./smartlist', {
                 method: 'POST',
                 body: new URLSearchParams(this.fetchFormData),
                 headers: {

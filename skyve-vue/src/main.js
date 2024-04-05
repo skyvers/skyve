@@ -17,10 +17,10 @@ import Calendar from 'primevue/calendar';
 import Dropdown from 'primevue/dropdown';
 
 // SKYVE name space definition
-if (!window.SKYVE) window.SKYVE = {};
+window.SKERV ??= {};
 
 // JS create method
-window.SKYVE.listgrid = function (config) {
+window.SKERV.listgrid = function (config) {
 
     const grid = createApp(ListGrid, {
         'module': config.m,
