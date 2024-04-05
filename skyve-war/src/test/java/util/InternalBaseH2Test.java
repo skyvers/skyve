@@ -30,6 +30,9 @@ import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 
+/**
+ * Common extension point for Junit 4 and 5 Abstract H2 Tests.
+ */
 abstract class InternalBaseH2Test {
 	protected static final String USER = "TestUser";
 	protected static final String PASSWORD = "TestPassword0!";
