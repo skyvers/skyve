@@ -1,6 +1,11 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.joining;
+
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -52,15 +57,15 @@ import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
-import org.skyve.util.OWASP;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.OWASP;
 
 public class SmartClientAttributeDefinition {
     protected SmartClientLookupDefinition lookup;
@@ -74,7 +79,7 @@ public class SmartClientAttributeDefinition {
 	protected String mask;
 	protected String textBoxStyle;
 	protected String validation;
-	protected String valueMap;
+	protected Map<String, String> valueMap;
 	protected boolean required = false;
 	protected boolean triStateCheckBox = false;
     protected boolean escape = true;
@@ -134,19 +139,19 @@ public class SmartClientAttributeDefinition {
 			if (domainType != null) {
 				// constant domain types
 				if (DomainType.constant.equals(domainType)) {
-					valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, runtime);
+					valueMap = getConstantDomainValueMap(customer, bindingDocument, bindingAttribute, runtime);
 				}
 				else {
 					// if this is an enumeration on a query column defn, ensure the filter has all values
 					if (isQueryColumn && bindingAttribute.getAttributeType() == AttributeType.enumeration) {
-						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, runtime);
+						valueMap = getConstantDomainValueMap(customer, bindingDocument, bindingAttribute, runtime);
 					}
 					// this valueMap will be replaced in client logic but this defn ensures that the
 					// select widget doesn't try to use the form's data source to get values when opened
 					else {
-						valueMap = "[' ']";
+						valueMap = emptyMap();
 					}
-					
+
 					if (domainType == DomainType.variant || domainType == DomainType.dynamic) {
 						hasDisplayField = true;
 					}
@@ -497,10 +502,32 @@ public class SmartClientAttributeDefinition {
 		this.escape = escape;
 	}
 
-	public String getValueMap() {
-		return valueMap;
-	}
-	
+    public Map<String, String> getValueMap() {
+        return valueMap;
+    }
+
+    /**
+     * Convert the valueMap to a string for use in the various toJavascript()
+     * methods in the sub-classes. Produces a JSON representation of the
+     * <code>valueMap</code> field (it the map contains any values), or an array
+     * containing one space (if the map is empty).
+     * 
+     * @return
+     */
+    protected String getValueMapAsString() {
+        if (valueMap.isEmpty()) {
+            // this valueMap will be replaced in client logic but this defn ensures that the
+            // select widget doesn't try to use the form's data source to get values when
+            // opened
+            return "[' ']";
+        } else {
+            return valueMap.entrySet()
+                           .stream()
+                           .map(entry -> "'" + entry.getKey() + "':'" + entry.getValue() + "'")
+                           .collect(joining(", ", "{", "}"));
+        }
+    }
+
 	void setMask(String mask) {
 		this.mask = mask;
 	}
@@ -753,7 +780,7 @@ public class SmartClientAttributeDefinition {
 		}
     }
 
-	private static String getConstantDomainValueMapString(Customer customer,
+	private static Map<String, String> getConstantDomainValueMap(Customer customer,
 															Document document,
 															Attribute attribute,
 															boolean runtime) {
@@ -762,20 +789,14 @@ public class SmartClientAttributeDefinition {
 																				attribute, 
 																				null,
 																				runtime);
-		
-		StringBuilder sb = new StringBuilder(64);
-		sb.append('{');
-		for (DomainValue value : values) {
-			sb.append('\'').append(OWASP.escapeJsString(value.getCode())).append("':'");
-			sb.append(OWASP.escapeJsString(value.getLocalisedDescription())).append("',");
-		}
-		if (values.isEmpty()) { // no values
-			sb.append('}');
-		}
-		else {
-			sb.setCharAt(sb.length() - 1, '}'); // replace last comma
-		}
 
-		return sb.toString();
-	}
+        Map<String, String> dvMap = new LinkedHashMap<>();
+        for (DomainValue domainValue : values) {
+            String key = OWASP.escapeJsString(domainValue.getCode());
+            String value = OWASP.escapeJsString(domainValue.getLocalisedDescription());
+            dvMap.put(key, value);
+        }
+
+        return dvMap;
+    }
 }

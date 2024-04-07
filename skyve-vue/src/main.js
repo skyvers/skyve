@@ -23,10 +23,10 @@ window.SKERV ??= {};
 window.SKERV.listgrid = function (config) {
 
     const grid = createApp(ListGrid, {
-        'module': config.m,
-        'title': config.t,
-        'query': config.q,
-        'columns': config.c
+        'module': config.module,
+        'title': config.title,
+        'query': config.query,
+        'columns': config.columns
     });
     grid.use(PrimeVue, { ripple: true });
     grid.component('Button', Button);
@@ -40,6 +40,5 @@ window.SKERV.listgrid = function (config) {
     grid.component('TimeCalendar', TimeCalendar);
     grid.component('DateOnlyCalendar', DateOnlyCalendar);
 
-    //    grid.configure(config); - can't call the method exposed here
-    grid.mount(config.e);
+    grid.mount(config.targetSelector);
 }  
