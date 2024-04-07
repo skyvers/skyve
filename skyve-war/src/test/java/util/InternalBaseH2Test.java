@@ -105,6 +105,10 @@ abstract class InternalBaseH2Test {
 		UtilImpl.SQL_TRACE = false;
 		UtilImpl.QUERY_TRACE = false;
 		UtilImpl.JOB_SCHEDULER = false;
+		UtilImpl.SMTP = "localhost";
+		UtilImpl.SMTP_SENDER = "noreply@skyve.org";
+		UtilImpl.SMTP_TEST_RECIPIENT = "noreceive@skyve.org";
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
 		UtilImpl.CONFIGURATION = new TreeMap<>();
 
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());
