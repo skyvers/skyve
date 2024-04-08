@@ -8,6 +8,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
@@ -38,7 +39,22 @@ public class FacesContentUtil {
 	
 	/**
 	 * Handle a file upload event and return the content once uploaded.
-	 * @param fileName the name of the uploaded file
+	 * @param fileContents	the contents of the uploaded file
+	 * @param bean the driving bean
+	 * @param binding the binding to upload
+	 * @return the uploaded content
+	 * @throws Exception
+	 */
+	public static AttachmentContent handleFileUpload(byte[] fileContents,
+														Bean bean,
+														String binding)
+	throws Exception {
+		return handleFileUpload(null, fileContents, bean, binding);
+	}
+	
+	/**
+	 * Handle a file upload event and return the content once uploaded.
+	 * @param filePathOrName the name or full path of the uploaded file
 	 * @param fileContents	the contents of the uploaded file
 	 * @param bean the driving bean
 	 * @param binding the binding to upload
@@ -50,11 +66,13 @@ public class FacesContentUtil {
 														Bean bean,
 														String binding)
 	throws Exception {
-		Customer customer = CORE.getCustomer();
-		String fileName = FilenameUtils.getName(filePathOrName);
-		String customerName = customer.getName();
+		User user = CORE.getUser();
+		Customer customer = user.getCustomer();
+		String fileName = (filePathOrName == null) ? null : FilenameUtils.getName(filePathOrName);
 		Bean contentOwner = bean;
 		String contentAttributeName = binding;
+		
+		// If the binding is compound, obtain the contentOwner bean - the penultimate binding
 		int contentBindingLastDotIndex = binding.lastIndexOf('.');
 		if (contentBindingLastDotIndex >= 0) { // compound binding
 			String penultimateBinding = binding.substring(0, contentBindingLastDotIndex);
@@ -72,15 +90,33 @@ public class FacesContentUtil {
 			contentAttributeName = binding.substring(contentBindingLastDotIndex + 1);
 		}
 
+		String contentOwnerBizId = contentOwner.getBizId();
+		String contentOwnerBizModule = contentOwner.getBizModule();
+		String contentOwnerBizDocument = contentOwner.getBizDocument();
+		String contentOwnerBizCustomer = contentOwner.getBizCustomer();
+		String contentOwnerBizDataGroupId = contentOwner.getBizDataGroupId();
+		String contentOwnerBizUserId = contentOwner.getBizUserId();
+		
+		// Checks for content permissions/restrictions and tests if bean instance can be read
+		if (! user.canAccessContent(contentOwnerBizId,
+										contentOwnerBizModule,
+										contentOwnerBizDocument,
+										contentOwnerBizCustomer,
+										contentOwnerBizDataGroupId,
+										contentOwnerBizUserId,
+										contentAttributeName)) {
+			throw new SecurityException("upload this content", user.getName());
+		}
+
 		// Always insert a new attachment content node into the content repository on upload.
 		// That way, if the change is discarded (not committed), it'll still point to the original attachment.
 		// Also, browser caching is simple as the URL is changed (as a consequence of the content id change)
-		AttachmentContent content = new AttachmentContent(customerName, 
-															contentOwner.getBizModule(),
-															contentOwner.getBizDocument(), 
-															contentOwner.getBizDataGroupId(),
-															contentOwner.getBizUserId(),
-															contentOwner.getBizId(), 
+		AttachmentContent content = new AttachmentContent(contentOwnerBizCustomer,
+															contentOwnerBizModule,
+															contentOwnerBizDocument, 
+															contentOwnerBizDataGroupId,
+															contentOwnerBizUserId,
+															contentOwnerBizId, 
 															contentAttributeName, 
 															fileName, 
 															fileContents);

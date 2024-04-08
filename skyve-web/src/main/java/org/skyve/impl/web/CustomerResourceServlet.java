@@ -413,15 +413,13 @@ public class CustomerResourceServlet extends HttpServlet {
 				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
 			}
 			
-			// Check that the user has access
+			// Check that the user has access - use the full binding here
 			// NB If you can text search you should already be able to see anything you have access to
 			if (! user.canTextSearch()) {
-				if (! user.canAccess(UserAccess.content(moduleName, documentName, binding), uxui)) {
-					throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
-				}
+				user.checkAccess(UserAccess.content(moduleName, documentName, binding), uxui);
 			}
 			
-			// Check that user has content access
+			// Check that user has content access - Use the content module and document and the target attribute name
 			AttachmentContent content = resource.getContent();
 			if (! user.canAccessContent(content.getBizId(),
 											content.getBizModule(),

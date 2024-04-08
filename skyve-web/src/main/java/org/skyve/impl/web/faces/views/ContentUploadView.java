@@ -12,9 +12,13 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
@@ -152,36 +156,22 @@ public class ContentUploadView extends AbstractUploadView {
 				throw new IllegalStateException("bean is null");
 			}
 			
+			// Check content access
 			User user = persistence.getUser();
-			String username = user.getName();
-			Document document = bean.getDocumentMetaData();
-			if (! user.canAccessDocument(document)) {
-				throw new SecurityException("view this document", username);
-			}
-			
-			if (document.isPersistable()) {
-				if (bean.isPersisted()) {
-					if (! user.canUpdateDocument(document)) {
-						throw new SecurityException("update this document", username);
-					}
-				}
-				else {
-					if (! user.canCreateDocument(document)) {
-						throw new SecurityException("create this document", username);
-					}
-				}
-			}
-			
-			String bizId = bean.getBizId();
 			String bizModule = bean.getBizModule();
 			String bizDocument = bean.getBizDocument();
-			String bizCustomer = bean.getBizCustomer();
-			String bizDataGroupId = bean.getBizDataGroupId();
-			String bizUserId = bean.getBizUserId();
-			if (! user.canAccessContent(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId, contentBinding)) {
-				throw new SecurityException("upload this content", username);
+			UxUi uxui = UserAgent.getUxUi(request);
+			user.checkAccess(UserAccess.content(bizModule, bizDocument, contentBinding), uxui.getName());
+
+			// Check document access
+			Customer customer = user.getCustomer();
+			Document document = customer.getModule(bizModule).getDocument(customer, bizDocument);
+			if (! user.canAccessDocument(document)) {
+				throw new SecurityException("view this document", user.getName());
 			}
 			
+			// Add to content 
+			// NB This handles compound bindings and checks for content access on the content owning bean
 			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));		
 			String contentId = content.getContentId();
 

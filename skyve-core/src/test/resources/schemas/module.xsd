@@ -156,16 +156,12 @@
   </xs:complexType>
 
   <xs:complexType name="contentRestriction">
-    <xs:sequence>
-      <xs:element name="documentName" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
+    <xs:sequence/>
     <xs:attribute name="attribute" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="contentPermission">
-    <xs:sequence>
-      <xs:element name="documentName" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
+    <xs:sequence/>
     <xs:attribute name="attribute" type="xs:string" use="required"/>
   </xs:complexType>
 

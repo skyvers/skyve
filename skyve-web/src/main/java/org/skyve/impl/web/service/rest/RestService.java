@@ -415,13 +415,13 @@ public class RestService {
 
 			response.setContentType(MediaType.APPLICATION_JSON);
 			final User u = CORE.getUser();
-			if (!u.canAccessContent(id,
-					module,
-					document,
-					customer,
-					u.getDataGroupId(),
-					id,
-					attributeName)) {
+			if (! u.canAccessContent(id,
+										module,
+										document,
+										customer,
+										u.getDataGroupId(),
+										id,
+										attributeName)) {
 				throw new SecurityException(module + '.' + document + '.' + attributeName, u.getName());
 			}
 
@@ -433,24 +433,23 @@ public class RestService {
 
 			try (final ContentManager cm = EXT.newContentManager()) {
 				final Base64 base64Codec = new Base64();
-				final AttachmentContent content = new AttachmentContent(
-						customer,
-						module,
-						document,
-						u.getDataGroupId(),
-						u.getId(),
-						id,
-						attributeName,
-						MimeType.valueOf(mimeType),
-						base64Codec.decode(encodedContent));
-
+				final AttachmentContent content = new AttachmentContent(customer,
+																			module,
+																			document,
+																			u.getDataGroupId(),
+																			u.getId(),
+																			id,
+																			attributeName,
+																			MimeType.valueOf(mimeType),
+																			base64Codec.decode(encodedContent));
 				cm.put(content);
 				BindUtil.set(bean, attributeName, content.getContentId());
 				CORE.getPersistence().save(bean);
 
 				return content.getContentId();
 			}
-		} catch (Throwable t) {
+		}
+		catch (Throwable t) {
 			t.printStackTrace();
 			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
 		}
