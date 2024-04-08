@@ -3957,45 +3957,47 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					case MSSQL_2016:
 						if (SQL_SERVER_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
-									createDialectError(document, attribute));
+									createDialectError(document, attribute, dialectOptions));
 						}
 						break;
 					case MYSQL_5:
 					case MYSQL_5_4_BYTE_CHARSET:
 						if (MYSQL_5_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
-									createDialectError(document, attribute));
+									createDialectError(document, attribute, dialectOptions));
 						}
 						break;
 					case MYSQL_8:
 					case MYSQL_8_4_BYTE_CHARSET:
 						if (MYSQL_8_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
-									createDialectError(document, attribute));
+									createDialectError(document, attribute, dialectOptions));
 						}
 						break;
 					case POSTGRESQL:
 						if (POSTGRESQL_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
 							throw new MetaDataException(
-									createDialectError(document, attribute));
+									createDialectError(document, attribute, dialectOptions));
 						}
 						break;
 					case H2:
 					case H2_NO_INDEXES:
-					default:
-						// H2 is the default dialect
-						if (H2_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
-							System.err.println("Reserved word: " + attribute.getName());
-							throw new MetaDataException(
-									createDialectError(document, attribute));
-						}
+						// H2 handled below
 						break;
+					default:
+						throw new IllegalStateException(dialectOptions + " not handled");
+				}
+				// H2 is the default dialect and also the test database	
+				if (H2_RESERVED_WORDS.contains(attribute.getName().toLowerCase())) {
+					System.err.println("Reserved word: " + attribute.getName());
+					throw new MetaDataException(
+							createDialectError(document, attribute, DialectOptions.H2_NO_INDEXES));
 				}
 			}
 		}
 	}
 
-	private String createDialectError(final Document document, Attribute attribute) {
+	private static String createDialectError(final Document document, Attribute attribute, DialectOptions dialect) {
 		return new StringBuilder(256).append("Document ")
 										.append(document.getOwningModuleName())
 										.append('.')
@@ -4003,7 +4005,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										.append(" cannot contain attribute named \"")
 										.append(attribute.getName())
 										.append("\" because it is a reserved word in database dialect ")
-										.append(dialectOptions.getDescription())
+										.append(dialect.getDescription())
 										.append('.').toString();
 	}
 
