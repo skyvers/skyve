@@ -138,13 +138,15 @@ public class StartupExtensionTest {
 
 	@Test
 	public void testSaveConfigurationUpdatesMailProperties() throws Exception {
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true; // set to true to ensure it is overridden and included below
+		
 		// setup mocks
 		Mockito.when(bean.getMailServerUrl()).thenReturn("127.0.0.1");
 		Mockito.when(bean.getMailSender()).thenReturn("test2@test.com");
 		Mockito.when(bean.getMailPort()).thenReturn(Integer.valueOf(465));
 		Mockito.when(bean.getMailUsername()).thenReturn("username");
 		Mockito.when(bean.getMailPassword()).thenReturn("password");
-		Mockito.when(bean.getMailBogusSend()).thenReturn(Boolean.TRUE);
+		Mockito.when(bean.getMailBogusSend()).thenReturn(Boolean.FALSE);
 		Mockito.when(bean.getMailTestRecipient()).thenReturn("test@test.com");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
