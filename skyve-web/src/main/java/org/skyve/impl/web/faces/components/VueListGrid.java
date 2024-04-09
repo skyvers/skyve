@@ -95,7 +95,7 @@ public class VueListGrid extends UIOutput {
         sj.add("<div id=\"grid\"></div>")
           .add("<script>")
           .add("window.addEventListener('load', () => {")
-          .add("                    SKERV.listgrid(")
+          .add("                    SKYVE.listgrid(")
           .add(paramsString)
           .add(");")
           .add("});")
