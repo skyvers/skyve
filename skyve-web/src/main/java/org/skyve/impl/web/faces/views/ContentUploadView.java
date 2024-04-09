@@ -161,7 +161,8 @@ public class ContentUploadView extends AbstractUploadView {
 			String bizModule = bean.getBizModule();
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getUxUi(request);
-			user.checkAccess(UserAccess.content(bizModule, bizDocument, contentBinding), uxui.getName());
+			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBinding);
+			user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 			// Check document access
 			Customer customer = user.getCustomer();
@@ -172,7 +173,7 @@ public class ContentUploadView extends AbstractUploadView {
 			
 			// Add to content 
 			// NB This handles compound bindings and checks for content access on the content owning bean
-			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));		
+			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, unsanitisedContentBinding);		
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing

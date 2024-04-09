@@ -893,12 +893,13 @@ public class FacesView extends HarnessView {
 					throw new ValidationException("Signature was not found");
 				}
 				Bean bean = getCurrentBean().getBean();
+				String unsanitisedContentBinding = BindUtil.unsanitiseBinding(binding);
 
 				// Check content access
 				User user = getUser();
 				String bizModule = bean.getBizModule();
 				String bizDocument = bean.getBizDocument();
-				user.checkAccess(UserAccess.content(bizModule, bizDocument, binding), uxui.getName());
+				user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 				// Check document access
 				Customer customer = user.getCustomer();
@@ -913,7 +914,7 @@ public class FacesView extends HarnessView {
 				// NB This handles compound bindings and checks for content access on the content owning bean
 				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, bean, BindUtil.unsanitiseBinding(binding));		
 				// Set the content attribute
-				BindUtil.set(bean, binding, content.getContentId());
+				BindUtil.set(bean, unsanitisedContentBinding, content.getContentId());
 
 				return null;
 			}
