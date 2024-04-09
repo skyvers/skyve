@@ -326,52 +326,56 @@ public class BackupJob extends CancellableJob {
 															else if (AttributeType.content.equals(attributeType) ||
 																	AttributeType.image.equals(attributeType)) {
 																String stringValue = resultSet.getString(name);
-																if (resultSet.wasNull() || redact || (! includeContent) ) {
-																	// Nullify sensitive content fields & do not include content in backup
+																if (resultSet.wasNull()) {
 																	value = "";
 																}
 																else {
 																	value = stringValue;
-																	AttachmentContent content = null;
-																	try {
-																		content = cm.getAttachment(stringValue);
-																		if (content == null) {
-																			problem = true;
-																			problems.write(String.format("Table [%s] with [%s] = %s is missing content for attribute [%s] = %s",
-																					table.name,
-																					Bean.DOCUMENT_ID,
-																					values.get(Bean.DOCUMENT_ID),
-																					name,
-																					stringValue));
-																			// See if the content file exists
-																			final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
-																			final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath()).append(File.separator);
-																			AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, false);
-																			final File contentFile = Paths.get(contentAbsolutePath.toString()).toFile();
-																			if (contentFile.exists()) {
-																				problems.write(" but the matching file was found for this missing content at ");
-																				problems.write(contentFile.getAbsolutePath());
+																	// Redacting or excluding content will include content IDs but no content.
+																	// This allows required content and workflow around content presence to continue to work.
+																	// The restore options allow for clearing content IDs on restore if required.
+																	if (includeContent && (! redact)) {
+																		AttachmentContent content = null;
+																		try {
+																			content = cm.getAttachment(stringValue);
+																			if (content == null) {
+																				problem = true;
+																				problems.write(String.format("Table [%s] with [%s] = %s is missing content for attribute [%s] = %s",
+																						table.name,
+																						Bean.DOCUMENT_ID,
+																						values.get(Bean.DOCUMENT_ID),
+																						name,
+																						stringValue));
+																				// See if the content file exists
+																				final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
+																				final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath()).append(File.separator);
+																				AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath, false);
+																				final File contentFile = Paths.get(contentAbsolutePath.toString()).toFile();
+																				if (contentFile.exists()) {
+																					problems.write(" but the matching file was found for this missing content at ");
+																					problems.write(contentFile.getAbsolutePath());
+																				}
+																				problems.newLine();
 																			}
-																			problems.newLine();
+																			else {
+																				StringBuilder contentPath = new StringBuilder(256);
+																				contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
+																				AbstractContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
+																			}
 																		}
-																		else {
-																			StringBuilder contentPath = new StringBuilder(256);
-																			contentPath.append(directory.getAbsolutePath()).append('/').append(ContentManager.FILE_STORE_NAME).append('/');
-																			AbstractContentManager.writeContentFiles(contentPath, content, content.getContentBytes());
-																		}
-																	}
-																	catch (Throwable t) {
-																		if (t instanceof FileNotFoundException) {
-																			problems.write(String.format("Table [%s] with [%s] = %s is missing a file in the content store for attribute [%s] = %s",
-																					table.name,
-																					Bean.DOCUMENT_ID,
-																					values.get(Bean.DOCUMENT_ID),
-																					name,
-																					stringValue));
-																			problems.newLine();
-																		}
-																		else {
-																			throw t;
+																		catch (Throwable t) {
+																			if (t instanceof FileNotFoundException) {
+																				problems.write(String.format("Table [%s] with [%s] = %s is missing a file in the content store for attribute [%s] = %s",
+																						table.name,
+																						Bean.DOCUMENT_ID,
+																						values.get(Bean.DOCUMENT_ID),
+																						name,
+																						stringValue));
+																				problems.newLine();
+																			}
+																			else {
+																				throw t;
+																			}
 																		}
 																	}
 																}
