@@ -79,7 +79,7 @@ public class MailUtil {
 		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 		UtilImpl.LOGGER.info("TO:");
 		if (UtilImpl.SMTP_TEST_RECIPIENT != null) {
-			UtilImpl.LOGGER.info("    SMTP_TEST_RECIPIENT IN WEB.XML - " + UtilImpl.SMTP_TEST_RECIPIENT);
+			UtilImpl.LOGGER.info("    SMTP_TEST_RECIPIENT - " + UtilImpl.SMTP_TEST_RECIPIENT);
 		}
 		else {
 			if (recipientEmailAddresses != null) {
