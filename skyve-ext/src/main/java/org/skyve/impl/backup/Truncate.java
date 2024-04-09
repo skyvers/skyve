@@ -16,7 +16,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.persistence.Persistence;
 
 public class Truncate {
@@ -132,14 +131,14 @@ public class Truncate {
 						while (columnResultSet.next()) {
 							String columnName = columnResultSet.getString("COLUMN_NAME");
 							if (columnName.toLowerCase().endsWith("_id")) {
-								table.fields.put(columnName, AttributeType.text);
+								table.fields.put(columnName, Table.TEXT);
 							}
 							else if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
 								hasBizIdColumn = true;
 							}
 							// NB Ensure we can detect extension tables
 							else if (columnName.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
-								table.fields.put(columnName, AttributeType.text);
+								table.fields.put(columnName, Table.TEXT);
 							}
 						}
 					}

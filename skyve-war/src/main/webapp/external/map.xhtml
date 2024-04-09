@@ -21,7 +21,7 @@
 			<ui:param name="bean" value="#{skyve}" />
 			<ui:param name="showMenu" value="true" />
 			<ui:param name="resetMenu" value="false" />
-			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType}" />
+			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
 			<ui:param name="showLogout" value="true" />
 			<ui:define name="body">
 				<h:form prependId="false">

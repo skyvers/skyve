@@ -199,6 +199,7 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="expression" type="xs:string"/>
+        <xs:attribute name="sensitivity" type="tns:sensitivity"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -266,6 +267,7 @@
         <xs:attribute name="deprecated" type="xs:boolean"/>
         <xs:attribute name="trackChanges" type="xs:boolean"/>
         <xs:attribute name="audited" type="xs:boolean"/>
+        <xs:attribute name="sensitivity" type="tns:sensitivity"/>
         <xs:attribute name="usage" type="tns:usageType"/>
       </xs:extension>
     </xs:complexContent>
@@ -658,6 +660,17 @@
       <xs:enumeration value="single"/>
       <xs:enumeration value="joined"/>
       <xs:enumeration value="mapped"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="sensitivity">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="internal"/>
+      <xs:enumeration value="confidential"/>
+      <xs:enumeration value="restricted"/>
+      <xs:enumeration value="personal"/>
+      <xs:enumeration value="secret"/>
     </xs:restriction>
   </xs:simpleType>
 

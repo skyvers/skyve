@@ -8,7 +8,7 @@
 	<pluralAlias>Audits</pluralAlias>
 	<audited>false</audited>
 	<iconStyleClass>fa-solid fa-check</iconStyleClass>
-	<bizKey expression="{operation} by {userName} at {timestamp}" />
+	<bizKey expression="{operation} by {userName} at {timestamp}" sensitivity="personal" />
 	<attributes>
 		<text name="auditModuleName" required="true">
 			<displayName>admin.audit.auditModuleName.displayName</displayName>
@@ -41,7 +41,7 @@
 			<displayName>admin.audit.millis.displayName</displayName>
 			<index>database</index>
 		</longInteger>
-		<text name="userName" required="true">
+		<text name="userName" required="true" sensitivity="personal">
 			<displayName>admin.audit.userName.displayName</displayName>
 			<length>254</length>
 		</text>

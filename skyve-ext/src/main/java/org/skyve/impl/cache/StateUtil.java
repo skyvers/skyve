@@ -154,13 +154,16 @@ public class StateUtil {
 		tokens.put(sessionId, values);
 	}
 	
-	public static Integer createToken() {
-	    // Get 128 random bytes - move past first seed sequence
-		SecureRandom random = new SecureRandom();
+	// This is thread-safe
+	private static final SecureRandom RANDOM = new SecureRandom();
+    // Get 128 random bytes - move past first seed sequence
+	static {
 	    byte[] randomBytes = new byte[128];
-	    random.nextBytes(randomBytes);
-	    
-		return Integer.valueOf(random.nextInt());
+	    RANDOM.nextBytes(randomBytes);
+	}
+	
+	public static Integer createToken() {
+		return Integer.valueOf(RANDOM.nextInt());
 	}
 	
 	public static void logStateStats() {

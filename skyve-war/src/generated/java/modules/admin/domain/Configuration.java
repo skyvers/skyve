@@ -33,7 +33,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class Configuration extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -148,7 +148,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 				in a future version of Skyve. Here for backwards compatibility during Restore.
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum PasswordComplexityModel implements Enumeration {
 		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
 		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
@@ -222,7 +222,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * The type of two factor authentication to be used for all users.
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum TwoFactorType implements Enumeration {
 		off("OFF", "Off"),
 		email("EMAIL", "Email");
@@ -293,35 +293,35 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * <br/>
 	 * The minimum number of characters for new passwords
 	 **/
-	private Integer passwordMinLength = Integer.valueOf(10);
+	private Integer passwordMinLength = Integer.valueOf(12);
 
 	/**
 	 * Requires Lowercase
 	 * <br/>
 	 * If new passwords should require at least one lowercase character
 	 **/
-	private Boolean passwordRequireLowercase;
+	private Boolean passwordRequireLowercase = Boolean.valueOf(true);
 
 	/**
 	 * Requires Uppercase
 	 * <br/>
 	 * If new passwords should require at least one uppercase character
 	 **/
-	private Boolean passwordRequireUppercase;
+	private Boolean passwordRequireUppercase = Boolean.valueOf(true);
 
 	/**
 	 * Requires Numeric Characters
 	 * <br/>
 	 * If new passwords should require at least one numeric character
 	 **/
-	private Boolean passwordRequireNumeric;
+	private Boolean passwordRequireNumeric = Boolean.valueOf(true);
 
 	/**
 	 * Requires Special Characters
 	 * <br/>
 	 * If new passwords should require at least one special character
 	 **/
-	private Boolean passwordRequireSpecial;
+	private Boolean passwordRequireSpecial = Boolean.valueOf(false);
 
 	/**
 	 * Password Rule Description

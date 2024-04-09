@@ -105,10 +105,33 @@
 						</row>
 					</form>
 					<vbox pixelMemberPadding="5">
-						<button action="Backup" pixelWidth="150" />
-						<button action="DownloadBackup" pixelWidth="150" />
-						<button action="UploadBackup" pixelWidth="150" />
-						<button action="DeleteBackup" pixelWidth="150" />
+						<form pixelWidth="225">
+							<column responsiveWidth="2"  />
+							<column responsiveWidth="4"  />
+							<row>
+								<item>
+									<combo binding="dataSensitivity" />
+								</item>
+							</row>
+						</form>
+						<form pixelWidth="225">
+							<column responsiveWidth="1"  />
+							<column responsiveWidth="1"  />
+							<column responsiveWidth="1"  />
+							<column responsiveWidth="1"  />
+							<row>
+								<item>
+									<checkBox binding="includeContent" triState="false" />
+								</item>
+								<item>
+									<checkBox binding="includeAuditLog" triState="false" />
+								</item>
+							</row>
+						</form>
+						<button action="Backup" pixelWidth="225" />
+						<button action="DownloadBackup" pixelWidth="225" />
+						<button action="UploadBackup" pixelWidth="225" />
+						<button action="DeleteBackup" pixelWidth="225" />
 					</vbox>
 				</hbox>
 			</vbox>

@@ -31,7 +31,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public class AllDynamicAttributesPersistent extends AbstractPersistentBean {
 	/**
 	 * For Serialization

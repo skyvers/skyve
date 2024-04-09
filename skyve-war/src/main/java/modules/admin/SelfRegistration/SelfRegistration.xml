@@ -11,12 +11,12 @@
             <displayName>admin.selfRegistration.activateUrl.displayName</displayName>
             <length>2083</length>
         </text>
-        <text name="confirmEmail">
+        <text name="confirmEmail" sensitivity="personal">
 			<displayName>admin.selfRegistration.confirmEmail.displayName</displayName>
 			<length>500</length>
 			<validator type="email" />
 		</text>
-        <text name="confirmPassword" persistent="false" audited="false" trackChanges="true">
+        <text name="confirmPassword" persistent="false" audited="false" trackChanges="true" sensitivity="secret">
             <documentation>Confirm password checked during user registration to bypass change password
                 validation in the UserBizlet.</documentation>
             <displayName>admin.selfRegistration.confirmPassword.displayName</displayName>

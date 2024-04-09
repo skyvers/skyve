@@ -25,7 +25,6 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
-import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.impl.domain.types.jaxb.Decimal10Mapper;
@@ -43,14 +42,11 @@ import org.skyve.util.Util;
  * All persistent attributes in a value object.
  * 
  * @depend - - - Enum3
- * @navhas n aggregatedCollection 0..n AllAttributesPersistent
- * @navcomposed n composedAssociation 0..1 AllAttributesPersistent
- * @navhas n aggregatedAssociation 0..1 AllAttributesPersistent
  * @stereotype "persistent child"
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public class AllAttributesEmbedded extends AbstractPersistentBean implements ChildBean<AllAttributesPersistent> {
 	/**
 	 * For Serialization
@@ -65,19 +61,13 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	public static final String DOCUMENT_NAME = "AllAttributesEmbedded";
 
 	/** @hidden */
-	public static final String aggregatedAssociationPropertyName = "aggregatedAssociation";
-
-	/** @hidden */
-	public static final String composedAssociationPropertyName = "composedAssociation";
-
-	/** @hidden */
 	public static final String booleanFlagPropertyName = "booleanFlag";
 
 	/** @hidden */
-	public static final String aggregatedCollectionPropertyName = "aggregatedCollection";
+	public static final String colourPropertyName = "colour";
 
 	/** @hidden */
-	public static final String colourPropertyName = "colour";
+	public static final String contentPropertyName = "content";
 
 	/** @hidden */
 	public static final String datePropertyName = "date";
@@ -128,7 +118,7 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	 * Enum 3
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Enum3 implements Enumeration {
 		one("one", "one"),
 		two("two", "two"),
@@ -196,29 +186,19 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	}
 
 	/**
-	 * Aggregated Association
-	 **/
-	private AllAttributesPersistent aggregatedAssociation = null;
-
-	/**
-	 * Composed Association
-	 **/
-	private AllAttributesPersistent composedAssociation = null;
-
-	/**
 	 * Boolean Flag
 	 **/
 	private Boolean booleanFlag;
 
 	/**
-	 * Aggregated Collection
-	 **/
-	private List<AllAttributesPersistent> aggregatedCollection = new ChangeTrackingArrayList<>("aggregatedCollection", this);
-
-	/**
 	 * Colour
 	 **/
 	private String colour;
+
+	/**
+	 * Content
+	 **/
+	private String content;
 
 	/**
 	 * Date
@@ -341,46 +321,6 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	}
 
 	/**
-	 * {@link #aggregatedAssociation} accessor.
-	 * @return	The value.
-	 **/
-	public AllAttributesPersistent getAggregatedAssociation() {
-		return aggregatedAssociation;
-	}
-
-	/**
-	 * {@link #aggregatedAssociation} mutator.
-	 * @param aggregatedAssociation	The new value.
-	 **/
-	@XmlElement
-	public void setAggregatedAssociation(AllAttributesPersistent aggregatedAssociation) {
-		if (this.aggregatedAssociation != aggregatedAssociation) {
-			preset(aggregatedAssociationPropertyName, aggregatedAssociation);
-			this.aggregatedAssociation = aggregatedAssociation;
-		}
-	}
-
-	/**
-	 * {@link #composedAssociation} accessor.
-	 * @return	The value.
-	 **/
-	public AllAttributesPersistent getComposedAssociation() {
-		return composedAssociation;
-	}
-
-	/**
-	 * {@link #composedAssociation} mutator.
-	 * @param composedAssociation	The new value.
-	 **/
-	@XmlElement
-	public void setComposedAssociation(AllAttributesPersistent composedAssociation) {
-		if (this.composedAssociation != composedAssociation) {
-			preset(composedAssociationPropertyName, composedAssociation);
-			this.composedAssociation = composedAssociation;
-		}
-	}
-
-	/**
 	 * {@link #booleanFlag} accessor.
 	 * @return	The value.
 	 **/
@@ -399,66 +339,6 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	}
 
 	/**
-	 * {@link #aggregatedCollection} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<AllAttributesPersistent> getAggregatedCollection() {
-		return aggregatedCollection;
-	}
-
-	/**
-	 * {@link #aggregatedCollection} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public AllAttributesPersistent getAggregatedCollectionElementById(String bizId) {
-		return getElementById(aggregatedCollection, bizId);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setAggregatedCollectionElementById(String bizId, AllAttributesPersistent element) {
-		setElementById(aggregatedCollection, element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.add(element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addAggregatedCollectionElement(int index, AllAttributesPersistent element) {
-		aggregatedCollection.add(index, element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeAggregatedCollectionElement(AllAttributesPersistent element) {
-		return aggregatedCollection.remove(element);
-	}
-
-	/**
-	 * {@link #aggregatedCollection} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public AllAttributesPersistent removeAggregatedCollectionElement(int index) {
-		return aggregatedCollection.remove(index);
-	}
-
-	/**
 	 * {@link #colour} accessor.
 	 * @return	The value.
 	 **/
@@ -474,6 +354,24 @@ public class AllAttributesEmbedded extends AbstractPersistentBean implements Chi
 	public void setColour(String colour) {
 		preset(colourPropertyName, colour);
 		this.colour = colour;
+	}
+
+	/**
+	 * {@link #content} accessor.
+	 * @return	The value.
+	 **/
+	public String getContent() {
+		return content;
+	}
+
+	/**
+	 * {@link #content} mutator.
+	 * @param content	The new value.
+	 **/
+	@XmlElement
+	public void setContent(String content) {
+		preset(contentPropertyName, content);
+		this.content = content;
 	}
 
 	/**

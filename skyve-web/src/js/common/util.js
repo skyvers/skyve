@@ -1,5 +1,5 @@
 // SKYVE name space definition
-SKYVE = {};
+if (! window.SKYVE) window.SKYVE = {};
 
 SKYVE.Util = function() {
 	var context = window.location + '';

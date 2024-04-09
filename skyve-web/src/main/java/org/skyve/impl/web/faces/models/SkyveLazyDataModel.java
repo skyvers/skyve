@@ -46,6 +46,8 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
+import jakarta.annotation.Nonnull;
+
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private static final long serialVersionUID = -2161288261538038204L;
 
@@ -58,7 +60,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private List<Parameter> parameters;
 	private boolean escape;
 	
-	public SkyveLazyDataModel(FacesView view,
+	public SkyveLazyDataModel(@Nonnull FacesView view,
 								String moduleName, 
 								String documentName, 
 								String queryName,
@@ -140,11 +142,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	        model = EXT.newListModel(query);
 		}
 
-		if (view != null) {
-			BeanMapAdapter currentBean = view.getCurrentBean();
-			if (currentBean != null) {
-				model.setBean(currentBean.getBean());
-			}
+		BeanMapAdapter currentBean = view.getCurrentBean();
+		if (currentBean != null) {
+			model.setBean(currentBean.getBean());
 		}
 		d = model.getDrivingDocument();
 		
@@ -182,7 +182,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), escape);
 		List<BeanMapAdapter> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
-			result.add(new BeanMapAdapter(bean, (view == null) ? null : view.getWebContext()));
+			result.add(new BeanMapAdapter(bean, view.getWebContext()));
 		}
 		return result;
 	}
@@ -208,7 +208,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		String bizDocument = rowKey.substring(hashIndex + 1, dotIndex);
 		String bizModule = rowKey.substring(dotIndex + 1);
 		DynamicBean bean = new DynamicBean(bizModule, bizDocument, properties);
-		return new BeanMapAdapter(bean, (view == null) ? null : view.getWebContext());
+		return new BeanMapAdapter(bean, view.getWebContext());
 	}
 	
 	private static void sort(Map<String, SortMeta> multiSortMeta, ListModel<Bean> model) {

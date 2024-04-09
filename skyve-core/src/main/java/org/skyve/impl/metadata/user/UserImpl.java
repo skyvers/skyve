@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.user;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
@@ -274,22 +276,23 @@ public class UserImpl implements User {
 		
 		// Only continue if role hasn't been added already
 		if (roleNames.add(roleName)) {
+			String owningModuleName = role.getOwningModule().getName();
 			for (Privilege privilege : role.getPrivileges()) {
 				if (privilege instanceof DocumentPrivilege) {
 					DocumentPermission permission = ((DocumentPrivilege) privilege).getPermission();
-					putDocumentPermission(role.getOwningModule().getName(), privilege.getName(), permission);
+					putDocumentPermission(owningModuleName, privilege.getName(), permission);
 				}
 				else if (privilege instanceof ActionPrivilege) {
-					addActionPermission(role.getOwningModule().getName(), (ActionPrivilege) privilege);
+					addActionPermission(owningModuleName, (ActionPrivilege) privilege);
 				}
 			}
 			
 			for (ContentRestriction contentRestriction : role.getContentRestrictions()) {
-				addContentRestriction(role.getOwningModule().getName(), contentRestriction);
+				addContentRestriction(owningModuleName, contentRestriction);
 			}
 			
 			for (ContentPermission contentPermission : role.getContentPermissions()) {
-				addContentPermission(role.getOwningModule().getName(), contentPermission);
+				addContentPermission(owningModuleName, contentPermission);
 			}
 		}
 	}
@@ -587,7 +590,7 @@ public class UserImpl implements User {
 					trace.append("Security - ");
 					trace.append(bizModule).append('.');
 					trace.append(bizDocument).append('.');
-					trace.append(bizId).append(" denied - no read");
+					trace.append(bizId).append(" denied - no read. Content permission can be explicitly granted for non-persistent document attribtues");
 					UtilImpl.LOGGER.info(trace.toString());
 				}
 			}
@@ -624,6 +627,11 @@ public class UserImpl implements User {
 
 		return result;
 	}
+	
+	@Override
+	public boolean canFlag() {
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getFlagRoles(), roleNames);
+	}
 
 	@Override
 	public boolean canReadDocument(Document document) {
@@ -636,6 +644,16 @@ public class UserImpl implements User {
 		}
 
 		return result;
+	}
+	
+	@Override
+	public boolean canTextSearch() {
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getTextSearchRoles(), roleNames);
+	}
+	
+	@Override
+	public boolean canSwitchMode() {
+		return ! Collections.disjoint(((CustomerImpl) getCustomer()).getSwitchModeRoles(), roleNames);
 	}
 
 	@Override

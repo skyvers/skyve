@@ -168,12 +168,27 @@ public class UserInjectable implements User {
 	public boolean canCreateDocument(Document document) {
 		return CORE.getUser().canCreateDocument(document);
 	}
+	
+	@Override
+	public boolean canFlag() {
+		return CORE.getUser().canFlag();
+	}
 
 	@Override
 	public boolean canReadDocument(Document document) {
 		return CORE.getUser().canReadDocument(document);
 	}
+	
+	@Override
+	public boolean canTextSearch() {
+		return CORE.getUser().canTextSearch();
+	}
 
+	@Override
+	public boolean canSwitchMode() {
+		return CORE.getUser().canSwitchMode();
+	}
+	
 	@Override
 	public boolean canUpdateDocument(Document document) {
 		return CORE.getUser().canUpdateDocument(document);

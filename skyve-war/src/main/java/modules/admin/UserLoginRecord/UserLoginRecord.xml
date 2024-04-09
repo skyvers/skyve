@@ -8,9 +8,9 @@
 	<pluralAlias>User Login Records</pluralAlias>
 	<audited>false</audited>
 	<iconStyleClass>fa-solid fa-history</iconStyleClass>
-	<bizKey expression="{userName} @ {loginDateTime}"/>
+	<bizKey expression="{userName} @ {loginDateTime}" sensitivity="personal" />
 	<attributes>
-		<text name="userName" required="true" usage="domain">
+		<text name="userName" required="true" usage="domain" sensitivity="personal">
 			<displayName>admin.userLoginRecord.userName.displayName</displayName>
 			<length>254</length>
 		</text>

@@ -161,7 +161,6 @@ public class DesktopView extends HarnessView {
         }
 	}
 
-	@SuppressWarnings("static-method")
 	public String getHeaderTemplate() {
 		StringBuilder result = new StringBuilder(128);
 		
@@ -174,10 +173,16 @@ public class DesktopView extends HarnessView {
     	result.append("<td width=\"10%\" align=\"right\">");
 		result.append("<img src=\"images/skyve-thick-grey.png\" style=\"max-height: 28px; height: auto;\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:void(setUxUi());\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"");
-		result.append(Icons.FONT_SWITCH).append(" fa-2x \"></i></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"");
-		result.append(Icons.FONT_SEARCH).append(" fa-2x\"></i></a></td>");
+    	
+    	if (isCanSwitchMode()) {
+    		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:void(setUxUi());\" class=\"dhtmlPageButton\" title=\"Switch Mode\"><i class=\"");
+    		result.append(Icons.FONT_SWITCH).append(" fa-2x \"></i></a></td>");
+    	}
+		if (isCanTextSearch()) {
+			result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><i class=\"");
+			result.append(Icons.FONT_SEARCH).append(" fa-2x\"></i></a></td>");
+		}
+		
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp({help});\" class=\"dhtmlPageButton\" title=\"Help\"><i class=\"");
 		result.append(Icons.FONT_HELP).append(" fa-2x\"></i></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><i class=\"");

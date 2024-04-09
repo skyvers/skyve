@@ -14,24 +14,28 @@
 		<integer name="passwordMinLength" required="true">
 			<displayName>admin.configuration.passwordMinLength.displayName</displayName>
 			<description>admin.configuration.passwordMinLength.description</description>
-			<defaultValue>10</defaultValue>
+			<defaultValue>12</defaultValue>
 			<validator min="1"/>
 		</integer>
 		<boolean name="passwordRequireLowercase">
 			<displayName>admin.configuration.passwordRequireLowercase.displayName</displayName>
 			<description>admin.configuration.passwordRequireLowercase.description</description>
+			<defaultValue>true</defaultValue>
 		</boolean>
 		<boolean name="passwordRequireUppercase">
 			<displayName>admin.configuration.passwordRequireUppercase.displayName</displayName>
 			<description>admin.configuration.passwordRequireUppercase.description</description>
+			<defaultValue>true</defaultValue>
 		</boolean>
 		<boolean name="passwordRequireNumeric">
 			<displayName>admin.configuration.passwordRequireNumeric.displayName</displayName>
 			<description>admin.configuration.passwordRequireNumeric.description</description>
+			<defaultValue>true</defaultValue>
 		</boolean>
 		<boolean name="passwordRequireSpecial">
 			<displayName>admin.configuration.passwordRequireSpecial.displayName</displayName>
 			<description>admin.configuration.passwordRequireSpecial.description</description>
+			<defaultValue>false</defaultValue>
 		</boolean>
 		<text name="passwordRuleDescription" audited="false" persistent="false" trackChanges="false" usage="both">
 			<documentation>A text description which can be shown to the user if their password does not comply

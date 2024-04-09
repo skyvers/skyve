@@ -47,6 +47,7 @@ import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
@@ -104,6 +105,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	// so that it can be checked by the repository implementor, as only then
 	// will all the references be resolved enough to check the bindings.
 	private String bizKeyExpression;
+	
+	private Sensitivity bizKeySensitity;
 
 	/**
 	 * A map of condition name -> Condition.
@@ -553,6 +556,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setBizKeyExpression(String bizKeyExpression) {
 		this.bizKeyExpression = bizKeyExpression;
+	}
+	
+	@Override
+	public Sensitivity getBizKeySensitity() {
+		return bizKeySensitity;
+	}
+
+	public void setBizKeySensitity(Sensitivity bizKeySensitity) {
+		this.bizKeySensitity = bizKeySensitity;
 	}
 
 	/**

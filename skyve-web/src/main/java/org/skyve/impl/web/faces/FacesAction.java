@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.omnifaces.config.WebXml;
 import org.primefaces.component.datatable.DataTable;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
@@ -26,7 +28,9 @@ import jakarta.faces.component.UIInput;
 import jakarta.faces.component.visit.VisitCallback;
 import jakarta.faces.component.visit.VisitContext;
 import jakarta.faces.component.visit.VisitResult;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Faces Action provides standard exception handling for Faces processing that
@@ -54,6 +58,16 @@ public abstract class FacesAction<T> {
 		}
 		// Allow security problems out so they are redirected to the error page
 		catch (SecurityException e) {
+			ExternalContext ec = fc.getExternalContext();
+			if (FacesUtil.isAjax((HttpServletRequest) ec.getRequest())) {
+				try {
+					String errorPageLocation = WebXml.instance().findErrorPageLocation(e);
+					ec.redirect(Util.getSkyveContextUrl() + errorPageLocation);
+				}
+				catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
 			persistence.setRollbackOnly();
 			throw e;
 		}

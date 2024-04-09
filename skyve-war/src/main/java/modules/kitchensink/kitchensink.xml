@@ -19,7 +19,11 @@
 		<role name="dev">
 			<description>Dev</description>
 			<privileges>
-				<document name="KitchenSink" permission="_____" />
+				<document name="KitchenSink" permission="_____">
+					<contentPermission attribute="contentImage" />
+					<contentPermission attribute="contentLink" />
+					<contentPermission attribute="contentSignature" />
+				</document>
 				<document name="ContainerGrid" permission="CRUDD" />
 				<document name="InlineGrid" permission="CRUDD" />
 				<document name="ListAttributes" permission="CRUDD" />

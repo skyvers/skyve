@@ -19,7 +19,7 @@
 		</text>
 
 		<!-- Schema Truncation -->
-		<text name="confirmPassword" persistent="false" trackChanges="false" >
+		<text name="confirmPassword" persistent="false" trackChanges="false" sensitivity="secret" >
 			<displayName>admin.dataMaintenance.confirmPassword.displayName</displayName>
 			<length>50</length>
 		</text>
@@ -170,6 +170,33 @@
 			<description>admin.dataMaintenance.flagFailed.description</description>
 			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
 			<defaultValue>false</defaultValue>
+		</boolean>
+		
+		<!-- Data Sensitivity -->
+		<enum name="dataSensitivity">
+			<documentation><![CDATA[Determines which attributes are redacted in backup job.]]></documentation>
+			<displayName>Sensitivity</displayName>
+			<description>Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.</description>
+			<values>
+				<value code="none" name="none" description="None" />
+				<value code="internal" name="internal" description="Internal" />
+				<value code="confidential" name="confidential" description="Confidential" />
+				<value code="restricted" name="restricted" description="Restricted" />
+				<value code="personal" name="personal" description="Personal" />
+				<value code="secret" name="secret" description="Secret" />
+			</values>
+		</enum>
+		<boolean name="includeContent">
+			<documentation><![CDATA[Determines if content is to be included in the generated backup.]]></documentation>
+			<displayName>Content</displayName>
+			<description>Determines if content is included in the backup file.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="includeAuditLog">
+			<documentation><![CDATA[Determines if the audit log is to be included in the generated backup.]]></documentation>
+			<displayName>Audit Log</displayName>
+			<description>Determines if the audit log is to be included in the backup file.</description>
+			<defaultValue>true</defaultValue>
 		</boolean>
 	</attributes>
 	<conditions>

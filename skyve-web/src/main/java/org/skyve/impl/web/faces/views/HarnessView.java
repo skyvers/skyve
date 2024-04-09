@@ -212,8 +212,9 @@ public abstract class HarnessView extends LocalisableView {
 		}
 		
 		sb.setLength(0);
-		sb.append("var u=SKYVE.Util;u.customer='").append(customer.getName()).append("';");
+		sb.append("var u=SKYVE.Util;u.setTouchCookie();u.customer='").append(customer.getName()).append("';");
 		sb.append("u.v='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
+		sb.append("u.canFlag=").append(user.canFlag()).append(";");
 		if (UtilImpl.GOOGLE_MAPS_V3_API_KEY == null) {
 			sb.append("u.googleMapsV3ApiKey=null;");
 		}
@@ -263,12 +264,23 @@ public abstract class HarnessView extends LocalisableView {
 		persistence.setUser(user);
 	}
 	
+	public boolean isCanTextSearch() {
+		return getUser().canTextSearch();
+	}
+	
+	public boolean isCanSwitchMode() {
+		return getUser().canSwitchMode();
+	}
+	
 	/**
 	 * Sets the UX/UI preference in the session.
 	 * @param uxui	The UX/UI name.
 	 */
-	@SuppressWarnings("static-method")
 	public void setUxUi(String uxui) {
+		if (! isCanSwitchMode()) {
+			throw new SecurityException("switch modes", getUser().getName());
+		}
+		
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		if (uxui == null) {
 			ec.getSessionMap().remove(AbstractWebContext.UXUI);

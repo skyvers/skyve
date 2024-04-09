@@ -8,9 +8,9 @@
 	<pluralAlias>User Monthly Hits</pluralAlias>
 	<audited>false</audited>
 	<iconStyleClass>fa-solid fa-bar-chart</iconStyleClass>
-	<bizKey expression="{userName} - {hitYear}/{hitMonth} = {numberOfHits}"/>
+	<bizKey expression="{userName} - {hitYear}/{hitMonth} = {numberOfHits}" sensitivity="personal" />
 	<attributes>
-		<text name="userName" required="true">
+		<text name="userName" required="true" sensitivity="personal">
 			<displayName>User Name</displayName>
 			<length>254</length>
 		</text>

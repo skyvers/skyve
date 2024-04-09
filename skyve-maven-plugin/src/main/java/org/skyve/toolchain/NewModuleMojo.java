@@ -1,5 +1,12 @@
 package org.skyve.toolchain;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.codehaus.plexus.components.interactivity.PrompterException;
@@ -11,13 +18,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Mojo(name = "newModule")
 public class NewModuleMojo extends AbstractSkyveMojo {
@@ -38,6 +38,9 @@ public class NewModuleMojo extends AbstractSkyveMojo {
 			}
 
 			final Path absoluteSrcPath = modulesDirectory.getParent();
+			if (absoluteSrcPath == null) {
+				throw new MojoExecutionException("src/ (parent directory) path is not resolvable from " + modulesDirectory.toFile().getAbsolutePath());
+			}
 
 			// The XMLMetaData class requires this path to be set to the src directory.
 			UtilImpl.APPS_JAR_DIRECTORY = absoluteSrcPath.toFile().getAbsolutePath() + File.separator;

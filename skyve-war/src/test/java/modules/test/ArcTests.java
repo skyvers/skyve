@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.util.Util;
@@ -15,15 +14,7 @@ import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
 
-/**
- * The arc tests fail as the class attributes of the any and many-to-any tags don't map correctly to
- * the entity-name s used in the current domain generation.
- * 
- * @author mike
- *
- */
 public class ArcTests extends AbstractSkyveTest {
-
 	/**
 	 * This just wont work...
 	 * 
@@ -52,7 +43,6 @@ public class ArcTests extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Disabled // One to one arcs don't work
 	public void testOneToOnePersist() throws Exception {
 		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 		test = p.save(test);
@@ -93,7 +83,6 @@ public class ArcTests extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Disabled // One to one arcs don't work
 	public void testOneToOnePersistPartlyTransient() throws Exception {
 		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 		test.setArc(p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0)));
@@ -135,7 +124,6 @@ public class ArcTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	@Disabled // One to one arcs don't work
 	public void testOneToOneUpsertUpdate() throws Exception {
 		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 		AnyDerived1 arc1 = p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));

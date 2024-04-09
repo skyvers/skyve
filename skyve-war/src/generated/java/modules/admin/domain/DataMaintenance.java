@@ -33,13 +33,14 @@ import org.skyve.util.Util;
  * @depend - - - Operation
  * @depend - - - RefreshOption
  * @depend - - - EvictOption
+ * @depend - - - DataSensitivity
  * @navhas n auditUser 0..1 UserProxy
  * @navhas n refreshDocuments 0..n ModuleDocument
  * @stereotype "persistent"
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -146,11 +147,20 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String flagFailedPropertyName = "flagFailed";
 
+	/** @hidden */
+	public static final String dataSensitivityPropertyName = "dataSensitivity";
+
+	/** @hidden */
+	public static final String includeContentPropertyName = "includeContent";
+
+	/** @hidden */
+	public static final String includeAuditLogPropertyName = "includeAuditLog";
+
 	/**
 	 * Pre-Process
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RestorePreProcess implements Enumeration {
 		noProcessing("noProcessing", "No Processing"),
 		dropTablesUsingMetadataRecreateTablesFromBackupCreatesql("dropUsingMetadataAndCreateUsingBackup", "Drop tables using metadata & recreate tables from backup create.sql"),
@@ -226,7 +236,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Content Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum ContentRestoreOption implements Enumeration {
 		clearOrphanedContentIDs("clearOrphanedContentIds", "Clear Orphaned Content IDs"),
 		saveOrphanedContentIDs("saveOrphanedContentIds", "Save Orphaned Content IDs"),
@@ -297,7 +307,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Indexing Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RestoreIndexingOption implements Enumeration {
 		data("data", "Data"),
 		content("content", "Content"),
@@ -369,7 +379,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Option
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RefreshOption implements Enumeration {
 		upsert("Upsert", "Upsert"),
 		save("Save", "Save");
@@ -442,7 +452,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 <p>Evicting beans will free memory for large data jobs, however there may be impacts if the action (processing) selected affects items that other beans may reference.</p>
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum EvictOption implements Enumeration {
 		bean("Bean", "Bean"),
 		none("None", "None"),
@@ -495,6 +505,84 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 			EvictOption result = null;
 
 			for (EvictOption value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Sensitivity
+	 * <br/>
+	 * Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.
+	 * <br/>
+	 * Determines which attributes are redacted in backup job.
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum DataSensitivity implements Enumeration {
+		none("none", "None"),
+		internal("internal", "Internal"),
+		confidential("confidential", "Confidential"),
+		restricted("restricted", "Restricted"),
+		personal("personal", "Personal"),
+		secret("secret", "Secret");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(DataSensitivity::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private DataSensitivity(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static DataSensitivity fromCode(String code) {
+			DataSensitivity result = null;
+
+			for (DataSensitivity value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static DataSensitivity fromLocalisedDescription(String description) {
+			DataSensitivity result = null;
+
+			for (DataSensitivity value : values()) {
 				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
@@ -668,6 +756,33 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * Flag records that fail to Save/Upsert
 	 **/
 	private Boolean flagFailed = Boolean.valueOf(false);
+
+	/**
+	 * Sensitivity
+	 * <br/>
+	 * Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.
+	 * <br/>
+	 * Determines which attributes are redacted in backup job.
+	 **/
+	private DataSensitivity dataSensitivity;
+
+	/**
+	 * Content
+	 * <br/>
+	 * Determines if content is included in the backup file.
+	 * <br/>
+	 * Determines if content is to be included in the generated backup.
+	 **/
+	private Boolean includeContent = Boolean.valueOf(true);
+
+	/**
+	 * Audit Log
+	 * <br/>
+	 * Determines if the audit log is to be included in the backup file.
+	 * <br/>
+	 * Determines if the audit log is to be included in the generated backup.
+	 **/
+	private Boolean includeAuditLog = Boolean.valueOf(true);
 
 	@Override
 	@XmlTransient
@@ -1301,6 +1416,60 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setFlagFailed(Boolean flagFailed) {
 		this.flagFailed = flagFailed;
+	}
+
+	/**
+	 * {@link #dataSensitivity} accessor.
+	 * @return	The value.
+	 **/
+	public DataSensitivity getDataSensitivity() {
+		return dataSensitivity;
+	}
+
+	/**
+	 * {@link #dataSensitivity} mutator.
+	 * @param dataSensitivity	The new value.
+	 **/
+	@XmlElement
+	public void setDataSensitivity(DataSensitivity dataSensitivity) {
+		preset(dataSensitivityPropertyName, dataSensitivity);
+		this.dataSensitivity = dataSensitivity;
+	}
+
+	/**
+	 * {@link #includeContent} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getIncludeContent() {
+		return includeContent;
+	}
+
+	/**
+	 * {@link #includeContent} mutator.
+	 * @param includeContent	The new value.
+	 **/
+	@XmlElement
+	public void setIncludeContent(Boolean includeContent) {
+		preset(includeContentPropertyName, includeContent);
+		this.includeContent = includeContent;
+	}
+
+	/**
+	 * {@link #includeAuditLog} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getIncludeAuditLog() {
+		return includeAuditLog;
+	}
+
+	/**
+	 * {@link #includeAuditLog} mutator.
+	 * @param includeAuditLog	The new value.
+	 **/
+	@XmlElement
+	public void setIncludeAuditLog(Boolean includeAuditLog) {
+		preset(includeAuditLogPropertyName, includeAuditLog);
+		this.includeAuditLog = includeAuditLog;
 	}
 
 	/**

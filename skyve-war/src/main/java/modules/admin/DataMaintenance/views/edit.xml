@@ -41,11 +41,8 @@
 					</onSelectedHandlers>
 				</listGrid>
 				<form>
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
+					<column responsiveWidth="2" />
+					<column responsiveWidth="2" />
 					<row>
 						<item>
 							<button action="RefreshBackupList">
@@ -55,28 +52,48 @@
 							</button> 
 						</item>
 						<item>
+							<button action="DeleteBackup">
+								<properties>
+									<c:property key="update">backups</c:property>
+								</properties>							
+							</button>
+						</item>
+						<item>
+							<button action="DownloadBackup" pixelWidth="250">
+								<properties>
+									<c:property key="update">backups</c:property>
+								</properties>							
+							</button>
+						</item>
+						<item>
+							<button action="UploadBackup" pixelWidth="250">
+								<properties>
+									<c:property key="update">backups</c:property>
+								</properties>							
+							</button>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
+					<column responsiveWidth="1" />
+					<column responsiveWidth="2" />
+					<column responsiveWidth="2" />
+					<row>
+						<item>
+							<checkBox binding="includeContent" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="includeAuditLog" triState="false" />
+						</item>
+						<item>
+							<combo binding="dataSensitivity" />
+						</item>
+						<item>
 							<button action="Backup" >
-								<properties>
-									<c:property key="update">backups</c:property>
-								</properties>							
-							</button>
-						</item>
-						<item>
-							<button action="DownloadBackup" >
-								<properties>
-									<c:property key="update">backups</c:property>
-								</properties>							
-							</button>
-						</item>
-						<item>
-							<button action="UploadBackup" >
-								<properties>
-									<c:property key="update">backups</c:property>
-								</properties>							
-							</button>
-						</item>
-						<item>
-							<button action="DeleteBackup"  >
 								<properties>
 									<c:property key="update">backups</c:property>
 								</properties>							

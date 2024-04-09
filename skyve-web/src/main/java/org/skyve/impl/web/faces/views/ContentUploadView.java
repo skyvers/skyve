@@ -7,11 +7,18 @@ import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
@@ -109,6 +116,11 @@ public class ContentUploadView extends AbstractUploadView {
 		upload(croppedFileName, base64Codec.decode(base64), fc);
 	}
 
+	/**
+	 * Does the upload work.
+	 * This method does not use FacesAction because it should show errors/growls under all circumstances
+	 * since the upload pages are embedded in iframes.
+	 */
 	private void upload(String fileName, byte[] fileContents, FacesContext fc) throws Exception {
 		String context = getContext();
 		if ((context == null) || (contentBinding == null)) {
@@ -144,7 +156,24 @@ public class ContentUploadView extends AbstractUploadView {
 				throw new IllegalStateException("bean is null");
 			}
 			
-			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, BindUtil.unsanitiseBinding(contentBinding));
+			// Check content access
+			User user = persistence.getUser();
+			String bizModule = bean.getBizModule();
+			String bizDocument = bean.getBizDocument();
+			UxUi uxui = UserAgent.getUxUi(request);
+			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBinding);
+			user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
+
+			// Check document access
+			Customer customer = user.getCustomer();
+			Document document = customer.getModule(bizModule).getDocument(customer, bizDocument);
+			if (! user.canAccessDocument(document)) {
+				throw new SecurityException("view this document", user.getName());
+			}
+			
+			// Add to content 
+			// NB This handles compound bindings and checks for content access on the content owning bean
+			AttachmentContent content = FacesContentUtil.handleFileUpload(fileName, fileContents, bean, unsanitisedContentBinding);		
 			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing

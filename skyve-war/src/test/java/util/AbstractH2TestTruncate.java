@@ -2,6 +2,7 @@ package util;
 
 import org.junit.jupiter.api.AfterEach;
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.backup.Truncate;
 import org.skyve.persistence.Persistence;
 
@@ -19,15 +20,21 @@ public abstract class AbstractH2TestTruncate extends AbstractH2Test {
 
 	private static final String SCHEMA = "PUBLIC";
 
+	@Override
 	@AfterEach
-	@SuppressWarnings("static-method")
-	public void after() throws Exception {
+	public void afterBase() {
+		super.afterBase(); // rollback and evict
+		
 		Persistence p = CORE.getPersistence();
-		Truncate.truncate(SCHEMA, true, true);
-
-		// relinquish transaction resources and start another
-		p.commit(false);
-		p.evictAllCached();
-		p.evictAllSharedCache();
+		try {
+			p.begin();
+			Truncate.truncate(SCHEMA, true, true);
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+		finally {
+			p.commit(false);
+		}
 	}
 }

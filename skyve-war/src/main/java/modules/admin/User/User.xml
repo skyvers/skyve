@@ -7,14 +7,14 @@
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
 	<iconStyleClass>fa-solid fa-user</iconStyleClass>
-	<bizKey >
+	<bizKey sensitivity="personal">
 		<![CDATA[return modules.admin.User.UserBizlet.bizKey(this);]]>
 	</bizKey>
 	<implements>
 		<interface>org.skyve.domain.app.admin.User</interface>
 	</implements>
 	<attributes>
-		<text name="userName" required="true">
+		<text name="userName" required="true" sensitivity="personal">
 			<documentation>
 				<![CDATA[
 					Length is derived from the maximum email address length from RFC 5321
@@ -23,13 +23,13 @@
 			<displayName>admin.user.userName.displayName</displayName>
 			<length>254</length>
 		</text>
-		<text name="password" audited="false">
+		<text name="password" audited="false" sensitivity="secret">
 			<displayName>admin.user.password.displayName</displayName>
 			<description>admin.user.password.description</description>
 			<!--  The password is checked and populated in the Bizlet -->
 			<length>255</length>
 		</text>
-		<text name="generatedPassword" audited="false" persistent="false" trackChanges="false" usage="view">
+		<text name="generatedPassword" audited="false" persistent="false" trackChanges="false" usage="view" sensitivity="secret">
 			<displayName>admin.user.generatedPassword.displayName</displayName>
 			<description>admin.user.generatedPassword.description</description>
 			<length>255</length>
@@ -44,12 +44,12 @@
 			<domain>variant</domain>
 			<length>30</length>
 		</text>
-		<text name="newPassword" audited="false" persistent="false" usage="both">
+		<text name="newPassword" audited="false" persistent="false" usage="both" sensitivity="secret">
 			<displayName>admin.user.newPassword.displayName</displayName>
 			<description>admin.user.newPassword.description</description>
 			<length>255</length>
 		</text>
-		<text name="confirmPassword" audited="false" persistent="false" usage="both">
+		<text name="confirmPassword" audited="false" persistent="false" usage="both" sensitivity="secret">
 			<displayName>admin.user.confirmPassword.displayName</displayName>
 			<description>admin.user.confirmPassword.description</description>
 			<length>255</length>
@@ -59,21 +59,21 @@
 			<description>admin.user.legacyId.description</description>
 			<length>100</length>
 		</text>
-		<boolean name="passwordExpired">
+		<boolean name="passwordExpired" sensitivity="secret">
 			<displayName>admin.user.passwordExpired.displayName</displayName>
 			<description>admin.user.passwordExpired.description</description>
 		</boolean >
-		<dateTime name="passwordLastChanged">
+		<dateTime name="passwordLastChanged" sensitivity="secret">
 			<displayName>admin.user.passwordLastChanged.displayName</displayName>
 			<description>admin.user.passwordLastChanged.description</description>
 		</dateTime>
-		<text name="passwordResetToken">
+		<text name="passwordResetToken" sensitivity="secret">
 			<documentation>This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.</documentation>
 			<displayName>admin.user.passwordResetToken.displayName</displayName>
 			<description>admin.user.passwordResetToken.description</description>
 			<length>56</length>
 		</text>
-		<memo name="passwordHistory" audited="false" trackChanges="false">
+		<memo name="passwordHistory" audited="false" trackChanges="false" sensitivity="secret">
 			<documentation>
 				A tab separated list of previous password hashes used
 			</documentation>

@@ -39,6 +39,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 	private static final String DEFAULT_ICON_CLASS = "fa-regular fa-file";
 	private static final int TILE_COUNT_LIMIT = 6;
+	
 	private final Set<Tile> tiles = new HashSet<>();
 
 	// used for 14 day dashboard calculations
@@ -74,13 +75,10 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @return The HTML markup for the favourites
 	 */
 	private void createFavourites() {
-
 		UserExtension currentUser = ModulesUtil.currentAdminUser();
 
-		try {
-			// temporarily elevate user permissions to view Audit records
-			persistence.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-
+		// temporarily elevate user permissions to view Audit records
+		persistence.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			// favourites for the most common record saved by me (which hasn't been deleted)
 			if (tiles.size() < TILE_COUNT_LIMIT) {
 				createTilesCommon(popularUpdates(currentUser), Operation.update, 1, "Popular by me");
@@ -97,7 +95,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 			if (tiles.size() < TILE_COUNT_LIMIT) {
 				// add favourites to home documents for all modules the user has access to
-				Customer customer = persistence.getUser().getCustomer();
+				Customer customer = p.getUser().getCustomer();
 				for (Module module : customer.getModules()) {
 					// check if user has access to the home document
 					Document document = module.getDocument(customer, module.getHomeDocumentName());
@@ -117,10 +115,7 @@ public class UserDashboardExtension extends UserDashboard {
 					}
 				}
 			}
-
-		} finally {
-			persistence.resetDocumentPermissionScopes();
-		}
+		});
 
 		// render the tiles for display
 		for (Tile tile : tiles) {

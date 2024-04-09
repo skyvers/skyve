@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -27,9 +28,18 @@ public class IteratingJobTest {
 	@InjectMocks
 	private TestJob testJob;
 
+	private AutoCloseable closeable;
+	
 	@Before
 	public void before() {
-		MockitoAnnotations.initMocks(this);
+		closeable = MockitoAnnotations.openMocks(this);
+	}
+	
+	@After
+	public void after() throws Exception {
+		if (closeable != null) {
+			closeable.close();
+		}
 	}
 
 	@Test

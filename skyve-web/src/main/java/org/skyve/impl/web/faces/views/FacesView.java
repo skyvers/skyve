@@ -15,12 +15,10 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.Visibility;
 import org.primefaces.model.charts.ChartModel;
-import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
-import org.skyve.content.ContentManager;
-import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
@@ -58,8 +56,12 @@ import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -891,21 +893,28 @@ public class FacesView extends HarnessView {
 					throw new ValidationException("Signature was not found");
 				}
 				Bean bean = getCurrentBean().getBean();
-				try (ContentManager cm = EXT.newContentManager()) {
-					byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
-					final AttachmentContent ac = new AttachmentContent(bean.getBizCustomer(),
-																		bean.getBizModule(),
-																		bean.getBizDocument(),
-																		bean.getBizDataGroupId(),
-																		bean.getBizUserId(),
-																		bean.getBizId(),
-																		binding,
-																		MimeType.png,
-																		signature);
-		
-					cm.put(ac);
-					BindUtil.set(bean, binding, ac.getContentId());
+				String unsanitisedContentBinding = BindUtil.unsanitiseBinding(binding);
+
+				// Check content access
+				User user = getUser();
+				String bizModule = bean.getBizModule();
+				String bizDocument = bean.getBizDocument();
+				user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
+
+				// Check document access
+				Customer customer = user.getCustomer();
+				Document document = customer.getModule(bizModule).getDocument(customer, bizDocument);
+				if (! user.canAccessDocument(document)) {
+					throw new SecurityException("view this document", user.getName());
 				}
+
+				// Get the signature image bytes from the JSON
+				byte[] signature = ImageUtil.signature(json, width, height, rgbHexBackgroundColour, rgbHexForegroundColour);
+				// Add to content 
+				// NB This handles compound bindings and checks for content access on the content owning bean
+				AttachmentContent content = FacesContentUtil.handleFileUpload(signature, bean, BindUtil.unsanitiseBinding(binding));		
+				// Set the content attribute
+				BindUtil.set(bean, unsanitisedContentBinding, content.getContentId());
 
 				return null;
 			}

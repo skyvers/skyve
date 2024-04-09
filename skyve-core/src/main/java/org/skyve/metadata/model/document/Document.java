@@ -12,6 +12,7 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
@@ -37,6 +38,8 @@ public interface Document extends Model, PersistentMetaData {
 	
 	public @Nullable String getBizKeyExpression();
 	
+	public @Nullable Sensitivity getBizKeySensitity();
+
 	/**
 	 * Set the bizKey for static/dynamic beans.
 	 * 

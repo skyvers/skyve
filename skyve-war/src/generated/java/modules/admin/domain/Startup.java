@@ -32,7 +32,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
-@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -121,7 +121,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Which map technology would you like to use for this Skyve application? Note: Google Maps requires an API key.
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum MapType implements Enumeration {
 		gmap("gmap", "Google Maps"),
 		leaflet("leaflet", "Open Street Map");
@@ -193,7 +193,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Which external backup provider should be used this Skyve application? Note: additional charges may apply.
 	 **/
 	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator", date = "2024-03-15T01:02:36.000Z")
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum BackupType implements Enumeration {
 		none("none", "None (Internal Backups)"),
 		azure("org.skyve.impl.backup.AzureBlobStorageBackup", "Azure Blob Storage");

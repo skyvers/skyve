@@ -10,7 +10,6 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.chart.OrderBy;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
-import org.skyve.persistence.Persistence;
 
 import modules.admin.ModulesUtil;
 import modules.admin.UserDashboard.UserDashboardExtension;
@@ -18,17 +17,11 @@ import modules.admin.domain.Audit;
 import modules.admin.domain.UserDashboard;
 
 public class UserActivityContextModel extends ChartModel<UserDashboard> {
-
 	@Override
 	public ChartData getChartData() {
-
-		Persistence pers = CORE.getPersistence();
-
 		// temporarily elevate user to be able to see Audit records in case they don't usually have access
-		try {
-			pers.setDocumentPermissionScopes(DocumentPermissionScope.customer);
-
-			DocumentQuery q = pers.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 			q.getFilter().addGreaterThan(Audit.millisPropertyName, UserDashboardExtension.TWO_WEEKS_AGO);
 			q.getFilter().addEquals(Audit.userNamePropertyName, ModulesUtil.currentAdminUser().getUserName());
 
@@ -40,9 +33,6 @@ public class UserActivityContextModel extends ChartModel<UserDashboard> {
 			cb.orderBy(OrderBy.category, SortDirection.ascending);
 
 			return cb.build("My activity by context - last 14 days", "Context");
-		} finally {
-			pers.resetDocumentPermissionScopes();
-
-		}
+		});
 	}
 }

@@ -3,8 +3,8 @@ package org.skyve.impl.tools.jasperreports;
 import java.util.Map;
 
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.customer.Customer;
@@ -44,9 +44,9 @@ public class SkyveDocumentExecuterFactory implements JRQueryExecuterFactory {
 		return true;
 	}
 	
-	private static UserImpl user;
-	public static org.skyve.metadata.user.User getUser() {
-		if (user == null) {
+	private static class UserSingleton {
+		private static UserImpl user;
+		static {
 			ProvidedRepository repository = new LocalDesignRepository() {
 				// Don't use bizlets for reporting
 				@Override
@@ -59,8 +59,11 @@ public class SkyveDocumentExecuterFactory implements JRQueryExecuterFactory {
 			user = new SuperUser();
 			user.setCustomerName("bizhub");
 			user.setName("user");
+			
 		}
-		
-		return user;
+	}
+
+	public static org.skyve.metadata.user.User getUser() {
+		return UserSingleton.user;
 	}
 }

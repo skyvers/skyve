@@ -26,9 +26,11 @@ public abstract class AbstractH2TestDispose extends AbstractH2Test {
 		EXT.getCaching().startup();
 	}
 
+	@Override
 	@AfterEach
-	@SuppressWarnings("static-method")
-	public void after() throws Exception {
+	public void afterBase() {
+		super.afterBase(); // rollback and evict
+
 		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
 		// For H2 by default, closing the last connection to a database closes the database.
 		// For an in-memory database, this means the content is lost.

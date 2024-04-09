@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 import javax.cache.management.CacheStatisticsMXBean;
@@ -124,6 +126,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DynamicPersistence;
+import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
@@ -543,7 +546,28 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope) {
+	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
+		try {
+			setDocumentPermissionScopes(scope);
+			return function.apply(this);
+		}
+		finally {
+			resetDocumentPermissionScopes();
+		}
+	}
+
+	@Override
+	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
+		try {
+			setDocumentPermissionScopes(scope);
+			consumer.accept(this);
+		}
+		finally {
+			resetDocumentPermissionScopes();
+		}
+	}
+	
+	private void setDocumentPermissionScopes(DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
@@ -563,9 +587,8 @@ t.printStackTrace();
 			}
 		}
 	}
-
-	@Override
-	public void resetDocumentPermissionScopes() {
+	
+	private void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
@@ -721,6 +744,12 @@ t.printStackTrace();
 	// So we have to ensure its robust as all fuck
 	@Override
 	public final void commit(boolean close) {
+		commit(close, true);
+	}
+	
+	// this variant is used by BackupUtil.executeScript() where the ADM_)Uniqueness table 
+	// may not exist after a script - eg drop script
+	public final void commit(boolean close, boolean removeUniqueHashes) {
 		boolean rollbackOnly = false;
 		try {
 			if (em != null) { // can be null after a relogin
@@ -735,20 +764,22 @@ t.printStackTrace();
 					}
 					else {
 						try {
-							// remove all inserted unique hashes (can only do if we have an em)
-							try {
-								final Persistent persistent = new Persistent();
-								persistent.setName(UniquenessEntity.TABLE_NAME);
-								final String persistentIdentifier = persistent.getPersistentIdentifier();
-								for (String hash : uniqueHashes) {
-									StringBuilder query = new StringBuilder(64);
-									query.append("delete from ").append(persistentIdentifier).append(" where ");
-									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
-									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+							// remove all inserted unique hashes if we were told to (can only do if we have an em)
+							if (removeUniqueHashes) {
+								try {
+									final Persistent persistent = new Persistent();
+									persistent.setName(UniquenessEntity.TABLE_NAME);
+									final String persistentIdentifier = persistent.getPersistentIdentifier();
+									for (String hash : uniqueHashes) {
+										StringBuilder query = new StringBuilder(64);
+										query.append("delete from ").append(persistentIdentifier).append(" where ");
+										query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+										newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+									}
 								}
-							}
-							finally {
-								uniqueHashes.clear();
+								finally {
+									uniqueHashes.clear();
+								}
 							}
 						}
 						finally {
@@ -1965,7 +1996,8 @@ if (document.isDynamic()) return;
 				// Need to check aggregation FKs
 				// Need to check collection joining table element_id FKs
 				// but do NOT need to check child collection parent_ids as they point back
-				if (! CollectionType.child.equals(type)) {
+				// and do NOT need to check embedded associations as they have no *_id FKs
+				if (! (CollectionType.child.equals(type) || AssociationType.embedded.equals(type))) {
 					// Check composed collections if we are deleting a composed collection element
 					// directly using p.delete(), otherwise,
 					// if preRemove() is being fired, we should NOT check composed collections or associations
@@ -2598,7 +2630,6 @@ public void doWorkOnConnection(Session session) {
 	}
 	
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
-	private static final String CHILD_PARENT_ID = ChildBean.PARENT_NAME + "_id";
 	
 	@Override
 	public void upsertBeanTuple(PersistentBean bean) {
@@ -2648,7 +2679,7 @@ public void doWorkOnConnection(Session session) {
 					query.append(',').append(HierarchicalBean.PARENT_ID).append("=:").append(HierarchicalBean.PARENT_ID);
 				}
 				else {
-					query.append(',').append(CHILD_PARENT_ID).append("=:").append(CHILD_PARENT_ID);
+					query.append(',').append(ChildBean.CHILD_PARENT_ID).append("=:").append(ChildBean.CHILD_PARENT_ID);
 				}
 			}
 
@@ -2701,8 +2732,8 @@ public void doWorkOnConnection(Session session) {
 					values.append(",:").append(HierarchicalBean.PARENT_ID);
 				}
 				else {
-					columns.append(',').append(CHILD_PARENT_ID);
-					values.append(",:").append(CHILD_PARENT_ID);
+					columns.append(',').append(ChildBean.CHILD_PARENT_ID);
+					values.append(",:").append(ChildBean.CHILD_PARENT_ID);
 				}
 			}
 			
@@ -2778,7 +2809,7 @@ public void doWorkOnConnection(Session session) {
 			}
 			else {
 				Bean parent = ((ChildBean<?>) bean).getParent();
-				sql.putParameter(CHILD_PARENT_ID, (parent == null) ? null : parent.getBizId(), false);
+				sql.putParameter(ChildBean.CHILD_PARENT_ID, (parent == null) ? null : parent.getBizId(), false);
 			}
 		}
 

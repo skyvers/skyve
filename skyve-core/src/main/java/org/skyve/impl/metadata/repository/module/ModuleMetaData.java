@@ -25,6 +25,7 @@ import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
+import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
@@ -541,7 +542,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 						List<ActionPrivilegeMetaData> repositoryActionPrivileges = documentPrivilegeMetaData.getActions();
 						if (repositoryActionPrivileges != null) {
 							for (ActionPrivilegeMetaData actionPrivilegeMetaData : repositoryActionPrivileges) {
-								org.skyve.impl.metadata.user.ActionPrivilege actionPrivilege = new org.skyve.impl.metadata.user.ActionPrivilege();
+								ActionPrivilege actionPrivilege = new ActionPrivilege();
 								value = actionPrivilegeMetaData.getActionName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +

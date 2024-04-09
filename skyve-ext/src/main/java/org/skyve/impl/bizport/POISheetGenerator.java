@@ -21,14 +21,12 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class POISheetGenerator {
-
 	private static final String XLSX = ".xlsx";
 
 	private String moduleName;
 	private String documentName;
 	private Boolean columnTitles;
 	private String downloadName;
-	private String absoluteFilePath;
 	private Boolean columnTitlesOnly;
 
 	public Boolean getColumnTitlesOnly() {
@@ -39,10 +37,6 @@ public class POISheetGenerator {
 	}
 
 	protected List<DataFileExportField> fields; // maintain order
-
-	public String getAbsoluteFilePath() {
-		return absoluteFilePath;
-	}
 
 	public String getDownloadName() {
 		return downloadName;

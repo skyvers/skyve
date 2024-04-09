@@ -17,7 +17,9 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
@@ -108,7 +110,10 @@ public class DynamicImageServlet extends HttpServlet {
 				String documentName = moduleDotDocumentName.substring(dotIndex + 1);
 				Customer customer = user.getCustomer();
 				Document document = customer.getModule(moduleName).getDocument(customer, documentName);
-	
+				
+				UxUi uxui = UserAgent.getUxUi(request);
+				user.checkAccess(UserAccess.dynamicImage(moduleName, documentName, imageName), uxui.getName());
+
 				DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageName);
 				BufferedImage image = dynamicImage.getImage(bean,
 															(int) (width * (widthZoom / 100.0)), 

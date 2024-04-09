@@ -11,7 +11,7 @@ import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 
 public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
-	private static TwoFactorAuthConfigurationSingleton instance;
+	private static TwoFactorAuthConfigurationSingleton instance = new TwoFactorAuthConfigurationSingleton();
 
 	private final ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configuration = new ConcurrentHashMap<>();
 
@@ -20,10 +20,6 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	}
 
 	public static TwoFactorAuthConfigurationSingleton getInstance() {
-		if (instance == null) {
-			instance = new TwoFactorAuthConfigurationSingleton();
-		}
-
 		return instance;
 	}
 	
