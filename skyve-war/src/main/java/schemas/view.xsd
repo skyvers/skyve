@@ -39,6 +39,8 @@
 
   <xs:element name="containerColumn" type="tns:dataGridContainerColumn"/>
 
+  <xs:element name="contentAccess" type="tns:viewContentUserAccessMetaData"/>
+
   <xs:element name="contentImage" type="tns:contentImage"/>
 
   <xs:element name="contentLink" type="tns:contentLink"/>
@@ -61,11 +63,13 @@
 
   <xs:element name="dialogButton" type="tns:dialogButton"/>
 
-  <xs:element name="documentAggregate" type="tns:viewDocumentAggregateUserAccessMetaData"/>
+  <xs:element name="documentAggregateAccess" type="tns:viewDocumentAggregateUserAccessMetaData"/>
 
   <xs:element name="download" type="tns:downloadAction"/>
 
   <xs:element name="dynamicImage" type="tns:dynamicImage"/>
+
+  <xs:element name="dynamicImageAccess" type="tns:viewDynamicImageUserAccessMetaData"/>
 
   <xs:element name="editViewReference" type="tns:editViewReference"/>
 
@@ -111,7 +115,7 @@
 
   <xs:element name="map" type="tns:map"/>
 
-  <xs:element name="modelAggregate" type="tns:viewModelAggregateUserAccessMetaData"/>
+  <xs:element name="modelAggregateAccess" type="tns:viewModelAggregateUserAccessMetaData"/>
 
   <xs:element name="new" type="tns:newAction"/>
 
@@ -127,13 +131,13 @@
 
   <xs:element name="password" type="tns:password"/>
 
-  <xs:element name="previousComplete" type="tns:viewPreviousCompleteUserAccessMetaData"/>
+  <xs:element name="previousCompleteAccess" type="tns:viewPreviousCompleteUserAccessMetaData"/>
 
   <xs:element name="print" type="tns:printAction"/>
 
   <xs:element name="progressBar" type="tns:progressBar"/>
 
-  <xs:element name="queryAggregate" type="tns:viewQueryAggregateUserAccessMetaData"/>
+  <xs:element name="queryAggregateAccess" type="tns:viewQueryAggregateUserAccessMetaData"/>
 
   <xs:element name="queryListViewReference" type="tns:queryListViewReference"/>
 
@@ -144,6 +148,8 @@
   <xs:element name="remove" type="tns:removeAction"/>
 
   <xs:element name="report" type="tns:reportAction"/>
+
+  <xs:element name="reportAccess" type="tns:viewReportUserAccessMetaData"/>
 
   <xs:element name="reportReference" type="tns:reportReference"/>
 
@@ -163,7 +169,7 @@
 
   <xs:element name="sidebar" type="tns:sidebar"/>
 
-  <xs:element name="singular" type="tns:viewSingularUserAccessMetaData"/>
+  <xs:element name="singularAccess" type="tns:viewSingularUserAccessMetaData"/>
 
   <xs:element name="slider" type="tns:slider"/>
 
@@ -2016,11 +2022,14 @@
   <xs:complexType name="accesses">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="tns:singular"/>
-        <xs:element ref="tns:documentAggregate"/>
-        <xs:element ref="tns:queryAggregate"/>
-        <xs:element ref="tns:modelAggregate"/>
-        <xs:element ref="tns:previousComplete"/>
+        <xs:element ref="tns:singularAccess"/>
+        <xs:element ref="tns:documentAggregateAccess"/>
+        <xs:element ref="tns:queryAggregateAccess"/>
+        <xs:element ref="tns:modelAggregateAccess"/>
+        <xs:element ref="tns:previousCompleteAccess"/>
+        <xs:element ref="tns:reportAccess"/>
+        <xs:element ref="tns:dynamicImageAccess"/>
+        <xs:element ref="tns:contentAccess"/>
       </xs:choice>
     </xs:sequence>
     <xs:attribute name="generate" type="xs:boolean" use="required"/>
@@ -2076,6 +2085,35 @@
   </xs:complexType>
 
   <xs:complexType name="viewPreviousCompleteUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewReportUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string" use="required"/>
+        <xs:attribute name="module" type="xs:string" use="required"/>
+        <xs:attribute name="report" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewDynamicImageUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:viewUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="image" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="viewContentUserAccessMetaData">
     <xs:complexContent>
       <xs:extension base="tns:viewUserAccessMetaData">
         <xs:sequence/>

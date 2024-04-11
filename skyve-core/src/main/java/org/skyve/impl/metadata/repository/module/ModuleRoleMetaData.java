@@ -58,7 +58,10 @@ public class ModuleRoleMetaData extends NamedMetaData {
 						@XmlElementRef(type = ModuleRoleDocumentAggregateUserAccessMetaData.class),
 						@XmlElementRef(type = ModuleRoleQueryAggregateUserAccessMetaData.class),
 						@XmlElementRef(type = ModuleRoleModelAggregateUserAccessMetaData.class),
-						@XmlElementRef(type = ModuleRolePreviousCompleteUserAccessMetaData.class)})
+						@XmlElementRef(type = ModuleRolePreviousCompleteUserAccessMetaData.class),
+						@XmlElementRef(type = ModuleRoleReportUserAccessMetaData.class),
+						@XmlElementRef(type = ModuleRoleDynamicImageUserAccessMetaData.class),
+						@XmlElementRef(type = ModuleRoleContentUserAccessMetaData.class)})
 	public List<ModuleRoleUserAccessMetaData> getAccesses() {
 		return accesses;
 	}

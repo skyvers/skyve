@@ -375,8 +375,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 			
 			// Check modelAggregate and previousComplete UserAccesses
 			for (UserAccess access : roleImpl.getAccesses().keySet()) {
-				if (access.isModelAggregate()) {
 /* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
+				if (access.isModelAggregate() || access.isDynamicImage()) {
 					Document accessDocument = module.getDocument(customer, access.getDocumentName());
 					try {
 						getModel(customer, accessDocument, access.getComponent(), false);
@@ -388,9 +388,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" which does not exist.",
 														e);
 					}
-*/
 				}
-				else if (access.isPreviousComplete()) {
+else */
+				if (access.isPreviousComplete() || access.isContent()) {
 					Document accessDocument = module.getDocument(customer, access.getDocumentName());
 					String binding = access.getComponent();
 					try {
@@ -401,6 +401,19 @@ public class LocalDesignRepository extends FileSystemRepository {
 														"] in module " + module.getName() +
 														" with binding " + binding +
 														" is not a valid binding.", e);
+					}
+				}
+				else if (access.isReport()) {
+					String reportModuleName = access.getModuleName();
+					String reportDocumentName = access.getDocumentName();
+					String reportName = access.getComponent();
+					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
+					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" for module/document/report " + reportModuleName + "/" +
+														reportDocumentName + "/" + reportName +
+														" does not exist.");
 					}
 				}
 			}
@@ -773,8 +786,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, document, uxui);
 		if (accesses != null) { // can be null if access control is turned off
 			for (UserAccess access : accesses) {
-				if (access.isModelAggregate()) {
 /* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
+				if (access.isModelAggregate() || access.isDynamicImage()) {
 					try {
 						getModel(customer, document, access.getComponent(), false);
 					}
@@ -786,9 +799,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" which does not exist.",
 														e);
 					}
-*/
 				}
-				else if (access.isPreviousComplete()) {
+else */
+				if (access.isPreviousComplete() || access.isContent()) {
 					final Module module = getModule(customer, document.getOwningModuleName());
 					final String binding = access.getComponent();
 					try {
@@ -800,6 +813,21 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" in view " + view.getName() +
 														" with binding " + binding +
 														" is not a valid binding.", e);
+					}
+				}
+				else if (access.isReport()) {
+					String reportModuleName = access.getModuleName();
+					String reportDocumentName = access.getDocumentName();
+					String reportName = access.getComponent();
+					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
+					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
+						final Module module = getModule(customer, document.getOwningModuleName());
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module.document " + module.getName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" for module/document/report " + reportModuleName + "/" +
+														reportDocumentName + "/" + reportName +
+														" does not exist.");
 					}
 				}
 			}

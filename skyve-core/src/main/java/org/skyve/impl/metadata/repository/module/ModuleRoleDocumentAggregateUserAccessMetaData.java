@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documentAggregate")
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documentAggregateAccess")
 public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUserAccessMetaData {
 	private static final long serialVersionUID = -9055003769635277281L;
 	
@@ -29,10 +29,10 @@ public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUse
 	@Override
 	public void validate(String metaDataName, String roleName, Module module) {
 		if (documentName == null) {
-			throw new MetaDataException(metaDataName + " : [documentName] is required for all documentAggregate, modelAggregate, previousComplete & singular user accesses defined in module role " + roleName);
+			throw new MetaDataException(metaDataName + " : [document] is required for all documentAggregate, modelAggregate, previousComplete & singular user accesses defined in module role " + roleName);
 		}
 		if (! module.getDocumentRefs().keySet().contains(documentName)) {
-			throw new MetaDataException(metaDataName + " : [documentName] " + documentName + " does not exist for user access " + toUserAccess(module.getName()).toString() + " in module role " + roleName);
+			throw new MetaDataException(metaDataName + " : [document] " + documentName + " does not exist for user access " + toUserAccess(module.getName()).toString() + " in module role " + roleName);
 		}
 	}
 

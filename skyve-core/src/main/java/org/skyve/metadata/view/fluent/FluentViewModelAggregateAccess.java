@@ -27,7 +27,8 @@ public class FluentViewModelAggregateAccess extends FluentViewUserAccess<FluentV
 	/**
 	 * Returns a FluentViewModelAggregateAccess from a runtime metadata.
 	 */
-	protected FluentViewModelAggregateAccess from(Set<String> uxuis) {
+	protected FluentViewModelAggregateAccess from(String modelName, Set<String> uxuis) {
+		modelName(modelName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
 	}
