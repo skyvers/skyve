@@ -3,8 +3,10 @@ package org.skyve.metadata;
 import org.skyve.domain.types.formatters.DecimalFormatter;
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.domain.types.formatters.SimpleDateFormatter;
+import org.skyve.domain.types.formatters.StringFormatter;
 import org.skyve.domain.types.formatters.TimeDurationFormatter;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -42,6 +44,7 @@ public enum FormatterName {
 	MMM_DD_YYYY_HH24_MI_SS(new SimpleDateFormatter(org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS.PATTERN)),
 	YYYY_MM_DD_HH_MI_SS(new SimpleDateFormatter(org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS.PATTERN)),
 	YYYY_MM_DD_HH24_MI_SS(new SimpleDateFormatter(org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS.PATTERN)),
+
 	Integer(new DecimalFormatter(DecimalFormatter.ZERO_DECIMAL_PLACES_PATTERN, false, null)),
 	OneDecimalPlace(new DecimalFormatter(DecimalFormatter.ONE_DECIMAL_PLACE_PATTERN, false, null)),
 	TwoDecimalPlaces(new DecimalFormatter(DecimalFormatter.TWO_DECIMAL_PLACES_PATTERN, false, null)),
@@ -106,7 +109,25 @@ public enum FormatterName {
 	AbsoluteEightOptionalDecimalPlaces(new DecimalFormatter(DecimalFormatter.EIGHT_OPTIONAL_DECIMAL_PLACES_PATTERN, true, null)),
 	AbsoluteNineOptionalDecimalPlaces(new DecimalFormatter(DecimalFormatter.NINE_OPTIONAL_DECIMAL_PLACES_PATTERN, true, null)),
 	AbsoluteTenOptionalDecimalPlaces(new DecimalFormatter(DecimalFormatter.TEN_OPTIONAL_DECIMAL_PLACES_PATTERN, true, null)),
-	TimeDuration(new TimeDurationFormatter());
+
+	TimeDuration(new TimeDurationFormatter()),
+	
+	// Formatting tags, structural tags, links and images and CSS too
+	RelaxedHTML(new StringFormatter(false, false, false, Sanitisation.relaxed)),
+	RelaxedEscapedHTML(new StringFormatter(true, false, false, Sanitisation.relaxed)),
+	// Formatting tags, structural tags, links and images
+	SimpleHTML(new StringFormatter(false, false, false, Sanitisation.simple)),
+	SimpleEscapedHTML(new StringFormatter(true, false, false, Sanitisation.simple)),
+	// Formatting tags only
+	BasicHTML(new StringFormatter(false, false, false, Sanitisation.basic)),
+	BasicEscapedHTML(new StringFormatter(true, false, false, Sanitisation.basic)),
+	// Only Text - no HTML
+	TextHTML(new StringFormatter(false, false, false, Sanitisation.text)),
+	TextEscapedHTML(new StringFormatter(true, false, false, Sanitisation.text)),
+	// No sanitisation
+	EscapedHTML(new StringFormatter(true, false, false, null)),
+	EscapedJSONString(new StringFormatter(false, true, false, null)),
+	EscapedJSString(new StringFormatter(false, false, true, null));
 
 	private Formatter<?> formatter;
 	private FormatterName(Formatter<?> formatter) {

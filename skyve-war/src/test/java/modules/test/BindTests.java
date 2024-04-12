@@ -364,6 +364,22 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("1.01", Binder.formatMessage("{el:bean.decimal10|TwoOptionalDecimalPlaces}", bean));
 		Assert.assertEquals("0", Binder.formatMessage("{el:Decimal2.ZERO|TwoOptionalDecimalPlaces}", bean));
 		Assert.assertEquals("100", Binder.formatMessage("{el:newDecimal2(100)|TwoOptionalDecimalPlaces}", bean));
+
+		bean.setText("<script>alert('yikes')</script><span/><div><p/><table style=\"\"><tr/><b>Bold</b></tr></table></div><style>.shite {}</style>");
+		Assert.assertEquals("<div><p></p><table><tbody><tr></tr></tbody></table><b>Bold</b></div>", Binder.formatMessage("{text|RelaxedHTML}", bean));
+		Assert.assertEquals("&lt;div&gt;&lt;p&gt;&lt;/p&gt;&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;b&gt;Bold&lt;/b&gt;&lt;/div&gt;",
+								Binder.formatMessage("{text|RelaxedEscapedHTML}", bean));
+		Assert.assertEquals("<div><p></p><b>Bold</b></div>", Binder.formatMessage("{text|SimpleHTML}", bean));
+		Assert.assertEquals("&lt;div&gt;&lt;p&gt;&lt;/p&gt;&lt;b&gt;Bold&lt;/b&gt;&lt;/div&gt;", Binder.formatMessage("{text|SimpleEscapedHTML}", bean));
+		Assert.assertEquals("<b>Bold</b>", Binder.formatMessage("{text|BasicHTML}", bean));
+		Assert.assertEquals("&lt;b&gt;Bold&lt;/b&gt;", Binder.formatMessage("{text|BasicEscapedHTML}", bean));
+		Assert.assertEquals("Bold", Binder.formatMessage("{text|TextHTML}", bean));
+		Assert.assertEquals("Bold", Binder.formatMessage("{text|TextEscapedHTML}", bean));
+		Assert.assertEquals("&lt;script&gt;alert(&#39;yikes&#39;)&lt;/script&gt;&lt;span/&gt;&lt;div&gt;&lt;p/&gt;&lt;table style=&#34;&#34;&gt;&lt;tr/&gt;&lt;b&gt;Bold&lt;/b&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;style&gt;.shite {}&lt;/style&gt;",
+								Binder.formatMessage("{text|EscapedHTML}", bean));
+		bean.setText("{\"poo\": \"wee\"}");
+		Assert.assertEquals("{\\\"poo\\\": \\\"wee\\\"}", Binder.formatMessage("{text|EscapedJSONString}", bean));
+		Assert.assertEquals("{&quot;poo&quot;: &quot;wee&quot;}", Binder.formatMessage("{text|EscapedJSString}", bean));
 	}
 
 	@Test
