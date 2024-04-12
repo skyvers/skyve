@@ -759,6 +759,7 @@
 				<column binding="auditModuleName" />
 				<column binding="auditDocumentName" />
 				<column binding="auditBizKey" />
+				<column binding="auditBizId" hidden="true" />
 				<column binding="millis" sortOrder="descending">
 					<projected>false</projected>
 				</column>
