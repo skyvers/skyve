@@ -3828,7 +3828,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String refreshId = refresh.getId();
 		refresh.setName(refreshId);
 		refresh.setActionExpression(methodExpressionForRerender(actionName, false));
-		refresh.setProcess("@none"); // no processing - just a refresh required
+		refresh.setProcess(process); // default process
 		refresh.setUpdate(update); // default update
 		children.add(refresh);
 
