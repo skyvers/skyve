@@ -480,7 +480,7 @@ public class BackupJob extends CancellableJob {
 	}
 	
 	public static void emailProblem(@Nonnull List<String> jobLog, @Nullable String problem) throws Exception {
-		String body = Binder.formatMessage("The backup taken at " + new DateOnly() + " has ");
+		String body = Binder.formatMessage("The " + UtilImpl.ARCHIVE_NAME + " backup taken at " + new DateOnly() + " has ");
 		if (problem == null) {
 			body += "problems.";
 		}
