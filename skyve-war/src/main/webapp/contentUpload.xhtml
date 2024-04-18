@@ -39,7 +39,7 @@
 								rendered="#{not _skyveContent.canAccess}"
 								escape="false"
 								style="width:100%; height:50px" />
-			<h:form enctype="multipart/form-data" prependId="false" rendered="#{_skyveUpload.canAccess}">
+			<h:form enctype="multipart/form-data" prependId="false" rendered="#{_skyveContent.canAccess}">
 				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
 				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
 				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
