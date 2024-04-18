@@ -16,9 +16,9 @@ public interface TextOutput {
 		// Formatting tags, structural tags, links and images and CSS too
 		relaxed,
 		// Formatting tags, structural tags, links and images
-		basic,
-		// Formatting tags only
 		simple,
+		// Formatting tags only
+		basic,
 		// Only Text - no HTML
 		text
 	}

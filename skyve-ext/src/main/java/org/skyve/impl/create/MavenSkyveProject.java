@@ -291,6 +291,7 @@ public class MavenSkyveProject {
 		}
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("faces-config.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("jboss-classloading.xml").toFile());
+		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("jboss-deployment-structure.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("undertow-handlers.conf").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("web.xml").toFile());
 		skyveWebAppFiles.addAll(FileUtils.listFiles(basePath.resolve("WEB-INF").resolve("resources").resolve("skyve").toFile(), null, true));

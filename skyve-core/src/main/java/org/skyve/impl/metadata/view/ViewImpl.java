@@ -259,6 +259,7 @@ public class ViewImpl extends Container implements View {
 		Set<UserAccess> result = accesses;
 		if (result != null) { // accesses were generated
 			for (Component component : components) {
+				String componentBinding = component.getBinding();
 				ViewImpl fragment = component.getFragment(customer, uxui);
 				Set<UserAccess> componentAccesses = fragment.getAccesses(customer, document, uxui);
 				for (UserAccess componentAccess : componentAccesses) {
@@ -276,7 +277,7 @@ public class ViewImpl extends Container implements View {
 							continue;
 						}
 					}
-					// Change the module and document name for the model aggregates as these are required
+					// Change the module and document name for model aggregates as these are required
 					// to be defined on each document they are referenced from.
 					else if (componentAccess.isModelAggregate()) {
 						if (! (document.getOwningModuleName().equals(componentAccess.getModuleName()) &&
@@ -285,6 +286,36 @@ public class ViewImpl extends Container implements View {
 							continue;
 						}
 					}
+					// Change the module and document name and place the binding prefix on the binding, if a bound component
+					else if (componentAccess.isContent()) {
+						if (componentBinding != null) {
+							result.add(UserAccess.content(document.getOwningModuleName(),
+															document.getName(),
+															componentBinding + '.' + componentAccess.getComponent()));
+							continue;
+						}
+					}
+					// Change the module and document name and place the binding prefix on the binding, if a bound component
+					else if (componentAccess.isPreviousComplete()) {
+						if (componentBinding != null) {
+							result.add(UserAccess.previousComplete(document.getOwningModuleName(),
+																	document.getName(),
+																	componentBinding + '.' + componentAccess.getComponent()));
+							continue;
+						}
+					}
+					// Change the module and document name for dynamic images as these are required
+					// to be defined on each document they are referenced from.
+					else if (componentAccess.isDynamicImage()) {
+						if (! (document.getOwningModuleName().equals(componentAccess.getModuleName()) &&
+								document.getName().equals(componentAccess.getDocumentName()))) {
+							result.add(UserAccess.dynamicImage(document.getOwningModuleName(), document.getName(), componentAccess.getComponent()));
+							continue;
+						}
+					}
+
+					// NB UserAccess.report have their own module and document in the definition and so require no translation
+					// NB UserAccess.singular don't change either
 					result.add(componentAccess);
 				}
 			}
@@ -610,11 +641,31 @@ public class ViewImpl extends Container implements View {
 			@Override
 			public void visitReportAction(ActionImpl action) {
 				ProvidedRepository r = (optionalRepositoryToUse == null) ? ProvidedRepositoryFactory.get() : optionalRepositoryToUse;
-				String resourceName = action.getResourceName();
-				String fileName = r.getReportFileName(customer, document, resourceName);
+				String reportName = action.getResourceName();
+
+				String reportModuleName = null;
+				String reportDocumentName = null;
+
+				// Determine report module and document names from parameters
+				List<Parameter> reportParameters = action.getParameters();
+				for (Parameter reportParameter : reportParameters) {
+					String reportParameterName = reportParameter.getName();
+					if (AbstractWebContext.MODULE_NAME.equals(reportParameterName)) {
+						reportModuleName = reportParameter.getValue();
+					}
+					else if (AbstractWebContext.DOCUMENT_NAME.equals(reportParameterName)) {
+						reportDocumentName = reportParameter.getValue();
+					}
+				}
+				
+				if ((reportModuleName == null) || (reportDocumentName == null)) {
+					throw new MetaDataException("Cannot determine document for report " + reportName + " in document " + 
+													document.getOwningModuleName() + "." + document.getName());
+				}
+				
+				// Add report engine parameter based on report file name suffix
+				String fileName = r.getReportFileName(customer, document, reportName);
 				if (fileName != null) {
-					List<Parameter> reportParameters = action.getParameters();
-					
 					ParameterImpl parameter = new ParameterImpl();
 					parameter.setName(AbstractWebContext.REPORT_ENGINE);
 					if (fileName.endsWith(".jasper")) {
@@ -624,7 +675,7 @@ public class ViewImpl extends Container implements View {
 						parameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
 					}
 					else {
-						throw new MetaDataException("Report Action for report " + resourceName + 
+						throw new MetaDataException("Report Action for report " + reportName + 
 														" in view " + name + " for module " + moduleName + " and document " + documentName + 
 														" does not reference a Jasper or Freemarker resource");
 					}
@@ -632,7 +683,7 @@ public class ViewImpl extends Container implements View {
 				}
 				
 				if (determineAccesses) {
-					accesses.add(UserAccess.report(moduleName, documentName, resourceName));
+					accesses.add(UserAccess.report(reportModuleName, reportDocumentName, reportName));
 				}
 			}
 		}.visit();

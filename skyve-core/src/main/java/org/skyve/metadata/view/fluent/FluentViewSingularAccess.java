@@ -11,23 +11,24 @@ import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMeta
  */
 public class FluentViewSingularAccess extends FluentViewUserAccess<FluentViewSingularAccess, ViewSingularUserAccessMetaData> {
 	/**
-	 * Creates a new FluentViewDocumentAggregateAccess
+	 * Creates a new FluentViewSingularAccess
 	 */
 	public FluentViewSingularAccess() {
 		access = new ViewSingularUserAccessMetaData();
 	}
 
 	/**
-	 * Creates a new FluentModuleRoleDocumentAggregateAccess from the specified ViewSingularUserAccessMetaData.
+	 * Creates a new FluentViewSingularAccess from the specified ViewSingularUserAccessMetaData.
 	 */
 	public FluentViewSingularAccess(ViewSingularUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
-	 * Returns a FluentViewDocumentAggregateAccess from a runtime metadata.
+	 * Returns a FluentViewSingularAccess from a runtime metadata.
 	 */
-	protected FluentViewSingularAccess from(Set<String> uxuis) {
+	protected FluentViewSingularAccess from(String documentName, Set<String> uxuis) {
+		documentName(documentName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
 	}

@@ -19,7 +19,10 @@ public class ViewUserAccessesMetaData {
 						@XmlElementRef(type = ViewDocumentAggregateUserAccessMetaData.class),
 						@XmlElementRef(type = ViewQueryAggregateUserAccessMetaData.class),
 						@XmlElementRef(type = ViewModelAggregateUserAccessMetaData.class),
-						@XmlElementRef(type = ViewPreviousCompleteUserAccessMetaData.class)})
+						@XmlElementRef(type = ViewPreviousCompleteUserAccessMetaData.class),
+						@XmlElementRef(type = ViewReportUserAccessMetaData.class),
+						@XmlElementRef(type = ViewDynamicImageUserAccessMetaData.class),
+						@XmlElementRef(type = ViewContentUserAccessMetaData.class)})
 	public List<ViewUserAccessMetaData> getAccesses() {
 		return accesses;
 	}

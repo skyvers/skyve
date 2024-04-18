@@ -7,7 +7,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "singular")
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "singularAccess")
 public class ViewSingularUserAccessMetaData extends ViewDocumentAggregateUserAccessMetaData {
 	private static final long serialVersionUID = 2888202790675893096L;
 	

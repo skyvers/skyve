@@ -79,8 +79,8 @@
 				<document name="Subscription" permission="_____"/>
 			</privileges>
 			<accesses>
-				<singular document="SelfRegistration" />
-				<singular document="SelfRegistrationActivation" />
+				<singularAccess document="SelfRegistration" />
+				<singularAccess document="SelfRegistrationActivation" />
 			</accesses>
 		</role>
 		<role name="AppUser">
@@ -112,7 +112,7 @@
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
 			<accesses>
-				<singular document="ReportTemplate"/>
+				<singularAccess document="ReportTemplate"/>
 			</accesses>
 		</role>
 		<role name="AuditManager">
@@ -408,7 +408,7 @@
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
 			<accesses>
-				<singular document="Startup" />
+				<singularAccess document="Startup" />
 			</accesses>
 		</role>
 		<role name="ViewUser">
@@ -759,6 +759,7 @@
 				<column binding="auditModuleName" />
 				<column binding="auditDocumentName" />
 				<column binding="auditBizKey" />
+				<column binding="auditBizId" hidden="true" />
 				<column binding="millis" sortOrder="descending">
 					<projected>false</projected>
 				</column>

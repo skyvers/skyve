@@ -11,9 +11,9 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "previousCompleteAccess")
-public class ViewPreviousCompleteUserAccessMetaData extends ViewUserAccessMetaData {
-	private static final long serialVersionUID = 7559630279039840437L;
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "contentAccess")
+public class ViewContentUserAccessMetaData extends ViewUserAccessMetaData {
+	private static final long serialVersionUID = 4118889847887224975L;
 
 	private String binding;
 
@@ -29,13 +29,13 @@ public class ViewPreviousCompleteUserAccessMetaData extends ViewUserAccessMetaDa
 	@Override
 	public void validate(String metaDataName, Module module) {
 		if (binding == null) {
-			throw new MetaDataException(metaDataName + " : [binding] is required for all previousComplete user accesses.");
+			throw new MetaDataException(metaDataName + " : [binding] is required for all content user accesses.");
 		}
 		// NB can't validate binding until second pass validation in LocalDesignRepository.validateViewForGenerateDomain()
 	}
 
 	@Override
 	public UserAccess toUserAccess(String moduleName, String documentName) {
-		return UserAccess.previousComplete(moduleName, documentName, binding);
+		return UserAccess.content(moduleName, documentName, binding);
 	}
 }

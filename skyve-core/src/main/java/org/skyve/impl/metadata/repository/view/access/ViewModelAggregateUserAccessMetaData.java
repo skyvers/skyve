@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "modelAggregate")
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "modelAggregateAccess")
 public class ViewModelAggregateUserAccessMetaData extends ViewUserAccessMetaData {
 	private static final long serialVersionUID = -3977408737246074194L;
 
@@ -29,7 +29,7 @@ public class ViewModelAggregateUserAccessMetaData extends ViewUserAccessMetaData
 	@Override
 	public void validate(String metaDataName, Module module) {
 		if (modelName == null) {
-			throw new MetaDataException(metaDataName + " : [modelName] is required for all modelAggregate user accesses");
+			throw new MetaDataException(metaDataName + " : [model] is required for all modelAggregate user accesses");
 		}
 		// NB can't validate modelName until second pass validation in LocalDesignRepository.validateViewForGenerateDomain()
 	}

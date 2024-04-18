@@ -27,13 +27,14 @@ public class FluentViewPreviousCompleteAccess extends FluentViewUserAccess<Fluen
 	/**
 	 * Returns a FluentViewPreviousCompleteAccess from a runtime metadata.
 	 */
-	protected FluentViewPreviousCompleteAccess from(Set<String> uxuis) {
+	protected FluentViewPreviousCompleteAccess from(String binding, Set<String> uxuis) {
+		binding(binding);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
 	}
 
 	/**
-	 * 
+	 * Specifies the binding for this FluentViewPreviousCompleteAccess.
 	 */
 	public FluentViewPreviousCompleteAccess binding(final String binding) {
 		access.setBinding(binding);

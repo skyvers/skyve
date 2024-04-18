@@ -13,7 +13,11 @@
 
   <xs:element name="content" type="tns:metaDataQueryContentColumnMetaData"/>
 
-  <xs:element name="documentAggregate" type="tns:moduleRoleDocumentAggregateUserAccessMetaData"/>
+  <xs:element name="contentAccess" type="tns:moduleRoleContentUserAccessMetaData"/>
+
+  <xs:element name="documentAggregateAccess" type="tns:moduleRoleDocumentAggregateUserAccessMetaData"/>
+
+  <xs:element name="dynamicImageAccess" type="tns:moduleRoleDynamicImageUserAccessMetaData"/>
 
   <xs:element name="edit" type="tns:edit"/>
 
@@ -27,17 +31,19 @@
 
   <xs:element name="map" type="tns:map"/>
 
-  <xs:element name="modelAggregate" type="tns:moduleRoleModelAggregateUserAccessMetaData"/>
+  <xs:element name="modelAggregateAccess" type="tns:moduleRoleModelAggregateUserAccessMetaData"/>
 
   <xs:element name="module" type="tns:module"/>
 
-  <xs:element name="previousComplete" type="tns:moduleRolePreviousCompleteUserAccessMetaData"/>
+  <xs:element name="previousCompleteAccess" type="tns:moduleRolePreviousCompleteUserAccessMetaData"/>
 
   <xs:element name="query" type="tns:query"/>
 
-  <xs:element name="queryAggregate" type="tns:moduleRoleQueryAggregateUserAccessMetaData"/>
+  <xs:element name="queryAggregateAccess" type="tns:moduleRoleQueryAggregateUserAccessMetaData"/>
 
-  <xs:element name="singular" type="tns:moduleRoleSingularUserAccessMetaData"/>
+  <xs:element name="reportAccess" type="tns:moduleRoleReportUserAccessMetaData"/>
+
+  <xs:element name="singularAccess" type="tns:moduleRoleSingularUserAccessMetaData"/>
 
   <xs:element name="sql" type="tns:sql"/>
 
@@ -126,11 +132,14 @@
             <xs:complexType>
               <xs:sequence>
                 <xs:choice minOccurs="0" maxOccurs="unbounded">
-                  <xs:element ref="tns:singular"/>
-                  <xs:element ref="tns:documentAggregate"/>
-                  <xs:element ref="tns:modelAggregate"/>
-                  <xs:element ref="tns:previousComplete"/>
-                  <xs:element ref="tns:queryAggregate"/>
+                  <xs:element ref="tns:singularAccess"/>
+                  <xs:element ref="tns:documentAggregateAccess"/>
+                  <xs:element ref="tns:modelAggregateAccess"/>
+                  <xs:element ref="tns:previousCompleteAccess"/>
+                  <xs:element ref="tns:dynamicImageAccess"/>
+                  <xs:element ref="tns:contentAccess"/>
+                  <xs:element ref="tns:queryAggregateAccess"/>
+                  <xs:element ref="tns:reportAccess"/>
                 </xs:choice>
               </xs:sequence>
             </xs:complexType>
@@ -215,6 +224,35 @@
   </xs:complexType>
 
   <xs:complexType name="moduleRolePreviousCompleteUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleReportUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string" use="required"/>
+        <xs:attribute name="module" type="xs:string" use="required"/>
+        <xs:attribute name="report" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleDynamicImageUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="image" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleContentUserAccessMetaData">
     <xs:complexContent>
       <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
         <xs:sequence/>

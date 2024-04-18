@@ -184,6 +184,17 @@
       <xs:enumeration value="AbsoluteNineOptionalDecimalPlaces"/>
       <xs:enumeration value="AbsoluteTenOptionalDecimalPlaces"/>
       <xs:enumeration value="TimeDuration"/>
+      <xs:enumeration value="RelaxedHTML"/>
+      <xs:enumeration value="RelaxedEscapedHTML"/>
+      <xs:enumeration value="SimpleHTML"/>
+      <xs:enumeration value="SimpleEscapedHTML"/>
+      <xs:enumeration value="BasicHTML"/>
+      <xs:enumeration value="BasicEscapedHTML"/>
+      <xs:enumeration value="TextHTML"/>
+      <xs:enumeration value="TextEscapedHTML"/>
+      <xs:enumeration value="EscapedHTML"/>
+      <xs:enumeration value="EscapedJSONString"/>
+      <xs:enumeration value="EscapedJSString"/>
     </xs:restriction>
   </xs:simpleType>
 

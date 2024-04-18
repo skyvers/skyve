@@ -11,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "queryAggregate")
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "queryAggregateAccess")
 public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAccessMetaData {
 	private static final long serialVersionUID = 7011821460848457822L;
 
@@ -29,10 +29,10 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 	@Override
 	public void validate(String metaDataName, String roleName, Module module) {
 		if (queryName == null) {
-			throw new MetaDataException(metaDataName + " : [queryName] is required for all queryAggregate user accesses defined in module role " + roleName);
+			throw new MetaDataException(metaDataName + " : [query] is required for all queryAggregate user accesses defined in module role " + roleName);
 		}
 		if (module.getMetaDataQuery(queryName) == null) {
-			throw new MetaDataException(metaDataName + " : [queryName] " + queryName + " does not exist for user access " + toUserAccess(module.getName()).toString() + " in module role " + roleName);
+			throw new MetaDataException(metaDataName + " : [query] " + queryName + " does not exist for user access " + toUserAccess(module.getName()).toString() + " in module role " + roleName);
 		}
 	}
 

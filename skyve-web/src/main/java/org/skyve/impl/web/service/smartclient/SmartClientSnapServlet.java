@@ -143,9 +143,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot);
-						sb.append("{bizId:'");
+						sb.append("{\"bizId\":\"");
 						sb.append(snapId);
-						sb.append("'}");
+						sb.append("\"}");
 					}
 					else if ("D".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
@@ -212,9 +212,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 			String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
 			String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
 
-			sb.append('{').append(Bean.DOCUMENT_ID).append(":'").append(escapedCode);
-			sb.append("',").append(AppConstants.NAME_ATTRIBUTE_NAME).append(":'").append(escapedDescription);
-			sb.append("',").append(AppConstants.SNAPSHOT_ATTRIBUTE_NAME).append(':').append(snapshot).append("},");
+			sb.append("{\"").append(Bean.DOCUMENT_ID).append("\":\"").append(escapedCode);
+			sb.append("\",\"").append(AppConstants.NAME_ATTRIBUTE_NAME).append("\":\"").append(escapedDescription);
+			sb.append("\",\"").append(AppConstants.SNAPSHOT_ATTRIBUTE_NAME).append("\":").append(snapshot).append("},");
 		}
 		if (! results.isEmpty()) {
 			sb.setLength(sb.length() - 1); // remove last comma
