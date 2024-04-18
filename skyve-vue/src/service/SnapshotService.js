@@ -43,7 +43,7 @@ function _filterSnapshots(input) {
 
 export const SnapshotService = {
 
-    async getSnapshots({ documentQuery, filterInvalid = true}) {
+    async getSnapshots({ documentQuery, filterInvalid = true }) {
 
         const fd = new FormData();
         fd.append(params.action, actions.list);
@@ -58,7 +58,12 @@ export const SnapshotService = {
         });
 
         const response = await fetch(req);
-        const payload = await response.json();
+        let payload;
+        try {
+            payload = await response.json();
+        } catch (err) {
+            throw new Error('Error retrieving snapshots', { cause: err });
+        }
 
         // Payload should be an array of objects
         // each with bizId, name, and snapshot props
@@ -82,8 +87,6 @@ export const SnapshotService = {
         fd.append(params.name, name);
         fd.append(params.document, documentQuery);
         fd.append(params.snapshot, snapString);
-        // CSRF not needed by the looks...
-        // fd.append(params.csrf, '???');
 
         const req = new Request(SNAP_PATH, {
             method: 'POST',
@@ -94,16 +97,13 @@ export const SnapshotService = {
         });
 
         const response = await fetch(req);
-        const json = await response.json();
-
         // Result should looks like { "bizId": "xyz-abc" }
-        console.debug('Created snapshot', json);
+        return await response.json();
     },
-    async deleteSnapshot({ id, documentQuery }) {
+    async deleteSnapshot({ id }) {
 
         const fd = new FormData();
         fd.append(params.action, actions.delete);
-        fd.append(params.document, documentQuery);
         fd.append(params.id, id);
 
         const req = new Request(SNAP_PATH, {
@@ -124,7 +124,7 @@ export const SnapshotService = {
             console.warn(`Could not delete ${id}`);
             return false;
         }
-    }, 
+    },
     async updateSnapshot({ snapshot, id }) {
 
         const snapString = JSON.stringify(snapshot);

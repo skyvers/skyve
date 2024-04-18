@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import ListGrid from './ListGrid.vue'
 import TimeCalendar from './TimeCalendar.vue'
 import DateOnlyCalendar from './DateOnlyCalendar.vue'
+import SnapshotPicker from './SnapshotPicker.vue'
 
 import PrimeVue from 'primevue/config'
 
@@ -15,6 +16,8 @@ import MultiSelect from 'primevue/multiselect';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import Calendar from 'primevue/calendar';
 import Dropdown from 'primevue/dropdown';
+import TieredMenu from 'primevue/tieredmenu';
+import Dialog from 'primevue/dialog';
 
 // SKYVE name space definition
 window.SKYVE ??= {};
@@ -37,8 +40,11 @@ window.SKYVE.listgrid = function (config) {
     grid.component('TriStateCheckbox', TriStateCheckbox);
     grid.component('Calendar', Calendar);
     grid.component('Dropdown', Dropdown);
+    grid.component('TieredMenu', TieredMenu);
     grid.component('TimeCalendar', TimeCalendar);
     grid.component('DateOnlyCalendar', DateOnlyCalendar);
+    grid.component('SnapshotPicker', SnapshotPicker);
+    grid.component('Dialog', Dialog);
 
     grid.mount(config.targetSelector);
 }  
