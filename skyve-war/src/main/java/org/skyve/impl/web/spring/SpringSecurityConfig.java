@@ -91,8 +91,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/chart").authenticated()
 				// Secure Image Servlet for HTML reporting through Jasper
 				.requestMatchers("/image").authenticated()
-				// Secure customer resource servlet
-				.requestMatchers("/resource", "/content").authenticated()
+				// Do not secure the customer resource servlet as it checks for a user
+				.requestMatchers("/resource", "/content").permitAll()
 				// Secure meta data servlet
 				.requestMatchers("/meta").authenticated()
 				// Secure SC edit view servlet

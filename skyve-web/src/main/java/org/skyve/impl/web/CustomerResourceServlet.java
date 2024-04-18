@@ -226,6 +226,9 @@ public class CustomerResourceServlet extends HttpServlet {
 						cm = EXT.newContentManager();
 						content = cm.getAttachment(resourceFileName);
 					}
+					else {
+						Util.LOGGER.severe("No skyve user or customer or the contentId is not valid");
+					}
 				} 
 				else if (DownloadAreaType.resources.toString().equals(resourceArea)) {
 					Repository repository = CORE.getRepository();
@@ -236,7 +239,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					else {
 						int underscoreIndex = resourceFileName.lastIndexOf('_');
 						if (underscoreIndex > 0) {
-							int dotIndex = resourceFileName.lastIndexOf('.');
+			  				int dotIndex = resourceFileName.lastIndexOf('.');
 							if (dotIndex > underscoreIndex) {
 								String baseFileName = resourceFileName.substring(0, underscoreIndex) + 
 														resourceFileName.substring(dotIndex);
