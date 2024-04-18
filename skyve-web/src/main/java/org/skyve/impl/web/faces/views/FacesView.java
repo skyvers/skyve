@@ -140,7 +140,7 @@ public class FacesView extends HarnessView {
 	
 	/**
 	 * Establishes a token if not already present and returns the same token until the token is set (from a hidden input in an AJAX request)
-	 * @return	Seure Random integer
+	 * @return	Secure Random integer
 	 */
 	public String getCsrfToken() {
 		if (csrfToken == null) {

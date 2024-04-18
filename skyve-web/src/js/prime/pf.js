@@ -32,6 +32,7 @@ SKYVE.PF = function() {
 		},
 		
 		afterContentUpload: function(binding, contentId, modoc, fileName) {
+			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
 			top.$('[id$="_' + binding + '"]').val(contentId);
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
 			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName).attr('onclick', 'return true');

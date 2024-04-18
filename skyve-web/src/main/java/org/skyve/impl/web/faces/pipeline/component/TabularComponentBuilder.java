@@ -1137,7 +1137,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
 	 *				<p:commandButton id="s03" icon="fa-solid fa-globe" title="Map" type="button" />
-	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="false" showCloseIcon="true" modal="true" style="width:50%;height:300px" onShow="SKYVE.PF.gmap({elementId:'poo',geometryBinding:'boundry',disabled:false})">
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="false" showCloseIcon="true" modal="true" style="width:50%;height:310px" onShow="SKYVE.PF.gmap({elementId:'poo',geometryBinding:'boundry',disabled:false})">
 	 *					<h:panelGroup layout="block" style="height:280px">
 	 *						<h:panelGroup id="poo" layout="block" style="margin:0;padding:0;height:100%;width:100%">
 	 *							Loading Map
@@ -1170,7 +1170,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-		overlay.setStyle("width:50%;height:300px");
+		overlay.setStyle("width:50%;height:310px");
 
 		MapDisplay display = new MapDisplay();
 		display.setPixelHeight(Integer.valueOf(280));
@@ -2479,7 +2479,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * 				...
 	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
 	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
-	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
 	 *					<iframe id="s01_iframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 *				<p:commandButton id="s05" icon="fa-solid fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
@@ -2539,7 +2539,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-			overlay.setStyle("width:50%;height:300px");
+			overlay.setStyle("width:50%;height:310px");
 			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
@@ -3803,7 +3803,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	/**
 	 * Add the buttons and overlay
 	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
-	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
 	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 */
@@ -3854,7 +3854,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
-		overlay.setStyle("width:50%;height:300px");
+		overlay.setStyle("width:50%;height:310px");
 		// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
 		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
 

@@ -42,7 +42,7 @@
 								allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
 								invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
 								update="messages problems" 
-								oncomplete="top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
+								oncomplete="window.parent.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
 			    <p/>
 			    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">

@@ -11,6 +11,7 @@
 		</f:metadata>
 		<h:head>
 			<title>#{_skyveContent.i18n['page.contentUpload.title']}</title>
+			<base href="#{_skyveContent.baseHref}" />
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -32,7 +33,13 @@
 			</style>
 		</h:head>
 		<h:body>
-			<h:form enctype="multipart/form-data" prependId="false">
+			<p:staticMessage severity="error"
+								summary="You cannot access this function"
+								detail="Click &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;window.top.location=''&quot;&gt;here&lt;/a&gt;"
+								rendered="#{not _skyveContent.canAccess}"
+								escape="false"
+								style="width:100%; height:50px" />
+			<h:form enctype="multipart/form-data" prependId="false" rendered="#{_skyveUpload.canAccess}">
 				<h:inputHidden id="_c" value="#{_skyveContent.context}" />
 				<h:inputHidden id="_b" value="#{_skyveContent.binding}" />
 				<h:inputHidden id="_n" value="#{_skyveContent.contentBinding}" />
@@ -44,7 +51,7 @@
 								invalidSizeMessage="#{_skyveContent.i18n['page.contentUpload.sizeLimit']}"
 								allowTypes="#{'/'.concat(_skyveContent.whitelistRegex).concat('/i')}"
 								invalidFileMessage="#{_skyveContent.i18n['page.contentUpload.invalidFile']}"
-								update="messages" />								
+								update="messages" />
 			    <p:growl id="messages" showDetail="true" escape="false" />
 			</h:form>
 		</h:body>

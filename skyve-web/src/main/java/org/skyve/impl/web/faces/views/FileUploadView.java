@@ -90,6 +90,11 @@ public class FileUploadView extends AbstractUploadView {
 	 * @param event
 	 */
 	public void handleFileUpload(FileUploadEvent event) throws Exception {
+		// If there is no access, don't process the upload and return to allow the view to render the no access message
+		if (! isCanAccess()) {
+			return;
+		}
+
 		FacesContext fc = FacesContext.getCurrentInstance();
 
 		UploadedFile file = event.getFile();
