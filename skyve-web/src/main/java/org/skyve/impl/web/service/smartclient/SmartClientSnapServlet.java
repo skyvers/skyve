@@ -1,15 +1,21 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static java.lang.Boolean.FALSE;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -42,7 +48,17 @@ import jakarta.servlet.http.HttpSession;
 
 public class SmartClientSnapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
+	
+	/**
+	 * Predicates to reject invalid snapshot string values.
+	 * 
+	 * TODO We should probably reject if the value isn't valid JSON...
+	 */
+	private static final List<Predicate<String>> invalidSnapshotPredicates = List.of(
+			StringUtils::isEmpty,
+			"null"::equalsIgnoreCase,
+			"undefined"::equalsIgnoreCase);
+	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
@@ -227,6 +243,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 									String snapName,
 									String snapshot)
 	throws Exception {
+
+		validateSnapshot(snapshot);
+
 		Persistence p = CORE.getPersistence();
 		User user = p.getUser();
 		Customer customer = user.getCustomer();
@@ -246,6 +265,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 
 	private static void update(String snapId, String snapshot)
 	throws Exception {
+
+		validateSnapshot(snapshot);
+
 		Persistence p = CORE.getPersistence();
 		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME,
 													AppConstants.SNAPSHOT_DOCUMENT_NAME,
@@ -257,6 +279,23 @@ public class SmartClientSnapServlet extends HttpServlet {
 		}
 		BindUtil.set(snap, AppConstants.SNAPSHOT_ATTRIBUTE_NAME, snapshot);
 		p.save(snap);
+	}
+
+	/**
+	 * Reject obviously invalid 'snapshot' values.
+	 * 
+	 * @param snapshot
+	 */
+	private static void validateSnapshot(String snapshot) {
+
+		Optional<Boolean> invalid = invalidSnapshotPredicates.stream()
+				.map(p -> p.test(snapshot))
+				.filter(b -> b)
+				.findAny();
+
+		if (invalid.orElse(FALSE)) {
+			throw new DomainException("Invalid snapshot value provided");
+		}
 	}
 
 	private static void delete(String snapId)
