@@ -1,5 +1,6 @@
 const SNAP_PATH = 'smartsnap';
 const FORM_URL_ENCODED = 'application/x-www-form-urlencoded;charset=UTF-8';
+const DEFAULT_TYPE = 'pf1';
 
 const params = {
     action: "a",
@@ -7,7 +8,8 @@ const params = {
     name: "n",
     csrf: "_csrf",
     snapshot: "s",
-    id: "i"
+    id: "i",
+    type: "type"
 };
 
 const actions = {
@@ -43,11 +45,12 @@ function _filterSnapshots(input) {
 
 export const SnapshotService = {
 
-    async getSnapshots({ documentQuery, filterInvalid = true }) {
+    async getSnapshots({ documentQuery, filterInvalid = true, type = DEFAULT_TYPE }) {
 
         const fd = new FormData();
         fd.append(params.action, actions.list);
         fd.append(params.document, documentQuery);
+        fd.append(params.type, type);
 
         const req = new Request(SNAP_PATH, {
             method: 'POST',
@@ -78,7 +81,7 @@ export const SnapshotService = {
         console.debug(`getSnapshots: Got ${payload.length} results; ${usableResults.length} usable`);
         return usableResults;
     },
-    async createSnapshot({ documentQuery, name, snapshot }) {
+    async createSnapshot({ documentQuery, name, snapshot, type = DEFAULT_TYPE }) {
 
         const snapString = JSON.stringify(snapshot);
 
@@ -87,6 +90,7 @@ export const SnapshotService = {
         fd.append(params.name, name);
         fd.append(params.document, documentQuery);
         fd.append(params.snapshot, snapString);
+        fd.append(params.type, type);
 
         const req = new Request(SNAP_PATH, {
             method: 'POST',
