@@ -2,17 +2,25 @@ package modules.admin.domain;
 
 import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.util.Util;
 
 /**
  * Snapshot
  * 
+ * @depend - - - Type
  * @navhas n copyToUser 0..1 UserProxy
  * @stereotype "persistent"
  */
@@ -45,6 +53,9 @@ public class Snapshot extends AbstractPersistentBean {
 	public static final String snapshotPropertyName = "snapshot";
 
 	/** @hidden */
+	public static final String typePropertyName = "type";
+
+	/** @hidden */
 	public static final String ordinalPropertyName = "ordinal";
 
 	/** @hidden */
@@ -52,6 +63,77 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String copyToUserSnapshotNamePropertyName = "copyToUserSnapshotName";
+
+	/**
+	 * Snapshot Type
+	 * <br/>
+	 * Distinguish snapshot types for different clients
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum Type implements Enumeration {
+		pf1("pf1", "Prime Faces 1");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(Type::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private Type(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static Type fromCode(String code) {
+			Type result = null;
+
+			for (Type value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static Type fromLocalisedDescription(String description) {
+			Type result = null;
+
+			for (Type value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
 
 	/**
 	 * Module
@@ -72,6 +154,13 @@ public class Snapshot extends AbstractPersistentBean {
 	 * Snapshot Code
 	 **/
 	private String snapshot;
+
+	/**
+	 * Snapshot Type
+	 * <br/>
+	 * Distinguish snapshot types for different clients
+	 **/
+	private Type type;
 
 	/**
 	 * Ordinal
@@ -199,6 +288,24 @@ public class Snapshot extends AbstractPersistentBean {
 	public void setSnapshot(String snapshot) {
 		preset(snapshotPropertyName, snapshot);
 		this.snapshot = snapshot;
+	}
+
+	/**
+	 * {@link #type} accessor.
+	 * @return	The value.
+	 **/
+	public Type getType() {
+		return type;
+	}
+
+	/**
+	 * {@link #type} mutator.
+	 * @param type	The new value.
+	 **/
+	@XmlElement
+	public void setType(Type type) {
+		preset(typePropertyName, type);
+		this.type = type;
 	}
 
 	/**

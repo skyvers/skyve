@@ -110,6 +110,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 					// Don't sanitise this one as it is JSON - TODO should use a JSON sanitiser on it.
 					String snapshot = Util.processStringValue(request.getParameter("s"));
 					String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
+					String snapType = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("type")));
 
 					String moduleName = null;
 					String documentOrQueryOrModelName = null;
@@ -150,7 +151,8 @@ public class SmartClientSnapServlet extends HttpServlet {
 					HttpSession session = request.getSession();
 
 					if ("L".equals(action)) {
-						list(moduleName, documentOrQueryOrModelName, sb);
+						String result = list(moduleName, documentOrQueryOrModelName, snapType);
+						sb.append(result);
 					}
 					else if ("U".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
@@ -158,7 +160,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 					}
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
-						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot);
+						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot, snapType);
 						sb.append("{\"bizId\":\"");
 						sb.append(snapId);
 						sb.append("\"}");
@@ -205,20 +207,29 @@ public class SmartClientSnapServlet extends HttpServlet {
 		}
 	}
 
-	private static void list(String moduleName,
+	private static String list(String moduleName,
 								String queryName,
-								StringBuilder sb)
+								String snapType)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME);
-		q.addBoundProjection(Bean.DOCUMENT_ID);
-		q.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME);
-		q.addBoundProjection(AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
-		DocumentFilter f = q.getFilter();
-		f.addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
-		f.addEquals(AppConstants.QUERY_NAME_ATTRIBUTE_NAME, queryName);
-		q.addBoundOrdering(AppConstants.ORDINAL_ATTRIBUTE_NAME);
-		q.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
+		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME)
+				.addBoundProjection(Bean.DOCUMENT_ID)
+				.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME)
+				.addBoundProjection(AppConstants.SNAPSHOT_ATTRIBUTE_NAME)
+				.addBoundOrdering(AppConstants.ORDINAL_ATTRIBUTE_NAME)
+				.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
+
+		DocumentFilter f = q.getFilter()
+				.addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName)
+				.addEquals(AppConstants.QUERY_NAME_ATTRIBUTE_NAME, queryName);
+
+		if (snapType == null) {
+			f.addNull("type");
+		} else {
+			f.addEquals("type", snapType);
+		}
+
+		StringBuilder sb = new StringBuilder();
 
 		// Snapshots array
 		sb.append('[');
@@ -228,20 +239,33 @@ public class SmartClientSnapServlet extends HttpServlet {
 			String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
 			String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
 
-			sb.append("{\"").append(Bean.DOCUMENT_ID).append("\":\"").append(escapedCode);
-			sb.append("\",\"").append(AppConstants.NAME_ATTRIBUTE_NAME).append("\":\"").append(escapedDescription);
-			sb.append("\",\"").append(AppConstants.SNAPSHOT_ATTRIBUTE_NAME).append("\":").append(snapshot).append("},");
+			sb.append("{\"")
+					.append(Bean.DOCUMENT_ID)
+					.append("\":\"")
+					.append(escapedCode);
+			sb.append("\",\"")
+					.append(AppConstants.NAME_ATTRIBUTE_NAME)
+					.append("\":\"")
+					.append(escapedDescription);
+			sb.append("\",\"")
+					.append(AppConstants.SNAPSHOT_ATTRIBUTE_NAME)
+					.append("\":")
+					.append(snapshot)
+					.append("},");
 		}
-		if (! results.isEmpty()) {
+		if (!results.isEmpty()) {
 			sb.setLength(sb.length() - 1); // remove last comma
 		}
 		sb.append(']');
+
+		return sb.toString();
 	}
 
 	private static String create(String snapModuleName,
 									String snapQueryName,
 									String snapName,
-									String snapshot)
+									String snapshot,
+									String snapType)
 	throws Exception {
 
 		validateSnapshot(snapshot);
@@ -257,6 +281,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 		BindUtil.set(snap, AppConstants.QUERY_NAME_ATTRIBUTE_NAME, snapQueryName);
 		BindUtil.set(snap, AppConstants.NAME_ATTRIBUTE_NAME, snapName);
 		BindUtil.set(snap, AppConstants.SNAPSHOT_ATTRIBUTE_NAME, snapshot);
+		BindUtil.set(snap, "type", snapType);
 		// NB SnapshotBizlet puts the new snapshot at the bottom of the list with max(ordinal) + 1
 		snap = p.save(document, snap);
 

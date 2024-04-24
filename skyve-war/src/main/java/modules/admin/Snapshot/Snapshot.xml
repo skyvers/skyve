@@ -27,6 +27,13 @@
 			<displayName>admin.snapshot.snapshot.displayName</displayName>
 			<index>none</index>
 		</memo>
+		<enum name="type" required="false">
+			<documentation>Distinguish snapshot types for different clients</documentation>
+			<displayName>admin.snapshot.type.displayName</displayName>
+			<values>
+				<value code="pf1" description="Prime Faces 1" name="pf1" />
+			</values>
+		</enum>
 		<integer name="ordinal">
 			<displayName>admin.snapshot.ordinal.displayName</displayName>
 		</integer>

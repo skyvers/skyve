@@ -581,6 +581,11 @@
 		<property name="queryName" length="100" />
 		<property name="name" length="256" />
 		<property name="snapshot" type="text" />
+		<property name="type" length="3">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Snapshot$Type</param>
+			</type>
+		</property>
 		<property name="ordinal" />
 		<filter name="adminSnapshotNoneFilter" condition="1=0"/>
 		<filter name="adminSnapshotCustomerFilter" condition="bizCustomer=:customerParam"/>
