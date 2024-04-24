@@ -19,33 +19,9 @@ const actions = {
     create: "N"
 };
 
-/**
- * Predicate function to filter out invalid/unusable 
- * snapshots.
- * 
- * @param {*} input Snapshot entry
- * @returns true if we can handle this entry
- */
-function _filterSnapshots(input) {
-
-    const fieldState = input?.snapshot?.fieldState;
-    if (!fieldState) {
-        return false;
-    }
-
-    try {
-        JSON.parse(fieldState);
-    } catch (err) {
-        return false;
-    }
-
-    return true;
-}
-
-
 export const SnapshotService = {
 
-    async getSnapshots({ documentQuery, filterInvalid = true, type = DEFAULT_TYPE }) {
+    async getSnapshots({ documentQuery, type = DEFAULT_TYPE }) {
 
         const fd = new FormData();
         fd.append(params.action, actions.list);
@@ -68,18 +44,8 @@ export const SnapshotService = {
             throw new Error('Error retrieving snapshots', { cause: err });
         }
 
-        // Payload should be an array of objects
-        // each with bizId, name, and snapshot props
-        // We may want to filter out results we
-        // can't use
-        let snapshotFilter = () => true;
-        if (filterInvalid) {
-            snapshotFilter = _filterSnapshots;
-        }
-
-        const usableResults = payload.filter(snapshotFilter);
-        console.debug(`getSnapshots: Got ${payload.length} results; ${usableResults.length} usable`);
-        return usableResults;
+        console.debug(`getSnapshots: Got ${payload.length} results`);
+        return payload;
     },
     async createSnapshot({ documentQuery, name, snapshot, type = DEFAULT_TYPE }) {
 

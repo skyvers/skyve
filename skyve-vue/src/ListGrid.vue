@@ -378,6 +378,18 @@ export default {
 
             return criteria;
         },
+        snapshotState() {
+
+            const visibleColNames = this.visibleColumns.map(col => col.field);
+
+            return {
+                "filters": this.filters,
+                "visibleColumns": visibleColNames,
+                "summarySelection": this.summarySelection,
+                "sortOrder": this.sortOrder,
+                "sortColumn": this.sortColumn
+            };
+        },
     },
     methods: {
         async load() {
@@ -392,6 +404,10 @@ export default {
             });
             const response = await fetch(listRequest);
             let payload = await response.json();
+            if (payload?.response?.status == -1) {
+                console.error('Something went wrong retrieving list contents', payload);
+                throw new Error('Error loading list contents');
+            }
 
             this.totalRecords = payload.response.totalRows;
 
@@ -416,11 +432,11 @@ export default {
         stateRestore(event) {
             // Triggered when the primevue datatable restores its own state
             // copy out the props 
-            this.firstRow = event.first;
-            this.pageSize = event.rows;
-            this.sortColumn = event.sortField;
-            this.sortOrder = event.sortOrder;
-            this.filters = event.filters;
+            this.firstRow = event.first ?? 0;
+            this.pageSize = event.rows ?? 25;
+            this.sortColumn = event.sortField ?? '';
+            this.sortOrder = event.sortOrder ?? 0;
+            this.filters = event.filters ?? {};
 
             // Using the DataTable's columnOrder property
             // to work backwards to the selectedColumns doesn't
@@ -462,6 +478,37 @@ export default {
             if (!arraysEqual(newWidths, this.columnWidths)) {
                 this.columnWidths = newWidths;
             }
+        },
+        snapshotChanged(newSnapshot) {
+            console.log('snapshotChanged', newSnapshot);
+
+            const snapstate = newSnapshot?.snapshot;
+            if (snapstate) {
+
+                // Filters
+                const incomingFilters = snapstate.filters ?? {};
+                this.filters = incomingFilters;
+                this.initFilters();
+
+                // Visible columns
+                const visibleCols = snapstate.visibleColumns ?? [];
+                this.selectedColumns = [];
+                for (let col of this.columns) {
+                    if (visibleCols.includes(col.field)) {
+                        this.selectedColumns.push(col);
+                    }
+                }
+
+                // Summary/aggregate row
+                this.summarySelection = snapstate.summarySelection ?? '';
+
+                // Sort order and column
+                if (!!snapstate.sortColumn) {
+                    this.sortColumn = snapstate.sortColumn;
+                    this.sortOrder = snapstate.sortOrder;
+                }
+
+            }
         }
     },
     beforeMount() {
@@ -480,6 +527,11 @@ export default {
 }
 </script>
 <template>
+    <SnapshotPicker
+        documentQuery="kitchensink_ListAttributes"
+        :snapshotState="snapshotState"
+        @snapshotChanged="snapshotChanged"
+    />
     <DataTable
         dataKey="bizId"
         filterDisplay="menu"
@@ -591,5 +643,8 @@ export default {
             />
         </template>
     </DataTable>
+    <ul>
+        <li v-for="x in visibleColumns">{{ x }}</li>
+    </ul>
 </template>
 <style scoped></style>

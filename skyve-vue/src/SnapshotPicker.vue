@@ -92,10 +92,7 @@ export default {
         },
         async reload() {
 
-            const queryObj = {
-                documentQuery: this.documentQuery,
-                filterInvalid: true
-            };
+            const queryObj = { documentQuery: this.documentQuery };
             this.snapshots = await SnapshotService.getSnapshots(queryObj);
         },
         chooseSnapshot(snapshot) {
@@ -137,11 +134,15 @@ export default {
                     }
                 });
         },
-        updateSnapshot(currSnap) {
-            return SnapshotService.updateSnapshot({
+        async updateSnapshot(currSnap) {
+            await SnapshotService.updateSnapshot({
                 id: currSnap.bizId,
                 snapshot: this.snapshotState
-            });
+            })
+
+            // The snapshot we just updated will
+            // need to be refreshed
+            await this.reload();
         },
         clearSnapshot() {
             this.selectedSnapshot = null;
