@@ -517,7 +517,7 @@ public class SmartClientListServlet extends HttpServlet {
 					Map<String, Object> criterium = (Map<String, Object>) JSON.unmarshall(user, jsonCriteria);
 					
 					// Check for filter by flag permissions
-					if (((String) criterium.get("fieldName")).equals(PersistentBean.FLAG_COMMENT_NAME)) {
+					if (PersistentBean.FLAG_COMMENT_NAME.equals(criterium.get("fieldName"))) {
 						if (! user.canFlag()) {					
 							throw new SecurityException("filter by flag", user.getName());
 						}
