@@ -83,7 +83,8 @@ public class StartupExtensionTest {
 	public void testSaveConfigurationUpdatesApiProperties() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getApiGoogleMapsKey()).thenReturn("12345");
-		Mockito.when(bean.getApiGoogleRecaptchaKey()).thenReturn("12345");
+		Mockito.when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("12345");
+		Mockito.when(bean.getApiGoogleRecaptchaSecretKey()).thenReturn("12345");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
@@ -95,7 +96,8 @@ public class StartupExtensionTest {
 		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_MAPS_V3_KEY));
-		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SITE_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SECRET_KEY));
 	}
 
 	@Test

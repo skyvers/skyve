@@ -1,10 +1,17 @@
 package org.skyve.impl.web;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -34,6 +41,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -287,13 +295,13 @@ public class WebUtil {
 			
 			// set reset password token for all users with the same email address across all customers
 			List<PersistentBean> users = q.beanResults();
-			if(! users.isEmpty()) {
+			if (! users.isEmpty()) {
 				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
-				for(PersistentBean user: users) {
+				for (PersistentBean user: users) {
 					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME, passwordResetToken);
 					p.upsertBeanTuple(user);
-					if(firstUser==null) {
+					if (firstUser == null) {
 						firstUser = user;
 					}
 				}
@@ -501,5 +509,55 @@ public class WebUtil {
 		finally {
 			persistence.commit(true);
 		}
+	}
+
+	/**
+	 * Validate the recaptcha response with google.
+	 * @param response	The response from the recaptcha control.
+	 * @return true if valid, otherwise false.
+	 */
+	public static boolean validateRecaptcha(String response) {
+		boolean valid = true;
+
+		if (UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
+			valid = false;
+			
+			try {
+				URL url = new URL("https://www.google.com/recaptcha/api/siteverify");
+				URLConnection connection = url.openConnection();
+				connection.setDoInput(true);
+				connection.setDoOutput(true);
+				connection.setUseCaches(false);
+				connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+	
+				// Create the post body with the required parameters
+				StringBuilder postBody = new StringBuilder();
+				postBody.append("secret=").append(URLEncoder.encode(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, Util.UTF8));
+				postBody.append("&response=").append((response == null) ? "" : URLEncoder.encode(response, Util.UTF8));
+	
+				try (OutputStream out = connection.getOutputStream()) {
+					out.write(postBody.toString().getBytes());
+					out.flush();
+				}
+	
+				try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+					StringBuilder result = new StringBuilder();
+					String line;
+					while ((line = rd.readLine()) != null) {
+						result.append(line);
+					}
+	
+					@SuppressWarnings("unchecked")
+					Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, result.toString());
+					valid = Boolean.TRUE.equals(json.get("success"));
+				}
+			}
+			catch (Exception e) {
+				// NB valid is already false here
+				e.printStackTrace();
+			}
+		}
+		
+		return valid;
 	}
 }

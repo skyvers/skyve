@@ -127,7 +127,12 @@
 	        <column responsiveWidth="2"/>
 	        <row>
 	            <item>
-	                <default binding="apiGoogleRecaptchaKey"/>
+	                <default binding="apiGoogleRecaptchaSiteKey"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <default binding="apiGoogleRecaptchaSecretKey"/>
 	            </item>
 	        </row>
 	        <row>

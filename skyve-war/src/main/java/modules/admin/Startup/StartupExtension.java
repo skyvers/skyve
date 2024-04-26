@@ -36,7 +36,8 @@ public class StartupExtension extends Startup {
 
 	static final String API_STANZA_KEY = "api";
 	static final String API_GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
-	static final String API_GOOGLE_RECAPTCHA_KEY = "googleRecaptchaSiteKey";
+	static final String API_GOOGLE_RECAPTCHA_SITE_KEY = "googleRecaptchaSiteKey";
+	static final String API_GOOGLE_RECAPTCHA_SECRET_KEY = "googleRecaptchaSecretKey";
 
 	static final String BACKUP_STANZA_KEY = "backup";
 	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
@@ -68,7 +69,8 @@ public class StartupExtension extends Startup {
 	 */
 	public void loadProperties() {
 		setApiGoogleMapsKey(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
-		setApiGoogleRecaptchaKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
+		setApiGoogleRecaptchaSiteKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
+		setApiGoogleRecaptchaSecretKey(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY);
 
 		setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);
 		setEnvironmentSupportEmail(UtilImpl.SUPPORT_EMAIL_ADDRESS);
@@ -222,10 +224,18 @@ public class StartupExtension extends Startup {
 			UtilImpl.GOOGLE_MAPS_V3_API_KEY = getApiGoogleMapsKey();
 		}
 
-		if (getApiGoogleRecaptchaKey() != null
-				&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, getApiGoogleRecaptchaKey())) {
-			api.put(API_GOOGLE_RECAPTCHA_KEY, getApiGoogleRecaptchaKey());
-			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getApiGoogleRecaptchaKey();
+		String siteKey = getApiGoogleRecaptchaSiteKey();
+		if (siteKey != null
+				&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, siteKey)) {
+			api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, siteKey);
+			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = siteKey;
+		}
+
+		String secretKey = getApiGoogleRecaptchaSecretKey();
+		if (secretKey != null
+				&& ! StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, secretKey)) {
+			api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, secretKey);
+			UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = secretKey;
 		}
 
 		return api;
