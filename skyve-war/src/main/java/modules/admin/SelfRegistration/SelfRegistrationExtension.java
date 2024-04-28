@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.GenericValidator;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
@@ -47,6 +48,15 @@ public class SelfRegistrationExtension extends SelfRegistration {
 			return !validateEmailAddress(getUser().getContact().getEmail1());
 		}
 		return false;
+	}
+
+	/**
+	 * This is called from a Skyve EL expression within the recaptcha blurb in the edit view.
+	 * @return	The site key.
+	 */
+	@SuppressWarnings("static-method")
+	public String getSiteKey() {
+		return UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
 	}
 
 	/**
