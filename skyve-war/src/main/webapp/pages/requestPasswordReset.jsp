@@ -23,18 +23,12 @@
 	// This is a postback, process it and move on
 	String customerValue = request.getParameter("customer");
 	String emailValue = request.getParameter("email");
-	String oldCaptcha = null;
-	HttpSession session = request.getSession(false);
-	if (session != null) {
-		oldCaptcha = (String) session.getAttribute("g-recaptcha-response");
-	}
-	String newCaptcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
+	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
 	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null);
 	
-	boolean postback = (emailValue != null) && (newCaptcha != null) && (! newCaptcha.equals(oldCaptcha));
+	boolean postback = (emailValue != null) && (captcha != null);
 	if (postback) {
-		if (WebUtil.validateRecaptcha(newCaptcha)) {
-			request.getSession().setAttribute("g-recaptcha-response", newCaptcha);
+		if (WebUtil.validateRecaptcha(captcha)) {
 			try {
 				WebUtil.requestPasswordReset(customerValue, emailValue);
 			}
