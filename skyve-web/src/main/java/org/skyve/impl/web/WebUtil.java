@@ -63,7 +63,8 @@ public class WebUtil {
 	throws Exception {
 		UserImpl user = null;
 		if (useSession) {
-			user = (UserImpl) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+			HttpSession session = request.getSession(false);
+			user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		}
 		
 		// If the user in the session is not the same as the security's user principal

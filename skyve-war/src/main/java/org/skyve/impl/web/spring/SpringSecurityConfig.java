@@ -93,6 +93,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/image").authenticated()
 				// Do not secure the customer resource servlet as it checks for a user
 				.requestMatchers("/resource", "/content").permitAll()
+				// Do not secure the Download Servlet as it checks for a user
+				.requestMatchers("/download").permitAll()
 				// Secure meta data servlet
 				.requestMatchers("/meta").authenticated()
 				// Secure SC edit view servlet
@@ -107,8 +109,6 @@ public class SpringSecurityConfig {
 				.requestMatchers("/map").authenticated()
 				// Secure the Bizport Export Servlet
 				.requestMatchers("/bizexport.*").authenticated()
-				// Secure the Download Servlet
-				.requestMatchers("/download").authenticated()
 				// Secure the Push endpoint
 				.requestMatchers("/omnifaces.push/**").authenticated()
 				// Permit all GET requests by default

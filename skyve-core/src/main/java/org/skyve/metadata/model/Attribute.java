@@ -114,7 +114,7 @@ public interface Attribute extends NamedMetaData {
 		 * IP address, bank account, location data, utility records, work hours/performance, biometric
 		 * data. Personal data can include information like someone's name (a direct identifier) or
 		 * physical characteristics (an indirect identifier). Ultimately, personal data is any
-		 * information that can identify an individual - whether it is used independantly or in tandem
+		 * information that can identify an individual - whether it is used independently or in tandem
 		 * with other data.
 		 */
 		personal,
