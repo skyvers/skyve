@@ -49,6 +49,7 @@ import jakarta.annotation.Nullable;
 
 public abstract class FileSystemRepository extends MutableCachedRepository {
 	protected String absolutePath;
+	// used to stop resources paths breaking out of the web root (eg ../../../../)
 	private String canonicalBasePath;
 	protected boolean loadClasses = true;
 	// class maps

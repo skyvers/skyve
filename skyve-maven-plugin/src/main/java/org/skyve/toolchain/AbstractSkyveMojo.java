@@ -1,14 +1,5 @@
 package org.skyve.toolchain;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.components.interactivity.Prompter;
-import org.codehaus.plexus.components.interactivity.PrompterException;
-import org.skyve.util.Util;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -21,6 +12,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.components.interactivity.Prompter;
+import org.codehaus.plexus.components.interactivity.PrompterException;
+import org.skyve.util.Util;
 
 public abstract class AbstractSkyveMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true)
@@ -36,12 +36,12 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
 	protected void configureClasspath(String srcDir) throws DependencyResolutionRequiredException, MalformedURLException {
         final Collection<String> elements = project.getTestClasspathElements();
         final List<URL> listUrl = new ArrayList<>(elements.size() + 1);
-        if (srcDir != null) {
-        	listUrl.add(new File(srcDir).toURI().toURL());
-        }
         for (String artifact : elements) {
             final URL url = new File(artifact).toURI().toURL();
             listUrl.add(url);
+        }
+        if (srcDir != null) {
+        	listUrl.add(new File(srcDir).toURI().toURL());
         }
 
         @SuppressWarnings("resource")
