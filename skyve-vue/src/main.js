@@ -23,13 +23,13 @@ import Dialog from 'primevue/dialog';
 window.SKYVE ??= {};
 
 // JS create method
-window.SKYVE.listgrid = function (config) {
+window.SKYVE.listgrid = function ({module, title, query, columns, targetSelector}) {
 
     const grid = createApp(ListGrid, {
-        'module': config.module,
-        'title': config.title,
-        'query': config.query,
-        'columns': config.columns
+        'module': module,
+        'title': title,
+        'query': query,
+        'columns': columns
     });
     grid.use(PrimeVue, { ripple: true });
     grid.component('Button', Button);
@@ -46,5 +46,5 @@ window.SKYVE.listgrid = function (config) {
     grid.component('SnapshotPicker', SnapshotPicker);
     grid.component('Dialog', Dialog);
 
-    grid.mount(config.targetSelector);
+    grid.mount(targetSelector);
 }  

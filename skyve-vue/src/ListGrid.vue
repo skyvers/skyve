@@ -233,7 +233,7 @@ export default {
 
             summarySelection: '',
             summaryOpts: ['', 'Count', 'Avg', 'Sum', 'Min', 'Max'],
-            summaryRow: {}
+            summaryRow: {},
         };
     },
     computed: {
@@ -295,19 +295,43 @@ export default {
             // Removing hidden columns
             const visCols = [...this.columnDefinitionsMap.values()].filter(showPredicate);
 
-            // No longer need to sort the columns, let DataTable handle it?
-            // if (this.columnOrder.length > 0) {
-            //     visCols.sort((a, b) => this.columnOrder.indexOf(a.field) - this.columnOrder.indexOf(b.field));
-            // }
+            if (this.columnOrder.length > 0) {
+                // Sort the columns usin g
+                visCols.sort((a, b) => {
+
+                    const aPosn = this.columnOrder.indexOf(a.field);
+                    const bPosn = this.columnOrder.indexOf(b.field);
+                    if (aPosn == -1 && bPosn == -1) {
+                        // Neither column appears in the DataTable's
+                        // columnOrder
+                        return 0;
+                    }
+
+                    if (aPosn == -1) {
+                        // Put 'a' after 'b'
+                        return 1;
+                    }
+
+                    if (bPosn == -1) {
+                        // Put 'a' before 'b'
+                        return -1;
+                    }
+
+                    return aPosn - bPosn;
+                });
+            }
 
             return visCols;
+        },
+        dataSource() {
+            return `${this.module}_${this.query}`;
         },
         fetchFormData() {
             // Constuct the FormData object that will be POSTed
 
             const fd = new FormData();
             fd.append('_operationType', 'fetch');
-            fd.append('_dataSource', `${this.module}_${this.query}`);
+            fd.append('_dataSource', this.dataSource);
             fd.append('_startRow', this.firstRow);
             fd.append('_endRow', this.endRow);
 
@@ -480,8 +504,6 @@ export default {
             }
         },
         snapshotChanged(newSnapshot) {
-            console.log('snapshotChanged', newSnapshot);
-
             const snapstate = newSnapshot?.snapshot;
             if (snapstate) {
 
@@ -528,14 +550,15 @@ export default {
 </script>
 <template>
     <SnapshotPicker
-        documentQuery="kitchensink_ListAttributes"
+        :documentQuery="dataSource"
         :snapshotState="snapshotState"
         @snapshotChanged="snapshotChanged"
     />
     <DataTable
         dataKey="bizId"
         filterDisplay="menu"
-        stateStorage="session"
+        :stateKey="query"
+        :stateStorage="session"
         :rowsPerPageOptions="[5, 25, 50, 75, 100]"
         :lazy="true"
         :value="value"
@@ -544,7 +567,6 @@ export default {
         :paginator="true"
         :reorderableColumns="true"
         :resizableColumns="true"
-        :stateKey="query"
         v-model:first="firstRow"
         v-model:rows="pageSize"
         v-model:filters="filters"
@@ -585,11 +607,13 @@ export default {
                 v-if="col.filterable"
             >
 
-                <!-- TODO probably need a label for the booleans -->
-                <TriStateCheckbox
-                    v-if="col.type == 'boolean'"
-                    v-model="filterModel.value"
-                />
+                <span v-if="col.type == 'boolean'">
+                    <label :for="'bool-' + col.field">{{ col.header }}</label>
+                    <TriStateCheckbox
+                        :inputId="'bool-' + col.field"
+                        v-model="filterModel.value"
+                    />
+                </span>
                 <MultiSelect
                     v-else-if="col.type == 'enum'"
                     v-model="filterModel.value"
@@ -643,8 +667,5 @@ export default {
             />
         </template>
     </DataTable>
-    <ul>
-        <li v-for="x in visibleColumns">{{ x }}</li>
-    </ul>
 </template>
 <style scoped></style>

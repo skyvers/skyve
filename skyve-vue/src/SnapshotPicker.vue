@@ -162,10 +162,6 @@ export default {
 
 <template>
     <Button
-        label="reload"
-        @click="reload"
-    />
-    <Button
         type="button"
         :label="buttonLabel"
         @click="toggle"
