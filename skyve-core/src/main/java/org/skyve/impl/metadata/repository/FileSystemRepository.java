@@ -58,8 +58,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	/**
 	 * Absolute path constructor
 	 * Prevent external instantiation.
+	 * Use a ConcurrentHashMap for the cache as it is thread-safe and performant for mostly-read operations.
 	 */
 	protected FileSystemRepository(@Nonnull String absolutePath) {
+		super(new ConcurrentHashMap<>());
 		this.absolutePath = absolutePath.replace('\\', '/');
 		if (this.absolutePath.charAt(this.absolutePath.length() - 1) != '/') {
 			this.absolutePath += '/';
