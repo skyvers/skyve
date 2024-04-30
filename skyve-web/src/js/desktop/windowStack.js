@@ -114,7 +114,7 @@ isc.WindowStack.addClassProperties({
 		return isc.WindowStack._stack[isc.WindowStack._stack.length - 2].items[0];
 	},
 	
-	// called by the browser resize handler - from util2.js
+	// called by the browser resize handler - from util.js
 	resize: function() {
 		var windowWidth = isc.Page.getWidth() - 50;
 		var windowHeight = isc.Page.getHeight() - 50;

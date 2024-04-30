@@ -9,7 +9,7 @@
 			</filelist>
 			<filelist dir="src/js/desktop/">
 				<!-- static utility functions -->
-				<file name="util2.js" />
+				<file name="util.js" />
 				<!-- basic bizhub types and their editors -->
 				<file name="types.js" />
 				<!-- bizhub modal windows -->
@@ -21,9 +21,10 @@
 				<!-- bizhub advanced filter builder -->
 				<file name="advancedFilter.js" />
 				<!-- bizhub grid implementations -->
-				<file name="grids.js" />
-				<!-- listview2.js must be first as it is used by harness -->
-				<file name="listview2.js" />
+				<file name="datagrid.js" />
+				<file name="listgrid.js" />
+				<!-- listview.js must be first as it is used by harness -->
+				<file name="listview.js" />
 				<!-- bizhub edit view -->
 				<file name="editView.js" />
 				<!-- bootstrap the bizhub environment -->
