@@ -1,7 +1,8 @@
 <script>
 import Column from 'primevue/column';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
-import Button from 'primevue/button';
+
+const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
 
 /**
  * Map from the skyve attribute type to
@@ -237,6 +238,8 @@ export default {
             summarySelection: '',
             summaryOpts: ['', 'Count', 'Avg', 'Sum', 'Min', 'Max'],
             summaryRow: {},
+
+            snapshotBizId: null,
         };
     },
     computed: {
@@ -459,7 +462,8 @@ export default {
         },
         /**
          * Modify the DataTable's state using the 
-         * supplied mutatorFunction.
+         * supplied mutatorFunction. Then cause the 
+         * DataTable to be re-mounted.
          * 
          * @param {*} mutatorFn A function which accepts
          * the current table state as an object, and 
@@ -467,20 +471,37 @@ export default {
          */
         modifyTableState(mutatorFn) {
 
-            const dt = this.$refs.datatable;
-            const stateKey = dt.stateKey;
-
-            const storageLoc = dt.stateStorage == 'session' ? sessionStorage : localStorage;
-            const str = storageLoc.getItem(stateKey) ?? '{}';
-            const currState = JSON.parse(str);
+            const stateString = this.getStorageItem('') ?? '{}';
+            const currState = JSON.parse(stateString);
             const newState = mutatorFn(currState);
 
-            sessionStorage.setItem(stateKey, JSON.stringify(newState));
+            this.setStorageItem('', JSON.stringify(newState));
 
             // Increment the datatable's key causing the table to 
             // be destroyed and re-mounted, reloading the state
             // we just modified
             this.dtKey = this.dtKey + 1;
+        },
+        /**
+         * Grab an item from storage (local or session whichever the 
+         * DataTable is using).
+         * 
+         * @param {*} keyPrefix Prefix to add to key. Emtpy string
+         * will be the DataTable's state.
+         */
+        getStorageItem(keyPrefix) {
+            const dt = this.$refs.datatable;
+            const stateKey = dt.stateKey;
+
+            const storageLoc = dt.stateStorage == 'session' ? sessionStorage : localStorage;
+            return storageLoc.getItem(keyPrefix + '' + stateKey);
+        },
+        setStorageItem(keyPrefix, strValue) {
+            const dt = this.$refs.datatable;
+            const stateKey = dt.stateKey;
+
+            const storageLoc = dt.stateStorage == 'session' ? sessionStorage : localStorage;
+            return storageLoc.setItem(keyPrefix + '' + stateKey, strValue);
         },
         stateRestore(event) {
 
@@ -527,6 +548,7 @@ export default {
         },
         snapshotChanged(newSnapshot) {
             const snapstate = newSnapshot?.snapshot;
+            this.setStorageItem(SNAP_KEY_PREFIX, newSnapshot?.bizId);
 
             if (snapstate) {
 
@@ -566,6 +588,10 @@ export default {
             }
         }
     },
+    mounted() {
+
+        this.snapshotBizId = this.getStorageItem(SNAP_KEY_PREFIX);
+    },
     beforeMount() {
         // Calling init filters from mounted() was
         // triggering this issue: https://github.com/primefaces/primevue/issues/4291
@@ -586,6 +612,7 @@ export default {
         :documentQuery="dataSource"
         :snapshotState="snapshotState"
         @snapshotChanged="snapshotChanged"
+        :initialSelection="snapshotBizId"
     />
     <DataTable
         :key="dtKey"

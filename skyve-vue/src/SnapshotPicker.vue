@@ -6,7 +6,11 @@ import Button from 'primevue/button';
 export default {
     props: {
         documentQuery: String,
-        snapshotState: Object
+        snapshotState: Object,
+        initialSelection: {
+            type: String,
+            default: null
+        }
     },
     data() {
         return {
@@ -96,7 +100,7 @@ export default {
             this.snapshots = await SnapshotService.getSnapshots(queryObj);
         },
         chooseSnapshot(snapshot) {
-            this.selectedSnapshot = snapshot;
+            this.selectedSnapshot = snapshot ?? null;
         },
         cofirmCreate() {
             this.showDialog = true;
@@ -155,8 +159,18 @@ export default {
     },
     emits: ['snapshotChanged'],
     mounted() {
-        this.reload();
-    }
+        this.reload()
+            .then(() => {
+
+                // If an initialSelection bizId was provided, try to find the 
+                // matching snapshot during this initial mounting of the picker
+                if (!!this.initialSelection) {
+                    const selection = this.snapshots
+                        .find(snap => snap.bizId == this.initialSelection);
+                    this.chooseSnapshot(selection);
+                }
+            });
+    },
 }
 </script>
 
