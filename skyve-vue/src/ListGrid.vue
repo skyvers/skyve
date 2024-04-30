@@ -1,6 +1,7 @@
 <script>
 import Column from 'primevue/column';
 import { FilterMatchMode, FilterOperator } from 'primevue/api';
+import Button from 'primevue/button';
 
 /**
  * Map from the skyve attribute type to
@@ -217,6 +218,8 @@ export default {
     },
     data() {
         return {
+            dtKey: 0,
+
             loading: true,
             value: [],
             totalRecords: 0,
@@ -411,7 +414,8 @@ export default {
                 "visibleColumns": visibleColNames,
                 "summarySelection": this.summarySelection,
                 "sortOrder": this.sortOrder,
-                "sortColumn": this.sortColumn
+                "sortColumn": this.sortColumn,
+                "columnWidths": this.columnWidths
             };
         },
     },
@@ -453,7 +457,33 @@ export default {
             this.value = rows;
             this.loading = false;
         },
+        /**
+         * Modify the DataTable's state using the 
+         * supplied mutatorFunction.
+         * 
+         * @param {*} mutatorFn A function which accepts
+         * the current table state as an object, and 
+         * returns the new state to apply.
+         */
+        modifyTableState(mutatorFn) {
+
+            const dt = this.$refs.datatable;
+            const stateKey = dt.stateKey;
+
+            const storageLoc = dt.stateStorage == 'session' ? sessionStorage : localStorage;
+            const str = storageLoc.getItem(stateKey) ?? '{}';
+            const currState = JSON.parse(str);
+            const newState = mutatorFn(currState);
+
+            sessionStorage.setItem(stateKey, JSON.stringify(newState));
+
+            // Increment the datatable's key causing the table to 
+            // be destroyed and re-mounted, reloading the state
+            // we just modified
+            this.dtKey = this.dtKey + 1;
+        },
         stateRestore(event) {
+
             // Triggered when the primevue datatable restores its own state
             // copy out the props 
             this.firstRow = event.first ?? 0;
@@ -461,14 +491,6 @@ export default {
             this.sortColumn = event.sortField ?? '';
             this.sortOrder = event.sortOrder ?? 0;
             this.filters = event.filters ?? {};
-
-            // Using the DataTable's columnOrder property
-            // to work backwards to the selectedColumns doesn't
-            // really work as columnOrder appears to be
-            // updated only when columns are reordered
-            // if ((event.columnOrder ?? []).length > 0) {
-            //     this.selectedColumns = this.columns.filter((col) => event.columnOrder.includes(col.field));
-            // }
         },
         initFilters() {
 
@@ -505,6 +527,7 @@ export default {
         },
         snapshotChanged(newSnapshot) {
             const snapstate = newSnapshot?.snapshot;
+
             if (snapstate) {
 
                 // Filters
@@ -520,6 +543,16 @@ export default {
                         this.selectedColumns.push(col);
                     }
                 }
+
+                const columnWidths = snapstate.columnWidths ?? [];
+                const colWidthString = columnWidths.join(',');
+
+                this.modifyTableState(state => {
+                    state.columnOrder = visibleCols;
+                    state.columnWidths = colWidthString;
+
+                    return state;
+                });
 
                 // Summary/aggregate row
                 this.summarySelection = snapstate.summarySelection ?? '';
@@ -555,9 +588,11 @@ export default {
         @snapshotChanged="snapshotChanged"
     />
     <DataTable
+        :key="dtKey"
+        ref="datatable"
         dataKey="bizId"
         filterDisplay="menu"
-        :stateKey="query"
+        :stateKey="dataSource"
         :stateStorage="session"
         :rowsPerPageOptions="[5, 25, 50, 75, 100]"
         :lazy="true"
