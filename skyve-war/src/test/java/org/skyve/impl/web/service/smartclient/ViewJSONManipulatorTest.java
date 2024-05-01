@@ -16,7 +16,6 @@ import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
 public class ViewJSONManipulatorTest extends AbstractSkyveTest {
-
 	private static final String TEST_UXUI = "external";
 	
 	@Test
@@ -27,7 +26,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
-		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
+		AbstractWebContext ctx = mockWebContext();
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,
@@ -44,7 +43,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
-		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
+		AbstractWebContext ctx = mockWebContext();
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,
@@ -61,7 +60,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
-		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
+		AbstractWebContext ctx = mockWebContext();
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,
@@ -78,7 +77,7 @@ public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
 		vjm.visit();
-		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
+		AbstractWebContext ctx = mockWebContext();
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx, null);
 		Assert.assertTrue("There should be 2 formats in the payload - " + json,

@@ -17,15 +17,18 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 
-import modules.WeldMarker;
+import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
@@ -69,7 +72,6 @@ abstract class InternalBaseH2Test {
 		// init injection
 		weld = new Weld();
 		weld.addPackage(true, SkyveCDIProducer.class); // skyve producer
-		weld.addPackage(true, WeldMarker.class); // domain classes
 		// For omnifaces to be injected
 		weld.addBeanClass(MockHttpServletRequest.class);
 		weld.addBeanClass(MockServletContext.class);
@@ -153,5 +155,11 @@ abstract class InternalBaseH2Test {
 		superUser.setContactId(adminUser.getContact().getBizId());
 		adminUser.setBizId(superUser.getId());
 		return adminUser;
+	}
+	
+	protected static AbstractWebContext mockWebContext() {
+		HttpServletRequest request = new MockHttpServletRequest();
+		request.getSession(true); // establish session
+		return new SmartClientWebContext(UUID.randomUUID().toString(), request, new MockHttpServletResponse());
 	}
 }
