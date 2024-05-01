@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.customer.Customer;
@@ -18,6 +19,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableMap;
 
 import jakarta.faces.application.ResourceDependencies;
 import jakarta.faces.application.ResourceDependency;
@@ -156,15 +158,30 @@ public class VueListGrid extends UIOutput {
         private boolean filterable = true;
         private List<EnumValue> enumValues = new ArrayList<>(0);
         private String type;
+        
+		private static final Map<String, String> typeConversions = new ImmutableMap.Builder<String, String>()
+				.put("bizDecimal2", "numeric")
+				.put("bizDecimal5", "numeric")
+				.put("bizDecimal10", "numeric")
+				.put("integer", "numeric")
+				.put("HH24_MI", "time")
+				.put("DD_MMM_YYYY_HH24_MI_SS", "timestamp")
+				.put("DD_MMM_YYYY", "date")
+				.put("DD_MMM_YYYY_HH24_MI", "dateTime")
+				.put("enum", "enum")
+				.put("boolean", "boolean")
+				.put("richText", "text")
+				.put("text", "text")
+				.build();  
 
-        public static ColumnDefinition fromSCColumnDefinition(SmartClientQueryColumnDefinition scColDefn) {
-            ColumnDefinition cd = new ColumnDefinition();
+		public static ColumnDefinition fromSCColumnDefinition(SmartClientQueryColumnDefinition scColDefn) {
+			ColumnDefinition cd = new ColumnDefinition();
 
-            cd.field = scColDefn.getName();
-            cd.header = scColDefn.getTitle();
-            cd.type = scColDefn.getType();
-            cd.sortable = scColDefn.isCanSortClientOnly();
-            cd.filterable = scColDefn.isCanFilter();
+			cd.field = scColDefn.getName();
+			cd.header = scColDefn.getTitle();
+			cd.type = flattenType(scColDefn.getType());
+			cd.sortable = scColDefn.isCanSortClientOnly();
+			cd.filterable = scColDefn.isCanFilter();
 
             Optional.ofNullable(scColDefn.getValueMap())
                     .ifPresent(map -> map.entrySet()
@@ -174,6 +191,15 @@ public class VueListGrid extends UIOutput {
 
             return cd;
         }
+
+		private static String flattenType(String inType) {
+			String resultType = typeConversions.get(inType);
+			if (resultType != null) {
+				return resultType;
+			}
+
+			throw new DomainException("Unable to convert column type: " + inType);
+		}
 
         public String getField() {
             return field;
