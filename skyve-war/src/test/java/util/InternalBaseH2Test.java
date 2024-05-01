@@ -157,6 +157,10 @@ abstract class InternalBaseH2Test {
 		return adminUser;
 	}
 	
+	/**
+	 * Create a WebContext with mock request, response and session objects.
+	 * @return	A mock WebContext.
+	 */
 	protected static AbstractWebContext mockWebContext() {
 		HttpServletRequest request = new MockHttpServletRequest();
 		request.getSession(true); // establish session
