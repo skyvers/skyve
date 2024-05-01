@@ -16,6 +16,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
@@ -84,7 +85,8 @@ public class VueListGrid extends UIOutput {
             SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(CORE.getUser(),
                     customer, module, document, mdQueryColumn, true, queryName);
 
-            ColumnDefinition colDefn = ColumnDefinition.fromSCColumnDefinition(scColDefn);
+            ColumnMetaData md = new ColumnMetaData(mdQueryColumn, scColDefn);
+            ColumnDefinition colDefn = ColumnDefinition.fromColumnMetaData(md);
 
             params.getColumns()
                   .add(colDefn);
@@ -104,7 +106,46 @@ public class VueListGrid extends UIOutput {
           .add(" </script>");
 
         return sj.toString();
-    }
+	}
+
+	private static class ColumnMetaData {
+		private final MetaDataQueryColumn mdQueryColumn;
+		private final SmartClientQueryColumnDefinition scQueryColumnDefn;
+
+		public ColumnMetaData(MetaDataQueryColumn mdQueryColumn, SmartClientQueryColumnDefinition scQueryColumnDefn) {
+			this.mdQueryColumn = mdQueryColumn;
+			this.scQueryColumnDefn = scQueryColumnDefn;
+		}
+
+		public String getBinding() {
+			return scQueryColumnDefn.getName();
+		}
+
+		public String getTitle() {
+			return scQueryColumnDefn.getTitle();
+		}
+
+		public String getType() {
+			return scQueryColumnDefn.getType();
+		}
+
+		public boolean isSortable() {
+
+			if (mdQueryColumn instanceof MetaDataQueryProjectedColumn mdcpc) {
+				return mdcpc.isSortable();
+			}
+
+			return false;
+		}
+
+		public boolean isCanFilter() {
+			return scQueryColumnDefn.isCanFilter();
+		}
+
+		public Map<String, String> getValueMap() {
+			return scQueryColumnDefn.getValueMap();
+		}
+	}
 
     private static class ListGridParams {
         private String targetSelector;
@@ -174,16 +215,16 @@ public class VueListGrid extends UIOutput {
 				.put("text", "text")
 				.build();  
 
-		public static ColumnDefinition fromSCColumnDefinition(SmartClientQueryColumnDefinition scColDefn) {
+		public static ColumnDefinition fromColumnMetaData(ColumnMetaData metadata) {
 			ColumnDefinition cd = new ColumnDefinition();
 
-			cd.field = scColDefn.getName();
-			cd.header = scColDefn.getTitle();
-			cd.type = flattenType(scColDefn.getType());
-			cd.sortable = scColDefn.isCanSortClientOnly();
-			cd.filterable = scColDefn.isCanFilter();
+			cd.field = metadata.getBinding();
+			cd.header = metadata.getTitle();
+			cd.type = flattenType(metadata.getType());
+			cd.sortable = metadata.isSortable();
+			cd.filterable = metadata.isCanFilter();
 
-            Optional.ofNullable(scColDefn.getValueMap())
+            Optional.ofNullable(metadata.getValueMap())
                     .ifPresent(map -> map.entrySet()
                                          .stream()
                                          .map(EnumValue::fromEnumeratedValue)
