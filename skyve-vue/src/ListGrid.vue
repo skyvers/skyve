@@ -1,6 +1,8 @@
 <script>
 import Column from 'primevue/column';
-import { FilterMatchMode, FilterOperator } from 'primevue/api';
+import { FilterMatchMode, FilterOperator, FilterService } from 'primevue/api';
+import { MatchModes } from './support/MatchModes';
+import Dropdown from 'primevue/dropdown';
 
 const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
 
@@ -11,16 +13,7 @@ const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
  */
 function defaultMatchMode(columnType) {
 
-    const mappings = {
-        'numeric': FilterMatchMode.EQUALS,
-        'text': FilterMatchMode.CONTAINS,
-        'time': FilterMatchMode.DATE_BEFORE,
-        'timestamp': FilterMatchMode.DATE_BEFORE,
-        'date': FilterMatchMode.DATE_BEFORE,
-        'dateTime': FilterMatchMode.DATE_BEFORE
-    };
-
-    return (mappings[columnType]) ?? FilterMatchMode.EQUALS;
+    return (MatchModes[columnType] ?? [MatchModes.MODES.EQUALS])[0].value;
 }
 
 /**
@@ -40,31 +33,6 @@ function arraysEqual(a, b) {
 
     return a.every((val, index) => val == b[index])
 }
-
-/**
- * Maps from the DataTable comparison operators
- * to the operator strings used by Skyve
- */
-const operatorMap = {
-    // 'text': [
-    'startsWith': 'iStartsWith',
-    'contains': 'iContains',
-    'notContains': 'iNotContains',
-    'endsWith': 'iEndsWith',
-    'equals': 'iEquals',
-    'notEquals': 'iNotEqual',
-    // 'numeric': [
-    'lt': 'lessThan',
-    'lte': 'lessOrEqual',
-    'gt': 'greaterThan',
-    'gte': 'greaterOrEqual',
-    //'date': [
-    'dateIs': 'equals',
-    'dateIsNot': 'notEqual',
-    'dateBefore': 'lessThan',
-    'dateAfter': 'greaterThan'
-    // boolean ops?, seems to always be 'contains'
-};
 
 /**
  * Replace values with their `_display` value, if present
@@ -240,6 +208,8 @@ export default {
             summaryRow: {},
 
             snapshotBizId: null,
+
+            matchModes: MatchModes
         };
     },
     computed: {
@@ -380,7 +350,7 @@ export default {
                 const createCriteria = (constraint) => ({
                     'fieldName': columnName,
                     'value': constraint.value,
-                    'operator': operatorMap[constraint.matchMode]
+                    'operator': constraint.matchMode
                 });
 
                 if (nonNullConstraints.length == 1) {
@@ -661,14 +631,13 @@ export default {
             :header="col.header"
             :sortable="col.sortable"
             :maxConstraints="20"
-            :dataType="col.dataType"
             :footer="summaryRow[col.field]"
+            :filterMatchModeOptions="matchModes[col.type]"
         >
             <template
                 #filter="{ filterModel }"
                 v-if="col.filterable"
             >
-
                 <span v-if="col.type == 'boolean'">
                     <label :for="'bool-' + col.field">{{ col.header }}</label>
                     <TriStateCheckbox
@@ -676,14 +645,14 @@ export default {
                         v-model="filterModel.value"
                     />
                 </span>
-                <MultiSelect
+                <Dropdown
                     v-else-if="col.type == 'enum'"
                     v-model="filterModel.value"
                     :options="col.enumValues"
                     optionLabel="label"
                     optionValue="value"
                 >
-                </MultiSelect>
+                </Dropdown>
                 <DateOnlyCalendar
                     v-else-if="col.type == 'date'"
                     v-model="filterModel.value"
