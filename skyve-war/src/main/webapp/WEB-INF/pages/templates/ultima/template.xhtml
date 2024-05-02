@@ -32,9 +32,11 @@
 			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="css/ultima.css?v=#{bean.webResourceFileVersion}" library="skyve" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />
-			
-			<h:outputScript name="ripple/ripple.js?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
-			<h:outputScript name="js/layout.js?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
+			<h:outputStylesheet name="css/ultima.css?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<h:outputScript name="ripple/ripple.js?v=#{bean.webResourceFileVersion}" library="layout" />
+			<h:outputScript name="js/layout.js?v=#{bean.webResourceFileVersion}" library="layout" />
+			<!-- Unsure why this isn't included by the menu component but I had to manually include it -->
+			<h:outputScript name="js/layout.menu.js?v=#{bean.webResourceFileVersion}" library="layout" />
 			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
 				<!-- PF8 doesnt work with touch on - a.swipe is not a function when registering swipeLeft and swipeRight -->
@@ -126,9 +128,9 @@
 				</f:facet>
 			</p:ajaxStatus>
 	
-			<h:outputStylesheet name="styles/layout-light.css?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
-			<h:outputStylesheet name="primeflex/primeflex.min.css?v=#{bean.webResourceFileVersion}" library="ultima-layout"/>
-			<h:outputStylesheet name="ripple/ripple.css?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
+			<h:outputStylesheet name="styles/layout-light.css?v=#{bean.webResourceFileVersion}" library="layout" />
+			<h:outputStylesheet name="primeflex/primeflex.min.css?v=#{bean.webResourceFileVersion}" library="layout"/>
+			<h:outputStylesheet name="ripple/ripple.css?v=#{bean.webResourceFileVersion}" library="layout" />
 		</h:body>
 	</f:view>
 </html>
