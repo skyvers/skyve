@@ -1,6 +1,6 @@
 <script>
 import Column from 'primevue/column';
-import { FilterMatchMode, FilterOperator, FilterService } from 'primevue/api';
+import { FilterOperator } from 'primevue/api';
 import { MatchModes } from './support/MatchModes';
 import Dropdown from 'primevue/dropdown';
 

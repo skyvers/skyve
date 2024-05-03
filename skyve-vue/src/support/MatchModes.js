@@ -29,15 +29,14 @@ const _DATE_MODES = [
 export const MatchModes = {
 
     MODES: FilterMatchMode,
-    text:
-        [
-            { label: 'Starts With', value: FilterMatchMode.STARTS_WITH },
-            { label: 'Contains', value: FilterMatchMode.CONTAINS },
-            { label: 'Not Contains', value: FilterMatchMode.NOT_CONTAINS },
-            { label: 'Ends With', value: FilterMatchMode.ENDS_WITH },
-            { label: 'Equals', value: FilterMatchMode.EQUALS },
-            { label: 'Not Equals', value: FilterMatchMode.NOT_EQUALS },
-        ],
+    text: [
+        { label: 'Starts With', value: FilterMatchMode.STARTS_WITH },
+        { label: 'Contains', value: FilterMatchMode.CONTAINS },
+        { label: 'Not Contains', value: FilterMatchMode.NOT_CONTAINS },
+        { label: 'Ends With', value: FilterMatchMode.ENDS_WITH },
+        { label: 'Equals', value: FilterMatchMode.EQUALS },
+        { label: 'Not Equals', value: FilterMatchMode.NOT_EQUALS },
+    ],
     numeric: [
         { label: 'Less Than', value: FilterMatchMode.LESS_THAN },
         { label: 'Less Than Or Equal', value: FilterMatchMode.LESS_THAN_OR_EQUAL_TO },
