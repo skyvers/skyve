@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 
-import jakarta.faces.application.ResourceDependencies;
 import jakarta.faces.application.ResourceDependency;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIOutput;
@@ -30,10 +29,10 @@ import jakarta.faces.context.FacesContext;
 
 @SuppressWarnings("unused")
 @FacesComponent(VueListGrid.COMPONENT_TYPE)
-@ResourceDependencies({ @ResourceDependency(library = "skyvevue", name = "index.js"),
-        @ResourceDependency(library = "skyvevue", name = "index.css"),
-        @ResourceDependency(library = "skyvevue", name = "Inter-italic.var.woff2"),
-        @ResourceDependency(library = "skyvevue", name = "Inter-roman.var.woff2") })
+@ResourceDependency(library = "skyvevue", name = "index.js")
+@ResourceDependency(library = "skyvevue", name = "index.css")
+//@ResourceDependency(library = "skyvevue", name = "Inter-italic.var.woff2")
+//@ResourceDependency(library = "skyvevue", name = "Inter-roman.var.woff2") 
 public class VueListGrid extends UIOutput {
 
     @SuppressWarnings("hiding")
@@ -51,7 +50,10 @@ public class VueListGrid extends UIOutput {
 
             String out;
             try {
-                out = generateHtml(attributes);
+				final String moduleName = (String) attributes.get("module");
+				final String documentName = (String) attributes.get("document");
+				final String queryName = (String) attributes.get("query");
+				out = generateHtml(moduleName, documentName, queryName);
                 setValue(out);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -59,10 +61,7 @@ public class VueListGrid extends UIOutput {
         }
     }
 
-    private String generateHtml(Map<String, Object> attributes) throws Exception {
-        final String moduleName = (String) attributes.get("module");
-        final String documentName = (String) attributes.get("document");
-        final String queryName = (String) attributes.get("query");
+    private String generateHtml(String moduleName, String documentName, String queryName) throws Exception {
 
         ListGridParams params = new ListGridParams();
         params.setTargetSelector("#grid");
