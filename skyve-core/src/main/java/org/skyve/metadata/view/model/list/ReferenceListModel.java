@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
@@ -35,23 +34,23 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param module	The reference's document's module.
 	 * @param drivingDocument	The reference's document
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
-	 * @throws Exception
 	 */
-	public ReferenceListModel(Module module, Document drivingDocument, String referenceBinding)
-	throws Exception {
+	public ReferenceListModel(Module module, Document drivingDocument, String referenceBinding) {
+		super(module, drivingDocument);
 		this.referenceBinding = referenceBinding;
-		setDrivingDocument(module, drivingDocument);
 	}
+	
+	private String moduleName;
+	private String drivingDocumentName;
 	
 	/**
 	 * Convenience constructor
 	 * @param drivingDocument	The reference's document
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
-	 * @throws Exception
 	 */
-	public ReferenceListModel(Document drivingDocument, String referenceBinding)
-	throws Exception {
-		this(CORE.getCustomer().getModule(drivingDocument.getOwningModuleName()), drivingDocument, referenceBinding);
+	public ReferenceListModel(Document drivingDocument, String referenceBinding) {
+		this.moduleName = drivingDocument.getOwningModuleName();
+		this.drivingDocumentName = drivingDocument.getName();
 	}
 	
 	/**
@@ -59,15 +58,22 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param moduleName	The reference's document's module name
 	 * @param drivingDocumentName	The reference's document name
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
-	 * @throws Exception
 	 */
-	public ReferenceListModel(String moduleName, String drivingDocumentName, String referenceBinding)
-	throws Exception {
-		Customer c = CORE.getCustomer();
-		Module m = c.getModule(moduleName);
-		Document d = m.getDocument(c, drivingDocumentName);
-		this.referenceBinding = referenceBinding;
-		setDrivingDocument(m, d);
+	public ReferenceListModel(String moduleName, String drivingDocumentName, String referenceBinding) {
+		this.moduleName = moduleName;
+		this.drivingDocumentName = drivingDocumentName;
+	}
+	
+	@Override
+	public void postConstruct(Customer customer, boolean runtime) {
+		// resolve driving document if required (for convenience constructor usage)
+		if ((moduleName != null) && (drivingDocumentName != null)) {
+			Module m = customer.getModule(moduleName);
+			Document d = m.getDocument(customer, drivingDocumentName);
+			setDrivingDocument(m, d);
+		}
+		
+		super.postConstruct(customer, runtime);
 	}
 	
 	/**

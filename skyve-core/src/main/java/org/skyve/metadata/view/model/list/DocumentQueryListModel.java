@@ -31,14 +31,16 @@ import org.skyve.web.SortParameter;
 public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private String description;
 	
-	private Customer customer;
 	private Module module;
 	private Document drivingDocument;
 	private MetaDataQueryDefinition query;
 
-	public void setQuery(MetaDataQueryDefinition query) {
-		customer = CORE.getUser().getCustomer();
+	public DocumentQueryListModel(MetaDataQueryDefinition query) {
 		this.query = query;
+	}
+
+	@Override
+	public void postConstruct(Customer customer, boolean runtime) {
 		description = query.getDescription();
 		columns = query.getColumns();
 		module = query.getDocumentModule(customer);

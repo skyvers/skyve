@@ -8,7 +8,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.web.WebContext;
 
-public class Bizlet extends org.skyve.metadata.model.document.Bizlet<DynamicPersistentBean> {
+public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<DynamicPersistentBean> {
 	@Override
 	public DynamicPersistentBean newInstance(DynamicPersistentBean bean) throws Exception {
 		return super.newInstance(bean);

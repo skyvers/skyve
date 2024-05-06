@@ -9,15 +9,15 @@
 		]]>
 	</documentation>
 	<persistent name="TEST_AllAttributesDynamicPersistent" />
-	<dynamic bizletClassName="modules.test.AllAttributesDynamicPersistent.Bizlet" dataFactoryClassName="modules.test.AllAttributesDynamicPersistent.DataFactory">
+	<dynamic bizletClassName="modules.test.AllAttributesDynamicPersistent.TestBizlet" dataFactoryClassName="modules.test.AllAttributesDynamicPersistent.TestDataFactory">
 		<actions>
-			<class name="ServerSideAction" className="modules.test.AllAttributesDynamicPersistent.ServerSideAction" />
+			<class name="TestServerSideAction" className="modules.test.AllAttributesDynamicPersistent.TestServerSideAction" />
 		</actions>
 		<images>
-			<class name="DynamicImage" className="modules.test.AllAttributesDynamicPersistent.DynamicImage" />
+			<class name="TestDynamicImage" className="modules.test.AllAttributesDynamicPersistent.TestDynamicImage" />
 		</images>
 		<models>
-			<class name="ListModel" className="modules.test.AllAttributesDynamicPersistent.ListModel" />
+			<class name="TestListModel" className="modules.test.AllAttributesDynamicPersistent.TestListModel" />
 		</models>
 	</dynamic>
 	<singularAlias>All Attributes Dynamic Persistent</singularAlias>

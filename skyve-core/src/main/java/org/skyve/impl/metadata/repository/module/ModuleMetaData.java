@@ -763,7 +763,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 				result.setAutoPopulate(! Boolean.FALSE.equals(item.getAutoPopulate()));
 				
 				items.add(result);
-			}
+			} 
 			else if (action instanceof MapItemMetaData) {
 				MapItemMetaData item = (MapItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.MapItem result = new org.skyve.impl.metadata.module.menu.MapItem();

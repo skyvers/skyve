@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
+import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.customer.CustomerModuleRoleMetaData;
@@ -60,6 +61,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
@@ -375,7 +377,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 			
 			// Check modelAggregate and previousComplete UserAccesses
 			for (UserAccess access : roleImpl.getAccesses().keySet()) {
-/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
 				if (access.isModelAggregate() || access.isDynamicImage()) {
 					Document accessDocument = module.getDocument(customer, access.getDocumentName());
 					try {
@@ -389,8 +390,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 														e);
 					}
 				}
-else */
-				if (access.isPreviousComplete() || access.isContent()) {
+				else if (access.isPreviousComplete() || access.isContent()) {
 					Document accessDocument = module.getDocument(customer, access.getDocumentName());
 					String binding = access.getComponent();
 					try {
@@ -464,20 +464,24 @@ else */
 							document = module.getDocument(customer, documentName);
 						}
 						
-						// TODO check list/tree/calendar model names
 						String modelName = ((AbstractDocumentOrQueryOrModelMenuItem) item).getModelName();
 						if (modelName != null) {
-							if (item instanceof MapItem) {
-								try {
+							try {
+								if (item instanceof ListItem) { // includes TreeItem
+									ListModel<Bean> model = getListModel(customer, document, modelName, false);
+									// Check driving document can be obtained to ensure bindings and accesses can be calculated
+									model.getDrivingDocument();
+								}
+								else if (item instanceof MapItem) {
 									getMapModel(customer, document, modelName, false);
 								}
-								catch (Exception e) {
-									throw new MetaDataException("Menu [" + item.getName() + 
-																	"] in module " + module.getName() +
-																	" is for model " + modelName +
-																	" which does not exist.",
-																	e);
-								}
+							}
+							catch (Exception e) {
+								throw new MetaDataException("Menu [" + item.getName() + 
+																"] in module " + module.getName() +
+																" is for model " + documentName + '.' + modelName +
+																" which does not exist or cannot be instantiated.",
+																e);
 							}
 						}
 						
@@ -786,13 +790,12 @@ else */
 		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, document, uxui);
 		if (accesses != null) { // can be null if access control is turned off
 			for (UserAccess access : accesses) {
-/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
 				if (access.isModelAggregate() || access.isDynamicImage()) {
 					try {
 						getModel(customer, document, access.getComponent(), false);
 					}
 					catch (Exception e) {
-						throw new MetaDataException(""User Access [" + access.toString() + 
+						throw new MetaDataException("User Access [" + access.toString() + 
 														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
 														" in view " + view.getName() +
 														" is for model " + access.getComponent() +
@@ -800,8 +803,7 @@ else */
 														e);
 					}
 				}
-else */
-				if (access.isPreviousComplete() || access.isContent()) {
+				else if (access.isPreviousComplete() || access.isContent()) {
 					final Module module = getModule(customer, document.getOwningModuleName());
 					final String binding = access.getComponent();
 					try {

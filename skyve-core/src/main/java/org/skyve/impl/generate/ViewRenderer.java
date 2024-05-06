@@ -1042,9 +1042,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 			}
 			currentListWidgetModelName = queryName;
 			currentListWidgetModelDocumentName = query.getDocumentName();
-			// Don't need the real list model here and EXT is not available.
-			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-	        queryModel.setQuery(query);
+			// Don't need the runtime list model here and EXT is not available.
+			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>(query);
+	        queryModel.postConstruct(customer, false);
 	        currentListWidgetModel = queryModel;
 	        currentListWidgetAggregateQuery = query.isAggregate();
 		}

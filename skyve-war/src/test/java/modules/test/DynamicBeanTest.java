@@ -32,6 +32,9 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.admin.domain.Contact;
+import modules.test.AllAttributesDynamicPersistent.TestDynamicImage;
+import modules.test.AllAttributesDynamicPersistent.TestListModel;
+import modules.test.AllAttributesDynamicPersistent.TestServerSideAction;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
@@ -231,13 +234,13 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		Object dataFactory = CORE.getRepository().getDataFactory(c, aadpd);
 		Assert.assertNotNull(dataFactory);
 		
-		ServerSideAction<Bean> action = aadpd.getServerSideAction(c, "ServerSideAction", true);
+		ServerSideAction<Bean> action = aadpd.getServerSideAction(c, TestServerSideAction.class.getSimpleName(), true);
 		Assert.assertNotNull(action);
 
-		DynamicImage<Bean> image = aadpd.getDynamicImage(c, "DynamicImage");
+		DynamicImage<Bean> image = aadpd.getDynamicImage(c, TestDynamicImage.class.getSimpleName());
 		Assert.assertNotNull(image);
 
-		ListModel<Bean> model = aadpd.getListModel(c, "ListModel", true);
+		ListModel<Bean> model = aadpd.getListModel(c, TestListModel.class.getSimpleName(), false);
 		Assert.assertNotNull(model);
 	}
 	

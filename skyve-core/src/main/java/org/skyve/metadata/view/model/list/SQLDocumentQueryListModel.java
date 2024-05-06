@@ -11,7 +11,8 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 	private SQL summarySQL;
 	private SQLFilter filter;
 	
-	protected void setSQL(SQL sql) {
+	protected SQLDocumentQueryListModel(SQL sql) {
+		super(null); // this is wrong
 		this.inputSQL = sql;
 	}
 
