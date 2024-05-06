@@ -107,15 +107,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						complete = CompleteType.valueOf(request.getParameter(AbstractWebContext.ACTION_NAME));
 
 			        	AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
-			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
-			        	bean = webContext.getCurrentBean();
-
-				    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
-				    	if (formBinding != null) {
-				    		formBinding = BindUtil.unsanitiseBinding(formBinding);
-				    		bean = (Bean) BindUtil.get(bean, formBinding);
-				    	}
-				    	if (bean == null) { // should never happen
+			        	bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+			        	if (bean == null) { // should never happen
 				    		throw new ServletException("Bean is null");
 				    	}
 				    	formModuleName = bean.getBizModule();
