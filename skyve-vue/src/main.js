@@ -18,6 +18,7 @@ import Calendar from 'primevue/calendar';
 import Dropdown from 'primevue/dropdown';
 import TieredMenu from 'primevue/tieredmenu';
 import Dialog from 'primevue/dialog';
+import ContextMenu from "primevue/contextmenu";
 
 // SKYVE name space definition
 window.SKYVE ??= {};
@@ -45,6 +46,7 @@ window.SKYVE.listgrid = function ({module, title, query, columns, targetSelector
     grid.component('DateOnlyCalendar', DateOnlyCalendar);
     grid.component('SnapshotPicker', SnapshotPicker);
     grid.component('Dialog', Dialog);
+    grid.component('ContextMenu', ContextMenu);
 
     grid.mount(targetSelector);
 }  

@@ -3,6 +3,7 @@ import Column from 'primevue/column';
 import { FilterOperator } from 'primevue/api';
 import { MatchModes } from './support/MatchModes';
 import Dropdown from 'primevue/dropdown';
+import { openDocInNewWindow, openDocInSameWindow } from './support/Util';
 
 const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
 
@@ -209,7 +210,30 @@ export default {
 
             snapshotBizId: null,
 
-            matchModes: MatchModes
+            matchModes: MatchModes,
+
+            // Support params for row right click context menu:
+            selectedRow: null,
+            menuModel: [
+                {
+                    label: 'View Detail',
+                    icon: 'pi pi-angle-right',
+                    command: () => openDocInSameWindow({
+                        bizId: this.selectedRow.bizId,
+                        module: this.module,
+                        document: this.query
+                    })
+                },
+                {
+                    label: 'Popout Detail',
+                    icon: 'pi pi-external-link',
+                    command: () => openDocInNewWindow({
+                        bizId: this.selectedRow.bizId,
+                        module: this.module,
+                        document: this.query
+                    })
+                }
+            ]
         };
     },
     computed: {
@@ -556,7 +580,10 @@ export default {
                 }
 
             }
-        }
+        },
+        onRowContextMenu(event) {
+            this.$refs.cm.show(event.originalEvent);
+        },
     },
     mounted() {
 
@@ -584,6 +611,11 @@ export default {
         @snapshotChanged="snapshotChanged"
         :initialSelection="snapshotBizId"
     />
+    <ContextMenu
+        ref="cm"
+        :model="menuModel"
+        @hide="selectedRow = null"
+    />
     <DataTable
         :key="dtKey"
         ref="datatable"
@@ -606,6 +638,9 @@ export default {
         v-model:sortOrder="sortOrder"
         @state-restore="stateRestore"
         @state-save="stateSave"
+        contextMenu
+        v-model:contextMenuSelection="selectedRow"
+        @rowContextmenu="onRowContextMenu"
     >
         <template #header>
             <div v-if="title">
