@@ -39,6 +39,21 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		this.query = query;
 	}
 
+	/**
+	 * Use this constructor when the driving document is explicitly set in postConstruct call.
+	 */
+	protected DocumentQueryListModel() {
+		// nothing to see here
+	}
+	
+	/**
+	 * Used to set the query in postConstruct() of subclasses.
+	 * @param query
+	 */
+	protected void setQuery(MetaDataQueryDefinition query) {
+		this.query = query;
+	}
+
 	@Override
 	public void postConstruct(Customer customer, boolean runtime) {
 		description = query.getDescription();

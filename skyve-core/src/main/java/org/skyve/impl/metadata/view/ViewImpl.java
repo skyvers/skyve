@@ -489,7 +489,7 @@ public class ViewImpl extends Container implements View {
 	
 					if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
 						if (modelName != null) {
-							ListModel<Bean> model = document.getListModel(customer, modelName, true);
+							ListModel<Bean> model = document.getListModel(customer, modelName, false);
 							Document drivingDocument = model.getDrivingDocument();
 							if (drivingDocument != null) {
 								String drivingModuleName = drivingDocument.getOwningModuleName();
