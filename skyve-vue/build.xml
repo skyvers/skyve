@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="build-vue" default="copy-artifacts" basedir=".">
+	<target name="copy-artifacts" depends="build-vue">
+		<echo>Copying dist/assets directory to skyve-web</echo>
+		<copy 
+			todir="../skyve-web/src/main/resources/META-INF/resources/skyvevue" 
+			verbose="true">
+			<fileset dir="./dist/assets" />
+		</copy>
+	</target>
+	<target name="build-vue">
+		<echo>Running npm/vite build [${os.name}]</echo>
+		<condition property="npm.executable" value="npm.cmd" else="npm">
+		  <os family="windows" />
+		</condition>
+		<exec executable="${npm.executable}">
+			<arg value="run" />
+			<arg value="build" />
+		</exec>
+	</target>
+</project>
