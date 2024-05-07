@@ -3,8 +3,8 @@
 
 ## Open source attributes
 
-- Java EE / Spring
-    - use CDI or Spring for injection of Skyve services
+- Jakarta EE / Spring
+   - use CDI or Spring for injection of Skyve services
 - XML meta-data driven
     - Declarative instead of procedural.
     - Data/Domain model, user interfaces, routing, menu, security
@@ -93,7 +93,7 @@
 - Automatic web service generation with Swagger
 - Scaffolding
 - Responsive UIs
-- SC, Faces, Angular/React/Vue/Flutter interpreted or generated UI
+- SC, Faces, Vue, Flutter interpreted or generated UI
 - Shaped data payloads
 - Client and server-side events.
 - Change tracking
