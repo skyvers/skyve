@@ -1,0 +1,139 @@
+# Architecure Document
+
+
+## Open source attributes
+
+- Java EE / Spring
+    - use CDI or Spring for injection of Skyve services
+- XML meta-data driven
+    - Declarative instead of procedural.
+    - Data/Domain model, user interfaces, routing, menu, security
+- Regularly pen tested
+- Declarative Role-based Security
+    - more than page based
+- Multi-tenant
+- Overridable per customer
+- Abstracted types and relations
+- Wrangles hibernate usage
+- No HTML
+- No Javascript
+- Spatial
+    - Geometry is a primary type
+    - Utilises database support where possible
+    - Skyve Hibernate Dialects
+    - Exposes API to search and manipulate gemoetries
+- Content Management / Federated text search
+    - Text extraction of attachments
+    - Transactional content relations with data
+    - Textual indexing of both data and content/files
+    - Federated text search across data and content exposed in UI.
+    - Implementations for Lucene and Elastic
+- Database agnostic
+    - Hibernate dialect extensions for MySQL/MariaDB/H2/PostgreSQL/SQLServer/Oracle
+- Best practice normalised schemas
+    - via Hibernate relations and domain generation that handles unidirectional and bidirectional
+        - many to one aggregation/composition with joining or owning database relations
+        - one to many composition with joining or owning database relations
+        - many to many aggregation
+        - one to one aggregation/composition
+        - arc relationships (relate to anything)
+        - Inheritance via joined, mapped or single table.
+        - Hierarchical (tree) structures.
+- Schema evolution
+    - via Skyve Hibernate Dialect extensions that allow for length and type coercion
+- Platform agnostic
+    - via Java
+- Internationalisation
+    - Use keys in code and metadata
+    - Browser integration
+- Cloud or on-prem
+- List Models
+- Routing
+    - through view metadata
+    - selectable programmatically
+- Interceptors
+    - before and after of every event
+    - chain them
+    - declared in metadata per customer
+- Reporting
+    - Jasper
+    - Freemarker
+- Query definitions
+    - A definition of a projected tabular set of results along with filter criteria where the expressions are relative to a defined driving document.
+    - Simple/Complex filtering
+    - Datastore or business tier sorting
+    - Obey security restrictions
+    - Non-persistent attribute projection and query engine knows how to retrieve
+    - No instantiation unless absolutely necessary
+        - Results are Maps that expose the domain interface, until real bean is required
+    - Paging filtering sorting joining built in
+        - inner or outer joins automatic based on metadata declaration
+- Expressions
+    - Binding
+    - EL
+- Import/Export
+    - BizPort
+        - Import/Export complete data graphs to spreadsheets
+    - Quick Import
+        - Simpler import/export
+- Backup/Restore
+    - Platform independent data/content backup and restore
+        - Backup from SQLServer and restore to H2
+- Caching
+    - Declare caches and use them in code
+    - Declare hibernate second level caches and assign to document metadata
+    - Conversations cached
+- Conversation state-based UIs
+- Isomorphic rendering
+- Project generation
+- UI interpretation
+- Multiple rendering pipelines
+- Plugin architecture
+- Drillable data intensive UIs
+- Automatic web service generation with Swagger
+- Scaffolding
+- Responsive UIs
+- SC, Faces, Angular/React/Vue/Flutter interpreted or generated UI
+- Shaped data payloads
+- Client and server-side events.
+- Change tracking
+- Defined lifecycle and callbacks for UI and domain events.
+- Workflow
+- SAIL
+    - Generation from metadata
+    - Selenese or Web Driver
+- Plugable converters/validators
+- Unit test generation
+    - CRUD Domain testing
+    - Action tests
+    - Test data generation
+    - Data store test data seeding.
+- Background UI task
+- Push tech
+- User Agent Sniffing in router
+- JS API and inject
+- XHTML off the reservation Page routing.
+- Charting
+    - Metadata definition
+    - Programmatic charting
+    - JS and server-side
+- Jobs
+- Skyve Script
+- Security Integration
+    - Database
+    - OAuth
+    - SAML 2.0
+    - SPNEGO/Kerberos
+    - OWASP
+- Tags
+- Flags
+- Thumbnail framework
+- Engineering
+    - Proxy framework
+    - Runtime compiling and in-memory class loading
+- Maven plugin
+- Javadoc
+    - metadata comment integration
+    - UML diagramming
+- Tiered resource serving
+- Error binding handling
