@@ -171,6 +171,7 @@ export default {
     props: {
         module: String,
         query: String,
+        document: String,
         title: String,
         columns: Object,
         dateFormat: {
@@ -221,7 +222,7 @@ export default {
                     command: () => openDocInSameWindow({
                         bizId: this.selectedRow.bizId,
                         module: this.module,
-                        document: this.query
+                        document: this.document
                     })
                 },
                 {
@@ -230,7 +231,7 @@ export default {
                     command: () => openDocInNewWindow({
                         bizId: this.selectedRow.bizId,
                         module: this.module,
-                        document: this.query
+                        document: this.document
                     })
                 }
             ]

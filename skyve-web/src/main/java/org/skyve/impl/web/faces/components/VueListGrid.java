@@ -67,6 +67,7 @@ public class VueListGrid extends UIOutput {
         params.setTargetSelector("#grid");
         params.setModule(moduleName);
         params.setQuery(queryName);
+        params.setDocument(documentName);
 
         // Column definitions
         Customer customer = CORE.getUser()
@@ -146,50 +147,59 @@ public class VueListGrid extends UIOutput {
 		}
 	}
 
-    private static class ListGridParams {
-        private String targetSelector;
-        private String module;
-        private String query;
-        private List<ColumnDefinition> columns = new ArrayList<>();
+	private static class ListGridParams {
+		private String targetSelector;
+		private String module;
+		private String query;
+		private String document;
+		private List<ColumnDefinition> columns = new ArrayList<>();
 
-        public String getTargetSelector() {
-            return targetSelector;
-        }
+		public String getTargetSelector() {
+			return targetSelector;
+		}
 
-        public void setTargetSelector(String targetSelector) {
-            this.targetSelector = targetSelector;
-        }
+		public void setTargetSelector(String targetSelector) {
+			this.targetSelector = targetSelector;
+		}
 
-        public String getModule() {
-            return module;
-        }
+		public String getDocument() {
+			return document;
+		}
 
-        public void setModule(String module) {
-            this.module = module;
-        }
+		public void setDocument(String document) {
+			this.document = document;
+		}
 
-        public String getQuery() {
-            return query;
-        }
+		public String getModule() {
+			return module;
+		}
 
-        public void setQuery(String query) {
-            this.query = query;
-        }
+		public void setModule(String module) {
+			this.module = module;
+		}
 
-        public List<ColumnDefinition> getColumns() {
-            return columns;
-        }
+		public String getQuery() {
+			return query;
+		}
 
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("targetSelector", targetSelector)
-                              .add("module", module)
-                              .add("query", query)
-                              .add("columns", columns)
-                              .toString();
-        }
-    }
+		public void setQuery(String query) {
+			this.query = query;
+		}
+
+		public List<ColumnDefinition> getColumns() {
+			return columns;
+		}
+
+		@Override
+		public String toString() {
+			return MoreObjects.toStringHelper(this)
+					.add("targetSelector", targetSelector)
+					.add("module", module)
+					.add("query", query)
+					.add("columns", columns)
+					.toString();
+		}
+	}
 
     private static class ColumnDefinition {
         private String field;
