@@ -417,6 +417,12 @@ export default {
         },
     },
     methods: {
+        notUsed() {
+            // Some dumb nonsense to prevent the transpilation process
+            // from using $ as a variable name and blatting jQuery
+            // There's potentially other globals at risk like this too
+            const dontDelete = $;
+        },
         async load() {
             this.loading = true;
 
