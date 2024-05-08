@@ -222,6 +222,7 @@ public class VueListGrid extends UIOutput {
 				.put("boolean", "boolean")
 				.put("richText", "text")
 				.put("text", "text")
+				.put("geometry", "text")
 				.build();  
 
 		public static ColumnDefinition fromColumnMetaData(ColumnMetaData metadata) {
