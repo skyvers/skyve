@@ -551,6 +551,9 @@ public class XMLMetaDataTest {
 		// System.out.println(result);
 
 		assertThat(result.contains("name=\"test\""), is(true));
+		assertThat("XML should not contain 'textSearchRoles'", result.contains("<textSearchRoles"), is(false));
+		assertThat("XML should not contain 'flagRoles'", result.contains("<flagRoles"), is(false));
+		assertThat("XML should not contain 'switchModeRoles'", result.contains("<switchModeRoles"), is(false));
 		assertThat("XML should not contain 'interceptors'", result.contains("<interceptors"), is(false));
 		assertThat("XML should not contain 'observers'", result.contains("<observers"), is(false));
 	}

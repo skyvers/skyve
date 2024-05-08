@@ -912,7 +912,11 @@ public class XMLMetaData {
 			// detect any empty customer elements which require children
 			if (uri.equals(CUSTOMER_NAMESPACE)) {
 				if (node.getParent() == null) {
-					removeEmptyChildElements(node, new String[] { "interceptors", "observers" });
+					removeEmptyChildElements(node, new String[] { "textSearchRoles",
+																	"flagRoles",
+																	"switchModeRoles",
+																	"interceptors",
+																	"observers" });
 				}
 			}
 
