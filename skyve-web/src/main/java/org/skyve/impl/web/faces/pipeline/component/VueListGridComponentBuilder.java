@@ -1,7 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,24 +27,21 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 			String title,
 			ListGrid grid,
 			boolean aggregateQuery) {
+
 		if (component != null) {
 			return component;
 		}
 
+
 		VueListGrid result = (VueListGrid) a.createComponent(VueListGrid.COMPONENT_TYPE);
 		Map<String, Object> attributes = result.getAttributes();
 
-		BiConsumer<String, Object> putIfNotNull = (key, value) -> {
-			if (value != null) {
-				attributes.put(key, value);
-			} else {
-				log.debug("Null value for key '{}'", key);
-			}
-		};
+		Document drivingDocument = model.getDrivingDocument();
+		attributes.put("module", drivingDocument.getOwningModuleName());
+		attributes.put("document", drivingDocument.getName());
+		attributes.put("query", modelName);
 
-		putIfNotNull.accept("module", moduleName);
-		putIfNotNull.accept("document", modelDocumentName);
-		putIfNotNull.accept("query", modelName);
+		log.trace("Created VueListGrid component with attributes: {}", attributes);
 
 		return result;
 	}
