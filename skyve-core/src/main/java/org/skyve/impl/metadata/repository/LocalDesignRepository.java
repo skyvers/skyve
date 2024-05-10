@@ -377,7 +377,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 			
 			// Check modelAggregate and previousComplete UserAccesses
 			for (UserAccess access : roleImpl.getAccesses().keySet()) {
-				if (access.isModelAggregate() || access.isDynamicImage()) {
+				if (access.isModelAggregate()) {
 					Document accessDocument = module.getDocument(customer, access.getDocumentName());
 					try {
 						getModel(customer, accessDocument, access.getComponent(), false);
@@ -386,6 +386,19 @@ public class LocalDesignRepository extends FileSystemRepository {
 						throw new MetaDataException("User Access [" + access.toString() + 
 														"] in module " + module.getName() +
 														" is for model " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+				}
+				else if (access.isDynamicImage()) {
+					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					try {
+						getDynamicImage(customer, accessDocument, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" is for dynamic image " + access.getComponent() +
 														" which does not exist.",
 														e);
 					}
@@ -790,7 +803,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		Set<UserAccess> accesses = viewImpl.getAccesses(customerImpl, document, uxui);
 		if (accesses != null) { // can be null if access control is turned off
 			for (UserAccess access : accesses) {
-				if (access.isModelAggregate() || access.isDynamicImage()) {
+				if (access.isModelAggregate()) {
 					try {
 						getModel(customer, document, access.getComponent(), false);
 					}
@@ -799,6 +812,19 @@ public class LocalDesignRepository extends FileSystemRepository {
 														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
 														" in view " + view.getName() +
 														" is for model " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+				}
+				else if (access.isDynamicImage()) {
+					try {
+						getDynamicImage(customer, document, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" is for dynamic image " + access.getComponent() +
 														" which does not exist.",
 														e);
 					}
