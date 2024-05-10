@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
@@ -38,7 +39,7 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 		DocumentPermissionScope scope = u.getScope(bizModule, bizDocument);
 		String key = null;
 		if (DocumentPermissionScope.customer.equals(scope)) {
-			key = new StringBuilder(128).append(bizModule).append('.').append(bizDocument).append(u.getCustomerName()).append('.').toString();
+			key = new StringBuilder(128).append(bizModule).append('.').append(bizDocument).append('.').append(u.getCustomerName()).toString();
 		}
 		else if (DocumentPermissionScope.global.equals(scope)) {
 			key = new StringBuilder(128).append(bizModule).append('.').append(bizDocument).toString();
@@ -58,8 +59,24 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 			}
 		}
 		else {
-			// This is most probably cached
+			// Note this is most probably cached in hibernate second level cache
 			result = CORE.getPersistence().retrieve(bizModule, bizDocument, bizId);
+			if (result == null) { // probably deleted somehow
+				result = super.newInstance(bean);
+				String newBizId = result.getBizId();
+				// replace the cached bizId if a new one exists in the data store
+				if (result.isPersisted()) {
+					INSTANCES.put(key, result.getBizId());
+					UtilImpl.LOGGER.warning("Cached instance " + key + '#' + bizId + 
+												" was replaced by " + newBizId + " in the data store.");
+				}
+				// remove from the cache if there is none in the data store
+				else {
+					INSTANCES.remove(key);
+					UtilImpl.LOGGER.warning("Cached instance " + key + '#' + bizId + 
+												" was removed  and a non-persistent instance " + newBizId + " was returned.");
+				}
+			}
 		}
 		return result;
 	}
