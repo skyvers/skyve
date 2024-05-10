@@ -17,12 +17,23 @@
 		},
 		
 		// Skyve data store for SQLServer
-		// Skyve data store
 		"skyve": {
 			// JNDI name
 			"jndi": "java:/SkyveDB", 
 			// Dialect
 			"dialect": "org.skyve.impl.persistence.hibernate.dialect.SQLServer2012SpatialDialect",
+			// Timeout for data store connections employed in general UI/forms processing - 0 indicates no timeout
+			"oltpConnectionTimeoutInSeconds": 30,
+			// Timeout for data store connections employed when running jobs and background tasks - 0 indicates no timeout
+			"asyncConnectionTimeoutInSeconds": 300
+		},
+		
+		// Skyve data store for MySQL
+		"skyve": {
+			// JNDI name
+			"jndi": "java:/SkyveDB", 
+			// Dialect
+			"dialect": "org.skyve.impl.persistence.hibernate.dialect.MySQL8InnoDBSpatialDialect",
 			// Timeout for data store connections employed in general UI/forms processing - 0 indicates no timeout
 			"oltpConnectionTimeoutInSeconds": 30,
 			// Timeout for data store connections employed when running jobs and background tasks - 0 indicates no timeout
@@ -49,5 +60,15 @@
 		"ddlSync": true, 
 		"catalog": "skyve",
 		"schema": "dbo"
+	},
+	
+	// Hibernate settings for MySQL
+	"hibernate": {
+		// Datastore hibernate uses
+		"dataStore": "skyve", 
+		// Issue DDL on startup to synchronise the database schema
+		"ddlSync": true, 
+		"catalog": null,
+		"schema": null
 	}
 }
