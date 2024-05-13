@@ -608,7 +608,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setEscape(false);
 
 		setTextAlign(result, textAlignment);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, ONE_HUNDRED, null);
+		// Note No default percentage width of 100% so that horizontal alignment of labels and blurbs works in form items.
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
 		setInvisible(result, invisibleConditionName, null);
 
 		return result;
