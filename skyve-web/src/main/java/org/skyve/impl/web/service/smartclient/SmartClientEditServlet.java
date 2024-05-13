@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
@@ -162,6 +163,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			        String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        if (webId != null) {
 			        	webContext = StateUtil.getCachedConversation(webId, request, response);
+			        	if (webContext == null) {
+			        		throw new ConversationEndedException(request.getLocale());
+			        	}
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
 			            persistence.setForThread();

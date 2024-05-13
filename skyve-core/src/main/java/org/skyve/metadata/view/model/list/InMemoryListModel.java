@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
@@ -27,22 +26,34 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.SortParameter;
 
 public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
-	private Customer customer;
 	private Module module;
 	private Document drivingDocument;
 	private Map<String, Object> parameters;
 	private List<Bean> rows;
 	
+	protected InMemoryListModel(Module module, Document drivingDocument) {
+		setDrivingDocument(module, drivingDocument);
+	}
+	
 	/**
-	 * 
-	 * @param module
-	 * @param document
+	 * Use this constructor when the driving document is explicitly set in postConstruct call.
 	 */
-	public void setDrivingDocument(Module module, Document drivingDocument) {
-		customer = CORE.getUser().getCustomer();
+	protected InMemoryListModel() {
+		// nothing to see here
+	}
+	
+	/**
+	 * Used to set the driving document in postConstruct() of subclasses.
+	 * @param module
+	 * @param drivingDocument
+	 */
+	protected void setDrivingDocument(Module module, Document drivingDocument) {
 		this.module = module;
 		this.drivingDocument = drivingDocument;
-		
+	}
+	
+	@Override
+	public void postConstruct(Customer customer, boolean runtime) {
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);
 		projections.add(PersistentBean.TAGGED_NAME);

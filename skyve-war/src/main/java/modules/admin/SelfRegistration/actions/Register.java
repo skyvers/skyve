@@ -1,10 +1,12 @@
 package modules.admin.SelfRegistration.actions;
 
+import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
@@ -13,6 +15,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Group.GroupExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
 import modules.admin.domain.Configuration;
@@ -31,6 +34,12 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
 		if (bean.getUser() != null && bean.getUser().getContact() != null) {
+			// Get and validate the recaptcha response from the request parameters
+			String captchaResponse = ((HttpServletRequest) webContext.getHttpServletRequest()).getParameter("g-recaptcha-response");
+			if ((captchaResponse == null) || (! WebUtil.validateRecaptcha(captchaResponse))) {
+				throw new ValidationException("Captcha is not valid");
+			}
+
 			// validate the email and confirm email match
 			bean.validateConfirmEmail();
 
@@ -86,6 +95,11 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 						bean.getUser().getContact().getEmail1()));
 				
 			} catch (Exception e) {
+				// reset the recaptcha on an error
+				PrimeFaces pf = PrimeFaces.current();
+				if (pf.isAjaxRequest()) {
+					pf.executeScript("if(document.getElementById('g-recaptcha-response')){try{grecaptcha.reset();}catch(error){PrimeFaces.error(error);}}");
+				}
 				throw e;
 			}
 		}

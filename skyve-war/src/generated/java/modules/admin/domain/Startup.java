@@ -92,7 +92,10 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String apiGoogleMapsKeyPropertyName = "apiGoogleMapsKey";
 
 	/** @hidden */
-	public static final String apiGoogleRecaptchaKeyPropertyName = "apiGoogleRecaptchaKey";
+	public static final String apiGoogleRecaptchaSiteKeyPropertyName = "apiGoogleRecaptchaSiteKey";
+
+	/** @hidden */
+	public static final String apiGoogleRecaptchaSecretKeyPropertyName = "apiGoogleRecaptchaSecretKey";
 
 	/** @hidden */
 	public static final String accountAllowUserSelfRegistrationPropertyName = "accountAllowUserSelfRegistration";
@@ -373,7 +376,15 @@ public abstract class Startup extends AbstractTransientBean {
 	 * To enable the forgot password function, this application must be registered 
 					for Google Recaptcha and the site key must be specified here.
 	 **/
-	private String apiGoogleRecaptchaKey;
+	private String apiGoogleRecaptchaSiteKey;
+
+	/**
+	 * Google Recaptcha Secret Key
+	 * <br/>
+	 * To enable the forgot password function, this application must be registered 
+					for Google Recaptcha and the secret key can be specified here to enable server-side validation for stronger security.
+	 **/
+	private String apiGoogleRecaptchaSecretKey;
 
 	/**
 	 * Allow User Self Registration
@@ -732,21 +743,39 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #apiGoogleRecaptchaKey} accessor.
+	 * {@link #apiGoogleRecaptchaSiteKey} accessor.
 	 * @return	The value.
 	 **/
-	public String getApiGoogleRecaptchaKey() {
-		return apiGoogleRecaptchaKey;
+	public String getApiGoogleRecaptchaSiteKey() {
+		return apiGoogleRecaptchaSiteKey;
 	}
 
 	/**
-	 * {@link #apiGoogleRecaptchaKey} mutator.
-	 * @param apiGoogleRecaptchaKey	The new value.
+	 * {@link #apiGoogleRecaptchaSiteKey} mutator.
+	 * @param apiGoogleRecaptchaSiteKey	The new value.
 	 **/
 	@XmlElement
-	public void setApiGoogleRecaptchaKey(String apiGoogleRecaptchaKey) {
-		preset(apiGoogleRecaptchaKeyPropertyName, apiGoogleRecaptchaKey);
-		this.apiGoogleRecaptchaKey = apiGoogleRecaptchaKey;
+	public void setApiGoogleRecaptchaSiteKey(String apiGoogleRecaptchaSiteKey) {
+		preset(apiGoogleRecaptchaSiteKeyPropertyName, apiGoogleRecaptchaSiteKey);
+		this.apiGoogleRecaptchaSiteKey = apiGoogleRecaptchaSiteKey;
+	}
+
+	/**
+	 * {@link #apiGoogleRecaptchaSecretKey} accessor.
+	 * @return	The value.
+	 **/
+	public String getApiGoogleRecaptchaSecretKey() {
+		return apiGoogleRecaptchaSecretKey;
+	}
+
+	/**
+	 * {@link #apiGoogleRecaptchaSecretKey} mutator.
+	 * @param apiGoogleRecaptchaSecretKey	The new value.
+	 **/
+	@XmlElement
+	public void setApiGoogleRecaptchaSecretKey(String apiGoogleRecaptchaSecretKey) {
+		preset(apiGoogleRecaptchaSecretKeyPropertyName, apiGoogleRecaptchaSecretKey);
+		this.apiGoogleRecaptchaSecretKey = apiGoogleRecaptchaSecretKey;
 	}
 
 	/**

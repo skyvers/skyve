@@ -69,34 +69,47 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	private String dynamicEntityPersistentIdentifier;
 	private String dynamicRelationPersistentIdentifier;
 
-	public void setQuery(MetaDataQueryDefinition query) throws Exception {
-		description = query.getDescription();
-		columns = query.getColumns();
-		
-		user = CORE.getUser();
-		customer = user.getCustomer();
-		module = query.getDocumentModule(customer);
-		document = module.getDocument(customer, query.getDocumentName());
-
-		determinePersistenceIdentifiers();
-		
-		setDrivingDocument(module, document);
+	private MetaDataQueryDefinition query;
+	
+	public RDBMSDynamicPersistenceListModel(MetaDataQueryDefinition query) {
+		this.query = query;
 	}
 	
-	public void setModel(String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
+	public RDBMSDynamicPersistenceListModel(String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
 		this.description = description;
+		this.document = drivingDocument;
 		this.columns = columns;
-		
-		user = CORE.getUser();
-		customer = user.getCustomer();
-		document = drivingDocument;
-		module = customer.getModule(document.getOwningModuleName());
-
-		determinePersistenceIdentifiers();
-
-		setDrivingDocument(module, document);
 	}
 	
+	/**
+	 * Establish the model state after the query or model constructor has been called.
+	 * Only set the user if this is instantiated at runtime.
+	 */
+	@Override
+	public void postConstruct(@SuppressWarnings("hiding") Customer customer, boolean runtime) {
+		this.customer = customer;
+
+		if (query != null) { // query constructor called
+			description = query.getDescription();
+			columns = query.getColumns();
+			
+			module = query.getDocumentModule(customer);
+			document = module.getDocument(customer, query.getDocumentName());
+		}
+		else { // model constructor called
+			module = customer.getModule(document.getOwningModuleName());
+		}
+
+		determinePersistenceIdentifiers();
+		
+		setDrivingDocument(module, document);
+		super.postConstruct(customer, runtime);
+
+		if (runtime) {
+			user = CORE.getUser();
+		}
+	}
+
 	private void determinePersistenceIdentifiers() {
 		Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 		@SuppressWarnings("null")

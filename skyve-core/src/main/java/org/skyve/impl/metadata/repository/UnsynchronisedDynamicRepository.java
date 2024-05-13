@@ -13,10 +13,11 @@ import org.skyve.impl.metadata.repository.view.ViewMetaData;
 
 /**
  * Extend or use this repository for dynamic domains where there is no on-demand loading.
+ * This implementation does not have a thread safe cache and mutations should happen before the repository is placed in the chain.
+ * Use this implementation when preloading all metadata on startup.
  * @author mike
- *
  */
-public class DynamicRepository extends AbstractDynamicOnDemandRepository {
+public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	@Override
 	public void populateKeys() {
 		// nothing to do as metadata will be added programmatically

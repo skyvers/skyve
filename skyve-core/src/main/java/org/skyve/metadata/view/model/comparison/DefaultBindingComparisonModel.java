@@ -19,14 +19,17 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 	private C toCompareTo;
 	private String[] excludedBindingPrefixes;
 	
-	public DefaultBindingComparisonModel(Customer customer,
-											Document document,
+	public DefaultBindingComparisonModel(Document document,
 											C toCompareTo,
 											String[] excludedBindingPrefixes) {
-		this.customer = customer;
 		this.document = document;
 		this.toCompareTo = toCompareTo;
 		this.excludedBindingPrefixes = excludedBindingPrefixes;
+	}
+	
+	@Override
+	public void postConstruct(@SuppressWarnings("hiding") Customer customer, boolean runtime) {
+		this.customer = customer;
 	}
 	
 	@Override

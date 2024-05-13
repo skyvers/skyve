@@ -289,6 +289,7 @@ public class MavenSkyveProject {
 		if (webInfPages.exists()) {
 			skyveWebAppFiles.addAll(FileUtils.listFiles(webInfPages, null, true));
 		}
+		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("beans.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("faces-config.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("jboss-classloading.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("jboss-deployment-structure.xml").toFile());

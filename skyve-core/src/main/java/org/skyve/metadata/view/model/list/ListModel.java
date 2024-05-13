@@ -21,7 +21,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -31,6 +30,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.view.model.ViewModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.persistence.AutoClosingIterable;
@@ -39,7 +39,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
-public abstract class ListModel<T extends Bean> implements MetaData {
+public abstract class ListModel<T extends Bean> implements ViewModel {
 	private T bean;
 	public T getBean() {
 		return bean;

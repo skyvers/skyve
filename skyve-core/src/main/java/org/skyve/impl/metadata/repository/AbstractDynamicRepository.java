@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository;
 import java.io.File;
 import java.sql.Connection;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
@@ -26,7 +27,19 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
-public abstract class AbstractDynamicOnDemandRepository extends MutableCachedRepository {
+/**
+ * A MutableCachedRepository that uses a plain TreeMap as the cache and is not thread-safe.
+ * It implements the Repository Java/Code methods as no-ops.
+ * Any thread safe extension classes need to implement their own concurrency.
+ */
+public abstract class AbstractDynamicRepository extends MutableCachedRepository {
+	/**
+	 * Use a plain TreeMap as the cache.
+	 */
+	public AbstractDynamicRepository() {
+		super(new TreeMap<>());
+	}
+
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		return null;

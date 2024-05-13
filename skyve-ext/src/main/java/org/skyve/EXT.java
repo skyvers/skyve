@@ -352,15 +352,15 @@ public class EXT {
 		try {
 			if (d.isDynamic()) {
 				if ((AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS != null) && RDBMSDynamicPersistence.class.isAssignableFrom(AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS)) {
-					RDBMSDynamicPersistenceListModel<T> result = new RDBMSDynamicPersistenceListModel<>();
-					result.setQuery(query);
+					RDBMSDynamicPersistenceListModel<T> result = new RDBMSDynamicPersistenceListModel<>(query);
+					result.postConstruct(c, true);
 					return result;
 				}
 				throw new DomainException("Cannot create new list model for dynamic persistence implementation " + AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS);
 			}
 
-			DocumentQueryListModel<T> result = new DocumentQueryListModel<>();
-			result.setQuery(query);
+			DocumentQueryListModel<T> result = new DocumentQueryListModel<>(query);
+			result.postConstruct(c, true);
 			return result;
 		}
 		catch (SkyveException e) {

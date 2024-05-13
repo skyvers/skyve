@@ -11,6 +11,7 @@
 		</f:metadata>
 		<h:head>
 			<title>#{_skyveImage.i18n['page.contentUpload.title']}</title>
+			<base href="#{_skyveImage.baseHref}" />
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -123,7 +124,13 @@
 			</script>
 		</h:head>
 		<h:body style="height:2000px">
-			<h:form id="form" enctype="multipart/form-data" prependId="false">
+			<p:staticMessage severity="error"
+								summary="You cannot access this function"
+								detail="Click &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;window.top.location=''&quot;&gt;here&lt;/a&gt;"
+								rendered="#{not _skyveImage.canAccess}"
+								escape="false"
+								style="width:100%; height:50px" />
+			<h:form id="form" enctype="multipart/form-data" prependId="false" rendered="#{_skyveImage.canAccess}">
 				<h:inputHidden id="_c" value="#{_skyveImage.context}" />
 				<h:inputHidden id="_b" value="#{_skyveImage.binding}" />
 				<h:inputHidden id="_n" value="#{_skyveImage.contentBinding}" />

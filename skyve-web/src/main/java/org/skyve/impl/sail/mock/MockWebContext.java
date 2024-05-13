@@ -15,6 +15,7 @@ public final class MockWebContext extends AbstractWebContext {
 
 	public MockWebContext() {
 		super(UUID.randomUUID().toString(), null, null);
+		sessionId = UUID.randomUUID().toString();
 	}
 
 	@Override

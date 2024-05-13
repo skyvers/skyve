@@ -43,7 +43,7 @@ Skyve is created by [Biz Hub Australia](https://www.bizhub.com.au/) and we offer
 
 ## Contributing
 
-We welcome new contributions to the project, however small. Please refer to our [contribution guidelines](https://github.com/skyvers/skyve/blob/master/CONTRIBUTING.md) for information about contributing to Skyve.
+We welcome new contributions to the project, however small. Please refer to our [contribution guidelines](/CONTRIBUTING.md) for information about contributing to Skyve.
 
 ## Questions
 
@@ -70,6 +70,10 @@ The development guide is available at [github.com/skyvers/skyve-dev-guide](https
 ### Skyve Cookbook
 
 The Skyve Cookbook is available at [github.com/skyvers/skyve-cookbook](https://github.com/skyvers/skyve-cookbook). This contains code samples of advanced usage such as REST API configuration and troubleshooting advice.
+
+### Architecure Document
+
+This document is a work in progress and can be found [here](/docs/architecture.md)
 
 ## Creating a new Skyve project
 

@@ -439,26 +439,11 @@ class ViewValidator extends ViewVisitor {
 		Document result = null;
 		if (modelName != null) {
 			try {
-				StringBuilder key = new StringBuilder(128);
-				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
-				key.append(document.getName()).append('/');
-				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
-				Class<?> modelClass = repository.getJavaClass(customer, key.toString());
-				if (modelClass == null) {
-					throw new MetaDataException(key + " not found.");
-				}
-				
-				// Try load the model class, if it doesn't load because of some dependency on runtime (eg injection), return null
-				try {
-					@SuppressWarnings("unchecked")
-					ListModel<Bean> model = (ListModel<Bean>) modelClass.getConstructor().newInstance();
-					result = model.getDrivingDocument();
-				}
-				catch (@SuppressWarnings("unused") Exception e) {
-					// can't do anything to get the driving document
-				}
+				ListModel<Bean> model = repository.getListModel(customer, document, modelName, false);
+				// Check driving document can be obtained to ensure bindings and accesses can be calculated
+				result = model.getDrivingDocument();
 			}
-			catch (Exception e) { // NB could be class cast problems
+			catch (Exception e) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid list model of " + modelName, e);
 			}
 		}
@@ -468,15 +453,9 @@ class ViewValidator extends ViewVisitor {
 	private void validateMapModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
-				StringBuilder key = new StringBuilder(128);
-				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
-				key.append(document.getName()).append('/');
-				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
-				if (repository.getJavaClass(customer, key.toString()) == null) {
-					throw new MetaDataException(key + " not found.");
-				}
+				repository.getMapModel(customer, document, modelName, false);
 			}
-			catch (Exception e) { // NB could be class cast problems
+			catch (Exception e) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid map model of " + modelName, e);
 			}
 		}
@@ -485,15 +464,9 @@ class ViewValidator extends ViewVisitor {
 	private void validateChartModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
-				StringBuilder key = new StringBuilder(128);
-				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
-				key.append(document.getName()).append('/');
-				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
-				if (repository.getJavaClass(customer, key.toString()) == null) {
-					throw new MetaDataException(key + " not found.");
-				}
+				repository.getChartModel(customer, document, modelName, false);
 			}
-			catch (Exception e) { // NB could be class cast problems
+			catch (Exception e) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid chart model of " + modelName, e);
 			}
 		}
@@ -502,15 +475,9 @@ class ViewValidator extends ViewVisitor {
 	private void validateComparisonModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
-				StringBuilder key = new StringBuilder(128);
-				key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
-				key.append(document.getName()).append('/');
-				key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
-				if (repository.getJavaClass(customer, key.toString()) == null) {
-					throw new MetaDataException(key + " not found.");
-				}
+				repository.getComparisonModel(customer, document, modelName, false);
 			}
-			catch (Exception e) { // NB could be class cast problems
+			catch (Exception e) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid comparison model of " + modelName, e);
 			}
 		}

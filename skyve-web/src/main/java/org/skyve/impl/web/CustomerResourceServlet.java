@@ -33,6 +33,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 		
 public class CustomerResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -188,7 +189,8 @@ public class CustomerResourceServlet extends HttpServlet {
 				Util.LOGGER.severe("No resource file name or data file name in the URL");
 			}
 			else {
-				User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+				HttpSession session = request.getSession(false);
+				User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 				Customer customer = null;
 				String customerName = null;
 				if (user != null) { // we are logged in
@@ -226,6 +228,9 @@ public class CustomerResourceServlet extends HttpServlet {
 						cm = EXT.newContentManager();
 						content = cm.getAttachment(resourceFileName);
 					}
+					else {
+						Util.LOGGER.severe("No skyve user or customer or the contentId is not valid");
+					}
 				} 
 				else if (DownloadAreaType.resources.toString().equals(resourceArea)) {
 					Repository repository = CORE.getRepository();
@@ -236,7 +241,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					else {
 						int underscoreIndex = resourceFileName.lastIndexOf('_');
 						if (underscoreIndex > 0) {
-							int dotIndex = resourceFileName.lastIndexOf('.');
+			  				int dotIndex = resourceFileName.lastIndexOf('.');
 							if (dotIndex > underscoreIndex) {
 								String baseFileName = resourceFileName.substring(0, underscoreIndex) + 
 														resourceFileName.substring(dotIndex);

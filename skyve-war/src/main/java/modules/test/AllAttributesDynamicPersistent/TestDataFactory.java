@@ -3,6 +3,6 @@ package modules.test.AllAttributesDynamicPersistent;
 import org.skyve.util.test.SkyveFactory;
 
 @SkyveFactory
-public class DataFactory {
+public class TestDataFactory {
 	// builder defaults
 }

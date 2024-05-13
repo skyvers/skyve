@@ -220,9 +220,9 @@ public class ChartServlet extends HttpServlet {
 			throw new SecurityException("read this data", user.getName());
 		}
 
-		ListGridChartListModel model = new ListGridChartListModel();
-		model.setQuery(query);
-
+		ListGridChartListModel model = new ListGridChartListModel(query);
+		model.postConstruct(customer, true);
+		
 		String tagId = request.getParameter("tagId");
 		model.setSelectedTagId(tagId);
 

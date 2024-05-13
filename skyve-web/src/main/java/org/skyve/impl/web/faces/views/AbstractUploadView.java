@@ -7,11 +7,14 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
+import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 import jakarta.faces.annotation.ManagedProperty;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpSession;
 
 public abstract class AbstractUploadView extends LocalisableView {
 	private static final long serialVersionUID = 8618349823087627588L;
@@ -26,6 +29,10 @@ public abstract class AbstractUploadView extends LocalisableView {
 	@ManagedProperty(value = "#{param." + AbstractWebContext.BINDING_NAME + "}")
 	private String binding;
 
+	// Indicates that there is a session and a skyve user in that session.
+	// Used to render a banner with login link (to replace winodw.location in frame bust)
+	private boolean canAccess;
+
 	private String whitelistRegex;
 	private long maximumSizeInBytes;
 
@@ -38,6 +45,8 @@ public abstract class AbstractUploadView extends LocalisableView {
 	protected void postConstruct() {
 		context = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(context));
 		binding = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(binding));
+		HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
+		canAccess = (session != null) && (session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME) != null);
 	}
 	
 	public String getContext() {
@@ -46,6 +55,15 @@ public abstract class AbstractUploadView extends LocalisableView {
 
 	public String getBinding() {
 		return binding;
+	}
+
+	public boolean isCanAccess() {
+		return canAccess;
+	}
+
+	@SuppressWarnings("static-method")
+	public final String getBaseHref() {
+		return Util.getSkyveContextUrl() + '/';
 	}
 
 	public String getWhitelistRegex() {

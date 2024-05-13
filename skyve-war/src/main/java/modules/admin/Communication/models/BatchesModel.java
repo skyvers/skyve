@@ -6,11 +6,9 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeSet;
 
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.Filter;
@@ -27,9 +25,9 @@ public class BatchesModel extends ListModel<Communication> {
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 
-	public BatchesModel() throws Exception {
-		Customer c = CORE.getUser().getCustomer();
-		drivingDocument = c.getModule(DownloadFolder.MODULE_NAME).getDocument(c, DownloadFolder.DOCUMENT_NAME);
+	@Override
+	public void postConstruct(org.skyve.metadata.customer.Customer customer, boolean runtime) {
+		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
 
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);

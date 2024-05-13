@@ -108,12 +108,22 @@
 			<description>If using Google Maps for your map type, specify your map key here</description>
 			<length>200</length>
 		</text>
-		<text name="apiGoogleRecaptchaKey">
+		<text name="apiGoogleRecaptchaSiteKey">
 			<displayName>Google Recaptcha Site Key</displayName>
 			<description>
 				<![CDATA[
 					To enable the forgot password function, this application must be registered 
 					for Google Recaptcha and the site key must be specified here.
+				]]>
+			</description>
+			<length>200</length>
+		</text>
+		<text name="apiGoogleRecaptchaSecretKey">
+			<displayName>Google Recaptcha Secret Key</displayName>
+			<description>
+				<![CDATA[
+					To enable the forgot password function, this application must be registered 
+					for Google Recaptcha and the secret key can be specified here to enable server-side validation for stronger security.
 				]]>
 			</description>
 			<length>200</length>

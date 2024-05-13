@@ -25,24 +25,29 @@
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
 	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
 	String passwordResetToken = OWASP.sanitise(Sanitisation.text, request.getParameter("t"));
+	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
 
 	if (passwordResetToken == null) {
 		passwordChangeErrorMessage = Util.i18n("page.resetPassword.link.error", locale);
 	}
 	// This is a postback, process it and move on
-	else if ((newPasswordValue != null) && (confirmPasswordValue != null)) {
-		passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
-		if (passwordChangeErrorMessage == null) {
-			
-			String redirectURL = response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp");
-
-			String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
-			if (customerName != null && !customerName.isBlank()) {
-				redirectURL = redirectURL + "?" + AbstractWebContext.CUSTOMER_COOKIE_NAME + "=" + customerName;
+	else if ((newPasswordValue != null) && (confirmPasswordValue != null) && (captcha != null)) {
+		if (WebUtil.validateRecaptcha(captcha)) {
+			passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
+			if (passwordChangeErrorMessage == null) {
+				String redirectURL = response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp");
+	
+				String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
+				if (customerName != null && !customerName.isBlank()) {
+					redirectURL = redirectURL + "?" + AbstractWebContext.CUSTOMER_COOKIE_NAME + "=" + customerName;
+				}
+				
+				response.sendRedirect(redirectURL);
+				return;
 			}
-			
-			response.sendRedirect(redirectURL);
-			return;
+		}
+		else {
+			UtilImpl.LOGGER.severe("Recaptcha failed validation");
 		}
 	}
 %>
@@ -76,6 +81,7 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+		<script src='https://www.google.com/recaptcha/api.js'></script>
 
 		<script type="text/javascript">
 			<!--
@@ -121,9 +127,9 @@
 		</script>
 	</head>
 	<% if (passwordChangeErrorMessage != null) { %>
-	<body style="background:white" onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
+		<body style="background:white" onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
 	<% } else { %>
-	<body style="background:white" onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus()">
+		<body style="background:white" onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus()">
 	<% } %>
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">

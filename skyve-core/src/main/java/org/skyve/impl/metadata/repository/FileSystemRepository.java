@@ -49,6 +49,7 @@ import jakarta.annotation.Nullable;
 
 public abstract class FileSystemRepository extends MutableCachedRepository {
 	protected String absolutePath;
+	// used to stop resources paths breaking out of the web root (eg ../../../../)
 	private String canonicalBasePath;
 	protected boolean loadClasses = true;
 	// class maps
@@ -57,8 +58,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	/**
 	 * Absolute path constructor
 	 * Prevent external instantiation.
+	 * Use a ConcurrentHashMap for the cache as it is thread-safe and performant for mostly-read operations.
 	 */
 	protected FileSystemRepository(@Nonnull String absolutePath) {
+		super(new ConcurrentHashMap<>());
 		this.absolutePath = absolutePath.replace('\\', '/');
 		if (this.absolutePath.charAt(this.absolutePath.length() - 1) != '/') {
 			this.absolutePath += '/';
@@ -818,8 +821,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
-	protected @Nonnull <T extends MetaData> T getModel(@Nullable Customer customer, @Nonnull Document document,
-			@Nonnull String modelName, boolean runtime) {
+	protected @Nonnull <T extends MetaData> T getModel(@Nullable Customer customer,
+														@Nonnull Document document,
+														@Nonnull String modelName,
+														boolean runtime) {
 		// If dynamic, use the models map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -844,12 +849,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 																						Document document, 
 																						String modelName,
 																						boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		ComparisonModel<T, C> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		MapModel<T> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
 	@Override
@@ -857,12 +866,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 															Document document,
 															String modelName,
 															boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		ChartModel<T> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		ListModel<T> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
 	protected @Nullable <T extends MetaData> T getClassAction(@Nullable Customer customer,

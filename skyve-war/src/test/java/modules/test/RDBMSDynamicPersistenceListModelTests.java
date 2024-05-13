@@ -15,7 +15,6 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 
 public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
-
 	@Test
 	public void testQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -24,8 +23,8 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		p.save(row);
 		
 		MetaDataQueryDefinition q = m.getMetaDataQuery("qRDBMSDynamic");
-		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>();
-		model.setQuery(q);
+		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>(q);
+		model.postConstruct(c, true);
 		
 		model.getRows();
 		// TODO check rows
@@ -38,15 +37,14 @@ public class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
-		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>();
-		
 		List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
 		column.setBinding(AllAttributesPersistent.colourPropertyName);
 		column.setDisplayName("Colour");
 		columns.add(column);
 		
-		model.setModel("Test", aadpd, columns);
+		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>("Test", aadpd, columns);
+		model.postConstruct(c, true);
 		
 		model.getRows();
 		// TODO check rows

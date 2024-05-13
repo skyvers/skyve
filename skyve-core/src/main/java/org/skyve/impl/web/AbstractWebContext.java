@@ -10,9 +10,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.web.WebContext;
 
 public abstract class AbstractWebContext implements Serializable, WebContext {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 876761059493617411L;
 	
 	/**
@@ -56,6 +53,10 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 	 */
 	public static String EMULATED_USER_AGENT_TYPE_KEY = "skyveEnumlatedUserAgentType";
 
+	// The Session ID of the session that "owns" this conversation - for security.
+	// This is set in the ViewWebContext constructor where we have access to the web session classes.
+	protected String sessionId;
+	
 	private Map<String, Bean> contextBeans = new TreeMap<>();
 
 	private AbstractPersistence conversation;
@@ -91,6 +92,10 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 	@Override
 	public void setKey(String key) {
 		this.key = key;
+	}
+	
+	public String getSessionId() {
+		return sessionId;
 	}
 	
 	@Override

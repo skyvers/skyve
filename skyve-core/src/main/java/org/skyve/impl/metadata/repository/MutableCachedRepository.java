@@ -3,9 +3,9 @@ package org.skyve.impl.metadata.repository;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.CORE;
 import org.skyve.impl.generate.DomainGenerator;
@@ -41,21 +41,28 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 public abstract class MutableCachedRepository extends ProvidedRepositoryDelegate implements MutableRepository, OnDemandRepository {
+	protected static final String ROUTER_KEY = ROUTER_NAMESPACE + ROUTER_NAME;
+
 	/**
 	 * The cache.
 	 * MetaData namespace and name -> MetaData.
 	 * eg customers/bizhub
 	 *    modules/admin
 	 *    modules/admin/Contact
-	 * Thread-safe and performant for mostly-read operations.
 	 * NB The population of the cache cannot use computeIfPresent() and computeIfAbsent() because the processing could
-	 * 		end up trying to compute the same key within the labda functions arguments to these methods which will throw
+	 * 		end up trying to compute the same key within the lambda functions arguments to these methods which will throw
 	 * 		java.lang.IllegalStateException: Recursive update as per the API contract.
 	 */
-	private ConcurrentHashMap<String, Optional<MetaData>> cache = new ConcurrentHashMap<>();
-	
-	protected static final String ROUTER_KEY = ROUTER_NAMESPACE + ROUTER_NAME;
+	private Map<String, Optional<MetaData>> cache;
 
+	/**
+	 * Used to supply the Map implementation required by this repository.
+	 * @param cache	The map to use as the cache.
+	 */
+	protected MutableCachedRepository(Map<String, Optional<MetaData>> cache) {
+		this.cache = cache;
+	}
+	
 	@Override
 	public void evictCachedMetaData(Customer customer) {
 		// Clear the lot

@@ -122,6 +122,11 @@ public class ContentUploadView extends AbstractUploadView {
 	 * since the upload pages are embedded in iframes.
 	 */
 	private void upload(String fileName, byte[] fileContents, FacesContext fc) throws Exception {
+		// If there is no access, don't process the upload and return to allow the view to render the no access message
+		if (! isCanAccess()) {
+			return;
+		}
+
 		String context = getContext();
 		if ((context == null) || (contentBinding == null)) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context or contentBinding is null");
@@ -182,11 +187,12 @@ public class ContentUploadView extends AbstractUploadView {
 			// update the content UUID value on the client and popoff the window on the stack
 			StringBuilder js = new StringBuilder(128);
 			String sanitisedContentBinding = BindUtil.sanitiseBinding(contentBinding);
-			// if top.isc is defined then we are using smart client, set the value in the values manager
-			js.append("if(top.isc){");
-			js.append("top.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
-			js.append("','").append(contentId).append("');top.isc.WindowStack.popoff(false)");
+			// if window.parent.isc is defined then we are using smart client, set the value in the values manager
+			js.append("if(window.parent.isc){");
+			js.append("window.parent.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
+			js.append("','").append(contentId).append("');window.parent.isc.WindowStack.popoff(false)");
 			// otherwise we are using prime faces, set the hidden input element that ends with "_<binding>"
+			// NB Cannot use window.parent here to support nested frames as the script is executed at the top window context.
 			js.append("}else if(top.SKYVE){if(top.SKYVE.PF){top.SKYVE.PF.afterContentUpload('").append(sanitisedContentBinding);
 			js.append("','").append(contentId).append("','");
 			js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
