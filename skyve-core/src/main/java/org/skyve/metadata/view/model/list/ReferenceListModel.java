@@ -51,6 +51,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	public ReferenceListModel(Document drivingDocument, String referenceBinding) {
 		this.moduleName = drivingDocument.getOwningModuleName();
 		this.drivingDocumentName = drivingDocument.getName();
+		this.referenceBinding = referenceBinding;
 	}
 	
 	/**
@@ -62,6 +63,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	public ReferenceListModel(String moduleName, String drivingDocumentName, String referenceBinding) {
 		this.moduleName = moduleName;
 		this.drivingDocumentName = drivingDocumentName;
+		this.referenceBinding = referenceBinding;
 	}
 	
 	@Override
