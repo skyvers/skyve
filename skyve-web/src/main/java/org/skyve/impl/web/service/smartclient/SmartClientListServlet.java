@@ -749,6 +749,7 @@ public class SmartClientListServlet extends HttpServlet {
 			// What filter operator should I use for this parameter?
 			SmartClientFilterOperator fo = filterOperator;
 
+			// Used by this Servlet and SmartClientTagServlet for Enum simple criteria (repeated request params)
 			if (value instanceof Object[]) {
 				Object[] values = (Object[]) value;
 				for (int i = 0, l = values.length; i < l; i++) {
@@ -761,6 +762,24 @@ public class SmartClientListServlet extends HttpServlet {
 										converter, 
 										type);
 						values[i] = v;
+					}
+				}
+				fo = SmartClientFilterOperator.inSet;
+			}
+			// Used by ReportServlet and ChartServlet for Enum simple criteria (JSON array)
+			else if (value instanceof List<?>) {
+				@SuppressWarnings("unchecked")
+				List<Object> values = (List<Object>) value;
+				for (int i = 0, l = values.size(); i < l; i++) {
+					Object v = values.get(i);
+					if (v != null) {
+						v = fromString(binding, 
+										"value", 
+										v.toString(),
+										customer, 
+										converter, 
+										type);
+						values.set(i, v);
 					}
 				}
 				fo = SmartClientFilterOperator.inSet;
