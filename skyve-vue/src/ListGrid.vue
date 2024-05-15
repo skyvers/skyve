@@ -591,6 +591,13 @@ export default {
         onRowContextMenu(event) {
             this.$refs.cm.show(event.originalEvent);
         },
+        onRowClick(event) {
+            openDocInSameWindow({
+                bizId: event.data.bizId,
+                module: this.module,
+                document: this.document
+            });
+        }
     },
     mounted() {
 
@@ -649,6 +656,7 @@ export default {
         contextMenu
         v-model:contextMenuSelection="selectedRow"
         @rowContextmenu="onRowContextMenu"
+        @row-click="onRowClick"
     >
         <template #header>
             <div v-if="title">
