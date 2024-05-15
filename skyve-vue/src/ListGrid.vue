@@ -747,14 +747,21 @@ export default {
         </Column>
         <Column>
             <template #header>
-                <Button icon="pi pi-plus" @click="() => zoomInto()" />
+                <Button
+                    icon="pi pi-plus"
+                    @click="() => zoomInto()"
+                />
             </template>
             <template #body="{ data }">
-                <Button icon="pi pi-chevron-right" @click="() => zoomInto(data.bizId)" />
+                <Button
+                    icon="pi pi-chevron-right"
+                    @click="() => zoomInto(data.bizId)"
+                />
             </template>
         </Column>
         <template #footer>
             <Dropdown
+                :pt:wrapper:style="{ maxHeight: 'none' }"
                 v-model="summarySelection"
                 :options="summaryOpts"
             />
