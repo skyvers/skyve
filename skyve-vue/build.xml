@@ -6,7 +6,7 @@
 		<copy 
 			todir="../skyve-web/src/main/resources/META-INF/resources/skyvevue" 
 			verbose="true">
-			<fileset dir="./dist/assets" />
+			<fileset dir="./dist/assets" includes="index.js,index.css" />
 		</copy>
 	</target>
 	<target name="build-vue">

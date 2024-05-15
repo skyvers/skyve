@@ -150,6 +150,10 @@ export default {
         },
         clearSnapshot() {
             this.selectedSnapshot = null;
+        },
+        cancelDialog() {
+            this.showDialog = false
+            this.snapshotName = '';
         }
     },
     watch: {
@@ -193,27 +197,28 @@ export default {
         :visible="showDialog"
         modal
         header="Enter the new Snapshot name"
+        @update:visible="cancelDialog"
     >
-        <div>
+        <div class="flex flex-column gap-2">
             <label for="snapName">Snapshot name</label>
             <InputText
                 id="snapName"
                 v-model="snapshotName"
             />
-        </div>
-        <div>
-            <Button
-                type="button"
-                label="Cancel"
-                severity="secondary"
-                @click="showDialog = false"
-            />
-            <Button
-                type="button"
-                label="Save"
-                @click="createSnapshot"
-                :disabled="disableCreateSubmit"
-            />
+            <div class="flex flex-row gap-2">
+                <Button
+                    type="button"
+                    label="Cancel"
+                    severity="secondary"
+                    @click="cancelDialog"
+                />
+                <Button
+                    type="button"
+                    label="Save"
+                    @click="createSnapshot"
+                    :disabled="disableCreateSubmit"
+                />
+            </div>
         </div>
     </Dialog>
 </template>
