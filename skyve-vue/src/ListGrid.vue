@@ -746,8 +746,11 @@ export default {
             </template>
         </Column>
         <Column>
-            <template #body="slotProps">
-                <Button icon="pi pi-chevron-right" @click="() => zoomInto(slotProps.data.bizId)" />
+            <template #header>
+                <Button icon="pi pi-plus" @click="() => zoomInto()" />
+            </template>
+            <template #body="{ data }">
+                <Button icon="pi pi-chevron-right" @click="() => zoomInto(data.bizId)" />
             </template>
         </Column>
         <template #footer>

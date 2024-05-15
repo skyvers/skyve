@@ -1,7 +1,19 @@
 
-function createEditUrl({ module, document, bizId }) {
+/**
+ * Create an edit url for the given module/doc/bizId. Omit bizId
+ * to get a url for creating a new document.
+ * 
+ * @param {*} param0 
+ * @returns 
+ */
+function createEditUrl({ module, document, bizId = '' }) {
 
-    return `./?a=e&m=${module}&d=${document}&i=${bizId}`;
+    let url = `./?a=e&m=${module}&d=${document}`;
+    if ((bizId ?? '').length > 0) {
+        url += `&i=${bizId}`;
+    }
+
+    return url;
 }
 
 /**
