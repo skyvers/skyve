@@ -628,6 +628,7 @@ export default {
         ref="datatable"
         dataKey="bizId"
         filterDisplay="menu"
+        selectionMode="single"
         :stateKey="dataSource"
         :stateStorage="session"
         :rowsPerPageOptions="[5, 25, 50, 75, 100]"
