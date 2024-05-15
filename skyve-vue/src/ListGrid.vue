@@ -592,8 +592,11 @@ export default {
             this.$refs.cm.show(event.originalEvent);
         },
         onRowClick(event) {
+            this.zoomInto(event.data.bizId);
+        },
+        zoomInto(bizId) {
             openDocInSameWindow({
-                bizId: event.data.bizId,
+                bizId: bizId,
                 module: this.module,
                 document: this.document
             });
@@ -740,6 +743,11 @@ export default {
                 <div v-else>
                     Unknown type: {{ col.type }}
                 </div>
+            </template>
+        </Column>
+        <Column>
+            <template #body="slotProps">
+                <Button icon="pi pi-chevron-right" @click="() => zoomInto(slotProps.data.bizId)" />
             </template>
         </Column>
         <template #footer>
