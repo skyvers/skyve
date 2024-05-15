@@ -1,3 +1,7 @@
+@layer main, primevue;
+
+@layer main {
+
 /* PF tweaks */
 .ui-datatable-data > tr {
 	text-align: center !important;
@@ -2997,3 +3001,6 @@ mark {
 	#footer .copyright a {
 		color: inherit;
 	}
+
+	
+}
