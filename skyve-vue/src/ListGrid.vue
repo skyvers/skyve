@@ -630,7 +630,7 @@ export default {
         filterDisplay="menu"
         selectionMode="single"
         :stateKey="dataSource"
-        :stateStorage="session"
+        stateStorage="session"
         :rowsPerPageOptions="[5, 25, 50, 75, 100]"
         :lazy="true"
         :value="value"
