@@ -2111,6 +2111,7 @@ class ViewValidator extends ViewVisitor {
 		String moduleName = null;
 		String documentName = null;
 		String reportFormat = null;
+		ParameterImpl reportEngineParameter = null;
 		
 		for (Parameter reportParameter : reportParameters) {
 			String name = reportParameter.getName();
@@ -2122,6 +2123,9 @@ class ViewValidator extends ViewVisitor {
 			}
 			else if (AbstractWebContext.DOCUMENT_NAME.equals(name)) {
 				documentName = reportParameter.getValue();
+			}
+			else if (AbstractWebContext.REPORT_ENGINE.equals(name)) {
+				reportEngineParameter = (ParameterImpl) reportParameter;
 			}
 		}
 		
@@ -2144,13 +2148,16 @@ class ViewValidator extends ViewVisitor {
 											" does not reference a Jasper or Freemarker resource");
 		}
 
-		ParameterImpl parameter = new ParameterImpl();
-		parameter.setName(AbstractWebContext.REPORT_ENGINE);
+		if (reportEngineParameter == null) {
+			reportEngineParameter = new ParameterImpl();
+			reportEngineParameter.setName(AbstractWebContext.REPORT_ENGINE);
+			reportParameters.add(reportEngineParameter);
+		}
 		if (fileName.endsWith(".jasper")) {
-			parameter.setValue(ProvidedRepository.JASPER_SUFFIX);
+			reportEngineParameter.setValue(ProvidedRepository.JASPER_SUFFIX);
 		}
 		else if (fileName.endsWith(".flth")) {
-			parameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
+			reportEngineParameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
 			
 			// Report format can on be PDF or CSV for freemarker
 			if (reportFormat != null) {
@@ -2167,7 +2174,6 @@ class ViewValidator extends ViewVisitor {
 											" in view " + viewIdentifier + 
 											" does not reference a Jasper or Freemarker resource");
 		}
-		reportParameters.add(parameter);
 	}
 
 	@Override
