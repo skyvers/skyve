@@ -3,59 +3,214 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
     <title>ListGrid</title>
 </head>
 
 <body>
     <div id="grid"></div>
     <div id="grid1"></div>
-    <script type="module" src="/src/main.js"></script>
+    <script
+        type="module"
+        src="/src/main.js"
+    ></script>
 
     <script>
         window.onload = function () {
-            // SKYVE.listgrid({
-            //     targetSelector: '#grid',
-            //     module: 'admin',
-            //     query: 'qContacts',
-            //     title: 'All Contacts',
-            //     columns: [
-            //         { field: 'name', header: 'Name', sortable: true, filterable: true },
-            //         { field: 'email1', header: 'Email', sortable: true, filterable: true }
-            //     ]
-            // });
-            SKYVE.listgrid({
-                targetSelector: '#grid1',
-                module: 'kitchensink',
-                query: 'ListAttributes',
-                document: 'ListAttributes',
-                columns: [
-                    { field: 'decimal2', header: 'Decimal 2', sortable: true, filterable: true, type: 'numeric' },
-                    { field: 'normalInteger', header: 'Integer', sortable: true, filterable: true, type: 'numeric' },
-                    { field: 'booleanFlag', header: 'Boolean Flag', sortable: true, filterable: true, type: 'boolean' },
-                    { field: 'text', header: 'Text', sortable: true, filterable: true, type: 'text' },
-                    {
-                        field: 'constantEnum', header: 'Constant Enum', sortable: true, filterable: true,
-                        type: 'enum',
-                        enumValues: [
-                            { value: 'one', label: 'One (1)!' },
-                            { value: 'two', label: 'Two (2)!' },
-                            { value: 'three', label: 'Three (3)!' }]
-                    },
-                    { field: 'constantDomain', header: 'Constant Domain', sortable: true, filterable: true, 
-                        type: 'enum',
-                        enumValues: [
-                            { value: 'one', label: 'One (1)!' },
-                            { value: 'two', label: 'Two (2)!' },
-                            { value: 'three', label: 'Three (3)!' }]
-                    },
-                    { field: 'variantDomain', header: 'Variant Domain', sortable: true, filterable: true, type: 'text' },
-                    { field: 'time', header: 'Time', sortable: true, filterable: true, type: 'time' },
-                    { field: 'timestamp', header: 'Timestamp', sortable: true, filterable: true, type: 'timestamp' },
-                    { field: 'date', header: 'Date', sortable: true, filterable: true, type: 'date' },
-                    { field: 'dateTime', header: 'Date Time', sortable: true, filterable: true, type: 'dateTime' },
-                ]
-            });
+            SKYVE.listgrid(
+                {
+                    "targetSelector": "#grid",
+                    "module": "kitchensink",
+                    "query": "ListAttributes",
+                    "document": "ListAttributes",
+                    "columns": [
+                        {
+                            "field": "constantEnum",
+                            "header": "ConstantEnum",
+                            "sortable": true,
+                            "filterable": true,
+                            "enumValues": [
+                                {
+                                    "value": "one",
+                                    "label": "One (1)!"
+                                },
+                                {
+                                    "value": "two",
+                                    "label": "Two (2)!"
+                                },
+                                {
+                                    "value": "three",
+                                    "label": "Three (3)!"
+                                }
+                            ],
+                            "type": "enum"
+                        },
+                        {
+                            "field": "constantDomain",
+                            "header": "ConstantDomain",
+                            "sortable": true,
+                            "filterable": true,
+                            "enumValues": [
+                                {
+                                    "value": "one",
+                                    "label": "One (1)!"
+                                },
+                                {
+                                    "value": "two",
+                                    "label": "Two (2)!"
+                                },
+                                {
+                                    "value": "three",
+                                    "label": "Three (3)!"
+                                }
+                            ],
+                            "type": "text"
+                        },
+                        {
+                            "field": "variantDomain",
+                            "header": "VariantDomain",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "text"
+                        },
+                        {
+                            "field": "dynamicDomain",
+                            "header": "DynamicDomain",
+                            "sortable": true,
+                            "filterable": false,
+                            "type": "text"
+                        },
+                        {
+                            "field": "booleanFlag",
+                            "header": "Boolean Flag",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "boolean"
+                        },
+                        {
+                            "field": "colour",
+                            "header": "Colour",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "text"
+                        },
+                        {
+                            "field": "date",
+                            "header": "Date",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "date",
+                            "converter": "DD_MMM_YYYY"
+                        },
+                        {
+                            "field": "dateAlt",
+                            "header": "Date Alternate",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "date",
+                            "converter": "YYYY_MM_DD"
+                        },
+                        {
+                            "field": "dateTime",
+                            "header": "Date Time",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "dateTime",
+                            "converter": "DD_MMM_YYYY_HH24_MI"
+                        },
+                        {
+                            "field": "decimal10",
+                            "header": "Decimal 10",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "numeric"
+                        },
+                        {
+                            "field": "decimal2",
+                            "header": "Decimal 2",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "numeric"
+                        },
+                        {
+                            "field": "decimal2percentage",
+                            "header": "D2 Percentage",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "numeric",
+                            "converter": "Decimal2TwoDecimalPlacesPercentage"
+                        },
+                        {
+                            "field": "decimal5",
+                            "header": "Decimal 5",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "numeric"
+                        },
+                        {
+                            "field": "id",
+                            "header": "Id",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "text"
+                        },
+                        {
+                            "field": "normalInteger",
+                            "header": "Integer",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "numeric"
+                        },
+                        {
+                            "field": "longInteger",
+                            "header": "Long Integer",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "numeric"
+                        },
+                        {
+                            "field": "markup",
+                            "header": "Markup",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "text"
+                        },
+                        {
+                            "field": "memo",
+                            "header": "Memo",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "text"
+                        },
+                        {
+                            "field": "text",
+                            "header": "Text",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "text"
+                        },
+                        {
+                            "field": "time",
+                            "header": "Time",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "time",
+                            "converter": "HH24_MI"
+                        },
+                        {
+                            "field": "timestamp",
+                            "header": "Timestamp",
+                            "sortable": true,
+                            "filterable": true,
+                            "type": "timestamp",
+                            "converter": "DD_MMM_YYYY_HH24_MI_SS"
+                        }
+                    ]
+                }
+            );
         }
     </script>
 </body>

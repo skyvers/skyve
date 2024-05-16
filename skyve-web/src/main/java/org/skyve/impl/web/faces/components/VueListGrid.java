@@ -7,17 +7,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
+import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
@@ -31,9 +38,11 @@ import jakarta.faces.context.FacesContext;
 @FacesComponent(VueListGrid.COMPONENT_TYPE)
 @ResourceDependency(library = "skyvevue", name = "index.js")
 @ResourceDependency(library = "skyvevue", name = "index.css")
-//@ResourceDependency(library = "skyvevue", name = "Inter-italic.var.woff2")
-//@ResourceDependency(library = "skyvevue", name = "Inter-roman.var.woff2") 
+// @ResourceDependency(library = "skyvevue", name = "Inter-italic.var.woff2")
+// @ResourceDependency(library = "skyvevue", name = "Inter-roman.var.woff2")
 public class VueListGrid extends UIOutput {
+
+    private static Logger logger = LogManager.getLogger(VueListGrid.class);
 
     @SuppressWarnings("hiding")
     public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.VueListGrid";
@@ -50,10 +59,10 @@ public class VueListGrid extends UIOutput {
 
             String out;
             try {
-				final String moduleName = (String) attributes.get("module");
-				final String documentName = (String) attributes.get("document");
-				final String queryName = (String) attributes.get("query");
-				out = generateHtml(moduleName, documentName, queryName);
+                final String moduleName = (String) attributes.get("module");
+                final String documentName = (String) attributes.get("document");
+                final String queryName = (String) attributes.get("query");
+                out = generateHtml(moduleName, documentName, queryName);
                 setValue(out);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -63,6 +72,7 @@ public class VueListGrid extends UIOutput {
 
     private String generateHtml(String moduleName, String documentName, String queryName) throws Exception {
 
+        logger.debug("Generating table definition for {} - {} - {}", moduleName, documentName, queryName);
         ListGridParams params = new ListGridParams();
         params.setTargetSelector("#grid");
         params.setModule(moduleName);
@@ -78,6 +88,7 @@ public class VueListGrid extends UIOutput {
         MetaDataQueryDefinition queryDefn = module.getMetaDataQuery(queryName);
         if (queryDefn == null) {
             queryDefn = module.getDocumentDefaultQuery(customer, documentName);
+            logger.debug("Using document default query definition: {}", queryDefn);
         }
 
         for (MetaDataQueryColumn mdQueryColumn : queryDefn.getColumns()) {
@@ -85,8 +96,12 @@ public class VueListGrid extends UIOutput {
             SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(CORE.getUser(),
                     customer, module, document, mdQueryColumn, true, queryName);
 
-            ColumnMetaData md = new ColumnMetaData(mdQueryColumn, scColDefn);
+            String binding = mdQueryColumn.getBinding();
+            Attribute attribute = document.getAttribute(binding);
+
+            ColumnMetaData md = new ColumnMetaData(mdQueryColumn, scColDefn, attribute, customer);
             ColumnDefinition colDefn = ColumnDefinition.fromColumnMetaData(md);
+            logger.trace("Created column definition: {}", colDefn);
 
             params.getColumns()
                   .add(colDefn);
@@ -106,133 +121,193 @@ public class VueListGrid extends UIOutput {
           .add(" </script>");
 
         return sj.toString();
-	}
+    }
 
-	private static class ColumnMetaData {
-		private final MetaDataQueryColumn mdQueryColumn;
-		private final SmartClientQueryColumnDefinition scQueryColumnDefn;
+    /**
+     * Utility class to group together the metadata we need to aggregate
+     */
+    private static class ColumnMetaData {
+        private final MetaDataQueryColumn mdQueryColumn;
+        private final SmartClientQueryColumnDefinition scQueryColumnDefn;
+        private final Attribute attribute;
+        private final Customer customer;
 
-		public ColumnMetaData(MetaDataQueryColumn mdQueryColumn, SmartClientQueryColumnDefinition scQueryColumnDefn) {
-			this.mdQueryColumn = mdQueryColumn;
-			this.scQueryColumnDefn = scQueryColumnDefn;
-		}
+        private static final Map<String, String> typeConversions = new ImmutableMap.Builder<String, String>()
+                .put("decimal2", "numeric")
+                .put("decimal5", "numeric")
+                .put("decimal10", "numeric")
+                .put("integer", "numeric")
+                .put("longInteger", "numeric")
+                .put("date", "date")
+                .put("dateTime", "dateTime")
+                .put("time", "time")
+                .put("timestamp", "timestamp")
+                .put("enumeration", "enum")
+                .put("bool", "boolean")
+                .put("text", "text")
+                .put("colour", "text")
+                .put("geometry", "text")
+                .put("memo", "text")
+                .put("markup", "text")
+                .put("id", "text")
+                .build();
 
-		public String getBinding() {
-			return scQueryColumnDefn.getName();
-		}
+        public ColumnMetaData(
+                MetaDataQueryColumn mdQueryColumn,
+                SmartClientQueryColumnDefinition scQueryColumnDefn,
+                Attribute attribute,
+                Customer customer) {
+            this.mdQueryColumn = mdQueryColumn;
+            this.scQueryColumnDefn = scQueryColumnDefn;
+            this.attribute = attribute;
+            this.customer = customer;
+        }
 
-		public String getTitle() {
-			return scQueryColumnDefn.getTitle();
-		}
+        public String getBinding() {
+            return scQueryColumnDefn.getName();
+        }
 
-		public String getType() {
-			return scQueryColumnDefn.getType();
-		}
+        public String getTitle() {
+            return scQueryColumnDefn.getTitle();
+        }
 
-		public boolean isSortable() {
+        public String getType() {
+            return flattenType(attribute.getAttributeType()
+                                        .name());
+        }
 
-			if (mdQueryColumn instanceof MetaDataQueryProjectedColumn mdcpc) {
-				return mdcpc.isSortable();
-			}
+        private static String flattenType(String inType) {
+            String resultType = typeConversions.get(inType);
+            if (resultType != null) {
+                return resultType;
+            }
 
-			return false;
-		}
+            throw new DomainException("Unable to convert column type: " + inType);
+        }
 
-		public boolean isCanFilter() {
-			return scQueryColumnDefn.isCanFilter();
-		}
+        public String getConverterName() {
 
-		public Map<String, String> getValueMap() {
-			return scQueryColumnDefn.getValueMap();
-		}
-	}
+            return Optional.of(attribute)
+                           .filter(ConvertableField.class::isInstance)
+                           .map(ConvertableField.class::cast)
+                           .map(cf -> cf.getConverterForCustomer(customer))
+                           .map(ConverterName::valueOf)
+                           .map(ConverterName::name)
+                           .orElse(null);
+        }
 
-	private static class ListGridParams {
-		private String targetSelector;
-		private String module;
-		private String query;
-		private String document;
-		private List<ColumnDefinition> columns = new ArrayList<>();
+        public boolean isSortable() {
 
-		public String getTargetSelector() {
-			return targetSelector;
-		}
+            if (mdQueryColumn instanceof MetaDataQueryProjectedColumn mdcpc) {
+                return mdcpc.isSortable();
+            }
 
-		public void setTargetSelector(String targetSelector) {
-			this.targetSelector = targetSelector;
-		}
+            return false;
+        }
 
-		public String getDocument() {
-			return document;
-		}
+        public boolean isFilterable() {
+            return scQueryColumnDefn.isCanFilter();
+        }
 
-		public void setDocument(String document) {
-			this.document = document;
-		}
+        public Map<String, String> getValueMap() {
+            return scQueryColumnDefn.getValueMap();
+        }
 
-		public String getModule() {
-			return module;
-		}
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .omitNullValues()
+                              .add("binding", getBinding())
+                              .add("title", getTitle())
+                              .add("type", getType())
+                              .add("converterName", getConverterName())
+                              .add("sortable", isSortable())
+                              .add("filterable", isFilterable())
+                              .toString();
+        }
+    }
 
-		public void setModule(String module) {
-			this.module = module;
-		}
+    /**
+     * We'll pull together all the params we'll need to supply to the javascript
+     * SKYVE.listgrid function in this class. Will get serialised to JSON and
+     * sent to the browser.
+     */
+    private static class ListGridParams {
+        private String targetSelector;
+        private String module;
+        private String query;
+        private String document;
+        private List<ColumnDefinition> columns = new ArrayList<>();
 
-		public String getQuery() {
-			return query;
-		}
+        public String getTargetSelector() {
+            return targetSelector;
+        }
 
-		public void setQuery(String query) {
-			this.query = query;
-		}
+        public void setTargetSelector(String targetSelector) {
+            this.targetSelector = targetSelector;
+        }
 
-		public List<ColumnDefinition> getColumns() {
-			return columns;
-		}
+        public String getDocument() {
+            return document;
+        }
 
-		@Override
-		public String toString() {
-			return MoreObjects.toStringHelper(this)
-					.add("targetSelector", targetSelector)
-					.add("module", module)
-					.add("query", query)
-					.add("columns", columns)
-					.toString();
-		}
-	}
+        public void setDocument(String document) {
+            this.document = document;
+        }
+
+        public String getModule() {
+            return module;
+        }
+
+        public void setModule(String module) {
+            this.module = module;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+
+        public List<ColumnDefinition> getColumns() {
+            return columns;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("targetSelector", targetSelector)
+                              .add("module", module)
+                              .add("query", query)
+                              .add("columns", columns)
+                              .toString();
+        }
+    }
 
     private static class ColumnDefinition {
         private String field;
         private String header;
         private boolean sortable = true;
         private boolean filterable = true;
+
+        @JsonInclude(Include.NON_EMPTY)
         private List<EnumValue> enumValues = new ArrayList<>(0);
         private String type;
-        
-		private static final Map<String, String> typeConversions = new ImmutableMap.Builder<String, String>()
-				.put("bizDecimal2", "numeric")
-				.put("bizDecimal5", "numeric")
-				.put("bizDecimal10", "numeric")
-				.put("integer", "numeric")
-				.put("HH24_MI", "time")
-				.put("DD_MMM_YYYY_HH24_MI_SS", "timestamp")
-				.put("DD_MMM_YYYY", "date")
-				.put("DD_MMM_YYYY_HH24_MI", "dateTime")
-				.put("enum", "enum")
-				.put("boolean", "boolean")
-				.put("richText", "text")
-				.put("text", "text")
-				.put("geometry", "text")
-				.build();  
 
-		public static ColumnDefinition fromColumnMetaData(ColumnMetaData metadata) {
-			ColumnDefinition cd = new ColumnDefinition();
+        @JsonInclude(Include.NON_NULL)
+        private String converter;
 
-			cd.field = metadata.getBinding();
-			cd.header = metadata.getTitle();
-			cd.type = flattenType(metadata.getType());
-			cd.sortable = metadata.isSortable();
-			cd.filterable = metadata.isCanFilter();
+        public static ColumnDefinition fromColumnMetaData(ColumnMetaData metadata) {
+            ColumnDefinition cd = new ColumnDefinition();
+
+            cd.field = metadata.getBinding();
+            cd.header = metadata.getTitle();
+            cd.type = metadata.getType();
+            cd.sortable = metadata.isSortable();
+            cd.filterable = metadata.isFilterable();
+            cd.converter = metadata.getConverterName();
 
             Optional.ofNullable(metadata.getValueMap())
                     .ifPresent(map -> map.entrySet()
@@ -242,15 +317,6 @@ public class VueListGrid extends UIOutput {
 
             return cd;
         }
-
-		private static String flattenType(String inType) {
-			String resultType = typeConversions.get(inType);
-			if (resultType != null) {
-				return resultType;
-			}
-
-			throw new DomainException("Unable to convert column type: " + inType);
-		}
 
         public String getField() {
             return field;
@@ -272,6 +338,10 @@ public class VueListGrid extends UIOutput {
             return type;
         }
 
+        public String getConverter() {
+            return converter;
+        }
+
         public List<EnumValue> getEnumValues() {
             return enumValues;
         }
@@ -279,11 +349,13 @@ public class VueListGrid extends UIOutput {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
+                              .omitNullValues()
                               .add("field", field)
                               .add("header", header)
                               .add("sortable", sortable)
                               .add("filterable", filterable)
                               .add("type", type)
+                              .add("converter", converter)
                               .add("enumValues", enumValues)
                               .toString();
         }
