@@ -116,7 +116,6 @@ import org.skyve.impl.web.faces.converters.decimal.Decimal2Converter;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2OneDecimalPlace;
-import org.skyve.impl.web.faces.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5Converter;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5IntegerPercentage;
@@ -2416,9 +2415,6 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace) {
 				result = new Decimal2OneDecimalPlace();
-			}
-			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage) {
-				result = new Decimal2TwoDecimalPlacesPercentage();
 			}
 			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5Converter) {
 				result = new Decimal5Converter();

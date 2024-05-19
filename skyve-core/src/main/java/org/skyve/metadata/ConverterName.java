@@ -20,7 +20,6 @@ import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
-import org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5Integer;
 import org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
@@ -79,7 +78,6 @@ public enum ConverterName {
 	Decimal2Integer(new Decimal2Integer()),
 	Decimal2IntegerPercentage(new Decimal2IntegerPercentage()),
 	Decimal2OneDecimalPlace(new Decimal2OneDecimalPlace()),
-	Decimal2TwoDecimalPlacesPercentage(new Decimal2TwoDecimalPlacesPercentage()),
 	Decimal5Integer(new Decimal5Integer()),
 	Decimal5IntegerPercentage(new Decimal5IntegerPercentage()),
 	Decimal5DollarsAndCents(new Decimal5DollarsAndCents()),
@@ -185,9 +183,6 @@ public enum ConverterName {
 		}
 		else if (converter instanceof Decimal2OneDecimalPlace) {
 			return Decimal2OneDecimalPlace;
-		}
-		else if (converter instanceof Decimal2TwoDecimalPlacesPercentage) {
-			return Decimal2TwoDecimalPlacesPercentage;
 		}
 		else if (converter instanceof Decimal5Integer) {
 			return Decimal5Integer;

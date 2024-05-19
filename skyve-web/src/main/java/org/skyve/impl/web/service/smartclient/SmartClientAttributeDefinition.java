@@ -11,7 +11,6 @@ import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
-import org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5Integer;
 import org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
@@ -52,15 +51,15 @@ import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
-import org.skyve.util.OWASP;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.OWASP;
 
 public class SmartClientAttributeDefinition {
     protected SmartClientLookupDefinition lookup;
@@ -344,9 +343,6 @@ public class SmartClientAttributeDefinition {
 				}
 				else if (converter instanceof Decimal2IntegerPercentage) {
 					type = "bizIntegerPercentage";
-				}
-				else if (converter instanceof Decimal2TwoDecimalPlacesPercentage) {
-					type = "bizTwoDecimalPlacesPercentage";
 				}
 				else if (converter instanceof Decimal2OneDecimalPlace) {
 					type = "bizDecimal1";
