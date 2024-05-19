@@ -41,6 +41,7 @@ import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.impl.web.filter.DevLoginFilter;
+import org.skyve.impl.web.filter.ResponseHeaderFilter;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
@@ -58,6 +59,7 @@ import jakarta.websocket.server.ServerEndpointConfig;
 
 public class SkyveContextListener implements ServletContextListener {
 	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
+	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
 
 	@Override
 	public void contextInitialized(ServletContextEvent evt) {
@@ -180,16 +182,28 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.ARCHIVE_NAME = archiveName;
 
 		// Determine if the DevLoginFilter is in the web.xml, this is used to influence the SpringSecurityConfig
+		// Ensure a filter called SecurityHeadersFilter of type org.skyve.impl.web.filter.ResponseHeaderFilter exists
+		boolean securityHeadersFilterExists = false;
 		for (Entry<String, ? extends FilterRegistration> entry : ctx.getFilterRegistrations().entrySet()) {
-			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(entry.getValue().getClassName())) {
+			FilterRegistration reg = entry.getValue();
+			String className = reg.getClassName();
+			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(className)) {
 				UtilImpl.DEV_LOGIN_FILTER_USED = true;
 				UtilImpl.LOGGER.warning("****************************************************************************************************");
 				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
 				UtilImpl.LOGGER.warning("****************************************************************************************************");
 				break;
 			}
+			else if (RESPONSE_HEADER_FILTER_CLASS_NAME.equals(className)) {
+				if (ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME.equals(reg.getName())) {
+					securityHeadersFilterExists = true;
+				}
+			}
 		}
-
+		if (! securityHeadersFilterExists) {
+			throw new IllegalStateException("A Filter <filter-name>SecurityHeadersFilter</filter-name> of <filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class> is required in web.xml.");
+		}
+		
 		Map<String, Object> properties = null;
 		try (FileInputStream fis = new FileInputStream(UtilImpl.PROPERTIES_FILE_PATH)) {
 			final VariableExpander variableExpander = new VariableExpander();
