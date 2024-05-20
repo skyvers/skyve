@@ -8,7 +8,7 @@
 <%@page import="org.skyve.impl.web.WebUtil"%>
 <%@page import="org.skyve.impl.web.filter.ResponseHeaderFilter"%>
 <%
-	// Teh web container error processing does not pass the error page the web app's filters 
+	// The web container error processing does not pass the error page the web app's filters 
 	ResponseHeaderFilter.applySecurityHeaders(response);
 	
 	String basePath = Util.getSkyveContextUrl() + "/";
