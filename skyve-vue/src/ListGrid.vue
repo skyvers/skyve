@@ -4,6 +4,7 @@ import { FilterOperator } from 'primevue/api';
 import { MatchModes } from './support/MatchModes';
 import Dropdown from 'primevue/dropdown';
 import { openDocInNewWindow, openDocInSameWindow } from './support/Util';
+import { applyConverters } from './support/Converters';
 
 const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
 
@@ -33,138 +34,6 @@ function arraysEqual(a, b) {
     }
 
     return a.every((val, index) => val == b[index])
-}
-
-/**
- * Replace values with their `_display` value, if present
- * 
- * @param {*} row Row to be updated
- */
-function updateDisplayValues(row) {
-    const targetKeys = Object
-        .keys(row)
-        .filter(colName => colName.startsWith('_display_'))
-        .map(colName => ({
-            columnKey: colName.replace('_display_', ''),
-            displayKey: colName
-        }));
-
-    for (let key of targetKeys) {
-        row[key.columnKey] = row[key.displayKey]
-    }
-};
-
-/**
- * Undefined for the first param means the default
- * locale is used.
- * 
- * TODO potentially this should probably be injected
- * from somewhere
- */
-const dateTimeFormats = {
-    date: new Intl.DateTimeFormat(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-    }),
-    dateTime: new Intl.DateTimeFormat(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    }),
-    timestamp: new Intl.DateTimeFormat(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    })
-}
-
-
-// Wrap a mutator lambda, skipping execution of that lambda 
-// if the provided value is a Number (ie, the aggregate row)
-// returning the original value instead
-// Used to avoid feeding aggregate row date (eg, count) into
-// the date formatter lambda
-const skipNumberValues = (mutatorFn) => {
-    return (val, colDefn) => {
-        if (Number.isInteger(val)) {
-            return val;
-        } else {
-            return mutatorFn(val, colDefn);
-        }
-    };
-};
-
-// Wrap the provied lambda, skipping it for nullish/blank values
-// and returning the original value instead
-const skipBlankValues = (mutatorFn) => {
-    return (val, colDefn) => {
-        if ((val ?? '') == '') {
-            return val;
-        } else {
-            return mutatorFn(val, colDefn);
-        }
-    };
-};
-
-/**
- * Create and return a lambda. The returned lambda takes one
- * row object (as returned by skyve) at a time and modifies
- * that row (formatting dates, replacing enum labels, etc)
- * 
- * @param {*} columnDefns Column definition data
- */
-function createRowMutator(columnDefns) {
-
-    const valueMutators = {
-        'dateTime': skipNumberValues((val) => dateTimeFormats.dateTime.format(new Date(val))),
-        'date': skipNumberValues((val) => dateTimeFormats.date.format(new Date(val))),
-        'timestamp': skipNumberValues((val) => dateTimeFormats.timestamp.format(new Date(val))),
-        'enum': (val, colDefn) => {
-            const newLabel = colDefn?.enumValues?.find(entry => entry.value == val)?.label;
-
-            if (!newLabel) {
-                // No matching enum value found, use the original value
-                // probably the aggregate row
-                return val;
-            }
-
-            return newLabel;
-        },
-    };
-
-    // Wrap every mutator in the skipNullValues lambda
-    for (let key in valueMutators) {
-        valueMutators[key] = skipBlankValues(valueMutators[key]);
-    }
-
-    // Index the column definitions on `field`
-    // TODO move this back to a computed value
-    // roll in any other junk too? -> see `columnDefinitionsMap`
-    const columnMap = new Map();
-    columnDefns.forEach(def => columnMap.set(def.field, def));
-
-    return (row) => {
-
-        for (let field in row) {
-            const columnDef = columnMap.get(field);
-            if (!columnDef) continue;
-            const type = columnDef.type;
-
-            // Grab the value mutator matching the column type
-            // or an identity func if nothing specified
-            const valMutator = valueMutators[type] ?? ((v) => v);
-            row[field] = valMutator(row[field], columnDef);
-        }
-
-        updateDisplayValues(row);
-        return row;
-    };
 }
 
 export default {
@@ -446,8 +315,12 @@ export default {
             const rows = payload.response.data;
 
             if (rows.length > 0) {
-                const rowMutator = createRowMutator(this.columns);
-                rows.forEach(rowMutator);
+
+                // Create column index, FIXME
+                const columnDefMap = new Map();
+                this.columns.forEach(def => columnDefMap.set(def.field, def));
+
+                rows.forEach(row => applyConverters(row, columnDefMap));
             }
 
             if (!!this.summarySelection) {

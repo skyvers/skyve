@@ -286,17 +286,14 @@ public class VueListGrid extends UIOutput {
         }
     }
 
+    @JsonInclude(Include.NON_EMPTY)
     private static class ColumnDefinition {
         private String field;
         private String header;
         private boolean sortable = true;
         private boolean filterable = true;
-
-        @JsonInclude(Include.NON_EMPTY)
         private List<EnumValue> enumValues = new ArrayList<>(0);
         private String type;
-
-        @JsonInclude(Include.NON_NULL)
         private String converter;
 
         public static ColumnDefinition fromColumnMetaData(ColumnMetaData metadata) {
