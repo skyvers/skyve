@@ -8,6 +8,7 @@ import ListGrid from './ListGrid.vue'
 import TimeCalendar from './TimeCalendar.vue'
 import DateOnlyCalendar from './DateOnlyCalendar.vue'
 import SnapshotPicker from './SnapshotPicker.vue'
+import Image from './Image.vue'
 
 import PrimeVue from 'primevue/config'
 
@@ -51,6 +52,7 @@ window.SKYVE.listgrid = function ({module, title, document, query, columns, targ
     grid.component('SnapshotPicker', SnapshotPicker);
     grid.component('Dialog', Dialog);
     grid.component('ContextMenu', ContextMenu);
+    grid.component('Image', Image);
 
     grid.mount(targetSelector);
 }  

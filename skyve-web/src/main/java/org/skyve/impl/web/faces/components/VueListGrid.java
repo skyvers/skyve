@@ -10,7 +10,6 @@ import java.util.StringJoiner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
@@ -138,13 +137,8 @@ public class VueListGrid extends UIOutput {
                 .put("decimal10", "numeric")
                 .put("integer", "numeric")
                 .put("longInteger", "numeric")
-                .put("date", "date")
-                .put("dateTime", "dateTime")
-                .put("time", "time")
-                .put("timestamp", "timestamp")
                 .put("enumeration", "enum")
                 .put("bool", "boolean")
-                .put("text", "text")
                 .put("colour", "text")
                 .put("geometry", "text")
                 .put("memo", "text")
@@ -182,7 +176,7 @@ public class VueListGrid extends UIOutput {
                 return resultType;
             }
 
-            throw new DomainException("Unable to convert column type: " + inType);
+            return inType;
         }
 
         public String getConverterName() {

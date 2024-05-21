@@ -495,6 +495,7 @@ export default {
 }
 </script>
 <template>
+
     <SnapshotPicker
         :documentQuery="dataSource"
         :snapshotState="snapshotState"
@@ -616,6 +617,19 @@ export default {
                 <div v-else>
                     Unknown type: {{ col.type }}
                 </div>
+            </template>
+            <template #body="{ data, field }">
+                <span v-if="col.type == 'image'">
+                    <Image
+                        :id="data[field]"
+                        :module="module"
+                        :document="document"
+                        :binding="field"
+                    />
+                </span>
+                <span v-else>
+                    {{ data[field] }}
+                </span>
             </template>
         </Column>
         <Column>

@@ -113,6 +113,9 @@ public class ListAttributes extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String timestampPropertyName = "timestamp";
 
+	/** @hidden */
+	public static final String imagePropertyName = "image";
+
 	/**
 	 * ConstantEnum
 	 **/
@@ -278,6 +281,11 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * Timestamp
 	 **/
 	private Timestamp timestamp;
+
+	/**
+	 * Image
+	 **/
+	private String image;
 
 	@Override
 	@XmlTransient
@@ -671,6 +679,24 @@ public class ListAttributes extends AbstractPersistentBean {
 	public void setTimestamp(Timestamp timestamp) {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;
+	}
+
+	/**
+	 * {@link #image} accessor.
+	 * @return	The value.
+	 **/
+	public String getImage() {
+		return image;
+	}
+
+	/**
+	 * {@link #image} mutator.
+	 * @param image	The new value.
+	 **/
+	@XmlElement
+	public void setImage(String image) {
+		preset(imagePropertyName, image);
+		this.image = image;
 	}
 
 	/**
