@@ -6,7 +6,11 @@
 <%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
+<%@page import="org.skyve.impl.web.filter.ResponseHeaderFilter"%>
 <%
+	// The web container error processing does not pass the error page the web app's filters 
+	ResponseHeaderFilter.applySecurityHeaders(response);
+	
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = WebUtil.getRefererHeader(request);

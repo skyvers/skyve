@@ -150,10 +150,6 @@
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2OneDecimalPlace</converter-class>
 	</converter>
 	<converter>
-		<converter-id>Decimal2TwoDecimalPlacesPercentage</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2TwoDecimalPlacesPercentage</converter-class>
-	</converter>
-	<converter>
 		<converter-for-class>org.skyve.domain.types.Decimal5</converter-for-class>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal5Converter</converter-class>
 	</converter>

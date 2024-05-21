@@ -48,7 +48,6 @@
       <xs:enumeration value="Decimal2Integer"/>
       <xs:enumeration value="Decimal2IntegerPercentage"/>
       <xs:enumeration value="Decimal2OneDecimalPlace"/>
-      <xs:enumeration value="Decimal2TwoDecimalPlacesPercentage"/>
       <xs:enumeration value="Decimal5Integer"/>
       <xs:enumeration value="Decimal5IntegerPercentage"/>
       <xs:enumeration value="Decimal5DollarsAndCents"/>

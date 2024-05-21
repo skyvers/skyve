@@ -16,7 +16,6 @@ import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
-import org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5Integer;
 import org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
@@ -349,9 +348,6 @@ public class SmartClientAttributeDefinition {
 				}
 				else if (converter instanceof Decimal2IntegerPercentage) {
 					type = "bizIntegerPercentage";
-				}
-				else if (converter instanceof Decimal2TwoDecimalPlacesPercentage) {
-					type = "bizTwoDecimalPlacesPercentage";
 				}
 				else if (converter instanceof Decimal2OneDecimalPlace) {
 					type = "bizDecimal1";

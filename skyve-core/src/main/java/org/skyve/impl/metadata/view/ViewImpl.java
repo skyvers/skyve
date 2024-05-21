@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
@@ -28,7 +27,6 @@ import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
-import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
@@ -50,7 +48,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -371,7 +368,7 @@ public class ViewImpl extends Container implements View {
 	 * Convert and validate any accesses defined in the view metadata.
 	 * If accesses are not defined then determine them.
 	 */
-	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate, final ProvidedRepository optionalRepositoryToUse) {
+	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate) {
 		final String moduleName = module.getName();
 		final String documentName = document.getName();
 
@@ -640,7 +637,6 @@ public class ViewImpl extends Container implements View {
 			
 			@Override
 			public void visitReportAction(ActionImpl action) {
-				ProvidedRepository r = (optionalRepositoryToUse == null) ? ProvidedRepositoryFactory.get() : optionalRepositoryToUse;
 				String reportName = action.getResourceName();
 
 				String reportModuleName = null;
@@ -661,25 +657,6 @@ public class ViewImpl extends Container implements View {
 				if ((reportModuleName == null) || (reportDocumentName == null)) {
 					throw new MetaDataException("Cannot determine document for report " + reportName + " in document " + 
 													document.getOwningModuleName() + "." + document.getName());
-				}
-				
-				// Add report engine parameter based on report file name suffix
-				String fileName = r.getReportFileName(customer, document, reportName);
-				if (fileName != null) {
-					ParameterImpl parameter = new ParameterImpl();
-					parameter.setName(AbstractWebContext.REPORT_ENGINE);
-					if (fileName.endsWith(".jasper")) {
-						parameter.setValue(ProvidedRepository.JASPER_SUFFIX);
-					}
-					else if (fileName.endsWith(".flth")) {
-						parameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
-					}
-					else {
-						throw new MetaDataException("Report Action for report " + reportName + 
-														" in view " + name + " for module " + moduleName + " and document " + documentName + 
-														" does not reference a Jasper or Freemarker resource");
-					}
-					reportParameters.add(parameter);
 				}
 				
 				if (determineAccesses) {
