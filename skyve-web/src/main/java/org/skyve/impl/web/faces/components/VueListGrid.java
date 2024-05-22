@@ -79,8 +79,10 @@ public class VueListGrid extends UIOutput {
 
     private String generateHtml(String moduleName, String documentName, String queryName, String modelName) throws Exception {
 
+        String parentId = this.getParent().getClientId();
+
         ListGridParams params = new ListGridParams();
-        params.setTargetSelector("#" + this.getParent().getId() + " .vue-list-grid-container");
+        params.setTargetSelector("[id='" + parentId + "'] .vue-list-grid-container");
         params.setModule(moduleName);
         params.setDocument(documentName);
         params.setQuery(queryName);
