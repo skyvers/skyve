@@ -26,6 +26,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.util.Binder;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -110,7 +111,8 @@ public class VueListGrid extends UIOutput {
                     customer, module, document, mdQueryColumn, true, queryName);
 
             String binding = mdQueryColumn.getBinding();
-            Attribute attribute = document.getAttribute(binding);
+            Attribute attribute = Binder.getMetaDataForBinding(customer, module, document, binding)
+                                        .getAttribute();
 
             ColumnMetaData md = new ColumnMetaData(mdQueryColumn, scColDefn, attribute, customer);
             ColumnDefinition colDefn = ColumnDefinition.fromColumnMetaData(md);
