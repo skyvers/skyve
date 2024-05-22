@@ -307,7 +307,7 @@
 							var verticalScale = (parent.height() - 40) / 1144;
 							// width - 2 * margin sides (20px) / (screen width (768px) + 2 * shim width (16px)
 							var horizontalScale = (parent.width() - 40) / 800;
-							device.css('transform', 'scale(' + verticalScale + ') translate(-50%) rotate(0deg)');
+							device.css('transform', 'scale(' + Math.min(verticalScale, horizontalScale) + ') translate(-50%) rotate(0deg)');
 						}
 						else if (styleClass == 'laptop') {
 							// height - 2 * margin top (20px) / (screen height (800px) + shim top height (24px) + shim bottom height (80px) + keyboard height (60px))
