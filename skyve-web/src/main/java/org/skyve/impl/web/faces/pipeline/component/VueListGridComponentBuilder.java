@@ -1,6 +1,9 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,35 +17,49 @@ import jakarta.faces.component.UIComponent;
 
 public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
-	private static final Logger log = LogManager.getLogger(VueListGridComponentBuilder.class);
+    private static final Logger log = LogManager.getLogger(VueListGridComponentBuilder.class);
 
-	@Override
-	public UIComponent listGrid(UIComponent component,
-			String moduleName,
-			String modelDocumentName,
-			String modelName,
-			String uxui,
-			ListModel<Bean> model,
-			Document owningDocument,
-			String title,
-			ListGrid grid,
-			boolean aggregateQuery) {
+    @Override
+    public UIComponent listGrid(UIComponent component,
+            String moduleName,
+            String modelDocumentName,
+            String modelName,
+            String uxui,
+            ListModel<Bean> model,
+            Document owningDocument,
+            String title,
+            ListGrid grid,
+            boolean aggregateQuery) {
 
-		if (component != null) {
-			return component;
-		}
+        if (component != null) {
+            return component;
+        }
 
+        VueListGrid result = (VueListGrid) a.createComponent(VueListGrid.COMPONENT_TYPE);
+        Map<String, Object> attributes = result.getAttributes();
 
-		VueListGrid result = (VueListGrid) a.createComponent(VueListGrid.COMPONENT_TYPE);
-		Map<String, Object> attributes = result.getAttributes();
+        BiConsumer<String, Object> put = (key, value) -> {
+            if (value != null)
+                attributes.put(key, value);
+        };
 
-		Document drivingDocument = model.getDrivingDocument();
-		attributes.put("module", drivingDocument.getOwningModuleName());
-		attributes.put("document", drivingDocument.getName());
-		attributes.put("query", modelName);
+        final Document docToUse;
 
-		log.trace("Created VueListGrid component with attributes: {}", attributes);
+        // Only set one of "query" or "model", preferring query
+        String queryName = grid.getQueryName();
+        if (isNotBlank(queryName)) {
+            put.accept("query", queryName);
+            docToUse = model.getDrivingDocument();
+        } else {
+            put.accept("model", modelName);
+            docToUse = owningDocument;
+        }
 
-		return result;
-	}
+        put.accept("module", docToUse.getOwningModuleName());
+        put.accept("document", docToUse.getName());
+
+        log.debug("Created VueListGrid component with attributes: {}", attributes);
+
+        return result;
+    }
 }

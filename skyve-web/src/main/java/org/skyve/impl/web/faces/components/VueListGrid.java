@@ -1,5 +1,8 @@
 package org.skyve.impl.web.faces.components;
 
+import static java.lang.Boolean.TRUE;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +13,7 @@ import java.util.StringJoiner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
@@ -21,6 +25,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.view.model.list.ListModel;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -53,30 +58,33 @@ public class VueListGrid extends UIOutput {
         // NB:- I might need to let this be evaluated always since this just isnt
         // structural but may have expressions that need re-evaluating
         // TODO Need to try this out.
-        if ((getValue() == null) || Boolean.TRUE.toString()
-                                                .equals(attributes.get("dynamic"))) {
+        if ((getValue() == null) || TRUE.toString()
+                                        .equals(attributes.get("dynamic"))) {
 
             String out;
             try {
                 final String moduleName = (String) attributes.get("module");
                 final String documentName = (String) attributes.get("document");
                 final String queryName = (String) attributes.get("query");
-                out = generateHtml(moduleName, documentName, queryName);
+                final String modelName = (String) attributes.get("model");
+
+                logger.debug("Generating table definition for {}, {}, {}, {}", moduleName, documentName, queryName, modelName);
+                out = generateHtml(moduleName, documentName, queryName, modelName);
                 setValue(out);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.fatal("VueListGrid.encodeBegin() failed", e);
             }
         }
     }
 
-    private String generateHtml(String moduleName, String documentName, String queryName) throws Exception {
+    private String generateHtml(String moduleName, String documentName, String queryName, String modelName) throws Exception {
 
-        logger.debug("Generating table definition for {} - {} - {}", moduleName, documentName, queryName);
         ListGridParams params = new ListGridParams();
-        params.setTargetSelector("#grid");
+        params.setTargetSelector("#" + this.getParent().getId() + " .vue-list-grid-container");
         params.setModule(moduleName);
-        params.setQuery(queryName);
         params.setDocument(documentName);
+        params.setQuery(queryName);
+        params.setModel(modelName);
 
         // Column definitions
         Customer customer = CORE.getUser()
@@ -84,13 +92,17 @@ public class VueListGrid extends UIOutput {
         Module module = customer.getModule(moduleName);
         Document document = module.getDocument(customer, documentName);
 
-        MetaDataQueryDefinition queryDefn = module.getMetaDataQuery(queryName);
-        if (queryDefn == null) {
-            queryDefn = module.getDocumentDefaultQuery(customer, documentName);
-            logger.debug("Using document default query definition: {}", queryDefn);
+        final List<MetaDataQueryColumn> columns;
+        if (isEmpty(modelName)) {
+            columns = findQueryColumns(documentName, queryName, customer, module);
+        } else {
+            ListModel<Bean> listModel = findListModel(customer, document, modelName);
+            columns = listModel.getColumns();
+            document = listModel.getDrivingDocument();
+            module = customer.getModule(document.getOwningModuleName());
         }
 
-        for (MetaDataQueryColumn mdQueryColumn : queryDefn.getColumns()) {
+        for (MetaDataQueryColumn mdQueryColumn : columns) {
 
             SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(CORE.getUser(),
                     customer, module, document, mdQueryColumn, true, queryName);
@@ -110,7 +122,7 @@ public class VueListGrid extends UIOutput {
         String paramsString = mapper.writeValueAsString(params);
 
         StringJoiner sj = new StringJoiner(" \n");
-        sj.add("<div id=\"grid\"></div>")
+        sj.add("<div class=\"vue-list-grid-container\"></div>")
           .add("<script>")
           .add("window.addEventListener('load', () => {")
           .add("                    SKYVE.listgrid(")
@@ -120,6 +132,21 @@ public class VueListGrid extends UIOutput {
           .add(" </script>");
 
         return sj.toString();
+    }
+
+    private ListModel<Bean> findListModel(Customer customer, Document document, String modelName) {
+
+        return document.getListModel(customer, modelName, true);
+    }
+
+    private List<MetaDataQueryColumn> findQueryColumns(String documentName, String queryName, Customer customer, Module module) {
+        MetaDataQueryDefinition queryDefn = module.getMetaDataQuery(queryName);
+        if (queryDefn == null) {
+            queryDefn = module.getDocumentDefaultQuery(customer, documentName);
+            logger.debug("Using document default query definition: {}", queryDefn);
+        }
+
+        return queryDefn.getColumns();
     }
 
     /**
@@ -226,11 +253,13 @@ public class VueListGrid extends UIOutput {
      * SKYVE.listgrid function in this class. Will get serialised to JSON and
      * sent to the browser.
      */
+    @JsonInclude(Include.NON_EMPTY)
     private static class ListGridParams {
         private String targetSelector;
         private String module;
         private String query;
         private String document;
+        private String model;
         private List<ColumnDefinition> columns = new ArrayList<>();
 
         public String getTargetSelector() {
@@ -269,12 +298,21 @@ public class VueListGrid extends UIOutput {
             return columns;
         }
 
+        public void setModel(String model) {
+            this.model = model;
+        }
+
+        public String getModel() {
+            return model;
+        }
+
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
                               .add("targetSelector", targetSelector)
                               .add("module", module)
                               .add("query", query)
+                              .add("columns", columns)
                               .add("columns", columns)
                               .toString();
         }

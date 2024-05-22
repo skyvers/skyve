@@ -39,8 +39,9 @@ function arraysEqual(a, b) {
 export default {
     props: {
         module: String,
-        query: String,
         document: String,
+        query: String,
+        model: String,
         title: String,
         columns: Object,
         dateFormat: {
@@ -194,7 +195,15 @@ export default {
             return visCols;
         },
         dataSource() {
-            return `${this.module}_${this.query}`;
+
+            if (this.query) {
+                return `${this.module}_${this.query}`;
+            } else if (this.model) {
+                return `${this.module}_${this.document}__${this.model}`;
+            } else {
+                return `${this.module}_${this.document}`;
+            }
+
         },
         fetchFormData() {
             // Constuct the FormData object that will be POSTed
