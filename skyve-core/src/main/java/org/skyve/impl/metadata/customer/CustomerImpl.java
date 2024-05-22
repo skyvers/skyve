@@ -55,6 +55,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.WebContext;
 
+import com.google.common.base.MoreObjects;
+
 public class CustomerImpl implements Customer {
 	private static final long serialVersionUID = 2926460705821800439L;
 
@@ -931,5 +933,13 @@ public class CustomerImpl implements Customer {
 	public Set<String> getSwitchModeRoles() {
 		return switchModeRoles;
 	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .toString();
+    }
 }
        

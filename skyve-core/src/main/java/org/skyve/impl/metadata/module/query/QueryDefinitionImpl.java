@@ -3,6 +3,8 @@ package org.skyve.impl.metadata.module.query;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryDefinition;
 
+import com.google.common.base.MoreObjects;
+
 public abstract class QueryDefinitionImpl implements QueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
 
@@ -60,4 +62,12 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	public void setTimeoutInSeconds(int timeoutInSeconds) {
 		this.timeoutInSeconds = timeoutInSeconds;
 	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .toString();
+    }
 }
