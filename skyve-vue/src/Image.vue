@@ -28,16 +28,10 @@ export default {
             return this.module + '.' + this.document;
         },
         srcUrl() {
-            // http://localhost:8080/skyve/content
-            // ?_n=2b05e215-fc5a-4591-98f9-edfd10786a6a
-            // &_doc=kitchensink.ListAttributes
-            // &_b=image
-            // &_w=64&_h=64
-
             const searchParams = new URLSearchParams();
             searchParams.append(params.id, this.id);
             searchParams.append(params.modoc, this.modoc);
-            searchParams.append(params.binding, 'image');
+            searchParams.append(params.binding, this.binding);
 
             if (!!this.size) {
                 searchParams.append(params.width, this.size);
