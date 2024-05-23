@@ -18,6 +18,11 @@ function defaultMatchMode(columnType) {
     return (MatchModes[columnType] ?? [MatchModes.MODES.EQUALS])[0].value;
 }
 
+function printFormData(formData) {
+    console.table([...formData.entries()]);
+}
+
+
 /**
  * Compare the two provided arrays for equality;
  * ie: same length, and contents are equal 
@@ -59,9 +64,8 @@ export default {
     },
     data() {
         return {
-            dtKey: 0,
-
             loading: true,
+            loadTimeout: null,
             value: [],
             totalRecords: 0,
             filters: {},
@@ -104,7 +108,7 @@ export default {
                         document: this.document
                     })
                 }
-            ]
+            ],
         };
     },
     computed: {
@@ -296,14 +300,29 @@ export default {
         },
     },
     methods: {
+
         notUsed() {
             // Some dumb nonsense to prevent the transpilation process
             // from using $ as a variable name and blatting jQuery
             // There's potentially other globals at risk like this too
             const dontDelete = $;
         },
-        async load() {
+        /**
+         * Call load after a slight delay, cancelling any pending
+         * calls.
+         */
+        debouncedLoad() {
             this.loading = true;
+            const delay = 250;
+            if (this.loadTimeout) {
+                clearTimeout(this.loadTimeout);
+            }
+            this.loadTimeout = setTimeout(() => {
+                this.load();
+                this.loadTimeout = null;
+            }, delay);
+        },
+        async load() {
 
             const listRequest = new Request('./smartlist', {
                 method: 'POST',
@@ -344,28 +363,6 @@ export default {
             this.loading = false;
         },
         /**
-         * Modify the DataTable's state using the 
-         * supplied mutatorFunction. Then cause the 
-         * DataTable to be re-mounted.
-         * 
-         * @param {*} mutatorFn A function which accepts
-         * the current table state as an object, and 
-         * returns the new state to apply.
-         */
-        modifyTableState(mutatorFn) {
-
-            const stateString = this.getStorageItem('') ?? '{}';
-            const currState = JSON.parse(stateString);
-            const newState = mutatorFn(currState);
-
-            this.setStorageItem('', JSON.stringify(newState));
-
-            // Increment the datatable's key causing the table to 
-            // be destroyed and re-mounted, reloading the state
-            // we just modified
-            this.dtKey = this.dtKey + 1;
-        },
-        /**
          * Grab an item from storage (local or session whichever the 
          * DataTable is using).
          * 
@@ -386,30 +383,6 @@ export default {
             const storageLoc = dt.stateStorage == 'session' ? sessionStorage : localStorage;
             return storageLoc.setItem(keyPrefix + '' + stateKey, strValue);
         },
-        stateRestore(event) {
-
-            // Triggered when the primevue datatable restores its own state
-            // copy out the props 
-            this.firstRow = event.first ?? 0;
-            this.pageSize = event.rows ?? 25;
-            this.sortColumn = event.sortField ?? '';
-            this.sortOrder = event.sortOrder ?? 0;
-            this.filters = event.filters ?? {};
-        },
-        initFilters() {
-
-            this.filters ??= {};
-
-            // Create a default entry in 'filters' for each column
-            for (let col of this.columns) {
-                if (col.filterable && !this.filters[col.field]) {
-                    this.filters[col.field] = {
-                        operator: FilterOperator.AND,
-                        constraints: [{ value: null, matchMode: defaultMatchMode(col.type) }]
-                    };
-                }
-            }
-        },
         stateSave(event) {
             // There doesn't appear to be any way to grab
             // these values except when the state is saved
@@ -429,7 +402,36 @@ export default {
                 this.columnWidths = newWidths;
             }
         },
+        stateRestore(event) {
+
+            // Triggered when the primevue datatable restores its own state
+            // copy out the props 
+            this.firstRow = event.first ?? 0;
+            this.pageSize = event.rows ?? 25;
+            this.sortColumn = event.sortField ?? '';
+            this.sortOrder = event.sortOrder ?? 0;
+            this.filters = event.filters ?? {};
+        },
+        /**
+         * Initialise/clear the filter state, optionally setting some 
+         * filter state (overlaying the provided state on the just reset state).
+         */
+        initFilters(incomingFilters = {}) {
+
+            const defaultFilters = {};
+
+            // Create a default entry in 'filters' for each column
+            for (let col of this.columns) {
+                this.filters[col.field] = {
+                    operator: FilterOperator.AND,
+                    constraints: [{ value: null, matchMode: defaultMatchMode(col.type) }]
+                };
+            }
+
+            this.filters = Object.assign(defaultFilters, incomingFilters);
+        },
         snapshotChanged(newSnapshot) {
+
             const snapstate = newSnapshot?.snapshot;
             this.setStorageItem(SNAP_KEY_PREFIX, newSnapshot?.bizId);
 
@@ -437,8 +439,7 @@ export default {
 
                 // Filters
                 const incomingFilters = snapstate.filters ?? {};
-                this.filters = incomingFilters;
-                this.initFilters();
+                this.initFilters(incomingFilters);
 
                 // Visible columns
                 const visibleCols = snapstate.visibleColumns ?? [];
@@ -449,15 +450,16 @@ export default {
                     }
                 }
 
+                // Update the DataTable's column order directly
+                this.$refs.datatable.d_columnOrder = visibleCols;
+
+                /*
+                // Update the column widths?
+                // DOESN'T WORK
                 const columnWidths = snapstate.columnWidths ?? [];
                 const colWidthString = columnWidths.join(',');
-
-                this.modifyTableState(state => {
-                    state.columnOrder = visibleCols;
-                    state.columnWidths = colWidthString;
-
-                    return state;
-                });
+                this.$refs.datatable.columnWidthsState = colWidthString
+                */
 
                 // Summary/aggregate row
                 this.summarySelection = snapstate.summarySelection ?? '';
@@ -468,7 +470,20 @@ export default {
                     this.sortOrder = snapstate.sortOrder;
                 }
 
+            } else {
+                this.clearedSnapshot();
             }
+        },
+        clearedSnapshot() {
+
+            this.selectedColumns = [];
+            this.summarySelection = '';
+            this.sortColumn = '';
+            this.sortOrder = 0;
+
+            this.$refs.datatable.d_columnOrder = null;
+
+            this.initFilters();
         },
         onRowContextMenu(event) {
             this.$refs.cm.show(event.originalEvent);
@@ -485,7 +500,6 @@ export default {
         }
     },
     mounted() {
-
         this.snapshotBizId = this.getStorageItem(SNAP_KEY_PREFIX);
     },
     beforeMount() {
@@ -496,9 +510,13 @@ export default {
         this.initFilters();
     },
     watch: {
-        fetchFormData(newUrl, oldUrl) {
-            // Whenever fetchFormData changes call to server
-            this.load();
+        fetchFormData: {
+            handler(newValue, oldValue) {
+                // printFormData(newValue)
+                // Whenever fetchFormData changes call to server
+                this.debouncedLoad();
+            },
+            deep: true
         }
     }
 }
@@ -517,7 +535,6 @@ export default {
         @hide="selectedRow = null"
     />
     <DataTable
-        :key="dtKey"
         ref="datatable"
         dataKey="bizId"
         filterDisplay="menu"
