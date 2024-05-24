@@ -38,7 +38,7 @@
 				}
 				
 				/* The device with borders */
-				.smartphone {
+				.phone {
 					transform-origin: 0 0;
 					left: 50%;
 					position: absolute;
@@ -53,7 +53,7 @@
 				}
 				
 				/* The horizontal line on the top of the device */
-				.smartphone:before {
+				.phone:before {
 					content: '';
 					display: block;
 					width: 60px;
@@ -67,7 +67,7 @@
 				}
 				
 				/* The circle on the bottom of the device */
-				.smartphone:after {
+				.phone:after {
 					content: '';
 					display: block;
 					width: 35px;
@@ -81,7 +81,7 @@
 				}
 				
 				/* The screen (or content) of the device */
-				.smartphone .content {
+				.phone .content {
 					width: 480px;
 					height: 800px;
 					background: white;
@@ -216,9 +216,9 @@
 			</style>
 		</head>
 		<body>
-			<div id="device" class="smartphone">
+			<div id="device">
 			  <div class="content">
-			    <iframe id="iframe" src="#{device.startingDeviceJspUrl}" style="width:100%;border:none;height:100%"></iframe>
+			    <iframe id="iframe" style="width:100%;border:none;height:100%"></iframe>
 			  </div>
 			</div>
 			<div style="position:fixed;bottom:80px;right:70px;">
@@ -239,18 +239,18 @@
 
 						const items = ref([
 							{
-								label: 'Mobile',
+								label: 'Phone',
 								icon: 'fa-solid fa-mobile-screen-button fa-2x',
 								command: () => {
-									App.clicked('smartphone', 'phone');
-									toast.add({severity: 'success', summary: 'Mobile', detail: 'Mobile selected', closable: false, life: 2000});
+									App.switch('phone');
+									toast.add({severity: 'success', summary: 'Phone', detail: 'Phone selected', closable: false, life: 2000});
 								}
 							},
 							{
 								label: 'Tablet',
 								icon: 'fa-solid fa-tablet-screen-button fa-2x',
 								command: () => {
-									App.clicked('tablet', 'tablet');
+									App.switch('tablet');
 									toast.add({severity: 'success', summary: 'Tablet', detail: 'Tablet selected', closable: false, life: 2000});
 								}
 							},
@@ -258,7 +258,7 @@
 								label: 'Laptop',
 								icon: 'fa-solid fa-laptop fa-2x',
 								command: () => {
-									App.clicked('laptop', 'desktop');
+									App.switch('laptop');
 									toast.add({severity: 'success', summary: 'Laptop', detail: 'Laptop selected', closable: false, life: 2000});
 								}
 							},
@@ -266,13 +266,18 @@
 								label: 'Desktop',
 								icon: 'fa-solid fa-desktop fa-2x',
 								command: () => {
-									App.clicked('desktop', 'desktop');
+									App.switch('desktop');
 									toast.add({severity: 'success', summary: 'Desktop', detail: 'Desktop selected', closable: false, life: 2000});
 								}
 							}
 						]);
 
-						App.size('smartphone');
+						// Get device from sessionStorage or default to phone
+						var device = sessionStorage.getItem('preview_device');
+						if (device) {} else {
+							device = 'phone';
+						}
+						App.switch(device);
 
 						$(window).bind('resize', function(e) {
 							App.size();
@@ -284,9 +289,19 @@
 						"p-speeddial": primevue.speeddial,
 						"p-toast": primevue.toast
 					},
-					clicked(styleClass, userAgentType) {
-						$('#device').attr('class', styleClass);
-						App.size(styleClass);
+					switch(device) {
+						var userAgentType = device;
+						if ((device != 'phone') &amp; (device != 'tablet') &amp; (device != 'desktop')) {
+							if (device == 'laptop') {
+								userAgentType = 'desktop';
+							}
+							else {
+								return; // protect from unsanitised values in storage
+							}
+						}
+						sessionStorage.setItem('preview_device', device);
+						$('#device').attr('class', device);
+						App.size(device);
 						$('#iframe').attr('src', "#{device.clickDeviceJspUrl}" + userAgentType);
 					},
 					size(styleClass) {
@@ -295,7 +310,7 @@
 						if (! styleClass) {
 							styleClass = device.attr('class');
 						}
-						if (styleClass == 'smartphone') {
+						if (styleClass == 'phone') {
 							// height - 2 * margin top (20px) / screen height (800px) + 2 * shim height (60px)
 							var verticalScale = (parent.height() - 40) / 920;
 							// width - 2 * margin sides (20px) / (screen width (480px) + 2 * shim width (16px)
