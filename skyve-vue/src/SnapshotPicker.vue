@@ -3,6 +3,16 @@ import { PrimeIcons } from 'primevue/api';
 import { SnapshotService } from '@/service/SnapshotService';
 import Button from 'primevue/button';
 
+const LABEL_CUTOFF = 45;
+
+function truncateLabel(label) {
+    if (label.length < LABEL_CUTOFF) {
+        return label;
+    }
+
+    return label.substring(0, LABEL_CUTOFF) + '…';
+}
+
 export default {
     props: {
         documentQuery: String,
@@ -23,7 +33,7 @@ export default {
     computed: {
         buttonLabel() {
             const label = this.selectedSnapshot?.name ?? 'None'
-            return 'Snapshot: ' + label;
+            return 'Snapshot: ' + truncateLabel(label);
         },
         disableCreateSubmit() {
             if (!this.snapshotName) {
@@ -71,7 +81,7 @@ export default {
                     }
 
                     let result = {
-                        label: currSnap.name,
+                        label: truncateLabel(currSnap.name),
                         icon: PrimeIcons.CAMERA,
                         items: [
                             optionalAction,
