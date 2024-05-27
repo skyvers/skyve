@@ -66,6 +66,7 @@ export default {
             filters: {},
             firstRow: 0,
             pageSize: 25,
+            errorText: '',
 
             sortColumn: '',
             sortOrder: 0,
@@ -329,8 +330,11 @@ export default {
             const response = await fetch(listRequest);
             let payload = await response.json();
             if (payload?.response?.status == -1) {
+                const errorResponse = payload?.response?.data;
                 console.error('Something went wrong retrieving list contents', payload);
-                throw new Error('Error loading list contents');
+                this.errorText = errorResponse;
+                this.loading = false;
+                throw new Error('Error loading grid contents');
             }
 
             this.totalRecords = payload.response.totalRows;
@@ -522,6 +526,30 @@ export default {
         :model="menuModel"
         @hide="selectedRow = null"
     />
+
+    <Dialog
+        modal
+        header="Warning"
+        :visible="!!errorText"
+        @update:visible="() => this.errorText = ''"
+    >
+        <span class="flex flex-column gap-5">
+            <span class="flex flex-row gap-3">
+                <div>
+                    <span class="pi pi-exclamation-triangle" />
+                </div>
+                <div v-html="errorText" />
+            </span>
+            <div class="flex flex-row justify-content-center">
+                <Button
+                    type="button"
+                    label="Ok"
+                    @click="() => this.errorText = ''"
+                />
+            </div>
+        </span>
+    </Dialog>
+
     <DataTable
         ref="datatable"
         dataKey="bizId"
@@ -573,7 +601,11 @@ export default {
             </div>
         </template>
         <template #empty> No data found.</template>
-        <template #loading> Loading data. Please wait.</template>
+        <template #loading>
+            <span style="color: var(--primary-color-text)">
+                Loading data. Please wait.
+            </span>
+        </template>
         <Column
             v-for="col of visibleColumns"
             :key="col.field"
