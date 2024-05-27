@@ -14,6 +14,36 @@
 	<pluralAlias>Generics</pluralAlias>
 	<parentDocument>Generic</parentDocument>
 	<attributes>
+		<id name="id1">
+			<displayName>id1</displayName>
+		</id>
+		<id name="id2">
+			<displayName>id2</displayName>
+		</id>
+		<id name="id3">
+			<displayName>id3</displayName>
+		</id>
+		<id name="id4">
+			<displayName>id4</displayName>
+		</id>
+		<id name="id5">
+			<displayName>id5</displayName>
+		</id>
+		<id name="id6">
+			<displayName>id6</displayName>
+		</id>
+		<id name="id7">
+			<displayName>id7</displayName>
+		</id>
+		<id name="id8">
+			<displayName>id8</displayName>
+		</id>
+		<id name="id9">
+			<displayName>id9</displayName>
+		</id>
+		<id name="id10">
+			<displayName>id10</displayName>
+		</id>
 		<memo name="memo1">
 			<displayName>memo1</displayName>
 		</memo>
@@ -32,6 +62,18 @@
 		<memo name="memo6">
 			<displayName>memo6</displayName>
 		</memo>
+		<memo name="memo7">
+			<displayName>memo7</displayName>
+		</memo>
+		<memo name="memo8">
+			<displayName>memo8</displayName>
+		</memo>
+		<memo name="memo9">
+			<displayName>memo9</displayName>
+		</memo>
+		<memo name="memo10">
+			<displayName>memo10</displayName>
+		</memo>
 		<boolean name="boolean1">
 			<displayName>boolean1</displayName>
 		</boolean>
@@ -46,6 +88,21 @@
 		</boolean>
 		<boolean name="boolean5">
 			<displayName>boolean5</displayName>
+		</boolean>
+		<boolean name="boolean6">
+			<displayName>boolean6</displayName>
+		</boolean>
+		<boolean name="boolean7">
+			<displayName>boolean7</displayName>
+		</boolean>
+		<boolean name="boolean8">
+			<displayName>boolean8</displayName>
+		</boolean>
+		<boolean name="boolean9">
+			<displayName>boolean9</displayName>
+		</boolean>
+		<boolean name="boolean10">
+			<displayName>boolean10</displayName>
 		</boolean>
 		<date name="date1">
 			<displayName>date1</displayName>
@@ -62,6 +119,21 @@
 		<date name="date5">
 			<displayName>date5</displayName>
 		</date>
+		<date name="date6">
+			<displayName>date6</displayName>
+		</date>
+		<date name="date7">
+			<displayName>date7</displayName>
+		</date>
+		<date name="date8">
+			<displayName>date8</displayName>
+		</date>
+		<date name="date9">
+			<displayName>date9</displayName>
+		</date>
+		<date name="date10">
+			<displayName>date10</displayName>
+		</date>
 		<dateTime name="dateTime1">
 			<displayName>dateTime1</displayName>
 		</dateTime>
@@ -76,6 +148,21 @@
 		</dateTime>
 		<dateTime name="dateTime5">
 			<displayName>dateTime5</displayName>
+		</dateTime>
+		<dateTime name="dateTime6">
+			<displayName>dateTime6</displayName>
+		</dateTime>
+		<dateTime name="dateTime7">
+			<displayName>dateTime7</displayName>
+		</dateTime>
+		<dateTime name="dateTime8">
+			<displayName>dateTime8</displayName>
+		</dateTime>
+		<dateTime name="dateTime9">
+			<displayName>dateTime9</displayName>
+		</dateTime>
+		<dateTime name="dateTime10">
+			<displayName>dateTime10</displayName>
 		</dateTime>
 		<time name="time1">
 			<displayName>time1</displayName>
@@ -92,6 +179,21 @@
 		<time name="time5">
 			<displayName>time5</displayName>
 		</time>
+		<time name="time6">
+			<displayName>time6</displayName>
+		</time>
+		<time name="time7">
+			<displayName>time7</displayName>
+		</time>
+		<time name="time8">
+			<displayName>time8</displayName>
+		</time>
+		<time name="time9">
+			<displayName>time9</displayName>
+		</time>
+		<time name="time10">
+			<displayName>time10</displayName>
+		</time>		
 		<timestamp name="timestamp1">
 			<displayName>timestamp1</displayName>
 		</timestamp>
@@ -106,6 +208,21 @@
 		</timestamp>
 		<timestamp name="timestamp5">
 			<displayName>timestamp5</displayName>
+		</timestamp>
+		<timestamp name="timestamp6">
+			<displayName>timestamp6</displayName>
+		</timestamp>
+		<timestamp name="timestamp7">
+			<displayName>timestamp7</displayName>
+		</timestamp>
+		<timestamp name="timestamp8">
+			<displayName>timestamp8</displayName>
+		</timestamp>
+		<timestamp name="timestamp9">
+			<displayName>timestamp9</displayName>
+		</timestamp>
+		<timestamp name="timestamp10">
+			<displayName>timestamp10</displayName>
 		</timestamp>
 		<decimal2 name="decimal21">
 			<displayName>decimal21</displayName>
@@ -122,6 +239,21 @@
 		<decimal2 name="decimal25">
 			<displayName>decimal25</displayName>
 		</decimal2>
+		<decimal2 name="decimal26">
+			<displayName>decimal26</displayName>
+		</decimal2>
+		<decimal2 name="decimal27">
+			<displayName>decimal27</displayName>
+		</decimal2>
+		<decimal2 name="decimal28">
+			<displayName>decimal28</displayName>
+		</decimal2>
+		<decimal2 name="decimal29">
+			<displayName>decimal29</displayName>
+		</decimal2>
+		<decimal2 name="decimal210">
+			<displayName>decimal210</displayName>
+		</decimal2>
 		<decimal5 name="decimal51">
 			<displayName>decimal51</displayName>
 		</decimal5>
@@ -136,6 +268,21 @@
 		</decimal5>
 		<decimal5 name="decimal55">
 			<displayName>decimal55</displayName>
+		</decimal5>
+		<decimal5 name="decimal56">
+			<displayName>decimal56</displayName>
+		</decimal5>
+		<decimal5 name="decimal57">
+			<displayName>decimal57</displayName>
+		</decimal5>
+		<decimal5 name="decimal58">
+			<displayName>decimal58</displayName>
+		</decimal5>
+		<decimal5 name="decimal59">
+			<displayName>decimal59</displayName>
+		</decimal5>
+		<decimal5 name="decimal510">
+			<displayName>decimal510</displayName>
 		</decimal5>
 		<decimal10 name="decimal101">
 			<displayName>decimal101</displayName>
@@ -152,6 +299,21 @@
 		<decimal10 name="decimal105">
 			<displayName>decimal105</displayName>
 		</decimal10>
+		<decimal10 name="decimal106">
+			<displayName>decimal106</displayName>
+		</decimal10>
+		<decimal10 name="decimal107">
+			<displayName>decimal107</displayName>
+		</decimal10>
+		<decimal10 name="decimal108">
+			<displayName>decimal108</displayName>
+		</decimal10>
+		<decimal10 name="decimal109">
+			<displayName>decimal109</displayName>
+		</decimal10>
+		<decimal10 name="decimal1010">
+			<displayName>decimal1010</displayName>
+		</decimal10>
 		<integer name="integer1">
 			<displayName>integer1</displayName>
 		</integer>
@@ -166,6 +328,21 @@
 		</integer>
 		<integer name="integer5">
 			<displayName>integer5</displayName>
+		</integer>
+		<integer name="integer6">
+			<displayName>integer6</displayName>
+		</integer>
+		<integer name="integer7">
+			<displayName>integer7</displayName>
+		</integer>
+		<integer name="integer8">
+			<displayName>integer8</displayName>
+		</integer>
+		<integer name="integer9">
+			<displayName>integer9</displayName>
+		</integer>
+		<integer name="integer10">
+			<displayName>integer10</displayName>
 		</integer>
 		<longInteger name="longInteger1">
 			<displayName>longInteger1</displayName>
@@ -182,6 +359,21 @@
 		<longInteger name="longInteger5">
 			<displayName>longInteger5</displayName>
 		</longInteger>
+		<longInteger name="longInteger6">
+			<displayName>longInteger6</displayName>
+		</longInteger>
+		<longInteger name="longInteger7">
+			<displayName>longInteger7</displayName>
+		</longInteger>
+		<longInteger name="longInteger8">
+			<displayName>longInteger8</displayName>
+		</longInteger>
+		<longInteger name="longInteger9">
+			<displayName>longInteger9</displayName>
+		</longInteger>
+		<longInteger name="longInteger10">
+			<displayName>longInteger10</displayName>
+		</longInteger>
 		<geometry name="geometry1">
 			<displayName>geometry1</displayName>
 		</geometry>
@@ -197,6 +389,21 @@
 		<geometry name="geometry5">
 			<displayName>geometry5</displayName>
 		</geometry>
+		<geometry name="geometry6">
+			<displayName>geometry6</displayName>
+		</geometry>
+		<geometry name="geometry7">
+			<displayName>geometry7</displayName>
+		</geometry>
+		<geometry name="geometry8">
+			<displayName>geometry8</displayName>
+		</geometry>
+		<geometry name="geometry9">
+			<displayName>geometry9</displayName>
+		</geometry>
+		<geometry name="geometry10">
+			<displayName>geometry10</displayName>
+		</geometry>
 		<markup name="markup1">
 			<displayName>markup1</displayName>
 		</markup>
@@ -211,6 +418,21 @@
 		</markup>
 		<markup name="markup5">
 			<displayName>markup5</displayName>
+		</markup>
+		<markup name="markup6">
+			<displayName>markup6</displayName>
+		</markup>
+		<markup name="markup7">
+			<displayName>markup7</displayName>
+		</markup>
+		<markup name="markup8">
+			<displayName>markup8</displayName>
+		</markup>
+		<markup name="markup9">
+			<displayName>markup9</displayName>
+		</markup>
+		<markup name="markup10">
+			<displayName>markup10</displayName>
 		</markup>
 		<text name="text5001">
 			<displayName>text 500 1</displayName>
@@ -230,6 +452,26 @@
 		</text>
 		<text name="text5005">
 			<displayName>text 500 5</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5006">
+			<displayName>text 500 6</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5007">
+			<displayName>text 500 7</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5008">
+			<displayName>text 500 8</displayName>
+			<length>500</length>
+		</text>
+		<text name="text5009">
+			<displayName>text 500 9</displayName>
+			<length>500</length>
+		</text>
+		<text name="text50010">
+			<displayName>text 500 10</displayName>
 			<length>500</length>
 		</text>
 	</attributes>
