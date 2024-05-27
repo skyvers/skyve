@@ -18,11 +18,6 @@ function defaultMatchMode(columnType) {
     return (MatchModes[columnType] ?? [MatchModes.MODES.EQUALS])[0].value;
 }
 
-function printFormData(formData) {
-    console.table([...formData.entries()]);
-}
-
-
 /**
  * Compare the two provided arrays for equality;
  * ie: same length, and contents are equal 
@@ -512,7 +507,6 @@ export default {
     watch: {
         fetchFormData: {
             handler(newValue, oldValue) {
-                // printFormData(newValue)
                 // Whenever fetchFormData changes call to server
                 this.debouncedLoad();
             },
@@ -523,12 +517,6 @@ export default {
 </script>
 <template>
 
-    <SnapshotPicker
-        :documentQuery="dataSource"
-        :snapshotState="snapshotState"
-        @snapshotChanged="snapshotChanged"
-        :initialSelection="snapshotBizId"
-    />
     <ContextMenu
         ref="cm"
         :model="menuModel"
@@ -565,14 +553,22 @@ export default {
             <div v-if="title">
                 {{ title }}
             </div>
-            <div style="text-align:left">
+            <div class="flex flex-column md:flex-row gap-2">
                 <MultiSelect
                     v-model="selectedColumns"
                     :options="columns"
                     optionLabel="header"
-                    display="chip"
+                    display="comma"
                     placeholder="Select Columns"
-                    :showToggleAll="false"
+                    :maxSelectedLabels="4"
+                    selectedItemsLabel="{0} columns selected"
+                    :showToggleAll="true"
+                />
+                <SnapshotPicker
+                    :documentQuery="dataSource"
+                    :snapshotState="snapshotState"
+                    @snapshotChanged="snapshotChanged"
+                    :initialSelection="snapshotBizId"
                 />
             </div>
         </template>
