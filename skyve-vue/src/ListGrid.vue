@@ -417,7 +417,7 @@ export default {
 
             // Create a default entry in 'filters' for each column
             for (let col of this.columns) {
-                this.filters[col.field] = {
+                defaultFilters[col.field] = {
                     operator: FilterOperator.AND,
                     constraints: [{ value: null, matchMode: defaultMatchMode(col.type) }]
                 };
