@@ -1,3 +1,7 @@
+@layer main, primevue;
+
+@layer main {
+
 /* PF tweaks */
 .ui-datatable-data > tr {
 	text-align: center !important;
@@ -8,25 +12,57 @@
 .ui-datatable thead th {
 	padding: 4px !important;
 }
-/* disable for now as leaflet maps cannot handle the zoom settings
+
+/* PrimeVue tweaks */
+.p-button {
+    background: #2196f3 !important;
+    border: 1px solid #2196f3 !important;
+}
+
+/* Device sizing */
 @media (min-width: 641px) {
-	html {
-		zoom: 95%
+	body .ui-widget {
+		font-size: 1rem !important;
+	}
+	body .ui-inputfield {
+		padding: 0.5em !important;
+	}
+	.p-component {
+		font-size: 1rem !important;
+	}
+	.p-datatable .p-datatable-tbody>tr>td {
+		padding: 1rem !important;
 	}
 }
-
 @media (min-width: 737px) {
-	html {
-		zoom: 90%
+	body .ui-widget {
+		font-size: 0.95rem !important;
+	}
+	body .ui-inputfield {
+		padding: 0.4em !important;
+	}
+	.p-component {
+		font-size: 0.95rem !important;
+	}
+	.p-datatable .p-datatable-tbody>tr>td {
+		padding: 0.8rem 1rem !important;
+	}
+}
+@media (min-width: 1281px) {
+	body .ui-widget {
+		font-size: 0.9rem !important;
+	}
+	body .ui-inputfield {
+		padding: 0.3em !important;
+	}
+	.p-component {
+		font-size: 0.9rem !important;
+	}
+	.p-datatable .p-datatable-tbody>tr>td {
+		padding: 0.6rem 1rem !important;
 	}
 }
 
-@media (min-width: 1281px) {
-	html {
-		zoom: 85%
-	}
-}
-*/
 /*
 	Editorial by HTML5 UP
 	html5up.net | @ajlkn
@@ -2548,6 +2584,7 @@ mark {
 		-ms-flex-shrink: 1;
 		flex-shrink: 1;
 		width: 100%;
+		min-width: 0;
 	}
 
 		#main > .inner {
@@ -2869,7 +2906,7 @@ mark {
 		#header .logo {
 			border-bottom: 0;
 			color: inherit;
-			font-size: 2em;
+			font-size: 2em !important;
 		}
 
 		#header .icons {
@@ -2997,3 +3034,6 @@ mark {
 	#footer .copyright a {
 		color: inherit;
 	}
+
+	
+}
