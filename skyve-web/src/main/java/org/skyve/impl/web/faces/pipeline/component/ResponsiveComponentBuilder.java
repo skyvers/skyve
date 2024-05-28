@@ -37,7 +37,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		HtmlPanelGroup result = (HtmlPanelGroup) super.view(component, createView);
 		// Change from a span with nowrap to a responsive div
 		result.setLayout("block");
-		result.setStyle("flex-grow:1"); // to ensure it takes up all the space it can in the sidebarWrapper div
+		result.setStyle("flex-grow:1; max-width:100%"); // to ensure it takes up all the space it can in the sidebarWrapper div
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
 
 		return result;
