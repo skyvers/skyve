@@ -1,5 +1,7 @@
 <script>
 
+import { unsanitiseBinding } from './support/Util';
+
 const params = {
     id: '_n',
     modoc: '_doc',
@@ -31,7 +33,7 @@ export default {
             const searchParams = new URLSearchParams();
             searchParams.append(params.id, this.id);
             searchParams.append(params.modoc, this.modoc);
-            searchParams.append(params.binding, this.binding);
+            searchParams.append(params.binding, this.rectifiedBinding);
 
             if (!!this.size) {
                 searchParams.append(params.width, this.size);
@@ -39,6 +41,11 @@ export default {
             }
 
             return `content?${searchParams}`;
+        },
+        rectifiedBinding() {
+            // Convert from the SmartClient sanitised binding into the
+            // original binding value for content servlet
+            return unsanitiseBinding(this.binding);
         }
     },
     methods: {
