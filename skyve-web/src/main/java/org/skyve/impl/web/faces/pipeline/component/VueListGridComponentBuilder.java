@@ -14,6 +14,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.model.list.ListModel;
 
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIOutput;
 
 public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
@@ -61,5 +62,15 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
         log.debug("Created VueListGrid component with attributes: {}", attributes);
 
         return result;
+    }
+
+    @Override
+    public UIComponent listGridContextMenu(UIComponent component, String listGridId, ListGrid listGrid) {
+
+        UIOutput empty = new UIOutput();
+        empty.setValue("");
+        empty.setRendered(false);
+
+        return empty;
     }
 }
