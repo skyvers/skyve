@@ -1,7 +1,3 @@
-@layer main, primevue;
-
-@layer main {
-
 /* PF tweaks */
 .ui-datatable-data > tr {
 	text-align: center !important;
@@ -13,53 +9,20 @@
 	padding: 4px !important;
 }
 
-/* PrimeVue tweaks */
-.p-button {
-    background: #2196f3 !important;
-    border: 1px solid #2196f3 !important;
-}
-
 /* Device sizing */
 @media (min-width: 641px) {
 	body .ui-widget {
 		font-size: 1rem !important;
-	}
-	body .ui-inputfield {
-		padding: 0.5em !important;
-	}
-	.p-component {
-		font-size: 1rem !important;
-	}
-	.p-datatable .p-datatable-tbody>tr>td {
-		padding: 1rem !important;
 	}
 }
 @media (min-width: 737px) {
 	body .ui-widget {
 		font-size: 0.95rem !important;
 	}
-	body .ui-inputfield {
-		padding: 0.4em !important;
-	}
-	.p-component {
-		font-size: 0.95rem !important;
-	}
-	.p-datatable .p-datatable-tbody>tr>td {
-		padding: 0.8rem 1rem !important;
-	}
 }
 @media (min-width: 1281px) {
 	body .ui-widget {
 		font-size: 0.9rem !important;
-	}
-	body .ui-inputfield {
-		padding: 0.3em !important;
-	}
-	.p-component {
-		font-size: 0.9rem !important;
-	}
-	.p-datatable .p-datatable-tbody>tr>td {
-		padding: 0.6rem 1rem !important;
 	}
 }
 
@@ -3034,6 +2997,3 @@ mark {
 	#footer .copyright a {
 		color: inherit;
 	}
-
-	
-}
