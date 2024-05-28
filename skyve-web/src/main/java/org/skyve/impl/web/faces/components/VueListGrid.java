@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
@@ -81,10 +82,12 @@ public class VueListGrid extends UIOutput {
 
     private String generateHtml(String moduleName, String documentName, String queryName, String modelName) throws Exception {
 
-        String parentId = this.getParent().getClientId();
+        // FIXME Generating a random id for the target div that Vue will render into
+        // We should probably update this whole component to be a PanelGroup or similar
+        String targetId = RandomStringUtils.randomAlphabetic(10);
 
         ListGridParams params = new ListGridParams();
-        params.setTargetSelector("[id='" + parentId + "'] .vue-list-grid-container");
+        params.setTargetSelector("#" + targetId + ".vue-list-grid-container");
         params.setModule(moduleName);
         params.setDocument(documentName);
         params.setQuery(queryName);
@@ -126,7 +129,7 @@ public class VueListGrid extends UIOutput {
         String paramsString = mapper.writeValueAsString(params);
 
         StringJoiner sj = new StringJoiner(" \n");
-        sj.add("<div class=\"vue-list-grid-container\"></div>")
+        sj.add("<div id=\"" + targetId + "\" class=\"vue-list-grid-container\"></div>")
           .add("<script>")
           .add("window.addEventListener('load', () => {")
           .add("                    SKYVE.listgrid(")
