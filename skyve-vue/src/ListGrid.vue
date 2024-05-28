@@ -283,7 +283,7 @@ export default {
         },
         snapshotState() {
 
-            const visibleColNames = this.visibleColumns.map(col => col.field);
+            const visibleColNames = this.selectedColumns.map(col => col.field);
 
             return {
                 "filters": this.filters,
@@ -521,12 +521,14 @@ export default {
 </script>
 <template>
 
+    <!-- Right click context menu -->
     <ContextMenu
         ref="cm"
         :model="menuModel"
         @hide="selectedRow = null"
     />
 
+    <!-- Error Dialog for any load errors -->
     <Dialog
         modal
         header="Warning"
@@ -582,6 +584,8 @@ export default {
                 {{ title }}
             </div>
             <div class="flex flex-column md:flex-row gap-2">
+
+                <!-- Multi select for choosing visible columns -->
                 <MultiSelect
                     v-model="selectedColumns"
                     :options="columns"
@@ -592,6 +596,8 @@ export default {
                     selectedItemsLabel="{0} columns selected"
                     :showToggleAll="true"
                 />
+
+                <!-- Snapshot CRUD control -->
                 <SnapshotPicker
                     :documentQuery="dataSource"
                     :snapshotState="snapshotState"
