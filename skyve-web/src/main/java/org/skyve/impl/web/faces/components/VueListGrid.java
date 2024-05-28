@@ -27,6 +27,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder;
+import org.skyve.util.Binder.TargetMetaData;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -111,10 +112,9 @@ public class VueListGrid extends UIOutput {
                     customer, module, document, mdQueryColumn, true, queryName);
 
             String binding = mdQueryColumn.getBinding();
-            Attribute attribute = Binder.getMetaDataForBinding(customer, module, document, binding)
-                                        .getAttribute();
+            TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, binding);
 
-            ColumnMetaData md = new ColumnMetaData(mdQueryColumn, scColDefn, attribute, customer);
+            ColumnMetaData md = new ColumnMetaData(mdQueryColumn, scColDefn, tmd, customer);
             ColumnDefinition colDefn = ColumnDefinition.fromColumnMetaData(md);
             logger.trace("Created column definition: {}", colDefn);
 
@@ -159,10 +159,10 @@ public class VueListGrid extends UIOutput {
     private static class ColumnMetaData {
         private final MetaDataQueryColumn mdQueryColumn;
         private final SmartClientQueryColumnDefinition scQueryColumnDefn;
-        private final Attribute attribute;
+        private final TargetMetaData targetMetaData;
         private final Customer customer;
 
-        private static final Map<String, String> typeConversions = new ImmutableMap.Builder<String, String>()
+        private static final Map<String, String> attributeTypeConversions = new ImmutableMap.Builder<String, String>()
                 .put("decimal2", "numeric")
                 .put("decimal5", "numeric")
                 .put("decimal10", "numeric")
@@ -177,14 +177,20 @@ public class VueListGrid extends UIOutput {
                 .put("id", "text")
                 .build();
 
+        private static final Map<Class<?>, String> implicitTypeConversions = new ImmutableMap.Builder<Class<?>, String>()
+                .put(String.class, "text")
+                .put(Integer.class, "numeric")
+                .put(Boolean.class, "boolean")
+                .build();
+
         public ColumnMetaData(
                 MetaDataQueryColumn mdQueryColumn,
                 SmartClientQueryColumnDefinition scQueryColumnDefn,
-                Attribute attribute,
+                TargetMetaData targetMetaData,
                 Customer customer) {
             this.mdQueryColumn = mdQueryColumn;
             this.scQueryColumnDefn = scQueryColumnDefn;
-            this.attribute = attribute;
+            this.targetMetaData = targetMetaData;
             this.customer = customer;
         }
 
@@ -197,12 +203,20 @@ public class VueListGrid extends UIOutput {
         }
 
         public String getType() {
+
+            Attribute attribute = targetMetaData.getAttribute();
+            if (attribute == null) {
+                // Defaulting to text for unhandled implicit type attributes
+                Class<?> implicitAttrType = targetMetaData.getType();
+                return implicitTypeConversions.getOrDefault(implicitAttrType, "text");
+            }
+
             return flattenType(attribute.getAttributeType()
                                         .name());
         }
 
         private static String flattenType(String inType) {
-            String resultType = typeConversions.get(inType);
+            String resultType = attributeTypeConversions.get(inType);
             if (resultType != null) {
                 return resultType;
             }
@@ -212,7 +226,7 @@ public class VueListGrid extends UIOutput {
 
         public String getConverterName() {
 
-            return Optional.of(attribute)
+            return Optional.ofNullable(targetMetaData.getAttribute())
                            .filter(ConvertableField.class::isInstance)
                            .map(ConvertableField.class::cast)
                            .map(cf -> cf.getConverterForCustomer(customer))
