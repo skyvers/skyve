@@ -11,6 +11,10 @@ function _createDateFormatter(format) {
 
     return (stringValue) => {
 
+        if (stringValue.trim() == ":") {
+            return "";
+        }
+
         const dt = DateTime.fromISO(stringValue);
         return dt.toFormat(format);
     };
