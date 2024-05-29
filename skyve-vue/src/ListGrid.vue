@@ -84,6 +84,18 @@ export default {
 
             snapshotBizId: null,
 
+            topLevelOperators: [
+                {
+                    label: 'Match All',
+                    value: 'and'
+                },
+                {
+                    label: 'Match Any',
+                    value: 'or'
+                }
+            ],
+            selectedTopLevelOperator: 'and',
+
             matchModes: MatchModes,
 
             // Support params for row right click context menu:
@@ -231,8 +243,7 @@ export default {
 
             if (this.skyveCriteria.length > 0) {
                 fd.append('_constructor', 'AdvancedCriteria');
-                // FIXME allow changing this top-level operator?
-                fd.append('operator', 'and');
+                fd.append('operator', this.selectedTopLevelOperator);
 
                 for (let crit of this.skyveCriteria) {
                     fd.append('criteria', JSON.stringify(crit));
@@ -629,6 +640,14 @@ export default {
                     :snapshotState="snapshotState"
                     @snapshotChanged="snapshotChanged"
                     :initialSelection="snapshotBizId"
+                />
+
+                <!-- Match Any/All Operator -->
+                <Dropdown
+                    v-model="selectedTopLevelOperator"
+                    :options="topLevelOperators"
+                    optionLabel="label"
+                    optionValue="value"
                 />
             </div>
         </template>
