@@ -70,9 +70,10 @@ public class VueListGrid extends UIOutput {
                 final String documentName = (String) attributes.get("document");
                 final String queryName = (String) attributes.get("query");
                 final String modelName = (String) attributes.get("model");
+                final String contextId = (String) attributes.get("contextId");
 
-                logger.debug("Generating table definition for {}, {}, {}, {}", moduleName, documentName, queryName, modelName);
-                out = generateHtml(moduleName, documentName, queryName, modelName);
+                logger.debug("Generating table definition for {}, {}, {}, {}, {}", moduleName, documentName, queryName, modelName, contextId);
+                out = generateHtml(moduleName, documentName, queryName, modelName, contextId);
                 setValue(out);
             } catch (Exception e) {
                 logger.fatal("VueListGrid.encodeBegin() failed", e);
@@ -80,7 +81,7 @@ public class VueListGrid extends UIOutput {
         }
     }
 
-    private String generateHtml(String moduleName, String documentName, String queryName, String modelName) throws Exception {
+    private String generateHtml(String moduleName, String documentName, String queryName, String modelName, String contextId) throws Exception {
 
         // FIXME Generating a random id for the target div that Vue will render into
         // We should probably update this whole component to be a PanelGroup or similar
@@ -92,6 +93,7 @@ public class VueListGrid extends UIOutput {
         params.setDocument(documentName);
         params.setQuery(queryName);
         params.setModel(modelName);
+        params.setContextId(contextId);
 
         // Column definitions
         Customer customer = CORE.getUser()
@@ -281,6 +283,7 @@ public class VueListGrid extends UIOutput {
         private String query;
         private String document;
         private String model;
+        private String contextId;
         private List<ColumnDefinition> columns = new ArrayList<>();
 
         public String getTargetSelector() {
@@ -327,12 +330,21 @@ public class VueListGrid extends UIOutput {
             return model;
         }
 
+        public String getContextId() {
+            return contextId;
+        }
+
+        public void setContextId(String contextId) {
+            this.contextId = contextId;
+        }
+
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
                               .add("targetSelector", targetSelector)
                               .add("module", module)
                               .add("query", query)
+                              .add("contextId", contextId)
                               .add("columns", columns)
                               .add("columns", columns)
                               .toString();

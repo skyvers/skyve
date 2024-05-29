@@ -28,7 +28,7 @@ import ContextMenu from "primevue/contextmenu";
 window.SKYVE ??= {};
 
 // JS create method
-window.SKYVE.listgrid = function ({module, title, document, query, columns, targetSelector, model}) {
+window.SKYVE.listgrid = function ({ module, title, document, query, columns, targetSelector, model, contextId }) {
 
     const grid = createApp(ListGrid, {
         module,
@@ -37,6 +37,7 @@ window.SKYVE.listgrid = function ({module, title, document, query, columns, targ
         query,
         model,
         columns,
+        contextId
     });
     grid.use(PrimeVue, { ripple: true });
     grid.component('Button', Button);

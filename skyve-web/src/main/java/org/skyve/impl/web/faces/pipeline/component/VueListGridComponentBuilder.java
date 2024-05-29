@@ -58,6 +58,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
         put.accept("module", docToUse.getOwningModuleName());
         put.accept("document", docToUse.getName());
+        put.accept("contextId", managedBean.getWebContext().getWebId());
 
         log.debug("Created VueListGrid component with attributes: {}", attributes);
 

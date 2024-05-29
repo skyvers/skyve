@@ -55,6 +55,10 @@ export default {
         hourFormat: {
             type: String,
             default: '24'
+        },
+        contextId: {
+            type: String,
+            default: null
         }
     },
     data() {
@@ -216,6 +220,10 @@ export default {
 
             if (!!this.summarySelection) {
                 fd.append('_summary', this.summarySelection);
+            }
+
+            if (!!this.contextId) {
+                fd.append('_c', this.contextId);
             }
 
             // Sort column and direction
