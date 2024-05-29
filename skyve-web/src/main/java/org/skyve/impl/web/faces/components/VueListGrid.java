@@ -131,12 +131,12 @@ public class VueListGrid extends UIOutput {
         StringJoiner sj = new StringJoiner(" \n");
         sj.add("<div id=\"" + targetId + "\" class=\"vue-list-grid-container\"></div>")
           .add("<script>")
-          .add("window.addEventListener('load', () => {")
-          .add("                    SKYVE.listgrid(")
+          .add("  setTimeout(() => {")
+          .add("    SKYVE.listgrid(")
           .add(paramsString)
-          .add(");")
-          .add("});")
-          .add(" </script>");
+          .add("    );")
+          .add("  }, 0);")
+          .add("</script>");
 
         return sj.toString();
     }

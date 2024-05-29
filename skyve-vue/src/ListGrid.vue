@@ -343,11 +343,16 @@ export default {
 
             if (rows.length > 0) {
 
+                if (this.summarySelection == "Count") {
+                    rows.at(-1).skipConverters = true;
+                }
+
                 // Create column index, FIXME
                 const columnDefMap = new Map();
                 this.columns.forEach(def => columnDefMap.set(def.field, def));
 
-                rows.forEach(row => applyConverters(row, columnDefMap));
+                rows.filter(row => !row.skipConverters)
+                    .forEach(row => applyConverters(row, columnDefMap));
             }
 
             if (!!this.summarySelection) {
