@@ -311,7 +311,6 @@ export default {
                 "filters": this.filters,
                 "visibleColumns": visibleColNames,
                 "summarySelection": this.summarySelection,
-                "sortOrder": this.sortOrder,
                 "sortColumns": this.sortColumns,
                 "columnWidths": this.columnWidths
             };
@@ -435,7 +434,6 @@ export default {
             this.firstRow = event.first ?? 0;
             this.pageSize = event.rows ?? 25;
             this.sortColumn = event.sortField ?? '';
-            this.sortOrder = event.sortOrder ?? 0;
             this.filters = event.filters ?? {};
         },
         /**
@@ -507,7 +505,6 @@ export default {
             this.selectedColumns = [];
             this.summarySelection = '';
             this.sortColumns = [];
-            this.sortOrder = 0;
 
             this.$refs.datatable.d_columnOrder = null;
 
