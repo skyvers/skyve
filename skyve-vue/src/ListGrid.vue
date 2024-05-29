@@ -72,8 +72,7 @@ export default {
             pageSize: 25,
             errorText: '',
 
-            sortColumn: '',
-            sortOrder: 0,
+            multiSortMeta: [],
 
             selectedColumns: [],
             columnOrder: [],
@@ -226,10 +225,8 @@ export default {
                 fd.append('_c', this.contextId);
             }
 
-            // Sort column and direction
-            if ((this.sortColumn ?? '').trim() != '') {
-                const sortPrefix = this.sortOrder == 1 ? '' : '-';
-                fd.append('_sortBy', sortPrefix + this.sortColumn);
+            for (let sortCol of this.sortColumns) {
+                fd.append('_sortBy', sortCol);
             }
 
             if (this.skyveCriteria.length > 0) {
@@ -243,6 +240,23 @@ export default {
             }
 
             return fd;
+        },
+        sortColumns: {
+            get() {
+                // convert from the DataTable's format eg:
+                // [ { "field": "longInteger", "order": 1 }, { "field": "normalInteger", "order": -1 } ]
+                // to what we'll send, eg:
+                // [ "longInteger", "-normalInteger" ]
+                return this.multiSortMeta
+                    .map(col => `${col.order == 1 ? '' : '-'}${col.field}`);
+            },
+            set(newValue) {
+                // reverse of the above
+                this.multiSortMeta = newValue.map(str => ({
+                    field: str.replace(/^-/, ''),
+                    order: str.charAt(0) == '-' ? -1 : 1
+                }));
+            }
         },
         skyveCriteria() {
             // Convert from the DataTable's 'filter' property
@@ -298,7 +312,7 @@ export default {
                 "visibleColumns": visibleColNames,
                 "summarySelection": this.summarySelection,
                 "sortOrder": this.sortOrder,
-                "sortColumn": this.sortColumn,
+                "sortColumns": this.sortColumns,
                 "columnWidths": this.columnWidths
             };
         },
@@ -476,10 +490,12 @@ export default {
                 // Summary/aggregate row
                 this.summarySelection = snapstate.summarySelection ?? '';
 
-                // Sort order and column
-                if (!!snapstate.sortColumn) {
-                    this.sortColumn = snapstate.sortColumn;
-                    this.sortOrder = snapstate.sortOrder;
+                // Sort order and columns
+                if (!!snapstate.sortColumns) {
+                    this.sortColumns = snapstate.sortColumns;
+                } else {
+                    // Clearing whatever was set if nothing defined in snapshot
+                    this.sortColumns = [];
                 }
 
             } else {
@@ -490,7 +506,7 @@ export default {
 
             this.selectedColumns = [];
             this.summarySelection = '';
-            this.sortColumn = '';
+            this.sortColumns = [];
             this.sortOrder = 0;
 
             this.$refs.datatable.d_columnOrder = null;
@@ -583,14 +599,14 @@ export default {
         v-model:first="firstRow"
         v-model:rows="pageSize"
         v-model:filters="filters"
-        v-model:sortField="sortColumn"
-        v-model:sortOrder="sortOrder"
         @state-restore="stateRestore"
         @state-save="stateSave"
         contextMenu
         v-model:contextMenuSelection="selectedRow"
         @rowContextmenu="onRowContextMenu"
         @row-click="onRowClick"
+        sortMode="multiple"
+        v-model:multiSortMeta="multiSortMeta"
     >
         <template #header>
             <div v-if="title">
@@ -621,7 +637,7 @@ export default {
         </template>
         <template #empty> No data found.</template>
         <template #loading>
-            <span style="color: var(--primary-color-text)">
+            <span style="color: var(--primary-color-text); text-shadow: 2px 2px 2px black;">
                 Loading data. Please wait.
             </span>
         </template>
@@ -706,6 +722,7 @@ export default {
             </template>
         </Column>
         <Column>
+            <!-- Final column with New Doc & Zoom In controls -->
             <template #header>
                 <Button
                     icon="pi pi-plus"
