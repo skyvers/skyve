@@ -2864,12 +2864,12 @@ mark {
 			-ms-flex: 1;
 			flex: 1;
 			margin-bottom: 0;
+			border: 0 !important;
 		}
 
 		#header .logo {
 			border-bottom: 0;
-			color: inherit;
-			font-size: 2em !important;
+			font-size: 1.8em !important;
 		}
 
 		#header .icons {
@@ -2879,7 +2879,12 @@ mark {
 
 		@media screen and (max-width: 1280px) {
 			#header {
-				padding-top: 3.5em;
+				padding-top: 2.2em;
+			}
+		}
+		@media screen and (max-width: 736px) {
+			#header {
+				padding-top: 3em;
 			}
 		}
 		
