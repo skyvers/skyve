@@ -1,6 +1,5 @@
 package org.skyve.impl.web.faces.components;
 
-import static java.lang.Boolean.TRUE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.IOException;
@@ -32,6 +31,7 @@ import org.skyve.util.Binder.TargetMetaData;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
@@ -39,73 +39,101 @@ import com.google.common.collect.ImmutableMap;
 import jakarta.faces.application.ResourceDependency;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
 @SuppressWarnings("unused")
 @FacesComponent(VueListGrid.COMPONENT_TYPE)
 @ResourceDependency(library = "skyvevue", name = "index.js")
 @ResourceDependency(library = "skyvevue", name = "index.css")
-// @ResourceDependency(library = "skyvevue", name = "Inter-italic.var.woff2")
-// @ResourceDependency(library = "skyvevue", name = "Inter-roman.var.woff2")
-public class VueListGrid extends UIOutput {
+public class VueListGrid extends HtmlPanelGroup {
 
     private static Logger logger = LogManager.getLogger(VueListGrid.class);
 
     @SuppressWarnings("hiding")
     public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.VueListGrid";
 
+    private String containerId;
+
+    private String moduleName;
+
+    private String documentName;
+
+    private String queryName;
+
+    private String modelName;
+
+    private String contextId;
+
     @Override
     public void encodeBegin(FacesContext context) throws IOException {
-        Map<String, Object> attributes = getAttributes();
 
-        // NB:- I might need to let this be evaluated always since this just isnt
-        // structural but may have expressions that need re-evaluating
-        // TODO Need to try this out.
-        if ((getValue() == null) || TRUE.toString()
-                                        .equals(attributes.get("dynamic"))) {
+        getChildren().clear();
+        grabAttributes();
 
-            String out;
-            try {
-                final String moduleName = (String) attributes.get("module");
-                final String documentName = (String) attributes.get("document");
-                final String queryName = (String) attributes.get("query");
-                final String modelName = (String) attributes.get("model");
-                final String contextId = (String) attributes.get("contextId");
+        logger.debug("Creating VueListGrid: {}", this);
 
-                logger.debug("Generating table definition for {}, {}, {}, {}, {}", moduleName, documentName, queryName, modelName, contextId);
-                out = generateHtml(moduleName, documentName, queryName, modelName, contextId);
-                setValue(out);
-            } catch (Exception e) {
-                logger.fatal("VueListGrid.encodeBegin() failed", e);
-            }
-        }
+        HtmlPanelGroup containerGroup = createContainerDiv();
+
+        UIOutput uiout = createScriptOutput();
+        containerGroup.getChildren()
+                      .add(uiout);
+
+        super.encodeBegin(context);
+        logger.debug("Created VueListGrid: {}", this);
     }
 
-    private String generateHtml(String moduleName, String documentName, String queryName, String modelName, String contextId) throws Exception {
+    private void grabAttributes() {
+        Map<String, Object> attributes = getAttributes();
+        this.moduleName = (String) attributes.get("module");
+        this.documentName = (String) attributes.get("document");
+        this.queryName = (String) attributes.get("query");
+        this.modelName = (String) attributes.get("model");
+        this.contextId = (String) attributes.get("contextId");
+    }
 
-        // FIXME Generating a random id for the target div that Vue will render into
-        // We should probably update this whole component to be a PanelGroup or similar
-        String targetId = RandomStringUtils.randomAlphabetic(10);
+    /**
+     * Create a container div to hold the div we'll render the Vue grid into. We'll also set
+     * aside it's id to hand to the Javascript later.
+     * 
+     * @return
+     */
+    private HtmlPanelGroup createContainerDiv() {
+        HtmlPanelGroup containerGroup = new HtmlPanelGroup();
+        containerGroup.setLayout("block");
+        containerGroup.setId(RandomStringUtils.randomAlphabetic(10));
+        getChildren().add(containerGroup);
+
+        this.containerId = containerGroup.getClientId();
+
+        HtmlPanelGroup targetGroup = new HtmlPanelGroup();
+        targetGroup.setLayout("block");
+        targetGroup.setStyleClass("vue-list-grid-container");
+        containerGroup.getChildren()
+                      .add(targetGroup);
+        return containerGroup;
+    }
+
+    private UIOutput createScriptOutput() throws JsonProcessingException {
+
+        Customer customer = CORE.getUser()
+                                .getCustomer();
+        Module module = customer.getModule(moduleName);
+        Document document = module.getDocument(customer, documentName);
 
         ListGridParams params = new ListGridParams();
-        params.setTargetSelector("#" + targetId + ".vue-list-grid-container");
+        params.setTargetSelector("[id='" + containerId + "'] .vue-list-grid-container");
         params.setModule(moduleName);
         params.setDocument(documentName);
         params.setQuery(queryName);
         params.setModel(modelName);
         params.setContextId(contextId);
 
-        // Column definitions
-        Customer customer = CORE.getUser()
-                                .getCustomer();
-        Module module = customer.getModule(moduleName);
-        Document document = module.getDocument(customer, documentName);
-
         final List<MetaDataQueryColumn> columns;
         if (isEmpty(modelName)) {
-            columns = findQueryColumns(documentName, queryName, customer, module);
+            columns = findQueryColumns(customer, module);
         } else {
-            ListModel<Bean> listModel = findListModel(customer, document, modelName);
+            ListModel<Bean> listModel = findListModel(customer, document);
             columns = listModel.getColumns();
             document = listModel.getDrivingDocument();
             module = customer.getModule(document.getOwningModuleName());
@@ -113,8 +141,8 @@ public class VueListGrid extends UIOutput {
 
         for (MetaDataQueryColumn mdQueryColumn : columns) {
 
-            SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(CORE.getUser(),
-                    customer, module, document, mdQueryColumn, true, queryName);
+            SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(
+                    CORE.getUser(), customer, module, document, mdQueryColumn, true, queryName);
 
             String binding = mdQueryColumn.getBinding();
             TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, binding);
@@ -131,8 +159,7 @@ public class VueListGrid extends UIOutput {
         String paramsString = mapper.writeValueAsString(params);
 
         StringJoiner sj = new StringJoiner(" \n");
-        sj.add("<div id=\"" + targetId + "\" class=\"vue-list-grid-container\"></div>")
-          .add("<script>")
+        sj.add("<script>")
           .add("  setTimeout(() => {")
           .add("    SKYVE.listgrid(")
           .add(paramsString)
@@ -140,15 +167,18 @@ public class VueListGrid extends UIOutput {
           .add("  }, 0);")
           .add("</script>");
 
-        return sj.toString();
+        String val = sj.toString();
+        UIOutput out = new UIOutput();
+        out.setValue(val);
+        return out;
     }
 
-    private ListModel<Bean> findListModel(Customer customer, Document document, String modelName) {
+    private ListModel<Bean> findListModel(Customer customer, Document document) {
 
         return document.getListModel(customer, modelName, true);
     }
 
-    private List<MetaDataQueryColumn> findQueryColumns(String documentName, String queryName, Customer customer, Module module) {
+    private List<MetaDataQueryColumn> findQueryColumns(Customer customer, Module module) {
         MetaDataQueryDefinition queryDefn = module.getMetaDataQuery(queryName);
         if (queryDefn == null) {
             queryDefn = module.getDocumentDefaultQuery(customer, documentName);
@@ -167,26 +197,26 @@ public class VueListGrid extends UIOutput {
         private final TargetMetaData targetMetaData;
         private final Customer customer;
 
-        private static final Map<String, String> attributeTypeConversions = new ImmutableMap.Builder<String, String>()
-                .put("decimal2", "numeric")
-                .put("decimal5", "numeric")
-                .put("decimal10", "numeric")
-                .put("integer", "numeric")
-                .put("longInteger", "numeric")
-                .put("enumeration", "enum")
-                .put("bool", "boolean")
-                .put("colour", "text")
-                .put("geometry", "text")
-                .put("memo", "text")
-                .put("markup", "text")
-                .put("id", "text")
-                .build();
+        private static final Map<String, String> attributeTypeConversions = //
+                new ImmutableMap.Builder<String, String>().put("decimal2", "numeric")
+                                                          .put("decimal5", "numeric")
+                                                          .put("decimal10", "numeric")
+                                                          .put("integer", "numeric")
+                                                          .put("longInteger", "numeric")
+                                                          .put("enumeration", "enum")
+                                                          .put("bool", "boolean")
+                                                          .put("colour", "text")
+                                                          .put("geometry", "text")
+                                                          .put("memo", "text")
+                                                          .put("markup", "text")
+                                                          .put("id", "text")
+                                                          .build();
 
-        private static final Map<Class<?>, String> implicitTypeConversions = new ImmutableMap.Builder<Class<?>, String>()
-                .put(String.class, "text")
-                .put(Integer.class, "numeric")
-                .put(Boolean.class, "boolean")
-                .build();
+        private static final Map<Class<?>, String> implicitTypeConversions = //
+                new ImmutableMap.Builder<Class<?>, String>().put(String.class, "text")
+                                                            .put(Integer.class, "numeric")
+                                                            .put(Boolean.class, "boolean")
+                                                            .build();
 
         public ColumnMetaData(
                 MetaDataQueryColumn mdQueryColumn,
@@ -451,5 +481,18 @@ public class VueListGrid extends UIOutput {
                               .add("label", label)
                               .toString();
         }
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .omitNullValues()
+                          .add("moduleName", moduleName)
+                          .add("documentName", documentName)
+                          .add("queryName", queryName)
+                          .add("modelName", modelName)
+                          .add("contextId", contextId)
+                          .add("containerId", containerId)
+                          .toString();
     }
 }
