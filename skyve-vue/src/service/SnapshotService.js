@@ -44,7 +44,6 @@ export const SnapshotService = {
             throw new Error('Error retrieving snapshots', { cause: err });
         }
 
-        console.debug(`getSnapshots: Got ${payload.length} results`);
         return payload;
     },
     async createSnapshot({ documentQuery, name, snapshot, type = DEFAULT_TYPE }) {

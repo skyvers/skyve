@@ -1,20 +1,25 @@
 package org.skyve.impl.web.faces.components;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.primefaces.component.remotecommand.RemoteCommand;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.ConverterName;
@@ -54,6 +59,7 @@ public class VueListGrid extends HtmlPanelGroup {
     public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.VueListGrid";
 
     private String containerId;
+    private String ourUniqueId;
 
     private String moduleName;
 
@@ -64,6 +70,10 @@ public class VueListGrid extends HtmlPanelGroup {
     private String modelName;
 
     private String contextId;
+
+    private Actions actions;
+
+    private ListGrid grid;
 
     @Override
     public void encodeBegin(FacesContext context) throws IOException {
@@ -90,6 +100,11 @@ public class VueListGrid extends HtmlPanelGroup {
         this.queryName = (String) attributes.get("query");
         this.modelName = (String) attributes.get("model");
         this.contextId = (String) attributes.get("contextId");
+
+        actions = (Actions) attributes.get(Actions.KEY);
+        if (actions == null) {
+            actions = new Actions();
+        }
     }
 
     /**
@@ -99,9 +114,12 @@ public class VueListGrid extends HtmlPanelGroup {
      * @return
      */
     private HtmlPanelGroup createContainerDiv() {
+
+        ourUniqueId = RandomStringUtils.randomAlphabetic(10);
+
         HtmlPanelGroup containerGroup = new HtmlPanelGroup();
         containerGroup.setLayout("block");
-        containerGroup.setId(RandomStringUtils.randomAlphabetic(10));
+        containerGroup.setId(ourUniqueId);
         getChildren().add(containerGroup);
 
         this.containerId = containerGroup.getClientId();
@@ -111,7 +129,35 @@ public class VueListGrid extends HtmlPanelGroup {
         targetGroup.setStyleClass("vue-list-grid-container");
         containerGroup.getChildren()
                       .add(targetGroup);
+
+        namespaceAndOutputCommands(containerGroup);
+
         return containerGroup;
+    }
+
+    /**
+     * Rename all the RemoteCommands we're about to output with unique names, this
+     * needs to happen before creating the ListGridParams that will be serialised
+     * to JSON.
+     * 
+     * @param containerGroup
+     */
+    private void namespaceAndOutputCommands(HtmlPanelGroup containerGroup) {
+
+        List<RemoteCommand> allCommands = Stream.of(actions.getSelectedCommand(), actions.getEditedCommand(),
+                actions.getDeletedCommand())
+                                                .filter(Objects::nonNull)
+                                                .collect(toList());
+
+        for (RemoteCommand rc : allCommands) {
+
+            String name = rc.getName();
+            rc.setName(ourUniqueId + "_" + name);
+
+            logger.trace("Adding RemoteCommand: {}", rc.getName());
+            containerGroup.getChildren()
+                          .add(rc);
+        }
     }
 
     private UIOutput createScriptOutput() throws JsonProcessingException {
@@ -128,6 +174,7 @@ public class VueListGrid extends HtmlPanelGroup {
         params.setQuery(queryName);
         params.setModel(modelName);
         params.setContextId(contextId);
+        params.actions = ClientActions.fromActions(actions);
 
         final List<MetaDataQueryColumn> columns;
         if (isEmpty(modelName)) {
@@ -315,6 +362,7 @@ public class VueListGrid extends HtmlPanelGroup {
         private String model;
         private String contextId;
         private List<ColumnDefinition> columns = new ArrayList<>();
+        private ClientActions actions = new ClientActions();
 
         public String getTargetSelector() {
             return targetSelector;
@@ -368,15 +416,75 @@ public class VueListGrid extends HtmlPanelGroup {
             this.contextId = contextId;
         }
 
+        public ClientActions getActions() {
+            return actions;
+        }
+
+        public void setActions(ClientActions actions) {
+            this.actions = actions;
+        }
+
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
                               .add("targetSelector", targetSelector)
                               .add("module", module)
                               .add("query", query)
+                              .add("document", document)
                               .add("contextId", contextId)
                               .add("columns", columns)
-                              .add("columns", columns)
+                              .add("actions", actions)
+                              .toString();
+        }
+    }
+
+    @JsonInclude
+    private static class ClientActions {
+        private String selected;
+        private String edited;
+        private String deleted;
+
+        public static ClientActions fromActions(Actions actions) {
+
+            ClientActions result = new ClientActions();
+
+            result.selected = actions.selectedCommand == null ? null : actions.selectedCommand.getName();
+            result.edited = actions.editedCommand == null ? null : actions.editedCommand.getName();
+            result.deleted = actions.deletedCommand == null ? null : actions.deletedCommand.getName();
+
+            return result;
+        }
+
+        public String getSelected() {
+            return selected;
+        }
+
+        public void setSelected(String selected) {
+            this.selected = selected;
+        }
+
+        public String getEdited() {
+            return edited;
+        }
+
+        public void setEdited(String edited) {
+            this.edited = edited;
+        }
+
+        public String getDeleted() {
+            return deleted;
+        }
+
+        public void setDeleted(String deleted) {
+            this.deleted = deleted;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("selected", selected)
+                              .add("edited", edited)
+                              .add("deleted", deleted)
                               .toString();
         }
     }
@@ -494,5 +602,45 @@ public class VueListGrid extends HtmlPanelGroup {
                           .add("contextId", contextId)
                           .add("containerId", containerId)
                           .toString();
+    }
+
+    public ListGrid getGrid() {
+        return grid;
+    }
+
+    public void setGrid(ListGrid grid) {
+        this.grid = grid;
+    }
+
+    public static class Actions {
+        public static final String KEY = "actions";
+
+        private RemoteCommand selectedCommand;
+        private RemoteCommand editedCommand;
+        private RemoteCommand deletedCommand;
+
+        public RemoteCommand getSelectedCommand() {
+            return selectedCommand;
+        }
+
+        public void setSelectedCommand(RemoteCommand selectedCommand) {
+            this.selectedCommand = selectedCommand;
+        }
+
+        public RemoteCommand getEditedCommand() {
+            return editedCommand;
+        }
+
+        public void setEditedCommand(RemoteCommand editedCommand) {
+            this.editedCommand = editedCommand;
+        }
+
+        public RemoteCommand getDeletedCommand() {
+            return deletedCommand;
+        }
+
+        public void setDeletedCommand(RemoteCommand deletedCommand) {
+            this.deletedCommand = deletedCommand;
+        }
     }
 }

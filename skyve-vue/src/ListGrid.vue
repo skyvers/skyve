@@ -36,6 +36,33 @@ function arraysEqual(a, b) {
     return a.every((val, index) => val == b[index])
 }
 
+/**
+ * Call the provided RemoteCommand function, converting the 
+ * supplied parameters object from `{ k: v }` to 
+ * `[{ name: k, value: v }]`.
+ * 
+ * Returns the result of the provided command (presumably a 
+ * Promise)
+ * 
+ * @param {String} commandName The name of the function (in 
+ * global scope) that will be called.
+ * @param {Object} paramsObj 
+ */
+async function callRemoteCommand(commandName, paramsObj) {
+
+    const commandFn = window[commandName];
+    if (!commandFn) {
+        throw `CommandName (${commandName}) not found`;
+    }
+
+    let paramsArray = [];
+    for (let key in paramsObj) {
+        paramsArray.push({ name: key, value: paramsObj[key] });
+    }
+
+    return commandFn(paramsArray);
+}
+
 export default {
     props: {
         module: String,
@@ -59,6 +86,14 @@ export default {
         contextId: {
             type: String,
             default: null
+        },
+        actions: {
+            type: Object,
+            default: {
+                selected: null,
+                edited: null,
+                deleted: null
+            }
         }
     },
     data() {
@@ -525,7 +560,13 @@ export default {
             this.$refs.cm.show(event.originalEvent);
         },
         onRowClick(event) {
-            this.zoomInto(event.data.bizId);
+            if (this.actions.selected) {
+                this.loading = true;
+                callRemoteCommand(this.actions.selected, { bizId: event.data.bizId })
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            }
         },
         zoomInto(bizId) {
             openDocInSameWindow({

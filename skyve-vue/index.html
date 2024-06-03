@@ -19,6 +19,16 @@
     ></script>
 
     <script>
+        function someTestSelectedAction(id) {
+            return new Promise((resolve) => {
+
+                console.warn('onSelectedIdAction', ...id);
+                setTimeout(resolve, 500);
+            });
+        }
+    </script>
+
+    <script>
         window.onload = function () {
             SKYVE.listgrid(
                 {
@@ -26,6 +36,11 @@
                     "module": "kitchensink",
                     "query": "ListAttributes",
                     "document": "ListAttributes",
+                    "actions": {
+                        "selected": "someTestSelectedAction",
+                        "edited": null,
+                        "deleted": null
+                    },
                     "columns": [
                         {
                             "field": "constantEnum",
