@@ -17,6 +17,14 @@ import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
+/**
+ * This class is used to visit a bean graph defined by its relations.
+ * It can also visit through null relations by following the document metadata if activated.
+ * 
+ */
 public abstract class BeanVisitor {
 	private boolean visitNulls;
 	private boolean visitInverses;
@@ -24,11 +32,21 @@ public abstract class BeanVisitor {
 	private boolean acceptVisited;
 
 	/**
+	 * Convenience constructor that enabled instance cyclic detection.
+	 * See {{@link #BeanVisitor(boolean, boolean, boolean, boolean)}
+	 */
+	public BeanVisitor(boolean visitNulls,
+						boolean visitInverses,
+						boolean vectorCyclicDetection) {
+		this(visitNulls, visitInverses, vectorCyclicDetection, false);
+	}
+
+	/**
 	 * Visit the structure of a bean (and it's related graph).
 	 * 
 	 * @param visitNulls	Visit a bean's relations including relations that are not defined.
 	 * 						In this method call, the bean can be null, which will visit all bindings defined in the document.
-	 * 						If a component instance is null then the document metadata is used for traversal.
+	 * 						If a related instance is null then the document metadata is used for traversal.
 	 * @param visitInverses	Visit any inverses defined in the document.
 	 * 						This option is available as inverses are weakly referenced (not validated, not cascaded).
 	 * @param vectorCyclicDetection	Cyclic dependencies are detected by keeping a breadcrumb list of beans visited.
@@ -39,15 +57,10 @@ public abstract class BeanVisitor {
 	 * 								eg visited contact "mike" from User "mike" through the association "contact".
 	 * 								In vector mode, a bean may be visited MORE THAN ONCE if it has multiple references
 	 * 								within the same object graph.
+	 * @param acceptVisited	Set true to continue to visit bean instances that have been visited before circumventing cyclic detection.
 	 * 
 	 * This visit method is thread-safe - the same instance can be used in multiple threads.
 	 */
-	public BeanVisitor(boolean visitNulls,
-						boolean visitInverses,
-						boolean vectorCyclicDetection) {
-		this(visitNulls, visitInverses, vectorCyclicDetection, false);
-	}
-
 	public BeanVisitor(boolean visitNulls,
 					   boolean visitInverses,
 					   boolean vectorCyclicDetection,
@@ -59,43 +72,39 @@ public abstract class BeanVisitor {
 	}
 	
 	/**
-	 * Visit a bean excluding relations that are null. 
+	 * Visit a bean.
 	 * This method is thread-safe.
 	 * 
-	 * @param document
-	 * @param bean
-	 * @param customer
+	 * @param document Document of the bean.
+	 * @param bean	The bean to visit.
+	 * @param customer	The current customer.
 	 */
-	public void visit(Document document, 
-						Bean bean, 
-						Customer customer) {
+	public void visit(@Nonnull Document document, 
+						@Nullable Bean bean, 
+						@Nonnull Customer customer) {
 		Set<String> visited = new HashSet<>();
 		visit("", document, null, null, bean, customer, visited);
 	}
 
-	private String determineVisitedKey(Bean bean, 
-										Document owningDocument,
-										Relation owningRelation) {
-		if (vectorCyclicDetection) {
-			StringBuilder sb = new StringBuilder(128).append(bean.getBizId());
-			if (owningRelation != null) {
-				sb.append(owningRelation.getName());
-			}
-			if (owningDocument != null) {
-				sb.append(owningDocument.getName()).append(owningDocument.getOwningModuleName());
-			}
-			return sb.toString();
-		}
-		return bean.getBizId();
-	}
-	
-	private void visit(String binding,
-						Document document,
-						Document owningDocument,
-						Relation owningRelation,
-						Bean bean,
-						Customer customer,
-						Set<String> visited) {
+	/**
+	 * Recursively visit each bean (or when nulls, the document) honoring the constructor parameters.
+	 * 
+	 * @param binding	Binding of this visit with respect to the root bean.
+	 * @param document	The document being visited.
+	 * @param owningDocument	The document that owns this relation being visited. Null for top level root bean.
+	 * @param owningRelation	The relation being visited. Null for top level root bean.
+	 * @param bean	The bean being visited.
+	 * @param customer	The current customer.
+	 * @param visited	The set of breadcrumbs that have been visited in the past (for cyclic detection)
+	 */
+	private void visit(@Nonnull String binding,
+						@Nonnull Document document,
+						@Nullable Document owningDocument,
+						@Nullable Relation owningRelation,
+						@Nullable Bean bean,
+						@Nonnull Customer customer,
+						@Nonnull Set<String> visited) {
+		// If we have no bean, still do cyclic detection
 		if (bean == null) {
 			if (owningRelation != null) {
 				String owningRelationName = owningRelation.getName();
@@ -114,6 +123,8 @@ public abstract class BeanVisitor {
 				}
 			}
 		}
+		// If we have turned off cyclic detection (acceptVisited is true), call the accept method anyways, and bug out
+		// NB We still add the key to our breadcrumb in case subsequent beans to visit are null.
 		else {
 			String key = determineVisitedKey(bean, owningDocument, owningRelation);
 			if (visited.contains(key)) {
@@ -131,14 +142,18 @@ public abstract class BeanVisitor {
 			visited.add(key);
 		}
 		
+		// We have a defined bean and we are performing cyclic detection
+		// If accept() returns true, we recurse, otherwise stop recursion for this branch
 		StringBuilder sb = new StringBuilder(64);
 		try {
+			// Do the callback and recurse (or not)
 			if (accept(binding, document, owningDocument, owningRelation, bean)) {
 				Module owningModule = customer.getModule(document.getOwningModuleName());
 
 				// NB visit relations in the order they are defined in the documents.
 				for (Attribute attribute : document.getAllAttributes(customer)) {
 					if (attribute instanceof Relation) {
+						// Don;t visit inverses if not required
 						if ((! visitInverses) && (attribute instanceof Inverse)) {
 							continue;
 						}
@@ -260,6 +275,7 @@ public abstract class BeanVisitor {
 					}
 				}
 
+				// Visit the parent of child documents (but not hierarchical documents which are loosely coupled)
 				Document parentDocument = document.getParentDocument(customer); 
 				if ((parentDocument != null) && 
 						// child document, not a hierarchical document
@@ -314,6 +330,25 @@ public abstract class BeanVisitor {
 	}
 
 	/**
+	 * @return The bizId of the instance unless vectorCyclicDetection is on, then return a path through the relation, module and document to the bean.
+	 */
+	private String determineVisitedKey(@Nonnull Bean bean, 
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation) {
+		if (vectorCyclicDetection) {
+			StringBuilder sb = new StringBuilder(128).append(bean.getBizId());
+			if (owningRelation != null) {
+				sb.append(owningRelation.getName());
+			}
+			if (owningDocument != null) {
+				sb.append(owningDocument.getName()).append(owningDocument.getOwningModuleName());
+			}
+			return sb.toString();
+		}
+		return bean.getBizId();
+	}
+
+	/**
 	 * Accept the reference.
 	 * 
 	 * @param binding	The visited binding.
@@ -325,10 +360,10 @@ public abstract class BeanVisitor {
 	 * @return <code>false</code> to terminate, <code>true</code> to continue.
 	 * @throws Exception
 	 */
-	protected abstract boolean accept(String binding,
-										Document document,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean) 
+	protected abstract boolean accept(@Nonnull String binding,
+										@Nonnull Document document,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean) 
 	throws Exception;
 }

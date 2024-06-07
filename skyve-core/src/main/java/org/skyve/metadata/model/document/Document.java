@@ -94,12 +94,6 @@ public interface Document extends Model, PersistentMetaData {
 	 * 
 	 * @return
 	 */
-	public Set<String> getReferencedDocumentNames();
-	
-	/**
-	 * 
-	 * @return
-	 */
 	public Set<String> getReferenceNames();
 	
 	/**
@@ -120,13 +114,6 @@ public interface Document extends Model, PersistentMetaData {
 	 */
 	public Set<String> getDefinedActionNames();
 
-	/**
-	 * 
-	 * @param customer
-	 * @return
-	 */
-	public Set<Document> getReferencedDocuments(Customer customer);
-	
 	/**
 	 * 
 	 * @return

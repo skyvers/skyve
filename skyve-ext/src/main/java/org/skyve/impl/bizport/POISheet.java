@@ -10,11 +10,24 @@ import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.usermodel.DVConstraint;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Shape;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.NumberToTextConverter;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKTWriter;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.SheetKey;
@@ -133,6 +146,7 @@ public final class POISheet implements BizPortSheet {
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
 
+		// Add all the columns to this sheet first - this will populate the column bindings
 		Row bindingRow = sheet.getRow(BINDING_ROW);
 		Row titleRow = sheet.getRow(TITLE_ROW);
 		for (int i = 0, l = bindingRow.getLastCellNum(); i < l; i++) {
@@ -152,10 +166,14 @@ public final class POISheet implements BizPortSheet {
 			BizPortColumn column = new BizPortColumn((titleCell == null) ? binding : titleCell.getStringCellValue(),
 														(cellComment == null) ? null : cellComment.getString().getString());
 			column.setIndex(i);
-
-			// if we are working with a document sheet, determine if we need to setup the
-			// column's "referencedSheet" property
-			if (collectionBinding == null) { // have a document sheet
+			addColumn(binding, column);
+		}
+		
+		// Add ReferenceSheets to the columns now we can tell ChildDocument sheets (from the column bindings)
+		for (String binding : getColumnBindings()) {
+			final BizPortColumn column = getColumn(binding);
+			// if we are working with a document sheet, determine if we need to setup the column's "referencedSheet" property
+			if ((collectionBinding == null) || getColumnBindings().contains(ChildBean.PARENT_NAME)) { // have a document sheet (including ChildDocument)
 				if (ChildBean.PARENT_NAME.equals(binding)) { // cater for the parent binding
 					Document parentDocument = document.getParentDocument(customer);
 					if (parentDocument != null) {
@@ -207,7 +225,6 @@ public final class POISheet implements BizPortSheet {
 					}
 				}
 			}
-			addColumn(binding, column);
 		}
 
 		this.parent = parent;
@@ -216,7 +233,7 @@ public final class POISheet implements BizPortSheet {
 		// index the data in the sheet, using column 0 for document, column 0 and 1 for collections
 		currentRow = sheet.getRow(nextRow);
 		if (currentRow != null) { // we have data to index
-			if (collectionBinding == null) { // have a document sheet
+			if ((collectionBinding == null) || getColumnBindings().contains(ChildBean.PARENT_NAME)) { // have a document sheet (including ChildDocument)
 				String id = getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 				if (id != null) {
 					indices.put(id, Integer.valueOf(nextRow));
@@ -229,7 +246,6 @@ public final class POISheet implements BizPortSheet {
 				}
 			}
 			else { // have a collection sheet
-// TODO key columns should be stored in the spread sheet?
 				String ownerId = getValue(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text, problems);
 				String elementId = getValue(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text, problems);
 				if ((ownerId != null) && (elementId != null)) {
@@ -603,14 +619,7 @@ public final class POISheet implements BizPortSheet {
 		if (cell != null) {
 			switch (cell.getCellType()) {
 			case STRING:
-				if (AttributeType.text.equals(attributeType) ||
-						AttributeType.enumeration.equals(attributeType) ||
-						AttributeType.association.equals(attributeType) ||
-						AttributeType.colour.equals(attributeType) ||
-						AttributeType.content.equals(attributeType) ||
-						AttributeType.image.equals(attributeType) ||
-						AttributeType.memo.equals(attributeType) ||
-						AttributeType.markup.equals(attributeType)) {
+				if (isStringCell(attributeType)) {
 					result = (T) cell.getStringCellValue();
 				}
 				else {
@@ -668,13 +677,7 @@ public final class POISheet implements BizPortSheet {
 					else if (AttributeType.decimal10.equals(attributeType)) {
 						result = (T) new Decimal10(cell.getNumericCellValue());
 					}
-					else if (AttributeType.text.equals(attributeType) ||
-								AttributeType.association.equals(attributeType) ||
-								AttributeType.colour.equals(attributeType) ||
-								AttributeType.content.equals(attributeType) ||
-								AttributeType.image.equals(attributeType) ||
-								AttributeType.memo.equals(attributeType) ||
-								AttributeType.markup.equals(attributeType)) {
+					else if (isStringCell(attributeType)) {
 						result = (T) NumberToTextConverter.toText(cell.getNumericCellValue());
 					}
 					else {
@@ -691,6 +694,19 @@ public final class POISheet implements BizPortSheet {
 		return result;
 	}
 
+	private static boolean isStringCell(AttributeType attributeType) {
+		return (AttributeType.text.equals(attributeType) ||
+					AttributeType.enumeration.equals(attributeType) ||
+					AttributeType.association.equals(attributeType) ||
+					AttributeType.colour.equals(attributeType) ||
+					AttributeType.content.equals(attributeType) ||
+					AttributeType.image.equals(attributeType) ||
+					AttributeType.memo.equals(attributeType) ||
+					AttributeType.markup.equals(attributeType) ||
+					AttributeType.geometry.equals(attributeType) ||
+					AttributeType.id.equals(attributeType));
+	}
+	
 	@Override
 	public void setValue(String columnBinding, Object value) {
 		if (sheet == null) {
@@ -736,6 +752,9 @@ public final class POISheet implements BizPortSheet {
 		}
 		else if (value instanceof Boolean) {
 			cell.setCellValue(((Boolean) value).booleanValue());
+		}
+		else if (value instanceof Geometry) {
+			cell.setCellValue(new WKTWriter().write((Geometry) value));
 		}
 
 		// if this column is a foreign key or parent key, setup the description for it

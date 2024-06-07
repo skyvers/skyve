@@ -4,7 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,11 +79,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
-
-	/**
-	 * This is a map of fieldName -> document's child or detail document names. This can be empty if no detail document exists.
-	 */
-	private Map<String, Reference> referencesByDocumentNames = new HashMap<>();
 
 	private Map<String, Reference> referencesByFieldNames = new HashMap<>();
 
@@ -464,12 +458,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return referencesByFieldNames.get(referenceName);
 	}
 
-	public Reference getReferenceByDocumentName(String detailDocumentName) {
-		return referencesByDocumentNames.get(detailDocumentName);
-	}
-
 	@Override
-	public org.skyve.metadata.model.document.Document getRelatedDocument(Customer customer, String relationName) {
+	public Document getRelatedDocument(Customer customer, String relationName) {
 		Relation relation = relationsByFieldNames.get(relationName);
 
 		// Find the relation up the document extension hierarchy
@@ -494,31 +484,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public Set<String> getReferencedDocumentNames() {
-		return referencesByDocumentNames.keySet();
-	}
-
-	@Override
 	public Set<String> getReferenceNames() {
 		return referencesByFieldNames.keySet();
-	}
-
-	@Override
-	public Set<org.skyve.metadata.model.document.Document> getReferencedDocuments(Customer customer) {
-		HashSet<org.skyve.metadata.model.document.Document> result = new HashSet<>();
-
-		for (String detailDocumentName : getReferencedDocumentNames()) {
-			result.add(customer.getModule(getOwningModuleName()).getDocument(customer, detailDocumentName));
-		}
-
-		return result;
 	}
 
 	public void putRelation(Relation relation) {
 		relationsByFieldNames.put(relation.getName(), relation);
 		if (relation instanceof Reference) {
 			Reference reference = (Reference) relation;
-			referencesByDocumentNames.put(reference.getDocumentName(), reference);
 			referencesByFieldNames.put(reference.getName(), reference);
 		}
 		putAttribute(relation);
@@ -617,8 +590,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 	
 	@Override
-	public org.skyve.metadata.model.document.Document getParentDocument(Customer customer) {
-		org.skyve.metadata.model.document.Document result = null;
+	public Document getParentDocument(Customer customer) {
+		Document result = null;
 
 		if (parentDocumentName != null) {
 			if (customer == null) {
@@ -769,7 +742,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		
 		if (attribute instanceof Reference) {
 			Reference reference = (Reference) attribute;
-			org.skyve.metadata.model.document.Document referencedDocument = getRelatedDocument(customer, attribute.getName());
+			Document referencedDocument = getRelatedDocument(customer, attribute.getName());
 			// Query only if persistent
 			if (referencedDocument.isPersistable()) { // persistent referenced document
 				AbstractDocumentQuery referenceQuery = null;
