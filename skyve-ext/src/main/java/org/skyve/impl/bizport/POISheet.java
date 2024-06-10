@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Hyperlink;
@@ -26,6 +27,8 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.NumberToTextConverter;
+import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
 import org.skyve.bizport.BizPortColumn;
@@ -55,6 +58,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Sets up a sheet with a number of columns in it.
  * Rows can be added to the sheet and rows are added and moved using a composite key structure.
@@ -69,6 +74,9 @@ public final class POISheet implements BizPortSheet {
 	// Rows 0, 1 and 2 hold sheet metadata and the title Row.
 	private static final int START_ROW = 3;
 
+	// Maximum number of rows in a sheet for xlsx
+	private static final int MAX_XSSF_ROW = 1048575;
+	
 	// The name row holds the module, document name or relative sheet binding and (optionally) the collection attribute name of the sheet.
 	static final int NAME_ROW = 0;
 	// The binding row holds the binding of the sheet columns relative to the sheet document.
@@ -273,7 +281,6 @@ public final class POISheet implements BizPortSheet {
 	 * @param parent	The pure Excel workbook that owns this sheet.
 	 * @param sheet	The pure Excel worksheet that backs this sheet in-memoty representation.
 	 */
-	@SuppressWarnings("incomplete-switch")
 	void materialise(SheetKey key,
 						@SuppressWarnings("hiding") POIWorkbook parent,
 						@SuppressWarnings("hiding") Sheet sheet) {
@@ -324,7 +331,6 @@ public final class POISheet implements BizPortSheet {
 					cell.setHyperlink(link);
 					cell.setCellStyle(parent.foreignKeyHeadingStyle);
 
-					// TODO Make the bizkey column
 					i++;
 					Cell titleCell = titleRow.createCell(i, CellType.STRING);
 					titleCell.setCellValue(column.getTitle() + " Description");
@@ -359,61 +365,11 @@ public final class POISheet implements BizPortSheet {
 //			Object minValue = column.getMinValue();
 //			Object maxValue = column.getMaxValue();
 
-			if (! parent.ooxmlFormat) { // old school
-				if (rangeValues != null) {
-					setRangeValues(rangeValues, i);
-				}
-				else {
-					CellRangeAddressList addresslist = new CellRangeAddressList(START_ROW, Integer.MAX_VALUE, i, i);
-					switch (column.getType()) {
-					case date:
-					case dateTime:
-					case time:
-					case timestamp:
-						DVConstraint dateConstraint = DVConstraint.createDateConstraint(DataValidationConstraint.OperatorType.IGNORED,
-																							"01/01/1900",
-																							"31/12/2999",
-																							"d/M/yy");
-						HSSFDataValidation dateValidation = new HSSFDataValidation(addresslist, dateConstraint);
-						dateValidation.setSuppressDropDownArrow(true);
-						dateValidation.setShowErrorBox(true);
-						dateValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
-						dateValidation.createErrorBox("Not a valid value", "Please enter a valid data value between .");
-						dateValidation.setEmptyCellAllowed(true);
-						((HSSFSheet) sheet).addValidationData(dateValidation);
-						break;
-					case integer:
-					case longInteger:
-// TODO look at string length and date ValidationTypes
-						DVConstraint longConstraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.INTEGER,
-																							DataValidationConstraint.OperatorType.BETWEEN,
-																							Integer.toString(Integer.MIN_VALUE),
-																							Integer.toString(Integer.MAX_VALUE));
-						HSSFDataValidation longValidation = new HSSFDataValidation(addresslist, longConstraint);
-						longValidation.setSuppressDropDownArrow(true);
-						longValidation.setShowErrorBox(true);
-						longValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
-						longValidation.createErrorBox("Not a valid value", "Please enter a valid value.");
-						longValidation.setEmptyCellAllowed(true);
-						((HSSFSheet) sheet).addValidationData(longValidation);
-						break;
-					case decimal2:
-					case decimal5:
-					case decimal10:
-						DVConstraint floatConstraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.DECIMAL,
-																								DataValidationConstraint.OperatorType.BETWEEN,
-																								Integer.toString(Integer.MIN_VALUE),
-																								Integer.toString(Integer.MAX_VALUE));
-						HSSFDataValidation floatValidation = new HSSFDataValidation(addresslist, floatConstraint);
-						floatValidation.setSuppressDropDownArrow(true);
-						floatValidation.setShowErrorBox(true);
-						floatValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
-						floatValidation.createErrorBox("Not a valid value", "Please enter a valid value.");
-						floatValidation.setEmptyCellAllowed(true);
-						((HSSFSheet) sheet).addValidationData(floatValidation);
-						break;
-					}
-				}
+			if (rangeValues != null) {
+				setRangeValues(rangeValues, i);
+			}
+			else {
+				setDataValidation(column.getType(), i);
 			}
 			i++;
 		}
@@ -444,36 +400,191 @@ public final class POISheet implements BizPortSheet {
 	 * @param columnIndex	The index of the column (starts with 0 index).
 	 */
 	private void setRangeValues(String[] rangeValues, int columnIndex) {
+		if (parent.ooxmlFormat) {
+			XSSFSheet xssfSheet = (XSSFSheet) sheet;
+			DataValidationHelper validationHelper = new XSSFDataValidationHelper((XSSFSheet) sheet);
+			CellRangeAddressList addresslist = new CellRangeAddressList(START_ROW, MAX_XSSF_ROW, columnIndex, columnIndex);
+			DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(rangeValues);
+			DataValidation validation = validationHelper.createValidation(constraint, addresslist);
 
-	    // populate range values
-		for (int i = 0, l = rangeValues.length; i < l; i++) {
-			Row row = sheet.getRow(i + START_ROW);
-			if (row == null) {
-				row = sheet.createRow(i + START_ROW);
-			}
-			row.createCell(validationColumn).setCellValue(rangeValues[i]);
+			validation.setSuppressDropDownArrow(true); // NB - Does the opposite for some reason.
+			validation.setShowErrorBox(true);
+			validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+			validation.createErrorBox("Pick a valid value", "Please pick a valid value from the drop down");
+			validation.setEmptyCellAllowed(true);
+			xssfSheet.addValidationData(validation);
 		}
-
-		// Create lookup cell range address expression
-		CellRangeAddressList addresslist = new CellRangeAddressList(START_ROW, Integer.MAX_VALUE, columnIndex, columnIndex);
-		CellRangeAddress validationListVals = new CellRangeAddress(START_ROW, rangeValues.length + START_ROW, validationColumn, validationColumn);
-		StringBuilder sb = new StringBuilder(validationListVals.formatAsString());
-		String validationListValsExpression = sb.insert(0, '$').insert(3, '$').insert(6, '$').insert(9, '$').toString();
-
-		// Create the constraint
-		DVConstraint constraint = DVConstraint.createFormulaListConstraint(validationListValsExpression);
-
-		HSSFDataValidation validation = new HSSFDataValidation(addresslist, constraint);
-		validation.setSuppressDropDownArrow(false);
-		validation.setShowErrorBox(true);
-		validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
-		validation.createErrorBox("Pick a valid value", "Please pick a valid value from the drop down");
-		validation.setEmptyCellAllowed(true);
-		((HSSFSheet) sheet).addValidationData(validation);
-
-		validationColumn--;
+		else {
+		    // populate range values
+			for (int i = 0, l = rangeValues.length; i < l; i++) {
+				Row row = sheet.getRow(i + START_ROW);
+				if (row == null) {
+					row = sheet.createRow(i + START_ROW);
+				}
+				row.createCell(validationColumn).setCellValue(rangeValues[i]);
+			}
+	
+			// Create lookup cell range address expression
+			CellRangeAddressList addresslist = new CellRangeAddressList(START_ROW, Integer.MAX_VALUE, columnIndex, columnIndex);
+			CellRangeAddress validationListVals = new CellRangeAddress(START_ROW, rangeValues.length + START_ROW, validationColumn, validationColumn);
+			StringBuilder sb = new StringBuilder(validationListVals.formatAsString());
+			String validationListValsExpression = sb.insert(0, '$').insert(3, '$').insert(6, '$').insert(9, '$').toString();
+	
+			// Create the constraint
+			DVConstraint constraint = DVConstraint.createFormulaListConstraint(validationListValsExpression);
+	
+			HSSFDataValidation validation = new HSSFDataValidation(addresslist, constraint);
+			validation.setSuppressDropDownArrow(false);
+			validation.setShowErrorBox(true);
+			validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+			validation.createErrorBox("Pick a valid value", "Please pick a valid value from the drop down");
+			validation.setEmptyCellAllowed(true);
+			((HSSFSheet) sheet).addValidationData(validation);
+	
+			validationColumn--;
+		}
 	}
 
+	/**
+	 * Set top Excel types from the attribute type given
+	 * @param type	The attri bute type
+	 * @param columnIndex	The column in the Excel sheet.
+	 */
+	@SuppressWarnings("incomplete-switch")
+	private void setDataValidation(@Nonnull AttributeType type, int columnIndex) {
+		if (parent.ooxmlFormat) { // new school
+			CellRangeAddressList addresslist = new CellRangeAddressList(START_ROW, MAX_XSSF_ROW, columnIndex, columnIndex);
+			XSSFSheet xssfSheet = (XSSFSheet) sheet;
+			DataValidationHelper validationHelper = new XSSFDataValidationHelper(xssfSheet);
+			DataValidationConstraint constraint = null;
+			DataValidation validation = null;
+			switch (type) {
+				case date:
+				case dateTime:
+				case timestamp:
+					constraint = validationHelper.createDateConstraint(DataValidationConstraint.OperatorType.GREATER_OR_EQUAL,
+																		"1",
+																		"1",
+																		"d/M/yy");
+					validation = validationHelper.createValidation(constraint, addresslist);
+
+					validation.setSuppressDropDownArrow(false); // NB - Does the opposite for some reason.
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid date");
+					validation.setEmptyCellAllowed(true);
+					xssfSheet.addValidationData(validation);
+					break;
+				case time:
+					constraint = validationHelper.createTimeConstraint(DataValidationConstraint.OperatorType.BETWEEN,
+																			"0",
+																			"0.99999");
+					validation = validationHelper.createValidation(constraint, addresslist);
+
+					validation.setSuppressDropDownArrow(false); // NB - Does the opposite for some reason.
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid time");
+					validation.setEmptyCellAllowed(true);
+					xssfSheet.addValidationData(validation);
+					break;
+				case integer:
+				case longInteger:
+					constraint = validationHelper.createIntegerConstraint(DataValidationConstraint.OperatorType.BETWEEN,
+																			String.valueOf(Integer.MIN_VALUE),
+																			String.valueOf(Integer.MAX_VALUE));
+					validation = validationHelper.createValidation(constraint, addresslist);
+
+					validation.setSuppressDropDownArrow(false); // NB - Does the opposite for some reason.
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid whole number");
+					validation.setEmptyCellAllowed(true);
+					xssfSheet.addValidationData(validation);
+					break;
+				case decimal2:
+				case decimal5:
+				case decimal10:
+					constraint = validationHelper.createDecimalConstraint(DataValidationConstraint.OperatorType.BETWEEN,
+																			String.valueOf(Integer.MIN_VALUE),
+																			String.valueOf(Integer.MAX_VALUE));
+					validation = validationHelper.createValidation(constraint, addresslist);
+
+					validation.setSuppressDropDownArrow(false); // NB - Does the opposite for some reason.
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid decimal number");
+					validation.setEmptyCellAllowed(true);
+					xssfSheet.addValidationData(validation);
+			}
+		}
+		else { // old school
+			CellRangeAddressList addresslist = new CellRangeAddressList(START_ROW, Integer.MAX_VALUE, columnIndex, columnIndex);
+			DataValidationConstraint constraint = null;
+			DataValidation validation = null;
+			HSSFSheet hssfSheet = (HSSFSheet) sheet;
+			switch (type) {
+				case date:
+				case dateTime:
+				case timestamp:
+					constraint = DVConstraint.createDateConstraint(DataValidationConstraint.OperatorType.IGNORED,
+																	"01/01/1900",
+																	"31/12/2999",
+																	"d/M/yy");
+					validation = new HSSFDataValidation(addresslist, constraint);
+					validation.setSuppressDropDownArrow(true);
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid date");
+					validation.setEmptyCellAllowed(true);
+					hssfSheet.addValidationData(validation);
+					break;
+				case time:
+					constraint = DVConstraint.createTimeConstraint(DataValidationConstraint.OperatorType.BETWEEN,
+																	"00:00:00",
+																	"23:59:59");
+					validation = new HSSFDataValidation(addresslist, constraint);
+
+					validation.setSuppressDropDownArrow(true);
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid time");
+					validation.setEmptyCellAllowed(true);
+					hssfSheet.addValidationData(validation);
+					break;
+				case integer:
+				case longInteger:
+					constraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.INTEGER,
+																		DataValidationConstraint.OperatorType.BETWEEN,
+																		Integer.toString(Integer.MIN_VALUE),
+																		Integer.toString(Integer.MAX_VALUE));
+					validation = new HSSFDataValidation(addresslist, constraint);
+					validation.setSuppressDropDownArrow(true);
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid whole number.");
+					validation.setEmptyCellAllowed(true);
+					hssfSheet.addValidationData(validation);
+					break;
+				case decimal2:
+				case decimal5:
+				case decimal10:
+					constraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.DECIMAL,
+																		DataValidationConstraint.OperatorType.BETWEEN,
+																		Integer.toString(Integer.MIN_VALUE),
+																		Integer.toString(Integer.MAX_VALUE));
+					validation = new HSSFDataValidation(addresslist, constraint);
+					validation.setSuppressDropDownArrow(true);
+					validation.setShowErrorBox(true);
+					validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
+					validation.createErrorBox("Not a valid value", "Please enter a valid decimal number.");
+					validation.setEmptyCellAllowed(true);
+					hssfSheet.addValidationData(validation);
+					break;
+			}
+		}
+	}
+	
 	@Override
 	public BizPortColumn addColumn(String columnBinding, BizPortColumn column) {
 		if (sheet != null) {
@@ -740,7 +851,7 @@ public final class POISheet implements BizPortSheet {
 			cell.setCellStyle(parent.dateTimeStyle);
 		}
 		else if (value instanceof TimeOnly) {
-			cell.setCellValue((Date) value);
+			cell.setCellValue(DateUtil.convertTime(((TimeOnly) value).toString()));
 			cell.setCellStyle(parent.timeStyle);
 		}
 		else if (value instanceof Timestamp) {

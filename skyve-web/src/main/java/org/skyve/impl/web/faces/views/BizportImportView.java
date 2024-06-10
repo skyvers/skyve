@@ -167,7 +167,7 @@ public class BizportImportView extends AbstractUploadView {
 				exception = e;
 			}
 			catch (IOException e) { // hide any file system paths from file operation problems encountered
-				throw new DomainException("File Upload could not be processed", e);
+				throw new DomainException("File Upload could not be processed. Ensure the file is not encrypted by setting its sensitivity to public.", e);
 			}
 
 			// only put conversation in cache if we have been successful in executing

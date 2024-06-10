@@ -81,14 +81,17 @@ public class BizportExportServlet extends HttpServlet {
 			            
 			            if (result != null) {
 							switch (result.getFormat()) {
-							case xls:
-								response.setContentType(MimeType.excel.toString());
-								response.setCharacterEncoding(Util.UTF8);
-								response.setHeader("Content-Disposition", "attachment; filename=\"bizport.xls\"");
-								break;
-							case xlsx:
-								break;
-							default:
+								case xls:
+									response.setContentType(MimeType.excel.toString());
+									response.setCharacterEncoding(Util.UTF8);
+									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xls\"");
+									break;
+								case xlsx:
+									response.setContentType(MimeType.xlsx.toString());
+									response.setCharacterEncoding(Util.UTF8);
+									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xlsx\"");
+									break;
+								default:
 							}
 			            }
 			
