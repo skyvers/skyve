@@ -272,6 +272,11 @@ public class Util {
 		return (UtilImpl.THUMBNAIL_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_THUMBNAILS/") : UtilImpl.THUMBNAIL_DIRECTORY;
 	}
 
+    public static String getArchiveDirectory() {
+        // TODO make configurable
+        return (UtilImpl.CONTENT_DIRECTORY + "archive/");
+    }
+
 	public static String getModuleDirectory() {
 		return UtilImpl.MODULE_DIRECTORY;
 	}
