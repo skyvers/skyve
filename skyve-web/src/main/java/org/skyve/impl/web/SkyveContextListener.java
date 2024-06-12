@@ -192,7 +192,6 @@ public class SkyveContextListener implements ServletContextListener {
 				UtilImpl.LOGGER.warning("****************************************************************************************************");
 				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
 				UtilImpl.LOGGER.warning("****************************************************************************************************");
-				break;
 			}
 			else if (RESPONSE_HEADER_FILTER_CLASS_NAME.equals(className)) {
 				if (ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME.equals(reg.getName())) {
