@@ -31,6 +31,13 @@ import org.skyve.metadata.view.model.map.MapModel;
 
 import jakarta.annotation.Nonnull;
 
+/**
+ * Implements a repository that delegates to a list of other repository delegates in order.
+ * This is not thread-safe and it is expected that the delegates are 
+ * setup using an Observer at startup time or extended and set in the constructor.
+ * All ProvidedRepositoryDelegate implementations can call getDelegator() to recursively get the top of the delegating hierarchy
+ * to call repository functions on related meta-data.
+ */
 public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegate {
 	protected List<ProvidedRepository> delegates;
 	
@@ -41,24 +48,24 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegat
 		}
 	}
 
-	public synchronized void addDelegate(@Nonnull ProvidedRepository delegate) {
+	public void addDelegate(@Nonnull ProvidedRepository delegate) {
 		if (delegates.add(delegate)) {
 			delegate.setDelegator(this);
 		}
 	}
 
-	public synchronized void addDelegate(int index, @Nonnull ProvidedRepository delegate) {
+	public void addDelegate(int index, @Nonnull ProvidedRepository delegate) {
 		delegates.add(index, delegate);
 		delegate.setDelegator(this);
 	}
 
-	public synchronized void removeDelegate(@Nonnull ProvidedRepository delegate) {
+	public void removeDelegate(@Nonnull ProvidedRepository delegate) {
 		if (delegates.remove(delegate)) {
 			delegate.setDelegator(null);
 		}
 	}
 
-	public synchronized void removeDelegate(int index) {
+	public void removeDelegate(int index) {
 		ProvidedRepository delegate = delegates.remove(index);
 		if (delegate != null) {
 			delegate.setDelegator(null);

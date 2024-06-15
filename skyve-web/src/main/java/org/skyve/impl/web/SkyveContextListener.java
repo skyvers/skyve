@@ -833,65 +833,70 @@ public class SkyveContextListener implements ServletContextListener {
 					try {
 						try {
 							try {
-								// Notify any observers of the shutdown.
-								ProvidedRepository repository = ProvidedRepositoryFactory.get();
-								if (UtilImpl.CUSTOMER != null) {
-									// if a default customer is specified, only notify that one
-									CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
-									if (internalCustomer == null) {
-										throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
-									}
-									internalCustomer.notifyShutdown();
-								}
-								else {
-									// notify all customers
-									for (String customerName : repository.getAllCustomerNames()) {
-										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+								try {
+									// Notify any observers of the shutdown.
+									ProvidedRepository repository = ProvidedRepositoryFactory.get();
+									if (UtilImpl.CUSTOMER != null) {
+										// if a default customer is specified, only notify that one
+										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
 										if (internalCustomer == null) {
-											throw new IllegalStateException("Customer " + customerName + " does not exist.");
+											throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
 										}
 										internalCustomer.notifyShutdown();
 									}
+									else {
+										// notify all customers
+										for (String customerName : repository.getAllCustomerNames()) {
+											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+											if (internalCustomer == null) {
+												throw new IllegalStateException("Customer " + customerName + " does not exist.");
+											}
+											internalCustomer.notifyShutdown();
+										}
+									}
+								}
+								finally {
+									// Ensure Two Factor Auth Configuration is finalized
+									TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
 								}
 							}
 							finally {
-								// Ensure Two Factor Auth Configuration is finalized
-								TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
+								EXT.getJobScheduler().shutdown();
 							}
 						}
 						finally {
-							EXT.getJobScheduler().shutdown();
+							EXT.getReporting().shutdown();
 						}
 					}
 					finally {
-						EXT.getReporting().shutdown();
+						// Ensure the caches are destroyed even in the event of other failures first
+						// so that resources and file locks are relinquished.
+						EXT.getCaching().shutdown();
 					}
 				}
 				finally {
-					// Ensure the caches are destroyed even in the event of other failures first
-					// so that resources and file locks are relinquished.
-					EXT.getCaching().shutdown();
+					// Ensure the content manager is destroyed so that resources and files locks are relinquished
+					@SuppressWarnings("resource")
+					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
+					if (cm != null) { // can be null if it wasn't initialised correctly.
+						try {
+							cm.close();
+							cm.shutdown();
+						}
+						catch (Exception e) {
+							UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 			finally {
-				// Ensure the content manager is destroyed so that resources and files locks are relinquished
-				@SuppressWarnings("resource")
-				AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
-				if (cm != null) { // can be null if it wasn't initialised correctly.
-					try {
-						cm.close();
-						cm.shutdown();
-					}
-					catch (Exception e) {
-						UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
-						e.printStackTrace();
-					}
-				}
+				// Ensure the add-in manager is stopped
+				EXT.getAddInManager().shutdown();
 			}
 		}
 		finally {
-			// Ensure the add-in manager is stopped
-			EXT.getAddInManager().shutdown();
+			ProvidedRepositoryFactory.set(null);
 		}
 	}
 

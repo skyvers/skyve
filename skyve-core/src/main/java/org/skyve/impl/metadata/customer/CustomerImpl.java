@@ -52,8 +52,11 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.WebContext;
+
+import jakarta.servlet.http.HttpSession;
 
 public class CustomerImpl implements Customer {
 	private static final long serialVersionUID = 2926460705821800439L;
@@ -542,15 +545,27 @@ public class CustomerImpl implements Customer {
 		}
 	}
 
-	public void notifyPreRestore() {
+	public void notifyBeforeRestore() {
 		for (ObserverMetaData observer : observers.values()) {
-			observer.getObserver().preRestore(this);
+			observer.getObserver().beforeRestore(this);
 		}
 	}
 
-	public void notifyPostRestore() {
+	public void notifyAfterRestore() {
+		for (ObserverMetaData observer : reversedObservers) {
+			observer.getObserver().afterRestore(this);
+		}
+	}
+
+	public void notifyLogin(User user, HttpSession session) {
 		for (ObserverMetaData observer : observers.values()) {
-			observer.getObserver().postRestore(this);
+			observer.getObserver().login(user, session);
+		}
+	}
+
+	public void notifyLogout(User user, HttpSession session) {
+		for (ObserverMetaData observer : reversedObservers) {
+			observer.getObserver().logout(user, session);
 		}
 	}
 

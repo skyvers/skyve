@@ -5,17 +5,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Base64;
 import java.util.logging.Level;
 
-import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
@@ -68,8 +68,9 @@ public class BasicAuthFilter extends AbstractRestFilter {
 				persistence.evictAllCached();
 				persistence.begin();
 
-				User user = CORE.getRepository().retrieveUser(username);
+				UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(username);
 				if (user != null) {
+					WebUtil.setSessionId(user, httpRequest);
 					persistence.setUser(user);
 					validateUserCredentials(persistence, username, password);
 					chain.doFilter(httpRequest, httpResponse);

@@ -25,6 +25,7 @@ import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -46,6 +47,8 @@ import org.skyve.util.Mail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,15 +60,11 @@ public class WebUtil {
 		// Disallow instantiation.
 	}
 	
-	public static User processUserPrincipalForRequest(HttpServletRequest request,
-														String userPrincipal,
-														boolean useSession)
+	public static User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
+														@Nullable String userPrincipal)
 	throws Exception {
-		UserImpl user = null;
-		if (useSession) {
-			HttpSession session = request.getSession(false);
-			user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		}
+		HttpSession session = request.getSession(false);
+		UserImpl user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
@@ -87,11 +86,18 @@ public class WebUtil {
 				if (user == null) {
 					throw new IllegalStateException("WebUtil: Cannot get the user " + userPrincipal);
 				}
-				if (useSession) {
-					request.getSession(true).setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+				// ensure there is a session established
+				if (session == null) {
+					session = request.getSession(true);
 				}
+				setSessionId(user, request);
+				session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 				AbstractPersistence.get().setUser(user);
 				WebStatsUtil.recordLogin(user);
+				Customer customer = user.getCustomer();
+				if (customer instanceof CustomerImpl) {
+					((CustomerImpl) customer).notifyLogin(user, session);
+				}
 			}
 			// TODO hack!
 			else { // check basic auth
@@ -107,6 +113,9 @@ public class WebUtil {
 //					final String password = UtilImpl.processStringValue(values[1]);
 					// TODO check password...
 					user = ProvidedRepositoryFactory.get().retrieveUser(username);
+					if (user != null) {
+						setSessionId(user, request);
+					}
 					AbstractPersistence.get().setUser(user);
 				}				
 			}
@@ -166,6 +175,16 @@ public class WebUtil {
 		}
 		
 		return result;
+	}
+	
+	/**]
+	 * Set the session ID if it is established.
+	 */
+	public static void setSessionId(@Nonnull UserImpl user, @Nonnull HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			user.setSessionId(session.getId());
+		}
 	}
 	
 	/**

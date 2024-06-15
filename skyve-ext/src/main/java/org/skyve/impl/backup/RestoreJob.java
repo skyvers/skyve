@@ -62,7 +62,7 @@ public class RestoreJob extends CancellableJob {
 		String customerName = customer.getName();
 
 		// Notify observers that we are starting a restore for this customer
-		customer.notifyPreRestore();
+		customer.notifyBeforeRestore();
 
 		Collection<String> log = getLog();
 		String trace;
@@ -194,7 +194,7 @@ public class RestoreJob extends CancellableJob {
 			}
 			finally {
 				// Notify observers that we are finished a restore for this customer
-				customer.notifyPostRestore();
+				customer.notifyAfterRestore();
 			}
 		}
 	}
