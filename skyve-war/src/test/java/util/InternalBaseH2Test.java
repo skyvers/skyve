@@ -35,10 +35,13 @@ import modules.admin.domain.User;
 
 /**
  * Common extension point for Junit 4 and 5 Abstract H2 Tests.
+ * Note:- The skyve maven AssembleMojo uses skyve-ext MavenSkyveProject.copySkyveTestFiles()
+ * to substitute the appropriate customer name. 
  */
 abstract class InternalBaseH2Test {
 	protected static final String USER = "TestUser";
 	protected static final String PASSWORD = "TestPassword0!";
+	// This value is substituted in AssembleMojo uses MavenSkyveProject.copySkyveTestFiles()
 	protected static final String CUSTOMER = "bizhub";
 
 	private static final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
