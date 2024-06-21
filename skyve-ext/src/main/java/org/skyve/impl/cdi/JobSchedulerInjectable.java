@@ -93,4 +93,9 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	public boolean cancelJob(String instanceId) {
 		return EXT.getJobScheduler().cancelJob(instanceId);
 	}
+	
+	@Override
+	public void validateMetaData() {
+		EXT.getJobScheduler().validateMetaData();
+	}
 }
