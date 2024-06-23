@@ -55,59 +55,147 @@ import org.skyve.util.Util;
  *				"left join ADM_DynamicEntity t7 on t7.bizId = t5.relatedId " +
  *				// aggregatedAssociation.aggregatedAssociation.bizKey (static)
  *				"left join TEST_AllDynamicAttributesPersistent t8 on t8.bizId = t6.aggregatedAssociation_id " +
- *				"where t0.moduleName = :moduleName and t0.documentName = :documentName order by t0.bizId"		
+ *				"where t0.moduleName = :moduleName and t0.documentName = :documentName order by t0.bizId"
+ *
+ * This class can be "constructed" either using the query or model constructor from programmatic use.
+ * The easiest way to extend this class is to create a default constructor in the extension class.
+ * And then establish a query or model state in the instance.
+ * This can be done in postConstruct() by calling setQuery() or setModel() before calling super.postConstruct()
+ * 
+ * 			@Override
+ *			public void postConstruct(Customer customer, boolean runtime) {
+ *				setQuery(q); OR setModel(customer, "Test", aadpd, columns);
+ *				super.postConstruct(customer, runtime);
+ *			}
+ * 
+ * Or if the model is more dynamic or "late" and dependent on the conversation bean then in setBean() in a similar manner
+ * 
+ * 			@Override
+ *			public void setBean(Bean bean) {
+ *				setQuery(q) OR setModel(c, "Test", aadpd, columns);
+ *				super.setBean(bean);
+ *			}
  */
 public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryListModel<T> {
+	// Used for the title in the list
 	private String description;
+	// The columns in the grid
 	private List<MetaDataQueryColumn> columns;
+	// Current user (if this is for runtime)
 	private User user;
+	// Holds the customer argument from postConstruct()
 	private Customer customer;
+	// The module from either the query or the model
+	// Holds the runtime argument from postConstruct()
+	private boolean runtime;
 	private Module module;
+	// The document from either the query or the model
 	private Document document;
+	// Does post-construction need to be done in setBean()
+	private boolean postConstructInSetBean = false;
 	
-	// The 2 cannot be static as it is technically possible that they are overridden per customer
+	// Note that these 2 cannot be static as it is technically possible that they are overridden per customer
 	private String dynamicEntityPersistentIdentifier;
 	private String dynamicRelationPersistentIdentifier;
 
+	// The query from the constructor or setQuery()
 	private MetaDataQueryDefinition query;
 	
+	/**
+	 * Query constructor.
+	 * Use this to drive the model off of a meta-data query programmatically to get Bean rows.
+	 * @param query	The meta-data query.
+	 */
 	public RDBMSDynamicPersistenceListModel(MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 	
+	/**
+	 * Model constructor.
+	 * Use this to drive the model off of list model state programmatically to get Bean rows.
+	 * @param description	The list title.
+	 * @param drivingDocument	The model driving document.
+	 * @param columns	The columns to project.
+	 */
 	public RDBMSDynamicPersistenceListModel(String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
 		this.description = description;
 		this.document = drivingDocument;
 		this.columns = columns;
 	}
+
+	/**
+	 * Default constructor.
+	 * Use this when extending this class. See {@link RDBMSDynamicPersistenceListModel}.
+	 */
+	public RDBMSDynamicPersistenceListModel() {
+		// nothing to see here
+	}
+	
+	/**
+	 * Use this method in your extension to set the state of the list model based on a meta data query.
+	 * @param query	The query.
+	 */
+	protected void setQuery(Customer customer, MetaDataQueryDefinition query) {
+		this.customer = customer;
+		this.query = query;
+
+		description = query.getDescription();
+		columns = query.getColumns();
+		
+		module = query.getDocumentModule(customer);
+		document = module.getDocument(customer, query.getDocumentName());
+	}
+
+	protected void setModel(Customer customer, String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
+		this.customer = customer;
+		this.description = description;
+		this.document = drivingDocument;
+		this.columns = columns;
+
+		module = customer.getModule(document.getOwningModuleName());
+	}
 	
 	/**
 	 * Establish the model state after the query or model constructor has been called.
 	 * Only set the user if this is instantiated at runtime.
+	 * Override this to either set the query, or set the model
 	 */
 	@Override
-	public void postConstruct(@SuppressWarnings("hiding") Customer customer, boolean runtime) {
+	public void postConstruct(@SuppressWarnings("hiding") Customer customer,
+								@SuppressWarnings("hiding") boolean runtime) {
 		this.customer = customer;
+		this.runtime = runtime;
 
 		if (query != null) { // query constructor called
-			description = query.getDescription();
-			columns = query.getColumns();
-			
-			module = query.getDocumentModule(customer);
-			document = module.getDocument(customer, query.getDocumentName());
+			setQuery(customer, query);
 		}
-		else { // model constructor called
-			module = customer.getModule(document.getOwningModuleName());
+		else if (document != null) { // model constructor called
+			setModel(customer, description, document, columns);
+		}
+		else {
+			postConstructInSetBean = true;
 		}
 
-		determinePersistenceIdentifiers();
-		
-		setDrivingDocument(module, document);
-		super.postConstruct(customer, runtime);
+		if (! postConstructInSetBean) {
+			determinePersistenceIdentifiers();
+			setDrivingDocument(module, document);
+			super.postConstruct(customer, runtime);
+		}
 
 		if (runtime) {
 			user = CORE.getUser();
 		}
+	}
+	
+	
+	@Override
+	public void setBean(T bean) {
+		if (postConstructInSetBean) {
+			determinePersistenceIdentifiers();
+			setDrivingDocument(module, document);
+			super.postConstruct(customer, runtime);
+		}
+		super.setBean(bean);
 	}
 
 	private void determinePersistenceIdentifiers() {
