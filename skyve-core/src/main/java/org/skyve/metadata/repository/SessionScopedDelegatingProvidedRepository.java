@@ -31,6 +31,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Implements a repository that delegates to a map of other repository delegates keyed by the User's session ID.
@@ -41,15 +42,32 @@ import jakarta.annotation.Nonnull;
 public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositoryDelegate {
 	private ConcurrentHashMap<String, ProvidedRepository> sessionScopedDelegates = new ConcurrentHashMap<>();
 	
-	private ProvidedRepository getDelegate() {
-		String sessionId = null;
+	public @Nullable ProvidedRepository getSessionDelegate() {
 		if (AbstractPersistence.isPresent()) {
 			User user = AbstractPersistence.get().getUser();
 			if (user != null) {
-				sessionId = user.getSessionId();
+				return getSessionDelegate(user);
 			}
 		}
+		return null;
+	}
+	
+	public @Nullable ProvidedRepository getSessionDelegate(@Nonnull User user) {
+		String sessionId = user.getSessionId();
 		return (sessionId == null) ? null : sessionScopedDelegates.get(sessionId);
+	}
+	
+	public void setSessionDelegate(@Nonnull ProvidedRepository delegate) {
+		if (AbstractPersistence.isPresent()) {
+			User user = AbstractPersistence.get().getUser();
+			if (user == null) {
+				throw new IllegalStateException("No user on the persistence on this thread");
+			}
+			setSessionDelegate(user, delegate);
+		}
+		else {
+			throw new IllegalStateException("No persistence on this thread");
+		}
 	}
 	
 	public void setSessionDelegate(@Nonnull User user, @Nonnull ProvidedRepository delegate) {
@@ -64,6 +82,19 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 		delegate.setDelegator(this);
 	}
 
+	public void removeSessionDelegate() {
+		if (AbstractPersistence.isPresent()) {
+			User user = AbstractPersistence.get().getUser();
+			if (user == null) {
+				throw new IllegalStateException("No user on the persistence on this thread");
+			}
+			removeSessionDelegate(user);
+		}
+		else {
+			throw new IllegalStateException("No persistence on this thread");
+		}
+	}
+	
 	public void removeSessionDelegate(@Nonnull User user) {
 		String sessionId = user.getSessionId();
 		if (sessionId == null) {
@@ -77,7 +108,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void evictCachedMetaData(Customer customer) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.evictCachedMetaData(customer);
 		}
@@ -86,7 +117,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
 		File result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.findResourceFile(resourcePath, customerName, moduleName);
 		}
@@ -96,7 +127,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public Router getRouter() {
 		Router result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getRouter();
 		}
@@ -106,7 +137,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public Customer getCustomer(String customerName) {
 		Customer result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getCustomer(customerName);
 		}
@@ -116,7 +147,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
 		DynamicImage<T> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getDynamicImage(customer, document, imageName, runtime);
 		}
@@ -126,7 +157,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public View getView(String uxui, Customer customer, Document document, String name) {
 		View result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getView(uxui, customer, document, name);
 		}
@@ -136,7 +167,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
 		ActionMetaData result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getMetaDataAction(customer, document, actionName);
 		}
@@ -146,7 +177,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime) {
 		ComparisonModel<T, C> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getComparisonModel(customer, document, modelName, runtime);
 		}
@@ -156,7 +187,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
 		MapModel<T> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getMapModel(customer, document, modelName, runtime);
 		}
@@ -166,7 +197,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime) {
 		ChartModel<T> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getChartModel(customer, document, modelName, runtime);
 		}
@@ -176,7 +207,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
 		ListModel<T> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getListModel(customer, document, modelName, runtime);
 		}
@@ -186,7 +217,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime) {
 		ServerSideAction<Bean> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getServerSideAction(customer, document, className, runtime);
 		}
@@ -196,7 +227,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime) {
 		BizExportAction result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getBizExportAction(customer, document, className, runtime);
 		}
@@ -206,7 +237,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime) {
 		BizImportAction result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getBizImportAction(customer, document, className, runtime);
 		}
@@ -216,7 +247,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime) {
 		DownloadAction<Bean> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getDownloadAction(customer, document, className, runtime);
 		}
@@ -226,7 +257,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime) {
 		UploadAction<Bean> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getUploadAction(customer, document, className, runtime);
 		}
@@ -236,7 +267,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public Object getDataFactory(Customer customer, Document document) {
 		Object result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getDataFactory(customer, document);
 		}
@@ -246,7 +277,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public UserImpl retrieveUser(String userName) {
 		UserImpl result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.retrieveUser(userName);
 		}
@@ -256,7 +287,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public List<Bean> retrieveAllJobSchedulesForAllCustomers() {
 		List<Bean> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.retrieveAllJobSchedulesForAllCustomers();
 		}
@@ -266,7 +297,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public List<Bean> retrieveAllReportSchedulesForAllCustomers() {
 		List<Bean> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.retrieveAllReportSchedulesForAllCustomers();
 		}
@@ -276,7 +307,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public String retrievePublicUserName(String customerName) {
 		String result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.retrievePublicUserName(customerName);
 		}
@@ -285,7 +316,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	
 	@Override
 	public void resetMenus(User user) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.resetMenus(user);
 		}
@@ -293,7 +324,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void populatePermissions(User user) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.populatePermissions(user);
 		}
@@ -301,7 +332,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void resetUserPermissions(User user) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.resetUserPermissions(user);
 		}
@@ -309,7 +340,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void populateUser(User user, Connection connection) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.populateUser(user, connection);
 		}
@@ -317,7 +348,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	
 	@Override
 	public List<String> getAllCustomerNames() {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			return delegate.getAllCustomerNames();
 		}
@@ -326,7 +357,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public List<String> getAllVanillaModuleNames() {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			return delegate.getAllVanillaModuleNames();
 		}
@@ -336,7 +367,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public Module getModule(Customer customer, String moduleName) {
 		Module result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getModule(customer, moduleName);
 		}
@@ -346,7 +377,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public Document getDocument(Customer customer, Module module, String documentName) {
 		Document result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getDocument(customer, module, documentName);
 		}
@@ -356,7 +387,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
 		Bizlet<T> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getBizlet(customer, document, runtime);
 		}
@@ -366,7 +397,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
 		BizletMetaData result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getMetaDataBizlet(customer, document);
 		}
@@ -375,7 +406,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void validateCustomerForGenerateDomain(Customer customer) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.validateCustomerForGenerateDomain(customer);
 		}
@@ -383,7 +414,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void validateModuleForGenerateDomain(Customer customer, Module module) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.validateModuleForGenerateDomain(customer, module);
 		}
@@ -391,7 +422,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.validateDocumentForGenerateDomain(customer, document);
 		}
@@ -399,7 +430,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			delegate.validateViewForGenerateDomain(customer, document, view, uxui);
 		}
@@ -408,7 +439,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public Router getGlobalRouter() {
 		Router result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getGlobalRouter();
 		}
@@ -417,7 +448,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 
 	@Override
 	public List<Router> getModuleRouters() {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			return delegate.getModuleRouters();
 		}
@@ -427,7 +458,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public String getReportFileName(Customer customer, Document document, String reportName) {
 		String result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getReportFileName(customer, document, reportName);
 		}
@@ -437,7 +468,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public Class<?> getJavaClass(Customer customer, String key) {
 		Class<?> result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.getJavaClass(customer, key);
 		}
@@ -447,7 +478,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	@Override
 	public String vtable(String customerName, String key) {
 		String result = null;
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			result = delegate.vtable(customerName, key);
 		}
@@ -456,7 +487,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	
 	@Override
 	public boolean getUseScaffoldedViews() {
-		ProvidedRepository delegate = getDelegate();
+		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
 			return delegate.getUseScaffoldedViews();
 		}
