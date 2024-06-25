@@ -452,12 +452,20 @@ public class LocalDesignRepository extends FileSystemRepository {
 															" is for document " + documentName +
 															" which does not exist.", e);
 						}
-						// NB EditItem can be to a transient document
-						if ((! (item instanceof EditItem)) && (document.getPersistent() == null)) {
-							throw new MetaDataException("Menu [" + item.getName() + 
-															"] in module " + module.getName() +
-															" is for document " + documentName +
-															" which is not persistent.");
+						// NB Only EditItems or ListModel ListItems can be to a transient document
+						if (document.getPersistent() == null) { // non-persistent document
+							boolean listModelItem = false;
+							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
+								AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+								listModelItem = (dataItem.getQueryName() == null) && (dataItem.getModelName() != null);
+							}
+							boolean editItem = (item instanceof EditItem);
+							if (! (listModelItem || editItem)) {
+								throw new MetaDataException("Menu [" + item.getName() + 
+																"] in module " + module.getName() +
+																" is for document " + documentName +
+																" which is not persistent.");
+							}
 						}
 					}
 
@@ -477,7 +485,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 							document = module.getDocument(customer, documentName);
 						}
 						
-						String modelName = ((AbstractDocumentOrQueryOrModelMenuItem) item).getModelName();
+						String modelName = dataItem.getModelName();
 						if (modelName != null) {
 							try {
 								if (item instanceof ListItem) { // includes TreeItem
