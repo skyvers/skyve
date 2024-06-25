@@ -12,7 +12,6 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Memo;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
@@ -20,6 +19,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
@@ -29,10 +29,10 @@ public class ReindexBeansJob extends CancellableJob {
 	public void execute() throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Customer customer = persistence.getUser().getCustomer();
+		String dynamicEntityPersistenceIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
 		List<String> log = getLog();
 		String trace;
 		
-
 		// truncate the bean content ready to reindex
 		try (ContentManager cm = EXT.newContentManager()) {
 			trace = "Truncate Beans";
@@ -67,7 +67,7 @@ public class ReindexBeansJob extends CancellableJob {
 								if (document.isDynamic()) {
 									SQL query = persistence.newSQL(String.format("select %s from %s where %s = :%s and %s = :%s",
 																					Bean.DOCUMENT_ID,
-																					RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME,
+																					dynamicEntityPersistenceIdentifier,
 																					AppConstants.MODULE_NAME_ATTRIBUTE_NAME,
 																					AppConstants.MODULE_NAME_ATTRIBUTE_NAME,
 																					AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME,

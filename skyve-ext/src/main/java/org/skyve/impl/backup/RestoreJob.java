@@ -272,12 +272,12 @@ public class RestoreJob extends CancellableJob {
 					}
 				}
 				Collection<String> log = getLog();
-				String trace = "    restore table " + table.name;
+				String trace = "    restore table " + table.agnosticIdentifier;
 				log.add(trace);
 				UtilImpl.LOGGER.info(trace);
-				File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
+				File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.agnosticIdentifier + ".csv");
 				if (! backupFile.exists()) {
-					trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + table.name + ".csv does not exist";
+					trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + table.agnosticIdentifier + ".csv does not exist";
 					log.add(trace);
 					System.err.println(trace);
 					continue;
@@ -290,7 +290,7 @@ public class RestoreJob extends CancellableJob {
 						String[] headers = reader.getHeader(true);
 
 						StringBuilder sql = new StringBuilder(128);
-						sql.append("insert into ").append(table.name).append(" (");
+						sql.append("insert into ").append(table.persistentIdentifier).append(" (");
 						for (String header : headers) {
 							if (joinTables) {
 								sql.append(header).append(',');
@@ -476,7 +476,7 @@ public class RestoreJob extends CancellableJob {
 						}
 					}
 				}
-				trace = "    restored table " + table.name + " with " + rowCount + " rows.";
+				trace = "    restored table " + table.agnosticIdentifier + " with " + rowCount + " rows.";
 				log.add(trace);
 				UtilImpl.LOGGER.info(trace);
 			} // for (each table)
@@ -494,10 +494,10 @@ public class RestoreJob extends CancellableJob {
 			if (table instanceof JoinTable) {
 				continue;
 			}
-			trace = "    restore foreign keys for table " + table.name;
+			trace = "    restore foreign keys for table " + table.agnosticIdentifier;
 			log.add(trace);
 			Util.LOGGER.info(trace);
-			File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
+			File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.agnosticIdentifier + ".csv");
 			if (! backupFile.exists()) {
 				trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist";
 				log.add(trace);
@@ -512,7 +512,7 @@ public class RestoreJob extends CancellableJob {
 					String[] headers = reader.getHeader(true);
 
 					StringBuilder sql = new StringBuilder(128);
-					sql.append("update ").append(table.name);
+					sql.append("update ").append(table.persistentIdentifier);
 					boolean foundAForeignKey = false;
 					for (String header : headers) {
 						if (header.endsWith("_id")) {
@@ -572,7 +572,7 @@ public class RestoreJob extends CancellableJob {
 					}
 				}
 			}
-			trace = "    restored foreign keys for table " + table.name + " with " + rowCount + " rows.";
+			trace = "    restored foreign keys for table " + table.agnosticIdentifier + " with " + rowCount + " rows.";
 			log.add(trace);
 			UtilImpl.LOGGER.info(trace);
 		} // for (each table)

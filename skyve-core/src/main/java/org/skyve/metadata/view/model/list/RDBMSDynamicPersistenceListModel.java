@@ -33,6 +33,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * An in-memory list model that can generate the appropriate select statement to join across static and dynamic references and fields
  * using a MetaDataQuery as input.
@@ -199,13 +201,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	}
 
 	private void determinePersistenceIdentifiers() {
-		Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
-		@SuppressWarnings("null")
-		String de = admin.getDocument(customer, AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
-		dynamicEntityPersistentIdentifier = de;
-		@SuppressWarnings("null")
-		String dr = admin.getDocument(customer, AppConstants.DYNAMIC_RELATION_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
-		dynamicRelationPersistentIdentifier = dr;
+		dynamicEntityPersistentIdentifier = getDynamicEntityPersistent(customer).getPersistentIdentifier();
+		dynamicRelationPersistentIdentifier = getDynamicRelationPersistent(customer).getPersistentIdentifier();
 	}
 	
 	@Override
@@ -617,5 +614,23 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				tableAliasNumber++;
 			}
 		}
+	}
+	
+	/**
+	 * Get the Persistent configuration for the DynamicEntity document for a customer
+	 * @param c	The customer
+	 * @return	The Persistent configuration
+	 */
+	public static @Nonnull Persistent getDynamicEntityPersistent(@Nonnull Customer c) {
+		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME).getPersistent();
+	}
+	
+	/**
+	 * Get the Persistent configuration for the DynamicRelation document for a customer
+	 * @param c	The customer
+	 * @return	The Persistent configuration
+	 */
+	public static @Nonnull Persistent getDynamicRelationPersistent(@Nonnull Customer c) {
+		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_RELATION_DOCUMENT_NAME).getPersistent();
 	}
 }

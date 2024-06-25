@@ -238,9 +238,10 @@ final class BackupUtil {
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
 			@SuppressWarnings("null") // test above
 			String persistentIdentifier = persistent.getPersistentIdentifier();
-			Table table = tables.get(persistentIdentifier);
+			String agnosticIdentifier = persistent.getAgnosticIdentifier();
+			Table table = tables.get(agnosticIdentifier);
 			if (table == null) {
-				table = new Table(persistentIdentifier);
+				table = new Table(agnosticIdentifier, persistentIdentifier);
 				tables.put(persistentIdentifier, table);
 			}
 
@@ -252,8 +253,7 @@ final class BackupUtil {
 				for (ExportedReference reference : references) {
 					Persistent referencePersistent = reference.getPersistent();
 					if (referencePersistent != null) {
-						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer,
-																													reference.getDocumentName());
+						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer, reference.getDocumentName());
 						// Add joining table for collections pointing to static documents
 						if (reference.isCollection() && (! referencedDocument.isDynamic())) {
 							// child collections have no joining table
@@ -261,7 +261,8 @@ final class BackupUtil {
 								String referenceFieldName = reference.getReferenceFieldName();
 								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getReferenceByName(referenceFieldName);
 								if (collection.isPersistent()) {
-									String ownerTableName = referencePersistent.getPersistentIdentifier();
+									String ownerAgnosticIdentifier = referencePersistent.getAgnosticIdentifier();
+									String ownerPersistentIdentifier = referencePersistent.getPersistentIdentifier();
 									ExtensionStrategy strategy = referencePersistent.getStrategy();
 									
 									// If it is a collection defined on a mapped document pointing to this document, find
@@ -274,13 +275,16 @@ final class BackupUtil {
 											Document derivedDocument = derivedModule.getDocument(customer, derivedModoc.substring(dotIndex + 1));
 	
 											if (derivedDocument.isPersistable()) {
-												@SuppressWarnings("null") // tested above
-												String persistentName = derivedDocument.getPersistent().getName();
-												ownerTableName = persistentName;
-												String tableName = ownerTableName + '_' + referenceFieldName;
-												if (! tables.containsKey(tableName)) {
-													JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
-													tables.put(tableName, joinTable);
+												Persistent derivedPersistent = derivedDocument.getPersistent();
+												@SuppressWarnings("null") // tested above in isPersistable()
+												String ai = derivedPersistent.getAgnosticIdentifier();
+												ownerAgnosticIdentifier = ai;
+												ownerPersistentIdentifier = derivedPersistent.getPersistentIdentifier();
+												String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
+												String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
+												if (! tables.containsKey(joinAgnosticIdentifier)) {
+													JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
+													tables.put(joinAgnosticIdentifier, joinTable);
 												}
 											}
 										}
@@ -312,21 +316,26 @@ final class BackupUtil {
 											}
 										}
 
+										Persistent ultimatePersistent = ultimateDocument.getPersistent();
 										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
-										String ultimatePersistentName = ultimateDocument.getPersistent().getName();
-										ownerTableName = ultimatePersistentName;
+										String ai = ultimatePersistent.getAgnosticIdentifier();
+										ownerAgnosticIdentifier = ai;
+										ownerPersistentIdentifier = ultimatePersistent.getPersistentIdentifier();
+										Persistent referencedPersistent = referencedDocument.getPersistent();
 										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
-										String tableName = referencedDocument.getPersistent().getName() + '_' + referenceFieldName;
-										if (! tables.containsKey(tableName)) {
-											JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
-											tables.put(tableName, joinTable);
+										String joinAgnosticIdentifier = referencedPersistent.getAgnosticIdentifier() + '_' + referenceFieldName;
+										String joinPersistentIdentifier = referencedPersistent.getPersistentIdentifier() + '_' + referenceFieldName;
+										if (! tables.containsKey(joinAgnosticIdentifier)) {
+											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
+											tables.put(joinAgnosticIdentifier, joinTable);
 										}
 									}
 									else {
-										String tableName = ownerTableName + '_' + referenceFieldName;
-										if (! tables.containsKey(tableName)) {
-											JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
-											tables.put(tableName, joinTable);
+										String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
+										String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
+										if (! tables.containsKey(joinAgnosticIdentifier)) {
+											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
+											tables.put(joinAgnosticIdentifier, joinTable);
 										}
 									}
 								}
@@ -353,7 +362,7 @@ final class BackupUtil {
 		if (table instanceof JoinTable) {
 			JoinTable joinTable = (JoinTable) table;
 			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
-			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerTableName);
+			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerPersistentIdentifier);
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}

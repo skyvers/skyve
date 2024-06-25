@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -77,27 +78,49 @@ public class Persistent extends NamedMetaData {
 		this.cacheName = cacheName;
 	}
 
-	public String getPersistentIdentifier() {
-		String name = getName();
+	/**
+	 * The RDBMS Table name replete with catalog and schema identifiers if defined.
+	 * This identifier is used for creating SQL statements for documents.
+	 * @return the persistent identifier
+	 */
+	public @Nullable String getPersistentIdentifier() {
+		return getPersistentIdentifier(getName(),
+										(catalog == null) ? UtilImpl.CATALOG : catalog,
+										(schema == null) ? UtilImpl.SCHEMA : schema);
+	}
+	
+	/**
+	 * The RDBMS Table name with the catalog and schema if defined in the metadata.
+	 * The JSON catalog and schema are not used to determine the agnostic identifier.
+	 * This identifier is agnostic of the RDBMS and the default catalog and schema the data store belongs to.
+	 * This identifier is used for database independent backups for the CSV file names.
+	 * @return
+	 */
+	public @Nullable String getAgnosticIdentifier() {
+		return getPersistentIdentifier(getName(), catalog, schema);
+	}
+	
+	private static @Nullable String getPersistentIdentifier(@Nullable String name,
+																@Nullable String catalog,
+																@Nullable String schema) {
 		if (name == null) {
 			return null;
 		}
 
-		String c = (catalog == null) ? UtilImpl.CATALOG : catalog;
-		String s = (schema == null) ? UtilImpl.SCHEMA : schema;
-		if ((c == null) && (s == null)) {
+		if ((catalog == null) && (schema == null)) {
 			return name;
 		}
 
 		StringBuilder result = new StringBuilder(64);
-		if (c != null) {
-			result.append(c).append('.');
+		if (catalog != null) {
+			result.append(catalog).append('.');
 		}
-		if (s != null) {
-			result.append(s).append('.');
+		if (schema != null) {
+			result.append(schema).append('.');
 		}
 		result.append(name);
 
 		return result.toString();
+		
 	}
 }

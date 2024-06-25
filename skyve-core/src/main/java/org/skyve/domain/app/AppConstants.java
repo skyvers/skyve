@@ -5,6 +5,7 @@ public final class AppConstants {
 	public static final String ADMIN_MODULE_NAME = "admin";
 
 	// Documents
+	public static final String AUDIT_DOCUMENT_NAME = "Audit";
 	public static final String CHANGE_PASSWORD_DOCUMENT_NAME = "ChangePassword";
 	public static final String CONTACT_DOCUMENT_NAME = "Contact";
 	public static final String COMMUNICATION_DOCUMENT_NAME = "Communication";
@@ -80,9 +81,6 @@ public final class AppConstants {
 	public static final String TEMPLATE_NAME_ATTRIBUTE_NAME = "templateName";
 	public static final String USER_ATTRIBUTE_NAME = "user";
 	public static final String USER_NAME_ATTRIBUTE_NAME = "userName";
-	
-	// Persistent Identifiers
-	public static final String ADMIN_AUDIT_PERSISTENT_IDENTIFIER = "ADM_Audit";
 	
 	// Actions
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";

@@ -33,22 +33,24 @@ class Table {
 	static final ImmutablePair<AttributeType, Sensitivity> ASSOCIATION = ImmutablePair.of(AttributeType.association, Sensitivity.none);
 	static final ImmutablePair<AttributeType, Sensitivity> INTEGER = ImmutablePair.of(AttributeType.integer, Sensitivity.none);
 
-	String name;
+	String agnosticIdentifier;
+	String persistentIdentifier;
 	LinkedHashMap<String, Pair<AttributeType, Sensitivity>> fields = new LinkedHashMap<>();
 	TreeMap<String, IndexType> indexes = new TreeMap<>();
 	
-	Table(String name) {
-		this.name = name;
+	Table(String agnosticIdentifier, String persistentIdentifier) {
+		this.agnosticIdentifier = agnosticIdentifier;
+		this.persistentIdentifier = persistentIdentifier;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return ((obj instanceof Table) && (name != null) && name.equals(((Table) obj).name));
+		return ((obj instanceof Table) && (agnosticIdentifier != null) && agnosticIdentifier.equals(((Table) obj).agnosticIdentifier));
 	}
 
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return agnosticIdentifier.hashCode();
 	}
 
 	void addFieldsFromDocument(Customer customer, Document document) {
@@ -165,7 +167,8 @@ class Table {
 	
 	public String toJSON() throws Exception {
 		Map<String, Object> result = new TreeMap<>();
-		result.put("name", name);
+		result.put("agnosticIdentifier", agnosticIdentifier);
+		result.put("persistentIdentifier", persistentIdentifier);
 		List<Map<String, Object>> fieldList = new ArrayList<>(fields.size());
 		for (String key : fields.keySet()) {
 			Pair<AttributeType, Sensitivity> pair = fields.get(key);
@@ -177,7 +180,8 @@ class Table {
 		result.put("fields", fieldList);
 		if (this instanceof JoinTable) {
 			JoinTable join = (JoinTable) this;
-			result.put("ownerTableName", join.ownerTableName);
+			result.put("ownerAgnosticIdentifier", join.ownerAgnosticIdentifier);
+			result.put("ownerPersistentIdentifier", join.ownerPersistentIdentifier);
 			result.put("ordered", Boolean.valueOf(join.ordered));
 		}
 		return JSON.marshall(result);
@@ -186,12 +190,26 @@ class Table {
 	@SuppressWarnings("unchecked")
 	public static Table fromJSON(String json) throws Exception {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(null, json);
-		String tableName = (String) map.get("name");
-		String ownerTableName = (String) map.get("ownerTableName");
+		Table result = null;
 		Boolean ordered = (Boolean) map.get("ordered");
-		Table result = (ownerTableName == null) ? 
-							new Table(tableName) :
-							new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(ordered));
+
+		// Cater for < Skyve 9 backups
+		String tableName = (String) map.get("name");
+		if (tableName != null) {
+			String ownerTableName = (String) map.get("ownerTableName");
+			result = (ownerTableName == null) ? 
+						new Table(tableName, tableName) :
+						new JoinTable(tableName, tableName, ownerTableName, ownerTableName, Boolean.TRUE.equals(ordered));
+		}
+		else { // Cater for >= Skyve 9 backups
+			String agnosticIdentifier = (String) map.get("agnosticIdentifier");
+			String persistentIdentifier = (String) map.get("persistentIdentifier");
+			String ownerAgnosticIdentifier = (String) map.get("ownerAgnosticIdentifier");
+			String ownerPersistentIdentifier = (String) map.get("ownerPersistentIdentifier");
+			result = (ownerAgnosticIdentifier == null) ? 
+						new Table(agnosticIdentifier, persistentIdentifier) :
+						new JoinTable(agnosticIdentifier, persistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(ordered));
+		}
 		List<Map<String, Object>> fieldList = (List<Map<String, Object>>) map.get("fields");
 		for (Map<String, Object> field : fieldList) {
 			for (String key : field.keySet()) {
