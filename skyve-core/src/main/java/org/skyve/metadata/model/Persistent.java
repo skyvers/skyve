@@ -84,9 +84,9 @@ public class Persistent extends NamedMetaData {
 	 * @return the persistent identifier
 	 */
 	public @Nullable String getPersistentIdentifier() {
-		return getPersistentIdentifier(getName(),
-										(catalog == null) ? UtilImpl.CATALOG : catalog,
-										(schema == null) ? UtilImpl.SCHEMA : schema);
+		return determinePersistentIdentifier(getName(),
+												(catalog == null) ? UtilImpl.CATALOG : catalog,
+												(schema == null) ? UtilImpl.SCHEMA : schema);
 	}
 	
 	/**
@@ -97,12 +97,19 @@ public class Persistent extends NamedMetaData {
 	 * @return
 	 */
 	public @Nullable String getAgnosticIdentifier() {
-		return getPersistentIdentifier(getName(), catalog, schema);
+		return determinePersistentIdentifier(getName(), catalog, schema);
 	}
 	
-	private static @Nullable String getPersistentIdentifier(@Nullable String name,
-																@Nullable String catalog,
-																@Nullable String schema) {
+	/**
+	 * Determines the persistent identifier given a table name, catalog and schema.
+	 * @param name	The table name
+	 * @param catalog	The catalog
+	 * @param schema	The schema
+	 * @return	The identifier
+	 */
+	public static @Nullable String determinePersistentIdentifier(@Nullable String name,
+																	@Nullable String catalog,
+																	@Nullable String schema) {
 		if (name == null) {
 			return null;
 		}
@@ -121,6 +128,5 @@ public class Persistent extends NamedMetaData {
 		result.append(name);
 
 		return result.toString();
-		
 	}
 }

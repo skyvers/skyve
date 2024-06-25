@@ -16,6 +16,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -167,8 +168,7 @@ class Table {
 	
 	public String toJSON() throws Exception {
 		Map<String, Object> result = new TreeMap<>();
-		result.put("agnosticIdentifier", agnosticIdentifier);
-		result.put("persistentIdentifier", persistentIdentifier);
+		result.put("name", agnosticIdentifier);
 		List<Map<String, Object>> fieldList = new ArrayList<>(fields.size());
 		for (String key : fields.keySet()) {
 			Pair<AttributeType, Sensitivity> pair = fields.get(key);
@@ -180,8 +180,7 @@ class Table {
 		result.put("fields", fieldList);
 		if (this instanceof JoinTable) {
 			JoinTable join = (JoinTable) this;
-			result.put("ownerAgnosticIdentifier", join.ownerAgnosticIdentifier);
-			result.put("ownerPersistentIdentifier", join.ownerPersistentIdentifier);
+			result.put("ownerTableName", join.ownerAgnosticIdentifier);
 			result.put("ordered", Boolean.valueOf(join.ordered));
 		}
 		return JSON.marshall(result);
@@ -190,26 +189,26 @@ class Table {
 	@SuppressWarnings("unchecked")
 	public static Table fromJSON(String json) throws Exception {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(null, json);
-		Table result = null;
-		Boolean ordered = (Boolean) map.get("ordered");
 
-		// Cater for < Skyve 9 backups
-		String tableName = (String) map.get("name");
-		if (tableName != null) {
-			String ownerTableName = (String) map.get("ownerTableName");
-			result = (ownerTableName == null) ? 
-						new Table(tableName, tableName) :
-						new JoinTable(tableName, tableName, ownerTableName, ownerTableName, Boolean.TRUE.equals(ordered));
+		String agnosticIdentifier = (String) map.get("name");
+		String persistentIdentifier = agnosticIdentifier;
+		String ownerAgnosticIdentifier = (String) map.get("ownerTableName");
+		String ownerPersistentIdentifier = ownerAgnosticIdentifier;
+
+		if ((UtilImpl.CATALOG != null) || (UtilImpl.SCHEMA != null)) {
+			if (agnosticIdentifier.indexOf('.') < 0) { // no schema or catalog
+				persistentIdentifier = Persistent.determinePersistentIdentifier(agnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+			}
+			if ((ownerAgnosticIdentifier != null) && (ownerAgnosticIdentifier.indexOf('.') < 0)) { // no schema or catalog
+				ownerPersistentIdentifier = Persistent.determinePersistentIdentifier(ownerAgnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+			}
 		}
-		else { // Cater for >= Skyve 9 backups
-			String agnosticIdentifier = (String) map.get("agnosticIdentifier");
-			String persistentIdentifier = (String) map.get("persistentIdentifier");
-			String ownerAgnosticIdentifier = (String) map.get("ownerAgnosticIdentifier");
-			String ownerPersistentIdentifier = (String) map.get("ownerPersistentIdentifier");
-			result = (ownerAgnosticIdentifier == null) ? 
+		
+		Boolean ordered = (Boolean) map.get("ordered");
+		Table result = (ownerAgnosticIdentifier == null) ? 
 						new Table(agnosticIdentifier, persistentIdentifier) :
 						new JoinTable(agnosticIdentifier, persistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(ordered));
-		}
+
 		List<Map<String, Object>> fieldList = (List<Map<String, Object>>) map.get("fields");
 		for (Map<String, Object> field : fieldList) {
 			for (String key : field.keySet()) {
