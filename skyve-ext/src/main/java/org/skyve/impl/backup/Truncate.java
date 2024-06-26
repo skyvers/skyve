@@ -112,6 +112,9 @@ public class Truncate {
 		}
 	}
 
+	// table types for getting table database metadata from JDBC
+	private static final String[] TABLE_TYPES = new String[] {"TABLE"};
+	
 	@SuppressWarnings("resource")
 	private static Collection<Table> getTables(String schema)
 	throws SQLException {
@@ -120,70 +123,68 @@ public class Truncate {
 		Connection c = ((AbstractHibernatePersistence) AbstractPersistence.get()).getConnection();
 		DatabaseMetaData dmd = c.getMetaData();
 		String catalog = c.getCatalog();
-		try (ResultSet tableResultSet = dmd.getTables(catalog, schema, "%", null)) {
+		// Although not necessarily standard, the following works for H2, MySQL, MSSQL, PostGreSQL
+		try (ResultSet tableResultSet = dmd.getTables(catalog, schema, "%", TABLE_TYPES)) {
 			while (tableResultSet.next()) {
 				String tableName = tableResultSet.getString("TABLE_NAME");
-				String tableType = tableResultSet.getString("TABLE_TYPE");
-				if ("BASE TABLE".equalsIgnoreCase(tableType)) { // true for H2, MySQL, MSSQL, PostGreSQL
-					Table table = new Table(tableName, tableName);
-					boolean hasBizIdColumn = false;
-					try (ResultSet columnResultSet = dmd.getColumns(catalog, schema, tableName, null)) {
-						while (columnResultSet.next()) {
-							String columnName = columnResultSet.getString("COLUMN_NAME");
-							if (columnName.toLowerCase().endsWith("_id")) {
-								table.fields.put(columnName, Table.TEXT);
-							}
-							else if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
-								hasBizIdColumn = true;
-							}
-							// NB Ensure we can detect extension tables
-							else if (columnName.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
-								table.fields.put(columnName, Table.TEXT);
-							}
+				Table table = new Table(tableName, tableName);
+				boolean hasBizIdColumn = false;
+				try (ResultSet columnResultSet = dmd.getColumns(catalog, schema, tableName, null)) {
+					while (columnResultSet.next()) {
+						String columnName = columnResultSet.getString("COLUMN_NAME");
+						if (columnName.toLowerCase().endsWith("_id")) {
+							table.fields.put(columnName, Table.TEXT);
+						}
+						else if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
+							hasBizIdColumn = true;
+						}
+						// NB Ensure we can detect extension tables
+						else if (columnName.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
+							table.fields.put(columnName, Table.TEXT);
 						}
 					}
+				}
 
-					// detect joining tables
-					int tableFieldSize = table.fields.size();
-					boolean joinTable = ((tableFieldSize == 2) || // unordered collection 
-											(tableFieldSize == 3)); // ordered collection
-					if (joinTable) {
-						// check for owner_id and element_id
-						Set<String> columnNames = table.fields.keySet();
-						for (String columnName : columnNames) {
-							if ((! PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
-									(! PersistentBean.ELEMENT_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
-									(! Bean.ORDINAL_NAME.equalsIgnoreCase(columnName))) {
-								joinTable = false;
-								break;
-							}
-						}
-						
-						if (joinTable) {
-							String ownerTableName = null;
-							try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, tableName)) {
-								while (foreignKeyResultSet.next()) {
-									String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
-									if (PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(foreignKeyColumn)) {
-										ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
-									}
-								}
-							}
-
-							if (ownerTableName == null) { // is null when the foreign key is not defined
-								table = null; // skip this table
-								joinTable = false;
-							}
-							else {
-								table = new JoinTable(tableName, tableName, ownerTableName, ownerTableName, (tableFieldSize == 3));
-							}
+				// detect joining tables
+				int tableFieldSize = table.fields.size();
+				boolean joinTable = ((tableFieldSize == 2) || // unordered collection 
+										(tableFieldSize == 3)); // ordered collection
+				if (joinTable) {
+					// check for owner_id and element_id
+					Set<String> columnNames = table.fields.keySet();
+					for (String columnName : columnNames) {
+						if ((! PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
+								(! PersistentBean.ELEMENT_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
+								(! Bean.ORDINAL_NAME.equalsIgnoreCase(columnName))) {
+							joinTable = false;
+							break;
 						}
 					}
 					
-					if ((table != null) && 
-							(joinTable || hasBizIdColumn)) {
-						result.add(table);
+					if (joinTable) {
+						String ownerTableName = null;
+						try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, tableName)) {
+							while (foreignKeyResultSet.next()) {
+								String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
+								if (PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(foreignKeyColumn)) {
+									ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
+								}
+							}
+						}
+
+						if (ownerTableName == null) { // is null when the foreign key is not defined
+							table = null; // skip this table
+							joinTable = false;
+						}
+						else {
+							table = new JoinTable(tableName, tableName, ownerTableName, ownerTableName, (tableFieldSize == 3));
+						}
 					}
+				}
+				
+				if ((table != null) && 
+						(joinTable || hasBizIdColumn)) {
+					result.add(table);
 				}
 			}
 			
