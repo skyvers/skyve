@@ -53,8 +53,8 @@ public class ArchiveIndexJob extends CancellableJob {
     private static final Logger logger = LogManager.getLogger();
 
     // Fields added to each Audit document index entry
-    private static String FILENAME_FIELD = "_filename";
-    private static String OFFSET_FIELD = "_offset";
+    public static String FILENAME_FIELD = "_filename";
+    public static String OFFSET_FIELD = "_offset";
 
     // Fields used to record indexing progress of each file
     private static String PROGRESS_FILENAME_FIELD = "_progress_filename";
@@ -243,7 +243,12 @@ public class ArchiveIndexJob extends CancellableJob {
         }
     }
 
-    private Path getIndexPath() {
+    /**
+     * TODO put somewhere more appropriate
+     * 
+     * @return
+     */
+    public static Path getIndexPath() {
 
         return Path.of(Util.getArchiveDirectory(), INDEX_DIR);
     }

@@ -126,6 +126,9 @@
 					<action name="TruncateAuditLog"/>
 				</document>
 			</privileges>
+			<accesses>
+				<modelAggregateAccess document="Audit" model="ArchivedAuditListModel" />
+			</accesses>
 		</role>
 		<role name="BasicUser">
 			<documentation>
@@ -540,6 +543,13 @@
 			<role name="BasicUser" />
 		</list>
 		<list document="Audit" name="admin.adminMenu.audits.list.displayName">
+			<uxui name="desktop" />
+			<uxui name="external" />
+			<uxui name="tablet" />
+			<role name="SecurityAdministrator" />
+			<role name="AuditManager" />
+		</list>
+		<list document="Audit" name="Audit 2" model="ArchivedAuditListModel">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />
