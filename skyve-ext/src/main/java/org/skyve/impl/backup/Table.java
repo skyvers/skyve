@@ -126,7 +126,8 @@ class Table {
 								fields.put(attributeName + "_type", TEXT);
 							}
 							
-							fields.put(attributeName + "_id", ImmutablePair.of(attribute.getAttributeType(), Sensitivity.none));
+							fields.put(attributeName + "_id", ImmutablePair.of(attributeType, Sensitivity.none));
+							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + attributeName + "_id -> " + attributeType);
 						}
 					}
 				}
@@ -153,6 +154,7 @@ class Table {
 						Pair<AttributeType, Sensitivity> pair = fields.get(fieldName);
 						if (pair == null) {
 							fields.put(fieldName, MutablePair.of(attributeType, sensitivity));
+							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + fieldName + " -> " + attributeType);
 						}
 						else {
 							Sensitivity existing = pair.getRight();

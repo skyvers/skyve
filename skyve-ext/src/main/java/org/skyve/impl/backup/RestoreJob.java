@@ -429,7 +429,13 @@ public class RestoreJob extends CancellableJob {
 										}
 									}
 									else {
-										throw new IllegalStateException("No value set for " + header);
+										trace = "RestoreJob unknown attribute type " + attributeType + " for column " + header;
+										Util.LOGGER.severe(trace);
+										// dump the field map for this table
+										table.fields.entrySet()
+												.stream()
+												.forEach(e -> Util.LOGGER.warning("    Table " + table.agnosticIdentifier + '.' + e.getKey() + " -> " + e.getValue()));
+										throw new IllegalStateException(trace);
 									}
 								} // for (each header)
 

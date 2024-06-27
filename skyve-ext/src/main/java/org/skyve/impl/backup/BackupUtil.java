@@ -115,7 +115,8 @@ final class BackupUtil {
 	}
 	
 	static Collection<Table> getTables() throws Exception {
-		Map<String, Table> result = new TreeMap<>();
+		// A case insensitive keyed map of tables
+		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();
 
 		// insert all defined documents into the tables list
@@ -133,7 +134,8 @@ final class BackupUtil {
 	}
 
 	static Collection<Table> getTablesForAllCustomers() throws Exception {
-		Map<String, Table> result = new TreeMap<>();
+		// A case insensitive keyed map of tables
+		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
@@ -242,7 +244,8 @@ final class BackupUtil {
 			Table table = tables.get(agnosticIdentifier);
 			if (table == null) {
 				table = new Table(agnosticIdentifier, persistentIdentifier);
-				tables.put(persistentIdentifier, table);
+				tables.put(agnosticIdentifier, table);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + agnosticIdentifier);
 			}
 
 			table.addFieldsFromDocument(customer, document);
@@ -285,6 +288,7 @@ final class BackupUtil {
 												if (! tables.containsKey(joinAgnosticIdentifier)) {
 													JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 													tables.put(joinAgnosticIdentifier, joinTable);
+													if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 												}
 											}
 										}
@@ -328,6 +332,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
+											if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 										}
 									}
 									else {
@@ -336,6 +341,7 @@ final class BackupUtil {
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
 											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(joinAgnosticIdentifier, joinTable);
+											if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 										}
 									}
 								}
