@@ -256,10 +256,8 @@ public class StandardLoader {
 		else {
 			sheetRowId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 			// find the bean by sheetRowId (assuming its a bizId of a persisted entity)
-			try {
-				result = persistence.retrieveAndLock(document, sheetRowId);
-			} 
-			catch (@SuppressWarnings("unused") Exception e) { // could not be retrieved, must be new
+			result = persistence.retrieve(document, sheetRowId);
+			if (result == null) {
 				result = document.newInstance(user);
 			}
 		}
