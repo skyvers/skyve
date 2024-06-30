@@ -17,7 +17,7 @@ public class DateTime extends Date {
 
 	public DateTime() {
 		super();
-		TimeUtil.clearMillisecondComponent(this);
+		TimeUtil.clearSecondAndMillisecondComponent(this);
 	}
 
 	public DateTime(long date) {
