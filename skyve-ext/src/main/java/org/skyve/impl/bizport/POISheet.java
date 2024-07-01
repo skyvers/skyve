@@ -194,7 +194,9 @@ public final class POISheet implements BizPortSheet {
 					Attribute attribute = target.getAttribute();
 					if (attribute instanceof Reference) {
 						Reference reference = (Reference) attribute;
-						Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
+						Document owningDocument = target.getDocument();
+						Module owningModule = customer.getModule(owningDocument.getOwningModuleName());
+						Document referenceDocument = owningModule.getDocument(customer, reference.getDocumentName());
 						column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(),
 																referenceDocument.getName()));
 					}
@@ -207,11 +209,9 @@ public final class POISheet implements BizPortSheet {
 						column.setReferencedSheet(new SheetKey(moduleName, documentName));
 					}
 					else { // compound binding
-						Module drivingModule = customer.getModule(moduleName);
-						Document drivingDocument = module.getDocument(customer, documentName);
 						TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
-																				drivingModule,
-																				drivingDocument,
+																				module,
+																				document,
 																				collectionBinding);
 						Document owningDocument = target.getDocument();
 						column.setReferencedSheet(new SheetKey(owningDocument.getOwningModuleName(),
@@ -219,15 +219,15 @@ public final class POISheet implements BizPortSheet {
 					}
 				}
 				else { // element ID
-					Module drivingModule = customer.getModule(moduleName);
-					Document drivingDocument = module.getDocument(customer, documentName);
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
-																			drivingModule,
-																			drivingDocument,
+																			module,
+																			document,
 																			collectionBinding);
 					Reference reference = (Reference) target.getAttribute();
 					if (reference != null) { // should always be
-						Document referenceDocument = drivingModule.getDocument(customer, reference.getDocumentName());
+						Document owningDocument = target.getDocument();
+						Module owningModule = customer.getModule(owningDocument.getOwningModuleName());
+						Document referenceDocument = owningModule.getDocument(customer, reference.getDocumentName());
 						column.setReferencedSheet(new SheetKey(referenceDocument.getOwningModuleName(),
 																referenceDocument.getName()));
 					}
