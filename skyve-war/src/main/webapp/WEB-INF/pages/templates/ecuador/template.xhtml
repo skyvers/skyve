@@ -44,6 +44,14 @@
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>
+			<style>
+				.layout-wrapper .layout-sidebar {
+					width: 250px !important
+				}
+				.layout-wrapper.layout-menu-static.layout-menu-static-inactive .layout-sidebar {
+					left: -250px !important;
+				}
+			</style>
 			<ui:insert name="templateHead" />
 		</h:head>
 	
