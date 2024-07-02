@@ -37,7 +37,7 @@ public class AuditDocumentConverter {
         // operation
         // FIXME probably shouldn't be the localised description...
         doc.add(new TextField(Audit.operationPropertyName, audit.getOperation()
-                                                                .toLocalisedDescription(),
+                                                                .name(),
                 Store.YES));
 
         // module+document
@@ -65,4 +65,5 @@ public class AuditDocumentConverter {
             throw new RuntimeException("Unable to parse date string: " + dateStr, e);
         }
     }
+
 }
