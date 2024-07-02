@@ -47,7 +47,7 @@ import modules.admin.Audit.job.support.BufferedLineReader.Line;
 import modules.admin.Audit.job.support.FileLockRepo;
 import modules.admin.domain.Audit;
 
-public class ArchiveIndexJob extends CancellableJob {
+public class IndexArchivesJob extends CancellableJob {
 
     private static final String INDEX_DIR = "index";
     private static final Logger logger = LogManager.getLogger();

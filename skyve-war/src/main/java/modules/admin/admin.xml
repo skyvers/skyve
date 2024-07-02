@@ -18,8 +18,8 @@
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
 		<job name="jAvailableDiskSpaceAlarm" displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob"/>
-		<job name="AuditArchiveJob" displayName="Archive Audit Job" className="modules.admin.Audit.job.AuditArchiveJob" />
-		<job name="ArchiveIndexJob" displayName="Archive Index Job" className="modules.admin.Audit.job.ArchiveIndexJob" />
+		<job name="AuditArchiveJob" displayName="Archive Audits Job" className="modules.admin.Audit.job.ArchiveAuditsJob" />
+		<job name="ArchiveIndexJob" displayName="Index Archives Job" className="modules.admin.Audit.job.IndexArchivesJob" />
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -542,14 +542,14 @@
 			<uxui name="desktop" />
 			<role name="BasicUser" />
 		</list>
-		<list document="Audit" name="admin.adminMenu.audits.list.displayName">
-			<uxui name="desktop" />
-			<uxui name="external" />
-			<uxui name="tablet" />
-			<role name="SecurityAdministrator" />
-			<role name="AuditManager" />
-		</list>
-		<list document="Audit" name="Audit 2" model="ArchivedAuditListModel">
+<!-- 		<list document="Audit" name="admin.adminMenu.audits.list.displayName"> -->
+<!-- 			<uxui name="desktop" /> -->
+<!-- 			<uxui name="external" /> -->
+<!-- 			<uxui name="tablet" /> -->
+<!-- 			<role name="SecurityAdministrator" /> -->
+<!-- 			<role name="AuditManager" /> -->
+<!-- 		</list> -->
+		<list document="Audit" name="Audit" model="ArchivedAuditListModel">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />

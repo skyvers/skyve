@@ -24,7 +24,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import jakarta.inject.Singleton;
-import modules.admin.Audit.job.ArchiveIndexJob;
+import modules.admin.Audit.job.IndexArchivesJob;
 import modules.admin.Audit.models.LuceneFilter;
 import modules.admin.domain.Audit;
 
@@ -96,7 +96,7 @@ public class ArchiveRetriever {
      */
     private List<ArchiveEntry> searchIndex(LuceneFilter filter, int maxResults) throws IOException {
 
-        Path auditArchiveIndexPath = ArchiveIndexJob.getIndexPath();
+        Path auditArchiveIndexPath = IndexArchivesJob.getIndexPath();
         logger.debug("Searching for {}; using index at {}", filter, auditArchiveIndexPath);
 
         try (Directory directory = FSDirectory.open(auditArchiveIndexPath);
@@ -118,10 +118,10 @@ public class ArchiveRetriever {
                 Document doc = ireader.storedFields()
                                       .document(docID);
 
-                long offset = doc.getField(ArchiveIndexJob.OFFSET_FIELD)
+                long offset = doc.getField(IndexArchivesJob.OFFSET_FIELD)
                                  .numericValue()
                                  .longValue();
-                String fileName = doc.get(ArchiveIndexJob.FILENAME_FIELD);
+                String fileName = doc.get(IndexArchivesJob.FILENAME_FIELD);
 
                 ArchiveEntry entry = new ArchiveEntry(fileName, offset);
                 entries.add(entry);

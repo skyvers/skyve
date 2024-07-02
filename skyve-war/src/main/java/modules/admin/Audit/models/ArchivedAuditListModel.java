@@ -40,7 +40,7 @@ import org.skyve.persistence.AutoClosingIterable;
 
 import com.google.common.base.Stopwatch;
 
-import modules.admin.Audit.job.ArchiveIndexJob;
+import modules.admin.Audit.job.IndexArchivesJob;
 import modules.admin.Audit.job.support.AuditDocumentConverter;
 import modules.admin.domain.Audit;
 
@@ -163,7 +163,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
 
         Stopwatch t = Stopwatch.createStarted();
 
-        Path auditArchiveIndexPath = ArchiveIndexJob.getIndexPath();
+        Path auditArchiveIndexPath = IndexArchivesJob.getIndexPath();
         logger.debug("Using index at {}", auditArchiveIndexPath);
         try (Directory directory = FSDirectory.open(auditArchiveIndexPath);
                 DirectoryReader ireader = DirectoryReader.open(directory)) {
