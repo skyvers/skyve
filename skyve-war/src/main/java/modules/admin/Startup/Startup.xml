@@ -230,13 +230,13 @@
 		<condition name="googleRecaptcha" usage="both">
 			<description>True when the captcha type is Google Recaptcha</description>
 			<expression>
-				<![CDATA[CaptchaType.googleRecaptcha == getCaptchaType()]]>
+				<![CDATA[getCaptchaType() != null && CaptchaType.googleRecaptcha == getCaptchaType()]]>
 			</expression>
 		</condition>
 		<condition name="cloudflareTurnstile" usage="both">
 			<description>True when the captcha type is Cloudflare Turnstile</description>
 			<expression>
-				<![CDATA[CaptchaType.cloudflareTurnstile == getCaptchaType()]]>
+				<![CDATA[getCaptchaType() != null && CaptchaType.cloudflareTurnstile == getCaptchaType()]]>
 			</expression>
 		</condition>
 		<condition name="noCaptcha" usage="both">
