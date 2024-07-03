@@ -38,6 +38,8 @@ public class StartupExtension extends Startup {
 	static final String API_GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
 	static final String API_GOOGLE_RECAPTCHA_SITE_KEY = "googleRecaptchaSiteKey";
 	static final String API_GOOGLE_RECAPTCHA_SECRET_KEY = "googleRecaptchaSecretKey";
+	static final String API_CLOUDFLARE_TURNSTILE_SITE_KEY = "cloudflareTurnstileSiteKey";
+	static final String API_CLOUDFLARE_TURNSTILE_SECRET_KEY = "cloudflareTurnstileSecretKey";
 
 	static final String BACKUP_STANZA_KEY = "backup";
 	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
@@ -223,19 +225,45 @@ public class StartupExtension extends Startup {
 			api.put(API_GOOGLE_MAPS_V3_KEY, getApiGoogleMapsKey());
 			UtilImpl.GOOGLE_MAPS_V3_API_KEY = getApiGoogleMapsKey();
 		}
+		
+		switch(getCaptchaType()) {
+			case googleRecaptcha:
+				// Set google recaptcha keys
+				String googleSiteKey = getApiGoogleRecaptchaSiteKey();
+				if (googleSiteKey != null
+						&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey)) {
+					api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey);
+					UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = googleSiteKey;
+				}
 
-		String siteKey = getApiGoogleRecaptchaSiteKey();
-		if (siteKey != null
-				&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, siteKey)) {
-			api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, siteKey);
-			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = siteKey;
-		}
-
-		String secretKey = getApiGoogleRecaptchaSecretKey();
-		if (secretKey != null
-				&& ! StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, secretKey)) {
-			api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, secretKey);
-			UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = secretKey;
+				String googleSecretKey = getApiGoogleRecaptchaSecretKey();
+				if (googleSecretKey != null
+						&& ! StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey)) {
+					api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey);
+					UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = googleSecretKey;
+				}
+				break;
+			case cloudflareTurnstile:
+				// Set turnstile keys
+				String turnstileSiteKey = getApiCloudflareTurnstileSiteKey();
+				if (turnstileSiteKey != null
+						&& !StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey)) {
+					api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = turnstileSiteKey;
+				}
+				
+				String turnstileSecretKey = getApiCloudflareTurnstileSecretKey();
+				if (turnstileSecretKey != null
+						&& ! StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey)) {
+					api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = turnstileSecretKey;
+				}
+				break;
+			default:
+				api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+				api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
 		}
 
 		return api;
