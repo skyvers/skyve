@@ -126,13 +126,41 @@
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
+	        	<item >
+	        		<combo binding="captchaType">
+	        			<onChangedHandlers>
+	        				<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity</c:property>
+	        					</properties>
+	        				</rerender>
+	        			</onChangedHandlers>
+	        		</combo>
+	        	</item>
+	        	<item>
+	        		<spacer/>
+	        	</item>
+	        </row>
+	        <!-- Google Recaptcha keys -->
+	        <row>
 	            <item>
-	                <default binding="apiGoogleRecaptchaSiteKey"/>
+	                <textField binding="apiGoogleRecaptchaSiteKey" visible="googleRecaptcha"/>
 	            </item>
 	        </row>
 	        <row>
 	            <item>
-	                <default binding="apiGoogleRecaptchaSecretKey"/>
+	                <textField binding="apiGoogleRecaptchaSecretKey" visible="googleRecaptcha"/>
+	            </item>
+	        </row>
+	        <!-- Cloudflare Turnstile keys -->
+	        <row>
+	            <item>
+	                <textField binding="apiCloudflareTurnstileSiteKey" visible="googleRecaptcha"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiCloudflareTurnstileSecretKey" visible="googleRecaptcha"/>
 	            </item>
 	        </row>
 	        <row>
