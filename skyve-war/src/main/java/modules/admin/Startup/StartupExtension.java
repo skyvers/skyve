@@ -226,6 +226,13 @@ public class StartupExtension extends Startup {
 			UtilImpl.GOOGLE_MAPS_V3_API_KEY = getApiGoogleMapsKey();
 		}
 		
+		if(getCaptchaType() == null) {
+			api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+			UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+			api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+			UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+			return api;
+		}
 		switch(getCaptchaType()) {
 			case googleRecaptcha:
 				// Set google recaptcha keys

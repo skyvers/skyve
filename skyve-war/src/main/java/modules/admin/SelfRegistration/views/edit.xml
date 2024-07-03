@@ -103,7 +103,7 @@
 						<spacer />
 					</item>
 					<item>
-						<blurb escape="false" sanitise="none">
+						<blurb escape="false" sanitise="none" visible="showGoogleRecaptcha">
 							<![CDATA[
 								<script src='https://www.google.com/recaptcha/api.js'></script>
 								<table>
@@ -124,9 +124,18 @@
 						<spacer />
 					</item>
 					<item>
-						<blurb escape="false" sanitise="none">
+						<blurb escape="false" sanitise="none" visible="showCloudflareTurnstile">
 							<![CDATA[
 								<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+								<table>
+									<tr>
+										<td style="width:50%" />
+										<td>
+											<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
+										</td>
+										<td style="width:50%" />
+									</tr>
+								</table>
 							]]>
 						</blurb>
 					</item>

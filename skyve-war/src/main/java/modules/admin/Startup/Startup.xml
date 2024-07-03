@@ -147,7 +147,7 @@
 			<length>200</length>
 		</text>
 		<text name="apiCloudflareTurnstileSecretKey">
-			<displayName>Google Recaptcha Secret Key</displayName>
+			<displayName>Cloudflare Turnstile Secret Key</displayName>
 			<description>
 				<![CDATA[
 					Cloudflare Turnstile secret key can be specified here to enable server-side validation for stronger security.

@@ -345,4 +345,42 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public boolean isNotSelfRegistrationAllowed() {
 		return (! isSelfRegistrationAllowed());
 	}
+
+	/**
+	 * Whether to show cloudflare turnstile.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowCloudflareTurnstile() {
+		return (org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null);
+	}
+
+	/**
+	 * {@link #isShowCloudflareTurnstile} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowCloudflareTurnstile() {
+		return (! isShowCloudflareTurnstile());
+	}
+
+	/**
+	 * Whether to show google recaptcha.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowGoogleRecaptcha() {
+		return (org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null);
+	}
+
+	/**
+	 * {@link #isShowGoogleRecaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowGoogleRecaptcha() {
+		return (! isShowGoogleRecaptcha());
+	}
 }

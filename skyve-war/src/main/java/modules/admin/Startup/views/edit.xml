@@ -155,12 +155,12 @@
 	        <!-- Cloudflare Turnstile keys -->
 	        <row>
 	            <item>
-	                <textField binding="apiCloudflareTurnstileSiteKey" visible="googleRecaptcha"/>
+	                <textField binding="apiCloudflareTurnstileSiteKey" visible="cloudflareTurnstile"/>
 	            </item>
 	        </row>
 	        <row>
 	            <item>
-	                <textField binding="apiCloudflareTurnstileSecretKey" visible="googleRecaptcha"/>
+	                <textField binding="apiCloudflareTurnstileSecretKey" visible="cloudflareTurnstile"/>
 	            </item>
 	        </row>
 	        <row>
