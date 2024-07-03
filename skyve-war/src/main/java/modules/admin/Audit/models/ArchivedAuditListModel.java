@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
@@ -24,6 +24,9 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -51,8 +54,6 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
     private org.skyve.metadata.model.document.Document drivingDocument;
     private List<MetaDataQueryColumn> columns;
     private Set<String> projections = new LinkedHashSet<>();
-
-    private Map<String, Object> parameters = new TreeMap<>();
 
     private LuceneFilter filter = new LuceneFilter();
 
@@ -130,7 +131,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
     @Override
     public void putParameter(String name, Object value) {
 
-        parameters.put(name, value);
+        // unused?
     }
 
     @Override
@@ -139,11 +140,11 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         logger.debug("Executing fetch, filter={}", filter);
         Query query = filter.toQuery();
 
-        List<Bean> rows = executeQuery(query);
+        Result<Bean> queryResults = executeQuery(query);
 
         Page p = new Page();
-        p.setTotalRows(100);
-        p.setRows(rows);
+        p.setTotalRows(queryResults.totalRowCount());
+        p.setRows(queryResults.rows());
         p.setSummary(createSummary());
 
         return p;
@@ -159,7 +160,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         return new DynamicBean("admin", "Audit", props);
     }
 
-    private List<Bean> executeQuery(Query query) throws IOException {
+    private Result<Bean> executeQuery(Query query) throws IOException {
 
         Stopwatch t = Stopwatch.createStarted();
 
@@ -169,15 +170,16 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
                 DirectoryReader ireader = DirectoryReader.open(directory)) {
 
             IndexSearcher isearcher = new IndexSearcher(ireader);
-            List<Document> queryResults = doQuery(ireader, isearcher, query);
+            Result<Document> queryResults = doQuery(ireader, isearcher, query);
 
-            List<Bean> convertedResults = queryResults.stream()
+            List<Bean> convertedResults = queryResults.rows()
+                                                      .stream()
                                                       .map(this::convertToBean)
                                                       .filter(Objects::nonNull)
                                                       .collect(toCollection(ArrayList::new));
-            logger.debug("Got {} results; took {}", queryResults.size(), t);
+            logger.debug("Got {} results; took {}", convertedResults.size(), t);
 
-            return convertedResults;
+            return new Result<>(convertedResults, queryResults.totalRowCount);
         }
     }
 
@@ -207,16 +209,20 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         return new DynamicBean("admin", "Audit", props);
     }
 
-    private List<Document> doQuery(DirectoryReader ireader, IndexSearcher isearcher, Query query) throws IOException {
+    private Result<Document> doQuery(DirectoryReader ireader, IndexSearcher isearcher, Query query) throws IOException {
 
-        int maxResults = getEndRow() - getStartRow();
-        // FIXME need to page through results properly
-        // searchAfter exists, but requires a ScoreDoc to 
-        // be supplied
-        TopDocs td = isearcher.search(query, maxResults);
-        List<Document> results = new ArrayList<>(maxResults);
+        int maxResults = getEndRow();
+        SortField sortTimestamp = new SortField("timestamp", Type.STRING);
 
-        for (ScoreDoc score : td.scoreDocs) {
+        TopDocs td = isearcher.search(query, maxResults, new Sort(sortTimestamp));
+
+        // Slice out only the page being requested
+        ScoreDoc[] resultSubset = ArrayUtils.subarray(td.scoreDocs, getStartRow(), getEndRow());
+
+        List<Document> results = new ArrayList<>(getEndRow() - getStartRow());
+        Result<Document> r = new Result<>(results, td.totalHits.value);
+
+        for (ScoreDoc score : resultSubset) {
 
             Document doc = ireader.storedFields()
                                   .document(score.doc);
@@ -226,7 +232,10 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
             results.add(doc);
         }
 
-        return results;
+        return r;
+    }
+
+    private static record Result<T>(List<T> rows, long totalRowCount) {
     }
 
     @Override

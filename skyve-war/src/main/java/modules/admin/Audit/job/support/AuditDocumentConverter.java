@@ -8,8 +8,10 @@ import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.util.BytesRef;
 import org.skyve.domain.Bean;
 
 import modules.admin.domain.Audit;
@@ -24,8 +26,9 @@ public class AuditDocumentConverter {
         // StringField: String indexed verbatim as a single token
 
         // timestamp
-        doc.add(new StringField(Audit.timestampPropertyName,
-                dateToString(audit.getTimestamp()), Store.YES));
+        String timestampStr = dateToString(audit.getTimestamp());
+        doc.add(new StringField(Audit.timestampPropertyName, timestampStr, Store.YES));
+        doc.add(new SortedDocValuesField(Audit.timestampPropertyName, new BytesRef(timestampStr)));
 
         // user
         doc.add(new TextField(Audit.userNamePropertyName, audit.getUserName(), Store.YES));
