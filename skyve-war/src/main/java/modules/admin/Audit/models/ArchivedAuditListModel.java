@@ -137,7 +137,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
     @Override
     public Page fetch() throws Exception {
 
-        logger.debug("Executing fetch, filter={}", filter);
+        logger.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
         Query query = filter.toQuery();
 
         Result<Bean> queryResults = executeQuery(query);
@@ -177,7 +177,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
                                                       .map(this::convertToBean)
                                                       .filter(Objects::nonNull)
                                                       .collect(toCollection(ArrayList::new));
-            logger.debug("Got {} results; took {}", convertedResults.size(), t);
+            logger.debug("Got {} results of {}; took {}", convertedResults.size(), queryResults.totalRowCount, t);
 
             return new Result<>(convertedResults, queryResults.totalRowCount);
         }
@@ -226,8 +226,6 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
 
             Document doc = ireader.storedFields()
                                   .document(score.doc);
-
-            logger.trace("Result document #{}: {}", score.doc, doc);
 
             results.add(doc);
         }

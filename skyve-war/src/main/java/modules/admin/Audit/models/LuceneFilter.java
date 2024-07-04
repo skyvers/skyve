@@ -1,5 +1,7 @@
 package modules.admin.Audit.models;
 
+import static org.apache.commons.lang3.StringUtils.toRootLowerCase;
+import static org.apache.lucene.queryparser.classic.QueryParserBase.escape;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST_NOT;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
@@ -10,6 +12,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.DateTools;
@@ -26,6 +29,9 @@ import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TermInSetQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
@@ -58,6 +64,16 @@ public class LuceneFilter implements Filter {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Lower case and (lucene) escape the provided string value.
+     * 
+     * @param value
+     * @return
+     */
+    private static String lowerEscape(String value) {
+        return toRootLowerCase(escape(value));
     }
 
     @Override
@@ -98,7 +114,7 @@ public class LuceneFilter implements Filter {
     @Override
     public void addEquals(String binding, String value) {
 
-        Query query = new TermQuery(new Term(binding, value));
+        Query query = new TermQuery(new Term(binding, lowerEscape(value)));
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -143,7 +159,7 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addNotEquals(String binding, String value) {
-        Query query = new TermQuery(new Term(binding, value));
+        Query query = new TermQuery(new Term(binding, lowerEscape(value)));
         clauses.add(new BooleanClause(query, MUST_NOT));
     }
 
@@ -194,32 +210,32 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addContains(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + value + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST));
     }
 
     @Override
     public void addNotContains(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + value + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
 
     @Override
     public void addStartsWith(String binding, String value) {
 
-        WildcardQuery wq = new WildcardQuery(new Term(binding, value + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, lowerEscape(value) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST));
     }
 
     @Override
     public void addNotStartsWith(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, value + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, lowerEscape(value) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
 
     @Override
     public void addEndsWith(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + value));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value)));
         clauses.add(new BooleanClause(wq, MUST));
     }
 
@@ -228,7 +244,7 @@ public class LuceneFilter implements Filter {
      */
     @Override
     public void addNotEndsWith(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + value));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value)));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
 
@@ -236,7 +252,7 @@ public class LuceneFilter implements Filter {
     public void addGreaterThan(String binding, String value) {
 
         boolean includeLower = false;
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, value, null, includeLower, INCLUDE_UPPER_BOUND);
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, lowerEscape(value), null, includeLower, INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -268,7 +284,8 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addGreaterThanOrEqualTo(String binding, String value) {
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, value, null, INCLUDE_LOWER_BOUND, INCLUDE_UPPER_BOUND);
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, lowerEscape(value), null, INCLUDE_LOWER_BOUND,
+                INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -299,7 +316,7 @@ public class LuceneFilter implements Filter {
     public void addLessThan(String binding, String value) {
 
         boolean includeUpper = false;
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, value, INCLUDE_LOWER_BOUND, includeUpper);
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lowerEscape(value), INCLUDE_LOWER_BOUND, includeUpper);
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -336,7 +353,8 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addLessThanOrEqualTo(String binding, String value) {
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, value, INCLUDE_LOWER_BOUND, INCLUDE_UPPER_BOUND);
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lowerEscape(value), INCLUDE_LOWER_BOUND,
+                INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -367,7 +385,7 @@ public class LuceneFilter implements Filter {
     @Override
     public void addBetween(String binding, String start, String end) {
 
-        TermRangeQuery rangeQuery = TermRangeQuery.newStringRange(binding, start, end,
+        TermRangeQuery rangeQuery = TermRangeQuery.newStringRange(binding, lowerEscape(start), lowerEscape(end),
                 INCLUDE_LOWER_BOUND, INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(rangeQuery, MUST));
     }

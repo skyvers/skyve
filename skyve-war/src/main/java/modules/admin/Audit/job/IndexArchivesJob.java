@@ -15,8 +15,9 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.core.KeywordTokenizerFactory;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.custom.CustomAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.LongField;
@@ -110,7 +111,8 @@ public class IndexArchivesJob extends CancellableJob {
         logger.debug(msg);
         getLog().add(msg);
 
-        try (Analyzer analyzer = new StandardAnalyzer(); Directory directory = FSDirectory.open(getIndexPath())) {
+        try (Analyzer analyzer = newAnalyzer();
+                Directory directory = FSDirectory.open(getIndexPath())) {
             IndexWriterConfig config = new IndexWriterConfig(analyzer);
             try (IndexWriter iwriter = new IndexWriter(directory, config)) {
 
@@ -125,6 +127,23 @@ public class IndexArchivesJob extends CancellableJob {
             }
         }
 
+    }
+
+    /**
+     * Create a custom analyzer. Uses the KeywordTokenizer and a LowercaseFilter.
+     * 
+     * @return
+     */
+    private Analyzer newAnalyzer() {
+        
+        try {
+            return CustomAnalyzer.builder()
+                                 .addTokenFilter(LowerCaseFilterFactory.NAME)
+                                 .withTokenizer(KeywordTokenizerFactory.NAME)
+                                 .build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void indexLine(String fileName, Line lineRecord, IndexWriter iwriter) throws IOException {
@@ -181,7 +200,7 @@ public class IndexArchivesJob extends CancellableJob {
 
         try (Directory directory = FSDirectory.open(getIndexPath());
                 DirectoryReader ireader = DirectoryReader.open(directory);
-                Analyzer analyzer = new WhitespaceAnalyzer()) {
+                Analyzer analyzer = newAnalyzer()) {
             IndexSearcher isearcher = new IndexSearcher(ireader);
 
             QueryParser qp = new QueryParser(PROGRESS_FILENAME_FIELD, analyzer);
