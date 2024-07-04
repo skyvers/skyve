@@ -140,6 +140,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         logger.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
         Query query = filter.toQuery();
 
+        try {
         Result<Bean> queryResults = executeQuery(query);
 
         Page p = new Page();
@@ -147,6 +148,21 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         p.setRows(queryResults.rows());
         p.setSummary(createSummary());
 
+            return p;
+        } catch (IndexNotFoundException e) {
+            logger.atWarn()
+                  .withThrowable(e)
+                  .log("No index found, returning empty Page");
+
+            Page p = emptyPage();
+            return p;
+        }
+    }
+
+    public Page emptyPage() {
+        Page p = new Page();
+        p.setRows(new ArrayList<>());
+        p.setSummary(createSummary());
         return p;
     }
 
