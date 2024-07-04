@@ -75,6 +75,17 @@ public class StartupExtension extends Startup {
 		setApiGoogleRecaptchaSecretKey(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY);
 		setApiCloudflareTurnstileSiteKey(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY);
 		setApiCloudflareTurnstileSecretKey(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY);
+		
+		boolean googleRecaptchaValuesSet = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null && UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null;
+		boolean cloudflareTurnstileValuesSet = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null && UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null;
+		
+		if(googleRecaptchaValuesSet) {
+			setCaptchaType(CaptchaType.googleRecaptcha);
+		}else if(cloudflareTurnstileValuesSet){
+			setCaptchaType(CaptchaType.cloudflareTurnstile);
+		}else {
+			setCaptchaType(null);
+		}
 
 		setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);
 		setEnvironmentSupportEmail(UtilImpl.SUPPORT_EMAIL_ADDRESS);

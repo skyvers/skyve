@@ -124,7 +124,7 @@
 						<spacer />
 					</item>
 					<item>
-						<blurb escape="false" sanitise="none">
+						<blurb escape="false" sanitise="none" visible="showCloudflareTurnstile">
 							<![CDATA[
 								<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
 								<table>
