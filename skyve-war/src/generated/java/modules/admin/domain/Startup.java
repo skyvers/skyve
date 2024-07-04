@@ -481,7 +481,7 @@ public abstract class Startup extends AbstractTransientBean {
 	private String apiCloudflareTurnstileSiteKey;
 
 	/**
-	 * Google Recaptcha Secret Key
+	 * Cloudflare Turnstile Secret Key
 	 * <br/>
 	 * Cloudflare Turnstile secret key can be specified here to enable server-side validation for stronger security.
 	 **/

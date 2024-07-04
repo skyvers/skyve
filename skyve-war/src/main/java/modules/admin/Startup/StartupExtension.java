@@ -73,6 +73,8 @@ public class StartupExtension extends Startup {
 		setApiGoogleMapsKey(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
 		setApiGoogleRecaptchaSiteKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
 		setApiGoogleRecaptchaSecretKey(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY);
+		setApiCloudflareTurnstileSiteKey(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY);
+		setApiCloudflareTurnstileSecretKey(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY);
 
 		setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);
 		setEnvironmentSupportEmail(UtilImpl.SUPPORT_EMAIL_ADDRESS);

@@ -736,6 +736,8 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString("api", "googleRecaptchaSiteKey", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString("api", "googleRecaptchaSecretKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getString("api", "cloudflareTurnstileSiteKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getString("api", "cloudflareTurnstileSecretKey", api, false);
 		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";

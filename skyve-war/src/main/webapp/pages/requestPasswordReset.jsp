@@ -24,7 +24,11 @@
 	String customerValue = request.getParameter("customer");
 	String emailValue = request.getParameter("email");
 	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
-	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null);
+	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null || UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
+	String siteKey = null;
+	if(recaptchaSet){
+		siteKey = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null ? UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY : UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
+	}
 	
 	boolean postback = (emailValue != null) && (captcha != null);
 	if (postback) {
@@ -171,7 +175,7 @@
 										<tr>
 											<td style="width:50%" />
 											<td>
-												<div class="g-recaptcha" data-sitekey="<%=UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY%>"></div>
+												<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
 											</td>
 											<td style="width:50%" />
 										</tr>

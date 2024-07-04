@@ -35,7 +35,12 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 		Persistence persistence = CORE.getPersistence();
 		if (bean.getUser() != null && bean.getUser().getContact() != null) {
 			// Get and validate the recaptcha response from the request parameters
-			String captchaResponse = ((HttpServletRequest) webContext.getHttpServletRequest()).getParameter("g-recaptcha-response");
+			String captchaResponse = null;
+			if(bean.isShowGoogleRecaptcha()) {
+				captchaResponse = ((HttpServletRequest) webContext.getHttpServletRequest()).getParameter("g-recaptcha-response");
+			} else if(bean.isShowCloudflareTurnstile()) {
+				captchaResponse = ((HttpServletRequest) webContext.getHttpServletRequest()).getParameter("cf-turnstile-response");
+			}
 			if ((captchaResponse == null) || (! WebUtil.validateRecaptcha(captchaResponse))) {
 				throw new ValidationException("Captcha is not valid");
 			}
