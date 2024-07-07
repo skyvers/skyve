@@ -4,6 +4,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
@@ -33,16 +34,21 @@ import jakarta.annotation.Nonnull;
 
 /**
  * Implements a repository that delegates to a list of other repository delegates in order.
- * This is not thread-safe and it is expected that the delegates are 
- * setup using an Observer at startup time or extended and set in the constructor.
- * All ProvidedRepositoryDelegate implementations can call getDelegator() to recursively get the top of the delegating hierarchy
- * to call repository functions on related meta-data.
+ * This is thread-safe for manipulating the list of delegates and the thread safety of the underlying delegated 
+ * repository methods depends on the implementations of the respective delegates.
+ * All ProvidedRepositoryDelegate implementations can call getDelegator() to recursively get the top of the
+ * delegating hierarchy to call repository functions on related meta-data.
  */
 public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegate {
-	protected List<ProvidedRepository> delegates;
+	/**
+	 * The list of delegate repositories.
+	 * This is a CopyOnWriteArrayList so that read operations are not synchronized and all 
+	 * delegate iterations will be safe from concurrent modifications by multiple threads.
+	 * This is a suitable choice as this is a small, stable, read-mostly collection.
+	 */
+	protected List<ProvidedRepository> delegates = new CopyOnWriteArrayList<>();
 	
 	public DelegatingProvidedRepositoryChain(@Nonnull ProvidedRepository... delegates) {
-		this.delegates = new ArrayList<>(delegates.length);
 		for (ProvidedRepository delegate : delegates) {
 			addDelegate(delegate);
 		}

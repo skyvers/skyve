@@ -197,7 +197,8 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<defaults />
+		<save />
+		
 		<export className="DataMaintenanceExportAction" displayName="admin.dataMaintenance.actions.exportData.displayName" inActionPanel="false" />
 		<import className="DataMaintenanceImportAction" displayName="admin.dataMaintenance.actions.importData.displayName" inActionPanel="false" />
 		<action className="Backup" displayName="admin.dataMaintenance.actions.backup.displayName" inActionPanel="false" relativeIconFileName="shared/icons/Backup.gif" iconStyleClass="fa-solid fa-square-caret-right" />

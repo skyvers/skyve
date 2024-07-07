@@ -42,6 +42,7 @@ import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
 import org.skyve.impl.web.filter.DevLoginFilter;
 import org.skyve.impl.web.filter.ResponseHeaderFilter;
+import org.skyve.job.JobScheduler;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
@@ -102,7 +103,8 @@ public class SkyveContextListener implements ServletContextListener {
 			
 			EXT.getReporting().startup();
 
-			EXT.getJobScheduler().startup();
+			JobScheduler jobScheduler = EXT.getJobScheduler();
+			jobScheduler.startup();
 
 			TwoFactorAuthConfigurationSingleton.getInstance().startup();
 
@@ -144,6 +146,9 @@ public class SkyveContextListener implements ServletContextListener {
 					internalCustomer.notifyStartup();
 				}
 			}
+			
+			// Validate Skyve meta-data
+			jobScheduler.validateMetaData();
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {

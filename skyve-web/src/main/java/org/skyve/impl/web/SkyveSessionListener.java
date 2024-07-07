@@ -4,6 +4,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
@@ -43,9 +44,25 @@ public class SkyveSessionListener implements HttpSessionListener {
 		User user = (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user != null) { // a Skyve user was present
 			try {
-				CustomerImpl customer = (CustomerImpl) user.getCustomer();
-				if (customer != null) {
-					customer.notifyLogout(user, session);
+				String customerName = user.getCustomerName();
+				if (customerName != null) {
+					// The user.customer lookup is not a reference, its a lookup of the name through the repository.
+					// If the repository has not been initialised its possible that an error will emanate from the User.getCustomer() call below.
+					// Note the current thread may not have a Persistence instance associated with it.
+					CustomerImpl customer = null;
+					try {
+						customer = (CustomerImpl) user.getCustomer();
+					}
+					catch (Exception e) {
+						UtilImpl.LOGGER.warning("Could not get the user customer " + customerName + " from the repository to call notifyLogout() on session destroyed.");
+						e.printStackTrace();
+					}
+					if (customer != null) {
+						customer.notifyLogout(user, session);
+					}
+				}
+				else {
+					UtilImpl.LOGGER.warning("Could not get the user customer as it is null so cannot call notifyLogout() on session destroyed.");
 				}
 			}
 			// Remove the session repository if it exists

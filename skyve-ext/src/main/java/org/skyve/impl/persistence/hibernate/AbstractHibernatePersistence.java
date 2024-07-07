@@ -2278,8 +2278,7 @@ if (document.isDynamic()) return;
 				}
 			}
 		}
-		catch (@SuppressWarnings("unused") StaleObjectStateException e) // thrown from session.load() with LockMode.UPGRADE
-		{
+		catch (@SuppressWarnings("unused") StaleObjectStateException e) { // thrown from session.load() with LockMode.UPGRADE
 			// Database was updated by another user.
 			// The select for update is by [bizId] and [bizVersion] and other transaction changed the bizVersion
 			// so it cannot be found.

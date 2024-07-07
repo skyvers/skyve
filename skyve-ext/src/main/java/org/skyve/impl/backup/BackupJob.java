@@ -41,8 +41,12 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.Sensitivity;
+import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Mail;
@@ -78,7 +82,8 @@ public class BackupJob extends CancellableJob {
 		List<String> log = getLog();
 		Collection<Table> tables = BackupUtil.getTables();
 		AbstractPersistence p = AbstractPersistence.get();
-		String customerName = p.getUser().getCustomerName();
+		Customer customer = p.getUser().getCustomer();
+		String customerName = customer.getName();
 
 		String backupDir = String.format("%sbackup_%s%s%s%s",
 											Util.getBackupDirectory(),
@@ -96,7 +101,11 @@ public class BackupJob extends CancellableJob {
 		// Are we including audits in this backup?
 		boolean includeAuditLog = getIncludeAuditLog(bean);
 		if (! includeAuditLog) {
-			tables.removeIf(t -> AppConstants.ADMIN_AUDIT_PERSISTENT_IDENTIFIER.equals(t.name));
+			Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+			Document audit = admin.getDocument(customer, AppConstants.AUDIT_DOCUMENT_NAME);
+			Persistent persistent = audit.getPersistent();
+			String auditPersistentIdentifier = (persistent == null) ? null : persistent.getPersistentIdentifier();
+			tables.removeIf(t -> t.persistentIdentifier.equals(auditPersistentIdentifier));
 		}
 		
 		// Are we including content in this backup?
@@ -122,15 +131,15 @@ public class BackupJob extends CancellableJob {
 								for (Table table : tables) {
 									StringBuilder sql = new StringBuilder(128);
 									try (Statement statement = connection.createStatement()) {
-										sql.append("select * from ").append(table.name);
+										sql.append("select * from ").append(table.persistentIdentifier);
 										BackupUtil.secureSQL(sql, table, customerName);
 										statement.execute(sql.toString());
 										try (ResultSet resultSet = statement.getResultSet()) {
-											trace = "Backup " + table.name;
+											trace = "Backup " + table.agnosticIdentifier;
 											log.add(trace);
 											UtilImpl.LOGGER.info(trace);
 											try (OutputStreamWriter out = new OutputStreamWriter(
-													new FileOutputStream(backupDir + File.separator + table.name + ".csv"), UTF_8)) {
+													new FileOutputStream(backupDir + File.separator + table.agnosticIdentifier + ".csv"), UTF_8)) {
 												try (CsvMapWriter writer = new CsvMapWriter(out, CsvPreference.STANDARD_PREFERENCE)) {
 													Map<String, Object> values = new TreeMap<>();
 													String[] headers = new String[table.fields.size()];
@@ -165,29 +174,29 @@ public class BackupJob extends CancellableJob {
 																if ("".equals(value)) {
 																	// bizId is mandatory
 																	if (name.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
-																		throw new IllegalStateException(table.name + " is missing a " + Bean.DOCUMENT_ID + " value.");
+																		throw new IllegalStateException(table.agnosticIdentifier + " is missing a " + Bean.DOCUMENT_ID + " value.");
 																	}
 																	// bizLock is mandatory
 																	if (name.equalsIgnoreCase(PersistentBean.LOCK_NAME)) {
-																		throw new IllegalStateException(table.name + " with " +
+																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
 																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																											" is missing a " + PersistentBean.LOCK_NAME + " value.");
 																	}
 																	// bizKey is mandatory
 																	if (name.equalsIgnoreCase(Bean.BIZ_KEY)) {
-																		throw new IllegalStateException(table.name + " with " +
+																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
 																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																											" is missing a " + Bean.BIZ_KEY + " value.");
 																	}
 																	// bizCustomer is mandatory
 																	if (name.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
-																		throw new IllegalStateException(table.name + " with " +
+																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
 																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																											" is missing a " + Bean.CUSTOMER_NAME + " value.");
 																	}
 																	// bizUserId is mandatory
 																	if (name.equalsIgnoreCase(Bean.USER_ID)) {
-																		throw new IllegalStateException(table.name + " with " +
+																		throw new IllegalStateException(table.agnosticIdentifier + " with " +
 																											Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																											" is missing a " + Bean.USER_ID + " value.");
 																	}
@@ -303,7 +312,7 @@ public class BackupJob extends CancellableJob {
 																// bizVersion is mandatory
 																if ("".equals(value) &&
 																		name.equalsIgnoreCase(PersistentBean.VERSION_NAME)) {
-																	throw new IllegalStateException(table.name + " with " +
+																	throw new IllegalStateException(table.agnosticIdentifier + " with " +
 																			Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
 																			" is missing a " + PersistentBean.VERSION_NAME + " value.");
 																}
@@ -341,7 +350,7 @@ public class BackupJob extends CancellableJob {
 																			if (content == null) {
 																				problem = true;
 																				problems.write(String.format("Table [%s] with [%s] = %s is missing content for attribute [%s] = %s",
-																						table.name,
+																						table.agnosticIdentifier,
 																						Bean.DOCUMENT_ID,
 																						values.get(Bean.DOCUMENT_ID),
 																						name,
@@ -366,7 +375,7 @@ public class BackupJob extends CancellableJob {
 																		catch (Throwable t) {
 																			if (t instanceof FileNotFoundException) {
 																				problems.write(String.format("Table [%s] with [%s] = %s is missing a file in the content store for attribute [%s] = %s",
-																						table.name,
+																						table.agnosticIdentifier,
 																						Bean.DOCUMENT_ID,
 																						values.get(Bean.DOCUMENT_ID),
 																						name,

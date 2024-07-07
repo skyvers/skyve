@@ -394,17 +394,11 @@ public class MavenSkyveProject {
 		copyFiles(targetDir, absoluteTestPath, getSkyveTestFiles(absoluteTestPath));
 
 		try {
-			// update the junit4 base test
-			final Path abstractTestFilePath = projectDirectory.resolve(testDirectory).resolve("util").resolve("AbstractH2Test.java");
+			// update the internal base test to the appropriate customer name
+			final Path abstractTestFilePath = projectDirectory.resolve(testDirectory).resolve("util").resolve("InternalBaseH2Test.java");
 			String testContent = new String(Files.readAllBytes(abstractTestFilePath));
 			testContent = testContent.replaceAll("bizhub", customerName);
 			Files.write(abstractTestFilePath, testContent.getBytes());
-
-			// update the junit5 base test
-			final Path abstractTestFilePath2 = projectDirectory.resolve(testDirectory).resolve("util").resolve("AbstractH2TestForJUnit5.java");
-			String testContent2 = new String(Files.readAllBytes(abstractTestFilePath2));
-			testContent2 = testContent2.replaceAll("bizhub", customerName);
-			Files.write(abstractTestFilePath2, testContent2.getBytes());
 		}
 		catch (@SuppressWarnings("unused") IOException e) {
 			UtilImpl.LOGGER.warning("Failed to update customer, tests will likely fail.");

@@ -437,9 +437,11 @@ public class ViewImpl extends Container implements View {
 					modelName = metaDataModel.getModelName();
 					inlineModels.put(modelName, metaDataModel);
 				}
-
-				if (determineAccesses) {
-					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
+				else { // not inlined
+					 // determine access if required
+					 if (determineAccesses) {
+						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
+					}
 				}
 			}
 

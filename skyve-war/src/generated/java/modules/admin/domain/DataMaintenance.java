@@ -158,6 +158,8 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Pre-Process
+	 * <br/>
+	 * Controls the preProcessing method used when a restore is running.
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
@@ -234,6 +236,8 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Content Option
+	 * <br/>
+	 * How to treat missing content during the restore.
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
@@ -305,6 +309,8 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Indexing Option
+	 * <br/>
+	 * Controls which data and content should be re-indexed after the restore.
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
@@ -524,7 +530,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * <br/>
 	 * Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.
 	 * <br/>
-	 * Determines which attributes are redacted in backup job.
+	 * Determines which attributes are redacted during an ad-hoc backup.
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
@@ -599,6 +605,8 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Module.Document
+	 * <br/>
+	 * Holds which module and document were selected for BizPort.
 	 **/
 	private String modDocName;
 
@@ -609,11 +617,15 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Inject bootstrap user
+	 * <br/>
+	 * Whether to inject the bootstrap user after truncation
 	 **/
 	private Boolean injectBootstrapUser;
 
 	/**
 	 * Schema Name
+	 * <br/>
+	 * The scheme name to truncate
 	 **/
 	private String schemaName;
 
@@ -654,16 +666,22 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Pre-Process
+	 * <br/>
+	 * Controls the preProcessing method used when a restore is running.
 	 **/
 	private RestorePreProcess restorePreProcess;
 
 	/**
 	 * Content Option
+	 * <br/>
+	 * How to treat missing content during the restore.
 	 **/
 	private ContentRestoreOption contentRestoreOption = ContentRestoreOption.error;
 
 	/**
 	 * Indexing Option
+	 * <br/>
+	 * Controls which data and content should be re-indexed after the restore.
 	 **/
 	private RestoreIndexingOption restoreIndexingOption = RestoreIndexingOption.both;
 
@@ -762,7 +780,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 * <br/>
 	 * Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.
 	 * <br/>
-	 * Determines which attributes are redacted in backup job.
+	 * Determines which attributes are redacted during an ad-hoc backup.
 	 **/
 	private DataSensitivity dataSensitivity;
 
@@ -857,6 +875,7 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setConfirmPassword(String confirmPassword) {
+		preset(confirmPasswordPropertyName, confirmPassword);
 		this.confirmPassword = confirmPassword;
 	}
 
@@ -1077,7 +1096,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setRestorePreProcess(RestorePreProcess restorePreProcess) {
-		preset(restorePreProcessPropertyName, restorePreProcess);
 		this.restorePreProcess = restorePreProcess;
 	}
 
@@ -1095,7 +1113,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setContentRestoreOption(ContentRestoreOption contentRestoreOption) {
-		preset(contentRestoreOptionPropertyName, contentRestoreOption);
 		this.contentRestoreOption = contentRestoreOption;
 	}
 
@@ -1113,7 +1130,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setRestoreIndexingOption(RestoreIndexingOption restoreIndexingOption) {
-		preset(restoreIndexingOptionPropertyName, restoreIndexingOption);
 		this.restoreIndexingOption = restoreIndexingOption;
 	}
 
@@ -1432,7 +1448,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setDataSensitivity(DataSensitivity dataSensitivity) {
-		preset(dataSensitivityPropertyName, dataSensitivity);
 		this.dataSensitivity = dataSensitivity;
 	}
 
@@ -1450,7 +1465,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setIncludeContent(Boolean includeContent) {
-		preset(includeContentPropertyName, includeContent);
 		this.includeContent = includeContent;
 	}
 
@@ -1468,7 +1482,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setIncludeAuditLog(Boolean includeAuditLog) {
-		preset(includeAuditLogPropertyName, includeAuditLog);
 		this.includeAuditLog = includeAuditLog;
 	}
 

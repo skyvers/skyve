@@ -6,6 +6,7 @@ import org.skyve.metadata.repository.SessionScopedDelegatingProvidedRepository;
 import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * The default repository for Skyve.
@@ -25,6 +26,29 @@ public class DefaultRepository extends DelegatingProvidedRepositoryChain {
 	}
 	
 	/**
+	 * Get the session-scoped repository for the current user's session.
+	 * @return 
+	 */
+	public @Nullable ProvidedRepository getSessionRepository() {
+		return sessionScopedDelegatingProvidedRepository.getSessionDelegate();
+	}
+
+	/**
+	 * Get the session-scoped repository for the given user's session.
+	 * @return 
+	 */
+	public @Nullable ProvidedRepository getSessionRepository(@Nonnull User user) {
+		return sessionScopedDelegatingProvidedRepository.getSessionDelegate(user);
+	}
+
+	/**
+	 * Set the session-scoped repository for the current user's session.
+	 */
+	public void setSessionRepository(@Nonnull ProvidedRepository delegate) {
+		sessionScopedDelegatingProvidedRepository.setSessionDelegate(delegate);
+	}
+
+	/**
 	 * Set the session-scoped repository for the given user's session.
 	 */
 	public void setSessionRepository(@Nonnull User user, @Nonnull ProvidedRepository delegate) {
@@ -32,7 +56,14 @@ public class DefaultRepository extends DelegatingProvidedRepositoryChain {
 	}
 	
 	/**
-	 * Remove the session-scoped repository for the user session.
+	 * Remove the session-scoped repository for the current user's session.
+	 */
+	public void removeSessionRepository() {
+		sessionScopedDelegatingProvidedRepository.removeSessionDelegate();
+	}
+
+	/**
+	 * Remove the session-scoped repository for the given user's session.
 	 */
 	public void removeSessionRepository(@Nonnull User user) {
 		sessionScopedDelegatingProvidedRepository.removeSessionDelegate(user);
