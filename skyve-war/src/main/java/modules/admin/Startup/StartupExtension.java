@@ -76,8 +76,8 @@ public class StartupExtension extends Startup {
 		setApiCloudflareTurnstileSiteKey(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY);
 		setApiCloudflareTurnstileSecretKey(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY);
 		
-		boolean googleRecaptchaValuesSet = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null && UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null;
-		boolean cloudflareTurnstileValuesSet = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null && UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null;
+		boolean googleRecaptchaValuesSet = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null;
+		boolean cloudflareTurnstileValuesSet = UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null;
 		
 		if(googleRecaptchaValuesSet) {
 			setCaptchaType(CaptchaType.googleRecaptcha);
@@ -240,10 +240,17 @@ public class StartupExtension extends Startup {
 		}
 		
 		if(getCaptchaType() == null) {
+			// Clear cloudflare turnstile site key and secret key
 			api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
 			UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
 			api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
 			UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+			
+			// Clear google recaptcha site key and secret key
+			api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+			api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+			UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
 			return api;
 		}
 		switch(getCaptchaType()) {
@@ -262,6 +269,13 @@ public class StartupExtension extends Startup {
 					api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey);
 					UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = googleSecretKey;
 				}
+				
+				// Clear cloudflare turnstile site key and secret key
+				api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+				api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+				
 				break;
 			case cloudflareTurnstile:
 				// Set turnstile keys
@@ -278,12 +292,26 @@ public class StartupExtension extends Startup {
 					api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey);
 					UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = turnstileSecretKey;
 				}
+				
+				// Clear google recaptcha site key and secret key
+				api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+				api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+				
 				break;
 			default:
+				// Clear cloudflare turnstile site key and secret key
 				api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
 				UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
 				api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
 				UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+				
+				// Clear google recaptcha site key and secret key
+				api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+				api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
 		}
 
 		return api;
