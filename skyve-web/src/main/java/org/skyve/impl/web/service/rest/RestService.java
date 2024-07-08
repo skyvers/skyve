@@ -25,6 +25,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
+import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -368,10 +369,11 @@ public class RestService {
 					throw new SecurityException(content.getBizModule() + '.' + content.getBizDocument() + '.' + content.getAttributeName(), u.getName());
 				}
 
-				result = content.getContentBytes();
+				Thumbnail thumbnail = new Thumbnail(content); 
+				result = thumbnail.getBytes();
 				
 				// Set headers
-				MimeType mimeType = content.getMimeType();
+				MimeType mimeType = thumbnail.getMimeType();
 				response.setContentType(mimeType.toString());
 				response.setCharacterEncoding(Util.UTF8);
 				String fileName = content.getFileName();

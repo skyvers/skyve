@@ -251,6 +251,7 @@
         <xs:attribute name="minPixelHeight" type="xs:int"/>
         <xs:attribute name="maxPixelHeight" type="xs:int"/>
         <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="showMarkup" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

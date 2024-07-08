@@ -1,5 +1,6 @@
 package org.skyve.util;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -10,6 +11,8 @@ import org.skyve.domain.messages.DomainException;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.modifier.Visibility;
+import net.bytebuddy.dynamic.DynamicType.Loaded;
+import net.bytebuddy.dynamic.DynamicType.Unloaded;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.jar.asm.Opcodes;
@@ -118,28 +121,42 @@ public class Proxy {
 		if (proxiedTransient) {
 			proxyClass = (Class<T>) CLASS_TO_PROXY_CLASS_WITH_TRANSIENT_PROXIED.computeIfAbsent(
 											proxiedClass,
-											k -> (Class<? extends Serializable>) new ByteBuddy()
-													.subclass(proxiedClass)
-													.method(ElementMatchers.isPublic()).intercept(InvocationHandlerAdapter.of(handler))
-													.implement(Serializable.class)
-													.defineField(PROXIED_FIELD_NAME, proxiedClass, Opcodes.ACC_PUBLIC | Opcodes.ACC_TRANSIENT)
-													.defineField(DELEGATE_FIELD_NAME, delegateClass, Visibility.PUBLIC)
-													.make()
-													.load(classLoader, ClassLoadingStrategy.Default.INJECTION)
-													.getLoaded());
+											k -> {
+												try (Unloaded<?> unloaded = new ByteBuddy()
+														.subclass(proxiedClass)
+														.method(ElementMatchers.isPublic()).intercept(InvocationHandlerAdapter.of(handler))
+														.implement(Serializable.class)
+														.defineField(PROXIED_FIELD_NAME, proxiedClass, Opcodes.ACC_PUBLIC | Opcodes.ACC_TRANSIENT)
+														.defineField(DELEGATE_FIELD_NAME, delegateClass, Visibility.PUBLIC)
+														.make()) {
+													try (Loaded<?> loaded = unloaded.load(classLoader, ClassLoadingStrategy.Default.INJECTION)) {
+														return (Class<? extends Serializable>) loaded.getLoaded();
+													}
+												}
+												catch (IOException e) {
+													throw new DomainException("Could not create a proxy for " + proxied, e);
+												}
+											});
 		}
 		else {
 			proxyClass = (Class<T>) CLASS_TO_PROXY_CLASS_WITH_SERIALIZABLE_PROXIED.computeIfAbsent(
 											proxiedClass,
-											k -> (Class<? extends Serializable>) new ByteBuddy()
-													.subclass(proxiedClass)
-													.method(ElementMatchers.isPublic()).intercept(InvocationHandlerAdapter.of(handler))
-													.implement(Serializable.class)
-													.defineField(PROXIED_FIELD_NAME, proxiedClass, Visibility.PUBLIC)
-													.defineField(DELEGATE_FIELD_NAME, delegateClass, Visibility.PUBLIC)
-													.make()
-													.load(classLoader, ClassLoadingStrategy.Default.INJECTION)
-													.getLoaded());
+											k -> {
+												try (Unloaded<?> unloaded = new ByteBuddy()
+														.subclass(proxiedClass)
+														.method(ElementMatchers.isPublic()).intercept(InvocationHandlerAdapter.of(handler))
+														.implement(Serializable.class)
+														.defineField(PROXIED_FIELD_NAME, proxiedClass, Visibility.PUBLIC)
+														.defineField(DELEGATE_FIELD_NAME, delegateClass, Visibility.PUBLIC)
+														.make()) {
+													try (Loaded<?> loaded = unloaded.load(classLoader, ClassLoadingStrategy.Default.INJECTION)) {
+														return (Class<? extends Serializable>) loaded.getLoaded();
+													}
+												}
+												catch (IOException e) {
+													throw new DomainException("Could not create a proxy for " + proxied, e);
+												}
+											});
 		}
 										
 		// Instantiate and set

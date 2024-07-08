@@ -23,7 +23,6 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
-import org.skyve.impl.content.AbstractContentManager;
 
 public abstract class AbstractContentManager implements ContentManager {
     public static final String META_JSON = "meta.json";
@@ -35,6 +34,7 @@ public abstract class AbstractContentManager implements ContentManager {
     public static final String ATTRIBUTE_NAME = "attribute";
     protected static final String ATTACHMENT = "attachment";
 	protected static final String CLUSTER_NAME = "SKYVE_CONTENT";
+    protected static final String MARKUP = "markup";
 
     
 	public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
@@ -159,6 +159,10 @@ public abstract class AbstractContentManager implements ContentManager {
 		meta.put(Bean.DOCUMENT_KEY, attachment.getBizDocument());
 		meta.put(Bean.DOCUMENT_ID, attachment.getBizId());
 		meta.put(ATTRIBUTE_NAME, attachment.getAttributeName());
+		String markup = attachment.getMarkup();
+		if (markup != null) {
+			meta.put(MARKUP, markup);
+		}
 
 		File dir = new File(absoluteBalancedFolderPath);
 
@@ -205,7 +209,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			return null;
 		}
 		@SuppressWarnings("unchecked")
-		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.getFileAsString(metaFile));
+		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.string(metaFile));
 
 		File file = new File(dir, CONTENT);
 		if (! file.exists()) {
@@ -229,6 +233,7 @@ public abstract class AbstractContentManager implements ContentManager {
 		String bizUserId = (String) meta.get(Bean.USER_ID);
 		String bizId = (String) meta.get(Bean.DOCUMENT_ID);
 		String binding = (String) meta.get(ATTRIBUTE_NAME);
+		String markup = (String) meta.get(MARKUP);
 
 		AttachmentContent result = new AttachmentContent(bizCustomer,
 															bizModule,
@@ -239,7 +244,8 @@ public abstract class AbstractContentManager implements ContentManager {
 															binding,
 															fileName,
 															mimeType,
-															file);
+															file,
+															markup);
 		result.setLastModified(lastModified);
 		result.setContentType(contentType);
 		result.setContentId(contentId);

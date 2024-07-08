@@ -163,8 +163,13 @@ public class CustomerResourceServlet extends HttpServlet {
 			String moduleName = null;
 			if (documentName != null) {
 				int dotIndex = documentName.indexOf('.');
-				moduleName = documentName.substring(0, dotIndex);
-				documentName = documentName.substring(dotIndex + 1);
+				if (dotIndex < 0) {
+					Util.LOGGER.severe("Module/Document is malformed in the URL");
+				}
+				else {
+					moduleName = documentName.substring(0, dotIndex);
+					documentName = documentName.substring(dotIndex + 1);
+				}
 			}
 			String binding = Util.processStringValue(request.getParameter(AbstractWebContext.BINDING_NAME));
 			String resourceFileName = Util.processStringValue(request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME));
@@ -227,6 +232,11 @@ public class CustomerResourceServlet extends HttpServlet {
 							(resourceFileName.length() == 36)) { // its a valid UUID in length at least
 						cm = EXT.newContentManager();
 						content = cm.getAttachment(resourceFileName);
+						// if &_nm is in the URL then don't include markup - we are most probably editing SVG
+						// PS The content is never put so the mutation below is OK
+						if (request.getParameterMap().containsKey(AbstractWebContext.NO_MARKUP)) {
+							content.setMarkup(null);
+						}
 					}
 					else {
 						Util.LOGGER.severe("No skyve user or customer or the contentId is not valid");

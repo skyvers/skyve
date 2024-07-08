@@ -2229,7 +2229,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		result.setColumns(5);
+		boolean showMarkup = (! Boolean.FALSE.equals(image.getShowMarkup()));
+		result.setColumns(showMarkup ? 6 : 5);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2253,7 +2254,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								sanitisedBinding,
 								image.getDisabledConditionName(),
 								formDisabledConditionName,
-								true);
+								true,
+								showMarkup);
 		}
 
 		return result;
@@ -2294,6 +2296,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								sanitisedBinding,
 								link.getDisabledConditionName(),
 								formDisabledConditionName,
+								false,
 								false);
 		}
 
@@ -2496,16 +2499,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String sanitisedBinding,
 									String disabledConditionName,
 									String formDisabledConditionName,
-									boolean image) {
+									boolean image,
+									boolean showMarkup) {
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, false, null, null);
-		setId(hidden, String.format("%s_%s", id, sanitisedBinding));
+		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
 		toAddTo.add(hidden);
 
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
 		uploadButton.setIcon(Icons.FONT_UPLOAD);
-		uploadButton.setTitle("Upload Content");
+		uploadButton.setTitle(image ? "Upload Image" : "Upload Content");
 		uploadButton.setValue(null);
 		uploadButton.setType("button"); // no process or update required
 		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
@@ -2558,7 +2562,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
@@ -2578,6 +2582,50 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// for admin theme
 		setSizeAndTextAlignStyle(clearButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
 		toAddTo.add(clearButton);
+		
+		// Markup button (if required)
+		if (showMarkup) {
+			CommandButton markupButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+			setId(markupButton, null);
+			markupButton.setIcon(Icons.FONT_EDIT);
+			markupButton.setTitle("Mark Up Image");
+			markupButton.setValue(null);
+			markupButton.setType("button"); // no process or update required
+			setDisabled(markupButton, disabledConditionName, formDisabledConditionName);
+			// for admin theme
+			setSizeAndTextAlignStyle(markupButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
+			toAddTo.add(markupButton);
+	
+			var = sanitisedBinding + "Markup";
+			value.setLength(0);
+			value.append("if($('[id$=\"_").append(sanitisedBinding).append("_hidden\"]').val().length==0){return false}else{PF('" + var + "').show();PF('" + var + "').toggleMaximize()}"); 
+			markupButton.setOnclick(value.toString());
+	
+			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+			setId(dialog, null);
+			dialog.setWidgetVar(var);
+			dialog.setModal(true);
+			dialog.setResponsive(true);
+			dialog.setFitViewport(true);
+			dialog.setHeader("Mark Up Image");
+			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
+			// clear the iframe src on hide so there is no flash next open
+			dialog.setOnHide("SKYVE.PF.contentMarkupOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
+			
+			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
+			value.setLength(0);
+			value.append("#{'SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
+			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
+			dialog.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+			toAddTo.add(dialog);
+
+			// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
+			iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+			iframe.setEscape(false);
+			iframe.setValue("<iframe id=\"" + id + "_markupiframe\" src=\"\" style=\"width:100%;height:calc(100% - 10px);border:none\"></iframe>");
+			setId(iframe, null);
+			dialog.getChildren().add(iframe);
+		}
 	}
 
 	@Override
@@ -4110,7 +4158,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(image, null);
 		String expression = String.format("#{%s.getContentUrl('%s', true)}", managedBeanName, binding);
 		image.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
-		image.setStyle("width:100%;height:100%;object-fit:contain;");
+		image.setStyle("width:100%;height:100%;object-fit:contain;cursor:pointer");
+		image.setOnclick("window.open(this.src, '_blank')");
 		result.getChildren().add(image);
 
 		return result;
