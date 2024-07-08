@@ -43,6 +43,7 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.web.SortParameter;
 
 import com.google.common.base.Stopwatch;
@@ -150,7 +151,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
             Page p = new Page();
             p.setTotalRows(queryResults.totalRowCount());
             p.setRows(queryResults.rows());
-            p.setSummary(createSummary());
+            p.setSummary(createSummary(queryResults.totalRowCount()));
 
             return p;
         } catch (IndexNotFoundException e) {
@@ -166,16 +167,29 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
     public Page emptyPage() {
         Page p = new Page();
         p.setRows(new ArrayList<>());
-        p.setSummary(createSummary());
+        p.setSummary(createSummary(0));
         return p;
     }
 
-    private DynamicBean createSummary(/*FIXME params etc*/) {
-        // IMLM uses `DynamicBean(module.getName(), drivingDocument.getName(), summaryData);`
+    private DynamicBean createSummary(long rowCount) {
         HashMap<String, Object> props = new HashMap<>();
         props.put(Bean.DOCUMENT_ID, UUID.randomUUID()
                                         .toString());
         props.put(PersistentBean.FLAG_COMMENT_NAME, "");
+
+        if (getSummary() != null) {
+            if (AggregateFunction.Count == getSummary()) {
+
+                for (MetaDataQueryColumn column : getColumns()) {
+                    String binding = column.getBinding();
+
+                    props.put(binding, rowCount);
+                }
+                // TODO can we even support the other aggregate types
+            } else {
+                logger.warn("Aggregate function {} not supported by {}", getSummary(), this);
+            }
+        }
 
         return new DynamicBean("admin", "Audit", props);
     }
