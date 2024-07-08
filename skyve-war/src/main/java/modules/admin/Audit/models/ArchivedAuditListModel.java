@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toCollection;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -34,12 +36,14 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.web.SortParameter;
 
 import com.google.common.base.Stopwatch;
 
@@ -88,7 +92,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
     private MetaDataQueryColumn createColumn(String binding) {
         MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
         column.setBinding(binding);
-        column.setSortable(false);
+        column.setSortable(true);
 
         if (Audit.auditBizIdPropertyName.equals(binding)) {
             column.setHidden(true);
@@ -141,12 +145,12 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         Query query = filter.toQuery();
 
         try {
-        Result<Bean> queryResults = executeQuery(query);
+            Result<Bean> queryResults = executeQuery(query);
 
-        Page p = new Page();
-        p.setTotalRows(queryResults.totalRowCount());
-        p.setRows(queryResults.rows());
-        p.setSummary(createSummary());
+            Page p = new Page();
+            p.setTotalRows(queryResults.totalRowCount());
+            p.setRows(queryResults.rows());
+            p.setSummary(createSummary());
 
             return p;
         } catch (IndexNotFoundException e) {
@@ -228,9 +232,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
     private Result<Document> doQuery(DirectoryReader ireader, IndexSearcher isearcher, Query query) throws IOException {
 
         int maxResults = getEndRow();
-        SortField sortTimestamp = new SortField("timestamp", Type.STRING);
-
-        TopDocs td = isearcher.search(query, maxResults, new Sort(sortTimestamp));
+        TopDocs td = isearcher.search(query, maxResults, getSort());
 
         // Slice out only the page being requested
         ScoreDoc[] resultSubset = ArrayUtils.subarray(td.scoreDocs, getStartRow(), getEndRow());
@@ -249,7 +251,32 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         return r;
     }
 
-    private static record Result<T>(List<T> rows, long totalRowCount) {
+    private Sort getSort() {
+
+        SortParameter[] params = getSortParameters();
+        if (params == null || params.length == 0) {
+            return Sort.RELEVANCE;
+        }
+
+        logger.debug("SortParameters: {}", () -> Arrays.asList(params));
+
+        List<SortField> sortFields = new ArrayList<>(params.length);
+
+        for (SortParameter sp : params) {
+
+            boolean reverse = sp.getDirection() == SortDirection.descending;
+            String binding = AuditDocumentConverter.toSortBinding(sp.getBy());
+            SortField sf = new SortField(binding, Type.STRING, reverse);
+
+            logger.debug("Sorting by {}", sf);
+
+            sortFields.add(sf);
+        }
+
+        return new Sort(sortFields.toArray(new SortField[0]));
+    }
+
+    private static record Result<U>(List<U> rows, long totalRowCount) {
     }
 
     @Override
