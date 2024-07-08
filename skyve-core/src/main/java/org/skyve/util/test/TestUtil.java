@@ -507,13 +507,15 @@ public class TestUtil {
 	 * @return A regex compliant random string, or null
 	 */
 	static String randomRegex(String regularExpression, Integer length) {
-		// strip boundaries
+		// strip anchors as they are not supported
 		String expression = regularExpression;
 		if (regularExpression.startsWith("^") && regularExpression.endsWith("$")) {
-			expression = StringUtils.substringBetween(regularExpression, "^", "$");
+			expression = expression.substring(1);
+			expression = expression.substring(0, expression.length() - 1);
 		}
 
 		Generex generex = new Generex(expression);
+		
 		// Generate random String matching the regex
 		try {
 			String result = generex.random();

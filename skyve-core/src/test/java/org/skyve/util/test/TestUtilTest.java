@@ -85,4 +85,18 @@ public class TestUtilTest {
 		assertThat(result, is(notNullValue()));
 		assertThat(result.matches("[a-z0-9]+(-[a-z0-9]+)*"), is(true));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testRandomRegexStripsAnchors() {
+		// setup the test data
+		final String expression = "^^\\$$";
+
+		// call the method under test
+		String result = TestUtil.randomRegex(expression, Integer.valueOf(10));
+
+		// verify the result
+		assertThat(result, is(notNullValue()));
+		assertThat(result, is("^$"));
+	}
 }
