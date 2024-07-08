@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,8 +27,10 @@ import org.skyve.util.Util;
 import jakarta.inject.Singleton;
 import modules.admin.Audit.job.IndexArchivesJob;
 import modules.admin.Audit.models.LuceneFilter;
-import modules.admin.domain.Audit;
 
+/**
+ * Utility class for retrieving Beans archived to file.
+ */
 @Singleton
 public class ArchiveRetriever {
 
@@ -36,12 +39,16 @@ public class ArchiveRetriever {
     private static final String READ_ONLY = "r";
 
     /**
-     * Retrieve 0 or 1 Audit entry via the <em>Audit</em>'s bizId.
+     * Retrieve 0 or 1 archived bean entry via that <em>Bean</em>'s bizId. If the bean has
+     * been archived more than once which instance is returned is not defined (though
+     * they should be identical). Requires the Bean's bizId to have been stored in a
+     * field called "bizId".
      * 
-     * @param bizId
-     * @return
+     * @param bizId bizId of the archived bean to retrieve
+     * @return an Optional containing the requested Bean, or an empty optional
+     *         if it could not be found.
      */
-    public Audit retrieveByBizId(String bizId) {
+    public <T extends Bean> Optional<T> retrieveByBizId(String bizId) {
 
         try {
             LuceneFilter lf = new LuceneFilter();
@@ -49,32 +56,30 @@ public class ArchiveRetriever {
 
             List<ArchiveEntry> entries = searchIndex(lf, 1);
             if (entries.isEmpty()) {
-                return null;
+                return Optional.empty();
             }
-            ArchiveEntry entry = entries.getFirst();
-            return retrieveBean(entry);
+
+            ArchiveEntry entry = entries.get(0);
+            return Optional.ofNullable(retrieveBean(entry));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     /**
-     * Retrive all
+     * Retrive all archived beans that match the supplied <em>LuceneFilter</em>.
      * 
-     * @param auditBizId
-     * @return
+     * @param filter Filter to use to search the index
+     * @return a list of results (empty if none are found)
      */
-    public List<Audit> retrieveByAuditBizId(String auditBizId) {
-
-        LuceneFilter filter = new LuceneFilter();
-        filter.addEquals(Audit.auditBizIdPropertyName, auditBizId);
+    public <T extends Bean> List<T> retrieveAll(LuceneFilter filter, int maxResults) {
 
         try {
-            List<ArchiveEntry> entries = searchIndex(filter, 100);
+            List<ArchiveEntry> entries = searchIndex(filter, maxResults);
 
-            List<Audit> audits = new ArrayList<>(entries.size());
+            List<T> audits = new ArrayList<>(entries.size());
             for (ArchiveEntry entry : entries) {
-                Audit a = retrieveBean(entry);
+                T a = retrieveBean(entry);
                 audits.add(a);
             }
 
@@ -106,7 +111,7 @@ public class ArchiveRetriever {
             TopDocs td = isearcher.search(filter.toQuery(), maxResults);
 
             if (td.scoreDocs.length < 1) {
-                logger.warn("No index entries found for {}", filter);
+                logger.debug("No index entries found for {}", filter);
                 return emptyList();
             }
 
@@ -139,6 +144,9 @@ public class ArchiveRetriever {
             String line = readLine(getArchiveFilePath(entry.fileName()), entry.offset());
             return (T) JSON.unmarshall(CORE.getUser(), line);
         } catch (Exception e) {
+            logger.atFatal()
+                  .withThrowable(e)
+                  .log("Unable to retrieve archived entry {}", entry);
             throw new RuntimeException(e);
         }
     }

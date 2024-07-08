@@ -5,6 +5,7 @@ import static java.util.Comparator.comparing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -13,6 +14,7 @@ import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
 import modules.admin.Audit.job.support.ArchiveRetriever;
+import modules.admin.Audit.models.LuceneFilter;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 
@@ -47,8 +49,8 @@ public class AuditBizlet extends Bizlet<Audit> {
                 String bizId = lesserVersions.get(0)
                                              .getCode();
 
-                Audit comparison = retriever.retrieveByBizId(bizId);
-                bean.setComparisonVersion(comparison);
+                Optional<Audit> comparison = retriever.retrieveByBizId(bizId);
+                bean.setComparisonVersion(comparison.orElse(null));
             }
         } else {
             bean.setComparisonVersion(null);
@@ -77,7 +79,10 @@ public class AuditBizlet extends Bizlet<Audit> {
             return new ArrayList<>();
         }
 
-        List<Audit> audits = new ArrayList<>(retriever.retrieveByAuditBizId(audit.getAuditBizId()));
+        LuceneFilter filter = new LuceneFilter();
+        filter.addEquals(Audit.auditBizIdPropertyName, audit.getAuditBizId());
+
+        List<Audit> audits = new ArrayList<>(retriever.retrieveAll(filter, 500));
 
         if (forComparison) {
             // f.addLessThan(Audit.millisPropertyName, audit.getMillis());
@@ -86,6 +91,10 @@ public class AuditBizlet extends Bizlet<Audit> {
 
         // q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
         Collections.sort(audits, comparing(Audit::getMillis).reversed());
+
+        // Delete spurious 'insert' records ()
+        Audit oldestInsert = audits.get(audits.size() - 1);
+        audits.removeIf(a -> a.getOperation() == Operation.insert && a != oldestInsert);
 
         List<DomainValue> result = new ArrayList<>(audits.size());
         for (Audit version : audits) {
@@ -97,6 +106,7 @@ public class AuditBizlet extends Bizlet<Audit> {
 
     @Override
     public Audit resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
-        return retriever.retrieveByBizId(bizId);
+        return retriever.<Audit> retrieveByBizId(bizId)
+                        .orElse(null);
     }
 }
