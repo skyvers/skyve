@@ -234,8 +234,10 @@ public class ImageUtil {
 			Node node = nodes.item(i);
 			String localName = node.getLocalName();
 			NamedNodeMap nodeMap = node.getAttributes();
-			// Remove comment and title nodes
-			if ((node.getNodeType() == Node.COMMENT_NODE) || "title".equals(localName)) {
+			// Remove comment nodes
+			// NB the "Layer 1" <title/> node needs to remain for svg-edit to be able 
+			// to create editable shapes inside that layer - the <g/>
+			if ((node.getNodeType() == Node.COMMENT_NODE)) {
 				node.getParentNode().removeChild(node);
 			}
 			else {

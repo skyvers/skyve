@@ -29,6 +29,7 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import jakarta.annotation.PostConstruct;
@@ -46,7 +47,7 @@ import jakarta.servlet.http.HttpSession;
  */
 @RequestScoped
 @Named("_skyveMarkup")
-public class ImageMarkupView extends HarnessView {
+public class ImageMarkupView extends LocalisableView {
 	private static final long serialVersionUID = 4573644429247936306L;
 
 	private boolean canAccess = false;
@@ -63,8 +64,14 @@ public class ImageMarkupView extends HarnessView {
 	public void postConstruct() {
 		HttpSession session = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
 		canAccess = (session != null) && (session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME) != null);
+		
 	}
 		
+	@SuppressWarnings("static-method")
+	public final String getBaseHref() {
+		return Util.getSkyveContextUrl() + '/';
+	}
+
 	/**
 	 * Initialise and setup the iframe URL to display the content as the background image
 	 */
@@ -116,6 +123,15 @@ public class ImageMarkupView extends HarnessView {
 
 	public void setContentIdParameter(String contentIdParameter) {
 		this.contentIdParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentIdParameter));
+	}
+
+	private String moduleDocument;
+	
+	/**
+	 * The <mod>.<doc> for the content request for SVG-Edit (set in process())
+	 */
+	public String getModuleDocument() {
+		return moduleDocument;
 	}
 
 	private int imageWidth = 800;
@@ -214,9 +230,13 @@ public class ImageMarkupView extends HarnessView {
 			String bizModule = bean.getBizModule();
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getUxUi(request);
+			// Ensure no UXUI is set in the request for this page (after UserAgent.getUxUi() call above)
+			// This was it will default to what is in the web.xml theme expression
+			request.removeAttribute(AbstractWebContext.UXUI);
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBindingParameter);
 			user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
+			
 			// Check document access
 			Customer customer = user.getCustomer();
 			Document document = customer.getModule(bizModule).getDocument(customer, bizDocument);
@@ -227,7 +247,7 @@ public class ImageMarkupView extends HarnessView {
 			try (ContentManager cm = EXT.newContentManager()) {
 				AttachmentContent content = cm.getAttachment(contentIdParameter);
 				if (content != null) {
-					setBizDocumentParameter(content.getBizModule() + '.' + content.getBizDocument());
+					moduleDocument = content.getBizModule() + '.' + content.getBizDocument();
 					// Set the SVG if we are rendering, but if we are applying we want the SVG sent in the request
 					if (! apply) {
 						svg = content.getMarkup();
