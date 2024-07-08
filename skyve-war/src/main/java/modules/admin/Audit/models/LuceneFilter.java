@@ -1,10 +1,12 @@
 package modules.admin.Audit.models;
 
 import static org.apache.commons.lang3.StringUtils.toRootLowerCase;
-import static org.apache.lucene.queryparser.classic.QueryParserBase.escape;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST_NOT;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
+import static org.apache.lucene.search.WildcardQuery.WILDCARD_CHAR;
+import static org.apache.lucene.search.WildcardQuery.WILDCARD_ESCAPE;
+import static org.apache.lucene.search.WildcardQuery.WILDCARD_STRING;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -72,8 +74,32 @@ public class LuceneFilter implements Filter {
      * @param value
      * @return
      */
-    private static String lowerEscape(String value) {
-        return toRootLowerCase(escape(value));
+    private static String lower(String value) {
+        return toRootLowerCase(value);
+    }
+
+    /**
+     * Adapated from QueryParserBase.escape(), however we only want to escape special
+     * characters for WildcardQuery; as we're not using a QueryParser.
+     * 
+     * @see org.apache.lucene.search.WildcardQuery.toAutomaton(Term)
+     * 
+     * @param s
+     * @return
+     */
+    private static String escape(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+
+            if (c == WILDCARD_STRING ||
+                    c == WILDCARD_CHAR ||
+                    c == WILDCARD_ESCAPE) {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     @Override
@@ -114,7 +140,7 @@ public class LuceneFilter implements Filter {
     @Override
     public void addEquals(String binding, String value) {
 
-        Query query = new TermQuery(new Term(binding, lowerEscape(value)));
+        Query query = new TermQuery(new Term(binding, lower(value)));
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -159,7 +185,7 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addNotEquals(String binding, String value) {
-        Query query = new TermQuery(new Term(binding, lowerEscape(value)));
+        Query query = new TermQuery(new Term(binding, lower(value)));
         clauses.add(new BooleanClause(query, MUST_NOT));
     }
 
@@ -210,32 +236,32 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addContains(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value) + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST));
     }
 
     @Override
     public void addNotContains(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value) + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
 
     @Override
     public void addStartsWith(String binding, String value) {
 
-        WildcardQuery wq = new WildcardQuery(new Term(binding, lowerEscape(value) + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST));
     }
 
     @Override
     public void addNotStartsWith(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, lowerEscape(value) + WILDCARD));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
 
     @Override
     public void addEndsWith(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value)));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value))));
         clauses.add(new BooleanClause(wq, MUST));
     }
 
@@ -244,7 +270,7 @@ public class LuceneFilter implements Filter {
      */
     @Override
     public void addNotEndsWith(String binding, String value) {
-        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lowerEscape(value)));
+        WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value))));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
 
@@ -252,7 +278,7 @@ public class LuceneFilter implements Filter {
     public void addGreaterThan(String binding, String value) {
 
         boolean includeLower = false;
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, lowerEscape(value), null, includeLower, INCLUDE_UPPER_BOUND);
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, lower(value), null, includeLower, INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -284,7 +310,7 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addGreaterThanOrEqualTo(String binding, String value) {
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, lowerEscape(value), null, INCLUDE_LOWER_BOUND,
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, lower(value), null, INCLUDE_LOWER_BOUND,
                 INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -316,7 +342,7 @@ public class LuceneFilter implements Filter {
     public void addLessThan(String binding, String value) {
 
         boolean includeUpper = false;
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lowerEscape(value), INCLUDE_LOWER_BOUND, includeUpper);
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lower(value), INCLUDE_LOWER_BOUND, includeUpper);
         clauses.add(new BooleanClause(query, MUST));
     }
 
@@ -353,7 +379,7 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addLessThanOrEqualTo(String binding, String value) {
-        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lowerEscape(value), INCLUDE_LOWER_BOUND,
+        TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lower(value), INCLUDE_LOWER_BOUND,
                 INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -385,7 +411,7 @@ public class LuceneFilter implements Filter {
     @Override
     public void addBetween(String binding, String start, String end) {
 
-        TermRangeQuery rangeQuery = TermRangeQuery.newStringRange(binding, lowerEscape(start), lowerEscape(end),
+        TermRangeQuery rangeQuery = TermRangeQuery.newStringRange(binding, lower(start), lower(end),
                 INCLUDE_LOWER_BOUND, INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(rangeQuery, MUST));
     }
@@ -393,7 +419,6 @@ public class LuceneFilter implements Filter {
     @Override
     public void addBetween(String binding, Date start, Date end) {
 
-        // FIXME need to jiggle dates properly
         addBetween(binding, formatDate(start), formatDate(end));
     }
 
@@ -499,6 +524,9 @@ public class LuceneFilter implements Filter {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * FIXME Temporary testing stuff, delete this
+     */
     public static class QueryTemp {
 
         public static void go(Query query) throws IOException, ParseException {
@@ -521,14 +549,14 @@ public class LuceneFilter implements Filter {
         private static void queryAndLog(DirectoryReader ireader, IndexSearcher isearcher, Query query)
                 throws IOException, ParseException {
 
-            System.out.println();
+            hr("");
             System.out.println("Using Query: " + query);
             System.out.println();
 
-            TopDocs td = isearcher.search(query, 20);
+            SortField sortTimestamp = new SortField("timestamp", Type.STRING);
+            TopDocs td = isearcher.search(query, 5, new Sort(sortTimestamp));
 
             String howManyMsg = td.totalHits + " [" + StringUtils.repeat('#', (int) td.totalHits.value) + "]";
-            System.out.println(howManyMsg);
 
             for (ScoreDoc score : td.scoreDocs) {
 
@@ -543,12 +571,18 @@ public class LuceneFilter implements Filter {
             }
 
             System.out.println();
+            System.out.println(query);
             System.out.println(howManyMsg);
         }
+
+        private static final Set<String> SHOW = Set.of("auditBizKey", "auditBizId", "timestamp");
 
         private static void printSomeDetails(Document doc) throws ParseException {
 
             for (IndexableField field : doc) {
+
+                if (!SHOW.contains(field.name()))
+                    continue;
 
                 String name = StringUtils.leftPad(field.name(), 18);
                 String val = field.stringValue();
@@ -558,7 +592,6 @@ public class LuceneFilter implements Filter {
                 }
 
                 System.out.printf("# %s: %s %n", name, val);
-
             }
 
         }
@@ -575,16 +608,16 @@ public class LuceneFilter implements Filter {
 
     public static void main(String[] args) throws Exception {
 
-        System.out.println(StringUtils.repeat('=', 72));
-        LuceneFilter test = new LuceneFilter();
+        LuceneFilter b = new LuceneFilter();
+        b.addStartsWith("auditBizKey", "sequence test");
+        b.addStartsWith("auditBizId", "463b5b42");
+        QueryTemp.go(b.toQuery());
 
-        // test.addContains("auditModuleName", "admin");
-        // test.addIn("auditDocumentName", "snapshot");
-        test.addIn("operation", "insert");
+        // ==========
 
-        System.out.println(test);
-        System.out.println(test.toQuery());
-
-        QueryTemp.go(test.toQuery());
+        LuceneFilter a = new LuceneFilter();
+        a.addStartsWith("auditBizKey", "sequence TEST");
+        a.addStartsWith("auditBizId", "463b5b42");
+        QueryTemp.go(a.toQuery());
     }
 }
