@@ -35,6 +35,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -185,8 +186,8 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
 
                     props.put(binding, rowCount);
                 }
-                // TODO can we even support the other aggregate types
             } else {
+                // TODO can we even support the other aggregate types, possibly not
                 logger.warn("Aggregate function {} not supported by {}", getSummary(), this);
             }
         }
@@ -238,7 +239,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
               .forEach(putStringField);
 
         String dateStr = luceneDoc.get(Audit.timestampPropertyName);
-        props.put(Audit.timestampPropertyName, AuditDocumentConverter.stringToDate(dateStr));
+        props.put(Audit.timestampPropertyName, new Timestamp(AuditDocumentConverter.stringToDate(dateStr)));
 
         return new DynamicBean("admin", "Audit", props);
     }
@@ -256,6 +257,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
 
         for (ScoreDoc score : resultSubset) {
 
+            logger.trace("Reading stored fields for doc {}", score.doc);
             Document doc = ireader.storedFields()
                                   .document(score.doc);
 

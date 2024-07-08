@@ -153,6 +153,8 @@ public class ArchiveRetriever {
 
     private String readLine(Path filePath, long offset) throws IOException {
 
+        logger.trace("Retrieving line from {} at {}", filePath, offset);
+
         try (RandomAccessFile raf = new RandomAccessFile(filePath.toFile(), READ_ONLY)) {
             raf.seek(offset);
             return raf.readLine();
