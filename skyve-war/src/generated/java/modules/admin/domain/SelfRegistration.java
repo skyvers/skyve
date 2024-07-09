@@ -353,7 +353,7 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isShowCloudflareTurnstile() {
-		return (org.skyve.impl.util.UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null);
+		return (org.skyve.impl.util.UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
 	}
 
 	/**
@@ -372,7 +372,7 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isShowGoogleRecaptcha() {
-		return (org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null);
+		return (org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null);
 	}
 
 	/**

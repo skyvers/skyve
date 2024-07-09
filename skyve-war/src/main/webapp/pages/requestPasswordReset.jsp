@@ -26,8 +26,15 @@
 	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
 	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null || UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
 	String siteKey = null;
+	boolean googleRecaptchaUsed = false;
+	boolean cloudflareTurnstileUsed = false;
 	if(recaptchaSet){
 		siteKey = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null ? UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY : UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
+		if(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null){
+			googleRecaptchaUsed = true;
+		}else{
+			cloudflareTurnstileUsed = true;
+		}
 	}
 	
 	boolean postback = (emailValue != null) && (captcha != null);
@@ -118,7 +125,11 @@
 			});
 			-->
 		</script>
-		<script src='https://www.google.com/recaptcha/api.js'></script>
+		<% if (googleRecaptchaUsed) { %>
+			<script src='https://www.google.com/recaptcha/api.js'></script>
+		<% } else if(cloudflareTurnstileUsed) {%>
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+		<% } %>
 	</head>
 	<body>
 		<div class="ui middle aligned center aligned grid">

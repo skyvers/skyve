@@ -66,7 +66,7 @@
             <description>Whether to show google recaptcha.</description>
             <expression>
                 <![CDATA[
-					org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null
+					org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null
 				]]>
             </expression>
         </condition>
@@ -74,7 +74,7 @@
             <description>Whether to show cloudflare turnstile.</description>
             <expression>
                 <![CDATA[
-					org.skyve.impl.util.UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null
+					org.skyve.impl.util.UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null
 				]]>
             </expression>
         </condition>
