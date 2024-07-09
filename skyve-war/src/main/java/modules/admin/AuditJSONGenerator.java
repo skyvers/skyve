@@ -48,7 +48,7 @@ public class AuditJSONGenerator extends BeanVisitor {
 			// Is audited and is not a relation
 			if (attribute.isAudited() && (! (attribute instanceof Relation))) {
 				String name = attribute.getName();
-				node.put(name, BindUtil.getSerialized(customer, bean, name));
+				node.put(name, BindUtil.get(bean, name));
 			}
 		}
 
