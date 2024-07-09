@@ -7,6 +7,7 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.Generic;
 import modules.admin.domain.ReportTemplate;
 
 public class AddUserToEmail implements ServerSideAction<ReportTemplate> {
@@ -22,6 +23,12 @@ public class AddUserToEmail implements ServerSideAction<ReportTemplate> {
 		}
 
 		bean.getUsersToEmail().add(bean.getNewUserToEmail());
+
+		Generic g = Generic.newInstance();
+		g.setId1(bean.getNewUserToEmail().getBizId());
+		g.setText5001(bean.getNewUserToEmail().getContact().getEmail1());
+		bean.getEditUsersToEmail().add(g);
+
 		bean.setNewUserToEmail(null);
 
 		return new ServerSideActionResult<>(bean);
