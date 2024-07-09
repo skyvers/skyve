@@ -8,46 +8,29 @@ import static org.apache.lucene.search.WildcardQuery.WILDCARD_CHAR;
 import static org.apache.lucene.search.WildcardQuery.WILDCARD_ESCAPE;
 import static org.apache.lucene.search.WildcardQuery.WILDCARD_STRING;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanQuery.Builder;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
-import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TermInSetQuery;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.WildcardQuery;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.types.Decimal;
 import org.skyve.metadata.view.model.list.Filter;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Stopwatch;
 
 public class LuceneFilter implements Filter {
 
@@ -524,100 +507,4 @@ public class LuceneFilter implements Filter {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * FIXME Temporary testing stuff, delete this
-     */
-    public static class QueryTemp {
-
-        public static void go(Query query) throws IOException, ParseException {
-
-            Stopwatch t = Stopwatch.createStarted();
-
-            // try (Directory directory = FSDirectory.open(Path.of("C:\\data\\lucene-test-data\\audit-index-01"));
-            try (Directory directory = FSDirectory.open(Path.of("C:\\data\\skyve-content\\skyve\\archive\\index"));
-                    DirectoryReader ireader = DirectoryReader.open(directory)) {
-
-                IndexSearcher isearcher = new IndexSearcher(ireader);
-
-                queryAndLog(ireader, isearcher, query);
-
-                System.out.println("\ndone, took " + t);
-            }
-
-        }
-
-        private static void queryAndLog(DirectoryReader ireader, IndexSearcher isearcher, Query query)
-                throws IOException, ParseException {
-
-            hr("");
-            System.out.println("Using Query: " + query);
-            System.out.println();
-
-            SortField sortTimestamp = new SortField("timestamp", Type.STRING);
-            TopDocs td = isearcher.search(query, 5, new Sort(sortTimestamp));
-
-            String howManyMsg = td.totalHits + " [" + StringUtils.repeat('#', (int) td.totalHits.value) + "]";
-
-            for (ScoreDoc score : td.scoreDocs) {
-
-                Document doc = ireader.storedFields()
-                                      .document(score.doc);
-
-                System.out.println();
-
-                hr("Doc num: " + score.doc + "; score: " + score.score);
-                printSomeDetails(doc);
-                hr("");
-            }
-
-            System.out.println();
-            System.out.println(query);
-            System.out.println(howManyMsg);
-        }
-
-        private static final Set<String> SHOW = Set.of("auditBizKey", "auditBizId", "timestamp");
-
-        private static void printSomeDetails(Document doc) throws ParseException {
-
-            for (IndexableField field : doc) {
-
-                if (!SHOW.contains(field.name()))
-                    continue;
-
-                String name = StringUtils.leftPad(field.name(), 18);
-                String val = field.stringValue();
-
-                if ("timestamp".equals(field.name())) {
-                    val = DateTools.stringToDate(val) + " [" + val + "]";
-                }
-
-                System.out.printf("# %s: %s %n", name, val);
-            }
-
-        }
-
-        private static void hr(String label) {
-            if (label.isBlank()) {
-                System.out.println(StringUtils.repeat('=', 70));
-            } else {
-                String s = "== " + StringUtils.rightPad(label + " ", 67, '=');
-                System.out.println(s);
-            }
-        }
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        LuceneFilter b = new LuceneFilter();
-        b.addStartsWith("auditBizKey", "sequence test");
-        b.addStartsWith("auditBizId", "463b5b42");
-        QueryTemp.go(b.toQuery());
-
-        // ==========
-
-        LuceneFilter a = new LuceneFilter();
-        a.addStartsWith("auditBizKey", "sequence TEST");
-        a.addStartsWith("auditBizId", "463b5b42");
-        QueryTemp.go(a.toQuery());
-    }
 }
