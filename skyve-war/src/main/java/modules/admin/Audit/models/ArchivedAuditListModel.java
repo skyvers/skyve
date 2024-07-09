@@ -7,10 +7,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
@@ -24,12 +24,12 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.skyve.domain.Bean;
@@ -144,10 +144,9 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
     public Page fetch() throws Exception {
 
         logger.debug("Executing fetch, filter={}, start={}, end={}", filter, getStartRow(), getEndRow());
-        Query query = filter.toQuery();
 
         try {
-            Result<Bean> queryResults = executeQuery(query);
+            Result queryResults = executeQuery();
 
             Page p = new Page();
             p.setTotalRows(queryResults.totalRowCount());
@@ -187,7 +186,8 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
                     props.put(binding, rowCount);
                 }
             } else {
-                // TODO can we even support the other aggregate types, possibly not
+                // We probably can't support the other aggregations, and
+                // they don't really make sense for the Audit list model
                 logger.warn("Aggregate function {} not supported by {}", getSummary(), this);
             }
         }
@@ -195,82 +195,30 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         return new DynamicBean("admin", "Audit", props);
     }
 
-    private Result<Bean> executeQuery(Query query) throws IOException {
+    private Result executeQuery() throws IOException {
 
         Stopwatch t = Stopwatch.createStarted();
 
-        Path auditArchiveIndexPath = IndexArchivesJob.getIndexPath();
-        logger.debug("Using index at {}", auditArchiveIndexPath);
-        try (Directory directory = FSDirectory.open(auditArchiveIndexPath);
-                DirectoryReader ireader = DirectoryReader.open(directory)) {
+        List<Bean> rows = new ArrayList<>(getEndRow() - getStartRow());
 
-            IndexSearcher isearcher = new IndexSearcher(ireader);
-            Result<Document> queryResults = doQuery(ireader, isearcher, query);
+        try (LuceneResultsIterable lri = this.new LuceneResultsIterable(getStartRow(), getEndRow())) {
 
-            List<Bean> convertedResults = queryResults.rows()
-                                                      .stream()
-                                                      .map(this::convertToBean)
-                                                      .filter(Objects::nonNull)
-                                                      .collect(toCollection(ArrayList::new));
-            logger.debug("Got {} results of {}; took {}", convertedResults.size(), queryResults.totalRowCount, t);
+            TotalHits hits = lri.totalHits();
 
-            return new Result<>(convertedResults, queryResults.totalRowCount);
+            lri.iterator()
+               .forEachRemaining(rows::add);
+
+            logger.debug("Got {} results of {}; took {}", rows.size(), lri.totalHits(), t);
+
+            return new Result(rows, hits.value);
         }
-    }
-
-    private DynamicBean convertToBean(Document luceneDoc) {
-
-        Map<String, Object> props = new HashMap<>();
-        // TODO this should probably live adjacent to or in AuditDocumentConverter
-
-        Consumer<String> putStringField = binding -> {
-            props.put(binding, luceneDoc.get(binding));
-        };
-
-        Stream.of(
-                Bean.DOCUMENT_ID,
-                Audit.userNamePropertyName,
-                Bean.USER_ID,
-                Audit.operationPropertyName,
-                Audit.auditModuleNamePropertyName,
-                Audit.auditDocumentNamePropertyName,
-                Audit.auditBizIdPropertyName,
-                Audit.auditBizKeyPropertyName)
-              .forEach(putStringField);
-
-        String dateStr = luceneDoc.get(Audit.timestampPropertyName);
-        props.put(Audit.timestampPropertyName, new Timestamp(AuditDocumentConverter.stringToDate(dateStr)));
-
-        return new DynamicBean("admin", "Audit", props);
-    }
-
-    private Result<Document> doQuery(DirectoryReader ireader, IndexSearcher isearcher, Query query) throws IOException {
-
-        int maxResults = getEndRow();
-        TopDocs td = isearcher.search(query, maxResults, getSort());
-
-        // Slice out only the page being requested
-        ScoreDoc[] resultSubset = ArrayUtils.subarray(td.scoreDocs, getStartRow(), getEndRow());
-
-        List<Document> results = new ArrayList<>(getEndRow() - getStartRow());
-        Result<Document> r = new Result<>(results, td.totalHits.value);
-
-        for (ScoreDoc score : resultSubset) {
-
-            logger.trace("Reading stored fields for doc {}", score.doc);
-            Document doc = ireader.storedFields()
-                                  .document(score.doc);
-
-            results.add(doc);
-        }
-
-        return r;
     }
 
     private Sort getSort() {
 
         SortParameter[] params = getSortParameters();
         if (params == null || params.length == 0) {
+            logger.debug("No sorting defined, using {}", Sort.RELEVANCE);
             return Sort.RELEVANCE;
         }
 
@@ -292,13 +240,13 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         return new Sort(sortFields.toArray(new SortField[0]));
     }
 
-    private static record Result<U>(List<U> rows, long totalRowCount) {
+    private static record Result(List<Bean> rows, long totalRowCount) {
     }
 
     @Override
     public AutoClosingIterable<Bean> iterate() throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+
+        return this.new LuceneResultsIterable(0, Integer.MAX_VALUE);
     }
 
     @Override
@@ -311,4 +259,123 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * NB Not a static class, accesses state from outer class (filter, sort)
+     */
+    private class LuceneResultsIterable implements AutoClosingIterable<Bean> {
+
+        private final Logger lriLogger = LogManager.getLogger();
+
+        private int readNextRowIdx = 0;
+        private final ScoreDoc[] scoreDocs;
+        private final DirectoryReader dirReader;
+        private final Directory directory;
+        private TopDocs topDocs;
+
+        public LuceneResultsIterable(int startRow, int endRow) throws IOException {
+
+            // open index
+            Path auditArchiveIndexPath = IndexArchivesJob.getIndexPath();
+            lriLogger.debug("Using index at {}", auditArchiveIndexPath);
+            directory = FSDirectory.open(auditArchiveIndexPath);
+            dirReader = DirectoryReader.open(directory);
+
+            IndexSearcher isearcher = new IndexSearcher(dirReader);
+
+            // execute query
+            lriLogger.debug("Executing filter {}", filter);
+            topDocs = isearcher.search(filter.toQuery(), endRow, getSort());
+
+            // set aside scoredocs
+            ScoreDoc[] allScoreDocs = topDocs.scoreDocs;
+            scoreDocs = ArrayUtils.subarray(allScoreDocs, startRow, endRow);
+            lriLogger.debug("Got {} results, retained {}", allScoreDocs.length, scoreDocs.length);
+        }
+
+        /**
+         * Iterator is not resettable, calling a 2nd time will break.
+         * 
+         * @return
+         */
+        @Override
+        public Iterator<Bean> iterator() {
+            return this.new LuceneResultsIterator();
+        }
+
+        @Override
+        public void close() {
+            // close index & directory
+            tryClose(dirReader);
+            tryClose(directory);
+        }
+
+        private void tryClose(AutoCloseable ac) {
+
+            try {
+                ac.close();
+            } catch (Exception e) {
+                lriLogger.atWarn()
+                         .withThrowable(e)
+                         .log("Could not close {}", ac);
+            }
+        }
+
+        public TotalHits totalHits() {
+            return topDocs.totalHits;
+        }
+
+        /**
+         * NB not a static class
+         */
+        private class LuceneResultsIterator implements Iterator<Bean> {
+
+            @Override
+            public boolean hasNext() {
+                return readNextRowIdx < scoreDocs.length;
+            }
+
+            @Override
+            public Bean next() {
+                int docId = scoreDocs[readNextRowIdx].doc;
+                ++readNextRowIdx;
+
+                try {
+                    Document doc = dirReader.storedFields()
+                                            .document(docId);
+                    return convertToBean(doc);
+                } catch (IOException ioe) {
+                    throw new RuntimeException("Unable to retrieve doc #" + docId, ioe);
+                }
+            }
+
+            private DynamicBean convertToBean(Document luceneDoc) {
+                // Maybe this should live adjacent to or in AuditDocumentConverter
+
+                Map<String, Object> props = new HashMap<>();
+
+                Consumer<String> putStringField = binding -> {
+                    props.put(binding, luceneDoc.get(binding));
+                };
+
+                Stream.of(
+                        Bean.DOCUMENT_ID,
+                        Audit.userNamePropertyName,
+                        Bean.USER_ID,
+                        Audit.operationPropertyName,
+                        Audit.auditModuleNamePropertyName,
+                        Audit.auditDocumentNamePropertyName,
+                        Audit.auditBizIdPropertyName,
+                        Audit.auditBizKeyPropertyName)
+                      .forEach(putStringField);
+
+                String dateStr = luceneDoc.get(Audit.timestampPropertyName);
+                props.put(Audit.timestampPropertyName, new Timestamp(AuditDocumentConverter.stringToDate(dateStr)));
+
+                lriLogger.trace("Converted bean {}", props.get("auditBizKey"));
+
+                return new DynamicBean("admin", "Audit", props);
+            }
+        }
+
+    }
 }
