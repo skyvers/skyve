@@ -2484,7 +2484,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
 	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
-	 *					<iframe id="s01_iframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *					<iframe id="s01_overlayiframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 *				<p:commandButton id="s05" icon="fa-solid fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
 	 *				...
@@ -3853,7 +3853,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Add the buttons and overlay
 	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
-	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *					<iframe id="s01_overlayiframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 */
 	private UIComponent uploadButton(String title,
@@ -3915,10 +3915,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		children.add(overlay);
 
-		// <iframe id="s01_iframe" src="" style="width:100%;height:280px;border:none"></iframe>
+		// <iframe id="s01_overlayiframe" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
 		setId(iframe, null);
 		overlay.getChildren().add(iframe);
 
