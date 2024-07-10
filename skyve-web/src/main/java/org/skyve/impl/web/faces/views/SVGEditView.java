@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.views;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
@@ -50,5 +51,17 @@ public class SVGEditView extends HarnessView {
 
 	public void setHeightParameter(int heightParameter) {
 		this.heightParameter = heightParameter;
+	}
+	
+	/**
+	 * Provides the background raster image URL for the SVG-Editor.
+	 * @return
+	 */
+	public String getBackgroundUrl() {
+		StringBuilder result = new StringBuilder(64);
+		result.append(getBaseHref()).append("content?_nm&_n=").append(contentIdParameter);
+		result.append("&_doc=").append(getBizDocumentParameter());
+		result.append("&_b=").append(BindUtil.unsanitiseBinding(contentBindingParameter));
+		return result.toString();
 	}
 }

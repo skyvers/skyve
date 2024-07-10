@@ -247,7 +247,7 @@ public class ImageMarkupView extends LocalisableView {
 			try (ContentManager cm = EXT.newContentManager()) {
 				AttachmentContent content = cm.getAttachment(contentIdParameter);
 				if (content != null) {
-					moduleDocument = content.getBizModule() + '.' + content.getBizDocument();
+					moduleDocument = bizModule + '.' + bizDocument;
 					// Set the SVG if we are rendering, but if we are applying we want the SVG sent in the request
 					if (! apply) {
 						svg = content.getMarkup();
