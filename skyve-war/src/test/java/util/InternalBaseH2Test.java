@@ -10,7 +10,7 @@ import org.skyve.EXT;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
-import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -116,7 +116,7 @@ abstract class InternalBaseH2Test {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
 		UtilImpl.CONFIGURATION = new TreeMap<>();
 
-		ProvidedRepositoryFactory.set(new LocalDesignRepository());
+		ProvidedRepositoryFactory.set(new DefaultRepository());
 
 		final SuperUser user = new SuperUser();
 		user.setCustomerName(CUSTOMER);
