@@ -1573,6 +1573,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(image.getDisabledConditionName(), code);
 		invisible(image.getInvisibleConditionName(), code);
 		editable(image.getEditable(), code);
+		code.append("showMarkup:").append((! Boolean.FALSE.equals(image.getShowMarkup())) ? "true," : "false,");
 	}
 
 	@Override

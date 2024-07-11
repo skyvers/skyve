@@ -18,6 +18,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -621,6 +622,8 @@ public class StandardLoader {
 		Object sheetRowId = bizIdToSheetRowId.get(bean.getBizId());
 		sheet.moveToRow(sheetRowId);
 		if (e instanceof MessageException) {
+			UtilImpl.LOGGER.severe("An error has occurred when loading...");
+			e.printStackTrace();
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
 			for (Message em : ((MessageException) e).getMessages()) {
@@ -628,6 +631,8 @@ public class StandardLoader {
 			}
 		}
 		else {
+			UtilImpl.LOGGER.severe("An error has occurred when loading...");
+			e.printStackTrace();
 			sheet.addErrorAtCurrentRow(problems, column, e.getMessage());
 		}
 	}

@@ -74,7 +74,7 @@ public class ExportReportSpecifications extends DownloadAction<ReportManagerExte
 	@Override
 	public Download download(ReportManagerExtension bean, WebContext webContext) throws Exception {
 
-		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), ReportManagerExtension.getZipName(), webContext);
+		Download download = FileUtil.prepareZipDownload(bean.getPathToZip(), ReportManagerExtension.getZipName());
 
 		ReportManagerExtension.cleanUpTemporaryFiles();
 

@@ -18,8 +18,11 @@ import com.cronutils.parser.CronParser;
 
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
+import modules.admin.UserProxy.UserProxyExtension;
+import modules.admin.domain.Generic;
 import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
+import modules.admin.domain.UserProxy;
 
 public class ReportTemplateExtension extends ReportTemplate {
 	private static final long serialVersionUID = -7147172221052954971L;
@@ -165,5 +168,32 @@ public class ReportTemplateExtension extends ReportTemplate {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Creates a {@link Generic} for each persistent user in the <code>usersToEmail</code>
+	 * collection so that it can be manipulated in the view.
+	 */
+	public void restoreScheduledUsers() {
+		for (UserProxy u : getUsersToEmail()) {
+			Generic g = Generic.newInstance();
+			g.setId1(u.getBizId());
+			g.setText5001(u.getContact().getEmail1());
+			getEditUsersToEmail().add(g);
+		}
+	}
+
+	/**
+	 * Stores a persistent {@link UserProxy} association for each Generic in the
+	 * <code>editUsersToEmail</code> collection.
+	 */
+	public void updateScheduledUsers() {
+		// clear the existing persistent collection
+		getUsersToEmail().clear();
+
+		for (Generic g : getEditUsersToEmail()) {
+			UserProxyExtension u = CORE.getPersistence().retrieve(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME, g.getId1());
+			getUsersToEmail().add(u);
+		}
 	}
 }

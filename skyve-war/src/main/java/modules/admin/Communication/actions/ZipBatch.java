@@ -21,6 +21,6 @@ public class ZipBatch extends DownloadAction<Communication> {
 		String batchPath = bean.getBasePath() + File.separator + bean.getSelectedBatchTimestampFolderName();
 		String zipName = FileUtil.constructSafeFilePath("", bean.getSelectedBatchTimestampFolderName() , ".zip", false, bean.getDescription()+ "_");
 		
-		return FileUtil.prepareZipDownload(batchPath, zipName, webContext);
+		return FileUtil.prepareZipDownload(batchPath, zipName);
 	}
 }

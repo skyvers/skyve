@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -272,7 +273,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Customer customer = CORE.getUser().getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
-		Attribute transientAttribute = null;
+		Attribute transientOrViewAttribute = null;
 
 		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes(customer));
 
@@ -305,15 +306,21 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 				continue;
 			}
 
+			// try not to use a view attribute if we can
+			if (attribute.getUsage() == UsageType.view) {
+				transientOrViewAttribute = attribute;
+				continue;
+			}
+
 			// try use a persistent attribute if we can
 			if (!attribute.isPersistent()) {
-				transientAttribute = attribute;
+				transientOrViewAttribute = attribute;
 				continue;
 			}
 
 			return attribute;
 		}
 
-		return transientAttribute != null ? transientAttribute : null;
+		return transientOrViewAttribute != null ? transientOrViewAttribute : null;
 	}
 }

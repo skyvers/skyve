@@ -40,6 +40,7 @@ import org.skyve.util.Util;
  * @navhas n runAs 0..1 UserProxy
  * @navhas n usersToEmail 0..n UserProxy
  * @navcomposed 1 datasets 0..n ReportDataset
+ * @navhas n editUsersToEmail 0..n Generic
  * @navcomposed 1 parameters 0..n ReportParameter
  * @navhas n newUserToEmail 0..1 UserProxy
  * @stereotype "persistent"
@@ -377,6 +378,9 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 
 	/** @hidden */
 	public static final String newUserToEmailPropertyName = "newUserToEmail";
+
+	/** @hidden */
+	public static final String editUsersToEmailPropertyName = "editUsersToEmail";
 
 	/**
 	 * Report Type
@@ -884,6 +888,8 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 
 	/**
 	 * Users to Email
+	 * <br/>
+	 * The collection of users that will be recipients of this report.
 	 **/
 	private List<UserProxyExtension> usersToEmail = new ChangeTrackingArrayList<>("usersToEmail", this);
 
@@ -1326,6 +1332,14 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * New Recipient
 	 **/
 	private UserProxyExtension newUserToEmail = null;
+
+	/**
+	 * Users to Email
+	 * <br/>
+	 * The collection of recipients shown in the view so users have permission to 
+				remove. Modifies the underlying usersToEmail persistent collection.
+	 **/
+	private List<Generic> editUsersToEmail = new ChangeTrackingArrayList<>("editUsersToEmail", this);
 
 	@Override
 	@XmlTransient
@@ -3418,6 +3432,66 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 		if (this.newUserToEmail != newUserToEmail) {
 			this.newUserToEmail = newUserToEmail;
 		}
+	}
+
+	/**
+	 * {@link #editUsersToEmail} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<Generic> getEditUsersToEmail() {
+		return editUsersToEmail;
+	}
+
+	/**
+	 * {@link #editUsersToEmail} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public Generic getEditUsersToEmailElementById(String bizId) {
+		return getElementById(editUsersToEmail, bizId);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setEditUsersToEmailElementById(String bizId, Generic element) {
+		setElementById(editUsersToEmail, element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addEditUsersToEmailElement(Generic element) {
+		return editUsersToEmail.add(element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addEditUsersToEmailElement(int index, Generic element) {
+		editUsersToEmail.add(index, element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeEditUsersToEmailElement(Generic element) {
+		return editUsersToEmail.remove(element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public Generic removeEditUsersToEmailElement(int index) {
+		return editUsersToEmail.remove(index);
 	}
 
 	/**

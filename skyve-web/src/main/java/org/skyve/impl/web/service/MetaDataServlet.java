@@ -1573,6 +1573,10 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"contentImage\"");
 				processInputWidget(image);
 				processEditable(image);
+				Boolean showMarkup = image.getShowMarkup();
+				if (showMarkup != null) {
+					result.append(",\"showMarkup\":").append(showMarkup);
+				}
 				processSize(image);
 				processDecorated(image);
 				result.append('}');

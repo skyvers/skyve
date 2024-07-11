@@ -24,32 +24,50 @@ SKYVE.PF = function() {
 		},
 		
 		contentOverlayOnShow: function(id, url) {
-			SKYVE.PF.getById(id + '_iframe').attr('src', url);
+			SKYVE.PF.getById(id + '_overlayiframe').attr('src', url);
 		},
 		
 		contentOverlayOnHide: function(id) {
-			SKYVE.PF.getById(id + '_iframe').attr('src','')
+			SKYVE.PF.getById(id + '_overlayiframe').attr('src','')
 		},
 		
 		afterContentUpload: function(binding, contentId, modoc, fileName) {
 			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
-			top.$('[id$="_' + binding + '"]').val(contentId);
+			top.$('[id$="_' + binding + '_hidden"]').val(contentId);
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
 			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName).attr('onclick', 'return true');
 			top.$('[id$="_' + binding + '_image"]').attr('src', url);
 			top.PF(binding + 'Overlay').hide();
 		},
-		
+
 		clearContentImage: function(binding) {
-			$('[id$="_' + binding + '"]').val('');
+			$('[id$="_' + binding + '_hidden"]').val('');
 			$('[id$="_' + binding + '_image"]').attr('src','images/blank.gif');
 		},
 		
 		clearContentLink: function(binding) {
-			$('[id$="_' + binding + '"]').val('');
+			$('[id$="_' + binding + '_hidden"]').val('');
 			$('[id$="_' + binding + '_link"]').attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false');
 		},
-		
+
+		contentMarkupOnShow: function(id, binding, url) {
+			var finalUrl = url += '&_id=' + $('[id$="_' + binding + '_hidden"]').val();
+			SKYVE.PF.getById(id + '_markupiframe').attr('src', finalUrl);
+		},
+
+		contentMarkupOnHide: function(id) {
+			SKYVE.PF.getById(id + '_markupiframe').attr('src','')
+		},
+
+		afterMarkupApply: function(binding, contentId, modoc, fileName) {
+			// Cannot use window.parent here to support nested frames as the script is called from eval server side which is executed at the top window context.
+			top.$('[id$="_' + binding + '_hidden"]').val(contentId);
+			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + binding.replace(/\_/g, '.');
+			top.$('[id$="_' + binding + '_link"]').attr('href', url).text(fileName).attr('onclick', 'return true');
+			top.$('[id$="_' + binding + '_image"]').attr('src', url);
+			top.PF(binding + 'Markup').hide();
+		},
+
 		tabChange: function(moduleName, documentName, id, index) {
 			sessionStorage['tab_' + moduleName + '_' + documentName + '_' + id] = index;
 			if (SKYVE.BizMap) {

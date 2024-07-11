@@ -277,7 +277,7 @@ public class RestoreJob extends CancellableJob {
 				UtilImpl.LOGGER.info(trace);
 				File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.agnosticIdentifier + ".csv");
 				if (! backupFile.exists()) {
-					trace = "        ***** File " + backupFile.getAbsolutePath() + File.separator + table.agnosticIdentifier + ".csv does not exist";
+					trace = "        ***** File " + backupFile.getAbsolutePath() + " does not exist";
 					log.add(trace);
 					System.err.println(trace);
 					continue;
