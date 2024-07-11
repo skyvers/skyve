@@ -154,50 +154,44 @@
 		    		<form method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 			    		<div class="ui segment">
 
-				    		<div class="ui header">
-				    			<%=Util.i18n("page.requestPasswordReset.banner", locale)%>
-				    		</div>
+			    		<div class="ui header">
+			    			<%=Util.i18n("page.requestPasswordReset.banner", locale)%>
+			    		</div>
 
-							<% if (recaptchaSet) { %>
-				    			<div class="field">
-									<%=Util.i18n("page.requestPasswordReset.message", locale)%>
-				    			</div>
-								<% if (customer == null) { %>
-									<div class="field">
-										<div class="ui left icon input">
-											<i class="building icon"></i>
-											<input type="text" id="customer" name="customer" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.customer.label", locale)%>">
-										</div>
-									</div>
-								<% } %>
+			    			<div class="field">
+								<%=Util.i18n("page.requestPasswordReset.message", locale)%>
+			    			</div>
+							<% if (customer == null) { %>
 								<div class="field">
-				                    <div class="ui left icon input">
-				                        <i class="user icon"></i>
-				                        <input type="text" name="email" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.requestPasswordReset.email.label", locale)%>">
-				                        <% if (customer != null) { %>
-											<input type="hidden" name="customer" value="<%=customer%>" />
-										<% } %>
-				                    </div>
-				                </div>
-	
-				                <div class="field">
-				                	<!-- A table to brute force the captcha to centre as it is an iframe -->
-									<table>
-										<tr>
-											<td style="width:50%" />
-											<td>
-												<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
-											</td>
-											<td style="width:50%" />
-										</tr>
-									</table>
-				                </div>
-			                	<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" class="ui fluid large blue submit button" />
-			                <% } else { %>
-				                <div class="field">
-			                		<%=Util.i18n("page.resetPassword.recaptchaNotConfiguredMessage", locale)%>
-				                </div>
-			                <% } %>
+									<div class="ui left icon input">
+										<i class="building icon"></i>
+										<input type="text" id="customer" name="customer" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.login.customer.label", locale)%>">
+									</div>
+								</div>
+							<% } %>
+							<div class="field">
+			                    <div class="ui left icon input">
+			                        <i class="user icon"></i>
+			                        <input type="text" name="email" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.requestPasswordReset.email.label", locale)%>">
+			                        <% if (customer != null) { %>
+										<input type="hidden" name="customer" value="<%=customer%>" />
+									<% } %>
+			                    </div>
+			                </div>
+
+			                <div class="field">
+			                	<!-- A table to brute force the captcha to centre as it is an iframe -->
+								<table>
+									<tr>
+										<td style="width:50%" />
+										<td>
+											<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
+										</td>
+										<td style="width:50%" />
+									</tr>
+								</table>
+			                </div>
+		                	<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" class="ui fluid large blue submit button" />
 			                
 			                <div style="margin-top: 5px;">
 			                	<% if (UtilImpl.CUSTOMER == null) { %>
