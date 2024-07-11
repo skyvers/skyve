@@ -1,6 +1,7 @@
 package modules.admin.Configuration;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.ValidationUtil;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -158,6 +160,8 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 				bean.setTwoFactorType(TwoFactorType.off);
 			}
 		} else if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
+			// validate
+			ValidationUtil.validateBeanAgainstBizlet(new StartupBizlet(), bean.getStartup());
 			bean.getStartup().saveConfiguration();
 		}
 
@@ -211,6 +215,21 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			if (bean.getTwofactorPushCodeTimeOutSeconds() == null) {
 				// default to 5 minutes
 				bean.setTwofactorPushCodeTimeOutSeconds(Integer.valueOf(5 * 60));
+			}
+		}
+		// Use key values found in the json file so that the user can easily switch between different captcha types
+		if(Binder.createCompoundBinding(Configuration.startupPropertyName, Startup.captchaTypePropertyName).equals(source)) {
+			StartupExtension startup = bean.getStartup();
+			Map<String, Object> properties = new HashMap<>(UtilImpl.OVERRIDE_CONFIGURATION);
+			startup.clearApi(properties);
+			Map<String, Object> configuration = UtilImpl.CONFIGURATION;
+			@SuppressWarnings("unchecked")
+			Map<String, Object> api = (Map<String, Object>) configuration.get("api");
+			if(api != null) {
+				startup.setApiGoogleRecaptchaSiteKey((String) api.get("googleRecaptchaSiteKey"));
+				startup.setApiGoogleRecaptchaSecretKey((String) api.get("googleRecaptchaSecretKey"));
+				startup.setApiCloudflareTurnstileSiteKey((String) api.get("cloudflareTurnstileSiteKey"));
+				startup.setApiCloudflareTurnstileSecretKey((String) api.get("cloudflareTurnstileSecretKey"));
 			}
 		}
 

@@ -545,4 +545,25 @@ public class StartupExtension extends Startup {
 			}
 		}
 	}
+	
+	/**
+	 * This method is used to clear any api values in the json override file found in the content folder
+	 * @param properties
+	 * @throws IOException
+	 */
+	public void clearApi(Map<String, Object> properties) throws IOException {
+		// initialise or get the existing property map
+		@SuppressWarnings("unchecked")
+		Map<String, Object> api = (Map<String, Object>) properties.get(StartupExtension.API_STANZA_KEY);
+		if (api == null) {
+			api = new HashMap<>();
+			properties.put(API_STANZA_KEY, api);
+		}
+		api.clear();
+		// write the json out to the content directory
+		String json = this.marshall(properties);
+		if (StringUtils.isNotBlank(json)) {
+			this.writeConfiguration(json);
+		}
+	}
 }

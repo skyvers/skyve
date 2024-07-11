@@ -545,6 +545,8 @@ public class WebUtil {
 			recaptchaSecretKey = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY;
 		}else if (UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null) {
 			recaptchaSecretKey = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+			//Because turnstile secret key is necessary set valid to false in case it's null		
+			valid = false;
 		}
 		
 		if (recaptchaSecretKey != null) {
