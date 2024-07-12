@@ -69,6 +69,28 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 						"Backup directory name cannot be more than 63 characters"));
 			}
 		}
+		if(bean.getCaptchaType() != null) {
+			switch(bean.getCaptchaType()) {
+				case googleRecaptcha:
+					if(bean.getApiGoogleRecaptchaSiteKey() == null) {
+						e.getMessages().add(new Message(Startup.apiGoogleRecaptchaSiteKeyPropertyName,
+								"Site Key cannot be null if using Google Recaptcha"));
+					}
+					break;
+				case cloudflareTurnstile:
+					if(bean.getApiCloudflareTurnstileSiteKey() == null) {
+						e.getMessages().add(new Message(Startup.apiCloudflareTurnstileSiteKeyPropertyName,
+								"Site Key cannot be null if using Cloudflare Turnstile"));
+					}
+					if(bean.getApiCloudflareTurnstileSecretKey() == null) {
+						e.getMessages().add(new Message(Startup.apiCloudflareTurnstileSecretKeyPropertyName,
+								"Secret Key cannot be null if using Cloudflare Turnstile"));
+					}
+					break;
+				default:
+					break;
+			}
+		}
 
 		super.validate(bean, e);
 	}

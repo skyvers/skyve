@@ -538,38 +538,55 @@ public class WebUtil {
 	 */
 	public static boolean validateRecaptcha(String response) {
 		boolean valid = true;
-
-		if (UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
+		String recaptchaSecretKey = null;
+		
+		// Use either google recaptcha or cloudflare turnstile secret key
+		if(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
+			recaptchaSecretKey = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY;
+		}else if (UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null) {
+			recaptchaSecretKey = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+			//Because turnstile secret key is necessary set valid to false in case it's null		
+			valid = false;
+		}
+		
+		if (recaptchaSecretKey != null) {
 			valid = false;
 			
 			try {
-				URL url = new URL("https://www.google.com/recaptcha/api/siteverify");
-				URLConnection connection = url.openConnection();
-				connection.setDoInput(true);
-				connection.setDoOutput(true);
-				connection.setUseCaches(false);
-				connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-	
-				// Create the post body with the required parameters
-				StringBuilder postBody = new StringBuilder();
-				postBody.append("secret=").append(URLEncoder.encode(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, Util.UTF8));
-				postBody.append("&response=").append((response == null) ? "" : URLEncoder.encode(response, Util.UTF8));
-	
-				try (OutputStream out = connection.getOutputStream()) {
-					out.write(postBody.toString().getBytes());
-					out.flush();
+				URL url = null;
+				if(recaptchaSecretKey == UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY) {
+					url = new URL("https://www.google.com/recaptcha/api/siteverify");
+				}else if(recaptchaSecretKey == UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
+					url = new URL("https://challenges.cloudflare.com/turnstile/v0/siteverify");
 				}
-	
-				try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-					StringBuilder result = new StringBuilder();
-					String line;
-					while ((line = rd.readLine()) != null) {
-						result.append(line);
+				if(url != null) {
+					URLConnection connection = url.openConnection();
+					connection.setDoInput(true);
+					connection.setDoOutput(true);
+					connection.setUseCaches(false);
+					connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		
+					// Create the post body with the required parameters
+					StringBuilder postBody = new StringBuilder();
+					postBody.append("secret=").append(URLEncoder.encode(recaptchaSecretKey, Util.UTF8));
+					postBody.append("&response=").append((response == null) ? "" : URLEncoder.encode(response, Util.UTF8));
+		
+					try (OutputStream out = connection.getOutputStream()) {
+						out.write(postBody.toString().getBytes());
+						out.flush();
 					}
-	
-					@SuppressWarnings("unchecked")
-					Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, result.toString());
-					valid = Boolean.TRUE.equals(json.get("success"));
+		
+					try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+						StringBuilder result = new StringBuilder();
+						String line;
+						while ((line = rd.readLine()) != null) {
+							result.append(line);
+						}
+		
+						@SuppressWarnings("unchecked")
+						Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, result.toString());
+						valid = Boolean.TRUE.equals(json.get("success"));
+					}
 				}
 			}
 			catch (Exception e) {

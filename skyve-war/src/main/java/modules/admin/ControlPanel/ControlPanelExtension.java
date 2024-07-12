@@ -53,6 +53,8 @@ public class ControlPanelExtension extends ControlPanel {
 	public static final String CK_EDITOR_CONFIG_FILE_URL = "ckEditorConfigFileUrl";
 	public static final String GOOGLE_RECAPTCHA_SITE_KEY = "googleRecaptchaSiteKey";
 	public static final String GOOGLE_RECAPTCHA_SECRET_KEY = "googleRecaptchaSecretKey";
+	public static final String CLOUDFLARE_TURNSTILE_SITE_KEY = "cloudflareTurnstileSiteKey";
+	public static final String CLOUDFLARE_TURNSTILE_SECRET_KEY = "cloudflareTurnstileSecretKey";
 	public static final String GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
 
 	private static final long serialVersionUID = -6204655500999983605L;
@@ -242,6 +244,8 @@ public class ControlPanelExtension extends ControlPanel {
 				"Google Maps API Key - to obtain a Google maps API Key go to https://developers.google.com/maps/documentation/javascript/get-api-key");
 		addProperty(API_STANZA_KEY + DISPLAY_DELIM + GOOGLE_RECAPTCHA_SITE_KEY, UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, "Google Recaptcha Site Key");
 		addProperty(API_STANZA_KEY + DISPLAY_DELIM + GOOGLE_RECAPTCHA_SECRET_KEY, UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, "Google Recaptcha Secret Key");
+		addProperty(API_STANZA_KEY + DISPLAY_DELIM + CLOUDFLARE_TURNSTILE_SITE_KEY, UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY, "Cloudflare Turnstile Site Key");
+		addProperty(API_STANZA_KEY + DISPLAY_DELIM + CLOUDFLARE_TURNSTILE_SECRET_KEY, UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY, "Cloudflare Turnstile Secret Key");
 		addProperty(API_STANZA_KEY + DISPLAY_DELIM + CK_EDITOR_CONFIG_FILE_URL, UtilImpl.CKEDITOR_CONFIG_FILE_URL, "CKEditor Config File URL");
 
 		@SuppressWarnings("unchecked")
@@ -249,7 +253,7 @@ public class ControlPanelExtension extends ControlPanel {
 		if (api != null) {
 			for (String k : api.keySet()) {
 				// ignore keys already loaded above
-				if (!k.equals(GOOGLE_MAPS_V3_KEY) && !k.equals(GOOGLE_RECAPTCHA_SITE_KEY) && !k.equals(CK_EDITOR_CONFIG_FILE_URL)) {
+				if (!k.equals(GOOGLE_MAPS_V3_KEY) && !k.equals(GOOGLE_RECAPTCHA_SITE_KEY) && !k.equals(CLOUDFLARE_TURNSTILE_SITE_KEY) && !k.equals(CK_EDITOR_CONFIG_FILE_URL)) {
 
 					// load this new key value - may be a string, or a hashmap
 					Object value = api.get(k);
@@ -532,6 +536,9 @@ public class ControlPanelExtension extends ControlPanel {
 				case API_STANZA_KEY + DISPLAY_DELIM + GOOGLE_RECAPTCHA_SITE_KEY:
 					UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = (String) changed.get(k);
 					break;
+				case API_STANZA_KEY + DISPLAY_DELIM + CLOUDFLARE_TURNSTILE_SITE_KEY:
+					UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = (String) changed.get(k);
+				break;
 				case API_STANZA_KEY + DISPLAY_DELIM + GOOGLE_RECAPTCHA_SECRET_KEY:
 					UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = (String) changed.get(k);
 					break;

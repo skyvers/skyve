@@ -20,6 +20,20 @@
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Locale locale = request.getLocale();
+	
+	//Captcha checking
+	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null || UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
+	boolean googleRecaptchaUsed = false;
+	boolean cloudflareTurnstileUsed = false;
+	String siteKey = null;
+	if(recaptchaSet){
+		siteKey = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null ? UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY : UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
+		if(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null){
+			googleRecaptchaUsed = true;
+		}else{
+			cloudflareTurnstileUsed = true;
+		}
+	}
 
 	String passwordChangeErrorMessage = null;
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
@@ -81,7 +95,13 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-		<script src='https://www.google.com/recaptcha/api.js'></script>
+		
+		<%-- Add script based on captcha type set --%>
+		<% if (googleRecaptchaUsed) { %>
+			<script src='https://www.google.com/recaptcha/api.js'></script>
+		<% } else if(cloudflareTurnstileUsed) {%>
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+		<% } %>
 
 		<script type="text/javascript">
 			<!--
@@ -158,7 +178,7 @@
 		                    </div>
 		                </div>
 		                <div class="field">
-							<div class="g-recaptcha" data-sitekey="<%=UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY%>"></div>
+							<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
 		                </div>
 	                	<input type="submit" value="<%=Util.i18n("page.changePassword.submit.label", locale)%>" class="ui fluid large blue submit button" />
 	                </div>
