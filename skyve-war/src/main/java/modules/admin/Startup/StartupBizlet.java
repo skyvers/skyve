@@ -74,17 +74,17 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 				case googleRecaptcha:
 					if(bean.getApiGoogleRecaptchaSiteKey() == null) {
 						e.getMessages().add(new Message(Startup.apiGoogleRecaptchaSiteKeyPropertyName,
-								"Site Key cannot be null if using google recaptcha"));
+								"Site Key cannot be null if using Google Recaptcha"));
 					}
 					break;
 				case cloudflareTurnstile:
 					if(bean.getApiCloudflareTurnstileSiteKey() == null) {
 						e.getMessages().add(new Message(Startup.apiCloudflareTurnstileSiteKeyPropertyName,
-								"Site Key cannot be null if using cloudflare turnstile"));
+								"Site Key cannot be null if using Cloudflare Turnstile"));
 					}
 					if(bean.getApiCloudflareTurnstileSecretKey() == null) {
 						e.getMessages().add(new Message(Startup.apiCloudflareTurnstileSecretKeyPropertyName,
-								"Secret Key cannot be null if using cloudflare turnstile"));
+								"Secret Key cannot be null if using Cloudflare Turnstile"));
 					}
 					break;
 				default:
