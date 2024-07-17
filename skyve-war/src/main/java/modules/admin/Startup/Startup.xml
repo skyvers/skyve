@@ -79,7 +79,7 @@
 			<description>Mail server username</description>
 			<length>200</length>
 		</text>
-		<text name="mailPassword">
+		<text name="mailPassword" audited="false" sensitivity="secret">
 			<displayName>Password</displayName>
 			<description>Mail server password</description>
 			<length>200</length>
@@ -119,7 +119,7 @@
 			<description>If using Google Maps for your map type, specify your map key here</description>
 			<length>200</length>
 		</text>
-		<text name="apiGoogleRecaptchaSiteKey">
+		<text name="apiGoogleRecaptchaSiteKey" sensitivity="secret">
 			<displayName>Google Recaptcha Site Key</displayName>
 			<description>
 				<![CDATA[
@@ -128,7 +128,7 @@
 			</description>
 			<length>200</length>
 		</text>
-		<text name="apiGoogleRecaptchaSecretKey">
+		<text name="apiGoogleRecaptchaSecretKey" audited="false" sensitivity="secret">
 			<displayName>Google Recaptcha Secret Key</displayName>
 			<description>
 				<![CDATA[
@@ -137,7 +137,7 @@
 			</description>
 			<length>200</length>
 		</text>
-		<text name="apiCloudflareTurnstileSiteKey">
+		<text name="apiCloudflareTurnstileSiteKey" sensitivity="secret">
 			<displayName>Cloudflare Turnstile Site Key</displayName>
 			<description>
 				<![CDATA[
@@ -146,7 +146,7 @@
 			</description>
 			<length>200</length>
 		</text>
-		<text name="apiCloudflareTurnstileSecretKey">
+		<text name="apiCloudflareTurnstileSecretKey" audited="false" sensitivity="secret">
 			<displayName>Cloudflare Turnstile Secret Key</displayName>
 			<description>
 				<![CDATA[
@@ -188,7 +188,7 @@
 				<value name="azure" code="org.skyve.impl.backup.AzureBlobStorageBackup" description="Azure Blob Storage" />
 			</values>
 		</enum>
-		<text name="backupConnectionString">
+		<text name="backupConnectionString" audited="false" sensitivity="secret">
 			<displayName>Connection String</displayName>
 			<description>
 				<![CDATA[
