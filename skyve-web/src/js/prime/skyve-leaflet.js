@@ -192,6 +192,7 @@ SKYVE.BizMapPicker = function() {
 			else {
 				display = {
 					_overlays: [],
+					drawingTools: options.drawingTools,
 					setFieldValue: function(wktValue) {
 			            var element = SKYVE.PF.getTextElement(elementId + '_value');
 			            element.val(wktValue);
