@@ -1071,11 +1071,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		mapDiv.setLayout("block");
 		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
 		setId(mapDiv, null);
-
-		UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		output.setValue("Loading Map...");
-		mapDiv.getChildren().add(output);
-
 		result.getChildren().add(mapDiv);
 
 		return result;

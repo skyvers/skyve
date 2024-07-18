@@ -698,8 +698,10 @@ public class FacesView extends HarnessView {
 		result.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100");
 		result.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(getWebContext().getWebId());
-		result.append("&bizId=").append(getCurrentBean().getBean().getBizId());
-		result.append("_ts=").append(System.currentTimeMillis());
+		if (viewBinding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		result.append("&_ts=").append(System.currentTimeMillis());
 		
 		return result.toString();
  	}
