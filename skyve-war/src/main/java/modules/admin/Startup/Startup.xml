@@ -119,7 +119,7 @@
 			<description>If using Google Maps for your map type, specify your map key here</description>
 			<length>200</length>
 		</text>
-		<text name="apiGoogleRecaptchaSiteKey" sensitivity="secret">
+		<text name="apiGoogleRecaptchaSiteKey" audited="false" sensitivity="secret">
 			<displayName>Google Recaptcha Site Key</displayName>
 			<description>
 				<![CDATA[
@@ -137,7 +137,7 @@
 			</description>
 			<length>200</length>
 		</text>
-		<text name="apiCloudflareTurnstileSiteKey" sensitivity="secret">
+		<text name="apiCloudflareTurnstileSiteKey" audited="false" sensitivity="secret">
 			<displayName>Cloudflare Turnstile Site Key</displayName>
 			<description>
 				<![CDATA[
