@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		dir="#{_skyveMarkup.dir}">
+    <f:view contentType="text/html" encoding="#{_skyveMarkup.encoding}">
+		<f:metadata>
+			<f:viewParam name="_id" value="#{_skyveMarkup.contentIdParameter}" />
+			<f:viewParam name="_n" value="#{_skyveMarkup.contentBindingParameter}" />
+			<f:viewParam name="_b" value="#{_skyveMarkup.bindingParameter}" />
+			<f:viewParam name="_c" value="#{_skyveMarkup.contextParameter}" />
+			<f:event type="preRenderView" listener="#{_skyveMarkup.preRender}" />
+		</f:metadata>
+		<h:head>
+			<title>#{_skyveMarkup.i18n['page.contentUpload.title']}</title>
+			<base href="#{_skyveMarkup.baseHref}" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
+			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{_skyveMarkup.webResourceFileVersion}" />
+		</h:head>
+		<h:body>
+			<p:staticMessage severity="error"
+								summary="You cannot access this function"
+								detail="Click &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;window.top.location=''&quot;&gt;here&lt;/a&gt;"
+								rendered="#{not _skyveMarkup.canAccess}"
+								escape="false"
+								style="width:100%; height:50px" />
+			<h:form id="form" prependId="false" rendered="#{_skyveMarkup.canAccess}">
+				<h:inputHidden id="svg" value="#{_skyveMarkup.svg}" />
+				<h:inputHidden id="_c" value="#{_skyveMarkup.contextParameter}" />
+				<h:inputHidden id="_b" value="#{_skyveMarkup.bindingParameter}" />
+				<h:inputHidden id="_n" value="#{_skyveMarkup.contentBindingParameter}" />
+			    <p:growl id="messages" showDetail="true" escape="false" />
+				<iframe id="svgedit"
+							src="svgedit.xhtml?_n=#{_skyveMarkup.contentIdParameter}&amp;_doc=#{_skyveMarkup.moduleDocument}&amp;_b=#{_skyveMarkup.contentBindingParameter}&amp;_w=#{_skyveMarkup.imageWidth}&amp;_h=#{_skyveMarkup.imageHeight}"
+							style="width:100%;height:calc(100vh - 45px);border:none">
+				</iframe>
+				<p:commandButton icon="fa-solid fa-pencil"
+									value="Apply" 
+									title="Apply the markup onto the image"
+									style="float:right"
+									action="#{_skyveMarkup.apply}"
+									update="@none" 
+									onstart="forms[0].svg.value = document.getElementById('svgedit').contentWindow.svgCanvas.getSvgString()" />
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

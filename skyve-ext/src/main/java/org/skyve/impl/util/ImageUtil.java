@@ -6,15 +6,19 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,14 +26,30 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.commons.io.FilenameUtils;
 import org.skyve.CORE;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import net.coobird.thumbnailator.util.exif.ExifFilterUtils;
 import net.coobird.thumbnailator.util.exif.ExifUtils;
 import net.coobird.thumbnailator.util.exif.Orientation;
@@ -52,7 +72,8 @@ public class ImageUtil {
 	 * @return	The buffered image.
 	 * @throws IOException
 	 */
-	public static final BufferedImage read(InputStream is, int subsamplingMinimumTargetSize) throws IOException {
+	public static final @Nullable BufferedImage read(@Nonnull InputStream is, int subsamplingMinimumTargetSize)
+	throws IOException {
 		BufferedImage result = null;
 		
 		try (ImageInputStream iis = ImageIO.createImageInputStream(is)) {
@@ -103,7 +124,8 @@ public class ImageUtil {
 	 * @throws IOException
 	 */
 	// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-war/src/main/java/resources/files/
-	public static byte[] svg(String fileName, int imageWidth, int imageHeight) throws IOException {
+	public static @Nonnull byte[] svg(@Nonnull String fileName, int imageWidth, int imageHeight)
+	throws IOException {
 		String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
 		Repository repository = CORE.getRepository();
 		File svgFile = null;
@@ -119,7 +141,7 @@ public class ImageUtil {
 		}
 		// Add the requested width and height to the SVG so that it can be scaled 
 		// and keep its aspect ratio in the browser <img/>.
-		String xml = FileUtil.getFileAsString(svgFile);
+		String xml = FileUtil.string(svgFile);
 		xml = String.format("<svg width=\"%dpx\" height=\"%dpx\" %s",
 								Integer.valueOf(imageWidth),
 								Integer.valueOf(imageHeight),
@@ -128,44 +150,20 @@ public class ImageUtil {
 	}
 	
 	/**
-	 * Read the bytes from an image file.
-	 * 
-	 * @param file	The file to read.
-	 * @return	the bytes.
+	 * Change a signature JSON from PrimeFaces signature component to a PNG byte array
+	 * @param json	The JSON from the Primefaces Signature component
+	 * @param width	The required width of the resulting image
+	 * @param height	The required height of the resulting image
+	 * @param rgbHexBackgroundColour	The background colour - null is transparent
+	 * @param rgbHexForegroundColour	The foreground colour - null is black
+	 * @return	The PNG as bytes
 	 * @throws IOException
 	 */
-	public static byte[] image(File file) throws IOException {
-		try (FileInputStream fis = new FileInputStream(file)) {
-			return image(fis);
-		}
-	}
-	
-	/**
-	 * Read the bytes from an image InputStream.
-	 * 
-	 * @param is	The input stream to read.
-	 * @return	the bytes.
-	 * @throws IOException
-	 */
-	public static byte[] image(InputStream is) throws IOException {
-		try (BufferedInputStream bis = new BufferedInputStream(is)) {
-			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				byte[] bytes = new byte[1024]; // 1K
-				int bytesRead = 0;
-				while ((bytesRead = bis.read(bytes)) > 0) {
-					baos.write(bytes, 0, bytesRead);
-				}
-				return baos.toByteArray();
-			}
-		}
-	}
-	
-	
-	public static byte[] signature(String json,
-									int width,
-									int height,
-									String rgbHexBackgroundColour,
-									String rgbHexForegroundColour)
+	public static @Nonnull byte[] signature(@Nonnull String json,
+												int width,
+												int height,
+												@Nullable String rgbHexBackgroundColour,
+												@Nullable String rgbHexForegroundColour)
 	throws IOException {
 		List<List<Point>> lines = new ArrayList<>();
 		Matcher lineMatcher = Pattern.compile("(\\[(?:,?\\[-?[\\d\\.]+,-?[\\d\\.]+\\])+\\])").matcher(json);
@@ -203,5 +201,111 @@ public class ImageUtil {
 			ImageIO.write(image, ImageFormat.png.toString(), output); 
 			return output.toByteArray();
 		}
+	}
+	
+	/**
+	 * Ensure SVG-Edit svg is valid by
+	 * 1) Making sure rx and ry attributes are present in ellipses. if one is missing, set it to the other.
+	 * 2) Removing ANY attribute that has a value of "null".
+	 * 
+	 * @param svg	The SVG produced by SVG-Edit
+	 * @return	The cleansed SVG
+	 * @throws Exception
+	 */
+	public static @Nonnull String cleanseSVGEdit(@Nonnull String svg) throws Exception {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(svg)));
+		cleanseNodes(doc.getChildNodes(), new TreeSet<>());
+
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		transformer.setOutputProperty(OutputKeys.INDENT, "no");
+		StreamResult result = new StreamResult(new StringWriter(svg.length()));
+		DOMSource source = new DOMSource(doc);
+		transformer.transform(source, result);
+		try (Writer w = result.getWriter()) {
+			return w.toString();
+		}
+	}
+
+	private static void cleanseNodes(@Nonnull NodeList nodes, @Nonnull Set<String> namesToRemove) {
+		// iterate backwards so we can remove unwanted nodes
+		for (int i = nodes.getLength() - 1; i >= 0; i--) {
+			Node node = nodes.item(i);
+			String localName = node.getLocalName();
+			NamedNodeMap nodeMap = node.getAttributes();
+			// Remove comment nodes
+			// NB the "Layer 1" <title/> node needs to remain for svg-edit to be able 
+			// to create editable shapes inside that layer - the <g/>
+			if ((node.getNodeType() == Node.COMMENT_NODE)) {
+				node.getParentNode().removeChild(node);
+			}
+			else {
+				if (nodeMap != null) {
+					// fix rx & ry
+					if ("ellipse".equals(localName)) {
+						Element ellipse = (Element) node;
+						String rx = Util.processStringValue(ellipse.getAttribute("rx"));
+						String ry = Util.processStringValue(ellipse.getAttribute("ry"));
+						if ((rx == null) && (ry != null)) {
+							ellipse.setAttribute("rx", ry);
+						}
+						else if ((rx != null) && (ry == null)) {
+							ellipse.setAttribute("ry", rx);
+						}
+					}
+	
+					// fix "null" nodes
+					namesToRemove.clear();
+					for (int j = 0; j < nodeMap.getLength(); j++) {
+						Node nodeAttr = nodeMap.item(j);
+						String value = nodeAttr.getTextContent();
+						if ("null".equals(value)) {
+							namesToRemove.add(nodeAttr.getLocalName());
+						}
+					}
+					for (String name : namesToRemove) {
+						nodeMap.removeNamedItem(name);
+					}
+				}
+				cleanseNodes(node.getChildNodes(), namesToRemove);
+			}
+		}
+	}
+	
+	/**
+	 * Batik Transcoder used in burnSvg().
+	 */
+	private static class BufferedImageTranscoder extends ImageTranscoder {
+		private BufferedImage image = null;
+
+		private BufferedImageTranscoder(@Nonnull BufferedImage image) {
+			this.image = image;
+		}
+
+		@Override
+		public @Nonnull BufferedImage createImage(int w, int h) {
+			return image;
+		}
+
+		@Override
+		public void writeImage(@SuppressWarnings("hiding") @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
+			this.image = image;
+		}
+	}
+
+	/**
+	 * Render the SVG given onto the background image given.
+	 * 
+	 * @param image	The background image
+	 * @param svg	The SVG markup to burn in.
+	 */
+	public static void burnSvg(@Nonnull BufferedImage image, @Nonnull String svg)
+	throws Exception {
+		BufferedImageTranscoder imageTranscoder = new BufferedImageTranscoder(image);
+
+		ByteArrayInputStream bais = new ByteArrayInputStream(svg.getBytes());
+		TranscoderInput input = new TranscoderInput(bais);
+		imageTranscoder.transcode(input, null);
 	}
 }

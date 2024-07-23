@@ -25,6 +25,7 @@ import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -46,6 +47,8 @@ import org.skyve.util.Mail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,15 +60,11 @@ public class WebUtil {
 		// Disallow instantiation.
 	}
 	
-	public static User processUserPrincipalForRequest(HttpServletRequest request,
-														String userPrincipal,
-														boolean useSession)
+	public static User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
+														@Nullable String userPrincipal)
 	throws Exception {
-		UserImpl user = null;
-		if (useSession) {
-			HttpSession session = request.getSession(false);
-			user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		}
+		HttpSession session = request.getSession(false);
+		UserImpl user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
@@ -87,11 +86,18 @@ public class WebUtil {
 				if (user == null) {
 					throw new IllegalStateException("WebUtil: Cannot get the user " + userPrincipal);
 				}
-				if (useSession) {
-					request.getSession(true).setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+				// ensure there is a session established
+				if (session == null) {
+					session = request.getSession(true);
 				}
+				setSessionId(user, request);
+				session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 				AbstractPersistence.get().setUser(user);
 				WebStatsUtil.recordLogin(user);
+				Customer customer = user.getCustomer();
+				if (customer instanceof CustomerImpl) {
+					((CustomerImpl) customer).notifyLogin(user, session);
+				}
 			}
 			// TODO hack!
 			else { // check basic auth
@@ -107,6 +113,9 @@ public class WebUtil {
 //					final String password = UtilImpl.processStringValue(values[1]);
 					// TODO check password...
 					user = ProvidedRepositoryFactory.get().retrieveUser(username);
+					if (user != null) {
+						setSessionId(user, request);
+					}
 					AbstractPersistence.get().setUser(user);
 				}				
 			}
@@ -166,6 +175,16 @@ public class WebUtil {
 		}
 		
 		return result;
+	}
+	
+	/**]
+	 * Set the session ID if it is established.
+	 */
+	public static void setSessionId(@Nonnull UserImpl user, @Nonnull HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			user.setSessionId(session.getId());
+		}
 	}
 	
 	/**
@@ -519,38 +538,55 @@ public class WebUtil {
 	 */
 	public static boolean validateRecaptcha(String response) {
 		boolean valid = true;
-
-		if (UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
+		String recaptchaSecretKey = null;
+		
+		// Use either google recaptcha or cloudflare turnstile secret key
+		if(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
+			recaptchaSecretKey = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY;
+		}else if (UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null) {
+			recaptchaSecretKey = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+			//Because turnstile secret key is necessary set valid to false in case it's null		
+			valid = false;
+		}
+		
+		if (recaptchaSecretKey != null) {
 			valid = false;
 			
 			try {
-				URL url = new URL("https://www.google.com/recaptcha/api/siteverify");
-				URLConnection connection = url.openConnection();
-				connection.setDoInput(true);
-				connection.setDoOutput(true);
-				connection.setUseCaches(false);
-				connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-	
-				// Create the post body with the required parameters
-				StringBuilder postBody = new StringBuilder();
-				postBody.append("secret=").append(URLEncoder.encode(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, Util.UTF8));
-				postBody.append("&response=").append((response == null) ? "" : URLEncoder.encode(response, Util.UTF8));
-	
-				try (OutputStream out = connection.getOutputStream()) {
-					out.write(postBody.toString().getBytes());
-					out.flush();
+				URL url = null;
+				if(recaptchaSecretKey == UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY) {
+					url = new URL("https://www.google.com/recaptcha/api/siteverify");
+				}else if(recaptchaSecretKey == UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
+					url = new URL("https://challenges.cloudflare.com/turnstile/v0/siteverify");
 				}
-	
-				try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-					StringBuilder result = new StringBuilder();
-					String line;
-					while ((line = rd.readLine()) != null) {
-						result.append(line);
+				if(url != null) {
+					URLConnection connection = url.openConnection();
+					connection.setDoInput(true);
+					connection.setDoOutput(true);
+					connection.setUseCaches(false);
+					connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		
+					// Create the post body with the required parameters
+					StringBuilder postBody = new StringBuilder();
+					postBody.append("secret=").append(URLEncoder.encode(recaptchaSecretKey, Util.UTF8));
+					postBody.append("&response=").append((response == null) ? "" : URLEncoder.encode(response, Util.UTF8));
+		
+					try (OutputStream out = connection.getOutputStream()) {
+						out.write(postBody.toString().getBytes());
+						out.flush();
 					}
-	
-					@SuppressWarnings("unchecked")
-					Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, result.toString());
-					valid = Boolean.TRUE.equals(json.get("success"));
+		
+					try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+						StringBuilder result = new StringBuilder();
+						String line;
+						while ((line = rd.readLine()) != null) {
+							result.append(line);
+						}
+		
+						@SuppressWarnings("unchecked")
+						Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, result.toString());
+						valid = Boolean.TRUE.equals(json.get("success"));
+					}
 				}
 			}
 			catch (Exception e) {

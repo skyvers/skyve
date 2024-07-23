@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,7 @@ import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.signature.Signature;
+import org.primefaces.component.slider.Slider;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
@@ -1071,11 +1074,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		mapDiv.setLayout("block");
 		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
 		setId(mapDiv, null);
-
-		UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		output.setValue("Loading Map...");
-		mapDiv.getChildren().add(output);
-
 		result.getChildren().add(mapDiv);
 
 		return result;
@@ -2229,7 +2227,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		result.setColumns(5);
+		boolean showMarkup = (! Boolean.FALSE.equals(image.getShowMarkup()));
+		result.setColumns(showMarkup ? 6 : 5);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2253,7 +2252,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								sanitisedBinding,
 								image.getDisabledConditionName(),
 								formDisabledConditionName,
-								true);
+								true,
+								showMarkup);
 		}
 
 		return result;
@@ -2294,6 +2294,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								sanitisedBinding,
 								link.getDisabledConditionName(),
 								formDisabledConditionName,
+								false,
 								false);
 		}
 
@@ -2481,7 +2482,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
 	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
-	 *					<iframe id="s01_iframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *					<iframe id="s01_overlayiframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 *				<p:commandButton id="s05" icon="fa-solid fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
 	 *				...
@@ -2496,16 +2497,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String sanitisedBinding,
 									String disabledConditionName,
 									String formDisabledConditionName,
-									boolean image) {
+									boolean image,
+									boolean showMarkup) {
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, false, null, null);
-		setId(hidden, String.format("%s_%s", id, sanitisedBinding));
+		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
 		toAddTo.add(hidden);
 
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
 		uploadButton.setIcon(Icons.FONT_UPLOAD);
-		uploadButton.setTitle("Upload Content");
+		uploadButton.setTitle(image ? "Upload Image" : "Upload Content");
 		uploadButton.setValue(null);
 		uploadButton.setType("button"); // no process or update required
 		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
@@ -2558,7 +2560,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
@@ -2578,6 +2580,50 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// for admin theme
 		setSizeAndTextAlignStyle(clearButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
 		toAddTo.add(clearButton);
+		
+		// Markup button (if required)
+		if (showMarkup) {
+			CommandButton markupButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+			setId(markupButton, null);
+			markupButton.setIcon(Icons.FONT_EDIT);
+			markupButton.setTitle("Mark Up Image");
+			markupButton.setValue(null);
+			markupButton.setType("button"); // no process or update required
+			setDisabled(markupButton, disabledConditionName, formDisabledConditionName);
+			// for admin theme
+			setSizeAndTextAlignStyle(markupButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
+			toAddTo.add(markupButton);
+	
+			var = sanitisedBinding + "Markup";
+			value.setLength(0);
+			value.append("if($('[id$=\"_").append(sanitisedBinding).append("_hidden\"]').val().length==0){return false}else{PF('" + var + "').show();PF('" + var + "').toggleMaximize()}"); 
+			markupButton.setOnclick(value.toString());
+	
+			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+			setId(dialog, null);
+			dialog.setWidgetVar(var);
+			dialog.setModal(true);
+			dialog.setResponsive(true);
+			dialog.setFitViewport(true);
+			dialog.setHeader("Mark Up Image");
+			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
+			// clear the iframe src on hide so there is no flash next open
+			dialog.setOnHide("SKYVE.PF.contentMarkupOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
+			
+			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
+			value.setLength(0);
+			value.append("#{'SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
+			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
+			dialog.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+			toAddTo.add(dialog);
+
+			// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
+			iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+			iframe.setEscape(false);
+			iframe.setValue("<iframe id=\"" + id + "_markupiframe\" src=\"\" style=\"width:100%;height:calc(100% - 10px);border:none\"></iframe>");
+			setId(iframe, null);
+			dialog.getChildren().add(iframe);
+		}
 	}
 
 	@Override
@@ -2727,6 +2773,103 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									facesConverter,
 									spinner.getPixelWidth());
 		return new EventSourceComponent(result, result);
+	}
+
+	@Override
+	public EventSourceComponent slider(EventSourceComponent component,
+											String dataWidgetVar,
+											org.skyve.impl.metadata.view.widget.bound.input.Slider slider,
+											String formDisabledConditionName,
+											String title,
+											boolean required,
+											Converter<?> facesConverter) {
+		if (component != null) {
+			return component;
+		}
+
+		boolean vertical = Boolean.TRUE.equals(slider.getVertical());
+		
+		// Table to hold it all
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		result.setColumns(vertical ? 4 : 1);
+		if (! vertical) {
+			result.setColumnClasses("center");
+			result.setStyle("width:100%");
+		}
+		List<UIComponent> toAddTo = result.getChildren();
+		
+		// Hidden component bound to data
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, slider.getBinding(), null, false, null, null);
+		toAddTo.add(hidden);
+		
+		// Display value
+		HtmlOutputText display = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		setId(display, null);
+		display.setValueExpression("value", hidden.getValueExpression("value"));
+
+		// Slider
+		Slider sliderComponent = (Slider) input(Slider.COMPONENT_TYPE,
+										dataWidgetVar,
+										slider.getBinding(),
+										title,
+										required,
+										slider.getDisabledConditionName(),
+										formDisabledConditionName);
+		sliderComponent.setFor(hidden.getId());
+		sliderComponent.setDisplay(display.getId());
+		sliderComponent.setDisplayTemplate("{value}");
+		if (vertical) {
+			sliderComponent.setType("vertical");
+		}
+		Double min = slider.getMin();
+		if (min != null) {
+			sliderComponent.setMinValue(min.doubleValue());
+		}
+		Double max = slider.getMax();
+		if (max != null) {
+			sliderComponent.setMaxValue(max.doubleValue());
+		}
+
+		// Convert discrete values and precision into steps.
+		Integer precision = slider.getRoundingPrecision();
+		Integer numberOfDiscreteValues = slider.getNumberOfDiscreteValues();
+		if ((numberOfDiscreteValues != null) && (min != null) && (max != null)) {
+			double range = max.doubleValue() - min.doubleValue();
+			double step = range / numberOfDiscreteValues.doubleValue();
+			if (precision != null) {
+				step = new BigDecimal(step).setScale(precision.intValue(), RoundingMode.HALF_UP).doubleValue();
+			}
+			sliderComponent.setStep(step);
+		}
+		else {
+			sliderComponent.setStep(1.0);
+		}
+
+		if (facesConverter != null) {
+			sliderComponent.setConverter(facesConverter);
+		}
+		// NB Text alignment set with a style class
+		setSizeAndTextAlignStyle(sliderComponent, null, null, slider.getPixelWidth(), null, null, slider.getPixelHeight(), null, null, null);
+
+		// TODO - slider.getChangedActions() - there is 1 ajax event called slide end
+		// <p:ajax event="slideEnd" listener="#{sliderBean.onSlideEnd}" update="@form" />
+		// public void onSlideEnd(SlideEndEvent event) {
+		//   int value = event.getValue();
+		// }
+
+		// Add all to table
+		toAddTo.add(sliderComponent);
+		// Add a spacer between the vertical slider and the display value
+		if (vertical) {
+			Spacer spacer = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
+			setId(spacer, null);
+			spacer.setWidth("10px");
+			toAddTo.add(spacer);
+		}
+		toAddTo.add(display);
+		
+		return new EventSourceComponent(result, sliderComponent);
 	}
 
 	@Override
@@ -3805,7 +3948,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Add the buttons and overlay
 	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
 	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
-	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *					<iframe id="s01_overlayiframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 */
 	private UIComponent uploadButton(String title,
@@ -3867,10 +4010,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		children.add(overlay);
 
-		// <iframe id="s01_iframe" src="" style="width:100%;height:280px;border:none"></iframe>
+		// <iframe id="s01_overlayiframe" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
 		setId(iframe, null);
 		overlay.getChildren().add(iframe);
 
@@ -4110,7 +4253,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setId(image, null);
 		String expression = String.format("#{%s.getContentUrl('%s', true)}", managedBeanName, binding);
 		image.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
-		image.setStyle("width:100%;height:100%;object-fit:contain;");
+		image.setStyle("width:100%;height:100%;object-fit:contain;cursor:pointer");
+		image.setOnclick("window.open(this.src, '_blank')");
 		result.getChildren().add(image);
 
 		return result;

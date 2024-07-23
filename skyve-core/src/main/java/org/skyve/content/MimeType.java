@@ -3,8 +3,11 @@ package org.skyve.content;
 import java.util.Map;
 import java.util.TreeMap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
- * 
+ * Encapsulates the main possible mime types, their content type and file suffixes
  */
 public enum MimeType {
 	access("application/x-msaccess", "mdb"),
@@ -169,63 +172,65 @@ public enum MimeType {
 		}
 	}
 	
+	// The content type of this mime type
 	private String contentType;
+	// The standard file suffix used for a file with this content
 	private String standardFileSuffix;
+	// Other file suffixes used for a file with this content
 	private String[] otherFileSuffixes;
 
 	/**
-	 * 
+	 * Constructor
 	 * @param contentType
 	 * @param standardFileSuffix
 	 * @param otherFileSuffixes
 	 */
-	private MimeType(String contentType, 
-						String standardFileSuffix,
-						String... otherFileSuffixes) {
+	private MimeType(@Nonnull String contentType, 
+						@Nonnull String standardFileSuffix,
+						@Nonnull String... otherFileSuffixes) {
 		this.contentType = contentType;
 		this.standardFileSuffix = standardFileSuffix;
 		this.otherFileSuffixes = otherFileSuffixes;
 	}
 
 	/**
-	 * 
+	 * Returns the content type.
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return contentType;
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Returns the standard file suffix
 	 */
-	public String getStandardFileSuffix() {
+	public @Nonnull String getStandardFileSuffix() {
 		return standardFileSuffix;
 	}
 
 	/**
-	 * 
-	 * @param mimeType
-	 * @return
+	 * Get the mime type for the contentType
+	 * @param contentType	The content type
+	 * @return	The mime type or null if there is no mime type for the given content type
 	 */
-	public static MimeType fromContentType(String contentType) {
+	public static @Nullable MimeType fromContentType(@Nonnull String contentType) {
 		return contentTypes.get(contentType);
 	}
 
 	/**
-	 * 
-	 * @param fileSuffix
-	 * @return
+	 * Get the mime type for the fileSuffix
+	 * @param fileSuffix	The file suffix
+	 * @return	The mime type or null if there is no mime type for the given file suffix.
 	 */
-	public static MimeType fromFileSuffix(String fileSuffix) {
+	public static @Nullable MimeType fromFileSuffix(@Nonnull String fileSuffix) {
 		return fileExtensions.get(fileSuffix);
 	}
 
 	/**
 	 * Returns the Mime Type of the file, depending on the extension of the filename
-	 * @return 
+	 * @return 	The mime type of the file or null if no mime type exists.
 	 */
-	public static MimeType fromFileName(String fileName) {
+	public static @Nullable MimeType fromFileName(@Nonnull String fileName) {
 		MimeType result = null;
 		
 		int dotIndex = fileName.lastIndexOf('.');

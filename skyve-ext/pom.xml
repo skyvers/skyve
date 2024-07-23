@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>9.0.0-SNAPSHOT</version>
+		<version>9.1.1</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 	
@@ -27,6 +27,12 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-jcache</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<!-- H2GIS (and H2) -->
+		<dependency>
+			<groupId>org.orbisgis</groupId>
+			<artifactId>h2gis</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -131,6 +137,18 @@
 			<artifactId>cron-utils</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- For image markup -->
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-all</artifactId>
+			<version>1.17</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-storage-blob</artifactId>
@@ -139,6 +157,7 @@
 			<!-- This is an optional dependency and will need to be included in the pom of any project that wishes to use it. -->
 			<optional>true</optional>
 		</dependency>
+		
 
 		<!-- Test dependencies -->
 		<dependency>

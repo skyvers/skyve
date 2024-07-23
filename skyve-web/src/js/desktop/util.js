@@ -438,7 +438,43 @@ isc.BizUtil.addClassMethods({
 	},
 	
 	createUploadButton: function(contentFormItem, // the item this upload button will live in
-									image) { // whether this is a contentImage or a contentLink
+									image, // whether this is a contentImage or a contentLink
+									showMarkup) { // whether the iage can be marked up
+		var menu = [{title: 'Clear',
+						icon: "icons/delete.png", 
+						click: function(event) {
+							contentFormItem.setValue(null);
+						},
+						enableIf: function(target, menu, item) {
+							return (contentFormItem.getValue() != null);
+						}
+					}];
+		if (showMarkup) {
+			menu.add({title: 'Mark Up',
+						icon: "icons/edit.png", 
+						click: function(event) {
+							var instance = contentFormItem.form._view.gather(false);
+							var url = 'imageMarkup.xhtml?_n=' + contentFormItem.name.replaceAll('_', '.') + 
+										'&_c=' + instance._c + 
+										'&_id=' + contentFormItem.getValue();
+							if (contentFormItem.form._view._b) {
+								url += '&_b=' + contentFormItem.form._view._b.replaceAll('_', '.');
+							}
+							isc.WindowStack.popup(null,
+													'Mark Up Image',
+													true,
+													[isc.HTMLPane.create({
+														contentsType: 'page',
+														contents: 'Loading Page...',
+														contentsURL: url
+													})]);
+						},
+						enableIf: function(target, menu, item) {
+							return (contentFormItem.getValue() != null);
+						}
+					});
+		}	
+										
 		return isc.BizUtil.createSplitButton(
 			'Upload', 
 			null, 
@@ -462,11 +498,7 @@ isc.BizUtil.addClassMethods({
 			},
 			'Other Options', 
 			null,
-			[{title: 'Clear', 
-				icon: "icons/delete.png",
-				click: function(event) {
-					contentFormItem.setValue(null);
-				}}]);
+			menu);
 	},
 	
 	// returns an edit view

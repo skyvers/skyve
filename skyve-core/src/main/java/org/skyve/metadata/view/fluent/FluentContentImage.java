@@ -19,6 +19,11 @@ public class FluentContentImage extends FluentInputWidget<FluentContentImage> im
 			editable(b.booleanValue());
 		}
 
+		b = image.getShowMarkup();
+		if (b != null) {
+			showMarkup(b.booleanValue());
+		}
+
 		relativeSize(image, this);
 
 		super.from(image);
@@ -27,6 +32,11 @@ public class FluentContentImage extends FluentInputWidget<FluentContentImage> im
 
 	public FluentContentImage editable(boolean editable) {
 		image.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
+		return this;
+	}
+
+	public FluentContentImage showMarkup(boolean showMarkup) {
+		image.setShowMarkup(showMarkup ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 

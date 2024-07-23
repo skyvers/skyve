@@ -230,6 +230,10 @@ public class LuceneContentManager extends FileSystemContentManager {
 			if (bytes != null) {
 				document.add(new StoredField(ATTACHMENT, bytes));
 			}
+			String markup = attachment.getMarkup();
+			if (markup != null) {
+				document.add(new StoredField(MARKUP, markup));
+			}
 		}
 		
 		putIndex(document, attachment);
@@ -322,6 +326,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 			if (bytes == null) {
 				return null;
 			}
+			String markup = document.get(MARKUP);
 			
 			AttachmentContent result = new AttachmentContent(bizCustomer,
 																bizModule,
@@ -332,7 +337,8 @@ public class LuceneContentManager extends FileSystemContentManager {
 																binding,
 																fileName,
 																mimeType,
-																bytes);
+																bytes,
+																markup);
 			result.setLastModified(lastModified);
 			result.setContentType(contentType);
 			result.setContentId(contentId);

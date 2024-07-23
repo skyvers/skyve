@@ -54,9 +54,14 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	 * This is called from a Skyve EL expression within the recaptcha blurb in the edit view.
 	 * @return	The site key.
 	 */
-	@SuppressWarnings("static-method")
 	public String getSiteKey() {
-		return UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
+		if(isShowGoogleRecaptcha()) {
+			return UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
+		}else if(isShowCloudflareTurnstile()) {
+			return UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
+		}else {
+			return null;
+		}
 	}
 
 	/**

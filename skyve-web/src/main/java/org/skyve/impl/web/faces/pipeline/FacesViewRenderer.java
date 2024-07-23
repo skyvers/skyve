@@ -2090,16 +2090,31 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private void renderSlider(int formColspan, Slider slider) {
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
+		Converter<?> converter = null;
+		if (attribute instanceof ConvertableField) {
+			converter = ((ConvertableField) attribute).getConverter();
+		}
+
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
-		UIComponentBase c = (UIComponentBase) cb.label(null, "slider"); // TODO slider
-		eventSource = c;
+		Form currentForm = getCurrentForm();
+		EventSourceComponent c = cb.slider(null,
+												dataWidgetVar,
+												slider,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required,
+												convertConverter(converter, type));
+		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
 						required,
 						slider.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
-						c,
+						c.getComponent(),
 						slider.getPixelWidth(),
 						null,
 						null,

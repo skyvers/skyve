@@ -56,7 +56,7 @@ public class FluentCustomer {
 
 		// Populate Observers
 		for (ObserverMetaData observer : customer.getObservers()) {
-			addInterceptor(observer.getClassName());
+			addObserver(observer.getClassName());
 		}
 
 		// Populate Chart Processors

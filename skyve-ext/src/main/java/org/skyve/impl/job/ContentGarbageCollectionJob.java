@@ -16,7 +16,6 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.backup.ContentChecker;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -24,6 +23,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
@@ -124,13 +124,11 @@ public class ContentGarbageCollectionJob implements Job {
 
 								// If dynamic look in ADM_DynamicEntity, otherwise look in the persistent identifier
 								if (dynamic) {
-									sql.append("select 1 from ").append(RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME);
-									sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
+									persistentIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
 								}
-								else {
-									sql.append("select 1 from ").append(persistentIdentifier);
-									sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
-								}
+
+								sql.append("select 1 from ").append(persistentIdentifier);
+								sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
 								
 								// check if we have a record
 								if (result.isAttachment()) { // attachment
@@ -161,7 +159,7 @@ public class ContentGarbageCollectionJob implements Job {
 								if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());
 								if (query.scalarResults(Integer.class).isEmpty()) {
 									if (result.isAttachment()) {
-										String bogusContentReference = contentChecker.bogusContentReference(contentId);
+										String bogusContentReference = contentChecker.bogusContentReference(contentId, customer);
 										if (bogusContentReference == null) {
 											orphanedAttachmentContentIds.add(contentId);
 											UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId " + contentId + "/" + bizId);

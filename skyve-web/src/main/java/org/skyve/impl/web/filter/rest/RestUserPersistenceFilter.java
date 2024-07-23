@@ -5,11 +5,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.logging.Level;
 
-import org.skyve.CORE;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
 import jakarta.servlet.FilterChain;
@@ -81,9 +82,10 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 			persistence.evictAllCached();
 			persistence.begin();
 
-			User user = CORE.getRepository().retrieveUser(persistenceUser);
+			UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(persistenceUser);
 			if (user != null) {
 				Util.LOGGER.fine("Setting persistence user to: " + persistenceUser);
+				WebUtil.setSessionId(user, httpRequest);
 				persistence.setUser(user);
 				Util.LOGGER.fine(
 						String.format("RestUserPersistenceFilter persistence injection took: %S",

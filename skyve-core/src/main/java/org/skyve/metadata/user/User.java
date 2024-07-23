@@ -7,10 +7,12 @@ import java.util.Set;
 import org.skyve.domain.messages.AccessException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * 
@@ -20,8 +22,16 @@ public interface User extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	String getId();
-	void setId(String id);
+	@Nonnull String getId();
+	void setId(@Nonnull String id);
+	
+	/**
+	 * Get the session ID of the session this user is in.
+	 * This can be used for customising per user session in tandem with an {#{@link Observer}.
+	 * It is used by the session scoped meta-data implementation as a key.
+	 * @return	The session ID.
+	 */
+	@Nullable String getSessionId();
 	
 	String getLanguageTag();
 	

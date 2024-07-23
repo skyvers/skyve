@@ -628,7 +628,24 @@ public class FacesView extends HarnessView {
 		}
 		return result.toString();
 	}
-	
+
+	/**
+	 * Most of the URL for launching the markup editor in a dialog (with a iframe)
+	 * This is setup in TabularComponentBuilder.
+	 * An _id=<contentId> is added to this url from the client-side.
+	 */
+	// /skyve/imageMarkup.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
+	public String getContentMarkupUrl(String sanitisedBinding) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl()).append("/imageMarkup.xhtml?");
+		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
+		if (viewBinding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		return result.toString();
+	}
+
 	// /skyve/fileUpload.xhtml?_a=<actionName>&_c=<webId>
 	public String getFileUploadUrl(String actionName) {
 		StringBuilder result = new StringBuilder(128);
@@ -681,8 +698,10 @@ public class FacesView extends HarnessView {
 		result.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100");
 		result.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(getWebContext().getWebId());
-		result.append("&bizId=").append(getCurrentBean().getBean().getBizId());
-		result.append("_ts=").append(System.currentTimeMillis());
+		if (viewBinding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		result.append("&_ts=").append(System.currentTimeMillis());
 		
 		return result.toString();
  	}

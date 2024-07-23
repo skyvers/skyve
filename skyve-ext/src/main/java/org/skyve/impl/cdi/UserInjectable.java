@@ -38,6 +38,11 @@ public class UserInjectable implements User {
 	}
 
 	@Override
+	public String getSessionId() {
+		return CORE.getUser().getSessionId();
+	}
+
+	@Override
 	public String getLanguageTag() {
 		return CORE.getUser().getLanguageTag();
 	}

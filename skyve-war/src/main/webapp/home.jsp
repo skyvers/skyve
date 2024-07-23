@@ -154,7 +154,7 @@
 			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
 				persistence.begin();
-				user = WebUtil.processUserPrincipalForRequest(request, userName, true);
+				user = WebUtil.processUserPrincipalForRequest(request, userName);
 			}
 			finally {
 				if (persistence != null) {

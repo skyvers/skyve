@@ -18,6 +18,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -131,7 +132,8 @@ public class StandardLoader {
 					throw new DomainException("Spreadsheet is malformed - Collection " + collectionBinding + " does not exist in document " + key.getModuleName() + '.' + key.getDocumentName());
 				}
 				Document owningDocument = target.getDocument();
-				Document elementDocument = module.getDocument(customer, collection.getDocumentName());
+				Module owningModule = customer.getModule(owningDocument.getOwningModuleName());
+				Document elementDocument = owningModule.getDocument(customer, collection.getDocumentName());
 				populateCollectionFromSheet(collectionBinding,
 												owningDocument, 
 												elementDocument, 
@@ -195,34 +197,35 @@ public class StandardLoader {
 																@Nonnull BizPortSheet sheet) 
 	throws Exception {
 		T result = getBeanForRow(persistence, user, document, sheet);
-
-		for (Attribute attribute : document.getAllAttributes(user.getCustomer())) {
-			if (! (attribute instanceof Relation)) {
-				String binding = attribute.getName();
-				// Ignore bizId, owner id and element id, bizKey columns
-				if (Bean.DOCUMENT_ID.equals(binding) ||
-						PersistentBean.OWNER_COLUMN_NAME.equals(binding) ||
-						PersistentBean.ELEMENT_COLUMN_NAME.equals(binding) ||
-						Bean.BIZ_KEY.equals(binding)) {
-					continue;
-				}
-
-				BizPortColumn column = sheet.getColumn(binding);
-				if (column != null) { // column exists
-					BindUtil.convertAndSet(result, 
-											binding, 
-											sheet.getValue(binding, 
-															attribute.getAttributeType(), 
-															problems));
-				}
-				else {
-					sheet.addWarningAtCurrentRow(problems, 
-													column, 
-													"Column with binding " + binding + " does not exist in the " + sheet.getTitle() + " sheet. Check the template you started with and copy the missing column back in.");
+		if (result != null) { // a real non-empty row
+			for (Attribute attribute : document.getAllAttributes(user.getCustomer())) {
+				if (! (attribute instanceof Relation)) {
+					String binding = attribute.getName();
+					// Ignore bizId, owner id and element id, bizKey columns
+					if (Bean.DOCUMENT_ID.equals(binding) ||
+							PersistentBean.OWNER_COLUMN_NAME.equals(binding) ||
+							PersistentBean.ELEMENT_COLUMN_NAME.equals(binding) ||
+							Bean.BIZ_KEY.equals(binding)) {
+						continue;
+					}
+	
+					BizPortColumn column = sheet.getColumn(binding);
+					if (column != null) { // column exists
+						BindUtil.convertAndSet(result, 
+												binding, 
+												sheet.getValue(binding, 
+																attribute.getAttributeType(), 
+																problems));
+					}
+					else {
+						sheet.addWarningAtCurrentRow(problems, 
+														column, 
+														"Column with binding " + binding + " does not exist in the " + sheet.getTitle() + " sheet. Check the template you started with and copy the missing column back in.");
+					}
 				}
 			}
 		}
-
+		
 		return result;
 	}
 	
@@ -237,10 +240,10 @@ public class StandardLoader {
 	 * @param user	The currently logged in user
 	 * @param document	The document of the bean
 	 * @param sheet	The sheet we are processing
-	 * @return	The bean.
+	 * @return	The bean or null if the row is empty
 	 * @throws Exception
 	 */
-	protected @Nonnull <T extends Bean> T getBeanForRow(@Nonnull Persistence persistence, 
+	protected @Nullable <T extends Bean> T getBeanForRow(@Nonnull Persistence persistence, 
 															@Nonnull User user,
 															@Nonnull Document document,
 															@Nonnull BizPortSheet sheet)
@@ -249,20 +252,20 @@ public class StandardLoader {
 		
 		// Find the bizId column in the sheet
 		BizPortColumn idColumn = sheet.getColumn(Bean.DOCUMENT_ID);
-		String sheetRowId = null;
 		if (idColumn == null) { // no ID column
 			result = document.newInstance(user);
 		}
 		else {
-			sheetRowId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
-			// find the bean by sheetRowId (assuming its a bizId of a persisted entity)
-			try {
-				result = persistence.retrieveAndLock(document, sheetRowId);
-			} 
-			catch (@SuppressWarnings("unused") Exception e) { // could not be retrieved, must be new
-				result = document.newInstance(user);
+			String sheetRowId = sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
+			if (sheetRowId != null) { // not an empty row
+				// find the bean by sheetRowId (assuming its a bizId of a persisted entity)
+				result = persistence.retrieve(document, sheetRowId);
+				if (result == null) {
+					result = document.newInstance(user);
+				}
 			}
 		}
+
 		return result;
 	}
 
@@ -619,6 +622,8 @@ public class StandardLoader {
 		Object sheetRowId = bizIdToSheetRowId.get(bean.getBizId());
 		sheet.moveToRow(sheetRowId);
 		if (e instanceof MessageException) {
+			UtilImpl.LOGGER.severe("An error has occurred when loading...");
+			e.printStackTrace();
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
 			for (Message em : ((MessageException) e).getMessages()) {
@@ -626,6 +631,8 @@ public class StandardLoader {
 			}
 		}
 		else {
+			UtilImpl.LOGGER.severe("An error has occurred when loading...");
+			e.printStackTrace();
 			sheet.addErrorAtCurrentRow(problems, column, e.getMessage());
 		}
 	}

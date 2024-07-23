@@ -41,7 +41,6 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -746,45 +745,6 @@ public final class BindUtil {
 
 			throw new DomainException(e);
 		}
-		return result;
-	}
-
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public static @Nullable Object getSerialized(@Nonnull Customer customer,
-													@Nonnull Bean bean,
-													@Nonnull String binding) {
-		Object result = null;
-		try {
-			result = BindUtil.get(bean, binding);
-			String documentName = bean.getBizDocument();
-			if (documentName != null) {
-				Module module = customer.getModule(bean.getBizModule());
-				Document document = module.getDocument(customer, documentName);
-				try {
-					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-					Attribute attribute = target.getAttribute();
-					if (attribute instanceof ConvertableField) {
-						Converter<?> converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
-						if (converter != null) {
-							Format format = converter.getFormat();
-							if (format != null) {
-								result = format.toDisplayValue(result);
-							}
-						}
-					}
-				}
-				catch (@SuppressWarnings("unused") MetaDataException e) {
-					// The binding may be a column alias with no metadata, so do nothing when this occurs
-				}
-			}
-		}
-		catch (Exception e) {
-			if (e instanceof SkyveException) {
-				throw (SkyveException) e;
-			}
-			throw new DomainException(e);
-		}
-		
 		return result;
 	}
 

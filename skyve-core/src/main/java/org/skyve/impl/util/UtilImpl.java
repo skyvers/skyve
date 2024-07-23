@@ -72,8 +72,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "52";
-	public static final String SKYVE_VERSION = "9.0.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "55";
+	public static final String SKYVE_VERSION = "9.1.1";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -266,6 +266,8 @@ public class UtilImpl {
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SECRET_KEY = null;
+	public static String CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+	public static String CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
 	public static String CKEDITOR_CONFIG_FILE_URL = "";
 
 	// null = prod, could be dev, test, uat or another arbitrary environment

@@ -281,7 +281,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			Persistent basePersistent = baseDocument.getPersistent();
 			boolean baseMapped = (basePersistent == null) ? false : ExtensionStrategy.mapped.equals(basePersistent.getStrategy());
 
-			if ((persistent.getName() == null) && (! mapped)) {
+			String persistentIdentifier = persistent.getPersistentIdentifier();
+			if ((persistentIdentifier == null) && (! mapped)) {
 				throw new MetaDataException("Document " + document.getName() + " cannot be transient when it is extending document " + baseDocument.getName());
 			}
 			if ((basePersistent == null) || (basePersistent.getName() == null)) {
@@ -298,10 +299,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					baseUnmappedPersistent = (baseUnmappedDocument == null) ? null : baseUnmappedDocument.getPersistent();
 				}
 				if ((baseUnmappedDocument != null) &&
-						(persistent.getName() != null) &&
-						persistent.getPersistentIdentifier().equals((baseUnmappedPersistent == null) ? 
-																		null : 
-																		baseUnmappedPersistent.getPersistentIdentifier())) {
+						(persistentIdentifier != null) &&
+						persistentIdentifier.equals((baseUnmappedPersistent == null) ? 
+														null : 
+														baseUnmappedPersistent.getPersistentIdentifier())) {
 					throw new MetaDataException("Document " + document.getName() + " extends document " +
 													baseUnmappedDocument.getName() + " with a strategy of " + strategy +
 													" but the persistent identifiers are the same.");
@@ -315,8 +316,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					baseUnmappedPersistent = (baseUnmappedDocument == null) ? null : baseUnmappedDocument.getPersistent();
 				}
 				if ((baseUnmappedDocument != null) &&
-						(persistent.getName() != null) &&
-						(! persistent.getPersistentIdentifier().equals((baseUnmappedPersistent == null) ? null : baseUnmappedPersistent.getPersistentIdentifier()))) {
+						(persistentIdentifier != null) &&
+						(! persistentIdentifier.equals((baseUnmappedPersistent == null) ? 
+															null : 
+															baseUnmappedPersistent.getPersistentIdentifier()))) {
 					throw new MetaDataException("Document " + document.getName() + " extends document " +
 													baseUnmappedDocument.getName() + " with a strategy of " + strategy +
 													" but the persistent identifiers are different.");
