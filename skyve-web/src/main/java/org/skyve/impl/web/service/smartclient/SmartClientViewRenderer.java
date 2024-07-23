@@ -1821,7 +1821,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		Integer numberOfDiscreteValues = slider.getNumberOfDiscreteValues();
 		if (numberOfDiscreteValues != null) {
-			code.append("numValues:").append(numberOfDiscreteValues).append(',');
+			code.append("numValues:").append(numberOfDiscreteValues.intValue() + 1).append(',');
 		}
 		Integer roundingPrecision = slider.getRoundingPrecision();
 		if ((roundingPrecision != null) && (roundingPrecision.intValue() != 0)) {

@@ -34,6 +34,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
@@ -794,6 +795,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, required, textAlignment, facesConverter);
+		}
+		return result;
+	}
+
+	@Override
+	public EventSourceComponent slider(EventSourceComponent component,
+											String dataWidgetVar,
+											Slider slider,
+											String formDisabledConditionName,
+											String title,
+											boolean required,
+											jakarta.faces.convert.Converter<?> facesConverter) {
+		EventSourceComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.slider(result, dataWidgetVar, slider, formDisabledConditionName, title, required, facesConverter);
 		}
 		return result;
 	}

@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,7 @@ import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.signature.Signature;
+import org.primefaces.component.slider.Slider;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
@@ -2770,6 +2773,103 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									facesConverter,
 									spinner.getPixelWidth());
 		return new EventSourceComponent(result, result);
+	}
+
+	@Override
+	public EventSourceComponent slider(EventSourceComponent component,
+											String dataWidgetVar,
+											org.skyve.impl.metadata.view.widget.bound.input.Slider slider,
+											String formDisabledConditionName,
+											String title,
+											boolean required,
+											Converter<?> facesConverter) {
+		if (component != null) {
+			return component;
+		}
+
+		boolean vertical = Boolean.TRUE.equals(slider.getVertical());
+		
+		// Table to hold it all
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		result.setColumns(vertical ? 4 : 1);
+		if (! vertical) {
+			result.setColumnClasses("center");
+			result.setStyle("width:100%");
+		}
+		List<UIComponent> toAddTo = result.getChildren();
+		
+		// Hidden component bound to data
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, slider.getBinding(), null, false, null, null);
+		toAddTo.add(hidden);
+		
+		// Display value
+		HtmlOutputText display = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		setId(display, null);
+		display.setValueExpression("value", hidden.getValueExpression("value"));
+
+		// Slider
+		Slider sliderComponent = (Slider) input(Slider.COMPONENT_TYPE,
+										dataWidgetVar,
+										slider.getBinding(),
+										title,
+										required,
+										slider.getDisabledConditionName(),
+										formDisabledConditionName);
+		sliderComponent.setFor(hidden.getId());
+		sliderComponent.setDisplay(display.getId());
+		sliderComponent.setDisplayTemplate("{value}");
+		if (vertical) {
+			sliderComponent.setType("vertical");
+		}
+		Double min = slider.getMin();
+		if (min != null) {
+			sliderComponent.setMinValue(min.doubleValue());
+		}
+		Double max = slider.getMax();
+		if (max != null) {
+			sliderComponent.setMaxValue(max.doubleValue());
+		}
+
+		// Convert discrete values and precision into steps.
+		Integer precision = slider.getRoundingPrecision();
+		Integer numberOfDiscreteValues = slider.getNumberOfDiscreteValues();
+		if ((numberOfDiscreteValues != null) && (min != null) && (max != null)) {
+			double range = max.doubleValue() - min.doubleValue();
+			double step = range / numberOfDiscreteValues.doubleValue();
+			if (precision != null) {
+				step = new BigDecimal(step).setScale(precision.intValue(), RoundingMode.HALF_UP).doubleValue();
+			}
+			sliderComponent.setStep(step);
+		}
+		else {
+			sliderComponent.setStep(1.0);
+		}
+
+		if (facesConverter != null) {
+			sliderComponent.setConverter(facesConverter);
+		}
+		// NB Text alignment set with a style class
+		setSizeAndTextAlignStyle(sliderComponent, null, null, slider.getPixelWidth(), null, null, slider.getPixelHeight(), null, null, null);
+
+		// TODO - slider.getChangedActions() - there is 1 ajax event called slide end
+		// <p:ajax event="slideEnd" listener="#{sliderBean.onSlideEnd}" update="@form" />
+		// public void onSlideEnd(SlideEndEvent event) {
+		//   int value = event.getValue();
+		// }
+
+		// Add all to table
+		toAddTo.add(sliderComponent);
+		// Add a spacer between the vertical slider and the display value
+		if (vertical) {
+			Spacer spacer = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
+			setId(spacer, null);
+			spacer.setWidth("10px");
+			toAddTo.add(spacer);
+		}
+		toAddTo.add(display);
+		
+		return new EventSourceComponent(result, sliderComponent);
 	}
 
 	@Override
