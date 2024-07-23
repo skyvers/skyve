@@ -1,12 +1,12 @@
 package org.skyve.impl.domain.types.jaxb;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.skyve.domain.messages.DomainException;
+
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "string")
 //@XmlJavaTypeAdapter(GeometryMapper.class)

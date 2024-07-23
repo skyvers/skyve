@@ -187,12 +187,15 @@ public class Util {
 			char ch = sequence.charAt(i);
 			if (ch <= 0x7F) {
 				count++;
-			} else if (ch <= 0x7FF) {
+			}
+			else if (ch <= 0x7FF) {
 				count += 2;
-			} else if (Character.isHighSurrogate(ch)) {
+			}
+			else if (Character.isHighSurrogate(ch)) {
 				count += 4;
 				++i;
-			} else {
+			}
+			else {
 				count += 3;
 			}
 		}
@@ -281,11 +284,15 @@ public class Util {
 		return ((UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS);
 	}
 
-	private static Boolean secureUrl = null;
+	private static volatile Boolean secureUrl = null;
 	
 	public static boolean isSecureUrl() {
 		if (secureUrl == null) {
-			secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://"));
+			synchronized (Util.class) {
+				if (secureUrl == null) {
+					secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://"));
+				}
+			}
 		}
 		return secureUrl.booleanValue();
 	}
@@ -485,5 +492,4 @@ public class Util {
     public static String getContentAnchorWithImageUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, int width, int height) {
     	return getContentAnchorUrl(bizModule, bizDocument, binding, contentId, targetNewWindow, getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
-
 }

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Audit"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Audit" />
+	<singularAlias>Audit</singularAlias>
+	<pluralAlias>Audits</pluralAlias>
+	<audited>false</audited>
+	<iconStyleClass>fa fa-check</iconStyleClass>
+	<bizKey expression="{operation} by {userName} at {timestamp}" />
+	<attributes>
+		<text name="auditModuleName" required="true">
+			<displayName>admin.audit.auditModuleName.displayName</displayName>
+			<length>128</length>
+		</text>
+		<text name="auditDocumentName" required="true">
+			<displayName>admin.audit.auditDocumentName.displayName</displayName>
+			<length>128</length>
+		</text>
+		<id name="auditBizId" required="true">
+			<displayName>admin.audit.auditBizId.displayName</displayName>
+			<index>database</index>
+		</id>
+		<text name="auditBizKey" required="true">
+			<displayName>admin.audit.auditBizKey.displayName</displayName>
+			<length>1024</length>
+		</text>
+		<enum name="operation" required="true">
+			<displayName>admin.audit.operation.displayName</displayName>
+			<values>
+				<value code="I" description="Insert" />
+				<value code="U" description="Update" />
+				<value code="D" description="Delete" />
+			</values>
+		</enum>
+		<timestamp name="timestamp" required="true">
+			<displayName>admin.audit.timestamp.displayName</displayName>
+		</timestamp>
+		<longInteger name="millis" required="true">
+			<displayName>admin.audit.millis.displayName</displayName>
+			<index>database</index>
+		</longInteger>
+		<text name="userName" required="true">
+			<displayName>admin.audit.userName.displayName</displayName>
+			<length>254</length>
+		</text>
+		<memo name="auditDetail" required="true">
+			<displayName>admin.audit.auditDetail.displayName</displayName>
+			<index>none</index>
+		</memo>
+		<!-- The following are used to drive the edit view -->
+		<association name="sourceVersion" type="aggregation" persistent="false" required="true">
+			<displayName>admin.audit.association.sourceVersion.displayName</displayName>
+			<domain>dynamic</domain>
+			<documentName>Audit</documentName>
+		</association>
+		<association name="comparisonVersion" type="aggregation" persistent="false">
+			<displayName>admin.audit.association.comparisonVersion.displayName</displayName>
+			<domain>dynamic</domain>
+			<documentName>Audit</documentName>
+		</association>
+		<association name="me" type="aggregation" persistent="false">
+			<displayName>admin.audit.association.me.displayName</displayName>
+			<documentName>Audit</documentName>
+		</association>
+	</attributes>
+</document>

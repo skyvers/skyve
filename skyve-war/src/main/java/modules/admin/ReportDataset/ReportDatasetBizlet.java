@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.util.BeanValidator;
@@ -19,6 +21,24 @@ import modules.admin.domain.ReportDataset;
 import modules.admin.domain.ReportTemplate;
 
 public class ReportDatasetBizlet extends Bizlet<ReportDatasetExtension> {
+
+	@Override
+	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+		if (ReportDataset.datasetTypePropertyName.equals(attributeName)) {
+			// SQL datasets are not available in multi-tenant applications
+			List<DomainValue> domainValues = new ArrayList<>();
+			for (DatasetType type : DatasetType.values()) {
+				if (type == DatasetType.SQL && UtilImpl.CUSTOMER == null) {
+					// don't show the SQL dataset type for multitenant applications
+					continue;
+				}
+				domainValues.add(type.toDomainValue());
+			}
+			return domainValues;
+		}
+
+		return super.getVariantDomainValues(attributeName);
+	}
 
 	@Override
 	public ReportDatasetExtension preExecute(ImplicitActionName actionName, ReportDatasetExtension bean, Bean parentBean,

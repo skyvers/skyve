@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit"
+		title="admin.group.edit.title"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<tabPane>
+		<tab title="admin.group.edit.groupDetails.tabTitle">
+			<vbox >
+				<component name="_groupCreator"/>
+			</vbox>
+		</tab>
+		<tab title="admin.group.edit.usersInGroup.tabTitle">
+			<listGrid title="Users In Group"
+						query="qUsersInGroup"
+						continueConversation="false"
+						showAdd="false"
+						showEdit="false"
+						showRemove="false"
+						percentageWidth="50"
+						responsiveWidth="12">
+				<parameter name="bizId" valueBinding="bizId" />
+			</listGrid>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+	</actions>
+</view>

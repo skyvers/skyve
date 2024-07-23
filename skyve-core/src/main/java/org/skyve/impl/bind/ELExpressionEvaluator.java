@@ -11,11 +11,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.el.ELManager;
-import javax.el.ELProcessor;
-
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
@@ -33,6 +28,11 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.el.ELManager;
+import jakarta.el.ELProcessor;
 
 public class ELExpressionEvaluator extends ExpressionEvaluator {
 	public static final String EL_PREFIX = "el";

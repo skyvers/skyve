@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,25 +9,28 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.el.ValueExpression;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIData;
-import javax.faces.component.UIInput;
-import javax.faces.component.visit.VisitCallback;
-import javax.faces.component.visit.VisitContext;
-import javax.faces.component.visit.VisitResult;
-import javax.faces.context.FacesContext;
-
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.omnifaces.config.WebXml;
 import org.primefaces.component.datatable.DataTable;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+
+import jakarta.el.ValueExpression;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.application.FacesMessage.Severity;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIData;
+import jakarta.faces.component.UIInput;
+import jakarta.faces.component.visit.VisitCallback;
+import jakarta.faces.component.visit.VisitContext;
+import jakarta.faces.component.visit.VisitResult;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Faces Action provides standard exception handling for Faces processing that
@@ -54,6 +58,16 @@ public abstract class FacesAction<T> {
 		}
 		// Allow security problems out so they are redirected to the error page
 		catch (SecurityException e) {
+			ExternalContext ec = fc.getExternalContext();
+			if (FacesUtil.isAjax((HttpServletRequest) ec.getRequest())) {
+				try {
+					String errorPageLocation = WebXml.instance().findErrorPageLocation(e);
+					ec.redirect(Util.getSkyveContextUrl() + errorPageLocation);
+				}
+				catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
+			}
 			persistence.setRollbackOnly();
 			throw e;
 		}

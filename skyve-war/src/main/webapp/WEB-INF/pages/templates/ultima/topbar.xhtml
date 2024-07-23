@@ -39,7 +39,7 @@
 									data-p-styleclass="{ selector: '@next', enterClass: 'hidden', enterActiveClass: 'overlay-enter', leaveToClass: 'hidden', leaveActiveClass: 'overlay-leave', hideOnOutsideClick: true }">
 								<span style="font-size:1.5em;" class="topbar-icon">#{user.name}</span>
 								<p:spacer width="10px" />
-								<i style="font-size:1em;" class="topbar-icon fa fa-angle-down"></i>
+								<i style="font-size:1em;" class="topbar-icon fa-solid fa-angle-down"></i>
 							</a>
 							<ul class="layout-topbar-action-panel shadow-6 hidden">
 								<c:if test="#{showSwitchMode}">
@@ -57,7 +57,7 @@
 															styleClass="flex flex-row align-items-center gap-2"
 															data-p-ripple="true"
 															data-p-styleclass-hide="true">
-												<i class="fa fa-retweet"></i>
+												<i class="fa-solid fa-retweet"></i>
 												<span>Switch Mode</span>
 											</p:commandLink>
 										</h:form>
@@ -66,7 +66,7 @@
 								<c:if test="#{showLogout}">
 									<li class="layout-topbar-action-item">
 										<a href="loggedOut" class="flex flex-row align-items-center gap-2" data-p-ripple="true" data-p-styleclass-hide="true">
-											<i class="fa fa-power-off"></i>
+											<i class="fa-solid fa-power-off"></i>
 											<span>Logout</span>
 										</a>
 									</li>

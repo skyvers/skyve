@@ -3,11 +3,6 @@ package org.skyve.impl.web.spring;
 import java.io.IOException;
 import java.util.Base64;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
@@ -22,6 +17,11 @@ import org.springframework.security.web.authentication.NullRememberMeServices;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Processes a HTTP request's BASIC authorization headers, putting the result into the
@@ -83,7 +83,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 								+ username + "'");
 			}
 
-			if (authenticationIsRequired(username)) {
+			if (authenticationRequired(username)) {
 				UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
 						username, tokens[1]);
 				authRequest.setDetails(
@@ -148,7 +148,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 		// THIS IS THE ONLY REAL CHANGE TO THE BASE CLASS
 	}
 
-	private static boolean authenticationIsRequired(String username) {
+	private static boolean authenticationRequired(String username) {
 		Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
 		if (existingAuth == null || ! existingAuth.isAuthenticated()) {
 			return true;

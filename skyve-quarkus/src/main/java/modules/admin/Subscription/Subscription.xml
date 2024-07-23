@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Subscription" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+		A subscription Preference models the receiver's preference about how they wish to receive the communication type (or not).
+
+		If the subscription is declined, the format type is not required. If the format type is supplied, then the communication
+		is only declined for that format.
+		
+		If the subscription is not declined, the format type is required, as this specifies the format preference for the communication.		
+		
+		If the subscription is not declined and has no formatType, the subscription can be deleted as it holds no value.
+		
+		Subscriptions are user-scoped - The assumption is that it is up to the user whether they wish to 
+		accept or decline receiving communications and in what manner they are delivered.
+		]]>
+	</documentation>
+	<persistent name="ADM_Subscription" />
+	<singularAlias>Subscription</singularAlias>
+	<pluralAlias>Subscriptions</pluralAlias>
+	<iconStyleClass>fa fa-envelope</iconStyleClass>
+	<icon16x16RelativeFilePath>icons/document/communication16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>
+	<bizKey expression="{communication.description} for {receiverIdentifier}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.Subscription</interface>
+	</implements>
+	<attributes>
+		<association name="communication" type="aggregation" required="true">
+			<displayName>admin.subscription.association.communication.displayName</displayName>
+			<documentName>Communication</documentName>
+		</association>
+		<text name="receiverIdentifier" required="true">
+			<displayName>admin.subscription.receiverIdentifier.displayName</displayName>
+			<description>admin.subscription.receiverIdentifier.description</description>			
+			<length>254</length>
+		</text>
+		<boolean name="declined">
+			<displayName>admin.subscription.declined.displayName</displayName>
+		</boolean>
+		<text name="preferredReceiverIdentifier">
+			<displayName>admin.subscription.preferredReceiverIdentifier.displayName</displayName>
+			<description>admin.subscription.preferredReceiverIdentifier.description</description>			
+			<length>254</length>
+		</text>
+	</attributes>
+</document>

@@ -16,6 +16,8 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * 
  */
@@ -56,7 +58,7 @@ public interface Customer extends NamedMetaData, PersistentMetaData {
 	 * @param moduleName
 	 * @return
 	 */
-	public Module getModule(String moduleName);
+	public @Nonnull Module getModule(@Nonnull String moduleName);
 	
 	/**
 	 * 

@@ -1,13 +1,14 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
@@ -33,6 +34,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -158,6 +160,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * User Agent Type
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum SailUserAgentType implements Enumeration {
 		desktop("desktop", "Desktop"),
 		tablet("tablet", "Tablet"),
@@ -231,6 +234,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum SailTestStrategy implements Enumeration {
 		Assert("Assert", "Assert"),
 		Verify("Verify", "Verify"),
@@ -301,6 +305,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 * Executor
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum SailExecutor implements Enumeration {
 		primeFacesInlineSelenese("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor", "PrimeFaces Inline Selenese"),
 		primeFacesInlineWebDriver("org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor", "PrimeFaces Inline Web Driver");

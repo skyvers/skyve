@@ -1,7 +1,7 @@
 package modules.test;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -11,10 +11,12 @@ import org.skyve.metadata.view.View;
 import modules.test.domain.AllAttributesPersistent;
 
 public class CustomerOverrideTests extends AbstractSkyveTest {
+
 	@Test
 	@SuppressWarnings("static-method")
 	public void testCustomerOverridesExist() throws Exception {
 		Customer customer = CORE.getRepository().getCustomer("test");
+		Assert.assertNotNull(customer);
 		Module module = customer.getModule("test");
 		Assert.assertNotNull(module.getRole("TestRole"));
 		Document document = module.getDocument(customer, AllAttributesPersistent.DOCUMENT_NAME);

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="admin.configuration.edit.title"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<tabPane>
+		<tab title="admin.configuration.edit.general.tabTitle">
+			<component name="_tabGeneral" />
+		</tab>
+		<tab title="admin.configuration.edit.startupConfiguration.tabTitle">
+			<component binding="startup" />
+		</tab>
+	</tabPane>
+	<actions>
+		<save />
+		
+		<action className="SendMail" displayName="admin.configuration.actions.sendMail.actionName" inActionPanel="false" />
+	</actions>
+	<newParameters />
+</view>

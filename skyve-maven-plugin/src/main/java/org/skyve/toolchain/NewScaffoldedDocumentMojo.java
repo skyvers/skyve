@@ -6,8 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -38,6 +36,9 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+
+import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 
 @Mojo(name = "newScaffoldedDocument")
 public class NewScaffoldedDocumentMojo extends NewDocumentMojo {

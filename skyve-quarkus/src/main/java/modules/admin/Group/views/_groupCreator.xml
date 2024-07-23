@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="_groupCreator" title="admin.group.group.title" xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form >
+		<column responsiveWidth="2"/>
+		<column />
+		<column />
+		<row>
+			<item>
+				<default binding="name" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="description" />
+			</item>
+		</row>
+	</form>
+	<listMembership binding="roles" candidatesHeading="admin.group.groupListMembership.candidatesHeading" membersHeading="admin.group.groupListMembership.membershipHeading"/>
+</view>

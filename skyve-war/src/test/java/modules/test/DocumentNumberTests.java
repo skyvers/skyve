@@ -1,8 +1,8 @@
 package modules.test;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.domain.number.DocumentNumberAutonomousTransactionGenerator;
 import org.skyve.impl.domain.number.DocumentNumberGenerator;
 
@@ -10,11 +10,12 @@ import modules.admin.domain.DocumentNumber;
 import modules.test.domain.AllAttributesPersistent;
 
 public class DocumentNumberTests extends AbstractSkyveTestDispose {
+
 	DocumentNumber dN;
 	DocumentNumberGenerator generator = new DocumentNumberGenerator();
 	DocumentNumberAutonomousTransactionGenerator autonomousGenerator = new DocumentNumberAutonomousTransactionGenerator();
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		dN = DocumentNumber.newInstance();
 		dN.setModuleName(AllAttributesPersistent.MODULE_NAME);

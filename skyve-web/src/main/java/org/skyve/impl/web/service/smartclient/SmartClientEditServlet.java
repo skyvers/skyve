@@ -10,30 +10,23 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
@@ -67,6 +60,13 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class SmartClientEditServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -103,7 +103,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 
 		try {
-			return (ViewJSONManipulator) MANIPULATOR_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, bean, Integer.valueOf(editIdCounter), Integer.valueOf(createIdCounter), Boolean.valueOf(forApply));
+			return (ViewJSONManipulator) MANIPULATOR_CLASS.getDeclaredConstructors()[0].newInstance(user, module, document, view, bean, uxui, Integer.valueOf(editIdCounter), Integer.valueOf(createIdCounter), Boolean.valueOf(forApply));
 		}
 		catch (Exception e) {
 			throw new DomainException("Cannot instantiate SmartClient JSON manipulator " + MANIPULATOR_CLASS, e);
@@ -163,6 +163,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			        String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        if (webId != null) {
 			        	webContext = StateUtil.getCachedConversation(webId, request, response);
+			        	if (webContext == null) {
+			        		throw new ConversationEndedException(request.getLocale());
+			        	}
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
 			            persistence.setForThread();
@@ -183,7 +186,7 @@ public class SmartClientEditServlet extends HttpServlet {
 					
 			    	persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -256,12 +259,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			processBean = formBean;
 		    		}
 			    	
-					if (! user.canAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName())) {
-						final String userName = user.getName();
-						UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + processModule.getName() + '.' + processDocument.getName());
-						UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-						throw new AccessException("this page", userName);
-					}
+					user.checkAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName());
 
 					if (! user.canAccessDocument(processDocument)) {
 						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(), user.getName());
@@ -711,7 +709,11 @@ public class SmartClientEditServlet extends HttpServlet {
     		}
     	}
 
-		try {
+		if (processBean == null) { // should never happen
+			throw new ServletException("processBean is null");
+		}
+
+    	try {
 			StringBuilder message = new StringBuilder(256);
 	    	message.append("{\"response\":{\"status\":0,\"startRow\":0,\"endRow\":0,\"totalRows\":1,\"data\":[");
 			ViewJSONManipulator manipulator = newManipulator(user, 
@@ -1035,12 +1037,14 @@ public class SmartClientEditServlet extends HttpServlet {
 		if (gridBinding != null) {
 			@SuppressWarnings("unchecked")
 			List<Bean> gridList = (List<Bean>) BindUtil.get(formBean, gridBinding);
-			int processedIndex = gridList.indexOf(processedBean);
-			if (processedIndex < 0) { // new not in the list
-				// look for old bean and replace it with the new
-				int processIndex = gridList.indexOf(processBean);
-				if (processIndex >= 0) { // found old bean
-					gridList.set(processIndex, processedBean);
+			if (gridList != null) { // should always happen
+				int processedIndex = gridList.indexOf(processedBean);
+				if (processedIndex < 0) { // new not in the list
+					// look for old bean and replace it with the new
+					int processIndex = gridList.indexOf(processBean);
+					if (processIndex >= 0) { // found old bean
+						gridList.set(processIndex, processedBean);
+					}
 				}
 			}
 		}

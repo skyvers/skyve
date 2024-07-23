@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="StaffQualification" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[ 
+			A skill, experience or formal qualification attained by this Staff person
+		]]>
+	</documentation>
+	<persistent name="WHO_StaffQualification" />
+	<singularAlias>Qualification</singularAlias>
+	<pluralAlias>Qualifications</pluralAlias>
+	<parentDocument>Staff</parentDocument>
+	<bizKey expression="{name} ({type})"/>
+	<attributes>
+		<enum name="type">
+			<displayName>Type</displayName>
+			<values>
+				<value code="Skill"/>
+				<value code="Experience"/>
+				<value code="Diploma"/>
+				<value code="Bachelor"/>
+				<value code="PostGraduate" description="Post Graduate"/>
+				<value code="Master"/>
+				<value code="PhD"/>
+				<value code="Other"/>
+			</values>
+		</enum>
+		<text name="name">
+			<displayName>Name</displayName>
+			<length>200</length>
+		</text>
+		<text name="issuingOrganisation">
+			<displayName>Issuing Organisation</displayName>
+			<length>200</length>
+		</text>
+		<memo name="description">
+			<displayName>Description</displayName>
+		</memo>
+		<date name="dateAttained">
+			<displayName>Date Attained</displayName>
+		</date>
+		<date name="dateExpiry">
+			<displayName>Date of Expiry (if applicable)</displayName>
+		</date>
+	</attributes>
+</document>

@@ -7,7 +7,6 @@ import org.openqa.selenium.By;
 import util.sail.BrowserConfiguration;
 import util.sail.Devices;
 import util.sail.PrimeFacesTest;
-import org.junit.Test;
 
 public class TestPreparation extends PrimeFacesTest {
 
@@ -23,8 +22,8 @@ private String pathToChromeDriver = "C:/Users/RBB/chromedriver.exe";
 		tearDownBrowser();
 	}
 
+	@Override
 	protected void login(String customer, String username, String password) throws Exception {
-
 		driver.get(baseUrl);
 
 		driver.findElement(By.name("customer")).clear();

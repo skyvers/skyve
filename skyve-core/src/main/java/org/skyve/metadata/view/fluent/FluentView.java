@@ -1,10 +1,13 @@
 package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
+import org.skyve.impl.metadata.repository.view.access.ViewContentUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewDocumentAggregateUserAccessMetaData;
+import org.skyve.impl.metadata.repository.view.access.ViewDynamicImageUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewModelAggregateUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewPreviousCompleteUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewQueryAggregateUserAccessMetaData;
+import org.skyve.impl.metadata.repository.view.access.ViewReportUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
@@ -221,6 +224,97 @@ public class FluentView extends FluentContainer<FluentView> {
 	public FluentView removeSingularAccess(final String documentName) {
 		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewSingularUserAccessMetaData) &&
 															((ViewSingularUserAccessMetaData) a).getDocumentName().equals(documentName)));
+		return this;
+	}
+
+	/**
+	 * Adds a new {@link FluentViewReportAccess} to this view.
+	 */
+	public FluentView addReportAccess(FluentViewReportAccess access) {
+		return addAccess(access);
+	}
+
+	/**
+	 * Finds the view report access in this view's list of accesses.
+	 */
+	public FluentViewReportAccess findReportAccess(final String moduleName, final String documentName, final String reportName) {
+		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
+												.filter(a -> ((a instanceof ViewReportUserAccessMetaData) &&
+																((ViewReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
+																((ViewReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+																((ViewReportUserAccessMetaData) a).getReportName().equals(reportName)))
+												.findFirst()
+												.orElse(null);
+		return (result != null) ? new FluentViewReportAccess((ViewReportUserAccessMetaData) result) : null;
+	}
+
+	/**
+	 * Removes the {@link ViewReportUserAccessMetaData} with the specified
+	 * module name, document name and report name if one is defined for this view.
+	 */
+	public FluentView removeReportAccess(final String moduleName, final String documentName, final String reportName) {
+		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewReportUserAccessMetaData) &&
+															((ViewReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
+															((ViewReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+															((ViewReportUserAccessMetaData) a).getReportName().equals(reportName)));
+		return this;
+	}
+
+	/**
+	 * Adds a new {@link FluentViewDynamicImageAccess} to this view.
+	 */
+	public FluentView addDynamicImageAccess(FluentViewDynamicImageAccess access) {
+		return addAccess(access);
+	}
+
+	/**
+	 * Finds the view dynamic image access in this view's list of accesses.
+	 */
+	public FluentViewDynamicImageAccess findDynamicImageAccess(final String imageName) {
+		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
+												.filter(a -> ((a instanceof ViewDynamicImageUserAccessMetaData) &&
+																((ViewDynamicImageUserAccessMetaData) a).getImageName().equals(imageName)))
+												.findFirst()
+												.orElse(null);
+		return (result != null) ? new FluentViewDynamicImageAccess((ViewDynamicImageUserAccessMetaData) result) : null;
+	}
+
+	/**
+	 * Removes the {@link ViewDynamicImageUserAccessMetaData} with the specified
+	 * image name if one is defined for this view.
+	 */
+	public FluentView removeDynamicImageAccess(final String imageName) {
+		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewDynamicImageUserAccessMetaData) &&
+															((ViewDynamicImageUserAccessMetaData) a).getImageName().equals(imageName)));
+		return this;
+	}
+
+	/**
+	 * Adds a new {@link FluentViewContentAccess} to this view.
+	 */
+	public FluentView addContentAccess(FluentViewContentAccess access) {
+		return addAccess(access);
+	}
+
+	/**
+	 * Finds the view content access in this view's list of accesses.
+	 */
+	public FluentViewContentAccess findContentAccess(final String binding) {
+		ViewUserAccessMetaData result = view.getAccesses().getAccesses().stream()
+												.filter(a -> ((a instanceof ViewContentUserAccessMetaData) &&
+																((ViewContentUserAccessMetaData) a).getBinding().equals(binding)))
+												.findFirst()
+												.orElse(null);
+		return (result != null) ? new FluentViewContentAccess((ViewContentUserAccessMetaData) result) : null;
+	}
+
+	/**
+	 * Removes the {@link ViewContentUserAccessMetaData} with the specified
+	 * binding if one is defined for this view.
+	 */
+	public FluentView removeContentAccess(final String binding) {
+		view.getAccesses().getAccesses().removeIf(a -> ((a instanceof ViewContentUserAccessMetaData) &&
+															((ViewContentUserAccessMetaData) a).getBinding().equals(binding)));
 		return this;
 	}
 

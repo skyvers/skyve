@@ -1,7 +1,5 @@
 package org.skyve.metadata.view;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
@@ -10,6 +8,8 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * 

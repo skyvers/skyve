@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
@@ -25,8 +26,7 @@ import modules.admin.domain.Startup.BackupType;
 import modules.admin.domain.Startup.MapType;
 
 public class StartupExtensionTest {
-
-	Map<String, Object> overrideProperties;
+	private Map<String, Object> overrideProperties;
 
 	@Mock
 	private Customer customer;
@@ -35,9 +35,11 @@ public class StartupExtensionTest {
 	@Spy
 	private StartupExtension bean;
 
+	private AutoCloseable closeable;
+	
 	@Before
 	public void before() throws Exception {
-		MockitoAnnotations.initMocks(this);
+		closeable = MockitoAnnotations.openMocks(this);
 
 		Map<String, Object> properties = new HashMap<>();
 		UtilImpl.CONFIGURATION = properties;
@@ -58,6 +60,13 @@ public class StartupExtensionTest {
 		Mockito.when(bean.getMapLayer()).thenReturn(UtilImpl.MAP_LAYERS);
 	}
 
+	@After
+	public void tearDown() throws Exception {
+		if (closeable != null) {
+			closeable.close();
+		}
+	}
+	
 	@Test
 	public void testSaveConfigurationEmptyPropertiesWritesNulls() throws Exception {
 		// setup mocks
@@ -74,7 +83,8 @@ public class StartupExtensionTest {
 	public void testSaveConfigurationUpdatesApiProperties() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getApiGoogleMapsKey()).thenReturn("12345");
-		Mockito.when(bean.getApiGoogleRecaptchaKey()).thenReturn("12345");
+		Mockito.when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("12345");
+		Mockito.when(bean.getApiGoogleRecaptchaSecretKey()).thenReturn("12345");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
@@ -86,7 +96,8 @@ public class StartupExtensionTest {
 		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_MAPS_V3_KEY));
-		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SITE_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SECRET_KEY));
 	}
 
 	@Test
@@ -129,13 +140,15 @@ public class StartupExtensionTest {
 
 	@Test
 	public void testSaveConfigurationUpdatesMailProperties() throws Exception {
+		UtilImpl.SMTP_TEST_BOGUS_SEND = true; // set to true to ensure it is overridden and included below
+		
 		// setup mocks
 		Mockito.when(bean.getMailServerUrl()).thenReturn("127.0.0.1");
 		Mockito.when(bean.getMailSender()).thenReturn("test2@test.com");
 		Mockito.when(bean.getMailPort()).thenReturn(Integer.valueOf(465));
 		Mockito.when(bean.getMailUsername()).thenReturn("username");
 		Mockito.when(bean.getMailPassword()).thenReturn("password");
-		Mockito.when(bean.getMailBogusSend()).thenReturn(Boolean.TRUE);
+		Mockito.when(bean.getMailBogusSend()).thenReturn(Boolean.FALSE);
 		Mockito.when(bean.getMailTestRecipient()).thenReturn("test@test.com");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);

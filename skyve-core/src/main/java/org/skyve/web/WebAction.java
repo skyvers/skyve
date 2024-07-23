@@ -1,8 +1,8 @@
 package org.skyve.web;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum WebAction {

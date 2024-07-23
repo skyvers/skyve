@@ -1,5 +1,9 @@
 package modules.test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,8 +11,8 @@ import java.util.List;
 import org.apache.commons.beanutils.DynaBean;
 import org.hibernate.Session;
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
@@ -39,12 +43,20 @@ import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.Reachability;
 
 public class PersistenceTests extends AbstractSkyveTestDispose {
+
 	@Test
 	public void testPersistenceOfObjectWithReferenceToAnotherObjectWithAggregatedCollectionWithCascadeMergeOn() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
 		test = p.save(test);
 		test = p.save(test);
 
+		Assert.assertEquals(Integer.valueOf(1), test.getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(0).getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(1).getBizVersion());
 	}
@@ -116,12 +128,16 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	 * A different object with the same identifier value was already associated with the session : [testAllAttributesPersistent#<bizId>]
 	 * @throws Exception
 	 */
-	@Test(expected = DomainException.class)
+	@Test
 	public void testPartialSave() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
-		test = p.save(test);
-		test.setAggregatedAssociation(Util.constructRandomInstance(u, m, aapd, 0));
-		test.setAggregatedAssociation(p.save(test.getAggregatedAssociation()));
+		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+			test = p.save(test);
+			test.setAggregatedAssociation(Util.constructRandomInstance(u, m, aapd, 0));
+			test.setAggregatedAssociation(p.save(test.getAggregatedAssociation()));
+		});
+
+		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	/**
@@ -617,36 +633,52 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 				.scalarResult(Number.class).intValue());
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testAggregatedAssociationReferentialIntegritySingleStrategy() throws Exception {
-		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
+			test = p.save(test);
 
-		p.delete(test.getAggregatedAssociation());
+			p.delete(test.getAggregatedAssociation());
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testAggregatedCollectionReferentialIntegritySingleStrategy() throws Exception {
-		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
+			test = p.save(test);
 
-		p.delete(test.getAggregatedCollection().get(0));
+			p.delete(test.getAggregatedCollection().get(0));
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testComposedAssociationReferentialIntegritySingleStrategy() throws Exception {
-		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
+			test = p.save(test);
 
-		p.delete(test.getComposedAssociation());
+			p.delete(test.getComposedAssociation());
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testComposedCollectionReferentialIntegritySingleStrategy() throws Exception {
-		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
+			test = p.save(test);
 
-		p.delete(test.getComposedCollection().get(0));
+			p.delete(test.getComposedCollection().get(0));
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
 	@Test
@@ -714,48 +746,68 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 								.scalarResult(Number.class).intValue());
 	}
 
-	@Test(expected = Exception.class)
+	@Test
 	public void testComposedCollectionMoveMemberWithoutFlushThrows() throws Exception {
-		MappedExtensionSingleStrategy source = Util.constructRandomInstance(u, m, messd, 2);
-		source = p.save(source);
-		MappedExtensionSingleStrategy dest = Util.constructRandomInstance(u, m, messd, 2);
-		dest = p.save(dest);
+		OptimisticLockException ole = Assert.assertThrows(OptimisticLockException.class, () -> {
+			MappedExtensionSingleStrategy source = Util.constructRandomInstance(u, m, messd, 2);
+			source = p.save(source);
+			MappedExtensionSingleStrategy dest = Util.constructRandomInstance(u, m, messd, 2);
+			dest = p.save(dest);
 
-		MappedExtensionSingleStrategyExtension element = source.getComposedCollection().remove(0);
-		dest.getComposedCollection().add(element);
-		p.save(source, dest);
+			MappedExtensionSingleStrategyExtension element = source.getComposedCollection().remove(0);
+			dest.getComposedCollection().add(element);
+			p.save(source, dest);
+		});
+
+		assertThat(ole.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testAggregatedAssociationReferentialIntegrityJoinedStrategy() throws Exception {
-		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
+			test = p.save(test);
 
-		p.delete(test.getAggregatedAssociation());
+			p.delete(test.getAggregatedAssociation());
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testAggregatedCollectionReferentialIntegrityJoinedStrategy() throws Exception {
-		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
+			test = p.save(test);
 
-		p.delete(test.getAggregatedCollection().get(0));
+			p.delete(test.getAggregatedCollection().get(0));
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testComposedAssociationReferentialIntegrityJoinedStrategy() throws Exception {
-		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
+			test = p.save(test);
 
-		p.delete(test.getComposedAssociation());
+			p.delete(test.getComposedAssociation());
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testComposedCollectionReferentialIntegrityJoinedStrategy() throws Exception {
-		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
-		test = p.save(test);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
+			test = p.save(test);
 
-		p.delete(test.getComposedCollection().get(0));
+			p.delete(test.getComposedCollection().get(0));
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
 	@Test
@@ -828,59 +880,76 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 								.scalarResult(Number.class).intValue());
 	}
 
-	@Test(expected = OptimisticLockException.class)
+	@Test
 	public void testOptimisticLockException() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		test = p.save(test);
-		@SuppressWarnings("null")
-		String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
-		SQL sql = p.newSQL(String.format("update %s set %s = :%s, %s = :%s",
-				persistentIdentifier,
-				PersistentBean.LOCK_NAME,
-				PersistentBean.LOCK_NAME,
-				PersistentBean.VERSION_NAME,
-				PersistentBean.VERSION_NAME));
-		sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(u.getName(), new Date()).toString(), false);
-		sql.putParameter(PersistentBean.VERSION_NAME, Integer.valueOf(2));
-		sql.execute();
+		OptimisticLockException ole = Assert.assertThrows(OptimisticLockException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+			test = p.save(test);
 
-		test.setText("optimistic lock test");
-		p.save(test);
+			@SuppressWarnings("null")
+			String persistentIdentifier = aapd.getPersistent().getPersistentIdentifier();
+			SQL sql = p.newSQL(String.format("update %s set %s = :%s, %s = :%s",
+					persistentIdentifier,
+					PersistentBean.LOCK_NAME,
+					PersistentBean.LOCK_NAME,
+					PersistentBean.VERSION_NAME,
+					PersistentBean.VERSION_NAME));
+			sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(u.getName(), new Date()).toString(), false);
+			sql.putParameter(PersistentBean.VERSION_NAME, Integer.valueOf(2));
+			sql.execute();
+
+			test.setText("optimistic lock test");
+			p.save(test);
+		});
+
+		assertThat(ole.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = OptimisticLockException.class)
+	@Test
 	public void testTransientStaleObjectStateExceptionOptimisticLock() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		p.save(test); // NB not returned
-		p.save(test);
+		OptimisticLockException ole = Assert.assertThrows(OptimisticLockException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+			p.save(test); // NB not returned
+			p.save(test);
+		});
+
+		assertThat(ole.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = OptimisticLockException.class)
+	@Test
 	public void testDetachedStaleObjectStateExceptionOptimisticLock() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		test = p.save(test);
+		OptimisticLockException ole = Assert.assertThrows(OptimisticLockException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+			test = p.save(test);
 
-		p.evictCached(test);
+			p.evictCached(test);
 
-		test.setText("optimistic lock test");
-		p.save(test); // NB not returned
+			test.setText("optimistic lock test");
+			p.save(test); // NB not returned
 
-		test.setText("optimistic lock test take 2");
-		p.save(test);
+			test.setText("optimistic lock test take 2");
+			p.save(test);
+		});
+
+		assertThat(ole.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = OptimisticLockException.class)
+	@Test
 	public void testClonedStaleObjectStateExceptionOptimisticLock() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		test = p.save(test);
+		OptimisticLockException ole = Assert.assertThrows(OptimisticLockException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+			test = p.save(test);
 
-		test = Util.cloneToTransientBySerialization(test);
+			test = Util.cloneToTransientBySerialization(test);
 
-		test.setText("optimistic lock test");
-		p.save(test); // NB not returned
+			test.setText("optimistic lock test");
+			p.save(test); // NB not returned
 
-		test.setText("optimistic lock test take 2");
-		p.save(test);
+			test.setText("optimistic lock test take 2");
+			p.save(test);
+		});
+
+		assertThat(ole.getMessage(), is(notNullValue()));
 	}
 
 	@Test
@@ -898,12 +967,16 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 		((AbstractHibernatePersistence) p).refresh(test);
 	}
 
-	@Test(expected = DomainException.class)
+	@Test
 	public void testRefreshDetached() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
-		test = p.save(test);
-		p.evictCached(test);
-		((AbstractHibernatePersistence) p).refresh(test);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+			AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+			test = p.save(test);
+			p.evictCached(test);
+			((AbstractHibernatePersistence) p).refresh(test);
+		});
+
+		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	@Test
@@ -1012,7 +1085,7 @@ public class PersistenceTests extends AbstractSkyveTestDispose {
 	}
 	
 	@Test
-	@Ignore("Doesnt run on the current version of H2 bundled.")
+	@Disabled("Doesnt run on the current version of H2 bundled.")
 	public void testGeometry() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test = p.save(test);

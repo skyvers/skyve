@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Users</singularAlias>
 	<pluralAlias>Users</pluralAlias>
-	<iconStyleClass>fa fa-user</iconStyleClass>
+	<iconStyleClass>fa-solid fa-users</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey expression="User List"/>

@@ -3,7 +3,6 @@ package modules.admin.User;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.skyve.CORE;
@@ -12,12 +11,11 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.User;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class UserExtensionTest extends AbstractH2Test {
-
+public class UserExtensionTest extends AbstractH2TestForJUnit4 {
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("static-method")
 	public void testToUserProxy() throws Exception {
 		// setup test data
 		UserExtension ue = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -30,14 +28,12 @@ public class UserExtensionTest extends AbstractH2Test {
 
 		// validate User Proxy
 		assertThat(upe, is(notNullValue()));
-		assertTrue(upe instanceof UserProxyExtension);
 
 		// convert user proxy to user
 		UserExtension ue2 = upe.toUser();
 
 		// validate test data
 		assertThat(ue2, is(notNullValue()));
-		assertTrue(ue2 instanceof UserExtension);
 
 		// check user returned is original user
 		assertThat(ue2, is(ue));
@@ -45,5 +41,4 @@ public class UserExtensionTest extends AbstractH2Test {
 		// Delete persisted user
 		CORE.getPersistence().delete(ue);
 	}
-
 }

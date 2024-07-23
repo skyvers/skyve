@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ModuleDocument"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		Non-persistent document used to store a selection of a document belonging to a specific
+		module. This allows it to be used in a lookupDescription, e.g. Control Panel - Generate 
+		Test Data, or when refreshing documents as part of DataMaintenance.
+	</documentation>
+	<singularAlias>Module Document</singularAlias>
+	<pluralAlias>Module Documents</pluralAlias>
+	<attributes>
+		<boolean name="include">
+			<documentation>
+				Used to indicate if this document is to be included when refreshing as part of DataMaintenance.
+			</documentation>
+			<displayName>Include</displayName>
+		</boolean>
+		<text name="moduleName" required="true">
+			<displayName>Module Name</displayName>
+			<description>The name of the module.</description>
+			<length>500</length>
+		</text>
+		<text name="documentName" required="true">
+			<displayName>Document Name</displayName>
+			<description>The name of the document.</description>
+			<length>500</length>
+		</text>
+		<text name="modDocName">
+			<displayName>Document Name</displayName>
+			<description>The name of the document.</description>
+			<length>500</length>
+		</text>
+	</attributes>
+</document>

@@ -3,13 +3,13 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Index;
 import org.hibernate.spatial.JTSGeometryType;
-import org.hibernate.spatial.dialect.mysql.MySQL8SpatialDialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
+import org.skyve.impl.persistence.hibernate.dialect.mysqlbugfix.MySQL8SpatialDialect;
 
 public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements SkyveDialect {
-	private static final long serialVersionUID = -1699568702042529712L;
+	private static final long serialVersionUID = 1802127305662334430L;
 
 	private MySQLSpatialDialectDelegate delegate = new MySQLSpatialDialectDelegate(this);
 

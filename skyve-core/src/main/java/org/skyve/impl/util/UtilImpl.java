@@ -2,8 +2,10 @@ package org.skyve.impl.util;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +41,15 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.JSON;
+import org.skyve.util.Util;
 
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.AnnotatedType;
+import jakarta.enterprise.inject.spi.BeanAttributes;
+import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.InjectionTarget;
+import jakarta.enterprise.inject.spi.InjectionTargetFactory;
 import net.gcardone.junidecode.Junidecode;
 
 public class UtilImpl {
@@ -62,8 +72,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "52";
-	public static final String SKYVE_VERSION = "8.3.1-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "55";
+	public static final String SKYVE_VERSION = "9.1.1";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -81,7 +91,10 @@ public class UtilImpl {
 
 	// the name of the application archive, e.g. typically projectName.war or projectName.ear
 	public static String ARCHIVE_NAME;
-
+	
+	// whether the DevLoginFilter is turned on or not
+	public static boolean DEV_LOGIN_FILTER_USED = false;
+	
 	// This is set in the web.xml but defaults to windows
 	// as a dev environment for design time and generation gear
 	public static String CONTENT_DIRECTORY = "/_/Apps/content/";
@@ -252,6 +265,9 @@ public class UtilImpl {
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;
+	public static String GOOGLE_RECAPTCHA_SECRET_KEY = null;
+	public static String CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+	public static String CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
 	public static String CKEDITOR_CONFIG_FILE_URL = "";
 
 	// null = prod, could be dev, test, uat or another arbitrary environment
@@ -333,7 +349,8 @@ public class UtilImpl {
 		if (absoluteBasePath == null) {
 			if (APPS_JAR_DIRECTORY != null) {
 				absoluteBasePath = APPS_JAR_DIRECTORY;
-			} else {
+			}
+			else {
 				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
 				if (url == null) {
 					UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
@@ -343,11 +360,19 @@ public class UtilImpl {
 						for (URL entry : ((URLClassLoader) cl).getURLs()) {
 							UtilImpl.LOGGER.severe(entry.getFile());
 						}
-					} else {
+					}
+					else {
 						UtilImpl.LOGGER.severe("Cannot determine the context classloader paths...");
 					}
-				} else {
+				}
+				else {
 					absoluteBasePath = url.getPath();
+					try {
+						absoluteBasePath = URLDecoder.decode(absoluteBasePath, Util.UTF8);
+					}
+					catch (UnsupportedEncodingException e) {
+						throw new IllegalStateException("UtilImpl.getAbsoluteBasePath() cannot URL decode " + absoluteBasePath, e);
+					}
 					absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
 					absoluteBasePath = absoluteBasePath.replace('\\', '/');
 				}
@@ -389,10 +414,11 @@ public class UtilImpl {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
 				if (element instanceof AbstractPersistentBean) {
-					populateFully((AbstractPersistentBean) object);
+					populateFully((AbstractPersistentBean) element);
 				}
 			}
-		} else if (object instanceof AbstractPersistentBean) {
+		}
+		else if (object instanceof AbstractPersistentBean) {
 			populateFully((AbstractPersistentBean) object);
 		}
 
@@ -453,9 +479,9 @@ public class UtilImpl {
 
 			if (beanAccepted.isChanged()) {
 				changed = true;
-				if (UtilImpl.DIRTY_TRACE)
-					UtilImpl.LOGGER.info(
-							"UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+				if (UtilImpl.DIRTY_TRACE) {
+					UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+				}
 				return false;
 			}
 			return true;
@@ -488,6 +514,31 @@ public class UtilImpl {
 	}
 
 	/**
+	 * Utility method to ensure that CDI injects are performed on existing (newly created) objects.
+	 * @param target	The target object to inject dependencies into (recursively)
+	 */
+	public static void inject(Object target) {
+		@SuppressWarnings("unchecked")
+		Class<Object> type = (Class<Object>) target.getClass();
+		try {
+			type.getConstructor();
+		}
+		catch (@SuppressWarnings("unused") NoSuchMethodException e) {
+			// Can't inject unless the class has a public default constructor
+			return;
+		}
+
+		BeanManager bm = CDI.current().getBeanManager();
+        AnnotatedType<Object> at = bm.createAnnotatedType(type);
+		BeanAttributes<Object> ba = bm.createBeanAttributes(at);
+		InjectionTargetFactory<Object> itf = bm.getInjectionTargetFactory(at);
+		CreationalContext<Object> cc = bm.createCreationalContext(null);
+		jakarta.enterprise.inject.spi.Bean<Object> b = bm.createBean(ba, type, itf);
+		InjectionTarget<Object> it = itf.createInjectionTarget(b);
+		it.inject(target, cc);
+	}
+	
+	/**
 	 * Utility method that tries to properly initialise the persistence layer proxies used by lazy loading.
 	 * 
 	 * @param <T>
@@ -509,7 +560,8 @@ public class UtilImpl {
 			for (Object element : list) {
 				setTransient(element);
 			}
-		} else if (object instanceof AbstractPersistentBean) {
+		}
+		else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
 			bean.setBizId(UUID.randomUUID().toString());
 			bean.setBizLock(null);
@@ -528,7 +580,8 @@ public class UtilImpl {
 						if (association.getType() != AssociationType.aggregation) {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
-					} else if (reference instanceof Collection) {
+					}
+					else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient
@@ -547,7 +600,8 @@ public class UtilImpl {
 			for (Object element : list) {
 				setDataGroup(element, bizDataGroupId);
 			}
-		} else if (object instanceof AbstractPersistentBean) {
+		}
+		else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
 			bean.setBizDataGroupId(bizDataGroupId);
 
@@ -564,7 +618,8 @@ public class UtilImpl {
 						if (association.getType() != AssociationType.aggregation) {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
-					} else if (reference instanceof Collection) {
+					}
+					else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient

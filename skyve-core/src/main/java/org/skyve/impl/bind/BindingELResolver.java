@@ -3,10 +3,10 @@ package org.skyve.impl.bind;
 import java.beans.FeatureDescriptor;
 import java.util.Iterator;
 
-import javax.el.ELContext;
-import javax.el.ELResolver;
-
 import org.skyve.domain.Bean;
+
+import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
 
 /**
  * Used to Resolve static/dynamic Skyve beans using BindUtil instead of bean introspection alone.

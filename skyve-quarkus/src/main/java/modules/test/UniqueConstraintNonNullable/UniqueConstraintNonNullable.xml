@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UniqueConstraintNonNullable" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			All unique constraint attributes are required.
+		]]>
+	</documentation>
+	<persistent name="TEST_UniqueConstraintNonNullable" />
+	<singularAlias>All Unique Constraint Non-nullable</singularAlias>
+	<pluralAlias>All Unique Constraint Non-nullable</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<boolean name="booleanFlag" required="true">
+			<displayName>Boolean Flag</displayName>
+		</boolean>
+		<enum name="enum3" required="true">
+			<displayName>Enum 3</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<length>255</length>
+		</text>
+	</attributes>
+	<uniqueConstraints>
+		<constraint name="uniqueFields" scope="customer">
+			<message>An instance with the values {booleanFlag}, {enum3} and {text} has already been defined.</message>
+			<fieldReferences>
+				<ref>booleanFlag</ref>
+				<ref>enum3</ref>
+				<ref>text</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

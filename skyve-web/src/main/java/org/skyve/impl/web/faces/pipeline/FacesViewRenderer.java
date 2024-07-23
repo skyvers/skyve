@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIComponentBase;
-
-import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.picklist.PickList;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -120,7 +116,6 @@ import org.skyve.impl.web.faces.converters.decimal.Decimal2Converter;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.impl.web.faces.converters.decimal.Decimal2OneDecimalPlace;
-import org.skyve.impl.web.faces.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5Converter;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5Integer;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5IntegerPercentage;
@@ -176,6 +171,9 @@ import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
+
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIComponentBase;
 
 public class FacesViewRenderer extends ViewRenderer {
 	private ComponentBuilder cb;
@@ -644,6 +642,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											widgetRequired,
 											widgetInvisible,
 											helpText,
+											pixelWidth,
 											isCurrentWidgetShowLabel(),
 											isCurrentFormRenderTopLabels());
 				for (int i = 0, l = formColspan; i < l; i++) {
@@ -1506,8 +1505,11 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
 		TargetMetaData target = getCurrentTarget();
 		HorizontalAlignment alignment = column.getAlignment();
-		if ((alignment == null) && (target != null) && (target.getAttribute() != null)) {
-			alignment = CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, target.getAttribute().getAttributeType());
+		if ((alignment == null) && (target != null)) {
+			Attribute targetAttribute = target.getAttribute();
+			if (targetAttribute != null) {
+				alignment = CORE.getCustomisations().determineDefaultTextAlignment(currentUxUi, targetAttribute.getAttributeType());
+			}
 		}
 
 		current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
@@ -2088,16 +2090,31 @@ public class FacesViewRenderer extends ViewRenderer {
 	}
 
 	private void renderSlider(int formColspan, Slider slider) {
+		TargetMetaData target = getCurrentTarget();
+		Attribute attribute = (target == null) ? null : target.getAttribute();
+		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
+		Converter<?> converter = null;
+		if (attribute instanceof ConvertableField) {
+			converter = ((ConvertableField) attribute).getConverter();
+		}
+
 		String title = getCurrentWidgetLabel();
 		boolean required = isCurrentWidgetRequired();
-		UIComponentBase c = (UIComponentBase) cb.label(null, "slider"); // TODO slider
-		eventSource = c;
+		Form currentForm = getCurrentForm();
+		EventSourceComponent c = cb.slider(null,
+												dataWidgetVar,
+												slider,
+												(currentForm == null) ? null : currentForm.getDisabledConditionName(),
+												title,
+												required,
+												convertConverter(converter, type));
+		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
 						required,
 						slider.getInvisibleConditionName(),
 						getCurrentWidgetHelp(),
-						c,
+						c.getComponent(),
 						slider.getPixelWidth(),
 						null,
 						null,
@@ -2317,8 +2334,8 @@ public class FacesViewRenderer extends ViewRenderer {
 		eventSource = null;
 	}
 
-	private static javax.faces.convert.Converter convertConverter(Converter<?> converter, AttributeType type) {
-		javax.faces.convert.Converter result = null;
+	private static jakarta.faces.convert.Converter<?> convertConverter(Converter<?> converter, AttributeType type) {
+		jakarta.faces.convert.Converter<?> result = null;
 		if (converter != null) {
 			// Date
 			if (converter instanceof org.skyve.domain.types.converters.date.DD_MM_YYYY) {
@@ -2413,9 +2430,6 @@ public class FacesViewRenderer extends ViewRenderer {
 			}
 			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace) {
 				result = new Decimal2OneDecimalPlace();
-			}
-			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage) {
-				result = new Decimal2TwoDecimalPlacesPercentage();
 			}
 			else if (converter instanceof org.skyve.domain.types.converters.decimal.Decimal5Converter) {
 				result = new Decimal5Converter();
@@ -2862,10 +2876,12 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 		else {
 			cb.addAjaxBehavior(eventSource, "change", dataWidgetBinding, dataWidgetVar, binding, changedActions);
-			// Add this special event for date selection on calendar as "changed" doesn't fire on select
+			// No need to add dateSelect event to datePicker as "changed" fires on the input field when selected
+/*
 			if (eventSource instanceof DatePicker) {
 				cb.addAjaxBehavior(eventSource, "dateSelect", dataWidgetBinding, dataWidgetVar, binding, changedActions);
 			}
+*/
 		}
 	}
 

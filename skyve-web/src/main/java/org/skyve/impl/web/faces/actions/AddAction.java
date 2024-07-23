@@ -5,12 +5,12 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -20,8 +20,8 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 /**
@@ -29,10 +29,10 @@ import org.skyve.web.WebContext;
  * The onAddedHandlers event actions is not implemented since the grid cannot be inlined.
  */
 public class AddAction extends FacesAction<Void> {
-	private FacesView<? extends Bean> facesView;
+	private FacesView facesView;
 	private String dataWidgetBinding;
 	private boolean inline;
-	public AddAction(FacesView<? extends Bean> facesView, String dataWidgetBinding, boolean inline) {
+	public AddAction(FacesView facesView, String dataWidgetBinding, boolean inline) {
 		this.facesView = facesView;
 		this.dataWidgetBinding = dataWidgetBinding;
 		this.inline = inline;
@@ -69,6 +69,9 @@ public class AddAction extends FacesAction<Void> {
     	// Create a new element
     	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
 		Relation targetRelation = (Relation) target.getAttribute();
+		if (targetRelation == null) {
+			throw new IllegalStateException(newViewBinding + " doesn't resolve to a target relation.");
+		}
 		Document relationDocument = module.getDocument(customer, targetRelation.getDocumentName());
 
     	// check for create privilege if the collection is persistent and the collection document is persistent
@@ -86,7 +89,9 @@ public class AddAction extends FacesAction<Void> {
 				Boolean.TRUE.equals(((Collection) targetRelation).getOrdered())) {
 			@SuppressWarnings("unchecked")
 			List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
-			Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
+			if (beans != null) {
+				Binder.set(newBean, Bean.ORDINAL_NAME, Integer.valueOf(beans.size() + 1));
+			}
 		}
 
 		// Call the bizlet and interceptors

@@ -1,13 +1,14 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import modules.admin.Tag.TagExtension;
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.DataMaintenance.EvictOption;
@@ -31,6 +32,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class Tag extends AbstractPersistentBean implements org.skyve.domain.app.admin.Tag {
 	/**
 	 * For Serialization
@@ -129,6 +131,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 * Operator
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum CombinationsOperator implements Enumeration {
 		union("Union", "Union"),
 		except("Except", "Except"),
@@ -199,6 +202,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 * Filter Operator
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum FilterOperator implements Enumeration {
 		equals("equals", "Equals"),
 		like("like", "Like"),
@@ -269,6 +273,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 	 * Filter Action
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum FilterAction implements Enumeration {
 		tagRecordsThatMatch("tag", "Tag records that match"),
 		unTagRecordsThatMatch("unTag", "UnTag records that match");

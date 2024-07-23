@@ -1,11 +1,5 @@
 package org.skyve.impl.metadata.model;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
@@ -26,6 +20,12 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.DomainType;
 
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"documentation",
 							"displayName", 
@@ -41,6 +41,7 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	private String displayName;
 	private AttributeType attributeType;
 	private UsageType usage;
+	private Sensitivity sensitivity;
 	private String description;
 	protected DomainType domainType;
 	private InputWidget defaultInputWidget;
@@ -92,6 +93,16 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	@XmlAttribute
 	public void setUsage(UsageType usage) {
 		this.usage = usage;
+	}
+	
+	@Override
+	public Sensitivity getSensitivity() {
+		return sensitivity;
+	}
+	
+	@XmlAttribute
+	public void setSensitivity(Sensitivity sensitivity) {
+		this.sensitivity = sensitivity;
 	}
 	
 	@Override

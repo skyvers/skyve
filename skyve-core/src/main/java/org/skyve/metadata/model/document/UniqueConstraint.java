@@ -2,12 +2,12 @@ package org.skyve.metadata.model.document;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * This class is used for collection unique constraints and for document unique constraints.

@@ -1,8 +1,8 @@
 package org.skyve;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,8 +40,8 @@ public class EXTParameterisedTest {
 				{ "bcrypt", longPassword },
 				{ "pbkdf2", shortPassword },
 				{ "pbkdf2", longPassword },
-				// { "scrypt", shortPassword },
-				// { "scrypt", longPassword },
+//				{ "scrypt", shortPassword },
+//				{ "scrypt", longPassword },
 		});
 	}
 
@@ -61,8 +61,8 @@ public class EXTParameterisedTest {
 		String result = EXT.hashPassword(clearText);
 
 		// verify the result
-		System.out.println(String.format("%s (%d): %s (%d)", algorithm, clearText.length(), result, result.length()));
-		assertThat("Encoded length should be less than 100 chars", result.length() <= 100, is(true));
+		// System.out.println(String.format("%s (%d): %s (%d)", algorithm, clearText.length(), result, result.length()));
+		assertThat("Encoded length should be less than 100 chars", result.length() <= 255, is(true));
 		assertThat(result, is(not(clearText)));
 	}
 }

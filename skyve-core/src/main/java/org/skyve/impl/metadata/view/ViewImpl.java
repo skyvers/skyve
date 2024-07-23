@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
@@ -26,10 +25,13 @@ import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
-import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
@@ -46,7 +48,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -255,6 +256,7 @@ public class ViewImpl extends Container implements View {
 		Set<UserAccess> result = accesses;
 		if (result != null) { // accesses were generated
 			for (Component component : components) {
+				String componentBinding = component.getBinding();
 				ViewImpl fragment = component.getFragment(customer, uxui);
 				Set<UserAccess> componentAccesses = fragment.getAccesses(customer, document, uxui);
 				for (UserAccess componentAccess : componentAccesses) {
@@ -272,7 +274,7 @@ public class ViewImpl extends Container implements View {
 							continue;
 						}
 					}
-					// Change the module and document name for the model aggregates as these are required
+					// Change the module and document name for model aggregates as these are required
 					// to be defined on each document they are referenced from.
 					else if (componentAccess.isModelAggregate()) {
 						if (! (document.getOwningModuleName().equals(componentAccess.getModuleName()) &&
@@ -281,6 +283,36 @@ public class ViewImpl extends Container implements View {
 							continue;
 						}
 					}
+					// Change the module and document name and place the binding prefix on the binding, if a bound component
+					else if (componentAccess.isContent()) {
+						if (componentBinding != null) {
+							result.add(UserAccess.content(document.getOwningModuleName(),
+															document.getName(),
+															componentBinding + '.' + componentAccess.getComponent()));
+							continue;
+						}
+					}
+					// Change the module and document name and place the binding prefix on the binding, if a bound component
+					else if (componentAccess.isPreviousComplete()) {
+						if (componentBinding != null) {
+							result.add(UserAccess.previousComplete(document.getOwningModuleName(),
+																	document.getName(),
+																	componentBinding + '.' + componentAccess.getComponent()));
+							continue;
+						}
+					}
+					// Change the module and document name for dynamic images as these are required
+					// to be defined on each document they are referenced from.
+					else if (componentAccess.isDynamicImage()) {
+						if (! (document.getOwningModuleName().equals(componentAccess.getModuleName()) &&
+								document.getName().equals(componentAccess.getDocumentName()))) {
+							result.add(UserAccess.dynamicImage(document.getOwningModuleName(), document.getName(), componentAccess.getComponent()));
+							continue;
+						}
+					}
+
+					// NB UserAccess.report have their own module and document in the definition and so require no translation
+					// NB UserAccess.singular don't change either
 					result.add(componentAccess);
 				}
 			}
@@ -336,7 +368,7 @@ public class ViewImpl extends Container implements View {
 	 * Convert and validate any accesses defined in the view metadata.
 	 * If accesses are not defined then determine them.
 	 */
-	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate, final ProvidedRepository optionalRepositoryToUse) {
+	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate) {
 		final String moduleName = module.getName();
 		final String documentName = document.getName();
 
@@ -357,35 +389,57 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
+			public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = image.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
+			public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = link.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
+			public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String binding = signature.getBinding();
+					if (dataGridBinding != null) {
+						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
+						sb.append(dataGridBinding).append('.').append(binding);
+						binding = sb.toString();
+					}
+					accesses.add(UserAccess.content(moduleName, documentName, binding));
+				}
+			}
+			
+			@Override
 			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+				String modelName = chart.getModelName();
+
 				// Add any inlined models to the view
 				ChartBuilderMetaData metaDataModel = chart.getModel();
 				if (metaDataModel != null) {
-					inlineModels.put(metaDataModel.getModelName(), metaDataModel);
+					modelName = metaDataModel.getModelName();
+					inlineModels.put(modelName, metaDataModel);
 				}
-
-				if (determineAccesses) {
-					if (metaDataModel != null) {
-						String modelModuleName = metaDataModel.getModuleName();
-						String modelQueryName = metaDataModel.getQueryName();
-						if (modelQueryName != null) {
-							accesses.add(UserAccess.queryAggregate(modelModuleName, modelQueryName));
-						}
-						else {
-							Module modelModule = customer.getModule(modelModuleName);
-							String moduleDocumentName = metaDataModel.getDocumentName();
-							DocumentRef ref = modelModule.getDocumentRefs().get(documentName);
-							modelQueryName = ref.getDefaultQueryName();
-							if (modelQueryName != null) {
-								accesses.add(UserAccess.queryAggregate(modelModuleName, modelQueryName));
-							}
-							else {
-								accesses.add(UserAccess.documentAggregate(modelModuleName, moduleDocumentName));
-							}
-						}
-					}
-					else {
-						String modelName = chart.getModelName();
+				else { // not inlined
+					 // determine access if required
+					 if (determineAccesses) {
 						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 					}
 				}
@@ -411,6 +465,14 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			// NB DataRepeater cannot zoom in
+			
+			@Override
+			public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
+				if (determineAccesses) {
+					String imageName = image.getName();
+					accesses.add(UserAccess.dynamicImage(moduleName, documentName, imageName));
+				}
+			}
 
 			@Override
 			public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
@@ -426,7 +488,7 @@ public class ViewImpl extends Container implements View {
 	
 					if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
 						if (modelName != null) {
-							ListModel<Bean> model = document.getListModel(customer, modelName, true);
+							ListModel<Bean> model = document.getListModel(customer, modelName, false);
 							Document drivingDocument = model.getDrivingDocument();
 							if (drivingDocument != null) {
 								String drivingModuleName = drivingDocument.getOwningModuleName();
@@ -477,6 +539,10 @@ public class ViewImpl extends Container implements View {
 					
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					Relation targetRelation = (Relation) target.getAttribute();
+					// This should never happen as the bindings should be validated by now
+					if (targetRelation == null) {
+						throw new MetaDataException(binding + " does not point anywhere from context document " + document.getName());
+					}
 					String targetDocumentName = targetRelation.getDocumentName();
 	
 					// Check lookup query
@@ -559,6 +625,10 @@ public class ViewImpl extends Container implements View {
 				}
 				else {
 					Relation targetRelation = (Relation) target.getAttribute();
+					// This should never happen as the bindings should be validated by now
+					if (targetRelation == null) {
+						throw new MetaDataException(binding + " does not point anywhere from context document " + document.getName());
+					}
 					String relatedDocumentName = targetRelation.getDocumentName();
 					relatedDocument = module.getDocument(customer, relatedDocumentName);
 				}
@@ -569,25 +639,30 @@ public class ViewImpl extends Container implements View {
 			
 			@Override
 			public void visitReportAction(ActionImpl action) {
-				ProvidedRepository r = (optionalRepositoryToUse == null) ? ProvidedRepositoryFactory.get() : optionalRepositoryToUse;
-				String fileName = r.getReportFileName(customer, document, action.getResourceName());
-				if (fileName != null) {
-					List<Parameter> reportParameters = action.getParameters();
-					
-					ParameterImpl parameter = new ParameterImpl();
-					parameter.setName(AbstractWebContext.REPORT_ENGINE);
-					if (fileName.endsWith(".jasper")) {
-						parameter.setValue(ProvidedRepository.JASPER_SUFFIX);
+				String reportName = action.getResourceName();
+
+				String reportModuleName = null;
+				String reportDocumentName = null;
+
+				// Determine report module and document names from parameters
+				List<Parameter> reportParameters = action.getParameters();
+				for (Parameter reportParameter : reportParameters) {
+					String reportParameterName = reportParameter.getName();
+					if (AbstractWebContext.MODULE_NAME.equals(reportParameterName)) {
+						reportModuleName = reportParameter.getValue();
 					}
-					else if (fileName.endsWith(".flth")) {
-						parameter.setValue(ProvidedRepository.FREEMARKER_SUFFIX);
+					else if (AbstractWebContext.DOCUMENT_NAME.equals(reportParameterName)) {
+						reportDocumentName = reportParameter.getValue();
 					}
-					else {
-						throw new MetaDataException("Report Action for report " + action.getResourceName() + 
-														" in view " + name + " for module " + moduleName + " and document " + documentName + 
-														" does not reference a Jasper or Freemarker resource");
-					}
-					reportParameters.add(parameter);
+				}
+				
+				if ((reportModuleName == null) || (reportDocumentName == null)) {
+					throw new MetaDataException("Cannot determine document for report " + reportName + " in document " + 
+													document.getOwningModuleName() + "." + document.getName());
+				}
+				
+				if (determineAccesses) {
+					accesses.add(UserAccess.report(reportModuleName, reportDocumentName, reportName));
 				}
 			}
 		}.visit();

@@ -1,18 +1,19 @@
 package org.skyve.impl.web.faces.converters.decimal.currency;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.ConverterException;
-
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.util.UtilImpl;
 
-public class Decimal5DollarsAndCents extends org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents implements Converter {
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.convert.ConverterException;
+
+public class Decimal5DollarsAndCents extends org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents
+										implements Converter<Decimal5> {
 	@Override
-	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
+	public Decimal5 getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
@@ -27,12 +28,12 @@ public class Decimal5DollarsAndCents extends org.skyve.domain.types.converters.d
 	}
 
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, Object value) {
+	public String getAsString(FacesContext fc, UIComponent component, Decimal5 value) {
 		if (value == null) {
 			return "";
 		}
 		try {
-			return toDisplayValue((Decimal5) value);
+			return toDisplayValue(value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "";

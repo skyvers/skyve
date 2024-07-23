@@ -3,18 +3,9 @@ package org.skyve.impl.metadata.repository.module;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.domain.types.formatters.Formatter;
 import org.skyve.domain.types.formatters.Formatters;
@@ -34,6 +25,7 @@ import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.impl.metadata.repository.ConvertableMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
+import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
@@ -50,6 +42,16 @@ import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlElementRefs;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "module")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
@@ -469,6 +471,15 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 					}
 				}
 			}
+			
+			// Check default query names exist as queries
+			for (Entry<String, DocumentRef> ref : result.getDocumentRefs().entrySet()) {
+				String defaultQueryName = ref.getValue().getDefaultQueryName();
+				if ((defaultQueryName != null) && (! queryNames.contains(defaultQueryName))) {
+					throw new MetaDataException(metaDataName + " : The default query of " + defaultQueryName + 
+													" does not exist for document " + ref.getKey());
+				}
+			}
 		}
 
 		// Populate Roles
@@ -531,7 +542,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 						List<ActionPrivilegeMetaData> repositoryActionPrivileges = documentPrivilegeMetaData.getActions();
 						if (repositoryActionPrivileges != null) {
 							for (ActionPrivilegeMetaData actionPrivilegeMetaData : repositoryActionPrivileges) {
-								org.skyve.impl.metadata.user.ActionPrivilege actionPrivilege = new org.skyve.impl.metadata.user.ActionPrivilege();
+								ActionPrivilege actionPrivilege = new ActionPrivilege();
 								value = actionPrivilegeMetaData.getActionName();
 								if (value == null) {
 									throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +
@@ -752,7 +763,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData
 				result.setAutoPopulate(! Boolean.FALSE.equals(item.getAutoPopulate()));
 				
 				items.add(result);
-			}
+			} 
 			else if (action instanceof MapItemMetaData) {
 				MapItemMetaData item = (MapItemMetaData) action;
 				org.skyve.impl.metadata.module.menu.MapItem result = new org.skyve.impl.metadata.module.menu.MapItem();

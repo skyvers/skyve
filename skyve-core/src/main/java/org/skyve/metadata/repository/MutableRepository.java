@@ -1,7 +1,5 @@
 package org.skyve.metadata.repository;
 
-import javax.annotation.Nonnull;
-
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
@@ -13,6 +11,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View;
+
+import jakarta.annotation.Nonnull;
 
 public interface MutableRepository {
 	/**
@@ -91,7 +91,7 @@ public interface MutableRepository {
 
 	/**
 	 * Puts a UX/UI agnostic view meta-data into this repository.
-	 * @param document	The document the document is for.
+	 * @param document	The document the view is for.
 	 * @param view	The view meta-data to put.
 	 * @return	The converted view.
 	 */

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
@@ -23,6 +24,8 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DeepUnwrap;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * FreeMarker user-defined directive that retrieves the description from the metadata for
@@ -130,12 +133,13 @@ public class DescriptionDirective implements TemplateDirectiveModel {
 	 * @param fullyQualifiedPropertyName The compound binding to the required attribute
 	 * @return The description of the attribute
 	 */
-	private static String getDescription(final Bean bean, final String fullyQualifiedPropertyName) {
+	private static @Nullable String getDescription(@Nonnull final Bean bean,
+														@Nonnull final String fullyQualifiedPropertyName) {
 		final Customer customer = CORE.getCustomer();
 		final Module module = customer.getModule(bean.getBizModule());
 		final Document document = module.getDocument(customer, bean.getBizDocument());
 		final TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, fullyQualifiedPropertyName);
-
-		return tmd.getAttribute().getDescription();
+		final Attribute ta = tmd.getAttribute();
+		return (ta == null) ? null : ta.getDescription();
 	}
 }

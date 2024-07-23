@@ -10,7 +10,7 @@
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Principal p = request.getUserPrincipal();
-	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName());
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
 %>
 <!DOCTYPE html>
@@ -20,7 +20,7 @@
 		<meta http-equiv="Content-Type" CONTENT="text/html; CHARSET=utf-8">
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png">
 		<title><%=Util.i18n("page.htmlEdit.browsImages.title", locale)%></title>
-		<link rel="stylesheet" type="text/css" href="../../css/basic.css"/>
+		<link rel="stylesheet" type="text/css" href="../../skyve/css/basic-min.css"/>
 	</head>
 	<body BGCOLOR='#e0e0e0' MARGINHEIGHT=0 MARGINWIDTH=0 LEFTMARGIN=0 TOPMARGIN=0>
 		<script type="text/javascript">var isomorphicDir='../../<%=UtilImpl.SMART_CLIENT_DIR%>/modules/ISC_Containers.js"></script>

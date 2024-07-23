@@ -19,7 +19,7 @@ public class AddImage extends UploadAction<Communication> {
 		Communication result = communication;
 
 		try (InputStream in = upload.getInputStream()) {
-			String base64EncodedImage = Base64.encodeBase64String(FileUtil.getFileBytes(in));
+			String base64EncodedImage = Base64.encodeBase64String(FileUtil.bytes(in));
 			StringBuilder imageTag = new StringBuilder();
 			imageTag.append("<div><img src=\"data:image/png;base64,");
 			imageTag.append(base64EncodedImage);

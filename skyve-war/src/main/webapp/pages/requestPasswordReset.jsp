@@ -17,31 +17,41 @@
 	String customer = WebUtil.determineCustomerWithoutSession(request);
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Principal p = request.getUserPrincipal();
-	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName());
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
 
 	// This is a postback, process it and move on
 	String customerValue = request.getParameter("customer");
 	String emailValue = request.getParameter("email");
-	String oldCaptcha = null;
-	HttpSession session = request.getSession(false);
-	if (session != null) {
-		oldCaptcha = (String) session.getAttribute("g-recaptcha-response");
-	}
-	String newCaptcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
-	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY!=null);
-	
-	boolean postback = (emailValue != null) && (newCaptcha != null) && (! newCaptcha.equals(oldCaptcha));
-	if (postback) {
-		request.getSession().setAttribute("g-recaptcha-response", newCaptcha);
-		try {
-			WebUtil.requestPasswordReset(customerValue, emailValue);
+	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
+	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null || UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
+	String siteKey = null;
+	boolean googleRecaptchaUsed = false;
+	boolean cloudflareTurnstileUsed = false;
+	if(recaptchaSet){
+		siteKey = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null ? UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY : UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
+		if(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null){
+			googleRecaptchaUsed = true;
+		}else{
+			cloudflareTurnstileUsed = true;
 		}
-		catch (Exception e) {
-			// don't stop - we need to give nothing away
-			UtilImpl.LOGGER.log(Level.SEVERE, 
-									String.format("Password Reset Request Failed for customer=%s and email=%s", customerValue, emailValue),
-									e);
+	}
+	
+	boolean postback = (emailValue != null) && (captcha != null);
+	if (postback) {
+		if (WebUtil.validateRecaptcha(captcha)) {
+			try {
+				WebUtil.requestPasswordReset(customerValue, emailValue);
+			}
+			catch (Exception e) {
+				// don't stop - we need to give nothing away
+				UtilImpl.LOGGER.log(Level.SEVERE, 
+										String.format("Password Reset Request Failed for customer=%s and email=%s", customerValue, emailValue),
+										e);
+			}
+		}
+		else {
+			UtilImpl.LOGGER.severe("Recaptcha failed validation");
 		}
 	}
 %>
@@ -115,7 +125,11 @@
 			});
 			-->
 		</script>
-		<script src='https://www.google.com/recaptcha/api.js'></script>
+		<% if (googleRecaptchaUsed) { %>
+			<script src='https://www.google.com/recaptcha/api.js'></script>
+		<% } else if(cloudflareTurnstileUsed) {%>
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+		<% } %>
 	</head>
 	<body>
 		<div class="ui middle aligned center aligned grid">
@@ -140,11 +154,10 @@
 		    		<form method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 			    		<div class="ui segment">
 
-				    		<div class="ui header">
-				    			<%=Util.i18n("page.requestPasswordReset.banner", locale)%>
-				    		</div>
+			    		<div class="ui header">
+			    			<%=Util.i18n("page.requestPasswordReset.banner", locale)%>
+			    		</div>
 
-							<% if (recaptchaSet) { %>
 			    			<div class="field">
 								<%=Util.i18n("page.requestPasswordReset.message", locale)%>
 			    			</div>
@@ -172,18 +185,13 @@
 									<tr>
 										<td style="width:50%" />
 										<td>
-											<div class="g-recaptcha" data-sitekey="<%=UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY%>"></div>
+											<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
 										</td>
 										<td style="width:50%" />
 									</tr>
 								</table>
 			                </div>
 		                	<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" class="ui fluid large blue submit button" />
-			                <% } else { %>
-			                <div class="field">
-		                		<%=Util.i18n("page.resetPassword.recaptchaNotConfiguredMessage", locale)%>
-			                </div>
-			                <% } %>
 			                
 			                <div style="margin-top: 5px;">
 			                	<% if (UtilImpl.CUSTOMER == null) { %>

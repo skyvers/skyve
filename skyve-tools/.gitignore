@@ -1,2 +1,8 @@
 /bin
 /target/
+/tools/lib
+/tools/sail/jre
+/tools/sail/chrome*
+/tools/sail/*.jar
+/tools/sail/sail.exe
+/sail.zip

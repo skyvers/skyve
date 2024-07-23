@@ -1,7 +1,7 @@
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Enumeration"%>
-<%@ page import="javax.servlet.http.Cookie"%>
+<%@ page import="jakarta.servlet.http.Cookie"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
 <%@ page import="org.skyve.metadata.user.User"%>
 <%@ page import="org.skyve.metadata.repository.ProvidedRepository"%>
@@ -154,7 +154,7 @@
 			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
 				persistence.begin();
-				user = WebUtil.processUserPrincipalForRequest(request, userName, true);
+				user = WebUtil.processUserPrincipalForRequest(request, userName);
 			}
 			finally {
 				if (persistence != null) {

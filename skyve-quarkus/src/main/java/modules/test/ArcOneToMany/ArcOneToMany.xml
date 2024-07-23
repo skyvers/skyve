@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ArcOneToMany" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			A collection of arcs
+		]]>
+	</documentation>
+	<persistent name="TEST_ArcOneToMany" />
+	<singularAlias>ArcOneToMany</singularAlias>
+	<pluralAlias>ArcOneToManys</pluralAlias>
+	<bizKey expression="ArcOneToMany" />
+	<attributes>
+		<collection name="arcs" type="aggregation">
+			<displayName>Arcs</displayName>
+			<documentName>AnyBase</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

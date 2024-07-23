@@ -1,5 +1,6 @@
 package org.skyve.impl.generate.jasperreports;
 
+import org.skyve.CORE;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -26,7 +27,7 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
                     .findFirst()
                     .orElse(null);
             if (attribute != null) {
-                final ReportField fld = fieldFromAttribute(design, design.getCustomer(), design.getDocument(), attribute, new StringBuilder(), new StringBuilder());
+                final ReportField fld = fieldFromAttribute(design, CORE.getCustomer(), design.getDocument(), attribute, new StringBuilder(), new StringBuilder());
                 design.getFields().add(fld);
             }
         }
@@ -46,9 +47,9 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
                 ReportElement.ElementType type = ReportElement.ElementType.staticText;
                 String valueExpression = a.getDisplayName();
                 ReportElement.ElementAlignment alignment = ReportElement.ElementAlignment.left;
-                Integer labelWidth = design.getDefaultElementHeight() * 5;
-                Integer top = 0;
-                Integer labelLeft = 0;
+                Integer labelWidth = Integer.valueOf(design.getDefaultElementHeight().intValue() * 5);
+                Integer top = Integer.valueOf(0);
+                Integer labelLeft = Integer.valueOf(0);
 
                 // add label
                 if (Boolean.TRUE.equals(design.getRenderLabelAsTextFields()) || Boolean.TRUE.equals(design.getDynamicFlow())) {
@@ -65,10 +66,10 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
                 // add value
                 type = ReportElement.ElementType.textField;
                 valueExpression = "$F{" + a.getName() + "}";
-                int valueWidth = design.getColumnWidth() - labelWidth;
+                int valueWidth = design.getColumnWidth().intValue() - labelWidth.intValue();
 
-                detail = Renderer.addElement(detail, type, a.getName(), valueExpression, null, null, top, labelWidth, valueWidth, null, null, alignment, null,
-                        null, null, null, null);
+                detail = Renderer.addElement(detail, type, a.getName(), valueExpression, null, null, top, labelWidth, Integer.valueOf(valueWidth),
+                		null, null, alignment, null, null, null, null, null);
 
                 design.getBands().add(detail);
             }

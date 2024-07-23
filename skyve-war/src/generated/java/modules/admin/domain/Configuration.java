@@ -1,13 +1,14 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.Group.GroupExtension;
 import modules.admin.Startup.StartupExtension;
@@ -32,6 +33,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class Configuration extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -146,6 +148,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 				in a future version of Skyve. Here for backwards compatibility during Restore.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum PasswordComplexityModel implements Enumeration {
 		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
 		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
@@ -219,6 +222,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * The type of two factor authentication to be used for all users.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum TwoFactorType implements Enumeration {
 		off("OFF", "Off"),
 		email("EMAIL", "Email");
@@ -289,35 +293,35 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * <br/>
 	 * The minimum number of characters for new passwords
 	 **/
-	private Integer passwordMinLength = Integer.valueOf(10);
+	private Integer passwordMinLength = Integer.valueOf(12);
 
 	/**
 	 * Requires Lowercase
 	 * <br/>
 	 * If new passwords should require at least one lowercase character
 	 **/
-	private Boolean passwordRequireLowercase;
+	private Boolean passwordRequireLowercase = Boolean.valueOf(true);
 
 	/**
 	 * Requires Uppercase
 	 * <br/>
 	 * If new passwords should require at least one uppercase character
 	 **/
-	private Boolean passwordRequireUppercase;
+	private Boolean passwordRequireUppercase = Boolean.valueOf(true);
 
 	/**
 	 * Requires Numeric Characters
 	 * <br/>
 	 * If new passwords should require at least one numeric character
 	 **/
-	private Boolean passwordRequireNumeric;
+	private Boolean passwordRequireNumeric = Boolean.valueOf(true);
 
 	/**
 	 * Requires Special Characters
 	 * <br/>
 	 * If new passwords should require at least one special character
 	 **/
-	private Boolean passwordRequireSpecial;
+	private Boolean passwordRequireSpecial = Boolean.valueOf(false);
 
 	/**
 	 * Password Rule Description
@@ -1142,6 +1146,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the captcha type of startup is Cloudflare Turnstile
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCloudflareTurnstile() {
+		return (getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.cloudflareTurnstile == getStartup().getCaptchaType());
+	}
+
+	/**
+	 * {@link #isCloudflareTurnstile} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCloudflareTurnstile() {
+		return (! isCloudflareTurnstile());
+	}
+
+	/**
 	 * emailConfigured
 	 *
 	 * @return The condition
@@ -1161,6 +1184,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the captcha type of startup is Google Recaptcha
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isGoogleRecaptcha() {
+		return (getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.googleRecaptcha == getStartup().getCaptchaType());
+	}
+
+	/**
+	 * {@link #isGoogleRecaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotGoogleRecaptcha() {
+		return (! isGoogleRecaptcha());
+	}
+
+	/**
 	 * True when the selected startup map type is Google Maps
 	 *
 	 * @return The condition
@@ -1177,6 +1219,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotMapTypeGmap() {
 		return (! isMapTypeGmap());
+	}
+
+	/**
+	 * True when no captcha type is selected in startup
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isNoCaptcha() {
+		return (getStartup().getCaptchaType() == null);
+	}
+
+	/**
+	 * {@link #isNoCaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotNoCaptcha() {
+		return (! isNoCaptcha());
 	}
 
 	/**

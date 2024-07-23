@@ -4,8 +4,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import javax.inject.Inject;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,10 +12,11 @@ import org.skyve.util.BeanValidator;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import jakarta.inject.Inject;
 import modules.admin.domain.Startup;
-import util.AbstractH2TestForJUnit5;
+import util.AbstractH2Test;
 
-public class StartupBizletH2Test extends AbstractH2TestForJUnit5 {
+public class StartupBizletH2Test extends AbstractH2Test {
 
 	@Inject
 	private StartupBizlet bizlet;

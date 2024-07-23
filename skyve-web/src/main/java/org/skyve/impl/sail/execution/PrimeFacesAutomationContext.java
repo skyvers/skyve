@@ -5,18 +5,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.faces.component.NamingContainer;
-import javax.faces.component.UIComponent;
-
-import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.components.ListGrid;
 import org.skyve.impl.web.faces.components.View;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilderChain;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+
+import jakarta.faces.component.NamingContainer;
+import jakarta.faces.component.UIComponent;
 
 public class PrimeFacesAutomationContext extends AutomationContext {
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
@@ -96,7 +96,7 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 
 		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
 		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
-		cbc.setSAILManagedBean(new FacesView<>());
+		cbc.setSAILManagedBean(new FacesView());
 		cbc.setManagedBeanName("skyve");
 		cbc.setUserAgentType(getUserAgentType());
 	
@@ -121,7 +121,7 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 		ComponentCollectingLayoutBuilder cclb = new ComponentCollectingLayoutBuilder(cccb);
 		LayoutBuilderChain lbc = new LayoutBuilderChain(layoutBuilder, cclb);
 		
-		FacesView<?> managedBean = new FacesView<>();
+		FacesView managedBean = new FacesView();
 		cbc.setSAILManagedBean(managedBean);
 		lbc.setSAILManagedBean(managedBean);
 

@@ -1,9 +1,8 @@
 package org.skyve.domain.app.admin;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.bind.annotation.XmlEnum;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.domain.Bean;
@@ -11,6 +10,8 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlEnum;
 
 public interface ReportDataset extends PersistentBean {
 	/**
@@ -32,7 +33,7 @@ public interface ReportDataset extends PersistentBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues;
+		private static List<DomainValue> domainValues = Stream.of(values()).map(DatasetType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
 		private DatasetType(String code, String description) {
 			this.code = code;
@@ -82,14 +83,6 @@ public interface ReportDataset extends PersistentBean {
 		}
 
 		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				DatasetType[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (DatasetType value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
 			return domainValues;
 		}
 	}

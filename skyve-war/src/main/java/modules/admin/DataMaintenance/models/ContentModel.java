@@ -38,9 +38,9 @@ public class ContentModel extends ListModel<DataMaintenance> {
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 	
-	public ContentModel() throws Exception {
-		Customer c = CORE.getUser().getCustomer();
-		drivingDocument = c.getModule(Content.MODULE_NAME).getDocument(c, Content.DOCUMENT_NAME);
+	@Override
+	public void postConstruct(Customer customer, boolean runtime) {
+		drivingDocument = customer.getModule(Content.MODULE_NAME).getDocument(customer, Content.DOCUMENT_NAME);
 		
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);

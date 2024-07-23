@@ -89,8 +89,8 @@
 						</item>
 					</row>
 				</form>
-				<dataGrid binding="usersToEmail" showAdd="false" showEdit="false" showZoom="false">
-					<boundColumn binding="contact.email1" />
+				<dataGrid binding="editUsersToEmail" showAdd="false" showEdit="false" showZoom="false">
+					<boundColumn binding="text5001" title="Email" />
 				</dataGrid>
 			</vbox>
 			<vbox border="true" borderTitle="When To Execute" visible="schedulingEnabled">
@@ -520,11 +520,11 @@
 		<defaults/>
 
 		<action className="AddUserToEmail" displayName="Add User to Email" inActionPanel="false"
-				  iconStyleClass="fa fa-plus"/>
+				  iconStyleClass="fa-solid fa-plus"/>
 		<download className="DownloadReport" displayName="Download Report" inActionPanel="false"
-				  iconStyleClass="fa fa-file-pdf-o" visible="typeFreemarker"/>
+				  iconStyleClass="fa-solid fa-file-pdf" visible="typeFreemarker"/>
 		<download className="DownloadJasperReport" displayName="Download Report" inActionPanel="false"
-				  iconStyleClass="fa fa-file-pdf-o" visible="typeJasper"/>
+				  iconStyleClass="fa-solid fa-file-pdf" visible="typeJasper"/>
 	</actions>
 	<newParameters/>
 </view>

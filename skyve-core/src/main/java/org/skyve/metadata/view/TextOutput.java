@@ -1,8 +1,8 @@
 package org.skyve.metadata.view;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 public interface TextOutput {
 	Boolean getEscape();
@@ -16,9 +16,9 @@ public interface TextOutput {
 		// Formatting tags, structural tags, links and images and CSS too
 		relaxed,
 		// Formatting tags, structural tags, links and images
-		basic,
-		// Formatting tags only
 		simple,
+		// Formatting tags only
+		basic,
 		// Only Text - no HTML
 		text
 	}

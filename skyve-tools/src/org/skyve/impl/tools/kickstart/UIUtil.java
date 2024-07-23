@@ -56,7 +56,6 @@ public final class UIUtil {
 		 * Popup the message.
 		 */
 		@Override
-		@SuppressWarnings("synthetic-access")
 		public void run() {
 			popupMessage(message); 
 		}
@@ -66,7 +65,6 @@ public final class UIUtil {
 	 * Popup a message in a dialog on the event-dispatch thread.
 	 * @param message	The mesasge to popup.
 	 */
-	@SuppressWarnings("synthetic-access")
 	public static void popup(String message) {
 		if (SwingUtilities.isEventDispatchThread()) { // we are in the event-dispatch thread
 			popupMessage(message); 

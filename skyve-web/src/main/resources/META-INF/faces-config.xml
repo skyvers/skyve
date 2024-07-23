@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<faces-config version="2.2"
-				xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
-				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-				xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+<faces-config version="4.0"
+				xmlns="https://jakarta.ee/xml/ns/jakartaee"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd">
 	<application>
 		<!-- This EL resolver is required to ensure that String properties of value "" (empty string) are successfully coerced to null -->
-		<el-resolver>
-			org.skyve.impl.web.faces.EmptyStringResolver
-		</el-resolver>
+		<el-resolver>org.skyve.impl.web.faces.EmptyStringResolver</el-resolver>
 	</application>
 
     <factory>
@@ -150,10 +148,6 @@
 	<converter>
 		<converter-id>Decimal2OneDecimalPlace</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2OneDecimalPlace</converter-class>
-	</converter>
-	<converter>
-		<converter-id>Decimal2TwoDecimalPlacesPercentage</converter-id>
-		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal2TwoDecimalPlacesPercentage</converter-class>
 	</converter>
 	<converter>
 		<converter-for-class>org.skyve.domain.types.Decimal5</converter-for-class>
@@ -339,11 +333,6 @@
 	</converter>
 	
 	<render-kit>
-		<renderer>
-			<component-family>org.primefaces.component</component-family>
-			<renderer-type>org.primefaces.component.CommandButtonRenderer</renderer-type>
-			<renderer-class>org.primefaces.extensions.renderer.CommandButtonSingleClickRenderer</renderer-class>
-		</renderer>
 		<renderer>
 			<component-family>org.primefaces.component</component-family>
 			<renderer-type>org.primefaces.component.PanelRenderer</renderer-type>

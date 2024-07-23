@@ -7,14 +7,10 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
@@ -37,6 +33,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.chart.Bucket;
@@ -53,12 +51,18 @@ import org.skyve.metadata.view.model.chart.TextLengthBucket;
 import org.skyve.metadata.view.model.chart.TextStartsWithBucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 /**
- * Chart Servlet - supplies map data to a map display.
+ * Chart Servlet - supplies chart config to a chart.
  * 
- * there are 2 usage modes:-
+ * there are 3 usage modes:-
  * 
  * 1) This mode uses the given model to generate its own ChartData object.
  * 		parameters
@@ -94,7 +98,7 @@ public class ChartServlet extends HttpServlet {
 				try {
 					persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -136,15 +140,19 @@ public class ChartServlet extends HttpServlet {
 	
 	private static String processChartModel(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
-		Customer customer = CORE.getCustomer();
-		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+		String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
-		Module module = customer.getModule(bean.getBizModule());
-		Document document = module.getDocument(customer, bean.getBizDocument());
 
+		User user = CORE.getUser();
+		String moduleName = bean.getBizModule();
+		String documentName = bean.getBizDocument();
 		UxUi uxui = UserAgent.getUxUi(request);
 		String uxuiName = uxui.getName();
+
+		Customer customer = CORE.getCustomer();
+		Module module = customer.getModule(moduleName);
+		Document document = module.getDocument(customer, documentName);
 		UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
 
 		View view = document.getView(uxuiName,
@@ -153,11 +161,13 @@ public class ChartServlet extends HttpServlet {
 											ViewType.edit.toString() :
 											ViewType.create.toString());
 
-		String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 		ChartData data = null;
 		// Check for an inline model builder
+		String modelName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODEL_NAME)));
 		ChartBuilderMetaData builder = (ChartBuilderMetaData) view.getInlineModel(modelName);
 		if (builder == null) {
+			// Check access since we know this is not an inline model
+			user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuiName);
 			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);
 			data = model.getChartData();
@@ -176,28 +186,44 @@ public class ChartServlet extends HttpServlet {
 
 	private static String processListModel(HttpServletRequest request)
 	throws Exception {
-		Customer customer = CORE.getCustomer();
+		User user = CORE.getUser();
+		Customer customer = user.getCustomer();
 
-		String module_QueryOrModel = request.getParameter(DATA_SOURCE_NAME);
+		String module_QueryOrModel = OWASP.sanitise(Sanitisation.text, request.getParameter(DATA_SOURCE_NAME));
 		int _Index = module_QueryOrModel.indexOf('_');
-		Module module = customer.getModule(module_QueryOrModel.substring(0, _Index));
+		String moduleName = module_QueryOrModel.substring(0, _Index);
+		Module module = customer.getModule(moduleName);
 		String documentOrQueryOrModelName = module_QueryOrModel.substring(_Index + 1);
 		int __Index = documentOrQueryOrModelName.indexOf("__");
 		if (__Index >= 0) { // this is a model
 			return emptyResponse();
 		}
 
+		UxUi uxui = UserAgent.getUxUi(request);
+
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
+		// not a query, must be a document
 		if (query == null) {
+			user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+		}
+		// a query
+		else {
+			user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 		}
 		if (query == null) {
 			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 		}
 
-		ListGridChartListModel model = new ListGridChartListModel();
-		model.setQuery(query);
+		// Check read permission
+		Document drivingDocument = module.getDocument(customer, query.getDocumentName());
+		if (! user.canReadDocument(drivingDocument)) {
+			throw new SecurityException("read this data", user.getName());
+		}
 
+		ListGridChartListModel model = new ListGridChartListModel(query);
+		model.postConstruct(customer, true);
+		
 		String tagId = request.getParameter("tagId");
 		model.setSelectedTagId(tagId);
 
@@ -212,7 +238,7 @@ public class ChartServlet extends HttpServlet {
 				List<Map<String, Object>> advancedCriteria = (List<Map<String, Object>>) criteria.get("criteria");
 				SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module,
 																			model.getDrivingDocument(),
-																			CORE.getUser(),
+																			user,
 																			CompoundFilterOperator.valueOf(operator),
 																			advancedCriteria,
 																			tagId,

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_testEmail" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<form border="true" borderTitle="admin.configuration.testEmail.testEmail.borderTitle" visible="emailConfigured">
+		<column pixelWidth="175" />
+		<column />
+		<column pixelWidth="110" />
+		<column />
+		<row>
+			<item>
+				<textField binding="emailTo" />
+			</item>
+			<item label="admin.configuration.testEmail.emailToContact.label">
+				<lookupDescription binding="emailToContact" descriptionBinding="email1">
+					<filterParameter filterBinding="email1" operator="notNull" />
+				</lookupDescription>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="emailSubject" />
+			</item>
+		</row>
+		<row>
+			<item showLabel="true" colspan="4">
+				<richText binding="emailContent" minPixelHeight="100" pixelWidth="400" pixelHeight="100" maxPixelHeight="100" />
+			</item>
+		</row>
+		<row>
+			<item colspan="2" align="right">
+				<button action="SendMail" pixelWidth="90" />
+			</item>
+		</row>
+	</form>
+</view>

@@ -1,26 +1,26 @@
 package org.skyve.impl.content.elastic;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
+//import java.io.File;
+//import java.io.FileOutputStream;
+//import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.logging.Level;
+//import java.nio.file.Files;
+//import java.nio.file.StandardCopyOption;
+//import java.util.ArrayList;
+//import java.util.Date;
+//import java.util.List;
+//import java.util.Map;
+//import java.util.TreeMap;
+//import java.util.UUID;
+//import java.util.logging.Level;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.tika.Tika;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.HttpHeaders;
+//import org.apache.commons.codec.binary.Base64;
+//import org.apache.tika.Tika;
+//import org.apache.tika.exception.TikaException;
+//import org.apache.tika.metadata.HttpHeaders;
 //import org.apache.tika.metadata.MSOffice;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TikaCoreProperties;
+//import org.apache.tika.metadata.Metadata;
+//import org.apache.tika.metadata.TikaCoreProperties;
 //import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 //import org.elasticsearch.action.get.GetRequestBuilder;
 //import org.elasticsearch.action.get.GetResponse;
@@ -48,16 +48,16 @@ import org.apache.tika.metadata.TikaCoreProperties;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
-import org.skyve.content.MimeType;
-import org.skyve.content.SearchResult;
+//import org.skyve.content.MimeType;
+//import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.DomainException;
+//import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.util.TimeUtil;
+//import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.FileUtil;
-import org.skyve.util.JSON;
+//import org.skyve.util.FileUtil;
+//import org.skyve.util.JSON;
 
 public class ElasticContentManager extends AbstractContentManager {
 	static final String ATTACHMENT_INDEX_NAME = "attachments";
@@ -65,24 +65,24 @@ public class ElasticContentManager extends AbstractContentManager {
 	static final String BEAN_INDEX_NAME = "beans";
 	static final String BEAN_INDEX_TYPE = "bean";
 
-    private static final String ATTACHMENT = "attachment";
-
-	private static final String FILE = "file";
-    public static final String FILE_CONTENT_TYPE = "file.content_type";
-    private static final String FILE_FILENAME = "file.filename";
-    public static final String FILE_LAST_MODIFIED = "file.last_modified";
-    private static final String FILESIZE = "filesize";
-
-    private static final String META = "meta";
-    private static final String META_TITLE = "meta.title";
-    private static final String META_AUTHOR = "meta.author";
-    private static final String META_KEYWORDS = "meta.keywords";
-    private static final String AUTHOR = "author";
-    private static final String TITLE = "title";
-    private static final String DATE = "date";
-    private static final String KEYWORDS = "keywords";
-
-    private static final String BEAN = "bean";
+//    private static final String ATTACHMENT = "attachment";
+//
+//	private static final String FILE = "file";
+//    public static final String FILE_CONTENT_TYPE = "file.content_type";
+//    private static final String FILE_FILENAME = "file.filename";
+//    public static final String FILE_LAST_MODIFIED = "file.last_modified";
+//    private static final String FILESIZE = "filesize";
+//
+//    private static final String META = "meta";
+//    private static final String META_TITLE = "meta.title";
+//    private static final String META_AUTHOR = "meta.author";
+//    private static final String META_KEYWORDS = "meta.keywords";
+//    private static final String AUTHOR = "author";
+//    private static final String TITLE = "title";
+//    private static final String DATE = "date";
+//    private static final String KEYWORDS = "keywords";
+//
+//    private static final String BEAN = "bean";
     static final String BEAN_CUSTOMER_NAME = "bean." + Bean.CUSTOMER_NAME;
     static final String BEAN_MODULE_KEY = "bean." + Bean.MODULE_KEY;
     static final String BEAN_DOCUMENT_KEY = "bean." + Bean.DOCUMENT_KEY;
@@ -92,7 +92,7 @@ public class ElasticContentManager extends AbstractContentManager {
     static final String BEAN_ATTRIBUTE_NAME = "bean.attribute";
 	
 //	private static Node node = ElasticUtil.localNode();
-	private static final Tika TIKA = new Tika();
+//	private static final Tika TIKA = new Tika();
 
 //	private Client client = null;
 	
@@ -175,11 +175,13 @@ public class ElasticContentManager extends AbstractContentManager {
 		// needs implementation
 	}
 	
+	@Override
 	public void reindex(AttachmentContent attachment, boolean index) 
 	throws Exception {
 		put(attachment, index, false);
 	}
 
+	@SuppressWarnings("unused")
 	private void put(AttachmentContent attachment, boolean index, boolean store)
 	throws Exception {
 /*
@@ -333,7 +335,8 @@ public class ElasticContentManager extends AbstractContentManager {
 		return getFromElastic(contentId);
 	}
 
-	private AttachmentContent getFromElastic(String contentId) throws Exception {
+	@SuppressWarnings("static-method")
+	private AttachmentContent getFromElastic(@SuppressWarnings("unused") String contentId) throws Exception {
 /*
 		GetRequestBuilder builder = client.prepareGet(ATTACHMENT_INDEX_NAME, ATTACHMENT_INDEX_TYPE, contentId);
 		builder.setFields(ATTACHMENT, 

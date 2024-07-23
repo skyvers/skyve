@@ -1,13 +1,14 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import modules.admin.ImportExport.ImportExportExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
@@ -28,6 +29,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class ImportExport extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -89,6 +91,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 * Mode
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Mode implements Enumeration {
 		importData("importData", "Import Data"),
 		exportData("exportData", "Export Data");
@@ -158,6 +161,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	 * Error handling
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum RollbackErrors implements Enumeration {
 		rollbackErrors("rollbackErrors", "admin.importExport.rollbackErrors.rollbackErrors.description"),
 		noRollbackErrors("noRollbackErrors", "admin.importExport.rollbackErrors.noRollbackErrors.description");
@@ -235,6 +239,7 @@ public abstract class ImportExport extends AbstractPersistentBean {
 <i>With this option, new records will always be created</i></p>
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum LoadType implements Enumeration {
 		createFind("createFind", "admin.importExport.loadType.createFind.description"),
 		createAll("createAll", "admin.importExport.loadType.createAll.description");

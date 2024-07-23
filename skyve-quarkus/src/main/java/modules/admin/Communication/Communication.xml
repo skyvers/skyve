@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Communication"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Communication" />
+	<singularAlias>Communication</singularAlias>
+	<pluralAlias>Communications</pluralAlias>
+	<iconStyleClass>fa fa-envelope</iconStyleClass>
+	<bizKey expression="{description}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.Communication</interface>
+	</implements>
+	<attributes>
+		<text name="description" required="true">
+			<displayName>admin.communication.description.displayName</displayName>
+			<length>250</length>
+		</text>
+		<text name="moduleName">
+			<displayName>admin.communication.moduleName.displayName</displayName>
+			<description>admin.communication.moduleName.description</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="documentName">
+			<displayName>admin.communication.documentName.displayName</displayName>
+			<description>admin.communication.documentName.description</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<association name="tag" type="aggregation" persistent="false" trackChanges="false">
+			<documentation><![CDATA[
+			<p>Tag is transient:
+			<ul><li>as good practice so that the user is forced to reconsider which
+			tag is used for the bulk communication each time, and</li>
+			<li>using a tag in the communication should not block the tag being removed
+			by normal user actions through the list functions</li></ul>
+			</p>
+			]]></documentation>
+			<displayName>admin.communication.tag.displayName</displayName>
+			<domain>variant</domain>
+			<documentName>Tag</documentName>
+		</association>
+		<text name="toBinding">
+			<displayName>admin.communication.toBinding.displayName</displayName>
+			<description>admin.communication.toBinding.description</description>
+			<length>500</length>
+		</text>
+		<text name="sendTo">
+			<displayName>admin.communication.sendTo.displayName</displayName>
+			<description>admin.communication.sendTo.description</description>
+			<length>250</length>
+		</text>
+		<text name="ccTo">
+			<displayName>admin.communication.ccTo.displayName</displayName>
+			<description>admin.communication.ccTo.description</description>
+			<length>250</length>
+		</text>
+		<text name="sendToOverride" persistent="false" trackChanges="false">
+			<displayName>admin.communication.sendToOverride.displayName</displayName>
+			<description>admin.communication.sendToOverride.description</description>
+			<length>250</length>
+		</text>
+		<text name="ccToOverride" persistent="false" trackChanges="false">
+			<displayName>admin.communication.ccToOverride.displayName</displayName>
+			<description>admin.communication.ccToOverride.description</description>
+			<length>250</length>
+		</text>		
+		<text name="sendFrom">
+			<displayName>admin.communication.sendFrom.displayName</displayName>
+			<description>admin.communication.sendFrom.description</description>
+			<length>250</length>
+		</text>
+		<boolean name="monitorBcc">
+			<displayName>admin.communication.monitorBcc.displayName</displayName>
+			<description>admin.communication.monitorBcc.description</description>
+		</boolean>
+		<text name="subject">
+			<displayName>admin.communication.subject.displayName</displayName>
+			<description>admin.communication.subject.description</description>
+			<length>250</length>
+		</text>
+		<markup name="body">
+			<displayName>admin.communication.body.displayName</displayName>
+			<description><![CDATA[admin.communication.body.description]]></description>
+		</markup>
+		<memo name="results" persistent="false">
+			<displayName>admin.communication.results.displayName</displayName>
+		</memo>
+		<content name="attachment1">
+			<displayName>admin.communication.attachment1.displayName</displayName>
+		</content>
+		<text name="attachmentFileName1">
+			<displayName>admin.communication.attachmentFileName1.displayName</displayName>
+			<description>admin.communication.attachmentFileName1.description</description>
+			<length>250</length>
+		</text>
+		<content name="attachment2">
+			<displayName>admin.communication.attachment2.displayName</displayName>
+		</content>
+		<text name="attachmentFileName2">
+			<displayName>admin.communication.attachmentFileName2.displayName</displayName>
+			<description>admin.communication.attachmentFileName2.description</description>
+			<length>250</length>
+		</text>
+		<content name="attachment3">
+			<displayName>admin.communication.attachment3.displayName</displayName>
+		</content>
+		<text name="attachmentFileName3">
+			<displayName>admin.communication.attachmentFileName3.displayName</displayName>
+			<description>admin.communication.attachmentFileName3.description</description>
+			<length>250</length>
+		</text>
+		<enum name="actionType" implementingEnumClassName="org.skyve.domain.app.admin.Communication$ActionType" trackChanges="false" persistent="false">
+			<displayName>admin.communication.actionType.displayName</displayName>
+		</enum>
+		<enum name="formatType" implementingEnumClassName="org.skyve.domain.app.admin.Communication$FormatType">
+			<displayName>admin.communication.formatType.displayName</displayName>
+		</enum>
+		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.communication.selectedBatchTimestampFolderName.displayName</displayName>
+		</id>
+		<boolean name="refreshBatches" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.communication.refreshBatches.displayName</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="unTagSuccessful" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.communication.unTagSuccessful.displayName</displayName>
+		</boolean>
+		<boolean name="notification" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.communication.notification.displayName</displayName>
+		</boolean>
+
+		<boolean name="systemUse">
+			<displayName>admin.communication.systemUse.displayName</displayName>
+			<description>admin.communication.systemUse.description</description>
+		</boolean>
+		<text name="unsubscribeUrl" trackChanges="false">
+			<displayName>admin.commmunication.unsubscribe.displayName</displayName>
+			<length>500</length>
+		</text>
+		<boolean name="includeCalendar">
+			<displayName>admin.communication.includeCalendar.displayName</displayName>
+			<description><![CDATA[admin.communication.includeCalendar.description]]></description>
+		</boolean>
+		<text name="calendarTitleExpression">
+			<displayName>admin.communication.calendarTitleExpression.displayName</displayName>
+			<description>admin.communication.calendarTitleExpression.description</description>
+			<length>200</length>
+		</text>
+		<dateTime name="calendarStartTime">
+			<displayName>admin.communication.calendarStartTime.displayName</displayName>
+		</dateTime>
+		<dateTime name="calendarEndTime">
+			<displayName>admin.communication.calendarEndTime.displayName</displayName>
+		</dateTime>
+		<text name="calendarDescriptionExpression">
+			<displayName>admin.communication.calendarDescriptionExpression.displayName</displayName>
+			<description><![CDATA[admin.communication.calendarDescriptionExpression.description]]></description>
+			<length>500</length>
+		</text>
+		<content name="mailImage" persistent="false" audited="false" trackChanges="false">
+			<displayName>admin.communication.mailImage.displayName</displayName>
+		</content>
+		<association name="template" type="aggregation">
+			<displayName>admin.communication.template.displayName</displayName>
+			<description><![CDATA[admin.communication.template.description]]></description>
+			<domain>variant</domain>
+			<documentName>CommunicationTemplate</documentName>
+		</association>
+		
+		<text name="basePath" persistent="false" audited="false" trackChanges="false">
+			<displayName>admin.communication.basePath.displayName</displayName>
+			<length>500</length>
+		</text>
+		<text name="batch" persistent="false" audited="false" trackChanges="false">
+			<displayName>admin.communication.batch.displayName</displayName>
+			<description>admin.communication.batch.description</description>
+			<length>14</length>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="showBatches">
+			<description>Whether to show the list of batches</description>
+			<expression><![CDATA[description!=null]]></expression>
+		</condition>
+		<condition name="saveAction">
+			<description>Save for Bulk Send</description>
+			<expression>
+				<![CDATA[ActionType.saveForBulkSend.equals(this.getActionType())]]>
+			</expression>
+		</condition>
+		<condition name="emailType">
+			<description>Email type format</description>
+			<expression>
+				<![CDATA[FormatType.email.equals(this.getFormatType())]]>
+			</expression>
+		</condition>
+		<condition name="locked">
+			<description>Locked</description>
+			<expression>
+				<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystemUse())]]>
+			</expression>
+		</condition>
+		<condition name="includesCalendar">
+			<description>Includes Calendar</description>
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(getIncludeCalendar())]]>
+			</expression>
+		</condition>
+		<condition name="batchSelected">
+			<description>Batch Selected</description>
+			<expression>
+				<![CDATA[
+					selectedBatchTimestampFolderName != null
+				]]>
+			</expression>
+		</condition>
+		<condition name="batchesRefreshRequired">
+			<description>Refresh Batches</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(refreshBatches)
+				]]>
+			</expression>
+		</condition>
+		<condition name="emailConfigured">
+			<expression>
+				<![CDATA[
+					modules.admin.Configuration.ConfigurationExtension.validSMTPHost()
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+	<uniqueConstraints>
+		<constraint scope="customer" description="Ensure no duplication of communication templates" name="UniqueSystemCommunication">
+			<message>A communication for {description} already exists.</message>
+			<fieldReferences>
+				<ref>description</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

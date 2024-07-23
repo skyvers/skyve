@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		name="edit" title="{bizKey}"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd">
+	<hbox>
+		<form responsiveWidth="6" border="true" borderTitle="Report Details" minPixelHeight="300">
+			<column responsiveWidth="4" />
+			<column responsiveWidth="7" />
+			<column responsiveWidth="1" />
+			<row>
+				<item>
+					<default binding="name" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<textArea binding="description" pixelHeight="60" />
+				</item>
+				
+			</row>
+			<row>
+				<item>
+					<radio vertical="false" binding="reportType">
+						<onChangedHandlers>
+							<rerender clientValidation="false" />
+						</onChangedHandlers>
+					</radio>
+				</item>
+			</row>
+	        <!-- freemaker report attributes -->
+			<row>
+				<item>
+					<checkBox binding="includeFragment" triState="false" visible="typeFreemarker" />
+				</item>
+			</row>
+	        <!-- jasper report attributes -->
+			<row>
+				<item required="true">
+					<combo binding="moduleName" visible="typeJasper">
+						<onChangedHandlers>
+							<rerender clientValidation="false" />
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+			<row>
+				<item required="true">
+					<combo binding="documentName" visible="typeJasper" />
+				</item>
+			</row>
+			<row>
+				<item required="true">
+					<textField binding="reportName" visible="typeJasper" />
+				</item>
+			</row>
+			<row>
+				<item required="true">
+					<combo binding="mode" visible="typeJasper" />
+				</item>
+			</row>
+	        <!-- common attributes -->
+			<row>
+				<item>
+					<default binding="enabled" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<radio binding="outputFormat" vertical="false" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="restrictToRole" />
+				</item>
+			</row>
+		</form>
+		<form responsiveWidth="6" border="true" borderTitle="Report Template" minPixelHeight="300" visible="typeFreemarker">
+			<column />
+			<row>
+				<item showLabel="false" showHelp="false">
+					<textArea binding="template" minPixelHeight="300" visible="typeFreemarker" />
+				</item>
+			</row>
+		</form>
+	</hbox>
+	
+	<dataGrid title="Datasets" binding="datasets" visible="typeFreemarker">
+		<boundColumn binding="datasetType" />
+		<boundColumn binding="datasetName" />
+		<boundColumn binding="query" />
+	</dataGrid>
+	
+    <dataGrid title="Report Parameters" binding="parameters" visible="typeJasper">
+        <boundColumn binding="name"/>
+        <boundColumn binding="description"/>
+        <boundColumn binding="type"/>
+        <boundColumn binding="required"/>
+        <boundColumn binding="testValueString"/>
+    </dataGrid>
+
+	<!-- <inject>
+		<script>
+			<![CDATA[
+				if(view) {
+					view.opened = function(data) {
+						isc.BizUtil.createCodeMirror(v1, 'template', 'application/xml');
+					};
+				}
+			]]>
+		</script>
+	</inject> -->
+	
+	<actions>
+		<defaults />
+
+		<download className="TestReport" displayName="Test Report" iconStyleClass="fa fa-file-pdf-o" visible="typeFreemarker" />
+		<download className="TestJasperReport" displayName="Test Report" iconStyleClass="fa fa-file-pdf-o" visible="typeJasper" />
+		<action className="CopyReport" displayName="Copy Report" iconStyleClass="fa fa-copy" confirm="Ok to copy this report to a new report?" />
+		<download className="ExportReportSpecification" displayName="Export Report Specification" iconStyleClass="fa fa-download" />
+		<download className="DownloadTemplate" displayName="Download Template" iconStyleClass="fa fa-arrow-circle-o-down" />
+	</actions>
+	<newParameters />
+</view>

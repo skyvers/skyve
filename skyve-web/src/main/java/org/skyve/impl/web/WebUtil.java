@@ -1,18 +1,19 @@
 package org.skyve.impl.web;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -21,9 +22,10 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.NoResultsException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -40,30 +42,39 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class WebUtil {
 	private WebUtil() {
 		// Disallow instantiation.
 	}
 	
-	public static User processUserPrincipalForRequest(HttpServletRequest request,
-														String userPrincipal,
-														boolean useSession)
+	public static User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
+														@Nullable String userPrincipal)
 	throws Exception {
-		UserImpl user = null;
-		if (useSession) {
-			user = (UserImpl) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		}
+		HttpSession session = request.getSession(false);
+		UserImpl user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
 		if ((user != null) && (userPrincipal != null)) {
 			UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-			if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
-					user.getName().equals(principalUser.getName()))) {
+			if (principalUser == null) {
+				user = null;
+			}
+			else if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
+							user.getName().equals(principalUser.getName()))) {
 				user = null;
 			}
 		}
@@ -75,11 +86,18 @@ public class WebUtil {
 				if (user == null) {
 					throw new IllegalStateException("WebUtil: Cannot get the user " + userPrincipal);
 				}
-				if (useSession) {
-					request.getSession(true).setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+				// ensure there is a session established
+				if (session == null) {
+					session = request.getSession(true);
 				}
+				setSessionId(user, request);
+				session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 				AbstractPersistence.get().setUser(user);
 				WebStatsUtil.recordLogin(user);
+				Customer customer = user.getCustomer();
+				if (customer instanceof CustomerImpl) {
+					((CustomerImpl) customer).notifyLogin(user, session);
+				}
 			}
 			// TODO hack!
 			else { // check basic auth
@@ -92,9 +110,12 @@ public class WebUtil {
 					// credentials = username:password or customer/username:password
 					final String[] values = credentials.split(":", 2);
 					final String username = UtilImpl.processStringValue(values[0]);
-					final String password = UtilImpl.processStringValue(values[1]);
+//					final String password = UtilImpl.processStringValue(values[1]);
 					// TODO check password...
 					user = ProvidedRepositoryFactory.get().retrieveUser(username);
+					if (user != null) {
+						setSessionId(user, request);
+					}
 					AbstractPersistence.get().setUser(user);
 				}				
 			}
@@ -154,6 +175,16 @@ public class WebUtil {
 		}
 		
 		return result;
+	}
+	
+	/**]
+	 * Set the session ID if it is established.
+	 */
+	public static void setSessionId(@Nonnull UserImpl user, @Nonnull HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			user.setSessionId(session.getId());
+		}
 	}
 	
 	/**
@@ -284,13 +315,13 @@ public class WebUtil {
 			
 			// set reset password token for all users with the same email address across all customers
 			List<PersistentBean> users = q.beanResults();
-			if(! users.isEmpty()) {
+			if (! users.isEmpty()) {
 				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
-				for(PersistentBean user: users) {
+				for (PersistentBean user: users) {
 					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME, passwordResetToken);
 					p.upsertBeanTuple(user);
-					if(firstUser==null) {
+					if (firstUser == null) {
 						firstUser = user;
 					}
 				}
@@ -301,8 +332,14 @@ public class WebUtil {
 				Document d = m.getDocument(c, AppConstants.CONFIGURATION_DOCUMENT_NAME);
 				Bean configuration = d.newInstance(u);
 				String subject = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME);
+				if (subject == null) { // should never happen
+					throw new IllegalStateException(AppConstants.ADMIN_MODULE_NAME + '.' + AppConstants.CONFIGURATION_DOCUMENT_NAME + '.' + AppConstants.PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME + " is null.");
+				}
 				subject = Binder.formatMessage(subject, firstUser);
 				String body = (String) Binder.get(configuration, AppConstants.PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME); 
+				if (body == null) { // should never happen
+					throw new IllegalStateException(AppConstants.ADMIN_MODULE_NAME + '.' + AppConstants.CONFIGURATION_DOCUMENT_NAME + '.' + AppConstants.PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME + " is null.");
+				}
 				
 				body = body.replace("{#resetPasswordUrl}", Util.getResetPasswordUrl());
 				// keeping this for backwards compatibility
@@ -492,5 +529,72 @@ public class WebUtil {
 		finally {
 			persistence.commit(true);
 		}
+	}
+
+	/**
+	 * Validate the recaptcha response with google.
+	 * @param response	The response from the recaptcha control.
+	 * @return true if valid, otherwise false.
+	 */
+	public static boolean validateRecaptcha(String response) {
+		boolean valid = true;
+		String recaptchaSecretKey = null;
+		
+		// Use either google recaptcha or cloudflare turnstile secret key
+		if(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY != null) {
+			recaptchaSecretKey = UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY;
+		}else if (UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY != null) {
+			recaptchaSecretKey = UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+			//Because turnstile secret key is necessary set valid to false in case it's null		
+			valid = false;
+		}
+		
+		if (recaptchaSecretKey != null) {
+			valid = false;
+			
+			try {
+				URL url = null;
+				if(recaptchaSecretKey == UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY) {
+					url = new URL("https://www.google.com/recaptcha/api/siteverify");
+				}else if(recaptchaSecretKey == UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY) {
+					url = new URL("https://challenges.cloudflare.com/turnstile/v0/siteverify");
+				}
+				if(url != null) {
+					URLConnection connection = url.openConnection();
+					connection.setDoInput(true);
+					connection.setDoOutput(true);
+					connection.setUseCaches(false);
+					connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		
+					// Create the post body with the required parameters
+					StringBuilder postBody = new StringBuilder();
+					postBody.append("secret=").append(URLEncoder.encode(recaptchaSecretKey, Util.UTF8));
+					postBody.append("&response=").append((response == null) ? "" : URLEncoder.encode(response, Util.UTF8));
+		
+					try (OutputStream out = connection.getOutputStream()) {
+						out.write(postBody.toString().getBytes());
+						out.flush();
+					}
+		
+					try (BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+						StringBuilder result = new StringBuilder();
+						String line;
+						while ((line = rd.readLine()) != null) {
+							result.append(line);
+						}
+		
+						@SuppressWarnings("unchecked")
+						Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, result.toString());
+						valid = Boolean.TRUE.equals(json.get("success"));
+					}
+				}
+			}
+			catch (Exception e) {
+				// NB valid is already false here
+				e.printStackTrace();
+			}
+		}
+		
+		return valid;
 	}
 }

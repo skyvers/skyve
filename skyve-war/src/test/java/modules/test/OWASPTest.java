@@ -6,8 +6,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
@@ -16,11 +16,12 @@ import org.skyve.util.Util;
 import modules.test.domain.AllAttributesPersistent;
 
 public class OWASPTest extends AbstractSkyveTest {
+
 	private final Map<String, String> escape = new TreeMap<>();
 	private final Map<String, String> sanitise = new TreeMap<>();
 	private final Map<String, String> both = new TreeMap<>();
 	
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		escape.put("poo@wee.com", "poo@wee.com");
 		escape.put("<h1>test</h1>", "&lt;h1&gt;test&lt;/h1&gt;");

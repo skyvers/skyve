@@ -1,11 +1,15 @@
 package modules.test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -40,6 +44,7 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
 
 public class BindTests extends AbstractSkyveTest {
+
 	@Test
 	@SuppressWarnings("static-method")
 	public void testSanitizeBinding() throws Exception {
@@ -235,10 +240,14 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("{text}{text}", Binder.formatMessage("{text}{text}", aap));
 	}
 	
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testDanglingMessageFormat() throws Exception {
-		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
-		Assert.assertEquals("{text", Binder.formatMessage("{text", aap));
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 2);
+			Assert.assertEquals("{text", Binder.formatMessage("{text", aap));
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 	
 	@Test
@@ -355,6 +364,22 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("1.01", Binder.formatMessage("{el:bean.decimal10|TwoOptionalDecimalPlaces}", bean));
 		Assert.assertEquals("0", Binder.formatMessage("{el:Decimal2.ZERO|TwoOptionalDecimalPlaces}", bean));
 		Assert.assertEquals("100", Binder.formatMessage("{el:newDecimal2(100)|TwoOptionalDecimalPlaces}", bean));
+
+		bean.setText("<script>alert('yikes')</script><span/><div><p/><table style=\"\"><tr/><b>Bold</b></tr></table></div><style>.shite {}</style>");
+		Assert.assertEquals("<div><p></p><table><tbody><tr></tr></tbody></table><b>Bold</b></div>", Binder.formatMessage("{text|RelaxedHTML}", bean));
+		Assert.assertEquals("&lt;div&gt;&lt;p&gt;&lt;/p&gt;&lt;table&gt;&lt;tbody&gt;&lt;tr&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;b&gt;Bold&lt;/b&gt;&lt;/div&gt;",
+								Binder.formatMessage("{text|RelaxedEscapedHTML}", bean));
+		Assert.assertEquals("<div><p></p><b>Bold</b></div>", Binder.formatMessage("{text|SimpleHTML}", bean));
+		Assert.assertEquals("&lt;div&gt;&lt;p&gt;&lt;/p&gt;&lt;b&gt;Bold&lt;/b&gt;&lt;/div&gt;", Binder.formatMessage("{text|SimpleEscapedHTML}", bean));
+		Assert.assertEquals("<b>Bold</b>", Binder.formatMessage("{text|BasicHTML}", bean));
+		Assert.assertEquals("&lt;b&gt;Bold&lt;/b&gt;", Binder.formatMessage("{text|BasicEscapedHTML}", bean));
+		Assert.assertEquals("Bold", Binder.formatMessage("{text|TextHTML}", bean));
+		Assert.assertEquals("Bold", Binder.formatMessage("{text|TextEscapedHTML}", bean));
+		Assert.assertEquals("&lt;script&gt;alert(&#39;yikes&#39;)&lt;/script&gt;&lt;span/&gt;&lt;div&gt;&lt;p/&gt;&lt;table style=&#34;&#34;&gt;&lt;tr/&gt;&lt;b&gt;Bold&lt;/b&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;style&gt;.shite {}&lt;/style&gt;",
+								Binder.formatMessage("{text|EscapedHTML}", bean));
+		bean.setText("{\"poo\": \"wee\"}");
+		Assert.assertEquals("{\\\"poo\\\": \\\"wee\\\"}", Binder.formatMessage("{text|EscapedJSONString}", bean));
+		Assert.assertEquals("{&quot;poo&quot;: &quot;wee&quot;}", Binder.formatMessage("{text|EscapedJSString}", bean));
 	}
 
 	@Test
@@ -367,6 +392,14 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertEquals("Test", Binder.formatMessage("{bean:text}", bean));
 		Assert.assertEquals("Test", Binder.formatMessage("{el:bean.text}", bean));
 		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.condition}", bean));
+
+		// Check falsey boolean evaluation
+		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, Boolean.TRUE);
+		Assert.assertEquals(Boolean.TRUE, ExpressionEvaluator.evaluate("{el:bean.falseyBooleanEvaluation}", bean));
+		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, Boolean.FALSE);
+		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.falseyBooleanEvaluation}", bean));
+		Binder.set(bean, AllAttributesPersistent.booleanFlagPropertyName, null);
+		Assert.assertEquals(Boolean.FALSE, ExpressionEvaluator.evaluate("{el:bean.falseyBooleanEvaluation}", bean));
 		
 		bean = aadpd.newInstance(u);
 		System.out.println(bean);
@@ -461,6 +494,12 @@ public class BindTests extends AbstractSkyveTest {
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{| }", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{|", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{ |", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:|}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean: |}", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:| }", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean:|", c, aapd));
+		Assert.assertNotNull(BindUtil.validateMessageExpressions("{bean: |", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("|}", c, aapd));
 		Assert.assertNull(BindUtil.validateMessageExpressions("|", c, aapd));
 		Assert.assertNotNull(BindUtil.validateMessageExpressions("{text\\}", c, aapd));
@@ -654,19 +693,32 @@ public class BindTests extends AbstractSkyveTest {
 								BindUtil.formatMessage("<h1>{text}</h1>", displayName -> OWASP.sanitise(Sanitisation.relaxed, displayName), aap));
 	}
 
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testGetMetaDataForBindingThrowsOnParentBindingOfNonChildDocument() {
-		BindUtil.getMetaDataForBinding(c, m, aapd, ChildBean.PARENT_NAME);
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			BindUtil.getMetaDataForBinding(c, m, aapd, ChildBean.PARENT_NAME);
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testGetMetaDataForBindingThrowsOnCompoundParentBindingOfNonChildDocument() {
-		BindUtil.getMetaDataForBinding(c, m, aapd, AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			BindUtil.getMetaDataForBinding(c, m, aapd,
+					AllAttributesPersistent.aggregatedAssociationPropertyName + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 	
-	@Test(expected = MetaDataException.class)
+	@Test
 	public void testGetMetaDataForBindingThrowsOnCompoundBinding() {
-		BindUtil.getMetaDataForBinding(c, m, aapd, "bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		MetaDataException mde = Assert.assertThrows(MetaDataException.class, () -> {
+			BindUtil.getMetaDataForBinding(c, m, aapd, "bogusPropertyName" + ChildBean.CHILD_PARENT_NAME_SUFFIX);
+		});
+
+		assertThat(mde.getMessage(), is(notNullValue()));
 	}
 
 	@Test

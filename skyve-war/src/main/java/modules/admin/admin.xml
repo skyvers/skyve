@@ -79,8 +79,8 @@
 				<document name="Subscription" permission="_____"/>
 			</privileges>
 			<accesses>
-				<singular document="SelfRegistration" />
-				<singular document="SelfRegistrationActivation" />
+				<singularAccess document="SelfRegistration" />
+				<singularAccess document="SelfRegistrationActivation" />
 			</accesses>
 		</role>
 		<role name="AppUser">
@@ -112,7 +112,7 @@
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
 			<accesses>
-				<singular document="ReportTemplate"/>
+				<singularAccess document="ReportTemplate"/>
 			</accesses>
 		</role>
 		<role name="AuditManager">
@@ -273,6 +273,7 @@
 					<action name="Submit" />
 					<action name="UpdatePreview" />
 				</document>
+				<document name="DownloadFolder" permission="CRUDC" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="ImportExport" permission="CRUDC">
 					<action name="ClearImport"/>
@@ -407,7 +408,7 @@
 				<document name="UserRole" permission="CRUDC" />
 			</privileges>
 			<accesses>
-				<singular document="Startup" />
+				<singularAccess document="Startup" />
 			</accesses>
 		</role>
 		<role name="ViewUser">
@@ -719,12 +720,12 @@
 					<filterExpression>?</filterExpression>
 					<projected>false</projected>
 				</column>
-				<column binding="year">
+				<column binding="hitYear">
 					<filterOperator>equal</filterOperator>
 					<filterExpression>?</filterExpression>
 					<projected>false</projected>
 				</column>
-				<column binding="month">
+				<column binding="hitMonth">
 					<filterOperator>equal</filterOperator>
 					<filterExpression>?</filterExpression>
 					<projected>false</projected>
@@ -758,6 +759,7 @@
 				<column binding="auditModuleName" />
 				<column binding="auditDocumentName" />
 				<column binding="auditBizKey" />
+				<column binding="auditBizId" hidden="true" />
 				<column binding="millis" sortOrder="descending">
 					<projected>false</projected>
 				</column>

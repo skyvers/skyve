@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DownloadFolder" 
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>DownloadFolder</singularAlias>
+	<pluralAlias>DownloadFolders</pluralAlias>
+	<attributes>
+		<text name="name">
+			<displayName>Name</displayName>
+			<length>1024</length>
+		</text>
+		<longInteger name="size">
+			<displayName>Size (MB)</displayName>
+			<converterName>LongIntegerSeparator</converterName>
+			<validator min="0"/>
+		</longInteger>
+	</attributes>
+</document>

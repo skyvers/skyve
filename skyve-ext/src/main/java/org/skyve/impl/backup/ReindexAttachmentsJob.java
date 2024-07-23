@@ -48,7 +48,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 				for (Table table : tables) {
 					i++;
 					if (! hasContent(table)) {
-						trace = "Skipping table " + table.name;
+						trace = "Skipping table " + table.persistentIdentifier;
 						getLog().add(trace);
 						UtilImpl.LOGGER.info(trace);
                 		continue;
@@ -56,11 +56,11 @@ public class ReindexAttachmentsJob extends CancellableJob {
 
                 	StringBuilder sql = new StringBuilder(128);
 					try (Statement statement = connection.createStatement()) {
-						sql.append("select * from ").append(table.name);
+						sql.append("select * from ").append(table.persistentIdentifier);
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
 						try (ResultSet resultSet = statement.getResultSet()) {
-							trace = "Reindexing content for " + table.name;
+							trace = "Reindexing content for " + table.persistentIdentifier;
 							log.add(trace);
 							UtilImpl.LOGGER.info(trace);
 
@@ -69,7 +69,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 									return;
 								}
 								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name);
+									AttributeType attributeType = table.fields.get(name).getLeft();
 									if (AttributeType.content.equals(attributeType) ||
 											AttributeType.image.equals(attributeType)) {
 										String stringValue = resultSet.getString(name);
@@ -79,7 +79,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 												content = cm.getAttachment(stringValue);
 												if (content == null) {
 													trace = String.format("Error reindexing content %s for field name %s for table %s - content does not exist",
-																			stringValue, name, table.name);
+																			stringValue, name, table.persistentIdentifier);
 													log.add(trace);
 													UtilImpl.LOGGER.severe(trace);
 												}
@@ -93,7 +93,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 											}
 											catch (Exception e) {
 												trace = String.format("Error reindexing content %s for field name %s for table %s - caused by %s",
-																		stringValue, name, table.name, e.getLocalizedMessage());
+																		stringValue, name, table.persistentIdentifier, e.getLocalizedMessage());
 												log.add(trace);
 												UtilImpl.LOGGER.severe(trace);
 												e.printStackTrace();
@@ -116,7 +116,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	
 	private static boolean hasContent(Table table) {
 		for (String name : table.fields.keySet()) {
-			AttributeType attributeType = table.fields.get(name);
+			AttributeType attributeType = table.fields.get(name).getLeft();
 			if (AttributeType.content.equals(attributeType) ||
 					AttributeType.image.equals(attributeType)) {
 				return true;

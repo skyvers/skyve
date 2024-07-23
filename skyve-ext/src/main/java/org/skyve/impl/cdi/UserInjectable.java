@@ -4,14 +4,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.
@@ -35,6 +35,11 @@ public class UserInjectable implements User {
 	@Override
 	public void setId(String id) {
 		CORE.getUser().setId(id);
+	}
+
+	@Override
+	public String getSessionId() {
+		return CORE.getUser().getSessionId();
 	}
 
 	@Override
@@ -168,12 +173,27 @@ public class UserInjectable implements User {
 	public boolean canCreateDocument(Document document) {
 		return CORE.getUser().canCreateDocument(document);
 	}
+	
+	@Override
+	public boolean canFlag() {
+		return CORE.getUser().canFlag();
+	}
 
 	@Override
 	public boolean canReadDocument(Document document) {
 		return CORE.getUser().canReadDocument(document);
 	}
+	
+	@Override
+	public boolean canTextSearch() {
+		return CORE.getUser().canTextSearch();
+	}
 
+	@Override
+	public boolean canSwitchMode() {
+		return CORE.getUser().canSwitchMode();
+	}
+	
 	@Override
 	public boolean canUpdateDocument(Document document) {
 		return CORE.getUser().canUpdateDocument(document);

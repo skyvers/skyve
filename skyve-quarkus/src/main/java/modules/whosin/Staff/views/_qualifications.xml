@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Staff - {contact.name}" name="_qualifications"
+	xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" borderTitle="Qualifications">
+		<form>
+			<column />
+			<row>
+				<item>
+					<button action="UploadQualifications" pixelWidth="200" />
+				</item>
+			</row>
+		</form>
+		<dataGrid binding="qualifications">
+			<boundColumn binding="name" />
+			<boundColumn binding="type" />
+			<boundColumn binding="issuingOrganisation" />
+			<boundColumn binding="description" />
+			<boundColumn binding="dateAttained" />
+			<boundColumn binding="dateExpiry" />
+		</dataGrid>
+	</vbox>
+</view>

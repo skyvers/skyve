@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
@@ -78,11 +79,16 @@ public abstract class DomainGenerator {
 		JAVA_RESERVED_WORDS = new TreeSet<>(Arrays.asList(javaReserved));
 
 		String h2Reserved[] = {
-				"all", "check", "constraint", "cross", "current_date", "current_time", "current_timestamp",
-				"distinct", "except", "exists", "false", "fetch", "for", "foreign", "from", "full", "group",
-				"having", "inner", "intersect", "is", "join", "like", "limit", "minus", "natural", "not", "null",
-				"offset", "on", "order", "primary", "rownum", "select", "sysdate", "systime", "systimestamp",
-				"today", "true", "union", "unique", "where", "with"
+				"all", "and", "any", "array", "as", "asymmetric	", "authorization", "between", "both",
+				"case", "cast", "check", "constraint", "cross", "current_catalog", "current_date", "current_path",
+				"current_role", "current_schema", "current_time", "current_timestamp", "current_user", "day", "default",
+				"distinct", "else", "end", "except", "exists", "false", "fetch", "for", "foreign", "from", "full",
+				"group", "groups", "having", "hour", "if", "ilike", "in", "inner", "intersect", "interval", "is",
+				"join", "key", "leading", "left", "like", "limit", "localtime", "localtimestamp", "minus", "minute",
+				"month", "natural", "not", "null", "offset", "on", "or", "order", "over", "partition", "primary",
+				"qualify", "range", "regexp", "right", "row", "rownum", "rows", "second", "select", "session_user",
+				"set", "some", "symmetric", "system_user", "table", "to", "top", "trailing", "true", "uescape", "union",
+				"unique", "unknown", "user", "using", "value", "values", "when", "where", "window", "with", "year"
 		};
 		H2_RESERVED_WORDS = new TreeSet<>(Arrays.asList(h2Reserved));
 
@@ -221,6 +227,9 @@ public abstract class DomainGenerator {
 	public void validate(String customerName) throws Exception {
 		if (debug) System.out.println("Get customer " + customerName);
 		Customer customer = repository.getCustomer(customerName);
+		if (customer == null) {
+			throw new MetaDataException(customerName + " does not exist.");
+		}
 		if (debug) System.out.println("Validate customer " + customerName);
 		repository.validateCustomerForGenerateDomain(customer);
 		for (Module module : customer.getModules()) {
@@ -273,6 +282,29 @@ public abstract class DomainGenerator {
 					new OverridableDomainGenerator(write, debug, multiTenant, repository, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules));
 	}
 	
+	/**
+	 * Validate a customer within a repository.
+	 */
+	public static void validate(ProvidedRepository repository, String customerName) {
+		long millis = System.currentTimeMillis();
+		DomainGenerator jenny = DomainGenerator.newDomainGenerator(false, false, false, repository, DialectOptions.H2_NO_INDEXES, "", "", "", "", "");
+		try {
+			jenny.validate(customerName);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Validation problem encountered: " + e.getLocalizedMessage(), e);
+		}
+		finally {
+			UtilImpl.LOGGER.info("Customer " + customerName + " validated in " + (System.currentTimeMillis() - millis) + " millis");
+		}
+	}
+	
+	/**
+	 * Generate the domain model.
+	 */
 	public static void generate(boolean debug,
 									boolean multiTenant,
 									DialectOptions dialectOptions,

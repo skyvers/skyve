@@ -1,13 +1,14 @@
 package org.skyve.impl.util;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class VariableExpanderTest {
 
@@ -15,7 +16,7 @@ public class VariableExpanderTest {
 	private Map<String, String> variables;
 	private Map<String, Object> properties;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		variableExpander = new VariableExpander();
 		variables = new HashMap<>();

@@ -40,9 +40,9 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	private Set<String> projections = new TreeSet<>();
 	private List<MetaDataQueryColumn> columns = new ArrayList<>(1);
 	
-	public BackupsModel() throws Exception {
-		Customer c = CORE.getUser().getCustomer();
-		drivingDocument = c.getModule(DownloadFolder.MODULE_NAME).getDocument(c, DownloadFolder.DOCUMENT_NAME);
+	@Override
+	public void postConstruct(Customer customer, boolean runtime) {
+		drivingDocument = customer.getModule(DownloadFolder.MODULE_NAME).getDocument(customer, DownloadFolder.DOCUMENT_NAME);
 
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);

@@ -3,6 +3,7 @@ package modules.admin.Configuration;
 import java.util.List;
 
 import org.skyve.domain.app.admin.Communication;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
@@ -16,7 +17,8 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 	private static final String AVAILABLE_DISK_SPACE_ALARM_NOFITICATION = "Available Disk Space Alarm Notification";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO = "{startup.environmentSupportEmail}";
 	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT = "Disk space notification for {#context}";
-	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY = "<p>Available disk space has fallen below the alarm level:</p><p>{markup1}</p>";
+	private static final String AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY = "<p>" + UtilImpl.ARCHIVE_NAME
+			+ " available disk space has fallen below the alarm level:</p><p>{markup1}</p>";
 
 	@Override
 	public String cancel() {
@@ -50,7 +52,9 @@ public class AvailableDiskSpaceAlarmJob extends Job {
 		}
 		if ((diskSpaceSummary.getTotalAvailableLevel() <= percentageLevel.longValue()) ||
 				(levelMB != null && (diskSpaceSummary.getTotalAvailable() <= levelMB.longValue()))) {
-			Communication communication = CommunicationUtil.initialiseSystemCommunication(AVAILABLE_DISK_SPACE_ALARM_NOFITICATION, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO, null, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY);
+			Communication communication = CommunicationUtil.initialiseSystemCommunication(AVAILABLE_DISK_SPACE_ALARM_NOFITICATION,
+					AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SEND_TO, null, AVAILABLE_DISK_SPACE_ALARM_DEFAULT_SUBJECT,
+					AVAILABLE_DISK_SPACE_ALARM_DEFAULT_BODY);
 			Generic generic = Generic.newInstance();
 			generic.setMarkup1(htmlSummary);
 			CommunicationUtil.send(communication, RunMode.ACTION, ResponseMode.SILENT, null, configuration, generic);

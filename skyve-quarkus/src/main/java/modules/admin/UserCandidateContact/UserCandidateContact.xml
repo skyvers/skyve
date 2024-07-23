@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserCandidateContact" 
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			User Candidate Contact is a transient child of User, and holds the potential matching contacts
+			when a search is conducted during the Create User wizard.
+			<br/>
+			When creating a new user, the wizard offers the opportunity to establish if the new user account
+			corresponds to an existing contact, via a basic search facility (name and/or email).
+			<br/>
+			Possible (i.e. candidate) matches (and their match scores) are presented via the wizard for selection
+			or alternatively, a new contact is created if required.
+		]]>
+	</documentation>
+	<singularAlias>User Candidate Contact</singularAlias>
+	<pluralAlias>User Candidate Contacts</pluralAlias>
+	<parentDocument>User</parentDocument>
+	<bizKey expression="Contact {contact.bizKey}"/>
+	<attributes>
+		<association name="contact" type="aggregation" persistent="false">
+			<displayName>admin.userCandidateContact.assocation.contact.displayName</displayName>
+			<documentName>Contact</documentName>
+		</association>
+		<integer name="matchScore" required="true">
+			<displayName>admin.userCandidateContact.matchScore.displayName</displayName>
+			<converterName>SimplePercentage</converterName>
+		</integer>
+	</attributes>
+</document>

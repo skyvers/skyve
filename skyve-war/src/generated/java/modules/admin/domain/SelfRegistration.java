@@ -1,11 +1,12 @@
 package modules.admin.domain;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
 import modules.admin.User.UserExtension;
 import org.skyve.CORE;
@@ -22,6 +23,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class SelfRegistration extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -342,5 +344,43 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 */
 	public boolean isNotSelfRegistrationAllowed() {
 		return (! isSelfRegistrationAllowed());
+	}
+
+	/**
+	 * Whether to show cloudflare turnstile.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowCloudflareTurnstile() {
+		return (org.skyve.impl.util.UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
+	}
+
+	/**
+	 * {@link #isShowCloudflareTurnstile} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowCloudflareTurnstile() {
+		return (! isShowCloudflareTurnstile());
+	}
+
+	/**
+	 * Whether to show google recaptcha.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowGoogleRecaptcha() {
+		return (org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null);
+	}
+
+	/**
+	 * {@link #isShowGoogleRecaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowGoogleRecaptcha() {
+		return (! isShowGoogleRecaptcha());
 	}
 }

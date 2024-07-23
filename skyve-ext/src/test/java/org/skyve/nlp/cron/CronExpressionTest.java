@@ -1,7 +1,8 @@
 package org.skyve.nlp.cron;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;

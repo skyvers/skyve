@@ -48,7 +48,7 @@
 					inActionPanel="false"
 					clientValidation="false"
 					toolTip="admin.snapshots.actions.reorder.toolTip"
-					iconStyleClass="fa fa-sort"
+					iconStyleClass="fa-solid fa-sort" />
 					confirm="The page will refresh after the reorder has occurred" />
         <!-- ./ customised -->
 	</actions>

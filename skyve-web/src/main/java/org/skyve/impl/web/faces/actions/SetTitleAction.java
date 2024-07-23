@@ -4,7 +4,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -15,8 +15,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 public class SetTitleAction extends FacesAction<Void> {
-	private FacesView<? extends Bean> facesView;
-	public SetTitleAction(FacesView<? extends Bean> facesView) {
+	private FacesView facesView;
+	public SetTitleAction(FacesView facesView) {
 		this.facesView = facesView;
 	}
 	

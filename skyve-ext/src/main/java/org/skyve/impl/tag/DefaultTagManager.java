@@ -8,6 +8,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Tag;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -168,14 +169,17 @@ public class DefaultTagManager implements TagManager {
 	public void delete(String tagId) throws Exception {
 		clear(tagId);
 
-		// Ensure that proper validation is fired
-		// especially reference constraints.
+		// Ensure that proper validation is fired - especially reference constraints.
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 		Document document = module.getDocument(customer, AppConstants.TAG_DOCUMENT_NAME);
 		PersistentBean bean = persistence.retrieveAndLock(document, tagId);
+		// Check the tag is for the current user
+		if (! user.getId().equals(bean.getBizUserId())) {
+			throw new SecurityException("delete this tag", user.getName());
+		}
 		persistence.delete(document, bean);
 	}
 

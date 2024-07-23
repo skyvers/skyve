@@ -11,8 +11,8 @@ import java.util.UUID;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.OptimisticLock;
@@ -25,6 +25,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
+import org.skyve.util.Icons;
 
 /**
  * This filter produces the child rows for the RelationTreeModel.
@@ -164,7 +165,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 		
 		properties.put(AppConstants.MEMO_1_ATTRIBUTE_NAME,
 						String.format("<i class=\"%s\"></i>&nbsp;%s",
-										(icon == null) ? "fa fa-document" : icon,
+										(icon == null) ? Icons.FONT_DOCUMENT : icon,
 										bean.getBizKey()));
 
 		return new DynamicBean(bean.getBizModule(), bean.getBizDocument(), properties);

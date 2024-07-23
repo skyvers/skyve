@@ -306,41 +306,43 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param cell
 	 * @return
 	 */
-	private static String getPOICellTypeDescription(Cell cell){
+	private static String getPOICellTypeDescription(Cell cell) {
 		String result = "unknown";
-		switch (cell.getCellType()) {
-		case BOOLEAN:
-			result = "Boolean";
-			break;
-		case NUMERIC:
-			result = "Numeric";
-			break;
-		case BLANK:
-			result = "Blank";
-			break;
-		case ERROR:
-			result = "Error";
-			break;
-		case FORMULA:
-			result = "Formula";
-			switch (cell.getCachedFormulaResultType()) {
+		if (cell != null) {
+			switch (cell.getCellType()) {
+			case BOOLEAN:
+				result = "Boolean";
+				break;
 			case NUMERIC:
-				result = "Numeric "+ result;
+				result = "Numeric";
+				break;
+			case BLANK:
+				result = "Blank";
+				break;
+			case ERROR:
+				result = "Error";
+				break;
+			case FORMULA:
+				result = "Formula";
+				switch (cell.getCachedFormulaResultType()) {
+				case NUMERIC:
+					result = "Numeric "+ result;
+					break;
+				case STRING:
+					result= "String " + result;
+					break;
+				default:
+					result = "Rich Text " + result;
+					break;
+				}
 				break;
 			case STRING:
-				result= "String " + result;
+				result = "String";
 				break;
 			default:
-				result = "Rich Text " + result;
+				result = "unknown";
 				break;
 			}
-			break;
-		case STRING:
-			result = "String";
-			break;
-		default:
-			result = "unknown";
-			break;
 		}
 		return result;
 	}

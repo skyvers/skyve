@@ -1,17 +1,17 @@
 package org.skyve.impl.web.faces.converters.select;
 
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-
 import org.primefaces.component.picklist.PickList;
 import org.primefaces.model.DualListModel;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
-public class AssociationPickListConverter implements Converter {
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+
+public class AssociationPickListConverter implements Converter<DomainValue> {
     @Override
-    public Object getAsObject(FacesContext context, UIComponent component, String value) {
+    public DomainValue getAsObject(FacesContext context, UIComponent component, String value) {
 		DomainValue result = null;
 
 		final String processedValue = UtilImpl.processStringValue(value);
@@ -40,7 +40,7 @@ public class AssociationPickListConverter implements Converter {
     }
 
     @Override
-    public String getAsString(FacesContext context, UIComponent component, Object value) {
-    	return (value == null) ? "" : ((DomainValue) value).getCode();
+    public String getAsString(FacesContext context, UIComponent component, DomainValue value) {
+    	return (value == null) ? "" : value.getCode();
     }
 }

@@ -131,6 +131,9 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 				bean.setAllWeekdays(ALL_CODE);
 			}
 			bean.originalValues().clear();
+
+			// populate the edit users to email collection
+			bean.restoreScheduledUsers();
 		}
 
 		return super.preExecute(actionName, bean, parentBean, webContext);
@@ -233,7 +236,7 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 		}
 
 		// update the scheduling if enabled
-		final Customer customer = CORE.getUser().getCustomer();
+		final Customer customer = CORE.getCustomer();
 		if (Boolean.TRUE.equals(bean.getScheduled())) {
 			if (bean.getRunAs() == null) {
 				throw new ValidationException(ReportTemplate.runAsPropertyName,
@@ -321,6 +324,11 @@ public class ReportTemplateBizlet extends Bizlet<ReportTemplateExtension> {
 			}
 		} else if (UtilImpl.JOB_SCHEDULER && Boolean.TRUE.equals(bean.originalValues().get(ReportTemplate.scheduledPropertyName))) {
 			jobScheduler.unscheduleReport(bean, customer);
+		}
+
+		// populate the edit users to email collection
+		if (bean.originalValues().containsKey(ReportTemplate.editUsersToEmailPropertyName)) {
+			bean.updateScheduledUsers();
 		}
 
 		super.preSave(bean);

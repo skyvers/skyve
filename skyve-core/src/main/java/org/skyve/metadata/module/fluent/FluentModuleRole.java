@@ -9,11 +9,14 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.impl.metadata.repository.module.DocumentPrivilegeMetaData;
+import org.skyve.impl.metadata.repository.module.ModuleRoleContentUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleDocumentAggregateUserAccessMetaData;
+import org.skyve.impl.metadata.repository.module.ModuleRoleDynamicImageUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleModelAggregateUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRolePreviousCompleteUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleQueryAggregateUserAccessMetaData;
+import org.skyve.impl.metadata.repository.module.ModuleRoleReportUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleSingularUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleUserAccessMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
@@ -70,20 +73,32 @@ public class FluentModuleRole {
 		if (accesses != null) {
 			for (Entry<UserAccess, Set<String>> access : accesses.entrySet()) {
 				UserAccess key = access.getKey();
+				Set<String> value = access.getValue();
+				String documentName = key.getDocumentName();
+				String component = key.getComponent();
 				if (key.isSingular()) {
-					addSingularAccess(new FluentModuleRoleSingularAccess().from(key.getDocumentName(), access.getValue()));
+					addSingularAccess(new FluentModuleRoleSingularAccess().from(documentName, value));
 				}
 				else if (key.isQueryAggregate()) {
-					addQueryAggregateAccess(new FluentModuleRoleQueryAggregateAccess().from(key.getComponent(), access.getValue()));
+					addQueryAggregateAccess(new FluentModuleRoleQueryAggregateAccess().from(component, value));
 				}
 				else if (key.isDocumentAggregate()) {
-					addDocumentAggregateAccess(new FluentModuleRoleDocumentAggregateAccess().from(key.getComponent(), access.getValue()));
+					addDocumentAggregateAccess(new FluentModuleRoleDocumentAggregateAccess().from(component, value));
 				}
 				else if (key.isModelAggregate()) {
-					addModelAggregateAccess(new FluentModuleRoleModelAggregateAccess().from(key.getDocumentName(), key.getComponent(), access.getValue()));
+					addModelAggregateAccess(new FluentModuleRoleModelAggregateAccess().from(documentName, component, value));
 				}
 				else if (key.isPreviousComplete()) {
-					addPreviousCompleteAccess(new FluentModuleRolePreviousCompleteAccess().from(key.getDocumentName(), key.getComponent(), access.getValue()));
+					addPreviousCompleteAccess(new FluentModuleRolePreviousCompleteAccess().from(documentName, component, value));
+				}
+				else if (key.isReport()) {
+					addReportAccess(new FluentModuleRoleReportAccess().from(key.getModuleName(), documentName, component, value));
+				}
+				else if (key.isDynamicImage()) {
+					addDynamicImageAccess(new FluentModuleRoleDynamicImageAccess().from(documentName, component, value));
+				}
+				else if (key.isContent()) {
+					addContentAccess(new FluentModuleRoleContentAccess().from(documentName, component, value));
 				}
 				else {
 					throw new IllegalStateException(key + " is not catered for");
@@ -265,6 +280,110 @@ public class FluentModuleRole {
 	public FluentModuleRole removeSingularAccess(String documentName) {
 		role.getAccesses().removeIf(a -> a instanceof ModuleRoleSingularUserAccessMetaData
 						&& ((ModuleRoleSingularUserAccessMetaData) a).getDocumentName().equals(documentName));
+		return this;
+	}
+
+	/**
+	 * Adds a new {@link FluentModuleRoleReportAccess} to this module role.
+	 */
+	public FluentModuleRole addReportAccess(FluentModuleRoleReportAccess access) {
+		return addAccess(access);
+	}
+
+	/**
+	 * Finds the report access with the specified module name, document name and report name in this module role's list of accesses.
+	 */
+	public FluentModuleRoleReportAccess findReportAccess(final String moduleName, final String documentName, final String reportName) {
+		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
+				.filter(a -> (a instanceof ModuleRoleReportUserAccessMetaData) &&
+								((ModuleRoleReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
+								((ModuleRoleReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+								((ModuleRoleReportUserAccessMetaData) a).getReportName().equals(reportName))
+				.findFirst()
+				.orElse(null);
+
+		return (result != null) ? 
+					new FluentModuleRoleReportAccess((ModuleRoleReportUserAccessMetaData) result) :
+					null;
+	}
+
+	/**
+	 * Removes the {@link ModuleRoleReportUserAccessMetaData} with the specified
+	 * module name, document name and report name if one is defined for this module role.
+	 */
+	public FluentModuleRole removeReportAccess(final String moduleName, final String documentName, final String reportName) {
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleReportUserAccessMetaData) &&
+											((ModuleRoleReportUserAccessMetaData) a).getModuleName().equals(moduleName) &&
+											((ModuleRoleReportUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+											((ModuleRoleReportUserAccessMetaData) a).getReportName().equals(reportName));
+		return this;
+	}
+
+	/**
+	 * Adds a new {@link FluentModuleRoleDynamicImageAccess} to this module role.
+	 */
+	public FluentModuleRole addDynamicImageAccess(FluentModuleRoleDynamicImageAccess access) {
+		return addAccess(access);
+	}
+
+	/**
+	 * Finds the dynamic image access with the specified document name and image name in this module role's list of accesses.
+	 */
+	public FluentModuleRoleDynamicImageAccess findDynamicImageAccess(final String documentName, final String imageName) {
+		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
+				.filter(a -> (a instanceof ModuleRoleDynamicImageUserAccessMetaData) &&
+								((ModuleRoleDynamicImageUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+								((ModuleRoleDynamicImageUserAccessMetaData) a).getImageName().equals(imageName))
+				.findFirst()
+				.orElse(null);
+
+		return (result != null) ? 
+					new FluentModuleRoleDynamicImageAccess((ModuleRoleDynamicImageUserAccessMetaData) result) :
+					null;
+	}
+
+	/**
+	 * Removes the {@link ModuleRoleDynamicImageUserAccessMetaData} with the specified
+	 * document name and image name if one is defined for this module role.
+	 */
+	public FluentModuleRole removeDynamicImageAccess(final String documentName, final String imageName) {
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleDynamicImageUserAccessMetaData) &&
+											((ModuleRoleDynamicImageUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+											((ModuleRoleDynamicImageUserAccessMetaData) a).getImageName().equals(imageName));
+		return this;
+	}
+
+	/**
+	 * Adds a new {@link FluentModuleRoleContentAccess} to this module role.
+	 */
+	public FluentModuleRole addContentAccess(FluentModuleRoleContentAccess access) {
+		return addAccess(access);
+	}
+
+	/**
+	 * Finds the content access with the specified document name and binding in this module role's list of accesses.
+	 */
+	public FluentModuleRoleContentAccess findContentAccess(final String documentName, final String binding) {
+		ModuleRoleUserAccessMetaData result = role.getAccesses().stream()
+				.filter(a -> (a instanceof ModuleRoleContentUserAccessMetaData) &&
+								((ModuleRoleContentUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+								((ModuleRoleContentUserAccessMetaData) a).getBinding().equals(binding))
+				.findFirst()
+				.orElse(null);
+
+		return (result != null) ? 
+					new FluentModuleRoleContentAccess((ModuleRoleContentUserAccessMetaData) result) :
+					null;
+	}
+
+	/**
+	 * Removes the {@link ModuleRoleContentUserAccessMetaData} with the specified
+	 * document name and binding if one is defined for this module role.
+	 */
+	public FluentModuleRole removeContentAccess(final String documentName, final String binding) {
+		role.getAccesses().removeIf(a -> (a instanceof ModuleRoleContentUserAccessMetaData) &&
+											((ModuleRoleContentUserAccessMetaData) a).getDocumentName().equals(documentName) &&
+											((ModuleRoleContentUserAccessMetaData) a).getBinding().equals(binding));
 		return this;
 	}
 

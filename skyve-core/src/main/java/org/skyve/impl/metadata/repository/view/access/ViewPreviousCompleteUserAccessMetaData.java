@@ -1,17 +1,17 @@
 package org.skyve.impl.metadata.repository.view.access;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
+
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "previousComplete")
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "previousCompleteAccess")
 public class ViewPreviousCompleteUserAccessMetaData extends ViewUserAccessMetaData {
 	private static final long serialVersionUID = 7559630279039840437L;
 
@@ -31,7 +31,7 @@ public class ViewPreviousCompleteUserAccessMetaData extends ViewUserAccessMetaDa
 		if (binding == null) {
 			throw new MetaDataException(metaDataName + " : [binding] is required for all previousComplete user accesses.");
 		}
-		// NB can't validate binding until second pass validation in LocalDesignRepository.validateModuleForGenerateDomain()
+		// NB can't validate binding until second pass validation in LocalDesignRepository.validateViewForGenerateDomain()
 	}
 
 	@Override

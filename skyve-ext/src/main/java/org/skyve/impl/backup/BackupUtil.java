@@ -9,6 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -18,22 +21,34 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.TimeOnly;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
@@ -100,7 +115,8 @@ final class BackupUtil {
 	}
 	
 	static Collection<Table> getTables() throws Exception {
-		Map<String, Table> result = new TreeMap<>();
+		// A case insensitive keyed map of tables
+		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();
 
 		// insert all defined documents into the tables list
@@ -118,10 +134,14 @@ final class BackupUtil {
 	}
 
 	static Collection<Table> getTablesForAllCustomers() throws Exception {
-		Map<String, Table> result = new TreeMap<>();
+		// A case insensitive keyed map of tables
+		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
+			if (customer == null) {
+				throw new MetaDataException(customerName + " does not exist.");
+			}
 			
 			// insert all defined documents into the tables list
 			for (Module module : customer.getModules()) {
@@ -210,19 +230,22 @@ final class BackupUtil {
 			}
 		}
 		finally {
-			persistence.commit(false);
+			// Use this form of commit method because ADM_Uniqueness may not exist here
+			((AbstractHibernatePersistence) persistence).commit(false, false);
 		}
 	}
 
-	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
+	private static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
 			@SuppressWarnings("null") // test above
 			String persistentIdentifier = persistent.getPersistentIdentifier();
-			Table table = tables.get(persistentIdentifier);
+			String agnosticIdentifier = persistent.getAgnosticIdentifier();
+			Table table = tables.get(agnosticIdentifier);
 			if (table == null) {
-				table = new Table(persistentIdentifier);
-				tables.put(persistentIdentifier, table);
+				table = new Table(agnosticIdentifier, persistentIdentifier);
+				tables.put(agnosticIdentifier, table);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + agnosticIdentifier);
 			}
 
 			table.addFieldsFromDocument(customer, document);
@@ -233,8 +256,7 @@ final class BackupUtil {
 				for (ExportedReference reference : references) {
 					Persistent referencePersistent = reference.getPersistent();
 					if (referencePersistent != null) {
-						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer,
-																													reference.getDocumentName());
+						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer, reference.getDocumentName());
 						// Add joining table for collections pointing to static documents
 						if (reference.isCollection() && (! referencedDocument.isDynamic())) {
 							// child collections have no joining table
@@ -242,7 +264,8 @@ final class BackupUtil {
 								String referenceFieldName = reference.getReferenceFieldName();
 								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getReferenceByName(referenceFieldName);
 								if (collection.isPersistent()) {
-									String ownerTableName = referencePersistent.getPersistentIdentifier();
+									String ownerAgnosticIdentifier = referencePersistent.getAgnosticIdentifier();
+									String ownerPersistentIdentifier = referencePersistent.getPersistentIdentifier();
 									ExtensionStrategy strategy = referencePersistent.getStrategy();
 									
 									// If it is a collection defined on a mapped document pointing to this document, find
@@ -255,13 +278,17 @@ final class BackupUtil {
 											Document derivedDocument = derivedModule.getDocument(customer, derivedModoc.substring(dotIndex + 1));
 	
 											if (derivedDocument.isPersistable()) {
-												@SuppressWarnings("null") // tested above
-												String persistentName = derivedDocument.getPersistent().getName();
-												ownerTableName = persistentName;
-												String tableName = ownerTableName + '_' + referenceFieldName;
-												if (! tables.containsKey(tableName)) {
-													JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
-													tables.put(tableName, joinTable);
+												Persistent derivedPersistent = derivedDocument.getPersistent();
+												@SuppressWarnings("null") // tested above in isPersistable()
+												String ai = derivedPersistent.getAgnosticIdentifier();
+												ownerAgnosticIdentifier = ai;
+												ownerPersistentIdentifier = derivedPersistent.getPersistentIdentifier();
+												String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
+												String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
+												if (! tables.containsKey(joinAgnosticIdentifier)) {
+													JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
+													tables.put(joinAgnosticIdentifier, joinTable);
+													if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 												}
 											}
 										}
@@ -293,21 +320,28 @@ final class BackupUtil {
 											}
 										}
 
+										Persistent ultimatePersistent = ultimateDocument.getPersistent();
 										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
-										String ultimatePersistentName = ultimateDocument.getPersistent().getName();
-										ownerTableName = ultimatePersistentName;
+										String ai = ultimatePersistent.getAgnosticIdentifier();
+										ownerAgnosticIdentifier = ai;
+										ownerPersistentIdentifier = ultimatePersistent.getPersistentIdentifier();
+										Persistent referencedPersistent = referencedDocument.getPersistent();
 										@SuppressWarnings("null") // tested above at baseDocument.isPersistable()
-										String tableName = referencedDocument.getPersistent().getName() + '_' + referenceFieldName;
-										if (! tables.containsKey(tableName)) {
-											JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
-											tables.put(tableName, joinTable);
+										String joinAgnosticIdentifier = referencedPersistent.getAgnosticIdentifier() + '_' + referenceFieldName;
+										String joinPersistentIdentifier = referencedPersistent.getPersistentIdentifier() + '_' + referenceFieldName;
+										if (! tables.containsKey(joinAgnosticIdentifier)) {
+											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
+											tables.put(joinAgnosticIdentifier, joinTable);
+											if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 										}
 									}
 									else {
-										String tableName = ownerTableName + '_' + referenceFieldName;
-										if (! tables.containsKey(tableName)) {
-											JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
-											tables.put(tableName, joinTable);
+										String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
+										String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
+										if (! tables.containsKey(joinAgnosticIdentifier)) {
+											JoinTable joinTable = new JoinTable(joinAgnosticIdentifier, joinPersistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(collection.getOrdered()));
+											tables.put(joinAgnosticIdentifier, joinTable);
+											if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Table definition created for " + joinAgnosticIdentifier);
 										}
 									}
 								}
@@ -334,7 +368,7 @@ final class BackupUtil {
 		if (table instanceof JoinTable) {
 			JoinTable joinTable = (JoinTable) table;
 			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
-			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerTableName);
+			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerPersistentIdentifier);
 			if (UtilImpl.CUSTOMER == null) { // multi-tenant
 				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
@@ -345,5 +379,254 @@ final class BackupUtil {
 				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 		}
+	}
+	
+	/**
+	 * Redacts data depending on type for most scalar types.
+	 * 
+	 * Returns value unchanged if redaction for this type is not (yet) supported.
+	 *  
+	 * @param value The Skyve record to be obfuscated
+	 * 
+	 * @author Simeon Solomou
+	 */
+	static Object redactData(AttributeType attributeType, Object value) {
+		if (value != null) {
+			switch (attributeType) {
+			case association:
+				// Nothing to see here
+				break;
+			case bool:
+				// Nothing to see here
+				break;
+			case collection:
+				// Nothing to see here
+				break;
+			case colour:
+				// Nothing to see here
+				break;
+			case content:
+				return null; // Nullify content fields
+			case date:
+				return redactDate((Date) value);
+			case dateTime:
+				return redactTimestamp((java.sql.Timestamp) value);
+			case decimal10:
+				return redactNumeric((BigDecimal) value);
+			case decimal2:
+				return redactNumeric((BigDecimal) value);
+			case decimal5:
+				return redactNumeric((BigDecimal) value);
+			case enumeration:
+				// Nothing to see here
+				break;
+			case geometry:
+				return redactGeometry((Geometry) value);
+			case id:
+				return redactString((String) value);
+			case image:
+				return null; // Nullify content fields
+			case integer:
+				return redactNumeric((Integer) value);
+			case inverseMany:
+				// Nothing to see here
+				break;
+			case inverseOne:
+				// Nothing to see here
+				break;
+			case longInteger:
+				return redactNumeric((Long) value);
+			case markup:
+				return redactString((String) value);
+			case memo:
+				return redactString((String) value);
+			case text:
+				return redactString((String) value);
+			case time:
+				return redactTime((Time) value);
+			case timestamp:
+				return redactTimestamp((java.sql.Timestamp) value);
+			default:
+				break;
+			}
+		}
+		return value;
+	}
+	
+	/**
+	 * Redacts a string by masking its middle part with asterisks.
+	 *
+	 * @param data The string to be redacted
+	 * @return The redacted string
+	 * 
+	 * @author Ben Petito
+	 */
+	private static String redactString(String data) {
+		if (data == null) {
+			return null;
+		}
+
+		// check if the data is an email address
+		if (data.contains("@")) {
+			int atIndex = data.indexOf("@");
+			String beforeAt = redactSegment(data.substring(0, atIndex));
+			String afterAt = redactSegment(data.substring(atIndex + 1));
+			return beforeAt + "@" + afterAt;
+		}
+
+		return redactSegment(data);
+	}
+	
+	/**
+	 * Redacts a segment of a string, only displaying a fixed number of chars at beginning & end.
+	 * 
+	 * @param data The segment to be redacted
+	 * @return The redacted segment 
+	 * 
+	 * @author Ben Petito
+	 */
+	private static String redactSegment(String data) {
+		// Define the number of characters to keep at the beginning and end based on data length.
+		int charsToShowAtStart = 2;
+		int charsToShowAtEnd = 2;
+
+		if (data.length() == 0) {
+			return "";
+		} else if (data.length() <= 1) {
+			charsToShowAtStart = 0;
+			charsToShowAtEnd = 0;
+		} else if (data.length() <= 2) {
+			charsToShowAtStart = 1;
+			charsToShowAtEnd = 0;
+		} else if (data.length() <= 4) {
+			charsToShowAtStart = 1;
+			charsToShowAtEnd = 1;
+		}
+
+		String start = data.substring(0, charsToShowAtStart);
+		String end = data.substring(data.length() - charsToShowAtEnd);
+
+		// calculate the number of asterisks to be used
+		int asteriskCount = data.length() - charsToShowAtStart - charsToShowAtEnd;
+
+		// set the max asterisk count to 10
+		if (asteriskCount > 10) {
+			asteriskCount = 10;
+		}
+
+		StringBuilder maskedSection = new StringBuilder();
+		for (int i = 0; i < asteriskCount; i++) {
+			maskedSection.append('*');
+		}
+
+		// remove any whitespace and re-assemble the redacted string
+		return start.trim() + maskedSection + end.trim();
+	}
+	
+	/**
+	 * Redacts skyve numeric attributes by rounding to the nearest 10.
+	 *
+	 * @param data The numeric to be redacted
+	 * @return The redacted numeric
+	 * 
+	 * @author Simeon Solomou
+	 */
+	private static <T extends Number> T redactNumeric(T data) {
+		if (data == null) {
+			return null;
+		}
+		
+		double doubleValue = data.doubleValue();
+		double dividedByTen = Math.round(doubleValue / 10.0f);
+		double div10 = dividedByTen * 10;
+		
+		if (data instanceof Integer) {
+			int intValue = (int) Math.round(div10);
+			@SuppressWarnings("unchecked")
+			T result = (T) Integer.valueOf(intValue);
+			return result;
+		}
+		else if (data instanceof Long) {
+			long longValue = (long) div10;
+			@SuppressWarnings("unchecked")
+			T result = (T) Long.valueOf(longValue);
+			return result;
+		}
+		else if (data instanceof BigDecimal) {
+			@SuppressWarnings("unchecked")
+			T result = (T) BigDecimal.valueOf(div10);
+			return result;
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Redacts {@link DateOnly} attribute by rounding it's value to the first day of the month.
+	 * 
+	 * @param data The date to be redacted
+	 * @return The redacted date
+	 * 
+	 * @author Simeon Solomou
+	 */
+	private static Date redactDate(Date data) {
+		return Date.valueOf(data.toLocalDate().withDayOfMonth(1));
+	}
+	
+	/**
+	 * Redacts {@link TimeOnly} attribute by rounding it's value to the nearest hour.
+	 * 
+	 * @param data The time to be redacted
+	 * @return The redacted time
+	 * 
+	 * @author Simeon Solomou
+	 */
+	private static Time redactTime(Time data) {
+		return Time.valueOf(data.toLocalTime().withMinute(0).withSecond(0).withNano(0));
+	}
+	
+	/**
+	 * Redacts {@link DateTime} attribute by rounding it's value to the first day of the month.
+	 * 
+	 * @param data The date-time to be redacted
+	 * @return The redacted date
+	 * 
+	 * @author Simeon Solomou
+	 */
+	private static java.sql.Timestamp redactTimestamp(java.sql.Timestamp data) {
+		return java.sql.Timestamp.valueOf(data.toLocalDateTime()
+				.withDayOfMonth(1).withHour(0).withMinute(0));
+	}
+	
+	/**
+	 * Redacts {@link Geometry} attribute by rounding its latitude/longitude to the nearest whole number.
+	 * 
+	 * @param data The geometry to be redacted
+	 * @return The redacted geometry
+	 * 
+	 * @author Simeon Solomou
+	 */
+	private static Geometry redactGeometry(Geometry data) {
+		Coordinate[] existingCoordinates = data.getCoordinates();
+		
+		Coordinate[] modifiedCoordinates = new Coordinate[existingCoordinates.length];
+		for (int i = 0; i < existingCoordinates.length; i++) {
+			double modifiedLongitude = Math.round(existingCoordinates[i].x);
+			double modifiedLatitude = Math.round(existingCoordinates[i].y);
+			modifiedCoordinates[i] = new Coordinate(modifiedLongitude, modifiedLatitude);
+		}
+		
+		if (data instanceof Point) {
+			return new GeometryFactory().createPoint(modifiedCoordinates[0]);
+		}
+		else if (data instanceof LineString) {
+			return new GeometryFactory().createLineString(modifiedCoordinates);
+		}
+		else if (data instanceof Polygon) {
+			return new GeometryFactory().createPolygon(modifiedCoordinates);
+		}
+		
+		// Should never reach - other geometry types are deprecated
+		return data;
 	}
 }

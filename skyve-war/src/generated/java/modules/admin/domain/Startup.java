@@ -1,14 +1,15 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.Startup.StartupExtension;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
@@ -26,11 +27,13 @@ import org.skyve.util.Util;
 		and is shown to the administrator by default on first login.
  * 
  * @depend - - - MapType
+ * @depend - - - CaptchaType
  * @depend - - - BackupType
  * @stereotype "transient"
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * For Serialization
@@ -87,10 +90,22 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String mailTestRecipientPropertyName = "mailTestRecipient";
 
 	/** @hidden */
+	public static final String captchaTypePropertyName = "captchaType";
+
+	/** @hidden */
 	public static final String apiGoogleMapsKeyPropertyName = "apiGoogleMapsKey";
 
 	/** @hidden */
-	public static final String apiGoogleRecaptchaKeyPropertyName = "apiGoogleRecaptchaKey";
+	public static final String apiGoogleRecaptchaSiteKeyPropertyName = "apiGoogleRecaptchaSiteKey";
+
+	/** @hidden */
+	public static final String apiGoogleRecaptchaSecretKeyPropertyName = "apiGoogleRecaptchaSecretKey";
+
+	/** @hidden */
+	public static final String apiCloudflareTurnstileSiteKeyPropertyName = "apiCloudflareTurnstileSiteKey";
+
+	/** @hidden */
+	public static final String apiCloudflareTurnstileSecretKeyPropertyName = "apiCloudflareTurnstileSecretKey";
 
 	/** @hidden */
 	public static final String accountAllowUserSelfRegistrationPropertyName = "accountAllowUserSelfRegistration";
@@ -119,6 +134,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Which map technology would you like to use for this Skyve application? Note: Google Maps requires an API key.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum MapType implements Enumeration {
 		gmap("gmap", "Google Maps"),
 		leaflet("leaflet", "Open Street Map");
@@ -185,11 +201,84 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
+	 * CAPTCHA Type
+	 * <br/>
+	 * To enable the forgot password function, this application must be registered for a captcha service. You may choose between Cloudflare Turnstile and Google Recaptcha.
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum CaptchaType implements Enumeration {
+		googleRecaptcha("Google Recaptcha", "Google Recaptcha"),
+		cloudflareTurnstile("Cloudflare Turnstile", "Cloudflare Turnstile");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(CaptchaType::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private CaptchaType(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static CaptchaType fromCode(String code) {
+			CaptchaType result = null;
+
+			for (CaptchaType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static CaptchaType fromLocalisedDescription(String description) {
+			CaptchaType result = null;
+
+			for (CaptchaType value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
+
+	/**
 	 * Type
 	 * <br/>
 	 * Which external backup provider should be used this Skyve application? Note: additional charges may apply.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum BackupType implements Enumeration {
 		none("none", "None (Internal Backups)"),
 		azure("org.skyve.impl.backup.AzureBlobStorageBackup", "Azure Blob Storage");
@@ -357,6 +446,13 @@ public abstract class Startup extends AbstractTransientBean {
 	private String mailTestRecipient;
 
 	/**
+	 * CAPTCHA Type
+	 * <br/>
+	 * To enable the forgot password function, this application must be registered for a captcha service. You may choose between Cloudflare Turnstile and Google Recaptcha.
+	 **/
+	private CaptchaType captchaType;
+
+	/**
 	 * Google Maps Key
 	 * <br/>
 	 * If using Google Maps for your map type, specify your map key here
@@ -366,10 +462,30 @@ public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * Google Recaptcha Site Key
 	 * <br/>
-	 * To enable the forgot password function, this application must be registered 
-					for Google Recaptcha and the site key must be specified here.
+	 * Google Recaptcha site key must be specified here.
 	 **/
-	private String apiGoogleRecaptchaKey;
+	private String apiGoogleRecaptchaSiteKey;
+
+	/**
+	 * Google Recaptcha Secret Key
+	 * <br/>
+	 * Google Recaptcha secret key can be specified here to enable server-side validation for stronger security.
+	 **/
+	private String apiGoogleRecaptchaSecretKey;
+
+	/**
+	 * Cloudflare Turnstile Site Key
+	 * <br/>
+	 * Cloudflare Turnstile site key must be specified here.
+	 **/
+	private String apiCloudflareTurnstileSiteKey;
+
+	/**
+	 * Cloudflare Turnstile Secret Key
+	 * <br/>
+	 * Cloudflare Turnstile secret key can be specified here to enable server-side validation for stronger security.
+	 **/
+	private String apiCloudflareTurnstileSecretKey;
 
 	/**
 	 * Allow User Self Registration
@@ -710,6 +826,24 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #captchaType} accessor.
+	 * @return	The value.
+	 **/
+	public CaptchaType getCaptchaType() {
+		return captchaType;
+	}
+
+	/**
+	 * {@link #captchaType} mutator.
+	 * @param captchaType	The new value.
+	 **/
+	@XmlElement
+	public void setCaptchaType(CaptchaType captchaType) {
+		preset(captchaTypePropertyName, captchaType);
+		this.captchaType = captchaType;
+	}
+
+	/**
 	 * {@link #apiGoogleMapsKey} accessor.
 	 * @return	The value.
 	 **/
@@ -728,21 +862,75 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #apiGoogleRecaptchaKey} accessor.
+	 * {@link #apiGoogleRecaptchaSiteKey} accessor.
 	 * @return	The value.
 	 **/
-	public String getApiGoogleRecaptchaKey() {
-		return apiGoogleRecaptchaKey;
+	public String getApiGoogleRecaptchaSiteKey() {
+		return apiGoogleRecaptchaSiteKey;
 	}
 
 	/**
-	 * {@link #apiGoogleRecaptchaKey} mutator.
-	 * @param apiGoogleRecaptchaKey	The new value.
+	 * {@link #apiGoogleRecaptchaSiteKey} mutator.
+	 * @param apiGoogleRecaptchaSiteKey	The new value.
 	 **/
 	@XmlElement
-	public void setApiGoogleRecaptchaKey(String apiGoogleRecaptchaKey) {
-		preset(apiGoogleRecaptchaKeyPropertyName, apiGoogleRecaptchaKey);
-		this.apiGoogleRecaptchaKey = apiGoogleRecaptchaKey;
+	public void setApiGoogleRecaptchaSiteKey(String apiGoogleRecaptchaSiteKey) {
+		preset(apiGoogleRecaptchaSiteKeyPropertyName, apiGoogleRecaptchaSiteKey);
+		this.apiGoogleRecaptchaSiteKey = apiGoogleRecaptchaSiteKey;
+	}
+
+	/**
+	 * {@link #apiGoogleRecaptchaSecretKey} accessor.
+	 * @return	The value.
+	 **/
+	public String getApiGoogleRecaptchaSecretKey() {
+		return apiGoogleRecaptchaSecretKey;
+	}
+
+	/**
+	 * {@link #apiGoogleRecaptchaSecretKey} mutator.
+	 * @param apiGoogleRecaptchaSecretKey	The new value.
+	 **/
+	@XmlElement
+	public void setApiGoogleRecaptchaSecretKey(String apiGoogleRecaptchaSecretKey) {
+		preset(apiGoogleRecaptchaSecretKeyPropertyName, apiGoogleRecaptchaSecretKey);
+		this.apiGoogleRecaptchaSecretKey = apiGoogleRecaptchaSecretKey;
+	}
+
+	/**
+	 * {@link #apiCloudflareTurnstileSiteKey} accessor.
+	 * @return	The value.
+	 **/
+	public String getApiCloudflareTurnstileSiteKey() {
+		return apiCloudflareTurnstileSiteKey;
+	}
+
+	/**
+	 * {@link #apiCloudflareTurnstileSiteKey} mutator.
+	 * @param apiCloudflareTurnstileSiteKey	The new value.
+	 **/
+	@XmlElement
+	public void setApiCloudflareTurnstileSiteKey(String apiCloudflareTurnstileSiteKey) {
+		preset(apiCloudflareTurnstileSiteKeyPropertyName, apiCloudflareTurnstileSiteKey);
+		this.apiCloudflareTurnstileSiteKey = apiCloudflareTurnstileSiteKey;
+	}
+
+	/**
+	 * {@link #apiCloudflareTurnstileSecretKey} accessor.
+	 * @return	The value.
+	 **/
+	public String getApiCloudflareTurnstileSecretKey() {
+		return apiCloudflareTurnstileSecretKey;
+	}
+
+	/**
+	 * {@link #apiCloudflareTurnstileSecretKey} mutator.
+	 * @param apiCloudflareTurnstileSecretKey	The new value.
+	 **/
+	@XmlElement
+	public void setApiCloudflareTurnstileSecretKey(String apiCloudflareTurnstileSecretKey) {
+		preset(apiCloudflareTurnstileSecretKeyPropertyName, apiCloudflareTurnstileSecretKey);
+		this.apiCloudflareTurnstileSecretKey = apiCloudflareTurnstileSecretKey;
 	}
 
 	/**
@@ -891,6 +1079,44 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
+	 * True when the captcha type is Cloudflare Turnstile
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCloudflareTurnstile() {
+		return (getCaptchaType() != null && CaptchaType.cloudflareTurnstile == getCaptchaType());
+	}
+
+	/**
+	 * {@link #isCloudflareTurnstile} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCloudflareTurnstile() {
+		return (! isCloudflareTurnstile());
+	}
+
+	/**
+	 * True when the captcha type is Google Recaptcha
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isGoogleRecaptcha() {
+		return (getCaptchaType() != null && CaptchaType.googleRecaptcha == getCaptchaType());
+	}
+
+	/**
+	 * {@link #isGoogleRecaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotGoogleRecaptcha() {
+		return (! isGoogleRecaptcha());
+	}
+
+	/**
 	 * True when the selected map type is Google Maps
 	 *
 	 * @return The condition
@@ -907,6 +1133,25 @@ public abstract class Startup extends AbstractTransientBean {
 	 */
 	public boolean isNotMapTypeGmap() {
 		return (! isMapTypeGmap());
+	}
+
+	/**
+	 * True when no captcha type is selected
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isNoCaptcha() {
+		return (getCaptchaType() == null);
+	}
+
+	/**
+	 * {@link #isNoCaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotNoCaptcha() {
+		return (! isNoCaptcha());
 	}
 
 	/**

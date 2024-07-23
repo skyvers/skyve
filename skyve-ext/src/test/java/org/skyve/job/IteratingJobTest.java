@@ -6,8 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
-import javax.inject.Inject;
-
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -16,6 +15,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.skyve.persistence.Persistence;
+
+import jakarta.inject.Inject;
 
 public class IteratingJobTest {
 
@@ -27,9 +28,18 @@ public class IteratingJobTest {
 	@InjectMocks
 	private TestJob testJob;
 
+	private AutoCloseable closeable;
+	
 	@Before
 	public void before() {
-		MockitoAnnotations.initMocks(this);
+		closeable = MockitoAnnotations.openMocks(this);
+	}
+	
+	@After
+	public void after() throws Exception {
+		if (closeable != null) {
+			closeable.close();
+		}
 	}
 
 	@Test
@@ -56,7 +66,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -78,7 +88,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -130,7 +140,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -152,7 +162,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -174,7 +184,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -194,7 +204,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -215,7 +225,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -240,7 +250,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -265,7 +275,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 
@@ -292,7 +302,7 @@ public class IteratingJobTest {
 		try {
 			testJob.execute();
 			fail();
-		} catch (Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// We are expecting an exception.
 		}
 

@@ -15,7 +15,7 @@
 	<persistent name="WHO_Staff" />
 	<singularAlias>Staff</singularAlias>
 	<pluralAlias>Staff Members</pluralAlias>
-	<iconStyleClass>fa fa-users</iconStyleClass>
+	<iconStyleClass>fa-solid fa-users</iconStyleClass>
 	<parentDocument>Staff</parentDocument>
 	<bizKey expression="{contact.name} ({contact.mobile})"/>
 	<attributes>

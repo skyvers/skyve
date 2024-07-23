@@ -1,0 +1,694 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.jobSchedule.edit.title" name="edit" refreshTimeInSeconds="30" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" borderTitle="admin.jobSchedule.edit.jobDetails.borderTitle">
+		<column responsiveWidth="2"/>
+		<column />
+		<column />
+		<row>
+			<item>
+				<combo binding="jobName" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<lookupDescription binding="runAs" descriptionBinding="bizKey" />
+			</item>
+		</row>
+	</form>
+	<vbox border="true" borderTitle="admin.jobSchedule.edit.whenToExecute.displayName">
+		<form>
+			<column responsiveWidth="2"/>
+			<column />
+			<row>
+				<item>
+					<checkBox binding="disabled" triState="false" />
+				</item>
+			</row>
+		</form>
+		<hbox>
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.minutes.borderTitle" responsiveWidth="6" widgetId="formMinutes">
+				<form>
+					<column />
+					<row>
+						<item showLabel="false">
+							<radio binding="allMinutes" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formMinutes</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
+						</item>
+					</row>
+				</form>
+				<form enabled="selectedMinutes">
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<row>
+						<item>
+							<checkBox binding="minute0" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute12" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute24" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute36" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute48" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute1" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute13" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute25" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute37" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute49" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute2" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute14" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute26" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute38" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute50" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute3" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute15" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute27" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute39" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute51" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute4" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute16" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute28" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute40" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute52" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute5" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute17" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute29" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute41" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute53" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute6" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute18" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute30" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute42" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute54" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute7" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute19" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute31" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute43" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute55" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute8" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute20" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute32" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute44" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute56" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute9" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute21" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute33" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute45" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute57" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute10" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute22" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute34" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute46" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute58" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="minute11" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute23" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute35" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute47" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="minute59" triState="false" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.hours.borderTitle" responsiveWidth="4" widgetId="formHours">
+				<form>
+					<column />
+					<row>
+						<item showLabel="false">
+							<radio binding="allHours" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formHours</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
+						</item>
+					</row>
+				</form>
+				<form enabled="selectedHours">
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<row>
+						<item>
+							<checkBox binding="hour0" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour12" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour1" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour13" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour2" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour14" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour3" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour15" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour4" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour16" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour5" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour17" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour6" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour18" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour7" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour19" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour8" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour20" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour9" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour21" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour10" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour22" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="hour11" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="hour23" triState="false" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			</hbox>
+			<hbox>
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.days.borderTitle" responsiveWidth="4" widgetId="formDays">
+				<form>
+					<column />
+					<row>
+						<item showLabel="false">
+							<radio binding="allDays" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formDays</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
+						</item>
+					</row>
+				</form>
+				<form enabled="selectedDays">
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<column responsiveWidth="1"/>
+					<column />
+					<row>
+						<item>
+							<checkBox binding="day1" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day11" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day21" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day31" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day2" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day12" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day22" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day3" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day13" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day23" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day4" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day14" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day24" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day5" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day15" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day25" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day6" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day16" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day26" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day7" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day17" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day27" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day8" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day18" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day28" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day9" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day19" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day29" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="day10" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day20" triState="false" />
+						</item>
+						<item>
+							<checkBox binding="day30" triState="false" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.months.borderTitle" responsiveWidth="4" widgetId="formMonths">
+				<form>
+					<column />
+					<row>
+						<item showLabel="false">
+							<radio binding="allMonths" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formMonths</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>							
+							</radio>
+						</item>
+					</row>
+				</form>
+				<form enabled="selectedMonths">
+					<column responsiveWidth="1"/>
+					<column />
+					<row>
+						<item>
+							<checkBox binding="month1" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month2" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month3" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month4" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month5" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month6" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month7" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month8" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month9" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month10" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month11" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="month12" triState="false" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<vbox border="true" borderTitle="admin.jobSchedule.edit.weekdays.borderTitle" responsiveWidth="4" widgetId="formWeekdays">
+				<form>
+					<column />
+					<row>
+						<item showLabel="false">
+							<radio binding="allWeekdays" >
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">formWeekdays</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</radio>
+						</item>
+					</row>
+				</form>
+				<form enabled="selectedWeekdays">
+					<column responsiveWidth="1"/>
+					<column />
+					<row>
+						<item>
+							<checkBox binding="weekday1" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="weekday2" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="weekday3" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="weekday4" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="weekday5" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="weekday6" triState="false" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox binding="weekday7" triState="false" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</hbox>
+	</vbox>
+	<form border="true" borderTitle="admin.jobSchedule.edit.dateRangeToExecute.borderTitle">
+		<column />
+		<column />
+		<column />
+		<column />
+		<row>
+			<item>
+				<textField binding="startTime" />
+			</item>
+			<item>
+				<textField binding="endTime" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<ok disabled="scheduledImmediately" visible="jobScheduler" />
+		<save disabled="scheduledImmediately" visible="jobScheduler" />
+		<cancel />
+		<delete disabled="scheduledImmediately" visible="jobScheduler" />
+		<action className="RunJobNow" displayName="admin.jobSchedule.actions.runJobNow.displayName" inActionPanel="true" 
+					confirm="OK to run the schedule the Job (as you) to run immediately? (Check Job history for results)"
+					relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-clock-o"
+					clientValidation="false"
+					disabled="scheduledImmediately"
+					visible="jobScheduler" />
+	</actions>
+</view>

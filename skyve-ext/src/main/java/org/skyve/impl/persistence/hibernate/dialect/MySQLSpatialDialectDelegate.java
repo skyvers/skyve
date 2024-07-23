@@ -25,7 +25,8 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	private static final long serialVersionUID = -484304589859254284L;
 
 	private JTSGeometryType geometryType = new JTSGeometryType(MySQLGeometryTypeDescriptor.INSTANCE);
-	private StandardIndexExporter indexExporter;
+	// This is used at startup (hopefully before any Serialization)
+	private transient StandardIndexExporter indexExporter;
 
 	public MySQLSpatialDialectDelegate(Dialect dialect) {
 		// We override index exporter for MySQL so that we can specify the max length of indexes.
@@ -33,6 +34,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 		indexExporter = new StandardIndexExporter(dialect) {
 			@Override
 			public String[] getSqlCreateStrings(Index index, Metadata metadata) {
+				@SuppressWarnings("deprecation")
 				String[] result = super.getSqlCreateStrings(index, metadata);
 
 				Iterator<Column> i = index.getColumnIterator();

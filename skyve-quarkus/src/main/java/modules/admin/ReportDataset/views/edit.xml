@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit" title="Report Dataset" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+    <vbox border="true">
+	    <form responsiveWidth="12">
+	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="6"/>
+	        <column responsiveWidth="4"/>
+	        <row>
+	            <item>
+	                <default binding="datasetName"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <radio binding="datasetType" vertical="false">
+	                	<onChangedHandlers>
+	                		<rerender clientValidation="false" />
+	                	</onChangedHandlers>
+	                </radio>
+	            </item>
+	        </row>
+	        <row>
+	        	<item label="Value" help="The value for this dataset">
+	        		<textField binding="query" visible="notTypeQuery"/>
+	        	</item>
+	        </row>
+	    </form>
+	    <!-- sql editor form -->
+	    <form responsiveWidth="12" visible="typeQuery">
+	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="8" />
+	        <column responsiveWidth="2"/>
+	        <row>
+	            <item>
+	                <textArea binding="query" minPixelHeight="150" pixelHeight="200">
+	                	<onBlurHandlers>
+	                		<rerender clientValidation="false" />
+	                	</onBlurHandlers>
+	                </textArea>
+	            </item>
+	        </row>
+        </form>
+        <form responsiveWidth="12">
+	        <column responsiveWidth="2"/>
+	        <column responsiveWidth="6"/>
+	        <column responsiveWidth="4"/>
+	        <row>
+	        	<item>
+	        		<spacer/>
+	        	</item>
+	        	<item>
+	        		<blurb visible="typeClass" escape="false">
+	        			<![CDATA[
+	        				<span style="font-size: 90%; color: #444;">
+	        					{i18n:admin.reportDataset.edit.typeClass.hint}
+	        				</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        	<item>
+	        		<blurb visible="typeSqlQuery">
+	        			<![CDATA[
+	        				<span style="font-size: 90%; color: #444;">
+	        					Note: For cross-database compatability, all SQL column names will be returned 
+	        					in <strong>lowercase</strong>. This is the name you will need to reference in 
+	        					your report template markup.
+	        				</span>
+	        			]]>
+	        		</blurb>
+	        	</item>
+	        </row>
+	        <row>
+	            <item>
+	                <textArea binding="results" visible="notTypeConstant"/>
+	            </item>
+	        </row>
+        </form>
+    </vbox>
+    <dataGrid title="Report Parameters" binding="parent.parameters" visible="notTypeConstant">
+        <boundColumn binding="name"/>
+        <boundColumn binding="description"/>
+        <boundColumn binding="type"/>
+        <boundColumn binding="required"/>
+        <boundColumn binding="testValueString"/>
+    </dataGrid>
+    
+   <!-- <inject>
+    	<script>
+    		<![CDATA[
+    			if(view) {
+					view.opened = function(data) {
+						isc.BizUtil.createCodeMirror(v1, 'query', 'text/x-sql');
+					};
+				}
+    		]]>
+    	</script>
+    </inject> -->
+    
+    <actions>
+        <defaults/>
+        
+        <action className="TestQuery" displayName="Test Query" iconStyleClass="fa fa-cog" visible="notTypeConstant"/>
+    </actions>
+    <newParameters/>
+</view>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DynamicEntity"
+				xmlns="http://www.skyve.org/xml/document"
+				xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			A JSON representation of scalar fields and embedded relations with a collection of related dynamic beans.
+			The Dynamic Entities are upserted with the same bizId as its static counterpart when there is a mix.
+			So this is manipulated outside of Hibernate O/R mapping.
+		]]>
+	</documentation>
+	<!-- Abstract so that Persistence can't be used with domain objects -->
+	<abstract>true</abstract>
+	<persistent name="ADM_DynamicEntity" />
+	<singularAlias>Dynamic Entity</singularAlias>
+	<pluralAlias>Dynamic Entities</pluralAlias>
+	<audited>false</audited>
+	<bizKey expression="{bizModule}.{bizDocument}#{bizId}" />
+	<attributes>
+		<text name="moduleName" required="true">
+			<displayName>Module Name</displayName>
+			<length>128</length>
+		</text>
+		<text name="documentName" required="true">
+			<displayName>Document Name</displayName>
+			<length>128</length>
+		</text>
+		<memo name="fields" required="true">
+			<displayName>Fields</displayName>
+			<index>none</index>
+		</memo>
+		<collection name="relations" type="child">
+			<displayName>Relations</displayName>
+			<documentName>DynamicRelation</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

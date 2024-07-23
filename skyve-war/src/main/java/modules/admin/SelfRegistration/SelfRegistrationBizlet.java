@@ -34,8 +34,7 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 	 * @throws A {@link ValidationException} if the email address has already been registered.
 	 */
 	private static void validateUniqueEmail(final String emailAddress, final ValidationException e) {
-		try {
-			CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
+		CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery qUnique = CORE.getPersistence().newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 			qUnique.getFilter().addEquals(User.userNamePropertyName, emailAddress);
 			UserExtension existingUser = qUnique.beanResult();
@@ -73,8 +72,6 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 										loginUrl,
 										requestPasswordResetUrl)));
 			}
-		} finally {
-			CORE.getPersistence().resetDocumentPermissionScopes();
-		}
+		});
 	}
 }

@@ -689,12 +689,12 @@ public class DocumentFilterImpl implements DocumentFilter {
 	
 	@Override
 	public boolean isEmpty() {
-		return (filterClause.length() == 0);
+		return filterClause.isEmpty();
 	}
 
 	@Override
 	public String toString() {
-		return (filterClause.length() > 0) ? filterClause.toString() : null;
+		return filterClause.toString();
 	}
 
 	private boolean useStr(String binding) {

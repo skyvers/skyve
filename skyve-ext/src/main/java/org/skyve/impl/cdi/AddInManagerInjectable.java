@@ -2,10 +2,10 @@ package org.skyve.impl.cdi;
 
 import java.io.Serializable;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.EXT;
 import org.skyve.addin.AddInManager;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.

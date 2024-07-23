@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="XSD Gen" default="buildXmlSchemas" basedir=".">
+    <path id="classpath">
+		<pathelement path="../skyve-war/deployments/skyve.war/WEB-INF/classes/" />
+		<fileset dir="../skyve-war/deployments/skyve.war/WEB-INF/lib/">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	<target name="buildXmlSchemas">
+		<java fork="true" classname="org.skyve.impl.util.XMLMetaData">
+			<classpath refid="classpath" />
+		</java>
+		<copy todir="../skyve-war/src/main/java/schemas" failonerror="true">
+			<fileset dir="." includes="*.xsd" />
+		</copy>
+		<move todir="../skyve-core/src/test/resources/schemas" failonerror="true">
+			<fileset dir="." includes="*.xsd" />
+		</move>
+	</target>
+</project>

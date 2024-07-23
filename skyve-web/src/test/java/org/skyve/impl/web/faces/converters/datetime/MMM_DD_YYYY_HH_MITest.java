@@ -1,17 +1,17 @@
 package org.skyve.impl.web.faces.converters.datetime;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
-import javax.faces.convert.ConverterException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.skyve.domain.types.DateTime;
 import org.skyve.util.Time;
 
-public class MMM_DD_YYYY_HH_MITest {
+import jakarta.faces.convert.ConverterException;
 
+public class MMM_DD_YYYY_HH_MITest {
 	private MMM_DD_YYYY_HH_MI formatter;
 
 	@Before

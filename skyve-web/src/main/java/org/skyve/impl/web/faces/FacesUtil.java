@@ -1,17 +1,17 @@
 package org.skyve.impl.web.faces;
 
-import javax.el.ELContext;
-import javax.el.ExpressionFactory;
-import javax.el.MethodExpression;
-import javax.el.ValueExpression;
-import javax.faces.FacesException;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-
 import org.primefaces.PrimeFaces;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
+
+import jakarta.el.ELContext;
+import jakarta.el.ExpressionFactory;
+import jakarta.el.MethodExpression;
+import jakarta.el.ValueExpression;
+import jakarta.faces.FacesException;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class FacesUtil {
 	/**
@@ -28,15 +28,15 @@ public class FacesUtil {
 	
 	private static final String SET_STYLE_CLASS_METHOD_NAME = "setStyleClass";
 	
-	public static FacesView<?> getManagedBean(final String beanName) {
+	public static FacesView getManagedBean(final String beanName) {
 		FacesContext fc = FacesContext.getCurrentInstance();
-		FacesView<?> result;
+		FacesView result;
 
 		ELContext elContext = fc.getELContext();
-		result = (FacesView<?>) elContext.getELResolver().getValue(elContext, null, beanName);
+		result = (FacesView) elContext.getELResolver().getValue(elContext, null, beanName);
 
 		if (result == null) {
-			throw new FacesException("Managed bean with name '" + beanName + "' was not found. Check your faces-config.xml or @ManagedBean annotation.");
+			throw new FacesException("Managed bean with name '" + beanName + "' was not found. Check your faces-config.xml or @Named annotation.");
 		}
 
 		return result;

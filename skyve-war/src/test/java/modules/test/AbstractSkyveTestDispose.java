@@ -1,6 +1,6 @@
 package modules.test;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -61,8 +61,8 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 
 	protected Persistence p;
 
-	@Before
 	@Override
+	@BeforeEach
 	public void before() {
 		p = CORE.getPersistence();
 		u = p.getUser();

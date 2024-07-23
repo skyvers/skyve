@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.faces.FacesException;
-
 import org.primefaces.model.DualListModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -16,7 +14,8 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.web.WebUtil;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -28,6 +27,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.faces.FacesException;
+
 /**
  * Deals with DomainValues in this model and uses scatter and gather methods to
  * effect changes in the domain model.
@@ -37,9 +38,9 @@ import org.skyve.util.Binder.TargetMetaData;
 public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainValue>> {
 	private static final long serialVersionUID = -9080244378508878127L;
 
-	private FacesView<? extends Bean> view;
+	private FacesView view;
 
-	public SkyveDualListModelMap(FacesView<? extends Bean> view) {
+	public SkyveDualListModelMap(FacesView view) {
 		this.view = view;
 	}
 
@@ -68,7 +69,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 				put(binding, new DualListModel<>(Collections.emptyList(), Collections.emptyList()));
 				return;
 			}
-			BeanMapAdapter<? extends Bean> currentBean = view.getCurrentBean();
+			BeanMapAdapter currentBean = view.getCurrentBean();
 			if (currentBean == null) {
 				put(binding, new DualListModel<>(Collections.emptyList(), Collections.emptyList()));
 				return;
@@ -137,7 +138,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 		if (view == null) {
 			return;
 		}
-		BeanMapAdapter<? extends Bean> currentBean = view.getCurrentBean();
+		BeanMapAdapter currentBean = view.getCurrentBean();
 		if (currentBean == null) {
 			return;
 		}
@@ -166,6 +167,9 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 				if (collection != null) {
 					TargetMetaData tmd = Binder.getMetaDataForBinding(c, m, d, binding);
 					Relation r = (Relation) tmd.getAttribute();
+					if (r == null) { // should never happen
+						throw new MetaDataException(binding + " does not point to a relation");
+					}
 					Document rd = m.getDocument(c, r.getDocumentName());
 
 					// process the existing beans applying the changes and ordering from the model target

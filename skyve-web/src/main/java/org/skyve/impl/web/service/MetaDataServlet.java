@@ -10,13 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.content.MimeType;
-import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.generate.ViewRenderer;
@@ -167,7 +161,6 @@ import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.FilterOperator;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -188,6 +181,7 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.Disableable;
@@ -200,7 +194,6 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.chart.Bucket;
-import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -210,11 +203,17 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 public class MetaDataServlet extends HttpServlet {
 	private static final long serialVersionUID = -2160904569807647301L;
 
 	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	throws ServletException, IOException {
     	response.setContentType(MimeType.json.toString());
         response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
@@ -227,7 +226,7 @@ public class MetaDataServlet extends HttpServlet {
 				try {
 					persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -240,6 +239,8 @@ public class MetaDataServlet extends HttpServlet {
 					String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 					documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 					if (documentName != null) {
+						user.checkAccess(UserAccess.singular(moduleName, documentName), uxui);
+
 						String top = Util.processStringValue(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME));
 						pw.append(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)));
 					}
@@ -607,6 +608,7 @@ public class MetaDataServlet extends HttpServlet {
 				visitedDataSourceNames.add(dataSourceName);
 			}
 
+/*
 			private void addModelDataSource(Document itemDocument, String modelName) {
 				ListModel<Bean> model = itemDocument.getListModel(customer, modelName, true);
 				// Note we cannot set the bean on the model here as we are only generating out the UI.
@@ -619,6 +621,7 @@ public class MetaDataServlet extends HttpServlet {
 
 				String dataSourceName = new StringBuilder(32).append(drivingDocumentModuleName).append('_').append(itemDocument.getName()).append("__").append(modelName).toString();
 			}
+*/
 /*			
 			private void addDataSource() {
 				String documentName = query.getDocumentName();
@@ -1570,6 +1573,10 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"contentImage\"");
 				processInputWidget(image);
 				processEditable(image);
+				Boolean showMarkup = image.getShowMarkup();
+				if (showMarkup != null) {
+					result.append(",\"showMarkup\":").append(showMarkup);
+				}
 				processSize(image);
 				processDecorated(image);
 				result.append('}');

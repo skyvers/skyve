@@ -24,7 +24,8 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	private static final long serialVersionUID = 614578841629775970L;
 
 	private JTSGeometryType geometryType = new JTSGeometryType(PGGeometryTypeDescriptor.INSTANCE_WKB_2);
-	private StandardIndexExporter indexExporter;
+	// This is used at startup (hopefully before any Serialization)
+	private transient StandardIndexExporter indexExporter;
 
 	public PostgreSQLSpatialDialectDelegate(Dialect dialect) {
 		// We override index exporter for PostGreSQL so that we can specify lower() functional indexes
@@ -32,6 +33,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 		indexExporter = new StandardIndexExporter(dialect) {
 			@Override
 			public String[] getSqlCreateStrings(Index index, Metadata metadata) {
+				@SuppressWarnings("deprecation")
 				String[] result = super.getSqlCreateStrings(index, metadata);
 
 				Iterator<Column> i = index.getColumnIterator();

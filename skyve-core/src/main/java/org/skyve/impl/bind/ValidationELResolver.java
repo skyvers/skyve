@@ -14,11 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.el.ELContext;
-import javax.el.ELResolver;
-import javax.el.MethodNotFoundException;
-import javax.el.PropertyNotFoundException;
-
 import org.apache.commons.beanutils.PropertyUtils;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -38,6 +33,11 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+
+import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
+import jakarta.el.MethodNotFoundException;
+import jakarta.el.PropertyNotFoundException;
 
 /**
  * Used to Resolve to classes/Documents/singletonList(Document) when walking an EL AST.

@@ -1,14 +1,14 @@
 package org.skyve.impl.metadata.repository;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	private static ProvidedRepository repository;
-	private static final ConcurrentHashMap<Long, ProvidedRepository> THREAD_MAP = new ConcurrentHashMap<>();
 	
 	/**
 	 * Default constructor
@@ -18,30 +18,24 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 		// nothing to do here
 	}
 
-	public static ProvidedRepository get() {
-		ProvidedRepository result = THREAD_MAP.get(Long.valueOf(Thread.currentThread().getId()));
-		if (result == null) {
-			result = repository;
-		}
-		return result;
+	/**
+	 * Get the default repository or the session repository if set.
+	 */
+	public static @Nonnull ProvidedRepository get() {
+		return repository;
 	}
 
-	public static void set(ProvidedRepository repository) {
+	/**]
+	 * Set the default repository.
+	 */
+	public static void set(@Nonnull ProvidedRepository repository) {
 		ProvidedRepositoryFactory.repository = repository;
 	}
-
-	public void setForThread() {
-		THREAD_MAP.put(Long.valueOf(Thread.currentThread().getId()), this);
-	}
 	
-	public static void removeForThread() {
-		THREAD_MAP.remove(Long.valueOf(Thread.currentThread().getId()));
-	}
-
 	/**
 	 * Return a UserImpl with the customerName and name properties set from the user principal given.
 	 */
-	public static UserImpl setCustomerAndUserFromPrincipal(String userPrincipal) {
+	public static @Nullable UserImpl setCustomerAndUserFromPrincipal(@Nullable String userPrincipal) {
 		UserImpl result = null;
 		if (userPrincipal != null) {
 			result = new UserImpl();

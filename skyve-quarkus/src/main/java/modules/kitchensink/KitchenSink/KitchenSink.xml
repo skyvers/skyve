@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="KitchenSink" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Kitchen Sink</singularAlias>
+	<pluralAlias>Kitchen Sinks</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+		</date>
+		<dateTime name="dateTime">
+			<displayName>Date Time</displayName>
+		</dateTime>
+		<decimal10 name="decimal10">
+			<displayName>Decimal 10</displayName>
+		</decimal10>
+		<decimal2 name="decimal2">
+			<displayName>Decimal 2</displayName>
+		</decimal2>
+		<decimal5 name="decimal5">
+			<displayName>Decimal 5</displayName>
+		</decimal5>
+		<enum name="combo">
+			<displayName>Combo</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+		<enum name="radio">
+			<displayName>Radio</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+		<geometry name="geometry">
+			<displayName>Geometry</displayName>
+		</geometry>
+		<id name="id">
+			<displayName>Id</displayName>
+		</id>
+		<integer name="normalInteger">
+			<displayName>Integer</displayName>
+		</integer>
+		<integer name="spinner">
+			<displayName>Spinner</displayName>
+		</integer>
+		<integer name="slider">
+			<displayName>Slider</displayName>
+		</integer>
+		<longInteger name="longInteger">
+			<displayName>Long Integer</displayName>
+		</longInteger>
+		<markup name="html">
+			<displayName>HTML</displayName>
+		</markup>
+		<markup name="markup">
+			<displayName>Markup</displayName>
+		</markup>
+		<memo name="memo">
+			<displayName>Memo</displayName>
+		</memo>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<length>255</length>
+		</text>
+		<time name="time">
+			<displayName>Time</displayName>
+		</time>
+		<timestamp name="timestamp">
+			<displayName>Timestamp</displayName>
+		</timestamp>
+		<content name="contentLink">
+			<displayName>Content Link</displayName>
+		</content>
+		<content name="contentImage">
+			<displayName>Content Image</displayName>
+		</content>
+		<content name="contentSignature">
+			<displayName>Content Signature</displayName>
+		</content>
+		<association name="lookupDescription" type="aggregation">
+			<displayName>Lookup Description</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<collection name="containerGrid" type="child">
+			<displayName>Container</displayName>
+			<documentName>ContainerGrid</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="inlineGrid" type="child">
+			<displayName>Inline</displayName>
+			<documentName>InlineGrid</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="orderedGrid" type="child" ordered="true">
+			<displayName>Ordered</displayName>
+			<documentName>OrderedGrid</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataRepeater" type="child" ordered="true">
+			<displayName>Data Repeater</displayName>
+			<documentName>DataRepeater</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

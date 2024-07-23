@@ -126,8 +126,41 @@
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
+	        	<item >
+	        		<combo binding="captchaType">
+	        			<onChangedHandlers>
+	        				<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity</c:property>
+	        					</properties>
+	        				</rerender>
+	        			</onChangedHandlers>
+	        		</combo>
+	        	</item>
+	        	<item>
+	        		<spacer/>
+	        	</item>
+	        </row>
+	        <!-- Google Recaptcha keys -->
+	        <row>
 	            <item>
-	                <default binding="apiGoogleRecaptchaKey"/>
+	                <textField binding="apiGoogleRecaptchaSiteKey" visible="googleRecaptcha"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiGoogleRecaptchaSecretKey" visible="googleRecaptcha"/>
+	            </item>
+	        </row>
+	        <!-- Cloudflare Turnstile keys -->
+	        <row>
+	            <item>
+	                <textField binding="apiCloudflareTurnstileSiteKey" visible="cloudflareTurnstile"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiCloudflareTurnstileSecretKey" visible="cloudflareTurnstile"/>
 	            </item>
 	        </row>
 	        <row>
@@ -256,7 +289,7 @@
 
     <actions widgetId="actionPanel">
         <!-- <defaults/> -->
-        <action className="Dismiss" displayName="Dismiss" clientValidation="false" iconStyleClass="fa fa-angle-left" />
-        <action className="SaveChanges" displayName="Save Changes" clientValidation="true" iconStyleClass="fa fa-floppy-o" inActionPanel="true"/>
+        <action className="Dismiss" displayName="Dismiss" clientValidation="false" iconStyleClass="fa-solid fa-angle-left" />
+        <action className="SaveChanges" displayName="Save Changes" clientValidation="true" iconStyleClass="fa-solid fa-floppy-disk" inActionPanel="true"/>
     </actions>
 </view>

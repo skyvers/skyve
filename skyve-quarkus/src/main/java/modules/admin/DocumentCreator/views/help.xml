@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="help" title="admin.documentCreator.edit.title" iconStyleClass="fa fa-pencil-square-o" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+	xmlns="http://www.skyve.org/xml/view" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <form>
+    	<column/>
+    	<row>
+    		<item>
+				<blurb>
+					<![CDATA[admin.documentCreator.help.blurb1]]>
+				</blurb>
+    		</item>
+    	</row>
+    </form>
+</view>

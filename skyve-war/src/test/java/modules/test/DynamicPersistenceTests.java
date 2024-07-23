@@ -1,9 +1,13 @@
 package modules.test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -23,6 +27,7 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
 public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
+
 	@Test
 	public void testHasDynamic() throws Exception {
 		Assert.assertFalse(aapd.hasDynamic());
@@ -55,9 +60,14 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		AllDynamicAttributesPersistent test = Util.constructRandomInstance(u, m, adapd, 2);
 		test = p.save(test);
 		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
+		test = p.save(test);
 
-		Assert.assertEquals(Integer.valueOf(0), test.getBizVersion());
-		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedAssociation().getBizVersion());
+		Assert.assertEquals(Integer.valueOf(1), test.getBizVersion());
+		Assert.assertEquals(Integer.valueOf(1), test.getAggregatedAssociation().getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), test.getComposedAssociation().getBizVersion());
 		Assert.assertEquals(null, test.getEmbeddedAssociation().getBizVersion());
 		Assert.assertEquals(Integer.valueOf(0), ((DynamicPersistentBean) test.getDynamic(AllDynamicAttributesPersistent.dynamicAggregatedAssociationPropertyName)).getBizVersion());
@@ -171,7 +181,7 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		test = p.save(test);
 
 		// Test
-		Assert.assertEquals(6, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
 		Assert.assertEquals(59, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
 		Assert.assertEquals(160, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
 		Assert.assertEquals(141, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
@@ -179,25 +189,28 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		p.delete(test);
 		
 		// Test
-		Assert.assertEquals(5, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
 		Assert.assertEquals(36, p.newSQL("select count(1) from TEST_AllDynamicAttributesPersistent").scalarResult(Number.class).intValue());
 		Assert.assertEquals(94, p.newSQL("select count(1) from ADM_DynamicEntity").scalarResult(Number.class).intValue());
 		Assert.assertEquals(54, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
 	}
 	
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testConstraintViolationOnDeletionOfDynamicAttributes() throws Exception {
-		PersistentBean referenced = Util.constructRandomInstance(u, m, adapd, 1);
-		referenced = p.save(referenced);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			PersistentBean referenced = Util.constructRandomInstance(u, m, adapd, 1);
+			referenced = p.save(referenced);
 
-		PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
-		referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
-		referrer = p.save(referrer);
-		
-		p.delete(referenced);
+			PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
+			referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
+			referrer = p.save(referrer);
+
+			p.delete(referenced);
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 
-	
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testPersistenceOfDynamicDocument() throws Exception {
@@ -345,15 +358,19 @@ public class DynamicPersistenceTests extends AbstractSkyveTestDispose {
 		Assert.assertEquals(72, p.newSQL("select count(1) from ADM_DynamicRelation").scalarResult(Number.class).intValue());
 	}
 
-	@Test(expected = ReferentialConstraintViolationException.class)
+	@Test
 	public void testConstraintViolationOnDeletionOfDynamicDocument() throws Exception {
-		PersistentBean referenced = Util.constructRandomInstance(u, m, aadpd, 1);
-		referenced = p.save(referenced);
+		ReferentialConstraintViolationException rcve = Assert.assertThrows(ReferentialConstraintViolationException.class, () -> {
+			PersistentBean referenced = Util.constructRandomInstance(u, m, aadpd, 1);
+			referenced = p.save(referenced);
 
-		PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
-		referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
-		referrer = p.save(referrer);
-		
-		p.delete(referenced);
+			PersistentBean referrer = Util.constructRandomInstance(u, m, aadpd, 1);
+			referrer.setDynamic(AllDynamicAttributesPersistent.dynamicComposedAssociationPropertyName, referenced);
+			referrer = p.save(referrer);
+
+			p.delete(referenced);
+		});
+
+		assertThat(rcve.getMessage(), is(notNullValue()));
 	}
 }

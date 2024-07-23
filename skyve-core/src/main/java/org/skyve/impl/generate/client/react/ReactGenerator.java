@@ -28,11 +28,6 @@ public class ReactGenerator {
 		this.srcSkyveViewsPath = new File(projectFolderPath, "src/skyve/views/");
 	}
 
-	// copy files in the router directly over
-	private void copyView() {
-
-	}
-
 	public void generate() throws IOException {
 		srcSkyveViewsPath.mkdirs();
 		new ReactNativeRouter(this).create();

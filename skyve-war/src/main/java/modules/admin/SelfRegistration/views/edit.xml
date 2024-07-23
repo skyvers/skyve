@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="admin.selfRegistration.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-		xmlns:c="http://www.skyve.org/xml/common"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view title="admin.selfRegistration.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:c="http://www.skyve.org/xml/common"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox widgetId="postRegister" border="true" visible="registrationComplete">
 		<blurb escape="false">
 			<![CDATA[
@@ -21,85 +21,138 @@
 				]]>
 			</blurb>
 		</vbox>
-		<form border="true" borderTitle="admin.selfRegistration.edit.userDetails.borderTitle" widgetId="formRegistration">
-			<column responsiveWidth="2"/>
-			<column responsiveWidth="3"/>
-			<row>
-				<item showHelp="false">
-					<default binding="user.contact.name"/>
-				</item>
-			</row>
-			<row>
-				<item required="true" showHelp="true" help="Your contact email address. This will be used to confirm your account.">
-					<textField binding="user.contact.email1" keyboardType="email">
-						<onChangedHandlers>
-							<rerender clientValidation="false">
-								<properties>
-									<c:property key="update">formRegistration</c:property>
-								</properties>
-							</rerender>
-						</onChangedHandlers>
-					</textField>
-				</item>
-			</row>
-			<row>
-				<item>
-					<spacer visible="emailInvalid"/>
-				</item>
-				<item>
-					<blurb visible="emailInvalid">
-						<![CDATA[
-							<span style="font-size:90%;color:#888;">The email address does not appear to be valid.</span>
-						]]>
-					</blurb>
-				</item>
-			</row>
-			<row>
-				<item required="true">
-					<textField binding="confirmEmail" keyboardType="email">
-						<onChangedHandlers>
-							<rerender clientValidation="false">
-								<properties>
-									<c:property key="update">formRegistration</c:property>
-								</properties>
-							</rerender>
-						</onChangedHandlers>
-					</textField>
-				</item>
-			</row>
-			<row>
-				<item>
-					<spacer visible="confirmEmailInvalid"/>
-				</item>
-				<item>
-					<blurb visible="confirmEmailInvalid">
-						<![CDATA[
-							<span style="font-size:90%;color:#888;">The email address does not appear to be valid.</span>
-						]]>
-					</blurb>
-				</item>
-			</row>
-			<row>
-				<item required="true" showHelp="false">
-					<password binding="user.password"/>
-				</item>
-			</row>
-			<row>
-				<item required="true" showHelp="false">
-					<password binding="confirmPassword"/>
-				</item>
-			</row>
-			<row>
-				<item>
-					<spacer/>
-				</item>
-				<item>
-					<button action="Register"/>
-				</item>
-			</row>
-		</form>
+		<vbox border="true" borderTitle="admin.selfRegistration.edit.userDetails.borderTitle">
+			<form>
+				<column responsiveWidth="2" />
+				<column responsiveWidth="6" />
+				<row>
+					<item showHelp="false">
+						<default binding="user.contact.name" />
+					</item>
+				</row>
+			</form>
+			<form widgetId="passwordsForm">
+				<column responsiveWidth="2" />
+				<column responsiveWidth="6" />
+				<row>
+					<item required="true" showHelp="true" help="Your contact email address. This will be used to confirm your account.">
+						<textField binding="user.contact.email1" keyboardType="email">
+							<onChangedHandlers>
+								<rerender clientValidation="false">
+									<properties>
+										<c:property key="update">passwordsForm</c:property>
+									</properties>
+								</rerender>
+							</onChangedHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer visible="emailInvalid" />
+					</item>
+					<item>
+						<blurb visible="emailInvalid">
+							<![CDATA[
+								<span style="font-size:90%;color:#888;">The email address does not appear to be valid.</span>
+							]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item required="true">
+						<textField binding="confirmEmail" keyboardType="email">
+							<onChangedHandlers>
+								<rerender clientValidation="false">
+									<properties>
+										<c:property key="update">passwordsForm</c:property>
+									</properties>
+								</rerender>
+							</onChangedHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer visible="confirmEmailInvalid" />
+					</item>
+					<item>
+						<blurb visible="confirmEmailInvalid">
+							<![CDATA[
+								<span style="font-size:90%;color:#888;">The email address does not appear to be valid.</span>
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+			<form>
+				<column responsiveWidth="2" />
+				<column responsiveWidth="6" />
+				<row>
+					<item required="true" showHelp="false">
+						<password binding="user.password" />
+					</item>
+				</row>
+				<row>
+					<item required="true" showHelp="false">
+						<password binding="confirmPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<blurb escape="false" sanitise="none" visible="showGoogleRecaptcha">
+							<![CDATA[
+								<script src='https://www.google.com/recaptcha/api.js'></script>
+								<table>
+									<tr>
+										<td style="width:50%" />
+										<td>
+											<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
+										</td>
+										<td style="width:50%" />
+									</tr>
+								</table>
+							]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<blurb escape="false" sanitise="none" visible="showCloudflareTurnstile">
+							<![CDATA[
+								<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+								<table>
+									<tr>
+										<td style="width:50%" />
+										<td>
+											<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
+										</td>
+										<td style="width:50%" />
+									</tr>
+								</table>
+							]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button action="Register" />
+					</item>
+				</row>
+			</form>
+		</vbox>
 	</vbox>
 	<actions>
-		<action className="Register" name="Register" displayName="admin.selfRegistration.actions.register.displayName" inActionPanel="false" />
+		<action className="Register" name="Register" displayName="admin.selfRegistration.actions.register.displayName"
+			inActionPanel="false" />
 	</actions>
 </view>

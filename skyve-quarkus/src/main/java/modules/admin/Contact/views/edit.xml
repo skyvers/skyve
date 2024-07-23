@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.contact.edit.title"
+		name="edit"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<hbox border="true" shrinkWrap="height">
+		<form percentageWidth="50" responsiveWidth="12">
+			<column pixelWidth="100" responsiveWidth="4"/>
+			<column />
+			<row>
+				<item>
+					<default binding="name" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="contactType" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="email1" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="mobile" />
+				</item>
+			</row>
+		</form>
+		<form percentageWidth="50" responsiveWidth="12">
+			<column />
+			<column />
+			<column />
+			<row>
+				<item>
+					<contentImage binding="image" pixelHeight="160" pixelWidth="160" />
+				</item>
+			</row>
+		</form>
+	</hbox>
+	<actions>
+		<defaults />
+	</actions>
+</view>

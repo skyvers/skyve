@@ -5,32 +5,35 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.view.DownloadAreaType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 		
 public class CustomerResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -160,8 +163,13 @@ public class CustomerResourceServlet extends HttpServlet {
 			String moduleName = null;
 			if (documentName != null) {
 				int dotIndex = documentName.indexOf('.');
-				moduleName = documentName.substring(0, dotIndex);
-				documentName = documentName.substring(dotIndex + 1);
+				if (dotIndex < 0) {
+					Util.LOGGER.severe("Module/Document is malformed in the URL");
+				}
+				else {
+					moduleName = documentName.substring(0, dotIndex);
+					documentName = documentName.substring(dotIndex + 1);
+				}
 			}
 			String binding = Util.processStringValue(request.getParameter(AbstractWebContext.BINDING_NAME));
 			String resourceFileName = Util.processStringValue(request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME));
@@ -186,7 +194,8 @@ public class CustomerResourceServlet extends HttpServlet {
 				Util.LOGGER.severe("No resource file name or data file name in the URL");
 			}
 			else {
-				User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+				HttpSession session = request.getSession(false);
+				User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 				Customer customer = null;
 				String customerName = null;
 				if (user != null) { // we are logged in
@@ -223,6 +232,14 @@ public class CustomerResourceServlet extends HttpServlet {
 							(resourceFileName.length() == 36)) { // its a valid UUID in length at least
 						cm = EXT.newContentManager();
 						content = cm.getAttachment(resourceFileName);
+						// if &_nm is in the URL then don't include markup - we are most probably editing SVG
+						// PS The content is never put so the mutation below is OK
+						if (request.getParameterMap().containsKey(AbstractWebContext.NO_MARKUP)) {
+							content.setMarkup(null);
+						}
+					}
+					else {
+						Util.LOGGER.severe("No skyve user or customer or the contentId is not valid");
 					}
 				} 
 				else if (DownloadAreaType.resources.toString().equals(resourceArea)) {
@@ -234,7 +251,7 @@ public class CustomerResourceServlet extends HttpServlet {
 					else {
 						int underscoreIndex = resourceFileName.lastIndexOf('_');
 						if (underscoreIndex > 0) {
-							int dotIndex = resourceFileName.lastIndexOf('.');
+			  				int dotIndex = resourceFileName.lastIndexOf('.');
 							if (dotIndex > underscoreIndex) {
 								String baseFileName = resourceFileName.substring(0, underscoreIndex) + 
 														resourceFileName.substring(dotIndex);
@@ -249,7 +266,7 @@ public class CustomerResourceServlet extends HttpServlet {
 				else {
 					throw new IllegalStateException("Unsupported resource area " + resourceArea);
 				}
-				CustomerResourceServlet.this.secure(this, moduleName, documentName, binding, resourceFileName, user);
+				CustomerResourceServlet.this.secure(this, moduleName, documentName, binding, resourceFileName, user, UserAgent.getUxUi(request).getName());
 			}
 		}
 	}
@@ -377,6 +394,7 @@ public class CustomerResourceServlet extends HttpServlet {
 	 * @param resourceFileName	The file/content identifier - never null.
 	 * @param user	The logged in user or null if not logged in
 	 * @param intendedCustomerName	The customer name from a customer cookie (if no principal).
+	 * @param uxui UxUi For access checking
 	 * @throws SecurityException
 	 */
 	@SuppressWarnings({"static-method"})
@@ -385,7 +403,8 @@ public class CustomerResourceServlet extends HttpServlet {
 							String documentName, 
 							String binding, 
 							String resourceFileName,
-							User user)
+							User user,
+							String uxui)
 	throws SecurityException {
 		// Content can only be accessed if we have an authenticated user that has access
 		if (resource.isContent()) {
@@ -395,6 +414,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			else if ((moduleName == null) || (documentName == null) || (binding == null)) {
 				throw new DomainException("Module name, document name & binding are required to secure a content resource");
 			}
+			
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
 			Document document = module.getDocument(customer, documentName);
@@ -402,7 +422,19 @@ public class CustomerResourceServlet extends HttpServlet {
 																	module,
 																	document,
 																	binding);
-			// Check that the user has access
+			Attribute attribute = target.getAttribute();
+			// If binding points nowhere, then deny
+			if (attribute == null) { // should never happen
+				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
+			}
+			
+			// Check that the user has access - use the full binding here
+			// NB If you can text search you should already be able to see anything you have access to
+			if (! user.canTextSearch()) {
+				user.checkAccess(UserAccess.content(moduleName, documentName, binding), uxui);
+			}
+			
+			// Check that user has content access - Use the content module and document and the target attribute name
 			AttachmentContent content = resource.getContent();
 			if (! user.canAccessContent(content.getBizId(),
 											content.getBizModule(),
@@ -410,7 +442,7 @@ public class CustomerResourceServlet extends HttpServlet {
 											content.getBizCustomer(),
 											content.getBizDataGroupId(),
 											content.getBizUserId(),
-											target.getAttribute().getName())) {
+											attribute.getName())) {
 				throw new SecurityException(moduleName + '.' + documentName + '.' + binding, user.getName());
 			}
 		}

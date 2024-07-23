@@ -3,13 +3,14 @@ package modules.test;
 import java.nio.charset.Charset;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
 
 public class UtilTests extends AbstractSkyveTest {
+
 	@Test
 	public void testPopulateFully() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);

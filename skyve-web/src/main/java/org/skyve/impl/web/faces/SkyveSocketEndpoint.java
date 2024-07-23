@@ -1,11 +1,11 @@
 package org.skyve.impl.web.faces;
 
-import javax.websocket.CloseReason;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
-
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.util.PushMessage;
+
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.Session;
 
 /**
  * This class extends omnifaces socket endpoint to enable the collection of 

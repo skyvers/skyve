@@ -3,7 +3,7 @@ package org.skyve.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 

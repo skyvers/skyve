@@ -12,11 +12,11 @@
 	        </row>
 	        <row>
 	            <item>
-	                <radio binding="datasetType" vertical="false">
+	                <combo binding="datasetType">
 	                	<onChangedHandlers>
 	                		<rerender clientValidation="false" />
 	                	</onChangedHandlers>
-	                </radio>
+	                </combo>
 	            </item>
 	        </row>
 	        <row>
@@ -99,7 +99,7 @@
     <actions>
         <defaults/>
         
-        <action className="TestQuery" displayName="Test Query" iconStyleClass="fa fa-cog" visible="notTypeConstant"/>
+        <action className="TestQuery" displayName="Test Query" iconStyleClass="fa-solid fa-cog" visible="notTypeConstant"/>
     </actions>
     <newParameters/>
 </view>

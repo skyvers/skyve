@@ -12,6 +12,8 @@ public interface ChildBean<T extends Bean> extends Bean {
 	
 	public static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
 	
+	public static final String CHILD_PARENT_ID = PARENT_NAME + "_id";
+
 	/**
 	 * 
 	 * @return

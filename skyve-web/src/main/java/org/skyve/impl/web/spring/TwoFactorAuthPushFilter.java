@@ -5,13 +5,6 @@ import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
@@ -29,8 +22,15 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthenticationFilter {
-	private static final AntPathRequestMatcher DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/loginAttempt", "POST");
+	private static final AntPathRequestMatcher DEFAULT_LOGIN_ATTEMPT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher(SkyveSpringSecurity.LOGIN_ATTEMPT_PATH, "POST");
 
 	public static final String SKYVE_SECURITY_FORM_CUSTOMER_KEY = "customer";
 	
@@ -300,15 +300,18 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	protected String generateTFAPushId(Timestamp generatedTS) {
 		return UUID.randomUUID().toString() + "-" + Long.toString(generatedTS.getTime());
 	}
-	
+
+	// This is thread-safe
+	private static final SecureRandom RANDOM = new SecureRandom();
+    // Get 128 random bytes - move past first seed sequence
+    static {
+		byte[] randomBytes = new byte[128];
+	    RANDOM.nextBytes(randomBytes);
+    }
+    
 	@SuppressWarnings("static-method")
 	protected String generateTFACode() {
-	    // Get 128 random bytes - move past first seed sequence
-		SecureRandom random = new SecureRandom();
-	    byte[] randomBytes = new byte[128];
-	    random.nextBytes(randomBytes);
-	    
-		return new DecimalFormat("000000").format(random.nextDouble() * 1000000d);
+		return new DecimalFormat("000000").format(RANDOM.nextDouble() * 1000000d);
 	}
 	
 	/**

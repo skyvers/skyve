@@ -1,18 +1,19 @@
 package org.skyve.impl.web.faces.converters.time;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.ConverterException;
-
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.impl.util.UtilImpl;
 
-public class HH_MI_SS extends org.skyve.domain.types.converters.time.HH_MI_SS implements Converter {
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.convert.ConverterException;
+
+public class HH_MI_SS extends org.skyve.domain.types.converters.time.HH_MI_SS
+						implements Converter<TimeOnly> {
 	@Override
-	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
+	public TimeOnly getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
@@ -27,12 +28,12 @@ public class HH_MI_SS extends org.skyve.domain.types.converters.time.HH_MI_SS im
 	}
 
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, Object value) {
+	public String getAsString(FacesContext fc, UIComponent component, TimeOnly value) {
 		if (value == null) {
 			return "";
 		}
 		try {
-			return toDisplayValue((TimeOnly) value);
+			return toDisplayValue(value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "";

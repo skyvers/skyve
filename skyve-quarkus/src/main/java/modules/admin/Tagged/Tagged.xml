@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Tagged" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Tagged" />
+	<singularAlias>Tagged</singularAlias>
+	<pluralAlias>Tagged</pluralAlias>
+	<bizKey expression="Tagged Item"/>
+	<attributes>
+		<text name="taggedModule">
+			<displayName>Tagged Module</displayName>
+			<length>30</length>
+		</text>
+		<text name="taggedDocument">
+			<displayName>Tagged Document</displayName>
+			<length>30</length>
+		</text>
+		<text name="taggedBizId">
+			<displayName>Tagged BizId</displayName>
+			<index>database</index>
+			<length>36</length>
+		</text>
+		<association name="tag" type="aggregation" required="true">
+			<displayName>Tag</displayName>
+			<description>The tag</description>
+			<documentName>Tag</documentName>
+		</association>
+	</attributes>
+	<uniqueConstraints>
+		<constraint name="uniqueTag" scope="user" description="Ensure that a document is tagged only once per tag">
+			<message>This document is already tagged.</message>
+			<fieldReferences>
+				<ref>tag</ref>
+				<ref>taggedModule</ref>
+				<ref>taggedDocument</ref>
+				<ref>taggedBizId</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

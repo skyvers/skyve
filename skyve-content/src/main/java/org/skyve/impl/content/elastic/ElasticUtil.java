@@ -1,12 +1,12 @@
 package org.skyve.impl.content.elastic;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
+//import java.io.BufferedReader;
+//import java.io.InputStream;
+//import java.io.InputStreamReader;
+//import java.security.MessageDigest;
+//import java.security.NoSuchAlgorithmException;
+//import java.util.List;
+//import java.util.Map;
 
 //import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
 //import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
@@ -26,11 +26,11 @@ import java.util.Map;
 //import org.elasticsearch.indices.IndexAlreadyExistsException;
 //import org.elasticsearch.node.Node;
 //import org.elasticsearch.node.NodeBuilder;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Util;
+//import org.skyve.impl.util.UtilImpl;
+//import org.skyve.util.Util;
 
 public class ElasticUtil {
-	private static final String CLUSTER_NAME = "SKYVE_CONTENT";
+//	private static final String CLUSTER_NAME = "SKYVE_CONTENT";
 
 	private ElasticUtil() {
 		// disallow instantiation
@@ -213,7 +213,7 @@ public class ElasticUtil {
 
 	public static void main(String[] args) 
 	throws Exception {
-		UtilImpl.CONTENT_DIRECTORY = "/C:/_/skyve/skyve-ee/content/";
+		UtilImpl.CONTENT_DIRECTORY = "/C:/_/content/skyve/";
 		try (Node n = localNode()) {
 			try (Client c = localClient(n)) {
 				ElasticUtil.prepareIndex(c, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);

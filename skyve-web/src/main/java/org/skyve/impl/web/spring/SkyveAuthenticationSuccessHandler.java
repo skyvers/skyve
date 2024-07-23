@@ -2,10 +2,6 @@ package org.skyve.impl.web.spring;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
@@ -16,6 +12,10 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * This class will redirect to the saved URL after login unless that URL is not a regular url.
@@ -33,8 +33,9 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request,
-											HttpServletResponse response,
-											Authentication authentication) throws ServletException, IOException {
+										HttpServletResponse response,
+										Authentication authentication)
+	throws ServletException, IOException {
 		String redirectUrl = null;
 		RequestCache requestCache = new HttpSessionRequestCache();
 		SavedRequest savedRequest = requestCache.getRequest(request, response);

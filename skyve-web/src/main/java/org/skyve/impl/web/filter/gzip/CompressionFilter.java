@@ -20,20 +20,19 @@ package org.skyve.impl.web.filter.gzip;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Implementation of <code>javax.servlet.Filter</code> used to compress
+ * Implementation of <code>jakarta.servlet.Filter</code> used to compress
  * the ServletResponse if it is bigger than a threshold.
  *
  * @author Amy Roh
@@ -130,9 +129,10 @@ public class CompressionFilter implements Filter {
      **/
 
     @Override
-	public void doFilter ( ServletRequest request, ServletResponse response,
-                        FilterChain chain ) throws IOException, ServletException {
-
+	public void doFilter(ServletRequest request,
+							ServletResponse response,
+							FilterChain chain)
+	throws IOException, ServletException {
         if (debug > 0) {
         	UtilImpl.LOGGER.info("@doFilter");
         }
@@ -148,7 +148,7 @@ public class CompressionFilter implements Filter {
         boolean supportCompression = false;
         if (request instanceof HttpServletRequest) {
             if (debug > 1) {
-            	UtilImpl.LOGGER.info("requestURI = " + ((HttpServletRequest)request).getRequestURI());
+            	UtilImpl.LOGGER.info("requestURI = " + ((HttpServletRequest) request).getRequestURI());
             }
 
             // Are we allowed to compress ?

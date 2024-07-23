@@ -12,6 +12,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nonnull;
+
 public abstract class AbstractPersistence implements Persistence {
 	private static final long serialVersionUID = -766607064543920926L;
 
@@ -20,11 +22,34 @@ public abstract class AbstractPersistence implements Persistence {
 	
 	protected static int bizKeyLength = Integer.MIN_VALUE;
 
-	public static AbstractPersistence get() {
-		return threadLocalPersistence.get();
+	// Holds Persistence instances for each thread - removed by commit(true)
+	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<>();
+
+	/**
+	 * Grab a thread-scoped singleton Persistence instance for the current thread.
+	 * If one doesn't exist it is created.
+	 */
+	public static @Nonnull AbstractPersistence get() {
+		AbstractPersistence result = threadLocalPersistence.get();
+		if (result == null) {
+			result = newInstance();
+			threadLocalPersistence.set(result);
+		}
+		return result;
 	}
 
-	public static AbstractPersistence newInstance() {
+	/**
+	 * Indicates if a thread-scoped singleton Persistence instance is associated
+	 * with the current thread of execution.
+	 */
+	public static boolean isPresent() {
+		return (threadLocalPersistence.get() != null);
+	}
+
+	/**
+	 * Construct a Persistence implementation based on Skyve system configuration.
+	 */
+	public static @Nonnull AbstractPersistence newInstance() {
 		AbstractPersistence result = null;
 		
 		try {
@@ -45,16 +70,8 @@ public abstract class AbstractPersistence implements Persistence {
 		return result;
 	}
 	
-	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<>() {
-		@Override
-		protected synchronized AbstractPersistence initialValue() throws IllegalArgumentException {
-			AbstractPersistence persistence = newInstance();
-			set(persistence);
-			return persistence;
-		}
-	};
-
 	protected transient User user;
+	
 	// NB We can never keep a reference to the customer as the app coder could change the customer name on their user at any time.
 	//protected transient Customer customer;
 
@@ -118,7 +135,7 @@ public abstract class AbstractPersistence implements Persistence {
 	public final void setForThread() {
 		threadLocalPersistence.set(this);
 	}
-
+	
 	@Override
 	public final boolean isPersisted(Bean bean) {
 		return (bean instanceof PersistentBean) && (((PersistentBean) bean).getBizVersion() != null);

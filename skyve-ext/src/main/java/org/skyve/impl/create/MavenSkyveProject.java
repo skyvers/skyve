@@ -196,7 +196,7 @@ public class MavenSkyveProject {
 	}
 
 	/**
-	 * Copies all skyve-ee files into the relevant project directories.
+	 * Copies all skyve files into the relevant project directories.
 	 */
 	public void assemble() throws IOException {
 		assemble(true, true, true, true);
@@ -289,8 +289,10 @@ public class MavenSkyveProject {
 		if (webInfPages.exists()) {
 			skyveWebAppFiles.addAll(FileUtils.listFiles(webInfPages, null, true));
 		}
+		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("beans.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("faces-config.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("jboss-classloading.xml").toFile());
+		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("jboss-deployment-structure.xml").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("undertow-handlers.conf").toFile());
 		skyveWebAppFiles.add(basePath.resolve("WEB-INF").resolve("web.xml").toFile());
 		skyveWebAppFiles.addAll(FileUtils.listFiles(basePath.resolve("WEB-INF").resolve("resources").resolve("skyve").toFile(), null, true));
@@ -311,7 +313,6 @@ public class MavenSkyveProject {
 
 		// If we are copying from a project, we should copy the entire modules directory
 		// as there will be an arbitrary number of modules.
-		// skyve-ee only provides the admin module.
 		if (copyFromProject) {
 			skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}
@@ -358,7 +359,7 @@ public class MavenSkyveProject {
 
 		// If we are copying from a project, we should copy the entire modules directory
 		// as there will be an arbitrary number of modules.
-		// skyve-ee only provides the admin module.
+		// skyve-war should only provide the admin module.
 		if (copyFromProject) {
 			skyveGeneratedFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}
@@ -393,17 +394,11 @@ public class MavenSkyveProject {
 		copyFiles(targetDir, absoluteTestPath, getSkyveTestFiles(absoluteTestPath));
 
 		try {
-			// update the junit4 base test
-			final Path abstractTestFilePath = projectDirectory.resolve(testDirectory).resolve("util").resolve("AbstractH2Test.java");
+			// update the internal base test to the appropriate customer name
+			final Path abstractTestFilePath = projectDirectory.resolve(testDirectory).resolve("util").resolve("InternalBaseH2Test.java");
 			String testContent = new String(Files.readAllBytes(abstractTestFilePath));
 			testContent = testContent.replaceAll("bizhub", customerName);
 			Files.write(abstractTestFilePath, testContent.getBytes());
-
-			// update the junit5 base test
-			final Path abstractTestFilePath2 = projectDirectory.resolve(testDirectory).resolve("util").resolve("AbstractH2TestForJUnit5.java");
-			String testContent2 = new String(Files.readAllBytes(abstractTestFilePath2));
-			testContent2 = testContent2.replaceAll("bizhub", customerName);
-			Files.write(abstractTestFilePath2, testContent2.getBytes());
 		}
 		catch (@SuppressWarnings("unused") IOException e) {
 			UtilImpl.LOGGER.warning("Failed to update customer, tests will likely fail.");
@@ -415,7 +410,7 @@ public class MavenSkyveProject {
 
 		// If we are copying from a project, we should copy the entire modules directory
 		// as there will be an arbitrary number of modules.
-		// skyve-ee only provides the admin module.
+		// skyve-war should only provide the admin module.
 		if (copyFromProject) {
 			skyveGeneratedTestFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
 		}

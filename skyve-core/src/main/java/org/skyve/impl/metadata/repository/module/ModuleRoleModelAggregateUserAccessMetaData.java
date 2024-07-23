@@ -1,17 +1,17 @@
 package org.skyve.impl.metadata.repository.module;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
+
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "modelAggregate")
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "modelAggregateAccess")
 public class ModuleRoleModelAggregateUserAccessMetaData extends ModuleRoleDocumentAggregateUserAccessMetaData {
 	private static final long serialVersionUID = 950718682785023214L;
 
@@ -30,7 +30,7 @@ public class ModuleRoleModelAggregateUserAccessMetaData extends ModuleRoleDocume
 	public void validate(String metaDataName, String roleName, Module module) {
 		super.validate(metaDataName, roleName, module);
 		if (modelName == null) {
-			throw new MetaDataException(metaDataName + " : [modelName] is required for all modelAggregate user accesses defined in module role " + roleName);
+			throw new MetaDataException(metaDataName + " : [model] is required for all modelAggregate user accesses defined in module role " + roleName);
 		}
 		// NB can't validate modelName exists until second pass validation in LocalDesignRepository.validateModuleForGenerateDomain()
 	}

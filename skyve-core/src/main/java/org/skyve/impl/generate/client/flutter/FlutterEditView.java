@@ -19,7 +19,8 @@ import org.skyve.metadata.view.View.ViewType;
 public class FlutterEditView extends FlutterView {
     private Module module;
     private Document document;
-    private View createView;
+    @SuppressWarnings("unused")
+	private View createView;
     private View editView;
 
     private final User user;

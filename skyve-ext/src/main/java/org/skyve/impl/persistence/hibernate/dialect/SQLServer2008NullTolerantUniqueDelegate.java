@@ -25,6 +25,7 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	@Override
 	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
 		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
+		@SuppressWarnings("deprecation")
 		final QualifiedObjectNameFormatter formatter = jdbcEnvironment.getQualifiedObjectNameFormatter();
 		final String tableName = formatter.format(uniqueKey.getTable().getQualifiedTableName(), dialect);
 		final String constraintName = dialect.quote(uniqueKey.getName());
@@ -63,6 +64,7 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 		StringBuilder result = new StringBuilder(64);
 
 		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
+		@SuppressWarnings("deprecation")
 		final QualifiedObjectNameFormatter formatter = jdbcEnvironment.getQualifiedObjectNameFormatter();
 		final String tableName = formatter.format(uniqueKey.getTable().getQualifiedTableName(), dialect);
 		result.append("DROP INDEX ").append(dialect.quote(uniqueKey.getName()));

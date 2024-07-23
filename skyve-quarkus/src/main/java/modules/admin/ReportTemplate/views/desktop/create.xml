@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		name="create" title="New Report Template"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd">
+	<!-- desktop report template create view -->
+	<vbox visible="enterDetails">
+		<component name="_enterDetails" />
+	</vbox>
+	<vbox visible="enterMarkup">
+		<component name="_enterMarkup" />
+	</vbox>
+	
+	<actions>
+		<cancel/>
+		
+		<action className="Back" displayName="Back" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="enterDetails" />
+		<action className="Next" displayName="Next" clientValidation="true" iconStyleClass="fa fa-arrow-right" invisible="notShowNext" />
+		<save visible="enterMarkup"/>
+	</actions>
+	<newParameters />
+</view>

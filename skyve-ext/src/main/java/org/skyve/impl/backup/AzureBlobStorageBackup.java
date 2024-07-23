@@ -41,7 +41,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 
 	@Override
 	public void downloadBackup(String backupName, OutputStream outputStream) {
-		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).download(outputStream);
+		getBlobContainerClient().getBlobClient(getDirectoryName() + backupName).downloadStream(outputStream);
 	}
 
 	@Override

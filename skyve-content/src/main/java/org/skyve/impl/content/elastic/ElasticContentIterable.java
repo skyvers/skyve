@@ -1,7 +1,7 @@
 package org.skyve.impl.content.elastic;
 
-import java.util.Collections;
-import java.util.Iterator;
+//import java.util.Collections;
+//import java.util.Iterator;
 
 //import org.elasticsearch.action.search.SearchResponse;
 //import org.elasticsearch.client.Client;
@@ -9,6 +9,7 @@ import java.util.Iterator;
 //import org.elasticsearch.index.query.QueryBuilders;
 //import org.elasticsearch.search.SearchHit;
 //import org.elasticsearch.search.SearchHits;
+
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
 
@@ -143,7 +144,6 @@ return null;
 	}
 	
 	@Override
-	@SuppressWarnings("synthetic-access")
 	public ContentIterator iterator() {
 		return new ESIterator();
 	}

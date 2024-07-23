@@ -1,0 +1,23 @@
+<!-- ... -->
+<subsystem xmlns="urn:jboss:domain:datasources:6.0">
+	<datasources>
+		<!-- ... -->
+		<drivers>
+			<driver name="h2" module="com.h2database.h2">
+				<xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+			</driver>
+			<driver name="mysql" module="com.mysql" />
+			<driver name="sqlserver" module="com.microsoft.sqlserver">
+				<xa-datasource-class>com.microsoft.sqlserver.jdbc.SQLServerXADataSource</xa-datasource-class>
+			</driver>
+			<driver name="postgresql" module="org.postgresql">
+				<driver-class>org.postgresql.Driver</driver-class>
+			</driver>
+		</drivers>
+	</datasources>
+</subsystem>
+<!-- ... -->
+<subsystem xmlns="urn:jboss:domain:jca:5.0">
+	<!-- ... -->
+	<cached-connection-manager debug="true" error="false" />
+</subsystem>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DataGroup"
+				xmlns="http://www.skyve.org/xml/document"
+				xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_DataGroup" />
+	<singularAlias>Data Group</singularAlias>
+	<pluralAlias>Data Groups</pluralAlias>
+	<iconStyleClass>fa fa-users</iconStyleClass>
+	<bizKey expression="{name}"/>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>Name</displayName>
+			<length>30</length>
+		</text>
+		<memo name="description" >
+			<displayName>Description</displayName>
+		</memo>
+	</attributes>
+	<uniqueConstraints>
+		<constraint name="UniqueName" scope="customer">
+			<message>A Data Group named {name} already exists.</message>
+			<fieldReferences>
+				<ref>name</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

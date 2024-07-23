@@ -5,15 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
@@ -78,6 +69,16 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.util.Icons;
+
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementRef;
+import jakarta.xml.bind.annotation.XmlElementRefs;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "document")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
@@ -102,8 +103,6 @@ import org.skyve.metadata.repository.ProvidedRepository;
 							"uniqueConstraints"})
 public class DocumentMetaData extends NamedMetaData implements ConvertableMetaData<Document> {
 	private static final long serialVersionUID = 222166383815547958L;
-
-	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
 
 	private Extends inherits;
 	private java.lang.Boolean abstractClass;
@@ -344,7 +343,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 		String icon = getIconStyleClass();
 
 		if ((icon16 == null) && (icon32 == null) && (icon == null)) {
-			icon = DEFAULT_DOCUMENT_ICON_STYLE_CLASS;
+			icon = Icons.FONT_DOCUMENT;
 		}
 		else {
 			if (icon16 == null) {
@@ -375,6 +374,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 		if (bizKey != null) {
 			bizKeyExpression = bizKey.getExpression();
 			bizKeyCode = bizKey.getCode();
+			result.setBizKeySensitity(bizKey.getSensitivity());
 		}
 
 		Persistent resultPersistent = result.getPersistent();
@@ -464,10 +464,13 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 				if (BindUtil.isImplicit(value)) {
 					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is already an implicit attribute.");
 				}
+				if (! value.equals(BindUtil.toJavaInstanceIdentifier(value))) {
+					throw new MetaDataException(metaDataName + " : The attribute named " + value + " is not a valid attribute name. This should be camel case with no punctuation");
+				}
 				if (! attributeNames.add(value)) {
 					throw new MetaDataException(metaDataName + " : Duplicate attribute named " + value);
 				}
-
+				
 				value = attribute.getDisplayName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The attribute [displayName] is required for attribute " + attribute.getName());
@@ -796,6 +799,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 															relation.getName());
 						}
 
+						// Ordered and Ordering are mutually exclusive
+						List<Ordering> orderings = collection.getOrdering();
+						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && 
+								(orderings != null) && (! orderings.isEmpty())) {
+							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " + 
+															relation.getName());
+						}
+						
 						java.lang.Boolean ownerDatabaseIndex = collection.getOwnerDatabaseIndex();
 						java.lang.Boolean elementDatabaseIndex = collection.getElementDatabaseIndex();
 
@@ -804,7 +815,6 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 						// This means, no compound bindings and references must actually be to foreign key columns.
 						// We need to indicate to the framework that we will need to order the collection ourselves in memory.
 						if (collection.isPersistent()) {
-							List<Ordering> orderings = collection.getOrdering();
 							if (orderings != null) {
 								for (Ordering ordering : orderings) {
 									String by = ordering.getBy();
@@ -850,13 +860,20 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 				if (conditionName == null) {
 					throw new MetaDataException(metaDataName + " : A condition [name] is required.");
 				}
+				// Check that conditions do not start with is or not and are a valid java bean property
+				if (conditionName.startsWith("is")) {
+					throw new MetaDataException(metaDataName + " Condition name " + conditionName + " cannot start with 'is' - the 'is' prefix is generated in the bean method.");
+				}
 				if (conditionName.startsWith("not")) {
 					throw new MetaDataException(metaDataName + " : Condition name " + conditionName + " cannot start with 'not'.  The negated condition will be generated automatically.");
 				}
-				if (! attributeNames.add(conditionName)) {
-					throw new MetaDataException(metaDataName + " : Condition name clashes with field/association/reference/condition named " + 
-													conditionName);
+				if (! conditionName.equals(BindUtil.toJavaInstanceIdentifier(conditionName))) {
+					throw new MetaDataException(metaDataName + " : The condition named " + conditionName + " is not a valid condition name. This should be camel case with no punctuation.");
 				}
+				if (! attributeNames.add(conditionName)) {
+					throw new MetaDataException(metaDataName + " : Condition name clashes with field/association/reference/condition named " + conditionName);
+				}
+
 				String conditionExpression = conditionMetaData.getExpression();
 				if (conditionExpression == null) {
 					throw new MetaDataException(metaDataName + " : A condition [expression] is required.");

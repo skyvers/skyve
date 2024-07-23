@@ -7,6 +7,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * 
  */
@@ -37,7 +40,7 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	 * @param customer
 	 * @return
 	 */
-	public Module getDocumentModule(Customer customer);
+	public Module getDocumentModule(@Nonnull Customer customer);
 	
 	/**
 	 * 
@@ -63,5 +66,5 @@ public interface MetaDataQueryDefinition extends QueryDefinition {
 	 * @param tagId
 	 * @return
 	 */
-	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType, String tagId);
+	public DocumentQuery constructDocumentQuery(@Nullable AggregateFunction summaryType, @Nullable String tagId);
 }

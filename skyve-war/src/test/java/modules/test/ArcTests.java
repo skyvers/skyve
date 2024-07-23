@@ -1,8 +1,11 @@
 package modules.test;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.util.Util;
 
@@ -11,30 +14,27 @@ import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
 
-/**
- * The arc tests fail as the class attributes of the any and many-to-any tags don't map correctly to
- * the entity-name s used in the current domain generation.
- * 
- * @author mike
- *
- */
 public class ArcTests extends AbstractSkyveTest {
 	/**
 	 * This just wont work...
 	 * 
 	 * @throws Exception
 	 */
-	@Test(expected = DomainException.class)
+	@Test
 	public void testOneToManyPersist() throws Exception {
-		ArcOneToMany test = Util.constructRandomInstance(u, m, ao2m, 0);
-		test = p.save(test);
-		test.getArcs().add(p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0)));
-		test.getArcs().add(p.save((AnyDerived2) Util.constructRandomInstance(u, m, ad2, 0)));
-		test = p.save(test);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+			ArcOneToMany test = Util.constructRandomInstance(u, m, ao2m, 0);
+			test = p.save(test);
+			test.getArcs().add(p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0)));
+			test.getArcs().add(p.save((AnyDerived2) Util.constructRandomInstance(u, m, ad2, 0)));
+			test = p.save(test);
 
-		p.evictAllCached();
+			p.evictAllCached();
 
-		test = p.retrieve(ao2m, test.getBizId());
+			test = p.retrieve(ao2m, test.getBizId());
+		});
+
+		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	/**
@@ -43,7 +43,6 @@ public class ArcTests extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Ignore // One to one arcs are screwed
 	public void testOneToOnePersist() throws Exception {
 		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 		test = p.save(test);
@@ -61,17 +60,21 @@ public class ArcTests extends AbstractSkyveTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test(expected = DomainException.class)
+	@Test
 	public void testOneToOnePersistArcTransient() throws Exception {
-		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
-		test = p.save(test);
-		test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
-		test = p.save(test);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+			ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
+			test = p.save(test);
+			test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
+			test = p.save(test);
 
-		p.evictAllCached();
+			p.evictAllCached();
 
-		test = p.retrieve(ao2o, test.getBizId());
-		Assert.assertNotNull(test.getArc());
+			test = p.retrieve(ao2o, test.getBizId());
+			Assert.assertNotNull(test.getArc());
+		});
+
+		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	/**
@@ -80,7 +83,6 @@ public class ArcTests extends AbstractSkyveTest {
 	 * @throws Exception
 	 */
 	@Test
-	@Ignore // One to one arcs are screwed
 	public void testOneToOnePersistPartlyTransient() throws Exception {
 		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 		test.setArc(p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0)));
@@ -97,11 +99,15 @@ public class ArcTests extends AbstractSkyveTest {
 	 * 
 	 * @throws Exception
 	 */
-	@Test(expected = DomainException.class)
+	@Test
 	public void testOneToOnePersistFullyTransient() throws Exception {
-		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
-		test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
-		test = p.save(test);
+		DomainException de = Assert.assertThrows(DomainException.class, () -> {
+			ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
+			test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
+			test = p.save(test);
+		});
+
+		assertThat(de.getMessage(), is(notNullValue()));
 	}
 
 	@Test
@@ -118,7 +124,6 @@ public class ArcTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	@Ignore // One to one arcs are screwed
 	public void testOneToOneUpsertUpdate() throws Exception {
 		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 		AnyDerived1 arc1 = p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));

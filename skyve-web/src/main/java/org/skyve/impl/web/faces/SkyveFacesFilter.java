@@ -4,16 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 
-import javax.faces.application.ViewExpiredException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
@@ -22,6 +12,16 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+
+import jakarta.faces.application.ViewExpiredException;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class SkyveFacesFilter implements Filter {
 	// This is used when the principal is not (or no longer) logged in.
@@ -33,7 +33,7 @@ public class SkyveFacesFilter implements Filter {
     private String expiredURI;
     // A list of all unsecured public pages
     private String[] unsecuredURLPrefixes;
-    // The value of javax.faces.DEFAULT_SUFFIX or ".jsf";
+    // The value of jakarta.faces.DEFAULT_SUFFIX or ".jsf";
     private String facesSuffix = ".jsf";
     
     @Override
@@ -49,7 +49,7 @@ public class SkyveFacesFilter implements Filter {
 			}
     	}
     	
-    	String facesSuffixParameter = config.getServletContext().getInitParameter("javax.faces.DEFAULT_SUFFIX");
+    	String facesSuffixParameter = config.getServletContext().getInitParameter("jakarta.faces.DEFAULT_SUFFIX");
     	if ((facesSuffixParameter != null) && (! facesSuffixParameter.isEmpty())) {
     		facesSuffix = facesSuffixParameter;
     	}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.importExportColumn.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+		<column/>
+		<column/>
+		<column/>
+		<row>
+			<item>
+				<default binding="columnName"/>
+			</item>
+		</row>
+		<row>
+			<item>
+				<combo binding="bindingName">
+					<onChangedHandlers><rerender/></onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField visible="showExpression" binding="bindingExpression"/>
+			</item>
+		</row>
+	</form>
+	<actions>
+		<defaults />
+	</actions>
+</view>

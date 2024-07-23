@@ -25,7 +25,14 @@ public class Time {
 	public static void clearTimeComponent(Date date) {
 		TimeUtil.clearTimeComponent(date);
 	}
-	
+
+	/**
+	 * Sets the second component of the date to 0.
+	 */
+	public static void clearSecondAndMillisecondComponent(Date date) {
+		TimeUtil.clearSecondAndMillisecondComponent(date);
+	}
+
 	/**
 	 * Clears the millisecond component of the date/time.
 	 */

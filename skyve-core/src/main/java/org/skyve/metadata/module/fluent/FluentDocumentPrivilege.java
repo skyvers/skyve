@@ -62,6 +62,7 @@ public class FluentDocumentPrivilege {
 	public FluentDocumentPrivilege addContentPermission(String attributeName) {
 		ContentPermission content = new ContentPermission();
 		content.setAttributeName(attributeName);
+		// NB No need to set documentName as this is done on ModuleMetaData.convert()
 		privilege.getContentPermissions().add(content);
 		return this;
 	}
@@ -79,6 +80,7 @@ public class FluentDocumentPrivilege {
 	public FluentDocumentPrivilege addContentRestriction(String attributeName) {
 		ContentRestriction content = new ContentRestriction();
 		content.setAttributeName(attributeName);
+		// NB No need to set documentName as this is done on ModuleMetaData.convert()
 		privilege.getContentRestrictions().add(content);
 		return this;
 	}

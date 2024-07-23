@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.importExport.edit.title" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox shrinkWrap="height">
+		<vbox border="true" borderTitle="admin.importExport.selectMode.borderTitle">
+			<form>
+				<column responsiveWidth="2" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<radio binding="mode" vertical="false">
+							<onChangedHandlers>
+								<rerender clientValidation="false" />
+							</onChangedHandlers>
+						</radio>
+					</item>
+					<item>
+						<button pixelWidth="250" action="GetImportTemplate" />
+					</item>
+				</row>
+			</form>
+		</vbox>
+		<vbox border="true" borderTitle="admin.importExport.edit.configureOptions.borderTitle" widgetId="configureOptions">
+			<vbox>
+				<form disabled="fileExists">
+					<column responsiveWidth="2" />
+					<column />
+					<column />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<blurb textAlignment="left">
+									<![CDATA[<em>{i18n:admin.importExport.edit.configureOptions.blurb1}</em>]]>
+								</blurb>
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="moduleName">
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">configureOptions</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="documentName">
+								<onChangedHandlers>
+									<rerender clientValidation="false">
+										<properties>
+											<c:property key="update">configureOptions,columns</c:property>
+										</properties>
+									</rerender>
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<checkBox triState="false" binding="fileContainsHeaders" />
+						</item>
+					</row>
+				</form>
+				<vbox invisible="showExport">
+					<form invisible="fileExists">
+						<column responsiveWidth="2" />
+						<column />
+						<column />
+						<row>
+							<item>
+								<spacer />
+							</item>
+							<item>
+								<button pixelWidth="200" action="UploadSimpleImportDataFile">
+									<properties>
+										<c:property key="update">columns</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+					</form>
+					<form visible="fileExists">
+						<column responsiveWidth="2" />
+						<column />
+						<column />
+						<row>
+							<item>
+								<spacer />
+							</item>
+							<item>
+								<blurb escape="false"><![CDATA[<strong><em>{importFileName}</em></strong>{i18n:admin.importExport.edit.configureOptions.blurb2}]]></blurb>
+							</item>
+							<item>
+								<button pixelWidth="200" action="ClearImport" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<combo binding="loadType" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox triState="false " binding="detailedLogging" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<spacer />
+							</item>
+							<item>
+								<button pixelWidth="200" action="RunImport">
+									<properties>
+										<c:property key="update">columns</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+					</form>
+				</vbox>
+			</vbox>
+			<vbox>
+				<form visible="showExport">
+					<column responsiveWidth="2" />
+					<column />
+					<column />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button pixelWidth="200" action="ResetColumns">
+								<properties>
+									<c:property key="update">columns</c:property>
+								</properties>
+							</button>
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button pixelWidth="200" action="RunExport" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</vbox>
+	</vbox>
+	<vbox widgetId="columns">
+		<vbox visible="showUploadColumns" border="true" borderTitle="admin.importExport.edit.configureImportColumns.borderTitle">
+			<dataGrid binding="importExportColumns" invisible="showExpressions" inline="true" >
+				<boundColumn binding="columnName" />
+				<boundColumn binding="bindingName" />
+			</dataGrid>
+			<dataGrid binding="importExportColumns" visible="showExpressions" >
+				<boundColumn binding="columnName" />
+				<boundColumn binding="bindingName" />
+				<boundColumn binding="bindingExpression" />
+			</dataGrid>
+		</vbox>
+		<vbox visible="showExport" border="true" borderTitle="admin.importExport.edit.configureExportColumns.borderTitle">
+			<dataGrid binding="importExportColumns" invisible="showExpressions" >
+				<boundColumn binding="bindingName" />
+				<boundColumn binding="columnName" />
+			</dataGrid>
+			<dataGrid binding="importExportColumns" visible="showExpressions" >
+				<boundColumn binding="bindingName" />
+				<boundColumn binding="bindingExpression" />
+				<boundColumn binding="columnName" />
+			</dataGrid>
+		</vbox>
+	</vbox>
+	<actions>
+		<defaults />
+		<upload className="UploadSimpleImportDataFile" displayName="admin.importExport.actions.uploadSimpleImportDataFile.displayName" visible="showUpload" inActionPanel="false" enabled="contextSet" />
+		<action className="ClearImport" displayName="admin.importExport.actions.clearImport.displayName" iconStyleClass="fa fa-trash-o" visible="fileExists" enabled="persisted" inActionPanel="false"
+			confirm="admin.importExport.actions.clearImport.confirm" />
+		<action className="RunImport" displayName="admin.importExport.actions.runImport.displayName" iconStyleClass="fa fa-gear" visible="fileExists" enabled="persisted" inActionPanel="false"
+			confirm="admin.importExport.actions.runImport.confirm" />
+		<action className="ResetColumns" displayName="admin.importExport.actions.resetColumns.displayName" iconStyleClass="fa fa-gear" visible="showExport" inActionPanel="false" enabled="contextSet" />
+		<download className="RunExport" displayName="admin.importExport.actions.runExport.displayName" visible="showExport" inActionPanel="false" enabled="contextSet" />
+		<download className="GetImportTemplate" displayName="admin.importExport.actions.getImportTemplate.displayName" invisible="showExport" inActionPanel="false" />
+	</actions>
+</view>

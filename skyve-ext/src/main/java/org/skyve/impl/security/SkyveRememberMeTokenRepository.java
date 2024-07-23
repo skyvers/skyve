@@ -1,20 +1,21 @@
 package org.skyve.impl.security;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.UUID;
+
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.UUID;
 
 public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements PersistentTokenRepository {
 	private String getTokenForSeriesSql = "select userName, series, token, lastUsed from ADM_UserToken where series = ?";
@@ -37,22 +38,30 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 			customerName = customerAndUserName.substring(0, slashIndex);
 			userName = customerAndUserName.substring(slashIndex);
 		}
-		getJdbcTemplate().update(createNewTokenSql,
-									UUID.randomUUID().toString(),
-									Integer.valueOf(0),
-									new OptimisticLock(userName, new Date()).toString(),
-									customerAndUserName,
-									customerName,
-									"SYSTEM",
-									customerAndUserName,
-									series,
-									token.getTokenValue(),
-									lastUsed);
+		JdbcTemplate t = getJdbcTemplate();
+		if (t == null) {
+			throw new IllegalStateException("getJdbcTemplate() is null");
+		}
+		t.update(createNewTokenSql,
+					UUID.randomUUID().toString(),
+					Integer.valueOf(0),
+					new OptimisticLock(userName, new Date()).toString(),
+					customerAndUserName,
+					customerName,
+					"SYSTEM",
+					customerAndUserName,
+					series,
+					token.getTokenValue(),
+					lastUsed);
 	}
 
 	@Override
 	public void updateToken(String series, String tokenValue, Date lastUsed) {
-		getJdbcTemplate().update(updateTokenSql, tokenValue, lastUsed, series);
+		JdbcTemplate t = getJdbcTemplate();
+		if (t == null) {
+			throw new IllegalStateException("getJdbcTemplate() is null");
+		}
+		t.update(updateTokenSql, tokenValue, lastUsed, series);
 	}
 
 	/**
@@ -63,7 +72,11 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	@Override
 	public PersistentRememberMeToken getTokenForSeries(String seriesId) {
 		try {
-			return getJdbcTemplate().queryForObject(
+			JdbcTemplate t = getJdbcTemplate();
+			if (t == null) {
+				throw new IllegalStateException("getJdbcTemplate() is null");
+			}
+			return t.queryForObject(
 						getTokenForSeriesSql,
 						new RowMapper<PersistentRememberMeToken>() {
 							@Override
@@ -93,7 +106,11 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 
 	@Override
 	public void removeUserTokens(String username) {
-		getJdbcTemplate().update(removeUserTokensSql, username);
+		JdbcTemplate t = getJdbcTemplate();
+		if (t == null) {
+			throw new IllegalStateException("getJdbcTemplate() is null");
+		}
+		t.update(removeUserTokensSql, username);
 	}
 
 	public String getGetTokenForSeriesSql() {

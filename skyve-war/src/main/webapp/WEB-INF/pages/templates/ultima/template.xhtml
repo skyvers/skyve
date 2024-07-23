@@ -25,19 +25,22 @@
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 			-->	
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<!-- 4.7 is disabled by default
 			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
-			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
-			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
+			-->
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
+			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="css/ultima.css?v=#{bean.webResourceFileVersion}" library="skyve" />
 			<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />
-			
-			<h:outputScript name="ripple/ripple.js?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
-			<h:outputScript name="js/layout.js?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
-			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<h:outputStylesheet name="css/ultima.css?v=#{bean.webResourceFileVersion}" library="skyve" />
+			<h:outputScript name="ripple/ripple.js?v=#{bean.webResourceFileVersion}" library="layout" />
+			<h:outputScript name="js/layout.js?v=#{bean.webResourceFileVersion}" library="layout" />
+			<!-- Unsure why this isn't included by the menu component but I had to manually include it -->
+			<h:outputScript name="js/layout.menu.js?v=#{bean.webResourceFileVersion}" library="layout" />
+			<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<script type="text/javascript">
 				<!-- PF8 doesnt work with touch on - a.swipe is not a function when registering swipeLeft and swipeRight -->
 				PrimeFaces.env.touch=false;
-				SKYVE.Util.setTouchCookie();
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>
@@ -93,13 +96,13 @@
 											type="button"
 											styleClass="ui-confirmdialog-no" 
 											style="float:right;"
-											icon="fa fa-remove" />
+											icon="fa-solid fa-xmark" />
 						<p:commandButton id="confirmOK" 
 											value="OK" 
 											type="button"
 											styleClass="ui-confirmdialog-yes" 
 											style="float:right;"
-											icon="fa fa-check" />
+											icon="fa-solid fa-check" />
 					</p:confirmDialog>
 					<div class="layout-content">
 						<ui:insert name="templateBody" />
@@ -115,18 +118,19 @@
 				</div>
 			</div>
 	
-			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+			<div id="glassPane" class="glassPane" />
+			<p:ajaxStatus id="wheelOfDeath" styleClass="wheelOfDeath" onstart="$('#glassPane').css({display:'block'})" oncomplete="$('#glassPane').css({display:'none'})">
 				<f:facet name="start">
-					<i id="busy" class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+					<i class="fa-solid fa-2x fa-circle-notch fa-spin ajax-loader" aria-hidden="true"></i>
 				</f:facet>
 				<f:facet name="complete">
 					<h:outputText value="" />
 				</f:facet>
 			</p:ajaxStatus>
 	
-			<h:outputStylesheet name="styles/layout-light.css?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
-			<h:outputStylesheet name="primeflex/primeflex.min.css?v=#{bean.webResourceFileVersion}" library="ultima-layout"/>
-			<h:outputStylesheet name="ripple/ripple.css?v=#{bean.webResourceFileVersion}" library="ultima-layout" />
+			<h:outputStylesheet name="styles/layout-light.css?v=#{bean.webResourceFileVersion}" library="layout" />
+			<h:outputStylesheet name="primeflex/primeflex.min.css?v=#{bean.webResourceFileVersion}" library="layout"/>
+			<h:outputStylesheet name="ripple/ripple.css?v=#{bean.webResourceFileVersion}" library="layout" />
 		</h:body>
 	</f:view>
 </html>

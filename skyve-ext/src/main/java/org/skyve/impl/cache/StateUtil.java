@@ -14,10 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.codec.binary.Base64;
 import org.ehcache.Cache;
 import org.ehcache.Cache.Entry;
@@ -28,8 +24,15 @@ import org.skyve.EXT;
 import org.skyve.cache.CacheTier;
 import org.skyve.cache.Caching;
 import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class StateUtil {
 	private StateUtil() {
@@ -40,7 +43,7 @@ public class StateUtil {
 		return EXT.getCaching().getEHCache(UtilImpl.CONVERSATION_CACHE.getName(), String.class, byte[].class);
 	}
 
-	public static void cacheConversation(AbstractWebContext webContext)
+	public static void cacheConversation(@Nonnull AbstractWebContext webContext)
 	throws Exception {
 		if (webContext != null) {
 			// Note that EHCache puts are thread-safe
@@ -48,9 +51,9 @@ public class StateUtil {
 		}
 	}
 	
-	public static AbstractWebContext getCachedConversation(String webId,
-															HttpServletRequest request,
-															HttpServletResponse response)
+	public static @Nullable AbstractWebContext getCachedConversation(@Nullable String webId,
+																		@Nullable HttpServletRequest request,
+																		@Nullable HttpServletResponse response)
 	throws Exception {
 		AbstractWebContext result = null;
 
@@ -65,12 +68,28 @@ public class StateUtil {
 			if (value == null) {
 				throw new ConversationEndedException((request == null) ? Locale.ENGLISH : request.getLocale());
 			}
-
+	
 			result = (AbstractWebContext) SerializationHelper.deserialize(value);
+			
+			// Check conversation belongs to the web session if defined
+			if (request != null) {
+				HttpSession session = request.getSession(false);
+				if (session == null) {
+					throw new SessionEndedException(request.getLocale());
+				}
+				String sessionId = result.getSessionId();
+				if (sessionId == null) {
+					throw new ConversationEndedException(request.getLocale());
+				}
+				if (! sessionId.equals(session.getId())) {
+					throw new ConversationEndedException(request.getLocale());
+				}
+			}
+			
 			result.setHttpServletRequest(request);
-            result.setHttpServletResponse(response);
-            result.setKey(conversationKey);
-            result.setCurrentBean(result.getBean(currentBeanId));
+	        result.setHttpServletResponse(response);
+	        result.setKey(conversationKey);
+	        result.setCurrentBean(result.getBean(currentBeanId));
 		}
 		
 		return result;
@@ -154,13 +173,16 @@ public class StateUtil {
 		tokens.put(sessionId, values);
 	}
 	
-	public static Integer createToken() {
-	    // Get 128 random bytes - move past first seed sequence
-		SecureRandom random = new SecureRandom();
+	// This is thread-safe
+	private static final SecureRandom RANDOM = new SecureRandom();
+    // Get 128 random bytes - move past first seed sequence
+	static {
 	    byte[] randomBytes = new byte[128];
-	    random.nextBytes(randomBytes);
-	    
-		return Integer.valueOf(random.nextInt());
+	    RANDOM.nextBytes(randomBytes);
+	}
+	
+	public static Integer createToken() {
+		return Integer.valueOf(RANDOM.nextInt());
 	}
 	
 	public static void logStateStats() {

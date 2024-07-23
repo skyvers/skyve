@@ -3,8 +3,6 @@ package org.skyve.impl.sail.execution;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.model.SelectItem;
-
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -38,6 +36,8 @@ import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Util;
+
+import jakarta.faces.model.SelectItem;
 
 public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	private Bean bean;

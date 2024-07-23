@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.view.reference;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -65,8 +66,9 @@ public abstract class ReferenceProcessor {
 
 		final Document listDocument;
 		// Figure out the document type of the relation.
-		if (listTarget.getAttribute() instanceof Relation) {
-			final String documentName = ((Relation) listTarget.getAttribute()).getDocumentName();
+		Attribute attribute = listTarget.getAttribute();
+		if (attribute instanceof Relation) {
+			final String documentName = ((Relation) attribute).getDocumentName();
 			listDocument = module.getDocument(customer, documentName);
 		}
 		else {

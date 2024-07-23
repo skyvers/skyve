@@ -1,6 +1,6 @@
 package modules.test;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.Util;
 
 import modules.admin.AuditJSONGenerator;
@@ -16,6 +16,7 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class AuditJSONGeneratorTests extends AbstractSkyveTest {
+
 	@Test
 	public void testAllAttributesPersistent() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Staff - {contact.name}" name="_status"
+	xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" borderTitle="Status">
+		<form>
+			<column responsiveWidth="3" />
+			<column />
+			<row>
+				<item>
+					<combo binding="status">
+						<onChangedHandlers>
+							<rerender />
+						</onChangedHandlers>
+					</combo>
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="dueBack" />
+				</item>
+			</row>
+		</form>
+		<form>
+			<column responsiveWidth="3" />
+			<column />
+			<row>
+				<item>
+					<geometryMap binding="location" type="point" />
+				</item>
+			</row>
+		</form>
+	</vbox>
+</view>

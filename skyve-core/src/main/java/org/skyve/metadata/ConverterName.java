@@ -1,6 +1,10 @@
 package org.skyve.metadata;
 
-import javax.xml.bind.annotation.XmlType;
+import static java.util.stream.Collectors.toMap;
+
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
@@ -22,7 +26,6 @@ import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
-import org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5Integer;
 import org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
@@ -50,6 +53,8 @@ import org.skyve.domain.types.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum ConverterName {
@@ -79,7 +84,6 @@ public enum ConverterName {
 	Decimal2Integer(new Decimal2Integer()),
 	Decimal2IntegerPercentage(new Decimal2IntegerPercentage()),
 	Decimal2OneDecimalPlace(new Decimal2OneDecimalPlace()),
-	Decimal2TwoDecimalPlacesPercentage(new Decimal2TwoDecimalPlacesPercentage()),
 	Decimal5Integer(new Decimal5Integer()),
 	Decimal5IntegerPercentage(new Decimal5IntegerPercentage()),
 	Decimal5DollarsAndCents(new Decimal5DollarsAndCents()),
@@ -109,166 +113,38 @@ public enum ConverterName {
 	YYYY_MM_DD_HH_MI_SS(new YYYY_MM_DD_HH_MI_SS()),
 	YYYY_MM_DD_HH24_MI_SS(new YYYY_MM_DD_HH24_MI_SS()),
 	YYYY_MM_DD_Timestamp(new org.skyve.domain.types.converters.timestamp.YYYY_MM_DD());
-	
+
+    /**
+     * A map keyed on Converter class, with values point to the relevant ConverterName (ie the 
+     * inverse of the definitions above).
+     */
+    private static Map<Class<?>, ConverterName> classToInstanceIndex = Stream.of(ConverterName.values())
+                                                                             .collect(toMap(cn -> cn.getConverter()
+                                                                                                    .getClass(),
+                                                                                     Function.identity()));
+
 	private Converter<?> converter;
 	private ConverterName(Converter<?> converter) {
 		this.converter = converter;
 	}
-	
+
 	public Converter<?> getConverter() {
 		return converter;
 	}
 
-	public static ConverterName valueOf(Converter<?> converter) {
-		if (converter instanceof DD_MM_YYYY) {
-			return DD_MM_YYYY;
-		}
-		else if (converter instanceof DD_MMM_YYYY) {
-			return DD_MMM_YYYY;
-		}
-		else if (converter instanceof MM_DD_YYYY) {
-			return MM_DD_YYYY;
-		}
-		else if (converter instanceof MMM_DD_YYYY) {
-			return MMM_DD_YYYY;
-		}
-		else if (converter instanceof DD_MM_YYYY_HH_MI) {
-			return DD_MM_YYYY_HH_MI;
-		}
-		else if (converter instanceof DD_MM_YYYY_HH24_MI) {
-			return DD_MM_YYYY_HH24_MI;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MM_YYYY) {
-			return DD_MM_YYYY_DateTime;
-		}
-		else if (converter instanceof DD_MMM_YYYY_HH_MI) {
-			return DD_MMM_YYYY_HH_MI;
-		}
-		else if (converter instanceof DD_MMM_YYYY_HH24_MI) {
-			return DD_MMM_YYYY_HH24_MI;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.datetime.DD_MMM_YYYY) {
-			return DD_MMM_YYYY_DateTime;
-		}
-		else if (converter instanceof MM_DD_YYYY_HH_MI) {
-			return MM_DD_YYYY_HH_MI;
-		}
-		else if (converter instanceof MM_DD_YYYY_HH24_MI) {
-			return MM_DD_YYYY_HH24_MI;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.datetime.MM_DD_YYYY) {
-			return MM_DD_YYYY_DateTime;
-		}
-		else if (converter instanceof MMM_DD_YYYY_HH_MI) {
-			return MMM_DD_YYYY_HH_MI;
-		}
-		else if (converter instanceof MMM_DD_YYYY_HH24_MI) {
-			return MMM_DD_YYYY_HH24_MI;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.datetime.MMM_DD_YYYY) {
-			return MMM_DD_YYYY_DateTime;
-		}
-		else if (converter instanceof Decimal10TwoDecimalPlaces) {
-			return Decimal10TwoDecimalPlaces;
-		}
-		else if (converter instanceof Decimal2DollarsAndCents) {
-			return Decimal2DollarsAndCents;
-		}
-		else if (converter instanceof Decimal2DollarsAndCentsAbsolute) {
-			return Decimal2DollarsAndCentsAbsolute;
-		}
-		else if (converter instanceof Decimal2Integer) {
-			return Decimal2Integer;
-		}
-		else if (converter instanceof Decimal2IntegerPercentage) {
-			return Decimal2IntegerPercentage;
-		}
-		else if (converter instanceof Decimal2OneDecimalPlace) {
-			return Decimal2OneDecimalPlace;
-		}
-		else if (converter instanceof Decimal2TwoDecimalPlacesPercentage) {
-			return Decimal2TwoDecimalPlacesPercentage;
-		}
-		else if (converter instanceof Decimal5Integer) {
-			return Decimal5Integer;
-		}
-		else if (converter instanceof Decimal5IntegerPercentage) {
-			return Decimal5IntegerPercentage;
-		}
-		else if (converter instanceof Decimal5DollarsAndCents) {
-			return Decimal5DollarsAndCents;
-		}
-		else if (converter instanceof Decimal5TimeDuration) {
-			return Decimal5TimeDuration;
-		}
-		else if (converter instanceof Decimal5OneDecimalPlace) {
-			return Decimal5OneDecimalPlace;
-		}
-		else if (converter instanceof Decimal5TwoDecimalPlaces) {
-			return Decimal5TwoDecimalPlaces;
-		}
-		else if (converter instanceof Decimal5TwoDecimalPlacesPercentage) {
-			return Decimal5TwoDecimalPlacesPercentage;
-		}
-		else if (converter instanceof SimplePercentage) {
-			return SimplePercentage;
-		}
-		else if (converter instanceof IntegerSeparator) {
-			return IntegerSeparator;
-		}
-		else if (converter instanceof LongIntegerSeparator) {
-			return LongIntegerSeparator;
-		}
-		else if (converter instanceof HH_MI) {
-			return HH_MI;
-		}
-		else if (converter instanceof HH24_MI) {
-			return HH24_MI;
-		}
-		else if (converter instanceof HH_MI_SS) {
-			return HH_MI_SS;
-		}
-		else if (converter instanceof HH24_MI_SS) {
-			return HH24_MI_SS;
-		}
-		else if (converter instanceof DD_MM_YYYY_HH_MI_SS) {
-			return DD_MM_YYYY_HH_MI_SS;
-		}
-		else if (converter instanceof DD_MM_YYYY_HH24_MI_SS) {
-			return DD_MM_YYYY_HH24_MI_SS;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MM_YYYY) {
-			return DD_MM_YYYY_Timestamp;
-		}
-		else if (converter instanceof DD_MMM_YYYY_HH_MI_SS) {
-			return DD_MMM_YYYY_HH_MI_SS;
-		}
-		else if (converter instanceof DD_MMM_YYYY_HH24_MI_SS) {
-			return DD_MMM_YYYY_HH24_MI_SS;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY) {
-			return DD_MMM_YYYY_Timestamp;
-		}
-		else if (converter instanceof MM_DD_YYYY_HH_MI_SS) {
-			return MM_DD_YYYY_HH_MI_SS;
-		}
-		else if (converter instanceof MM_DD_YYYY_HH24_MI_SS) {
-			return MM_DD_YYYY_HH24_MI_SS;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.timestamp.MM_DD_YYYY) {
-			return MM_DD_YYYY_Timestamp;
-		}
-		else if (converter instanceof MMM_DD_YYYY_HH_MI_SS) {
-			return MMM_DD_YYYY_HH_MI_SS;
-		}
-		else if (converter instanceof MMM_DD_YYYY_HH24_MI_SS) {
-			return MMM_DD_YYYY_HH24_MI_SS;
-		}
-		else if (converter instanceof org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY) {
-			return MMM_DD_YYYY_Timestamp;
-		}
-		else {
-			throw new IllegalArgumentException(converter + " is not catered for");
-		}
-	}
+    /**
+     * Convert from the provided Converter's class to the corresponding ConverterName instance.
+     * 
+     * @param converter
+     * @return
+     */
+    public static ConverterName valueOf(Converter<?> converter) {
+
+        if (converter == null || !classToInstanceIndex.containsKey(converter.getClass())) {
+
+            throw new IllegalArgumentException(converter + " is not catered for");
+        }
+
+        return classToInstanceIndex.get(converter.getClass());
+    }
 }

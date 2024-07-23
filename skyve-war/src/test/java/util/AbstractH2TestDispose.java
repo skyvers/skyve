@@ -1,7 +1,7 @@
 package util;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -20,15 +20,17 @@ import org.skyve.persistence.Persistence;
  */
 public abstract class AbstractH2TestDispose extends AbstractH2Test {
 
-	@Before
+	@BeforeEach
 	@SuppressWarnings("static-method")
 	public void before() throws Exception {
 		EXT.getCaching().startup();
 	}
 
-	@After
-	@SuppressWarnings("static-method")
-	public void after() throws Exception {
+	@Override
+	@AfterEach
+	public void afterBase() {
+		super.afterBase(); // rollback and evict
+
 		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
 		// For H2 by default, closing the last connection to a database closes the database.
 		// For an in-memory database, this means the content is lost.

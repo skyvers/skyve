@@ -16,12 +16,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.jts.geom.Geometry;
@@ -34,14 +28,13 @@ import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -77,6 +70,12 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 /**
  * Service for list views.
  */
@@ -104,10 +103,9 @@ public class SmartClientListServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 	
-	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
     private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
-        response.setContentType(MimeType.json.toString());
+    	response.setContentType(MimeType.json.toString());
         response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
@@ -158,8 +156,7 @@ public class SmartClientListServlet extends HttpServlet {
 			        persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
 			    	User user = WebUtil.processUserPrincipalForRequest(request,
-			    														(userPrincipal == null) ? null : userPrincipal.getName(),
-	    																true);
+			    														(userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -181,17 +178,12 @@ public class SmartClientListServlet extends HttpServlet {
 						String moduleName = tokens[0];
 			        	module = customer.getModule(moduleName);
 						
-						// model type of request
 						UxUi uxui = UserAgent.getUxUi(request);
+						// model type of request
 						if (dataSource.contains("__")) {
 							final String documentName = tokens[1];
 							final String modelName = tokens[3];
-							if (! user.canAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName())) {
-								final String userName = user.getName();
-								UtilImpl.LOGGER.warning("User " + userName + " cannot access model " + moduleName + '.' + documentName + '.' + modelName);
-								UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-								throw new AccessException("this data", userName);
-							}
+							user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 							
 							drivingDocument = module.getDocument(customer, documentName);
 							model = drivingDocument.getListModel(customer, modelName, true);
@@ -207,21 +199,11 @@ public class SmartClientListServlet extends HttpServlet {
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
-								if (! user.canAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName())) {
-									final String userName = user.getName();
-									UtilImpl.LOGGER.warning("User " + userName + " cannot access document " + moduleName + '.' + documentOrQueryName);
-									UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-									throw new AccessException("this data", userName);
-								}
+								user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 							}
 							else {
-								if (! user.canAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName())) {
-									final String userName = user.getName();
-									UtilImpl.LOGGER.warning("User " + userName + " cannot access query " + moduleName + '.' + documentOrQueryName);
-									UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-									throw new AccessException("this data", userName);
-								}
+								user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
@@ -354,27 +336,40 @@ public class SmartClientListServlet extends HttpServlet {
 						break;
 					case update:
 						checkCsrfToken(session, request, response, currentCsrfToken);
-
+						
 						String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
+						String bizFlagComment = request.getParameter(PersistentBean.FLAG_COMMENT_NAME);
 						if ("TAG".equals(bizTagged)) {
-							tag(customer, module, model, tagId, parameters, pw);
+							tag(user, customer, module, model, tagId, parameters, pw);
 						}
 						else if ("UNTAG".equals(bizTagged)) {
-							untag(customer, module, model, tagId, parameters, pw);
+							untag(user, customer, module, model, tagId, parameters, pw);
+						}
+						else if (bizFlagComment != null) {
+							bizFlagComment = OWASP.sanitise(Sanitisation.basic, Util.processStringValue(bizFlagComment));
+							
+				    		if (! user.canUpdateDocument(drivingDocument)) {
+				    			throw new SecurityException("update this data", user.getName());
+				    		}
+				    		if (! user.canFlag()) {
+				    			throw new SecurityException("flag this data", user.getName());
+				    		}
+				    		
+				    		if (! drivingDocument.isPersistable()) {
+				    			throw new ServletException("Flagging on a non-persistent document is an invalid state");
+				    		}
+				    		
+				    		flag(request, pw, persistence, user, customer, module,
+				    				drivingDocument, model, parameters, bizFlagComment);
 						}
 						else {
 							if (! user.canUpdateDocument(drivingDocument)) {
 								throw new SecurityException("update this data", user.getName());
 							}
-		
-							boolean rowIsTagged = false;
-							String oldValuesJSON = request.getParameter(OLD_VALUES);
-							if (oldValuesJSON != null) {
-								rowIsTagged = oldValuesJSON.contains(PersistentBean.TAGGED_NAME + "\":true");
-							}
+							
 							update(module, 
 									model, 
-									rowIsTagged,
+									isRowTagged(request),
 									parameters, 
 									persistence, 
 									pw);
@@ -451,6 +446,13 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
+
+		// Nullify flag comments if not given permissions
+		if (! user.canFlag()) {
+			for (Bean bean : beans) {
+				BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+			}
+		}
 		
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
@@ -492,7 +494,7 @@ public class SmartClientListServlet extends HttpServlet {
     	SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
     	CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
     	String operatorParameter = (String) mutableParameters.get("operator");
-    	if (operatorParameter != null) { // advanced criteria
+    	if (operatorParameter != null) { // advanced criteria    		
     		try {
     			compoundFilterOperator = CompoundFilterOperator.valueOf(operatorParameter);
     		}
@@ -512,7 +514,15 @@ public class SmartClientListServlet extends HttpServlet {
     				// Get each criterium name, operator and operands
 					@SuppressWarnings("unchecked")
 					Map<String, Object> criterium = (Map<String, Object>) JSON.unmarshall(user, jsonCriteria);
-    				advancedCriteria.add(criterium);
+
+					// Check for filter by flag permissions
+					if (PersistentBean.FLAG_COMMENT_NAME.equals(criterium.get("fieldName"))) {
+						if (! user.canFlag()) {					
+							throw new SecurityException("filter by flag", user.getName());
+						}
+					}
+
+					advancedCriteria.add(criterium);
         		}
     		}
     		addAdvancedFilterCriteriaToQuery(module,
@@ -527,6 +537,11 @@ public class SmartClientListServlet extends HttpServlet {
     		mutableParameters.remove("criteria");
     	}
 
+    	// check for filter by flag permissions
+    	if (mutableParameters.containsKey(PersistentBean.FLAG_COMMENT_NAME) && ! user.canFlag()) {
+    		throw new SecurityException("filter by flag", user.getName());
+    	}
+    	
     	// simple criteria or extra criteria from grid filter parameters
     	addSimpleFilterCriteriaToQuery(module,
 										document,
@@ -617,7 +632,8 @@ public class SmartClientListServlet extends HttpServlet {
 		return result;
     }
     
-    static void checkCsrfToken(HttpSession session,
+    @SuppressWarnings("unused")
+	static void checkCsrfToken(HttpSession session,
 								HttpServletRequest request,
 								HttpServletResponse response,
 								Integer currentCsrfToken) {
@@ -660,6 +676,7 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			
 			binding = BindUtil.unsanitiseBinding(binding);
+			@SuppressWarnings("null") // BindUtil.unsantiseBinding will never return null for non-null argument
 			boolean parameter = (binding.charAt(0) == ':');
 			if (parameter) {
 				binding = binding.substring(1); // lose the colon
@@ -731,6 +748,7 @@ public class SmartClientListServlet extends HttpServlet {
 			// What filter operator should I use for this parameter?
 			SmartClientFilterOperator fo = filterOperator;
 
+			// Used by this Servlet and SmartClientTagServlet for Enum simple criteria (repeated request params)
 			if (value instanceof Object[]) {
 				Object[] values = (Object[]) value;
 				for (int i = 0, l = values.length; i < l; i++) {
@@ -743,6 +761,24 @@ public class SmartClientListServlet extends HttpServlet {
 										converter, 
 										type);
 						values[i] = v;
+					}
+				}
+				fo = SmartClientFilterOperator.inSet;
+			}
+			// Used by ReportServlet and ChartServlet for Enum simple criteria (JSON array)
+			else if (value instanceof List<?>) {
+				@SuppressWarnings("unchecked")
+				List<Object> values = (List<Object>) value;
+				for (int i = 0, l = values.size(); i < l; i++) {
+					Object v = values.get(i);
+					if (v != null) {
+						v = fromString(binding, 
+										"value", 
+										v.toString(),
+										customer, 
+										converter, 
+										type);
+						values.set(i, v);
 					}
 				}
 				fo = SmartClientFilterOperator.inSet;
@@ -1575,10 +1611,11 @@ public class SmartClientListServlet extends HttpServlet {
 		Bean bean = model.update(bizId, properties);
 
 		// return the updated row
-		pw.append(returnUpdatedMessage(customer, module, document, model, bean, rowIsTagged));
+		pw.append(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged));
     }
 
-	private static void tag(Customer customer,
+	private static void tag(User user,
+								Customer customer,
 								Module module,
 								ListModel<Bean> model, 
 								String tagId,
@@ -1589,14 +1626,16 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
-		pw.append(returnTagUpdateMessage(customer,
+		pw.append(returnTagUpdateMessage(user,
+											customer,
 											parameters, 
 											module, 
 											model,
 											true));
 	}
 
-	private static void untag(Customer customer,
+	private static void untag(User user,
+								Customer customer,
 								Module module,
 								ListModel<Bean> model,
 								String tagId,
@@ -1607,14 +1646,28 @@ public class SmartClientListServlet extends HttpServlet {
 		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
-		pw.append(returnTagUpdateMessage(customer, 
+		pw.append(returnTagUpdateMessage(user,
+											customer, 
 											parameters,
 											module,
 											model,
 											false));
 	}
 
-	private static String returnUpdatedMessage(Customer customer,
+	private static void flag(HttpServletRequest request, PrintWriter pw, AbstractPersistence persistence, User user,
+			Customer customer, Module module, Document drivingDocument, ListModel<Bean> model,
+			SortedMap<String, Object> parameters, String bizFlagComment) throws Exception {
+		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
+		Bean bean = persistence.retrieve(drivingDocument, bizId);
+		
+		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
+		upsertFlag(drivingDocument, bean, bizFlagComment);			    		
+		
+		pw.append(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)));
+	}
+	
+	private static String returnUpdatedMessage(User user,
+												Customer customer,
 												Module module,
 												Document document,
 												ListModel<Bean> model, 
@@ -1624,6 +1677,11 @@ public class SmartClientListServlet extends HttpServlet {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
+		// Nullify flag comment if not given permissions
+		if (! user.canFlag()) {
+			BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+		}
+		
 		Set<String> projections = processRows(Collections.singletonList(bean), model, customer, module, document);
 		String json = JSON.marshall(customer, bean, projections);
 
@@ -1638,7 +1696,8 @@ public class SmartClientListServlet extends HttpServlet {
 		return message.toString();
 	}
 	
-	private static String returnTagUpdateMessage(Customer customer,
+	private static String returnTagUpdateMessage(User user,
+													Customer customer,
 													Map<String, Object> parameters,
 													Module module,
 													ListModel<Bean> model,
@@ -1647,11 +1706,17 @@ public class SmartClientListServlet extends HttpServlet {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
 
+		boolean canFlag = user.canFlag();
+		
 		Set<String> projections = model.getProjections();
 		Map<String, Object> properties = new TreeMap<>();
 		for (String projection : projections) {
 			if (PersistentBean.TAGGED_NAME.equals(projection)) {
 				properties.put(projection, Boolean.valueOf(tagging));
+			}
+			else if (! canFlag && PersistentBean.FLAG_COMMENT_NAME.equals(projection)) {
+				// Nullify flag comments
+				properties.put(projection, null);
 			}
 			else {
 				properties.put(projection, parameters.get(projection));
@@ -1674,5 +1739,27 @@ public class SmartClientListServlet extends HttpServlet {
 	throws Exception {
 		model.remove((String) parameters.get(Bean.DOCUMENT_ID));
 		pw.append("{\"response\":{\"status\":0}}");
+	}
+	
+	private static void upsertFlag(Document drivingDocument, Bean bean, String flag) {
+		StringBuilder sql = new StringBuilder(64);
+		@SuppressWarnings("null")
+		String persistentIdentifier = drivingDocument.getPersistent().getPersistentIdentifier();
+		sql.append("update ").append(persistentIdentifier).append(" set ").append(PersistentBean.FLAG_COMMENT_NAME)
+				.append("= :").append(PersistentBean.FLAG_COMMENT_NAME).append(" where ").append(Bean.DOCUMENT_ID)
+				.append("= :").append(Bean.DOCUMENT_ID);
+		CORE.getPersistence().newSQL(sql.toString())
+				.putParameter(PersistentBean.FLAG_COMMENT_NAME, flag, false)
+				.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).execute();
+	}
+	
+	private static boolean isRowTagged(HttpServletRequest request) {
+		boolean rowIsTagged = false;
+		String oldValuesJSON = request.getParameter(OLD_VALUES);
+		if (oldValuesJSON != null) {
+			rowIsTagged = oldValuesJSON.contains(PersistentBean.TAGGED_NAME + "\":true");
+		}
+		
+		return rowIsTagged;
 	}
 }

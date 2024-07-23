@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
@@ -20,6 +20,7 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.InverseOneToOnePersistent;
 
 public class BeanVisitorTests extends AbstractSkyveTest {
+
 	@Test
 	public void testStandard() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
@@ -161,6 +162,10 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		// inverseAggregatedAssociation[0]
 		String expectedBinding = Binder.createIndexedBinding(AllAttributesPersistent.inverseAggregatedAssociationPropertyName, 0);
 		expectedBindings.add(expectedBinding);
+		// inverseAggregatedAssociation[0].aggregatedCollection[0]
+		expectedBindings.add(Binder.createIndexedBinding(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName), 0));
+		// inverseAggregatedAssociation[0].aggregatedCollection[1]
+		expectedBindings.add(Binder.createIndexedBinding(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName), 1));
 		// inverseAggregatedAssociation[0].composedAssociation
 		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedAssociationPropertyName));
 		// inverseAggregatedAssociation[0].composedCollection[0]
@@ -169,11 +174,6 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		expectedBindings.add(Binder.createIndexedBinding(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.composedCollectionPropertyName), 1));
 		// inverseAggregatedAssociation[0].embeddedAssociation
 		expectedBindings.add(Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.embeddedAssociationPropertyName));
-		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.embeddedAssociationPropertyName, AllAttributesPersistent.aggregatedCollectionPropertyName);
-		// inverseAggregatedAssociation[0].embeddedAssociation.aggregatedCollection[0]
-		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 0));
-		// inverseAggregatedAssociation[0].embeddedAssociation.aggregatedCollection[1]
-		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 1));
 
 		final Set<String> actualBindings = new TreeSet<>();
 

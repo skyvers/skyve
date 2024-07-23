@@ -24,7 +24,6 @@ import org.skyve.domain.types.converters.decimal.Decimal2Converter;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
-import org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal5Converter;
 import org.skyve.domain.types.converters.decimal.Decimal5Integer;
 import org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage;
@@ -96,7 +95,6 @@ public class ConversionException extends DomainException implements MessageExcep
 	public static final String DECIMAL_2_INTEGER_KEY = I18N_DECIMAL_PREFIX + Decimal2Integer.class.getSimpleName();
 	public static final String DECIMAL_2_INTEGER_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal2IntegerPercentage.class.getSimpleName();
 	public static final String DECIMAL_2_ONE_DECIMAL_PLACE_KEY = I18N_DECIMAL_PREFIX + Decimal2OneDecimalPlace.class.getSimpleName();
-	public static final String DECIMAL_2_TWO_DECIMAL_PLACES_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal2TwoDecimalPlacesPercentage.class.getSimpleName();
 	public static final String DECIMAL_5_CONVERTER_KEY = I18N_DECIMAL_PREFIX + Decimal5Converter.class.getSimpleName();
 	public static final String DECIMAL_5_INTEGER_KEY = I18N_DECIMAL_PREFIX + Decimal5Integer.class.getSimpleName();
 	public static final String DECIMAL_5_INTEGER_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal5IntegerPercentage.class.getSimpleName();

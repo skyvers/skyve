@@ -4,7 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,18 +12,15 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import javax.annotation.Nonnull;
-
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.DynamicChildBean;
 import org.skyve.domain.DynamicHierarchicalBean;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.DynamicPersistentChildBean;
 import org.skyve.domain.DynamicPersistentHierarchicalBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
@@ -50,6 +46,7 @@ import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
@@ -74,17 +71,14 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.ExpressionEvaluator;
 
+import jakarta.annotation.Nonnull;
+
 public final class DocumentImpl extends ModelImpl implements Document {
 	private static final long serialVersionUID = 9091172268741052691L;
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
-
-	/**
-	 * This is a map of fieldName -> document's child or detail document names. This can be empty if no detail document exists.
-	 */
-	private Map<String, Reference> referencesByDocumentNames = new HashMap<>();
 
 	private Map<String, Reference> referencesByFieldNames = new HashMap<>();
 
@@ -105,6 +99,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	// so that it can be checked by the repository implementor, as only then
 	// will all the references be resolved enough to check the bindings.
 	private String bizKeyExpression;
+	
+	private Sensitivity bizKeySensitity;
 
 	/**
 	 * A map of condition name -> Condition.
@@ -151,8 +147,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		T result = newInstance(customer);
 		
 		// Inject any dependencies
-		result = BeanProvider.injectFields(result);
-		
+		UtilImpl.inject(result);
+
 		// Set implicit properties
 		// NB These properties need to be set before the bizlet.newInstance() is called.
 		// For singletons, if we were to set these after the bizlet call, 
@@ -216,55 +212,62 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		}
 		
 		// Look for a hand-crafted extension first (in module or as a customer override)
-		key.append('/').append(documentName).append("Extension");
-		String extensionKey = repository.vtable(customerName, key.toString());
-		if (extensionKey != null) {
-			result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(extensionKey.replace('/', '.'));
-		}
-		else {
-			// Convert the vtable key to a package path
-			packagePath = packagePath.replace('/', '.');
-			int lastDotIndex = packagePath.lastIndexOf('.');
-			packagePath = packagePath.substring(0, lastDotIndex + 1);
-
-			StringBuilder className = new StringBuilder(128);
-
-			if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
-				// Look for an override first and if not found look for a domain class
-				try {
-					className.setLength(0);
-					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
-					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-				}
-				catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no override class
-					// Look for the domain class in the customer area
-					try {
-						className.setLength(className.length() - 3); // remove "Ext"
-						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-					}
-					catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
-						// Look for the domain class in the modules area
-						className.setLength(0);
-						className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-					}
-				}
+		StringBuilder className = new StringBuilder(128);
+		try {
+			key.append('/').append(documentName).append("Extension");
+			String extensionKey = repository.vtable(customerName, key.toString());
+			if (extensionKey != null) {
+				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(extensionKey.replace('/', '.'));
 			}
 			else {
-				// Look for domain class and if abstract, look for an override
-				className.setLength(0);
-				className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-				if (Modifier.isAbstract(result.getModifiers())) {
-					className.append("Ext");
+				// Convert the vtable key to a package path
+				packagePath = packagePath.replace('/', '.');
+				int lastDotIndex = packagePath.lastIndexOf('.');
+				packagePath = packagePath.substring(0, lastDotIndex + 1);
+	
+				if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
+					// Look for an override first and if not found look for a domain class
 					try {
+						className.setLength(0);
+						className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
 						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 					}
-					catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
-						// stick with the domain class
+					catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no override class
+						// Look for the domain class in the customer area
+						try {
+							className.setLength(className.length() - 3); // remove "Ext"
+							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+						}
+						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
+							// Look for the domain class in the modules area
+							className.setLength(0);
+							className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
+							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+						}
+					}
+				}
+				else {
+					// Look for domain class and if abstract, look for an override
+					className.setLength(0);
+					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
+					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+					if (Modifier.isAbstract(result.getModifiers())) {
+						className.append("Ext");
+						try {
+							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+						}
+						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
+							// stick with the domain class
+						}
 					}
 				}
 			}
+		}
+		catch (ClassNotFoundException e) {
+			if (UtilImpl.DEV_MODE) {
+				throw new ClassNotFoundException("Bean Class " + className.toString() + " not found. Is domain generation required or are there compile errors?", e);
+			}
+			throw e;
 		}
 		
 		return result;
@@ -455,12 +458,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return referencesByFieldNames.get(referenceName);
 	}
 
-	public Reference getReferenceByDocumentName(String detailDocumentName) {
-		return referencesByDocumentNames.get(detailDocumentName);
-	}
-
 	@Override
-	public org.skyve.metadata.model.document.Document getRelatedDocument(Customer customer, String relationName) {
+	public Document getRelatedDocument(Customer customer, String relationName) {
 		Relation relation = relationsByFieldNames.get(relationName);
 
 		// Find the relation up the document extension hierarchy
@@ -485,31 +484,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public Set<String> getReferencedDocumentNames() {
-		return referencesByDocumentNames.keySet();
-	}
-
-	@Override
 	public Set<String> getReferenceNames() {
 		return referencesByFieldNames.keySet();
-	}
-
-	@Override
-	public Set<org.skyve.metadata.model.document.Document> getReferencedDocuments(Customer customer) {
-		HashSet<org.skyve.metadata.model.document.Document> result = new HashSet<>();
-
-		for (String detailDocumentName : getReferencedDocumentNames()) {
-			result.add(customer.getModule(getOwningModuleName()).getDocument(customer, detailDocumentName));
-		}
-
-		return result;
 	}
 
 	public void putRelation(Relation relation) {
 		relationsByFieldNames.put(relation.getName(), relation);
 		if (relation instanceof Reference) {
 			Reference reference = (Reference) relation;
-			referencesByDocumentNames.put(reference.getDocumentName(), reference);
 			referencesByFieldNames.put(reference.getName(), reference);
 		}
 		putAttribute(relation);
@@ -547,6 +529,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setBizKeyExpression(String bizKeyExpression) {
 		this.bizKeyExpression = bizKeyExpression;
+	}
+	
+	@Override
+	public Sensitivity getBizKeySensitity() {
+		return bizKeySensitity;
+	}
+
+	public void setBizKeySensitity(Sensitivity bizKeySensitity) {
+		this.bizKeySensitity = bizKeySensitity;
 	}
 
 	/**
@@ -599,8 +590,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 	
 	@Override
-	public org.skyve.metadata.model.document.Document getParentDocument(Customer customer) {
-		org.skyve.metadata.model.document.Document result = null;
+	public Document getParentDocument(Customer customer) {
+		Document result = null;
 
 		if (parentDocumentName != null) {
 			if (customer == null) {
@@ -751,7 +742,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		
 		if (attribute instanceof Reference) {
 			Reference reference = (Reference) attribute;
-			org.skyve.metadata.model.document.Document referencedDocument = getRelatedDocument(customer, attribute.getName());
+			Document referencedDocument = getRelatedDocument(customer, attribute.getName());
 			// Query only if persistent
 			if (referencedDocument.isPersistable()) { // persistent referenced document
 				AbstractDocumentQuery referenceQuery = null;
@@ -820,38 +811,32 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
-	private static Text bizKeyField;
+	private static Text bizKeyField = new Text();
+	static {
+		bizKeyField.setAttributeType(AttributeType.text);
+		bizKeyField.setDisplayName("Business Key");
+		bizKeyField.setName(Bean.BIZ_KEY);
+		bizKeyField.setPersistent(false);
+		bizKeyField.setRequired(false);
+		bizKeyField.setDescription(null);
+		bizKeyField.setDomainType(null);
+		bizKeyField.setLength(1024);
+	}
 	public static Text getBizKeyAttribute() {
-		if (bizKeyField == null) {
-			bizKeyField = new Text();
-			
-			bizKeyField.setAttributeType(AttributeType.text);
-			bizKeyField.setDisplayName("Business Key");
-			bizKeyField.setName(Bean.BIZ_KEY);
-			bizKeyField.setPersistent(false);
-			bizKeyField.setRequired(false);
-			bizKeyField.setDescription(null);
-			bizKeyField.setDomainType(null);
-			bizKeyField.setLength(1024);
-		}
-		
 		return bizKeyField;
 	}
 	
-	private static org.skyve.impl.metadata.model.document.field.Integer bizOrdinalField;
+	private static org.skyve.impl.metadata.model.document.field.Integer bizOrdinalField = new org.skyve.impl.metadata.model.document.field.Integer();
+	static {
+		bizOrdinalField.setAttributeType(AttributeType.integer);
+		bizOrdinalField.setDisplayName("Order");
+		bizOrdinalField.setName(Bean.ORDINAL_NAME);
+		bizOrdinalField.setPersistent(true);
+		bizOrdinalField.setRequired(false);
+		bizOrdinalField.setDescription(null);
+		bizOrdinalField.setDomainType(null);
+	}
 	public static org.skyve.impl.metadata.model.document.field.Integer getBizOrdinalAttribute() {
-		if (bizOrdinalField == null) {
-			bizOrdinalField = new org.skyve.impl.metadata.model.document.field.Integer();
-			
-			bizOrdinalField.setAttributeType(AttributeType.integer);
-			bizOrdinalField.setDisplayName("Order");
-			bizOrdinalField.setName(Bean.ORDINAL_NAME);
-			bizOrdinalField.setPersistent(true);
-			bizOrdinalField.setRequired(false);
-			bizOrdinalField.setDescription(null);
-			bizOrdinalField.setDomainType(null);
-		}
-		
 		return bizOrdinalField;
 	}
 }

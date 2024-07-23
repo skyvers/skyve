@@ -485,6 +485,10 @@ public class ViewGenerator {
 			for (String propertyName : propertyNames) {
 				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, propertyName);
 				Attribute attribute = target.getAttribute();
+				// Should never happen as property names comes straight from the bound Document.
+				if (attribute == null) {
+					throw new MetaDataException(propertyName + " is not an attribute on document " + document.getName());
+				}
 				DataGridBoundColumn column = new DataGridBoundColumn();
 
 				DomainType domainType = attribute.getDomainType();
@@ -528,26 +532,29 @@ public class ViewGenerator {
 		return result;
 	}
 	
-	public String generateEditViewXML(Customer customer,
-												Document document,
-												boolean customerOverridden,
-												boolean uxuiOverridden) {
+	public ViewMetaData generateEditView(Customer customer, Document document) {
 		ViewImpl view = generate(customer, document, ViewType.edit.toString());
 		
-		ViewMetaData repositoryView = new ViewMetaData();
-		repositoryView.setName(ViewType.edit.toString());
-		repositoryView.setTitle(view.getTitle());
+		ViewMetaData result = new ViewMetaData();
+		result.setName(ViewType.edit.toString());
+		result.setTitle(view.getTitle());
 
-		repositoryView.getContained().addAll(view.getContained());
+		result.getContained().addAll(view.getContained());
 		Actions actions = new Actions();
 		for (Action action : view.getActions()) {
 			actions.getActions().add(((ActionImpl) action).toRepositoryAction());
 		}
-		repositoryView.setActions(actions);
+		result.setActions(actions);
+		
+		return result;
+	}	
 
-		return XMLMetaData.marshalView(repositoryView, customerOverridden, uxuiOverridden);
+	public String generateEditViewXML(Customer customer,
+										Document document,
+										boolean customerOverridden,
+										boolean uxuiOverridden) {
+		return XMLMetaData.marshalView(generateEditView(customer, document), customerOverridden, uxuiOverridden);
 	}
-	
 
 	private void writeEditView(String srcPath,
 								Module module,
@@ -615,6 +622,9 @@ public class ViewGenerator {
 
 		// If the module and/or document was not specified, we will just generate all edit views.
 		if ((moduleName == null) || (documentName == null)) {
+			if (customer == null) {
+				throw new MetaDataException("Customer " + customerName + " does not exist.");
+			}
 			for (Module module : customer.getModules()) {
 				for (Map.Entry<String, Module.DocumentRef> entry : module.getDocumentRefs().entrySet()) {
 					Module.DocumentRef documentRef = entry.getValue();

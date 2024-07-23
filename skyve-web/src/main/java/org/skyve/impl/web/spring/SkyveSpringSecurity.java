@@ -1,15 +1,20 @@
 package org.skyve.impl.web.spring;
 
+import java.io.PrintWriter;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -21,6 +26,7 @@ import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.AuthenticatedPrincipal;
@@ -45,6 +51,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 public class SkyveSpringSecurity {
+	public static final String LOGIN_ATTEMPT_PATH = "/loginAttempt";
 	
 	@SuppressWarnings("static-method")
 	public PasswordEncoder passwordEncoder() {
@@ -53,21 +60,90 @@ public class SkyveSpringSecurity {
 		return result;
 	}
 	
-	public PersistentTokenRepository tokenRepository() throws Exception {
+	public PersistentTokenRepository tokenRepository() {
 		SkyveRememberMeTokenRepository result = new SkyveRememberMeTokenRepository();
 		result.setDataSource(dataSource());
 		return result;
 	}
 	
+	private static class ThreadSafeSingleton {
+		private static DataSource dataSource;
+		
+		static {
+			try {
+				// Assign a JNDI Data Source, if applicable
+				String jndi = UtilImpl.DATA_STORE.getJndiDataSourceName();
+				if (jndi != null) {
+					InitialContext ctx = new InitialContext();
+					dataSource = (DataSource) ctx.lookup(jndi);
+				}
+				else {
+					// Assign a no-op DataSource that dishes out EXT.getDataStoreConnection()s.
+					dataSource = new DataSource() {
+						@Override
+						public <T> T unwrap(Class<T> iface) throws SQLException {
+							return null;
+						}
+						
+						@Override
+						public boolean isWrapperFor(Class<?> iface) throws SQLException {
+							return false;
+						}
+						
+						@Override
+						public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+							return null;
+						}
+						
+						@Override
+						public void setLoginTimeout(int seconds) throws SQLException {
+							// nothing to see here
+						}
+						
+						@Override
+						public void setLogWriter(PrintWriter out) throws SQLException {
+							// nothing to see here
+						}
+						
+						@Override
+						public int getLoginTimeout() throws SQLException {
+							return 30;
+						}
+						
+						@Override
+						public PrintWriter getLogWriter() throws SQLException {
+							return null;
+						}
+						
+						@Override
+						public Connection getConnection(String username, String password) throws SQLException {
+							return getConnection();
+						}
+						
+						@Override
+						public Connection getConnection() throws SQLException {
+							Connection result = EXT.getDataStoreConnection();
+							// Override to be non transactional
+							result.setAutoCommit(true);
+							return result;
+						}
+					};
+				}
+			}
+			catch (Exception e) {
+				throw new DomainException("Cannot obtain the JNDI datasource", e);
+			}
+		}
+	}
+	
+	/**
+	 * Returns a JNDI DataSource or a no-op DataSource that dishes new connections.
+	 * NB This method does not have to be thread-safe as it is only referenced in Spring Configuration setup.
+	 * @return	The appropriate DataSource
+	 */
 	@SuppressWarnings("static-method")
 	public DataSource dataSource() {
-		try {
-			InitialContext ctx = new InitialContext();
-			return (DataSource) ctx.lookup(UtilImpl.DATA_STORE.getJndiDataSourceName());
-		}
-		catch (Exception e) {
-			throw new DomainException("Cannot obtain the JNDI datasource", e);
-		}
+		return ThreadSafeSingleton.dataSource;
 	}
 	
 	@SuppressWarnings("static-method")
@@ -174,7 +250,11 @@ public class SkyveSpringSecurity {
 				final String customerName = tempCustomerName;
 				final String userName = tempUserName;
 				
-				return getJdbcTemplate().query(
+				JdbcTemplate t = getJdbcTemplate();
+				if (t == null) {
+					throw new IllegalStateException("getJdbcTemplate() is null");
+				}
+				return t.query(
 						skyveUserQuery,
 						new RowMapper<UserDetails>() {
 							@Override
@@ -259,7 +339,11 @@ public class SkyveSpringSecurity {
 				
 				Timestamp codeGenTS = tfa.getTfaCodeGeneratedTimestamp() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedTimestamp().getTime());
 				
-				getJdbcTemplate().update(this.skyveUserTFAUpdate, (ps) -> {
+				JdbcTemplate t = getJdbcTemplate();
+				if (t == null) {
+					throw new IllegalStateException("getJdbcTemplate() is null");
+				}
+				t.update(this.skyveUserTFAUpdate, ps -> {
 					ps.setString(1, tfa.getTfaCode());
 					ps.setString(2, tfa.getTfaToken());
 					ps.setTimestamp(3, codeGenTS);

@@ -1,8 +1,8 @@
 package org.skyve.impl.domain.types.jaxb;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.skyve.domain.types.OptimisticLock;
+
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "string")
 //@XmlJavaTypeAdapter(OptimisticLockMapper.class)

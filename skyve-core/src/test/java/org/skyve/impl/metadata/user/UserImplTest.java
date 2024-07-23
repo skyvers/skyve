@@ -3,7 +3,7 @@ package org.skyve.impl.metadata.user;
 import java.util.Locale;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 
 public class UserImplTest {

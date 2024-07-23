@@ -50,13 +50,15 @@ public class Minifier {
 		String currentCommentIndicator = null;
 		Character currentStringChar = null;
 		for (int i = 0; i < json.length(); i++) {
-			char current = json.charAt(i);
+			Character current = Character.valueOf(json.charAt(i));
 			if (currentStringChar != null) {
 				sb.append(current);
-				if (current == STRING_CHARS.get(currentStringChar))
+				if (current.equals(STRING_CHARS.get(currentStringChar))) {
 					currentStringChar = null;
-				if (ESCAPE_CHARS.contains(current) && json.length() > ++i)
+				}
+				if (ESCAPE_CHARS.contains(current) && json.length() > ++i) {
 					sb.append(json.charAt(i));
+				}
 			} else if (currentCommentIndicator != null) {
 				char lookup;
 				lookup: {
@@ -76,7 +78,7 @@ public class Minifier {
 						}
 					}
 				}
-			} else if (!Character.isWhitespace(current)) {
+			} else if (!Character.isWhitespace(current.charValue())) {
 				if (STRING_CHARS.containsKey(current))
 					currentStringChar = current;
 				else {

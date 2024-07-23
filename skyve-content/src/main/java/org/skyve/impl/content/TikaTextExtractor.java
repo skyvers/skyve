@@ -4,16 +4,17 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.logging.Level;
 
-import org.pf4j.Extension;
 import org.apache.tika.Tika;
 import org.apache.tika.language.detect.LanguageDetector;
 import org.apache.tika.language.detect.LanguageResult;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Office;
 import org.apache.tika.metadata.TikaCoreProperties;
+import org.pf4j.Extension;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.Util;
 
 @Extension(points = {TextExtractor.class})
 public class TikaTextExtractor implements TextExtractor {
@@ -74,6 +75,20 @@ public class TikaTextExtractor implements TextExtractor {
 						result.append(". ");
 					}
 					result.append(subject);
+				}
+			}
+			
+			// Any markup text nodes
+			String markup = content.getMarkup();
+			if (markup != null) {
+				try (InputStream markupStream = new ByteArrayInputStream(markup.getBytes(Util.UTF8))) {
+					markup = UtilImpl.processStringValue(TIKA.parseToString(markupStream, new Metadata(), 100000));
+					if (markup != null) {
+						if (result.length() > 0) {
+							result.append(". ");
+						}
+						result.append(markup);
+					}
 				}
 			}
 		}

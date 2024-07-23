@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
@@ -45,8 +44,12 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public abstract class FileSystemRepository extends MutableCachedRepository {
 	protected String absolutePath;
+	// used to stop resources paths breaking out of the web root (eg ../../../../)
 	private String canonicalBasePath;
 	protected boolean loadClasses = true;
 	// class maps
@@ -55,8 +58,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	/**
 	 * Absolute path constructor
 	 * Prevent external instantiation.
+	 * Use a ConcurrentHashMap for the cache as it is thread-safe and performant for mostly-read operations.
 	 */
-	protected FileSystemRepository(String absolutePath) {
+	protected FileSystemRepository(@Nonnull String absolutePath) {
+		super(new ConcurrentHashMap<>());
 		this.absolutePath = absolutePath.replace('\\', '/');
 		if (this.absolutePath.charAt(this.absolutePath.length() - 1) != '/') {
 			this.absolutePath += '/';
@@ -76,7 +81,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * Absolute path and load classes constructor
 	 * Prevent external instantiation.
 	 */
-	protected FileSystemRepository(String absolutePath, boolean loadClasses) {
+	protected FileSystemRepository(@Nonnull String absolutePath, boolean loadClasses) {
 		this(absolutePath);
 		this.loadClasses = loadClasses;
 	}
@@ -128,7 +133,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 	}
 
-	private void populateModuleLocation(String customerName, String moduleName) {
+	private void populateModuleLocation(@Nullable String customerName, @Nonnull String moduleName) {
 		StringBuilder sb = new StringBuilder(256);
 		if (customerName == null) {
 			String key = MODULES_NAMESPACE + moduleName;
@@ -154,166 +159,190 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		}
 	}
 
-	private void populateDocumentLocations(String key) {
+	private void populateDocumentLocations(@Nonnull String key) {
 		StringBuilder sb = new StringBuilder(256);
 
 		File moduleDirectory = new File(absolutePath + key);
 		if (moduleDirectory.exists() && moduleDirectory.isDirectory()) {
-			for (File moduleFile : moduleDirectory.listFiles()) {
-				String moduleFileName = moduleFile.getName();
-				if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module file name = " + moduleFileName);
-
-				// we have found some modules
-				if (moduleFile.isDirectory()) {
-					for (File documentFile : moduleFile.listFiles()) {
-						String documentFileName = documentFile.getName();
-						// found the document actions directory
-						if (documentFileName.equals(ACTIONS_NAME) && documentFile.isDirectory()) {
-							for (File actionFile : documentFile.listFiles()) {
-								String actionFileName = actionFile.getName();
-								if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java") || actionFileName.endsWith(".xml")) {
-									String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
-
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(ACTIONS_NAMESPACE).append(actionName);
-									if (actionFileName.endsWith(".xml")) {
-										sb.append(META_DATA_SUFFIX);
-									}
-									String actionLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
-									addKey(actionLocation);
-								}
-							}
-						}
-						// found the document images directory
-						else if (documentFileName.equals(IMAGES_NAME) && documentFile.isDirectory()) {
-							for (File imageFile : documentFile.listFiles()) {
-								String imageFileName = imageFile.getName();
-								if (imageFileName.endsWith(".class") || imageFileName.endsWith(".java")) {
-									String imageName = imageFileName.substring(0, imageFileName.lastIndexOf('.'));
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(IMAGES_NAMESPACE).append(imageName);
-									String imageLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(" -> ").append(imageLocation).toString());
-									addKey(imageLocation);
-								}
-							}
-						}
-						// found the document models directory
-						else if (documentFileName.equals(MODELS_NAME) && documentFile.isDirectory()) {
-							for (File modelFile : documentFile.listFiles()) {
-								String modelFileName = modelFile.getName();
-								if (modelFileName.endsWith(".class") || modelFileName.endsWith(".java")) {
-									String modelName = modelFileName.substring(0, modelFileName.lastIndexOf('.'));
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(MODELS_NAMESPACE).append(modelName);
-									String modelLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(" -> ").append(modelLocation).toString());
-									addKey(modelLocation);
-								}
-							}
-						}
-						// found the document reports directory
-						else if (documentFileName.equals(REPORTS_NAME) && documentFile.isDirectory()) {
-							for (File reportFile : documentFile.listFiles()) {
-								String reportFileName = reportFile.getName();
-								if (reportFileName.endsWith(".jasper")) {
-									String reportName = reportFileName.substring(0, reportFileName.length() - 7);
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(REPORTS_NAMESPACE).append(reportName).append(JASPER_SUFFIX);
-									String reportLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
-									addKey(reportLocation);
-								}
-								else if (reportFileName.endsWith(".ftlh")) {
-									String reportName = reportFileName.substring(0, reportFileName.length() - 5);
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(REPORTS_NAMESPACE).append(reportName).append(FREEMARKER_SUFFIX);
-									String reportLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
-									addKey(reportLocation);
-								}
-							}
-						}
-						// found the document views directory
-						else if (documentFileName.equals(VIEWS_NAME) && documentFile.isDirectory()) {
-							for (File viewFile : documentFile.listFiles()) {
-								String viewFileName = viewFile.getName();
-								if (viewFileName.endsWith(".xml")) { // found a view file
-									String viewType = viewFileName.substring(0, viewFileName.length() - 4);
-									sb.setLength(0);
-									sb.append(key).append(moduleFileName).append('/');
-									sb.append(VIEWS_NAMESPACE).append(viewType);
-									String viewLocation = sb.toString();
-									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
-									addKey(viewLocation);
-								}
-								else if (viewFile.isDirectory()) {
-									for (File uxuiViewFile : viewFile.listFiles()) {
-										String uxuiViewFileName = uxuiViewFile.getName();
-										if (uxuiViewFileName.endsWith(".xml")) { // found a view file
-											String viewType = uxuiViewFileName.substring(0, uxuiViewFileName.length() - 4);
-											sb.setLength(0);
-											sb.append(key).append(moduleFileName).append('/');
-											sb.append(VIEWS_NAMESPACE).append(viewFileName).append('/').append(viewType);
-											String viewLocation = sb.toString();
-											if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
-											addKey(viewLocation);
+			File[] moduleFiles = moduleDirectory.listFiles();
+			if (moduleFiles != null) {
+				for (File moduleFile : moduleFiles) {
+					String moduleFileName = moduleFile.getName();
+					if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info("module file name = " + moduleFileName);
+	
+					// we have found some modules
+					if (moduleFile.isDirectory()) {
+						File[] documentFiles = moduleFile.listFiles();
+						if (documentFiles != null) {
+							for (File documentFile : documentFiles) {
+								String documentFileName = documentFile.getName();
+								// found the document actions directory
+								if (documentFileName.equals(ACTIONS_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File actionFile : files) {
+											String actionFileName = actionFile.getName();
+											if (actionFileName.endsWith(".class") || actionFileName.endsWith(".java") || actionFileName.endsWith(".xml")) {
+												String actionName = actionFileName.substring(0, actionFileName.lastIndexOf('.'));
+			
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(ACTIONS_NAMESPACE).append(actionName);
+												if (actionFileName.endsWith(".xml")) {
+													sb.append(META_DATA_SUFFIX);
+												}
+												String actionLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Action ").append(actionName).append(" -> ").append(actionLocation).toString());
+												addKey(actionLocation);
+											}
 										}
 									}
 								}
-							}
+								// found the document images directory
+								else if (documentFileName.equals(IMAGES_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File imageFile : files) {
+											String imageFileName = imageFile.getName();
+											if (imageFileName.endsWith(".class") || imageFileName.endsWith(".java")) {
+												String imageName = imageFileName.substring(0, imageFileName.lastIndexOf('.'));
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(IMAGES_NAMESPACE).append(imageName);
+												String imageLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Dynamic Image ").append(imageName).append(" -> ").append(imageLocation).toString());
+												addKey(imageLocation);
+											}
+										}
+									}
+								}
+								// found the document models directory
+								else if (documentFileName.equals(MODELS_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File modelFile : files) {
+											String modelFileName = modelFile.getName();
+											if (modelFileName.endsWith(".class") || modelFileName.endsWith(".java")) {
+												String modelName = modelFileName.substring(0, modelFileName.lastIndexOf('.'));
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(MODELS_NAMESPACE).append(modelName);
+												String modelLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Model ").append(modelName).append(" -> ").append(modelLocation).toString());
+												addKey(modelLocation);
+											}
+										}
+									}
+								}
+								// found the document reports directory
+								else if (documentFileName.equals(REPORTS_NAME) && documentFile.isDirectory()) {
+									File[] files = documentFile.listFiles();
+									if (files != null) {
+										for (File reportFile : files) {
+											String reportFileName = reportFile.getName();
+											if (reportFileName.endsWith(".jasper")) {
+												String reportName = reportFileName.substring(0, reportFileName.length() - 7);
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(REPORTS_NAMESPACE).append(reportName).append(JASPER_SUFFIX);
+												String reportLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Jasper Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												addKey(reportLocation);
+											}
+											else if (reportFileName.endsWith(".ftlh")) {
+												String reportName = reportFileName.substring(0, reportFileName.length() - 5);
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(REPORTS_NAMESPACE).append(reportName).append(FREEMARKER_SUFFIX);
+												String reportLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Freemarker Report ").append(reportName).append(" -> ").append(reportLocation).toString());
+												addKey(reportLocation);
+											}
+										}
+									}
+								}
+								// found the document views directory
+								else if (documentFileName.equals(VIEWS_NAME) && documentFile.isDirectory()) {
+									File[] viewFiles = documentFile.listFiles();
+									if (viewFiles != null) {
+										for (File viewFile : viewFiles) {
+											String viewFileName = viewFile.getName();
+											if (viewFileName.endsWith(".xml")) { // found a view file
+												String viewType = viewFileName.substring(0, viewFileName.length() - 4);
+												sb.setLength(0);
+												sb.append(key).append(moduleFileName).append('/');
+												sb.append(VIEWS_NAMESPACE).append(viewType);
+												String viewLocation = sb.toString();
+												if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+												addKey(viewLocation);
+											}
+											else if (viewFile.isDirectory()) {
+												File[] uxuiViewFiles = viewFile.listFiles();
+												if (uxuiViewFiles != null) {
+													for (File uxuiViewFile : uxuiViewFiles) {
+														String uxuiViewFileName = uxuiViewFile.getName();
+														if (uxuiViewFileName.endsWith(".xml")) { // found a view file
+															String viewType = uxuiViewFileName.substring(0, uxuiViewFileName.length() - 4);
+															sb.setLength(0);
+															sb.append(key).append(moduleFileName).append('/');
+															sb.append(VIEWS_NAMESPACE).append(viewFileName).append('/').append(viewType);
+															String viewLocation = sb.toString();
+															if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("View ").append(viewType).append(" -> ").append(viewLocation).toString());
+															addKey(viewLocation);
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+								// found the bizlet class file
+								else if (documentFileName.equals(moduleFileName + "Bizlet.class")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append(BIZLET_SUFFIX);
+									String bizletLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									addKey(bizletLocation);
+								}
+								// found the bizlet metadata file
+								else if (documentFileName.equals(moduleFileName + "Bizlet.xml")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
+									String bizletLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
+									addKey(bizletLocation);
+								}
+								// found the extension class file
+								else if (documentFileName.equals(moduleFileName + "Extension.class")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append("Extension");
+									String extensionLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(" -> ").append(extensionLocation).toString());
+									addKey(extensionLocation);
+								}
+								// found the factory class file
+								else if (documentFileName.equals(moduleFileName + "Factory.class")) {
+									sb.setLength(0);
+									sb.append(key).append(moduleFileName).append('/');
+									sb.append(moduleFileName).append("Factory");
+									String factoryLocation = sb.toString();
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(" -> ").append(factoryLocation).toString());
+									addKey(factoryLocation);
+								}
+								// found the document definition file
+								else if (documentFileName.equals(moduleFileName + ".xml")) {
+									String documentLocation = key + moduleFileName;
+									if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(" -> ").append(documentLocation).toString());
+									addKey(documentLocation);
+								}
+							} // for (all document files)
 						}
-						// found the bizlet class file
-						else if (documentFileName.equals(moduleFileName + "Bizlet.class")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append(BIZLET_SUFFIX);
-							String bizletLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Bizlet ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
-							addKey(bizletLocation);
-						}
-						// found the bizlet metadata file
-						else if (documentFileName.equals(moduleFileName + "Bizlet.xml")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append(BIZLET_SUFFIX).append(META_DATA_SUFFIX);
-							String bizletLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("BizletMetaData ").append(moduleFileName).append(" -> ").append(bizletLocation).toString());
-							addKey(bizletLocation);
-						}
-						// found the extension class file
-						else if (documentFileName.equals(moduleFileName + "Extension.class")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append("Extension");
-							String extensionLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Extension ").append(moduleFileName).append(" -> ").append(extensionLocation).toString());
-							addKey(extensionLocation);
-						}
-						// found the factory class file
-						else if (documentFileName.equals(moduleFileName + "Factory.class")) {
-							sb.setLength(0);
-							sb.append(key).append(moduleFileName).append('/');
-							sb.append(moduleFileName).append("Factory");
-							String factoryLocation = sb.toString();
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Factory ").append(moduleFileName).append(" -> ").append(factoryLocation).toString());
-							addKey(factoryLocation);
-						}
-						// found the document definition file
-						else if (documentFileName.equals(moduleFileName + ".xml")) {
-							String documentLocation = key + moduleFileName;
-							if (UtilImpl.XML_TRACE) UtilImpl.LOGGER.info(new StringBuilder(128).append("Document ").append(moduleFileName).append(" -> ").append(documentLocation).toString());
-							addKey(documentLocation);
-						}
-					} // for (all document files)
-				} // if (moduleFile is a directory)
-			} // for (all module files)
+					} // if (moduleFile is a directory)
+				} // for (all module files)
+			}
 		} // if (module directory exists)
 	}
 
@@ -356,7 +385,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
  		return routersFileInfo.values().stream().max(Comparator.naturalOrder()).get().longValue();
 	}
 	
-	private Map<String, Long> routersFileInfo(boolean includeGlobal, boolean includeModule) {
+	private @Nonnull Map<String, Long> routersFileInfo(boolean includeGlobal, boolean includeModule) {
 		Map<String, Long> result = new LinkedHashMap<>(); // keep the global one first
 		StringBuilder sb = new StringBuilder(256);
 		String s = null;
@@ -377,6 +406,9 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			// Add customer overrides
 			for (String customerName : getAllCustomerNames()) {
 				final Customer customer = getCustomer(customerName);
+				if (customer == null) {
+					throw new MetaDataException("Customer " + customerName + " does not exist.");
+				}
 				for (Module module : customer.getModules()) {
 					sb.append(absolutePath);
 					sb.append(CUSTOMERS_NAMESPACE).append(customerName).append('/').append(module.getName()).append("/").append(ROUTER_NAME).append(".xml");
@@ -438,9 +470,12 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		
 		File customersDirectory = new File(absolutePath + CUSTOMERS_NAMESPACE);
 		if (customersDirectory.exists() && customersDirectory.isDirectory()) {
-			for (File customerDirectory : customersDirectory.listFiles()) {
-				if (customerDirectory.isDirectory() && (customerDirectory.getName().charAt(0) != '.')) {
-					result.add(customerDirectory.getName());
+			File[] files = customersDirectory.listFiles();
+			if (files != null) {
+				for (File customerDirectory : files) {
+					if (customerDirectory.isDirectory() && (customerDirectory.getName().charAt(0) != '.')) {
+						result.add(customerDirectory.getName());
+					}
 				}
 			}
 		}
@@ -454,13 +489,19 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 
 		File modulesDirectory = new File(absolutePath + MODULES_NAMESPACE);
 		if (modulesDirectory.exists() && modulesDirectory.isDirectory()) {
-			for (File moduleDirectory : modulesDirectory.listFiles()) {
-				if (moduleDirectory.isDirectory() && (moduleDirectory.getName().charAt(0) != '.')) {
-					// make sure there is a module.xml with the same name as the module directory to cater for deleted modules
-					for (File moduleChild : moduleDirectory.listFiles()) {
-						if (moduleChild.getName().equals(moduleDirectory.getName() + ".xml")) {
-							result.add(moduleDirectory.getName());
-							break;
+			File[] moduleDirectories = modulesDirectory.listFiles();
+			if (moduleDirectories != null) {
+				for (File moduleDirectory : moduleDirectories) {
+					if (moduleDirectory.isDirectory() && (moduleDirectory.getName().charAt(0) != '.')) {
+						// make sure there is a module.xml with the same name as the module directory to cater for deleted modules
+						File[] moduleChildren = moduleDirectory.listFiles();
+						if (moduleChildren != null) {
+							for (File moduleChild : moduleChildren) {
+								if (moduleChild.getName().equals(moduleDirectory.getName() + ".xml")) {
+									result.add(moduleDirectory.getName());
+									break;
+								}
+							}
 						}
 					}
 				}
@@ -470,7 +511,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return result;
 	}
 
-	private String customerPath(String customerName) {
+	private @Nonnull String customerPath(@Nonnull String customerName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		result.append(CUSTOMERS_NAMESPACE);
@@ -510,7 +551,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 	
-	private String modulePath(String customerName, String moduleName) {
+	private @Nonnull String modulePath(@Nullable String customerName, @Nonnull String moduleName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -553,7 +594,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 	
-	private String documentPath(String customerName, String moduleName, String documentName) {
+	private @Nonnull String documentPath(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -597,7 +638,11 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 
-	private String viewPath(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+	private @Nonnull String viewPath(@Nullable String customerName,
+										@Nonnull String moduleName,
+										@Nonnull String documentName,
+										@Nullable String uxui,
+										@Nonnull String viewName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -645,7 +690,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return Long.MIN_VALUE;
 	}
 	
-	private String actionPath(String customerName, String moduleName, String documentName, String actionName) {
+	private @Nonnull String actionPath(@Nullable String customerName,
+										@Nonnull String moduleName,
+										@Nonnull String documentName,
+										@Nonnull String actionName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -711,7 +759,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), false, runtime);
 	}
 
-	private String bizletPath(String customerName, String moduleName, String documentName) {
+	private @Nonnull String bizletPath(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		StringBuilder result = new StringBuilder(256);
 		result.append(absolutePath);
 		if (customerName != null) {
@@ -773,7 +821,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		return getJavaMetaData(customer, key.toString(), true, runtime);
 	}
 
-	protected <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
+	protected @Nonnull <T extends MetaData> T getModel(@Nullable Customer customer,
+														@Nonnull Document document,
+														@Nonnull String modelName,
+														boolean runtime) {
 		// If dynamic, use the models map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -798,12 +849,16 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 																						Document document, 
 																						String modelName,
 																						boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		ComparisonModel<T, C> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		MapModel<T> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
 	@Override
@@ -811,15 +866,23 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 															Document document,
 															String modelName,
 															boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		ChartModel<T> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
-		return getModel(customer, document, modelName, runtime);
+		ListModel<T> result = getModel(customer, document, modelName, runtime);
+		result.postConstruct(customer, runtime);
+		return result;
 	}
 
-	protected <T extends MetaData> T getClassAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
+	protected @Nullable <T extends MetaData> T getClassAction(@Nullable Customer customer,
+																@Nonnull Document document,
+																@Nonnull String actionName,
+																boolean assertExistence,
+																boolean runtime) {
 		// If dynamic, use the actions map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -952,7 +1015,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	public Class<?> getJavaClass(Customer customer, String key) {
 		Class<?> result = null;
 		
-		String newKey = vtable(customer.getName(), key);
+		String newKey = vtable((customer == null) ? null : customer.getName(), key);
 		if (newKey != null) {
 			result = classes.computeIfAbsent(newKey, k -> {
 				String className = k.replace('/', '.');
@@ -991,10 +1054,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
 	 */
 	@SuppressWarnings("unchecked")
-	public final <T extends MetaData> T getJavaMetaData(Customer customer, 
-															String key,
-															boolean assertExistence,
-															boolean runtime) {
+	public final @Nullable <T extends MetaData> T getJavaMetaData(@Nullable Customer customer,
+																	@Nonnull String key,
+																	boolean assertExistence,
+																	boolean runtime) {
 		T result = null;
 		
 		Class<?> type = getJavaClass(customer, key);
@@ -1007,7 +1070,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			try {
 				result = (T) type.getDeclaredConstructor().newInstance();
 				if (runtime) {
-					BeanProvider.injectFields(result);
+					UtilImpl.inject(result);
 				}
 			}
 			catch (SkyveException e) {
@@ -1027,27 +1090,29 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		path.append(document.getName()).append('/');
 		path.append(REPORTS_NAMESPACE).append(reportName);
 		String key = path.toString() + JASPER_SUFFIX;
-		String result = vtable(customer.getName(), key);
+		String customerName = (customer == null) ? null : customer.getName();
+		String result = vtable(customerName, key);
 		if (result == null) {
 			key = path.toString() + FREEMARKER_SUFFIX;
-			result = vtable(customer.getName(), key);
-			if (result == null) {
-				throw new IllegalArgumentException("Report " + reportName + " for document " + 
-													document.getOwningModuleName() + '.' + document.getName() + " is not defined.");
+			result = vtable(customerName, key);
+			if (result != null) {
+				path.setLength(0);
+				path.append(absolutePath).append(result);
+				path.setLength(path.length() - FREEMARKER_SUFFIX.length()); // remove the suffix
+				path.append(".flth");
+				return path.toString();
 			}
-			path.setLength(0);
-			path.append(absolutePath).append(result);
-			path.setLength(path.length() - FREEMARKER_SUFFIX.length()); // remove the suffix
-			path.append(".flth");
 		}
 		else {
 			path.setLength(0);
 			path.append(absolutePath).append(result);
 			path.setLength(path.length() - JASPER_SUFFIX.length()); // remove the suffix
 			path.append(".jasper");
+			return path.toString();
 		}
 
-		return path.toString();
+		// not found
+		return null;
 	}
 
 	/**
@@ -1120,7 +1185,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	// Ensure that the file path asks for doesn't break out of the project / web root directory
-	private File protect(File file) {
+	private @Nonnull File protect(@Nonnull File file) {
 		// resolve ../ and symbolic links with canonical path
 		String pathToTest = null;
 		try {

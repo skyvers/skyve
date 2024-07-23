@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.ConditionMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
@@ -236,12 +237,25 @@ public class FluentDocument {
 	}
 
 	public FluentDocument bizKeyExpression(String expression) {
-		BizKey bizKey = new BizKey();
+		BizKey bizKey = document.getBizKey();
+		if (bizKey == null) {
+			bizKey = new BizKey();
+			document.setBizKey(bizKey);
+		}
 		bizKey.setExpression(expression);
-		document.setBizKey(bizKey);
 		return this;
 	}
-	
+
+	public FluentDocument bizKeySensitivity(Sensitivity sensitivity) {
+		BizKey bizKey = document.getBizKey();
+		if (bizKey == null) {
+			bizKey = new BizKey();
+			document.setBizKey(bizKey);
+		}
+		bizKey.setSensitivity(sensitivity);
+		return this;
+	}
+
 	public FluentDocument iconStyleClass(String iconStyleClass) {
 		document.setIconStyleClass(iconStyleClass);
 		return this;

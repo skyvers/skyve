@@ -1,6 +1,6 @@
 package org.skyve.metadata.view.model.chart;
 
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * Bucket text data by the length of starting characters and case sensitivity.

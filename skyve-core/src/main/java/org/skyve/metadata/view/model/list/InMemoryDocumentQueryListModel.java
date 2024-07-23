@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.SortedMap;
 
 import org.skyve.domain.Bean;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.persistence.DocumentQuery;
 
@@ -11,8 +14,14 @@ public class InMemoryDocumentQueryListModel<T extends Bean> extends InMemoryList
 	@SuppressWarnings("unused")
 	private DocumentQuery query;
 	
-	public InMemoryDocumentQueryListModel(DocumentQuery query) {
+	public InMemoryDocumentQueryListModel(Module module, Document drivingDocument, DocumentQuery query) {
+		super(module, drivingDocument);
 		this.query = query;
+	}
+	
+	@Override
+	public void postConstruct(Customer customer, boolean runtime) {
+		// TODO Auto-generated method stub
 	}
 	
 	@Override

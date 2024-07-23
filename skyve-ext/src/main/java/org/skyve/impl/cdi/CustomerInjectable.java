@@ -3,8 +3,6 @@ package org.skyve.impl.cdi;
 import java.util.Collection;
 import java.util.List;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
@@ -23,6 +21,8 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.

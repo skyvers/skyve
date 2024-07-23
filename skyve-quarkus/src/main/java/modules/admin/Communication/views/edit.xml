@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit" title="admin.communication.edit.title" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<component name="_emailNotConfiguredBanner" document="Configuration" />
+	<tabPane>
+		<tab title="admin.communication.edit.contents.tabTitle">
+			<form border="true">
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<textField binding="description" disabled="locked" />
+					</item>
+					<item>
+						<checkBox binding="systemUse" triState="false" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.communication.edit.contents.email.borderTitle">
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="formatType">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="sendFrom" invisible="notEmailType" />
+					</item>
+					<item>
+						<checkBox binding="monitorBcc" invisible="notEmailType" triState="false" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item colspan="3">
+						<blurb>	
+							<![CDATA[<font color="green"><em>{i18n:admin.communication.sendTo.hint}</em></font>]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+						<textField binding="sendTo" />
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+						<textField binding="ccTo" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer visible="emailType" />
+					</item>
+					<item colspan="3">
+						<blurb visible="emailType">	
+							<![CDATA[<font color="green"><em>{i18n:admin.communication.emailType.hint}</em></font>]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+						<textField binding="subject" visible="emailType" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item colspan="3">
+						<blurb>	
+							<![CDATA[<font color="green"><em>{i18n:admin.communication.body.hint}</em></font>]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+		            	<!-- using a textarea in responsive because the quill editor does not allow html source to be edited -->
+						<textArea binding="body" />						
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="template" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.communication.edit.contents.options.borderTitle">
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="includeCalendar" triState="false" />
+					</item>
+					<item>
+						<button action="AddUnsubscribeLink" pixelWidth="200" />
+					</item>
+					<item>
+						<button action="AddImage" pixelWidth="200" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.communication.edit.attachments.tabTitle">
+			<form border="true" borderTitle="Attachments">
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<default binding="attachment1" />
+					</item>
+					<item>
+						<default binding="attachmentFileName1" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="attachment2" />
+					</item>
+					<item>
+						<default binding="attachmentFileName2" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="attachment3" />
+					</item>
+					<item>
+						<default binding="attachmentFileName3" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.communication.edit.attachments.calendar.borderTitle">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item colspan="2">
+						<default binding="calendarTitleExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="calendarStartTime" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="calendarEndTime" />
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+						<default binding="calendarDescriptionExpression" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="admin.communication.edit.manage.tabTitle">
+			<form border="true" borderTitle="admin.communication.edit.manage.configuration.borderTitle">
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item colspan="3">
+						<combo binding="moduleName" disabled="locked">
+							<onChangedHandlers>
+								<rerender clientValidation="false" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item colspan="3">
+						<combo binding="documentName" disabled="locked" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="admin.communication.edit.manage.results.borderTitle" widgetId="results">
+				<hbox>
+					<form responsiveWidth="8">
+						<column />
+						<column />
+						<row>
+							<item>
+								<default binding="tag" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="unTagSuccessful" triState="false" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="notification" triState="false" />
+							</item>
+						</row>
+					</form>
+					<form responsiveWidth="4">
+						<column />
+						<row>
+							<item>
+								<button action="GetCount" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button action="TestSend" pixelWidth="200" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<button action="GetResults" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button action="CreateFiles" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+						<row>
+							<item>
+								<button action="SendNow" pixelWidth="200">
+									<properties>
+										<c:property key="update">results</c:property>
+									</properties>
+								</button>
+							</item>
+						</row>
+					</form>
+				</hbox>
+				<form>
+					<column />
+					<row>
+						<item showLabel="false">
+							<textArea binding="results" pixelHeight="100" disabled="true" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<vbox border="true" borderTitle="admin.communication.edit.manage.batches.borderTitle" widgetId="batches">
+				<listGrid visible="showBatches" model="BatchesModel" selectedIdBinding="selectedBatchTimestampFolderName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
+					showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="batchesRefreshRequired">
+					<onSelectedHandlers>
+						<server action="BatchSelected" />
+					</onSelectedHandlers>
+				</listGrid>
+				<form>
+					<column />
+					<column />
+					<row>
+						<item>
+							<button action="ZipBatch" pixelWidth="200">
+								<properties>
+									<c:property key="update">batches</c:property>
+								</properties>
+							</button>
+						</item>
+						<item>
+							<button action="DeleteBatch" pixelWidth="200">
+								<properties>
+									<c:property key="update">batches</c:property>
+								</properties>
+							</button>
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</tab>
+		<tab title="admin.communication.edit.subscriptions.tabTitle" visible="persisted">
+			<listGrid continueConversation="true" query="qSubscriptions">
+				<filterParameter filterBinding="communication" operator="equal" valueBinding="bizId" />
+			</listGrid>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<action clientValidation="true" className="GetResults" displayName="admin.communication.actions.getResults.displayName" inActionPanel="false" iconStyleClass="fa fa-rotate-right" />
+
+		<action clientValidation="true" className="GetCount" displayName="admin.communication.actions.getCount.displayName" inActionPanel="false" iconStyleClass="fa fa-calculator" />
+
+		<action clientValidation="true" className="CreateFiles" displayName="admin.communication.actions.createFiles.displayName" inActionPanel="false" iconStyleClass="fa fa-cogs" confirm="OK to create email files?" />
+
+		<action clientValidation="true" className="SendNow" displayName="admin.communication.actions.sendNow.displayName" inActionPanel="false" iconStyleClass="fa fa-envelope" confirm="OK to send emails?" />
+
+		<action clientValidation="true" className="TestSend" displayName="admin.communication.actions.testSend.displayName" inActionPanel="false" iconStyleClass="fa fa-envelope-square" confirm="Send test email to yourself?" />
+
+		<action clientValidation="false" className="AddUnsubscribeLink" displayName="admin.communication.actions.addUnsubscribeLink.displayName" iconStyleClass="fa fa-link" inActionPanel="false" />
+
+		<upload className="AddImage" displayName="admin.communication.actions.addImage.displayName" inActionPanel="false" iconStyleClass="fa fa-file-photo-o" />
+
+		<action className="BatchSelected" displayName="admin.communication.actions.batchSelected.displayName" inActionPanel="false" />
+
+		<action className="DeleteBatch" displayName="admin.communication.actions.deleteBatch.displayName" inActionPanel="false" disabled="notBatchSelected" confirm="Are you sure you want to delete this batch folder from the server filesystem?"
+			iconStyleClass="fa fa-trash" />
+
+		<download className="ZipBatch" displayName="admin.communication.actions.zipBatch.displayName" inActionPanel="false" disabled="notBatchSelected"
+			confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" iconStyleClass="fa fa-file-zip-o" />
+
+	</actions>
+	<newParameters />
+</view>

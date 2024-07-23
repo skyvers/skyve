@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="AllDynamicAttributesPersistent"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			All dynamic attributes in a persistent document.
+		]]>
+	</documentation>
+	<persistent name="TEST_AllDynamicAttributesPersistent" />
+	<singularAlias>All Dynamic Attributes Persistent</singularAlias>
+	<pluralAlias>All Dynamic Attributes Persistent</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<association name="aggregatedAssociation" type="aggregation">
+			<displayName>Aggregated Association</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+		</association>
+		<association name="composedAssociation" type="composition">
+			<displayName>Composed Association</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+		</association>
+		<association name="embeddedAssociation" type="embedded" embeddedColumnsPrefix="embedded">
+			<displayName>Embedded Association</displayName>
+			<documentName>AllAttributesEmbedded</documentName>
+		</association>
+		<association name="dynamicAggregatedAssociation" type="aggregation">
+			<displayName>Dynamic Aggregated Association</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+		</association>
+		<association name="dynamicComposedAssociation" type="composition">
+			<displayName>Dynamic Composed Association</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+		</association>
+		<association name="dynamicEmbeddedAssociation" type="embedded" embeddedColumnsPrefix="dynamicEmbedded">
+			<displayName>Dynamic Embedded Association</displayName>
+			<documentName>AllAttributesDynamicEmbedded</documentName>
+		</association>
+		<collection name="composedCollection" type="composition">
+			<displayName>Composed Collection</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicAggregatedCollection" type="aggregation">
+			<displayName>Dynamic Aggregated Collection</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicComposedCollection" type="composition">
+			<displayName>Dynamic Composed Collection</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dynamicChildCollection" type="child">
+			<displayName>Dynamic Child Collection</displayName>
+			<documentName>AllDynamicAttributesPersistentDynamicChild</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+			<dynamic>true</dynamic>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+			<dynamic>true</dynamic>
+			<defaultValue>#000000</defaultValue>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+			<dynamic>true</dynamic>
+		</date>
+		<dateTime name="dateTime">
+			<displayName>Date Time</displayName>
+			<dynamic>true</dynamic>
+		</dateTime>
+		<decimal10 name="decimal10">
+			<displayName>Decimal 10</displayName>
+			<dynamic>true</dynamic>
+		</decimal10>
+		<decimal2 name="decimal2">
+			<displayName>Decimal 2</displayName>
+			<dynamic>true</dynamic>
+		</decimal2>
+		<decimal5 name="decimal5">
+			<displayName>Decimal 5</displayName>
+			<dynamic>true</dynamic>
+		</decimal5>
+		<enum name="enum3">
+			<displayName>Enum 3</displayName>
+			<dynamic>true</dynamic>
+			<values>
+				<value code="one" />
+				<value code="two" />
+				<value code="three" />
+			</values>
+		</enum>
+		<geometry name="geometry">
+			<displayName>Geometry</displayName>
+			<dynamic>true</dynamic>
+		</geometry>
+		<id name="id">
+			<displayName>Id</displayName>
+			<dynamic>true</dynamic>
+		</id>
+		<integer name="normalInteger">
+			<displayName>Integer</displayName>
+			<dynamic>true</dynamic>
+		</integer>
+		<inverseMany name="inverseAggregatedAssociation">
+			<displayName>Inverse</displayName>
+			<documentName>AllDynamicAttributesPersistent</documentName>
+			<referenceName>aggregatedAssociation</referenceName>
+		</inverseMany>
+		<inverseMany name="dynamicInverseAggregatedAssociation">
+			<displayName>Dynamic Inverse</displayName>
+			<documentName>AllAttributesDynamicPersistent</documentName>
+			<referenceName>dynamicAggregatedAssociation</referenceName>
+		</inverseMany>
+		<longInteger name="longInteger">
+			<displayName>Long Integer</displayName>
+			<dynamic>true</dynamic>
+		</longInteger>
+		<markup name="markup">
+			<displayName>Markup</displayName>
+			<dynamic>true</dynamic>
+		</markup>
+		<memo name="memo">
+			<displayName>Memo</displayName>
+			<dynamic>true</dynamic>
+		</memo>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<dynamic>true</dynamic>
+			<length>255</length>
+		</text>
+		<time name="time">
+			<displayName>Time</displayName>
+			<dynamic>true</dynamic>
+		</time>
+		<timestamp name="timestamp">
+			<displayName>Timestamp</displayName>
+			<dynamic>true</dynamic>
+		</timestamp>
+	</attributes>
+</document>

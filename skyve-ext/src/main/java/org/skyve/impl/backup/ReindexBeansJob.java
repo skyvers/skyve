@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
+import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Memo;
@@ -17,18 +19,20 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.SQL;
 
 public class ReindexBeansJob extends CancellableJob {
 	@Override
 	public void execute() throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Customer customer = persistence.getUser().getCustomer();
+		String dynamicEntityPersistenceIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
 		List<String> log = getLog();
 		String trace;
 		
-
 		// truncate the bean content ready to reindex
 		try (ContentManager cm = EXT.newContentManager()) {
 			trace = "Truncate Beans";
@@ -57,16 +61,37 @@ public class ReindexBeansJob extends CancellableJob {
 								// Don't check if a document has indexable fields as we
 								// may need to have nodes deleted
 								// (i.e. a document field used to be indexed but now is not)
-								trace = String.format("Reindex document %s.%s", module.getName(), documentName);
+								trace = String.format("Reindex document %s.%s", moduleName, documentName);
 								log.add(trace);
 								UtilImpl.LOGGER.info(trace);
-								DocumentQuery query = persistence.newDocumentQuery(document);
-								query.noTimeout();
-								try (AutoClosingIterable<PersistentBean> it = query.beanIterable()) {
-									for (PersistentBean bean : it) {
-										persistence.reindex(bean);
-										// Evict anything inadvertently loaded and cached by the reindex operation above
-										persistence.evictAllCached();
+								if (document.isDynamic()) {
+									SQL query = persistence.newSQL(String.format("select %s from %s where %s = :%s and %s = :%s",
+																					Bean.DOCUMENT_ID,
+																					dynamicEntityPersistenceIdentifier,
+																					AppConstants.MODULE_NAME_ATTRIBUTE_NAME,
+																					AppConstants.MODULE_NAME_ATTRIBUTE_NAME,
+																					AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME,
+																					AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME));
+									query.putParameter(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName, false);
+									query.putParameter(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, documentName, false);
+									try (AutoClosingIterable<String> it = query.scalarIterable(String.class)) {
+										for (String bizId : it) {
+											PersistentBean bean = persistence.retrieve(document, bizId);
+											persistence.reindex(bean);
+											// Evict anything inadvertently loaded and cached by the reindex operation above
+											persistence.evictAllCached();
+										}
+									}
+								}
+								else {
+									DocumentQuery query = persistence.newDocumentQuery(document);
+									query.noTimeout();
+									try (AutoClosingIterable<PersistentBean> it = query.beanIterable()) {
+										for (PersistentBean bean : it) {
+											persistence.reindex(bean);
+											// Evict anything inadvertently loaded and cached by the reindex operation above
+											persistence.evictAllCached();
+										}
 									}
 								}
 							}

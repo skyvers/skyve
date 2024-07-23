@@ -32,7 +32,9 @@ import org.skyve.content.MimeType;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.Download;
-import org.skyve.web.WebContext;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Basic file utilities
@@ -47,32 +49,44 @@ public class FileUtil {
 	}
 
 	/**
+	 * Read the bytes from a file.
+	 * 
+	 * @param file	The file to read.
+	 * @return	the bytes.
+	 * @throws IOException
+	 */
+	public static @Nonnull byte[] bytes(@Nonnull File file) throws IOException {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			return bytes(fis);
+		}
+	}
+	
+	/**
 	 * Return a byte array from an input stream
 	 * 
-	 * WARNING: If the input stream is large, this may have impacts on
-	 * performance.
+	 * WARNING: If the input stream is large, this may have impacts on performance.
 	 * 
 	 * @param inputStream
 	 * @return
 	 * @throws IOException
 	 */
-	public static final byte[] getFileBytes(InputStream inputStream) throws IOException {
-		byte[] bytes = null;
-
+	public static @Nonnull byte[] bytes(@Nonnull InputStream inputStream) throws IOException {
 		try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				bis.transferTo(baos);
-				bytes = baos.toByteArray();
+				byte[] bytes = new byte[1024]; // 1K
+				int bytesRead = 0;
+				while ((bytesRead = bis.read(bytes)) > 0) {
+					baos.write(bytes, 0, bytesRead);
+				}
+				return baos.toByteArray();
 			}
 		}
-
-		return bytes;
 	}
 	
 	/**
 	 * Return the contents of a text file as a String.
 	 */
-	public static final String getFileAsString(File file) throws IOException {
+	public static final @Nonnull String string(@Nonnull File file) throws IOException {
 		StringBuilder result = new StringBuilder(1024);
 		
 		try (FileReader fr = new FileReader(file)) {
@@ -93,8 +107,7 @@ public class FileUtil {
 	 * @param unsafeName
 	 * @return
 	 */
-	public static String safeFileName(String unsafeName) {
-
+	public static @Nonnull String safeFileName(@Nonnull String unsafeName) {
 		// suitable for FAT32 - thanks to SharkAlley@Stack Overflow
 		final Pattern PATTERN = Pattern.compile("[%\\.\"\\*/:<>\\?\\\\\\|\\+,\\.;=\\[\\]]");
 
@@ -106,7 +119,6 @@ public class FileUtil {
 	    Matcher m = PATTERN.matcher(unsafeName);
 
 	    while (m.find()) {
-
 	        // Convert matched character to percent-encoded.
 	        String replacement = "%"+Integer.toHexString(m.group().charAt(0)).toUpperCase();
 
@@ -129,42 +141,44 @@ public class FileUtil {
 	 * @param extension
 	 * @param makeDirectories
 	 * @param unsafeFolderNames
-	 * @return the full filepath (and filename with extension if provided)
+	 * @return the full file path (and filename with extension if provided)
 	 */
-	public static String constructSafeFilePath(String safeBasePath, String unsafeFileName, String extension, boolean makeDirectories, String... unsafeFolderNames) {
-		
-		StringBuilder filePath = new StringBuilder();
-		filePath.append(safeBasePath);
+	public static @Nonnull String constructSafeFilePath(@Nonnull String safeBasePath,
+															@Nonnull String unsafeFileName,
+															@Nullable String extension,
+															boolean makeDirectories,
+															@Nonnull String... unsafeFolderNames) {
+		StringBuilder result = new StringBuilder();
+		result.append(safeBasePath);
 		
 		//construct subfolders as required
 		String separator = System.getProperty("file.separator");
-		if (!safeBasePath.endsWith(separator)) {
-			filePath.append(separator);
+		if (! safeBasePath.endsWith(separator)) {
+			result.append(separator);
 		}
-		if(unsafeFolderNames!=null){
-			for (String folder : unsafeFolderNames) {
-				filePath.append(FileUtil.safeFileName(folder));
-			}
+		for (String folder : unsafeFolderNames) {
+			result.append(FileUtil.safeFileName(folder));
 		}
-		if (!filePath.toString().endsWith(separator)) {
-			filePath.append(separator);
+
+		if (! result.toString().endsWith(separator)) {
+			result.append(separator);
 		}
 
 		//make directories if requested
 		if (makeDirectories) {
-			new File(filePath.toString()).mkdirs();
+			new File(result.toString()).mkdirs();
 		}
 
 		//append the file name with extension
-		filePath.append(safeFileName(unsafeFileName));
+		result.append(safeFileName(unsafeFileName));
 		if (extension != null) {
-			if (!extension.startsWith(".")) {
-				filePath.append('.');
+			if (! extension.startsWith(".")) {
+				result.append('.');
 			}
-			filePath.append(extension);
+			result.append(extension);
 		}
 
-		return filePath.toString();
+		return result.toString();
 	}
 
 	/**
@@ -172,11 +186,11 @@ public class FileUtil {
 	 * 
 	 * @param directoryPath
 	 * @param zipName
-	 * @param webContext
 	 * @return
 	 * @throws IOException
 	 */
-	public static Download prepareZipDownload(String directoryPath, String zipName, WebContext webContext)
+	public static @Nonnull Download prepareZipDownload(@Nonnull String directoryPath,
+														@Nonnull String zipName)
 	throws IOException {
 		try (ByteArrayOutputStream out = new ByteArrayOutputStream(20480)) {
 			File backupDir = new File(directoryPath);
@@ -192,7 +206,7 @@ public class FileUtil {
 	 * @param zip	The archive file.
 	 * @throws IOException
 	 */
-	public static void createZipArchive(File directory, File zip)
+	public static void createZipArchive(@Nonnull File directory,@Nonnull File zip)
 	throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(zip)) {
 			createZipArchive(directory, fos);
@@ -206,7 +220,8 @@ public class FileUtil {
 	 * @param out
 	 * @throws IOException
 	 */
-	public static void createJarArchive(File directory, OutputStream out) throws IOException {
+	public static void createJarArchive(@Nonnull File directory, @Nonnull OutputStream out)
+	throws IOException {
 		if (directory.exists() && directory.isDirectory()) {
 			Manifest manifest = new Manifest();
 			manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
@@ -235,7 +250,8 @@ public class FileUtil {
 	 * @param out
 	 * @throws IOException
 	 */
-	public static void createZipArchive(File directory, OutputStream out) throws IOException {
+	public static void createZipArchive(@Nonnull File directory, @Nonnull OutputStream out)
+	throws IOException {
 		if (directory.exists() && directory.isDirectory()) {
 			try (ZipOutputStream zos = new ZipOutputStream(out)) {
 				List<File> fileList = new ArrayList<>();
@@ -261,12 +277,14 @@ public class FileUtil {
 	 * @param dir
 	 * @param fileList
 	 */
-	private static void getAllFiles(File dir, List<File> fileList) {
+	private static void getAllFiles(@Nonnull File dir, @Nonnull List<File> fileList) {
 		File[] files = dir.listFiles();
-		for (File file : files) {
-			fileList.add(file);
-			if (file.isDirectory()) {
-				getAllFiles(file, fileList);
+		if (files != null) {
+			for (File file : files) {
+				fileList.add(file);
+				if (file.isDirectory()) {
+					getAllFiles(file, fileList);
+				}
 			}
 		}
 	}
@@ -280,7 +298,7 @@ public class FileUtil {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static void addToZip(File directoryToZip, File file, ZipOutputStream zos)
+	public static void addToZip(@Nonnull File directoryToZip, @Nonnull File file, @Nonnull ZipOutputStream zos)
 	throws FileNotFoundException, IOException {
 		try (FileInputStream fis = new FileInputStream(file)) {
 			// we want the zipEntry's path to be a relative path that is relative
@@ -302,7 +320,7 @@ public class FileUtil {
 		}
 	}
 
-	private static void extractFile(ZipInputStream in, File outdir, String name)
+	private static void extractFile(@Nonnull ZipInputStream in, @Nonnull File outdir, @Nonnull String name)
 	throws IOException {
 		File file = new File(outdir, name);
 		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Writing '%s' from zip file to %s", name, file));
@@ -317,14 +335,14 @@ public class FileUtil {
 		}
 	}
 
-	private static void mkdirs(File outdir, String path) {
+	private static void mkdirs(@Nonnull File outdir, @Nonnull String path) {
 		File d = new File(outdir, path);
 		if (! d.exists()) {
 			d.mkdirs();
 		}
 	}
 
-	private static String dirpart(String name) {
+	private static String dirpart(@Nonnull String name) {
 		int s = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
 		return (s == -1) ? null : name.substring( 0, s );
 	  }
@@ -335,7 +353,7 @@ public class FileUtil {
 	 * @param zipfile Input .zip file
 	 * @param outdir Output directory
 	 */
-	public static void extractZipArchive(File zipfile, File outdir)
+	public static void extractZipArchive(@Nonnull File zipfile, @Nonnull File outdir)
 	throws IOException {
 		outdir.mkdirs();
 		try (FileInputStream fis = new FileInputStream(zipfile)) {
@@ -371,10 +389,13 @@ public class FileUtil {
 	 * @param f	The file to delete
 	 * @throws IOException
 	 */
-	public static void delete(File f) throws IOException {
+	public static void delete(@Nonnull File f) throws IOException {
 		if (f.isDirectory()) {
-			for (File c : f.listFiles()) {
-				delete(c);
+			File[] cs = f.listFiles();
+			if (cs != null) {
+				for (File c : cs) {
+					delete(c);
+				}
 			}
 		}
 		
@@ -389,7 +410,7 @@ public class FileUtil {
 	 * @param dest
 	 * @throws IOException
 	 */
-	public static void copy(File src, File dest) throws IOException {
+	public static void copy(@Nonnull File src, @Nonnull File dest) throws IOException {
 		FileUtils.copyFile(src, dest);
 	}
 	
@@ -400,7 +421,9 @@ public class FileUtil {
 	 * @param direction	If defined, perform a case insensitive sort by the file name (not the whole path).
 	 * @return	The files.
 	 */
-	public static File[] listFiles(File dir, String regexPattern, SortDirection direction) {
+	public static @Nullable File[] listFiles(@Nonnull File dir,
+												@Nullable String regexPattern,
+												@Nullable SortDirection direction) {
 		File[] files = (regexPattern == null) ? 
 							dir.listFiles() :
 							dir.listFiles((FilenameFilter) new RegexFileFilter(regexPattern));

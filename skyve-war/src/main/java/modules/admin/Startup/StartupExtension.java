@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -23,6 +21,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import jakarta.inject.Inject;
 import modules.admin.domain.Startup;
 
 public class StartupExtension extends Startup {
@@ -37,7 +36,10 @@ public class StartupExtension extends Startup {
 
 	static final String API_STANZA_KEY = "api";
 	static final String API_GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
-	static final String API_GOOGLE_RECAPTCHA_KEY = "googleRecaptchaSiteKey";
+	static final String API_GOOGLE_RECAPTCHA_SITE_KEY = "googleRecaptchaSiteKey";
+	static final String API_GOOGLE_RECAPTCHA_SECRET_KEY = "googleRecaptchaSecretKey";
+	static final String API_CLOUDFLARE_TURNSTILE_SITE_KEY = "cloudflareTurnstileSiteKey";
+	static final String API_CLOUDFLARE_TURNSTILE_SECRET_KEY = "cloudflareTurnstileSecretKey";
 
 	static final String BACKUP_STANZA_KEY = "backup";
 	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
@@ -69,7 +71,21 @@ public class StartupExtension extends Startup {
 	 */
 	public void loadProperties() {
 		setApiGoogleMapsKey(UtilImpl.GOOGLE_MAPS_V3_API_KEY);
-		setApiGoogleRecaptchaKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
+		setApiGoogleRecaptchaSiteKey(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY);
+		setApiGoogleRecaptchaSecretKey(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY);
+		setApiCloudflareTurnstileSiteKey(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY);
+		setApiCloudflareTurnstileSecretKey(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY);
+		
+		boolean googleRecaptchaValuesSet = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null;
+		boolean cloudflareTurnstileValuesSet = UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null;
+		
+		if(googleRecaptchaValuesSet) {
+			setCaptchaType(CaptchaType.googleRecaptcha);
+		}else if(cloudflareTurnstileValuesSet){
+			setCaptchaType(CaptchaType.cloudflareTurnstile);
+		}else {
+			setCaptchaType(null);
+		}
 
 		setEnvironmentIdentifier(UtilImpl.ENVIRONMENT_IDENTIFIER);
 		setEnvironmentSupportEmail(UtilImpl.SUPPORT_EMAIL_ADDRESS);
@@ -222,11 +238,80 @@ public class StartupExtension extends Startup {
 			api.put(API_GOOGLE_MAPS_V3_KEY, getApiGoogleMapsKey());
 			UtilImpl.GOOGLE_MAPS_V3_API_KEY = getApiGoogleMapsKey();
 		}
+		
+		if(getCaptchaType() == null) {
+			// Clear cloudflare turnstile site key and secret key
+			api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+			UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+			api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+			UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+			
+			// Clear google recaptcha site key and secret key
+			api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+			api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+			UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+			return api;
+		}
+		switch(getCaptchaType()) {
+			case googleRecaptcha:
+				// Set google recaptcha keys
+				String googleSiteKey = getApiGoogleRecaptchaSiteKey();
+				if (googleSiteKey != null
+						&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey)) {
+					api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey);
+					UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = googleSiteKey;
+				}
 
-		if (getApiGoogleRecaptchaKey() != null
-				&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, getApiGoogleRecaptchaKey())) {
-			api.put(API_GOOGLE_RECAPTCHA_KEY, getApiGoogleRecaptchaKey());
-			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getApiGoogleRecaptchaKey();
+				String googleSecretKey = getApiGoogleRecaptchaSecretKey();
+				if (googleSecretKey != null
+						&& ! StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey)) {
+					api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey);
+					UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = googleSecretKey;
+				}
+				
+				// Clear cloudflare turnstile site key and secret key
+				api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+				api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+				
+				break;
+			case cloudflareTurnstile:
+				// Set turnstile keys
+				String turnstileSiteKey = getApiCloudflareTurnstileSiteKey();
+				if (turnstileSiteKey != null
+						&& !StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey)) {
+					api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = turnstileSiteKey;
+				}
+				
+				String turnstileSecretKey = getApiCloudflareTurnstileSecretKey();
+				if (turnstileSecretKey != null
+						&& ! StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey)) {
+					api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = turnstileSecretKey;
+				}
+				
+				// Clear google recaptcha site key and secret key
+				api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+				api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+				
+				break;
+			default:
+				// Clear cloudflare turnstile site key and secret key
+				api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+				api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+				UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+				
+				// Clear google recaptcha site key and secret key
+				api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+				api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+				UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
 		}
 
 		return api;
@@ -432,10 +517,7 @@ public class StartupExtension extends Startup {
 			}
 
 			if (!properties.isEmpty()) {
-				String json = JSON.marshall(customer, properties);
-				Util.LOGGER.info(String.format("Override json: %s", json));
-
-				return json;
+				return JSON.marshall(customer, properties);
 			}
 		}
 
@@ -458,6 +540,28 @@ public class StartupExtension extends Startup {
 			try (BufferedWriter writer = new BufferedWriter(new FileWriter(overridesFile))) {
 				writer.write(json);
 			}
+		}
+	}
+	
+	/**
+	 * This method is used to clear any api values in the json override file found in the content folder
+	 * @param properties
+	 * @throws IOException
+	 */
+	public void clearApi(Map<String, Object> properties) throws IOException {
+		// initialise or get the existing property map
+		@SuppressWarnings("unchecked")
+		Map<String, Object> api = (Map<String, Object>) properties.get(StartupExtension.API_STANZA_KEY);
+		if (api == null) {
+			api = new HashMap<>();
+			properties.put(API_STANZA_KEY, api);
+		}
+		api.clear();
+		// write the json out to the content directory
+		String json = this.marshall(properties);
+		if (StringUtils.isNotBlank(json)) {
+			this.writeConfiguration(json);
+			Util.LOGGER.info("Wrote updated properties to override json");
 		}
 	}
 }

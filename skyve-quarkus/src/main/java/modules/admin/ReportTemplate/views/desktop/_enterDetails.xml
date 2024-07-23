@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		name="_enterDetails" title="New Report Template"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd">
+	<!-- enter details component view -->
+	<form responsiveWidth="12" border="true" borderTitle="Report Details">
+		<column responsiveWidth="2" />
+		<column responsiveWidth="6" />
+		<column responsiveWidth="6" />
+		<row>
+			<item>
+				<default binding="name" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textArea binding="description" pixelHeight="60" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<radio vertical="false" binding="reportType">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</radio>
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer/>
+			</item>
+			<item>
+				<blurb escape="false">
+					<![CDATA[
+						 <span style="line-height: 1.5">
+							 {i18n:admin.reportTemplate.edit.reportTypeHint}
+						 </span>
+					]]>
+				</blurb>
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<radio binding="generateExisting" vertical="false" visible="typeFreemarker">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</radio>
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<combo binding="generateModuleName" visible="enterGenerate">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<combo binding="generateDocumentName" visible="enterGenerate" />
+			</item>
+		</row>
+	</form>
+</view>

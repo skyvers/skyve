@@ -55,6 +55,9 @@ public class NewActionMojo extends AbstractSkyveMojo {
 			}
 
 			final Path absoluteSrcPath = modulesDirectory.getParent();
+			if (absoluteSrcPath == null) {
+				throw new MojoExecutionException("src/ (parent directory) path is not resolvable from " + moduleDirectory.toFile().getAbsolutePath());
+			}
 
 			// The XMLMetaData class requires this path to be set to the src directory.
 			UtilImpl.APPS_JAR_DIRECTORY = absoluteSrcPath.toFile().getAbsolutePath() + File.separator;

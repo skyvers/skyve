@@ -1,15 +1,16 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.ReportDataset.ReportDatasetExtension;
 import modules.admin.ReportParameter.ReportParameterExtension;
 import modules.admin.ReportTemplate.ReportTemplateExtension;
@@ -39,12 +40,14 @@ import org.skyve.util.Util;
  * @navhas n runAs 0..1 UserProxy
  * @navhas n usersToEmail 0..n UserProxy
  * @navcomposed 1 datasets 0..n ReportDataset
+ * @navhas n editUsersToEmail 0..n Generic
  * @navcomposed 1 parameters 0..n ReportParameter
  * @navhas n newUserToEmail 0..1 UserProxy
  * @stereotype "persistent"
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class ReportTemplate extends AbstractPersistentBean implements org.skyve.domain.app.admin.ReportTemplate {
 	/**
 	 * For Serialization
@@ -376,12 +379,16 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	/** @hidden */
 	public static final String newUserToEmailPropertyName = "newUserToEmail";
 
+	/** @hidden */
+	public static final String editUsersToEmailPropertyName = "editUsersToEmail";
+
 	/**
 	 * Report Type
 	 * <br/>
 	 * Which template engine is being used to create this report?
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum ReportType implements Enumeration {
 		jasper("Jasper", "Jasper"),
 		freemarker("Freemarker", "Freemarker");
@@ -453,6 +460,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * What is the output format for this report?
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum OutputFormat implements Enumeration {
 		CSV("CSV", "CSV"),
 		PDF("PDF", "PDF");
@@ -524,6 +532,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * The query mode of the Jasper report
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Mode implements Enumeration {
 		SQL("sql", "SQL"),
 		bean("bean", "Bean");
@@ -599,6 +608,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 					</ul>
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum WizardState implements Enumeration {
 		enterDetails("enterDetails", "enterDetails"),
 		enterMarkup("enterMarkup", "enterMarkup");
@@ -671,6 +681,7 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 				markup to enter directly?
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum GenerateExisting implements Enumeration {
 		generate("Generate", "Generate"),
 		existing("Existing", "Existing");
@@ -877,6 +888,8 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 
 	/**
 	 * Users to Email
+	 * <br/>
+	 * The collection of users that will be recipients of this report.
 	 **/
 	private List<UserProxyExtension> usersToEmail = new ChangeTrackingArrayList<>("usersToEmail", this);
 
@@ -1319,6 +1332,14 @@ public abstract class ReportTemplate extends AbstractPersistentBean implements o
 	 * New Recipient
 	 **/
 	private UserProxyExtension newUserToEmail = null;
+
+	/**
+	 * Users to Email
+	 * <br/>
+	 * The collection of recipients shown in the view so users have permission to 
+				remove. Modifies the underlying usersToEmail persistent collection.
+	 **/
+	private List<Generic> editUsersToEmail = new ChangeTrackingArrayList<>("editUsersToEmail", this);
 
 	@Override
 	@XmlTransient
@@ -3414,6 +3435,66 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	}
 
 	/**
+	 * {@link #editUsersToEmail} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<Generic> getEditUsersToEmail() {
+		return editUsersToEmail;
+	}
+
+	/**
+	 * {@link #editUsersToEmail} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public Generic getEditUsersToEmailElementById(String bizId) {
+		return getElementById(editUsersToEmail, bizId);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setEditUsersToEmailElementById(String bizId, Generic element) {
+		setElementById(editUsersToEmail, element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addEditUsersToEmailElement(Generic element) {
+		return editUsersToEmail.add(element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addEditUsersToEmailElement(int index, Generic element) {
+		editUsersToEmail.add(index, element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeEditUsersToEmailElement(Generic element) {
+		return editUsersToEmail.remove(element);
+	}
+
+	/**
+	 * {@link #editUsersToEmail} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public Generic removeEditUsersToEmailElement(int index) {
+		return editUsersToEmail.remove(index);
+	}
+
+	/**
 	 * Shows the Scheduling tab if the user has permissions to save changes to reports.
 	 *
 	 * @return The condition
@@ -3701,5 +3782,25 @@ return getName() != null ? String.format("Report - %s", getName()) : "New Report
 	 */
 	public boolean isNotTypeJasper() {
 		return (! isTypeJasper());
+	}
+
+	/**
+	 * Controls whether this report template should be accessible and visible to the 
+                current user, specifically if the user has the DevOps role.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isValidAccess() {
+		return (isUserInOwningModuleRole("DevOps"));
+	}
+
+	/**
+	 * {@link #isValidAccess} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotValidAccess() {
+		return (! isValidAccess());
 	}
 }

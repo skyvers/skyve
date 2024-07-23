@@ -3,37 +3,51 @@ package org.skyve.impl.web.filter;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.util.Util;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
+
 public class ResponseHeaderFilter implements Filter {
+	public static final String SECURITY_HEADERS_FILTER_NAME = "SecurityHeadersFilter";
+	private static FilterConfig SECURITY_HEADERS_FILTER_CONFIG = null;
+	
 	private FilterConfig fc;
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
+		if (SECURITY_HEADERS_FILTER_NAME.equals(config.getFilterName())) {
+			SECURITY_HEADERS_FILTER_CONFIG = config;
+		}
 		fc = config;
 	}
 
 	@Override
 	public void destroy() {
+		if (SECURITY_HEADERS_FILTER_NAME.equals(fc.getFilterName())) {
+			SECURITY_HEADERS_FILTER_CONFIG = null;
+		}
 		fc = null;
 	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		applyHeaders(fc, (HttpServletResponse) response);
 
-		// set the provided HTTP response parameters
-		for (Enumeration<?> e = fc.getInitParameterNames(); e.hasMoreElements();) {
-			String headerName = (String) e.nextElement();
+		// pass the request/response on
+		chain.doFilter(request, response);
+	}
+	
+	// set the provided HTTP response parameters
+	private static void applyHeaders(FilterConfig fc, HttpServletResponse httpResponse) {
+		for (Enumeration<String> e = fc.getInitParameterNames(); e.hasMoreElements();) {
+			String headerName = e.nextElement();
 			if ("Expires".equals(headerName)) {
 				httpResponse.setDateHeader(headerName, System.currentTimeMillis() + Long.parseLong(fc.getInitParameter(headerName)));
 			}
@@ -47,8 +61,13 @@ public class ResponseHeaderFilter implements Filter {
 				httpResponse.setHeader(headerName, fc.getInitParameter(headerName));
 			}
 		}
-
-		// pass the request/response on
-		chain.doFilter(request, httpResponse);
+	}
+	
+	/**
+	 * Used in error.jsp to apply security headers as web container error processing does not pass through the web app's filters.
+	 * @param httpResponse	The response to apply the headers to.
+	 */
+	public static void applySecurityHeaders(HttpServletResponse httpResponse) {
+		applyHeaders(SECURITY_HEADERS_FILTER_CONFIG, httpResponse);
 	}
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ReportManager" xmlns="http://www.skyve.org/xml/document" xmlns:v="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			<p>The Report Manager document provides functions to manage system Report Templates and Report Configurations.</p>
+		]]>
+	</documentation>
+	<singularAlias>Report Manager</singularAlias>
+	<pluralAlias>Report Manager</pluralAlias>
+	<iconStyleClass>fa fa-file-pdf-o</iconStyleClass>
+	<attributes>
+		<text name="pathToZip">
+			<documentation>The path of the zip of report configurations for download</documentation>
+			<displayName>Path to Zip</displayName>
+			<length>500</length>
+		</text>
+		<enum name="importActionType" required="true">
+			<displayName>Import action</displayName>
+			<defaultValue>validateOnlyReportConfigurationsAndTemplates</defaultValue>
+			<values>
+				<value code="validate" description="Validate only report configurations and templates" />
+				<value code="import" description="Validate then import report configurations and templates" />
+			</values>
+		</enum>
+
+		<collection name="currentReports" type="aggregation">
+			<displayName>Current Reports</displayName>
+			<domain>variant</domain>
+			<documentName>ReportTemplate</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order sort="ascending" by="name" />
+			</ordering>
+		</collection>
+	</attributes>
+</document>

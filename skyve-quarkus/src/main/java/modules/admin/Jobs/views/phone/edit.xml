@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.jobs.edit.title" name="edit" refreshTimeInSeconds="30" xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<dataGrid binding="runningJobs" title="Running Jobs" disableAdd="true" disableRemove="true">
+		<boundColumn binding="startTime" title="Start Time" />
+		<boundColumn binding="displayName" title="Name" />
+		<boundColumn binding="percentComplete" title="Percent Complete" />
+	</dataGrid>
+	<actions>
+		<action className="Refresh" displayName="Refresh" relativeIconFileName="shared/icons/Globe.gif" />
+	</actions>
+</view>

@@ -1,15 +1,16 @@
 package modules.kitchensink.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
@@ -41,6 +42,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public class ListAttributes extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -111,10 +113,14 @@ public class ListAttributes extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String timestampPropertyName = "timestamp";
 
+	/** @hidden */
+	public static final String imagePropertyName = "image";
+
 	/**
 	 * ConstantEnum
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum ConstantEnum implements Enumeration {
 		one1("one", "One (1)!"),
 		two2("two", "Two (2)!"),
@@ -275,6 +281,11 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * Timestamp
 	 **/
 	private Timestamp timestamp;
+
+	/**
+	 * Image
+	 **/
+	private String image;
 
 	@Override
 	@XmlTransient
@@ -668,6 +679,24 @@ public class ListAttributes extends AbstractPersistentBean {
 	public void setTimestamp(Timestamp timestamp) {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;
+	}
+
+	/**
+	 * {@link #image} accessor.
+	 * @return	The value.
+	 **/
+	public String getImage() {
+		return image;
+	}
+
+	/**
+	 * {@link #image} mutator.
+	 * @param image	The new value.
+	 **/
+	@XmlElement
+	public void setImage(String image) {
+		preset(imagePropertyName, image);
+		this.image = image;
 	}
 
 	/**

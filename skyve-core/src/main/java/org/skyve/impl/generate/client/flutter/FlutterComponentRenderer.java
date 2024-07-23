@@ -181,8 +181,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
         return result;
     }
 	
-    private String deriveActionType(ImplicitActionName implicitName) {
-
+    private static String deriveActionType(ImplicitActionName implicitName) {
         return Optional.ofNullable(implicitName)
                        .map(ImplicitActionName::name)
                        .orElse(" ");

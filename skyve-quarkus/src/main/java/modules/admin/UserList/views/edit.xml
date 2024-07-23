@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="admin.userList.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="admin.userList.edit.users.tabTitle">
+			<listGrid continueConversation="false" query="qUsers"></listGrid>
+		</tab>
+		<tab title="admin.userList.edit.inviteUsers.tabTitle">
+			<component document="Configuration" name="_emailNotConfiguredBanner" />
+			<vbox border="true" borderTitle="admin.userList.edit.userInvitations.borderTitle" >
+				<form>
+					<column />
+					<row>
+						<item>
+							<blurb>{i18n:admin.userList.edit.blurb1}</blurb>
+						</item>
+					</row>
+				</form>
+				<vbox percentageHeight="40">
+					<listMembership binding="userInvitationGroups" candidatesHeading="Available Groups" membersHeading="Assigned Groups" />
+				</vbox>
+				<form>
+					<column />
+					<row>
+						<item>
+							<blurb>{i18n:admin.userList.edit.blurb2}</blurb>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column />
+					<row>
+						<item showLabel="false" colspan="2">
+							<textArea binding="userInvitiationEmailList" pixelHeight="200" />
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<row>
+						<item>
+							<blurb>{i18n:admin.userList.edit.blurb3}</blurb>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item colspan="2">
+							<combo binding="defaultModuleName">
+								<onChangedHandlers>
+									<rerender clientValidation="false" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+				</form>
+				<form>
+					<column />
+					<column />
+					<row>
+						<item>
+							<button action="InviteUsers" pixelWidth="250" />
+						</item>
+						<item>
+							<button action="CreateUsers" pixelWidth="250" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</tab>
+	</tabPane>
+	<actions>
+		<action className="InviteUsers" displayName="admin.userList.actions.inviteUsers.displayName" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+			confirm="Ok to create users and send each user an invitation?" />
+		<action className="CreateUsers" displayName="admin.userList.actions.createUsers.displayName" iconStyleClass="fa fa-user-plus" inActionPanel="false" 
+			confirm="Ok to create the users (no invitation email will be sent)?" />
+	</actions>
+</view>

@@ -2,8 +2,6 @@ package org.skyve.metadata.model;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlType;
-
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
@@ -18,6 +16,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * 
@@ -75,13 +75,64 @@ public interface Attribute extends NamedMetaData {
 		domain, view, both
 	}
 	
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public enum Sensitivity {	
+		/**
+		 * Data is freely available and does not require any special security measures. 
+		 * This data can be openly shared with anyone without the need for additional precautions.
+		 */
+		none,
+		
+		/**
+		 * Internal data is only intended for use within an organisation, and can include things
+		 * like the employee handbook, company policies, and certain company-wide communications.
+		 * Though it should remain private, if this type of information were to be public, the
+		 * repercussions would be minimal.
+		 */
+		internal, 
+		
+		/**
+		 * Confidential data must be kept within the organisation and should only be accessed by
+		 * authorised personnel. It can include information like pricing details, promotional
+		 * materials, or contact information. If this type of data were to be disclosed, it could
+		 * damage the company or brand.
+		 */
+		confidential,
+		
+		/**
+		 * Restricted data requires the highest level of protection and access must be limited to
+		 * necessary personnel. Often protected by a Non-Disclosure-Agreement (NDA), restricted
+		 * data can include trade secrets and medical records - which is especially important in
+		 * the context of privacy.
+		 */
+		restricted, 
+		
+		/**
+		 * `Personally Identifiable Information' (PII) means any information relating to an identified
+		 * or identifiable natural person. Under this definition, personal data includes phone number,
+		 * physical address, driver's license number, license plate number, social security number,
+		 * IP address, bank account, location data, utility records, work hours/performance, biometric
+		 * data. Personal data can include information like someone's name (a direct identifier) or
+		 * physical characteristics (an indirect identifier). Ultimately, personal data is any
+		 * information that can identify an individual - whether it is used independently or in tandem
+		 * with other data.
+		 */
+		personal,
+		
+		/**
+		 * Applies when compromise might reasonably cause serious injury e.g., passwords, credit card
+		 * details.
+		 */
+		secret
+	}
+	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getDisplayName();
+	String getDisplayName();
 	
-	public default String getLocalisedDisplayName() {
+	default String getLocalisedDisplayName() {
 		return Util.i18n(getDisplayName());
 	}
 	
@@ -89,9 +140,9 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getDescription();
+	String getDescription();
 	
-	public default String getLocalisedDescription() {
+	default String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 
@@ -99,51 +150,63 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public AttributeType getAttributeType();
+	AttributeType getAttributeType();
+	
+	/**
+	 * Fields are scalar (a single value), Relations are not.
+	 * @return	whether scalar.
+	 */
+	boolean isScalar();
 
 	/**
 	 * Informs the Skyve framework when to include and exclude the attributes.
 	 * @return	the usage.
 	 */
-	public UsageType getUsage();
+	UsageType getUsage();
+	
+	/**
+	 * Informs the Skyve framework when to redact information when performing backups.
+	 * @return	the data sensitivity.
+	 */
+	Sensitivity getSensitivity();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public boolean isPersistent();
+	boolean isPersistent();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public boolean isRequired();
+	boolean isRequired();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public DomainType getDomainType();
+	DomainType getDomainType();
 
 	/**
 	 * 
 	 * @return
 	 */
-	public boolean isDeprecated();
+	boolean isDeprecated();
 	
 	/**
 	 * Should mutations to this attribute be tracked and make the object "changed".
 	 * 
 	 * @return
 	 */
-	public boolean isTrackChanges();
+	boolean isTrackChanges();
 
 	/**
 	 * Should this attribute be audited.
 	 * 
 	 * @return
 	 */
-	public boolean isAudited();
+	boolean isAudited();
 
 	/**
 	 * Should the attribute have the transient java modifier added to its definition.
@@ -151,17 +214,17 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public boolean isTransient();
+	boolean isTransient();
 
 	/**
 	 * 
 	 * @return
 	 */
-	public InputWidget getDefaultInputWidget();
+	InputWidget getDefaultInputWidget();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getDocumentation();
+	String getDocumentation();
 }

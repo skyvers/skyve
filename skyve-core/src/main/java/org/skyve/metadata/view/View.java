@@ -3,9 +3,6 @@ package org.skyve.metadata.view;
 import java.util.Collection;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.UtilImpl;
@@ -15,6 +12,9 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * 

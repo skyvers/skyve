@@ -1,17 +1,16 @@
 package modules.admin.User.actions;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.User;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class GeneratePasswordActionTest extends AbstractH2Test {
-
+public class GeneratePasswordActionTest extends AbstractH2TestForJUnit4 {
 	@Test
 	@SuppressWarnings("static-method")
 	public void testExecuteGeneratesNewPassword() throws Exception {
@@ -29,5 +28,4 @@ public class GeneratePasswordActionTest extends AbstractH2Test {
 		assertThat(user.getGeneratedPassword(), is(notNullValue()));
 		assertThat(user.getConfirmPassword(), is(notNullValue()));
 	}
-
 }

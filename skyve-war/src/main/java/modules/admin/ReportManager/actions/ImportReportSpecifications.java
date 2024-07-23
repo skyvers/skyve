@@ -11,10 +11,12 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.persistence.DocumentQuery;
@@ -148,7 +150,15 @@ public class ImportReportSpecifications extends UploadAction<ReportManagerExtens
 			ReportTemplate newTemplate = (ReportTemplate) pb;
 			BeanValidator.validateBeanAgainstDocument(newTemplate);
 			BeanValidator.validateBeanAgainstBizlet(newTemplate);
-
+			
+			// validate no SQL dataset if this is a multi-tenant installation
+			if (UtilImpl.CUSTOMER == null) {
+				if (newTemplate.getDatasets().stream().anyMatch(d -> d.getDatasetType() == DatasetType.SQL)) {
+					throw new ValidationException("SQL dataset in report template " + newTemplate.getName()
+							+ " is not supported in multi-tenant applications");
+				}
+			}
+					
 			if (withRemove) {
 				removePreviousTemplate(newTemplate.getName());
 			} else {

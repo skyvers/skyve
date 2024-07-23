@@ -4,6 +4,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryDelegate;
@@ -29,34 +30,48 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
+import jakarta.annotation.Nonnull;
+
+/**
+ * Implements a repository that delegates to a list of other repository delegates in order.
+ * This is thread-safe for manipulating the list of delegates and the thread safety of the underlying delegated 
+ * repository methods depends on the implementations of the respective delegates.
+ * All ProvidedRepositoryDelegate implementations can call getDelegator() to recursively get the top of the
+ * delegating hierarchy to call repository functions on related meta-data.
+ */
 public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryDelegate {
-	protected List<ProvidedRepository> delegates;
+	/**
+	 * The list of delegate repositories.
+	 * This is a CopyOnWriteArrayList so that read operations are not synchronized and all 
+	 * delegate iterations will be safe from concurrent modifications by multiple threads.
+	 * This is a suitable choice as this is a small, stable, read-mostly collection.
+	 */
+	protected List<ProvidedRepository> delegates = new CopyOnWriteArrayList<>();
 	
-	public DelegatingProvidedRepositoryChain(ProvidedRepository... delegates) {
-		this.delegates = new ArrayList<>(delegates.length);
+	public DelegatingProvidedRepositoryChain(@Nonnull ProvidedRepository... delegates) {
 		for (ProvidedRepository delegate : delegates) {
 			addDelegate(delegate);
 		}
 	}
 
-	public synchronized void addDelegate(ProvidedRepository delegate) {
+	public void addDelegate(@Nonnull ProvidedRepository delegate) {
 		if (delegates.add(delegate)) {
 			delegate.setDelegator(this);
 		}
 	}
 
-	public synchronized void addDelegate(int index, ProvidedRepository delegate) {
+	public void addDelegate(int index, @Nonnull ProvidedRepository delegate) {
 		delegates.add(index, delegate);
 		delegate.setDelegator(this);
 	}
 
-	public synchronized void removeDelegate(ProvidedRepository delegate) {
+	public void removeDelegate(@Nonnull ProvidedRepository delegate) {
 		if (delegates.remove(delegate)) {
 			delegate.setDelegator(null);
 		}
 	}
 
-	public synchronized void removeDelegate(int index) {
+	public void removeDelegate(int index) {
 		ProvidedRepository delegate = delegates.remove(index);
 		if (delegate != null) {
 			delegate.setDelegator(null);

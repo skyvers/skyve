@@ -20,7 +20,7 @@ import org.skyve.web.UserAgentType;
 import modules.admin.domain.User;
 
 public class GenerateSAILSuite extends Job {
-	private static String baseSailXMLPath = "C:/_/skyve/skyve-ee/src/test/sail/";
+	private static String baseSailXMLPath = "C:/_/skyve/skyve-core/src/test/resources/schemas/";
 
 	@Override
 	public void execute() throws Exception {

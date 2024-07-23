@@ -1,5 +1,6 @@
 package org.skyve.impl.generate.jasperreports;
 
+import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -15,7 +16,7 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
     protected void addFields(DesignSpecification design) {
         super.addFields(design);
 
-        final Customer customer = design.getCustomer();
+        final Customer customer = CORE.getCustomer();
         final Document document = design.getDocument();
         for (Attribute a : document.getAttributes()) {
             if (!a.isDeprecated() && (a.isPersistent() || DesignSpecification.Mode.bean.equals(design.getMode()))) {
@@ -84,7 +85,6 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                 design.getBands().add(subReportDetail);
 
                 break;
-
             case report:
                 for (ReportField a : design.getFields()) {
                     if (!Attribute.AttributeType.collection.name().equals(a.getSkyveType()) && !Boolean.TRUE.equals(a.getImplicit())) {
@@ -115,10 +115,10 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                         // add value
                         type = ReportElement.ElementType.textField;
                         valueExpression = "$F{" + a.getName() + "}";
-                        int valueWidth = design.getColumnWidth().intValue() - labelWidth;
+                        int valueWidth = design.getColumnWidth().intValue() - labelWidth.intValue();
 
-                        detail = Renderer.addElement(detail, type, a.getName(), valueExpression, null, null, top, labelWidth, valueWidth, null, null, alignment, null,
-                                null, null, null, null);
+                        detail = Renderer.addElement(detail, type, a.getName(), valueExpression, null, null, top, labelWidth, Integer.valueOf(valueWidth),
+                        		null, null, alignment, null, null, null, null, null);
 
                         design.getBands().add(detail);
                     }
@@ -135,8 +135,8 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                     ReportElement eS = new ReportElement(ReportElement.ElementType.subreport,
                             sub.getField().getName(),
                             null,
-                            0,
-                            0,
+                            Integer.valueOf(0),
+                            Integer.valueOf(0),
                             design.getColumnWidth(),
                             null);
                     eS.setReportFileName(sub.getName());
@@ -153,6 +153,8 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                 }
 
                 break;
+            default:
+                throw new IllegalStateException(design.getReportType() + " not catered for");
         }
 
         ReportBand columnFooter = new ReportBand();
@@ -171,8 +173,8 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                         alignment = ReportElement.ElementAlignment.right;
                     }
 
-                    columnFooter = Renderer.addElement(columnFooter, ReportElement.ElementType.textField, a.getName(), valueExpression, null, null, 0, 0,
-                            0, null, null, alignment, design.getBoldLabels(), null, null, null, null);
+                    columnFooter = Renderer.addElement(columnFooter, ReportElement.ElementType.textField, a.getName(), valueExpression, null, null,
+                    		Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0), null, null, alignment, design.getBoldLabels(), null, null, null, null);
                 }
             }
             columnFooter.spreadElements();
@@ -185,9 +187,9 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
         ReportBand title = super.createTitleBand(design);
 
         if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
-            title = Renderer.addElement(title, ReportElement.ElementType.textField, "bizKey", Renderer.renderBoundMessage(design, "{bizKey}"), null, null, 0,
-                    0, design.getColumnWidth(),
-                    design.getDefaultElementHeight() * 2, null, ReportElement.ElementAlignment.center, Boolean.TRUE, null, null, null, null);
+            title = Renderer.addElement(title, ReportElement.ElementType.textField, "bizKey", Renderer.renderBoundMessage(design, "{bizKey}"), null, null,
+            		Integer.valueOf(0), Integer.valueOf(0), design.getColumnWidth(), Integer.valueOf(design.getDefaultElementHeight().intValue() * 2), 
+                    null, ReportElement.ElementAlignment.center, Boolean.TRUE, null, null, null, null);
 
             if (Boolean.TRUE.equals(design.getSectionBorderTop())
                     || Boolean.TRUE.equals(design.getSectionBorderLeft())
@@ -195,8 +197,9 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                     || Boolean.TRUE.equals(design.getSectionBorderRight())) {
 
                 // TODO implement borders as lines
-                title = Renderer.addElement(title, ReportElement.ElementType.border, null, null, null, null, 0, 0, design.getColumnWidth(),
-                        design.getDefaultElementHeight() * 2, null, null, null, null, null, null, null);
+                title = Renderer.addElement(title, ReportElement.ElementType.border, null, null, null, null,
+                		Integer.valueOf(0), Integer.valueOf(0), design.getColumnWidth(), Integer.valueOf(design.getDefaultElementHeight().intValue() * 2), 
+                        null, null, null, null, null, null, null);
             }
         }
 

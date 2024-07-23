@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DataMaintenance"
+			xmlns="http://www.skyve.org/xml/document"
+			xmlns:v="http://www.skyve.org/xml/view"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_DataMaintenance">
+		<cache>eternal</cache>
+	</persistent>
+	<singularAlias>Data Maintenance</singularAlias>
+	<pluralAlias>Data Maintenance</pluralAlias>
+	<iconStyleClass>fa fa-wrench</iconStyleClass>
+	<bizKey expression="Data Maintenance"/>
+	<attributes>
+		<text name="modDocName">
+			<displayName>admin.dataMaintenance.modDocName.displayName</displayName>
+			<domain>constant</domain>
+			<length>100</length>
+		</text>
+
+		<!-- Schema Truncation -->
+		<text name="confirmPassword" persistent="false" trackChanges="false" >
+			<displayName>admin.dataMaintenance.confirmPassword.displayName</displayName>
+			<length>50</length>
+		</text>
+		<boolean name="injectBootstrapUser">
+			<displayName>admin.dataMaintenance.injectBootstrapUser.displayName</displayName>
+		</boolean>
+		<text name="schemaName">
+			<displayName>admin.dataMaintenance.schemaName.displayName</displayName>
+			<length>1024</length>
+		</text>
+		
+		<!-- Data Refresh -->
+		<collection type="aggregation" persistent="false" audited="false" deprecated="false" name="refreshDocuments" ordered="true">
+			<displayName>admin.dataMaintenance.collection.refreshDocuments.displayName</displayName>
+			<domain>constant</domain>
+			<documentName>ModuleDocument</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="notification">
+			<displayName>admin.dataMaintenance.notification.displayName</displayName>
+		</boolean>
+		<memo name="ddlScript" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.ddlScript.displayName</displayName>
+		</memo>		
+		
+		<!-- Backup job parameters -->
+		<integer name="dailyBackupRetention">
+			<displayName>admin.dataMaintenance.dailyBackupRetention.displayName</displayName>
+		</integer>
+		<integer name="weeklyBackupRetention">
+			<displayName>admin.dataMaintenance.weeklyBackupRetention.displayName</displayName>
+		</integer>
+		<integer name="monthlyBackupRetention">
+			<displayName>admin.dataMaintenance.monthlyBackupRetention.displayName</displayName>
+		</integer>
+		<integer name="yearlyBackupRetention">
+			<displayName>admin.dataMaintenance.yearlyBackupRetention.displayName</displayName>
+		</integer>
+		
+		<!-- Restore parameters -->
+		<enum name="restorePreProcess">
+			<displayName>admin.dataMaintenance.restorePreProcess.displayName</displayName>
+			<domain>constant</domain>
+			<values>
+				<value code="noProcessing" description="No Processing" />
+				<value code="dropUsingMetadataAndCreateUsingBackup" description="Drop tables using metadata &amp; recreate tables from backup create.sql" />
+				<value code="dropUsingBackupAndCreateUsingBackup" description="Drop tables using backup drop.sql &amp; recreate tables from backup create.sql" />
+				<value code="dropUsingMetadataAndCreateUsingMetadata" description="Drop tables using metadata &amp; recreate tables from metadata" />
+				<value code="dropUsingBackupAndCreateUsingMetadata" description="Drop tables using backup drop.sql &amp; recreate tables from metadata" />
+				<value code="createUsingBackup" description="Create tables from backup" />
+				<value code="createUsingMetadata" description="Create tables from metadata" />
+				<value code="deleteData" description="Delete existing table data using metadata" />
+			</values>
+		</enum>
+		<enum name="contentRestoreOption">
+			<displayName>admin.dataMaintenance.contentRestoreOption.displayName</displayName>
+			<defaultValue>error</defaultValue>
+			<values>
+				<value code="clearOrphanedContentIds" description="Clear Orphaned Content IDs" />
+				<value code="saveOrphanedContentIds" description="Save Orphaned Content IDs" />
+				<value code="error" description="Error" />
+			</values>
+		</enum>
+		<enum name="restoreIndexingOption">
+			<displayName>admin.dataMaintenance.restoreIndexingOption.displayName</displayName>
+			<defaultValue>both</defaultValue>
+			<values>
+				<value code="data" description="Data" />
+				<value code="content" description="Content" />
+				<value code="both" description="Both" />
+				<value code="none" description="None" />
+			</values>
+		</enum>
+		<id name="selectedBackupName" persistent="false" trackChanges="false">
+			<displayName>admin.dataMaintenance.selectedBackupName.displayName</displayName>
+		</id>
+		<id name="selectedContentId" persistent="false" trackChanges="false">
+			<displayName>admin.dataMaintenance.selectedContentId.displayName</displayName>
+		</id>
+		<boolean name="refreshBackups" persistent="false" trackChanges="false">
+			<displayName>admin.dataMaintenance.refreshBackups.displayName</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<memo name="instructionHint" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.instructionHint.displayName</displayName>
+		</memo>
+		
+		<!-- Content -->
+		<boolean name="refreshContent" persistent="false" trackChanges="false">
+			<displayName>admin.dataMaintenance.refreshContent.displayName</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<memo name="contentLink" persistent="false" trackChanges="false">
+			<displayName>admin.dataMaintenance.contentLink.displayName</displayName>
+		</memo>
+		
+		<!-- Audit Truncation -->
+		<text name="auditModuleName">
+			<displayName>admin.dataMaintenance.auditModuleName.displayName</displayName>
+			<domain>constant</domain>
+			<length>128</length>
+		</text>
+		<text name="auditDocumentName">
+			<displayName>admin.dataMaintenance.auditDocumentName.displayName</displayName>
+			<domain>dynamic</domain>
+			<length>128</length>
+		</text>
+		<enum name="auditOperation" documentRef="Audit" attributeRef="operation">
+			<displayName>admin.dataMaintenance.auditOperation.displayName</displayName>
+		</enum>
+		<timestamp name="auditTimestampStart">
+			<displayName>admin.dataMaintenance.auditTimestampStart.displayName</displayName>
+		</timestamp>
+		<timestamp name="auditTimestampEnd">
+			<displayName>admin.dataMaintenance.auditTimestampEnd.displayName</displayName>
+		</timestamp>
+		<association type="aggregation" name="auditUser">
+			<displayName>admin.dataMaintenance.association.auditUser.displayName</displayName>
+			<documentName>UserProxy</documentName>
+		</association>
+		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.auditMatchCount.displayName</displayName>
+		</integer>
+		<memo name="auditResponse" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.auditResponse.displayName</displayName>
+		</memo>
+
+		<!-- Data Refresh -->
+		<enum name="refreshOption" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.refreshOption.displayName</displayName>
+			<values>
+				<value code="Upsert"/>
+				<value code="Save"/>
+			</values>
+		</enum>
+		<enum name="evictOption" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.evictOption.displayName</displayName>
+			<description><![CDATA[admin.dataMaintenance.evictOption.description]]></description>			
+			<defaultValue>bean</defaultValue>
+			<values>
+				<value code="Bean" />
+				<value code="None" />
+				<value code="All" />
+			</values>
+		</enum>
+		<boolean name="flagFailed" persistent="false" trackChanges="false" audited="false">
+			<displayName>admin.dataMaintenance.flagFailed.displayName</displayName>
+			<description>admin.dataMaintenance.flagFailed.description</description>
+			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
+			<defaultValue>false</defaultValue>
+		</boolean>
+	</attributes>
+	<conditions>
+		<condition name="backupSelected">
+			<description>Backup Selected</description>
+			<expression>
+				<![CDATA[
+					selectedBackupName != null
+				]]>
+			</expression>
+		</condition>
+		<condition name="backupsRefreshRequired">
+			<description>Refresh Backups</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(refreshBackups)
+				]]>
+			</expression>
+		</condition>
+		<condition name="contentSelected">
+			<description>Content Selected</description>
+			<expression>
+				<![CDATA[
+					selectedContentId != null
+				]]>
+			</expression>
+		</condition>
+		<condition name="contentRefreshRequired">
+			<description>Content Refresh Required</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(refreshContent)
+				]]>
+			</expression>
+		</condition>
+		<condition name="attachmentSelected">
+			<description>Attachment Selected</description>
+			<expression>
+				<![CDATA[
+					contentLink != null
+				]]>
+			</expression>
+		</condition>
+		<condition name="auditManager">
+			<description>Current user is in the role "Audit Manager"</description>
+			<expression>
+				<![CDATA[
+				isUserInRole("admin","AuditManager")
+				]]>
+			</expression>
+		</condition>
+		<condition name="jobCommenced">
+			<description>Truncation Job has commenced.</description>
+			<expression>
+				<![CDATA[
+				auditResponse!=null
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

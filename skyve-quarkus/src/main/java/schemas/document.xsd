@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/document" xmlns:tns="http://www.skyve.org/xml/document" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common">
+
+  <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
+
+  <xs:import namespace="http://www.skyve.org/xml/view" schemaLocation="view.xsd"/>
+
+  <xs:element name="association" type="tns:association"/>
+
+  <xs:element name="boolean" type="tns:boolean"/>
+
+  <xs:element name="collection" type="tns:collection"/>
+
+  <xs:element name="colour" type="tns:colour"/>
+
+  <xs:element name="content" type="tns:content"/>
+
+  <xs:element name="date" type="tns:date"/>
+
+  <xs:element name="dateTime" type="tns:dateTime"/>
+
+  <xs:element name="dateValidator" type="tns:dateValidator"/>
+
+  <xs:element name="decimal10" type="tns:decimal10"/>
+
+  <xs:element name="decimal2" type="tns:decimal2"/>
+
+  <xs:element name="decimal5" type="tns:decimal5"/>
+
+  <xs:element name="decimalValidator" type="tns:decimalValidator"/>
+
+  <xs:element name="document" type="tns:document"/>
+
+  <xs:element name="dynamic" type="tns:dynamic"/>
+
+  <xs:element name="enum" type="tns:enumeration"/>
+
+  <xs:element name="extends" type="tns:extends"/>
+
+  <xs:element name="format" type="tns:textFormat"/>
+
+  <xs:element name="geometry" type="tns:geometry"/>
+
+  <xs:element name="id" type="tns:id"/>
+
+  <xs:element name="image" type="tns:image"/>
+
+  <xs:element name="integer" type="tns:integer"/>
+
+  <xs:element name="integerValidator" type="tns:integerValidator"/>
+
+  <xs:element name="inverseMany" type="tns:inverseMany"/>
+
+  <xs:element name="inverseOne" type="tns:inverseOne"/>
+
+  <xs:element name="longInteger" type="tns:longInteger"/>
+
+  <xs:element name="longValidator" type="tns:longValidator"/>
+
+  <xs:element name="markup" type="tns:markup"/>
+
+  <xs:element name="memo" type="tns:memo"/>
+
+  <xs:element name="persistent" type="tns:persistent"/>
+
+  <xs:element name="text" type="tns:text"/>
+
+  <xs:element name="textValidator" type="tns:textValidator"/>
+
+  <xs:element name="time" type="tns:time"/>
+
+  <xs:element name="timestamp" type="tns:timestamp"/>
+
+  <xs:complexType name="document">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element ref="tns:extends" minOccurs="0"/>
+          <xs:element name="abstract" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element ref="tns:persistent" minOccurs="0"/>
+          <xs:element ref="tns:dynamic" minOccurs="0"/>
+          <xs:element name="singularAlias" type="xs:string" form="qualified"/>
+          <xs:element name="pluralAlias" type="xs:string" form="qualified"/>
+          <xs:element name="audited" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="iconStyleClass" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="icon16x16RelativeFilePath" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="icon32x32RelativeFilePath" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="parentDocument" type="tns:parentDocument" form="qualified" minOccurs="0"/>
+          <xs:element name="bizKey" type="tns:bizKey" form="qualified" minOccurs="0"/>
+          <xs:element name="implements" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="interface" type="tns:interfaceImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="attributes" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:text"/>
+                  <xs:element ref="tns:date"/>
+                  <xs:element ref="tns:time"/>
+                  <xs:element ref="tns:dateTime"/>
+                  <xs:element ref="tns:timestamp"/>
+                  <xs:element ref="tns:integer"/>
+                  <xs:element ref="tns:longInteger"/>
+                  <xs:element ref="tns:decimal2"/>
+                  <xs:element ref="tns:decimal5"/>
+                  <xs:element ref="tns:decimal10"/>
+                  <xs:element ref="tns:boolean"/>
+                  <xs:element ref="tns:enum"/>
+                  <xs:element ref="tns:memo"/>
+                  <xs:element ref="tns:markup"/>
+                  <xs:element ref="tns:colour"/>
+                  <xs:element ref="tns:content"/>
+                  <xs:element ref="tns:image"/>
+                  <xs:element ref="tns:association"/>
+                  <xs:element ref="tns:collection"/>
+                  <xs:element ref="tns:inverseOne"/>
+                  <xs:element ref="tns:inverseMany"/>
+                  <xs:element ref="tns:geometry"/>
+                  <xs:element ref="tns:id"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="conditions" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="condition" type="tns:condition" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="uniqueConstraints" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="constraint" type="tns:DocumentUniqueConstraint" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="extends">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="persistent">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="cache" type="xs:string" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="schema" type="xs:string"/>
+        <xs:attribute name="catalog" type="xs:string"/>
+        <xs:attribute name="strategy" type="tns:extensionStrategy"/>
+        <xs:attribute name="discriminator" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dynamic">
+    <xs:sequence>
+      <xs:element name="actions" type="tns:dynamicClassMapType" form="qualified" minOccurs="0"/>
+      <xs:element name="images" type="tns:dynamicClassMapType" form="qualified" minOccurs="0"/>
+      <xs:element name="models" type="tns:dynamicClassMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="bizletClassName" type="xs:string"/>
+    <xs:attribute name="dataFactoryClassName" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="dynamicClassMapType" final="extension restriction">
+    <xs:sequence>
+      <xs:element name="class" type="tns:dynamicClassMapEntryType" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="dynamicClassMapEntryType" final="extension restriction">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="className" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="parentDocument">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="databaseIndex" type="xs:boolean"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="bizKey">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="expression" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="interfaceImpl">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:complexType name="text">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="length" type="xs:int" form="qualified"/>
+          <xs:element ref="tns:format" minOccurs="0"/>
+          <xs:element name="validator" type="tns:textValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="convertableField">
+    <xs:complexContent>
+      <xs:extension base="tns:constrainableField">
+        <xs:sequence>
+          <xs:element name="converterName" type="ns1:converterName" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="constrainableField">
+    <xs:complexContent>
+      <xs:extension base="tns:field">
+        <xs:sequence>
+          <xs:element name="domain" type="tns:domainType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="field" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAttribute">
+        <xs:sequence>
+          <xs:element name="dynamic" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="defaultValue" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="index" type="tns:indexType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="persistent" type="xs:boolean"/>
+        <xs:attribute name="required" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractAttribute" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="displayName" type="xs:string" form="qualified"/>
+          <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="defaultWidget" type="ns2:widgetReference" form="qualified" minOccurs="0"/>
+          <xs:element name="transient" type="xs:boolean" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="deprecated" type="xs:boolean"/>
+        <xs:attribute name="trackChanges" type="xs:boolean"/>
+        <xs:attribute name="audited" type="xs:boolean"/>
+        <xs:attribute name="usage" type="tns:usageType"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="textFormat">
+    <xs:sequence/>
+    <xs:attribute name="case" type="tns:textCase"/>
+    <xs:attribute name="mask" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="textValidator">
+    <xs:complexContent>
+      <xs:extension base="tns:fieldValidator">
+        <xs:sequence/>
+        <xs:attribute name="regularExpression" type="xs:string"/>
+        <xs:attribute name="type" type="tns:validatorType"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="fieldValidator" abstract="true">
+    <xs:sequence/>
+    <xs:attribute name="validationMessage" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="date">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dateValidator">
+    <xs:complexContent>
+      <xs:extension base="tns:rangeValidator">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="rangeValidator" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:fieldValidator">
+        <xs:sequence/>
+        <xs:attribute name="max" type="xs:string"/>
+        <xs:attribute name="min" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="time">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dateTime">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="timestamp">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="integer">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:integerValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="integerValidator">
+    <xs:complexContent>
+      <xs:extension base="tns:rangeValidator">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="longInteger">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:longValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="longValidator">
+    <xs:complexContent>
+      <xs:extension base="tns:rangeValidator">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="decimal2">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:decimalValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="decimalValidator">
+    <xs:complexContent>
+      <xs:extension base="tns:rangeValidator">
+        <xs:sequence/>
+        <xs:attribute name="precision" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="decimal5">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:decimalValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="decimal10">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence>
+          <xs:element name="validator" type="tns:decimalValidator" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="boolean">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="enumeration">
+    <xs:complexContent>
+      <xs:extension base="tns:constrainableField">
+        <xs:sequence>
+          <xs:element name="values" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="tns:enumeratedValue" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="typeName" type="xs:string"/>
+        <xs:attribute name="implementingEnumClassName" type="xs:string"/>
+        <xs:attribute name="moduleRef" type="xs:string"/>
+        <xs:attribute name="documentRef" type="xs:string"/>
+        <xs:attribute name="attributeRef" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="enumeratedValue">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="code" type="xs:string" use="required"/>
+    <xs:attribute name="description" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="memo">
+    <xs:complexContent>
+      <xs:extension base="tns:constrainableField">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="markup">
+    <xs:complexContent>
+      <xs:extension base="tns:memo">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="colour">
+    <xs:complexContent>
+      <xs:extension base="tns:convertableField">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="content">
+    <xs:complexContent>
+      <xs:extension base="tns:constrainableField">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="image">
+    <xs:complexContent>
+      <xs:extension base="tns:content">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="association">
+    <xs:complexContent>
+      <xs:extension base="tns:referenceImpl">
+        <xs:sequence>
+          <xs:element name="databaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="required" type="xs:boolean"/>
+        <xs:attribute name="type" type="tns:associationType" use="required"/>
+        <xs:attribute name="embeddedColumnsPrefix" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="referenceImpl" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAttribute">
+        <xs:sequence>
+          <xs:element name="domain" type="tns:domainType" form="qualified" minOccurs="0"/>
+          <xs:element name="documentName" type="xs:string" form="qualified"/>
+          <xs:element name="queryName" type="xs:string" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="persistent" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="collection">
+    <xs:complexContent>
+      <xs:extension base="tns:referenceImpl">
+        <xs:sequence>
+          <xs:element name="minCardinality" type="xs:int" form="qualified"/>
+          <xs:element name="maxCardinality" type="xs:int" form="qualified" minOccurs="0"/>
+          <xs:element name="ordering" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="order" type="tns:ordering" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="unique" type="tns:CollectionUniqueConstraint" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="ownerDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="elementDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="cache" type="xs:string" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="tns:collectionType" use="required"/>
+        <xs:attribute name="ordered" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="ordering" final="extension restriction">
+    <xs:sequence/>
+    <xs:attribute name="sort" type="ns1:sortDirection" use="required"/>
+    <xs:attribute name="by" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="CollectionUniqueConstraint">
+    <xs:sequence>
+      <xs:element name="message" type="xs:string" form="qualified"/>
+      <xs:element name="fieldReferences" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ref" type="xs:string" form="qualified" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="description" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="inverseOne">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractInverse">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractInverse" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAttribute">
+        <xs:sequence>
+          <xs:element name="domain" type="tns:domainType" form="qualified" minOccurs="0"/>
+          <xs:element name="documentName" type="xs:string" form="qualified"/>
+          <xs:element name="referenceName" type="xs:string" form="qualified"/>
+        </xs:sequence>
+        <xs:attribute name="cascade" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="inverseMany">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractInverse">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="geometry">
+    <xs:complexContent>
+      <xs:extension base="tns:field">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="id">
+    <xs:complexContent>
+      <xs:extension base="tns:field">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="condition">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="expression" type="xs:string" form="qualified"/>
+        </xs:sequence>
+        <xs:attribute name="usage" type="tns:usageType"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="DocumentUniqueConstraint">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="message" type="xs:string" form="qualified"/>
+          <xs:element name="fieldReferences" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="ref" type="tns:fieldReference" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="scope" type="tns:documentScope" use="required"/>
+        <xs:attribute name="description" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="fieldReference">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="extensionStrategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="single"/>
+      <xs:enumeration value="joined"/>
+      <xs:enumeration value="mapped"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="textCase">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="upper"/>
+      <xs:enumeration value="lower"/>
+      <xs:enumeration value="capital"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="validatorType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="ibanCheckDigit"/>
+      <xs:enumeration value="ipAddress"/>
+      <xs:enumeration value="ipv4Address"/>
+      <xs:enumeration value="isbnCheckDigit"/>
+      <xs:enumeration value="isinCheckDigit"/>
+      <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="domainType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="constant"/>
+      <xs:enumeration value="variant"/>
+      <xs:enumeration value="dynamic"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="indexType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="database"/>
+      <xs:enumeration value="textual"/>
+      <xs:enumeration value="both"/>
+      <xs:enumeration value="none"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="usageType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="domain"/>
+      <xs:enumeration value="view"/>
+      <xs:enumeration value="both"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="associationType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
+      <xs:enumeration value="embedded"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="collectionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="child"/>
+      <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="documentScope">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="global"/>
+      <xs:enumeration value="customer"/>
+      <xs:enumeration value="dataGroup"/>
+      <xs:enumeration value="user"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

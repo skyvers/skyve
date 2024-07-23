@@ -1,6 +1,5 @@
 package org.skyve.impl.metadata.repository;
 
-import java.beans.Introspector;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +18,7 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
+import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.customer.CustomerModuleRoleMetaData;
@@ -40,6 +40,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Inverse;
@@ -60,8 +61,12 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.ExpressionEvaluator;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Do not instantiate directly, use CORE.getRepository().
@@ -73,11 +78,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 		super();
 	}
 
-	public LocalDesignRepository(String absolutePath) {
+	public LocalDesignRepository(@Nonnull String absolutePath) {
 		super(absolutePath);
 	}
 
-	public LocalDesignRepository(String absolutePath, boolean loadClasses) {
+	public LocalDesignRepository(@Nonnull String absolutePath, boolean loadClasses) {
 		super(absolutePath, loadClasses);
 	}
 
@@ -131,7 +136,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 		}
 	}
 
-	private static void removeInaccessibleItems(String moduleName, Menu menu, User user) {
+	private static void removeInaccessibleItems(@Nonnull String moduleName, @Nonnull Menu menu, @Nonnull User user) {
 		// Check all the child items to see if we have access
 		Iterator<MenuItem> i = menu.getItems().iterator();
 		while (i.hasNext()) {
@@ -185,8 +190,10 @@ public class LocalDesignRepository extends FileSystemRepository {
 			throw new MetaDataException("Home Module reference does not reference a module in customer " + customer.getName(), e);
 		}
 
+		CustomerImpl customerImpl = (CustomerImpl) customer;
+		
 		// NB Module entry names (keys) are in defined order
-		for (Entry<String, FormLabelLayout> moduleEntry : ((CustomerImpl) customer).getModuleEntries().entrySet()) {
+		for (Entry<String, FormLabelLayout> moduleEntry : customerImpl.getModuleEntries().entrySet()) {
 			String moduleName = moduleEntry.getKey();
 			FormLabelLayout formLabelLayout = moduleEntry.getValue();
 
@@ -227,6 +234,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 			}
 		}
+		
+		// Validate text search roles point to valid module roles
+		validateFeatureRoles(customer, customerImpl.getTextSearchRoles());
+		
+		// Validate flag roles point to valid module roles
+		validateFeatureRoles(customer, customerImpl.getFlagRoles());
+		
+		// Validate switch mode roles point to valid module roles
+		validateFeatureRoles(customer, customerImpl.getSwitchModeRoles());
 		
 		// TODO check the converter type corresponds to the type required.
 	}
@@ -362,7 +378,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 			// Check modelAggregate and previousComplete UserAccesses
 			for (UserAccess access : roleImpl.getAccesses().keySet()) {
 				if (access.isModelAggregate()) {
-/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
 					Document accessDocument = module.getDocument(customer, access.getDocumentName());
 					try {
 						getModel(customer, accessDocument, access.getComponent(), false);
@@ -374,9 +389,21 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" which does not exist.",
 														e);
 					}
-*/
 				}
-				else if (access.isPreviousComplete()) {
+				else if (access.isDynamicImage()) {
+					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					try {
+						getDynamicImage(customer, accessDocument, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" is for dynamic image " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+				}
+				else if (access.isPreviousComplete() || access.isContent()) {
 					Document accessDocument = module.getDocument(customer, access.getDocumentName());
 					String binding = access.getComponent();
 					try {
@@ -389,11 +416,24 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" is not a valid binding.", e);
 					}
 				}
+				else if (access.isReport()) {
+					String reportModuleName = access.getModuleName();
+					String reportDocumentName = access.getDocumentName();
+					String reportName = access.getComponent();
+					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
+					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module " + module.getName() +
+														" for module/document/report " + reportModuleName + "/" +
+														reportDocumentName + "/" + reportName +
+														" does not exist.");
+					}
+				}
 			}
 		}
 	}
 
-	private void checkMenu(List<MenuItem> items, Customer customer, Module module) {
+	private void checkMenu(@Nonnull List<MenuItem> items, @Nullable Customer customer, @Nonnull Module module) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup) {
 				checkMenu(((MenuGroup) item).getItems(), customer, module);
@@ -412,12 +452,20 @@ public class LocalDesignRepository extends FileSystemRepository {
 															" is for document " + documentName +
 															" which does not exist.", e);
 						}
-						// NB EditItem can be to a transient document
-						if ((! (item instanceof EditItem)) && (document.getPersistent() == null)) {
-							throw new MetaDataException("Menu [" + item.getName() + 
-															"] in module " + module.getName() +
-															" is for document " + documentName +
-															" which is not persistent.");
+						// NB Only EditItems or ListModel ListItems can be to a transient document
+						if (document.getPersistent() == null) { // non-persistent document
+							boolean listModelItem = false;
+							if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
+								AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+								listModelItem = (dataItem.getQueryName() == null) && (dataItem.getModelName() != null);
+							}
+							boolean editItem = (item instanceof EditItem);
+							if (! (listModelItem || editItem)) {
+								throw new MetaDataException("Menu [" + item.getName() + 
+																"] in module " + module.getName() +
+																" is for document " + documentName +
+																" which is not persistent.");
+							}
 						}
 					}
 
@@ -437,20 +485,24 @@ public class LocalDesignRepository extends FileSystemRepository {
 							document = module.getDocument(customer, documentName);
 						}
 						
-						// TODO check list/tree/calendar model names
-						String modelName = ((AbstractDocumentOrQueryOrModelMenuItem) item).getModelName();
+						String modelName = dataItem.getModelName();
 						if (modelName != null) {
-							if (item instanceof MapItem) {
-								try {
+							try {
+								if (item instanceof ListItem) { // includes TreeItem
+									ListModel<Bean> model = getListModel(customer, document, modelName, false);
+									// Check driving document can be obtained to ensure bindings and accesses can be calculated
+									model.getDrivingDocument();
+								}
+								else if (item instanceof MapItem) {
 									getMapModel(customer, document, modelName, false);
 								}
-								catch (Exception e) {
-									throw new MetaDataException("Menu [" + item.getName() + 
-																	"] in module " + module.getName() +
-																	" is for model " + modelName +
-																	" which does not exist.",
-																	e);
-								}
+							}
+							catch (Exception e) {
+								throw new MetaDataException("Menu [" + item.getName() + 
+																"] in module " + module.getName() +
+																" is for model " + documentName + '.' + modelName +
+																" which does not exist or cannot be instantiated.",
+																e);
 							}
 						}
 						
@@ -511,7 +563,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 			}
 		}
 	}
-	
+
 	@Override
 	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
@@ -519,17 +571,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 		// Check conditions
 		for (String conditionName : document.getConditionNames()) {
-			// Check that conditions do not start with is or not and are a valid java bean property
-			if (conditionName.startsWith("is")) {
-				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'is' - the 'is' prefix is generated in the bean method.");
-			}
-			else if (conditionName.startsWith("not")) {
-				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'not' - not conditions are automatically generated.  Switch the sense of the condition.");
-			}
-			if (! conditionName.equals(Introspector.decapitalize(conditionName))) {
-				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " is not a valid property name - should be camel capitalized unless it's an initialism/acronym.");
-			}
-
 			// Check expression conditions
 			Condition condition = document.getCondition(conditionName);
 			String expression = condition.getExpression();
@@ -582,11 +623,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 			// TODO for all composition collections (ie reference a document that has a parentDocument = to this one) - no queryName is defined on the collection.
 			// TODO for all aggregation collections (ie reference a document that has does not have a parentDocument = to this one {or parentDocument is not defined}) - a queryName must be defined on the collection.
 
-			String name = attribute.getName();
-			if (! name.equals(Introspector.decapitalize(name))) {
-				throw new MetaDataException("Attribute " + name + " in document " + documentIdentifier + " is not a valid property name - should be camel capitalized unless it's an initialism/acronym.");
-			}
-			
 			if (attribute instanceof Field) {
 				// Check the default value expressions, if defined
 				String defaultValue = ((Field) attribute).getDefaultValue();
@@ -660,6 +696,27 @@ public class LocalDesignRepository extends FileSystemRepository {
 														reference.getName() + " in document " + 
 														documentIdentifier + " references a document query for document " + 
 														queryDocumentName + ", not document " + targetDocumentName);
+					}
+				}
+				
+				// Check collection order by bindings are valid
+				if (reference instanceof Collection) {
+					Module targetModule = getModule(customer, targetDocument.getOwningModuleName());
+					Collection collection = (Collection) reference;
+					for (Ordering ordering : collection.getOrdering()) {
+						String by = ordering.getBy();
+						TargetMetaData target = null; 
+						try {
+							target = BindUtil.validateBinding(customer, targetModule, targetDocument, by);
+						}
+						catch (MetaDataException e) {
+							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
+															" in document " +  documentIdentifier + " is invalid", e);
+						}
+						if (! BindUtil.isAScalarType(target.getType())) {
+							throw new MetaDataException("The order by binding of " + by + " in collection " + collection.getName() +
+															" in document " +  documentIdentifier + " is not scalar.");
+						}
 					}
 				}
 				
@@ -755,22 +812,33 @@ public class LocalDesignRepository extends FileSystemRepository {
 		if (accesses != null) { // can be null if access control is turned off
 			for (UserAccess access : accesses) {
 				if (access.isModelAggregate()) {
-/* TODO can't create models here as it relies on Skyve services like CORE.getPersistence() in model constructors - maybe this should check for class loading only
 					try {
 						getModel(customer, document, access.getComponent(), false);
 					}
 					catch (Exception e) {
-						throw new MetaDataException(""User Access [" + access.toString() + 
+						throw new MetaDataException("User Access [" + access.toString() + 
 														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
 														" in view " + view.getName() +
 														" is for model " + access.getComponent() +
 														" which does not exist.",
 														e);
 					}
-*/
 				}
-				else if (access.isPreviousComplete()) {
-					final Module module = customer.getModule(document.getOwningModuleName());
+				else if (access.isDynamicImage()) {
+					try {
+						getDynamicImage(customer, document, access.getComponent(), false);
+					}
+					catch (Exception e) {
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module.document " + document.getOwningModuleName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" is for dynamic image " + access.getComponent() +
+														" which does not exist.",
+														e);
+					}
+				}
+				else if (access.isPreviousComplete() || access.isContent()) {
+					final Module module = getModule(customer, document.getOwningModuleName());
 					final String binding = access.getComponent();
 					try {
 						BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -783,6 +851,44 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" is not a valid binding.", e);
 					}
 				}
+				else if (access.isReport()) {
+					String reportModuleName = access.getModuleName();
+					String reportDocumentName = access.getDocumentName();
+					String reportName = access.getComponent();
+					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
+					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
+						final Module module = getModule(customer, document.getOwningModuleName());
+						throw new MetaDataException("User Access [" + access.toString() + 
+														"] in module.document " + module.getName() + '.' + document.getName() +
+														" in view " + view.getName() +
+														" for module/document/report " + reportModuleName + "/" +
+														reportDocumentName + "/" + reportName +
+														" does not exist.");
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Validates feature roles point to valid module roles.
+	 * 
+	 * We don't need to check the module name of the role as this is checked when the metadata 
+	 * is converted and we know all module names are correct from the validation performed prior.
+	 * 
+	 * @param customer
+	 * @param featureRoles
+	 */
+	private void validateFeatureRoles(Customer customer, Set<String> featureRoles) {
+		for (String textSearchModuleRole : featureRoles) {
+			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
+			String moduleName = moduleAndRoleName[0];
+			Module module = getModule(customer, moduleName);
+			String roleName = moduleAndRoleName[1];
+			if (module.getRole(roleName) == null) {
+				throw new MetaDataException("Module role " + roleName + 
+						" for module " + moduleName +
+						" does not reference a valid module role");
 			}
 		}
 	}

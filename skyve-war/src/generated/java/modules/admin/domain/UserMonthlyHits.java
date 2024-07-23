@@ -1,13 +1,14 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
@@ -23,6 +24,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public class UserMonthlyHits extends AbstractPersistentBean {
 	/**
 	 * For Serialization
@@ -40,10 +42,10 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	public static final String userNamePropertyName = "userName";
 
 	/** @hidden */
-	public static final String yearPropertyName = "year";
+	public static final String hitYearPropertyName = "hitYear";
 
 	/** @hidden */
-	public static final String monthPropertyName = "month";
+	public static final String hitMonthPropertyName = "hitMonth";
 
 	/** @hidden */
 	public static final String userAgentHeaderPropertyName = "userAgentHeader";
@@ -58,6 +60,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	 * Device
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum Device implements Enumeration {
 		phone("P", "Phone"),
 		tablet("T", "Tablet"),
@@ -133,12 +136,12 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	/**
 	 * Year
 	 **/
-	private Integer year;
+	private Integer hitYear;
 
 	/**
 	 * Month
 	 **/
-	private Integer month;
+	private Integer hitMonth;
 
 	/**
 	 * User-Agent Header
@@ -183,7 +186,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizKey() {
 		try {
-			return org.skyve.util.Binder.formatMessage("{userName} - {year}/{month} = {numberOfHits}", this);
+			return org.skyve.util.Binder.formatMessage("{userName} - {hitYear}/{hitMonth} = {numberOfHits}", this);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "Unknown";
@@ -215,39 +218,39 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #year} accessor.
+	 * {@link #hitYear} accessor.
 	 * @return	The value.
 	 **/
-	public Integer getYear() {
-		return year;
+	public Integer getHitYear() {
+		return hitYear;
 	}
 
 	/**
-	 * {@link #year} mutator.
-	 * @param year	The new value.
+	 * {@link #hitYear} mutator.
+	 * @param hitYear	The new value.
 	 **/
 	@XmlElement
-	public void setYear(Integer year) {
-		preset(yearPropertyName, year);
-		this.year = year;
+	public void setHitYear(Integer hitYear) {
+		preset(hitYearPropertyName, hitYear);
+		this.hitYear = hitYear;
 	}
 
 	/**
-	 * {@link #month} accessor.
+	 * {@link #hitMonth} accessor.
 	 * @return	The value.
 	 **/
-	public Integer getMonth() {
-		return month;
+	public Integer getHitMonth() {
+		return hitMonth;
 	}
 
 	/**
-	 * {@link #month} mutator.
-	 * @param month	The new value.
+	 * {@link #hitMonth} mutator.
+	 * @param hitMonth	The new value.
 	 **/
 	@XmlElement
-	public void setMonth(Integer month) {
-		preset(monthPropertyName, month);
-		this.month = month;
+	public void setHitMonth(Integer hitMonth) {
+		preset(hitMonthPropertyName, hitMonth);
+		this.hitMonth = hitMonth;
 	}
 
 	/**

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="SelfRegistrationActivation" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Self Registration Activation</singularAlias>
+	<pluralAlias>Self Registration Activations</pluralAlias>
+	<bizKey expression="Activation" />
+	<attributes>
+		<enum name="result">
+			<displayName>Activation Result</displayName>
+			<values>
+				<value code="SUCCESS" />
+				<value code="ALREADY_ACTIVATED" />
+				<value code="EXPIRED" />
+				<value code="FAILURE" />
+			</values>
+		</enum>
+		<association name="user" type="aggregation">
+			<displayName>User</displayName>
+			<description>The activated user.</description>
+			<documentName>User</documentName>
+		</association>
+        <text name="loginUrl" persistent="false" audited="false" trackChanges="false">
+            <displayName>Login Url</displayName>
+            <length>2083</length>
+        </text>		
+        <markup name="pleaseSignIn">
+			<documentation>
+        		<![CDATA[
+        			<p>Congratulations {0}! Your account is now active.</p><p>Please <a href="{1}">Sign in</a> with the email address {2}.</p>
+        		]]>
+        	</documentation>
+			<displayName>Please sign in message</displayName>
+		</markup>
+		<markup name="signInLink">
+			<documentation>
+				<![CDATA[
+					<a href="{0}">Sign in</a>
+				]]>
+			</documentation>
+			<displayName>Sign in link</displayName>
+		</markup>
+		<markup name="alreadyActivated">
+			<documentation>
+				<![CDATA[
+					<p>Welcome {0} - you have already activated your account.</p><p>Please <a href="{1}">Sign in</a>.</p>
+				]]>
+			</documentation>
+			<displayName>Account already activated</displayName>
+		</markup>
+		<markup name="noLongerValid">
+			<documentation>
+				<![CDATA[
+					<p>Sorry, that code is no longer valid.</p><p>Please <a href="{0}">Sign in</a> or Register again to request a new activation email.</p>
+				]]>
+			</documentation>
+			<displayName>No longer valid</displayName>
+		</markup>
+		<markup name="notRecognised">
+			<documentation>
+				<![CDATA[
+			 		<p>Sorry, that link is not recognised. Please check the link and try again.</p><p>Return to <a href="{0}">Sign in</a>.</p>
+				]]>
+			</documentation>
+			<displayName>Not recognised</displayName>
+		</markup>
+	</attributes>
+	<conditions>
+		<condition name="showSuccess">
+			<expression><![CDATA[result==Result.SUCCESS]]></expression>
+		</condition>
+		<condition name="showAlready">
+			<expression><![CDATA[result==Result.ALREADYACTIVATED]]></expression>
+		</condition>
+		<condition name="showExpired">
+			<expression><![CDATA[result==Result.EXPIRED]]></expression>
+		</condition>
+		<condition name="showFailure">
+			<expression><![CDATA[result==Result.FAILURE]]></expression>
+		</condition>
+	</conditions>
+</document>

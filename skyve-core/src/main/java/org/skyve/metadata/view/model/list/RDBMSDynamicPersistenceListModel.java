@@ -10,8 +10,10 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
@@ -30,6 +32,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * An in-memory list model that can generate the appropriate select statement to join across static and dynamic references and fields
@@ -53,38 +57,152 @@ import org.skyve.util.Util;
  *				"left join ADM_DynamicEntity t7 on t7.bizId = t5.relatedId " +
  *				// aggregatedAssociation.aggregatedAssociation.bizKey (static)
  *				"left join TEST_AllDynamicAttributesPersistent t8 on t8.bizId = t6.aggregatedAssociation_id " +
- *				"where t0.moduleName = :moduleName and t0.documentName = :documentName order by t0.bizId"		
+ *				"where t0.moduleName = :moduleName and t0.documentName = :documentName order by t0.bizId"
+ *
+ * This class can be "constructed" either using the query or model constructor from programmatic use.
+ * The easiest way to extend this class is to create a default constructor in the extension class.
+ * And then establish a query or model state in the instance.
+ * This can be done in postConstruct() by calling setQuery() or setModel() before calling super.postConstruct()
+ * 
+ * 			@Override
+ *			public void postConstruct(Customer customer, boolean runtime) {
+ *				setQuery(q); OR setModel(customer, "Test", aadpd, columns);
+ *				super.postConstruct(customer, runtime);
+ *			}
+ * 
+ * Or if the model is more dynamic or "late" and dependent on the conversation bean then in setBean() in a similar manner
+ * 
+ * 			@Override
+ *			public void setBean(Bean bean) {
+ *				setQuery(q) OR setModel(c, "Test", aadpd, columns);
+ *				super.setBean(bean);
+ *			}
  */
 public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryListModel<T> {
+	// Used for the title in the list
 	private String description;
+	// The columns in the grid
 	private List<MetaDataQueryColumn> columns;
+	// Current user (if this is for runtime)
 	private User user;
+	// Holds the customer argument from postConstruct()
 	private Customer customer;
+	// The module from either the query or the model
+	// Holds the runtime argument from postConstruct()
+	private boolean runtime;
 	private Module module;
+	// The document from either the query or the model
 	private Document document;
+	// Does post-construction need to be done in setBean()
+	private boolean postConstructInSetBean = false;
+	
+	// Note that these 2 cannot be static as it is technically possible that they are overridden per customer
+	private String dynamicEntityPersistentIdentifier;
+	private String dynamicRelationPersistentIdentifier;
 
-	public void setQuery(MetaDataQueryDefinition query) throws Exception {
+	// The query from the constructor or setQuery()
+	private MetaDataQueryDefinition query;
+	
+	/**
+	 * Query constructor.
+	 * Use this to drive the model off of a meta-data query programmatically to get Bean rows.
+	 * @param query	The meta-data query.
+	 */
+	public RDBMSDynamicPersistenceListModel(MetaDataQueryDefinition query) {
+		this.query = query;
+	}
+	
+	/**
+	 * Model constructor.
+	 * Use this to drive the model off of list model state programmatically to get Bean rows.
+	 * @param description	The list title.
+	 * @param drivingDocument	The model driving document.
+	 * @param columns	The columns to project.
+	 */
+	public RDBMSDynamicPersistenceListModel(String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
+		this.description = description;
+		this.document = drivingDocument;
+		this.columns = columns;
+	}
+
+	/**
+	 * Default constructor.
+	 * Use this when extending this class. See {@link RDBMSDynamicPersistenceListModel}.
+	 */
+	public RDBMSDynamicPersistenceListModel() {
+		// nothing to see here
+	}
+	
+	/**
+	 * Use this method in your extension to set the state of the list model based on a meta data query.
+	 * @param query	The query.
+	 */
+	protected void setQuery(Customer customer, MetaDataQueryDefinition query) {
+		this.customer = customer;
+		this.query = query;
+
 		description = query.getDescription();
 		columns = query.getColumns();
 		
-		user = CORE.getUser();
-		customer = user.getCustomer();
 		module = query.getDocumentModule(customer);
 		document = module.getDocument(customer, query.getDocumentName());
+	}
 
-		setDrivingDocument(module, document);
+	protected void setModel(Customer customer, String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
+		this.customer = customer;
+		this.description = description;
+		this.document = drivingDocument;
+		this.columns = columns;
+
+		module = customer.getModule(document.getOwningModuleName());
 	}
 	
-	public void setModel(String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
-		this.description = description;
-		this.columns = columns;
-		
-		user = CORE.getUser();
-		customer = user.getCustomer();
-		document = drivingDocument;
-		module = customer.getModule(document.getOwningModuleName());
+	/**
+	 * Establish the model state after the query or model constructor has been called.
+	 * Only set the user if this is instantiated at runtime.
+	 * Override this to either set the query, or set the model
+	 */
+	@Override
+	public void postConstruct(@SuppressWarnings("hiding") Customer customer,
+								@SuppressWarnings("hiding") boolean runtime) {
+		this.customer = customer;
+		this.runtime = runtime;
 
-		setDrivingDocument(module, document);
+		if (query != null) { // query constructor called
+			setQuery(customer, query);
+		}
+		else if (document != null) { // model constructor called
+			setModel(customer, description, document, columns);
+		}
+		else {
+			postConstructInSetBean = true;
+		}
+
+		if (! postConstructInSetBean) {
+			determinePersistenceIdentifiers();
+			setDrivingDocument(module, document);
+			super.postConstruct(customer, runtime);
+		}
+
+		if (runtime) {
+			user = CORE.getUser();
+		}
+	}
+	
+	
+	@Override
+	public void setBean(T bean) {
+		if (postConstructInSetBean) {
+			determinePersistenceIdentifiers();
+			setDrivingDocument(module, document);
+			super.postConstruct(customer, runtime);
+		}
+		super.setBean(bean);
+	}
+
+	private void determinePersistenceIdentifiers() {
+		dynamicEntityPersistentIdentifier = getDynamicEntityPersistent(customer).getPersistentIdentifier();
+		dynamicRelationPersistentIdentifier = getDynamicRelationPersistent(customer).getPersistentIdentifier();
 	}
 	
 	@Override
@@ -148,8 +266,12 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		Persistence p = CORE.getPersistence();
 		StringBuilder sql = new StringBuilder(projectedColumns.length() + joinedTables.length() + 90);
 		sql.append("select ").append(projectedColumns).append(" from ").append(joinedTables);
-		sql.append(" where t0.moduleName = :moduleName and t0.documentName = :documentName");
-		return p.newSQL(sql.toString()).putParameter("moduleName", module.getName(), false).putParameter("documentName", document.getName(), false).tupleIterable();
+		sql.append(" where t0.").append(AppConstants.MODULE_NAME_ATTRIBUTE_NAME).append(" = :").append(AppConstants.MODULE_NAME_ATTRIBUTE_NAME);
+		sql.append(" and t0.").append(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME).append(" = :").append(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME);
+		return p.newSQL(sql.toString())
+					.putParameter(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, module.getName(), false)
+					.putParameter(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, document.getName(), false)
+					.tupleIterable();
 	}
 	
 	@Override
@@ -175,12 +297,19 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					}
 				}
 				
+				boolean canFlag = user.canFlag();
+				
 				// Now extract the values out of the tuple.
 				Map<String, Object> values = new TreeMap<>();
 				for (Entry<String, FieldInfo> entry : projectionBindingToFieldInfo.entrySet()) {
 					String projection = entry.getKey();
 					// NB Set bizTagged null always
 					Object value = PersistentBean.TAGGED_NAME.equals(projection) ? null : tuple[entry.getValue().fieldIndex];
+					
+					// Nullify flag comments if not given permissions
+					if (! canFlag) {
+						value = PersistentBean.FLAG_COMMENT_NAME.equals(projection) ? null : tuple[entry.getValue().fieldIndex];
+					}
 
 					// If we have a map we know we need to get the binding out of that map (its a "fields" field)
 					if (value instanceof Map) {
@@ -201,7 +330,6 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 							e.printStackTrace();
 						}
 					}
-
 					values.put(projection, value);
 				}
 				result.add(new DynamicBean(module.getName(), document.getName(), values));
@@ -224,8 +352,11 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		info.dynamicEntityTableAliasNumber = Integer.valueOf(0);
 		referenceBindingToTableInfo.put("", info);
 		// First 4 fields are the implicit fields required by any data model
-		projectedColumns.append("t0.bizId, t0.bizLock, t0.bizFlagComment, t0.bizKey");
-		joinedTables.append("ADM_DynamicEntity t0");
+		projectedColumns.append("t0.").append(Bean.DOCUMENT_ID);
+		projectedColumns.append(", t0.").append(PersistentBean.LOCK_NAME);
+		projectedColumns.append(", t0.").append(PersistentBean.FLAG_COMMENT_NAME);
+		projectedColumns.append(", t0.").append(Bean.BIZ_KEY);
+		joinedTables.append(dynamicEntityPersistentIdentifier).append(" t0");
 		
 		// Now process each projection
 		Set<String> projections = getProjections();
@@ -272,7 +403,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 							info = referenceBindingToTableInfo.get("");
 							if (info.fieldsIndex == null) {
 								info.fieldsIndex = Integer.valueOf(fieldIndex++);
-								projectedColumns.append(", t0.fields as f").append(fieldAliasNumber++);
+								projectedColumns.append(", t0.").append(AppConstants.FIELDS_ATTRIBUTE_NAME).append(" as f").append(fieldAliasNumber++);
 							}
 							addField(a, projection, info.fieldsIndex.intValue());
 						}
@@ -331,16 +462,17 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					// Add dynamic relation left join, if applicable
 					if (Binder.isDynamic(customer, simpleBindingModule, simpleBindingDocument, a)) {
 						info.dynamicRelationTableAliasNumber = Integer.valueOf(tableAliasNumber);
-						joinedTables.append("\nleft join ADM_DynamicRelation t").append(tableAliasNumber);
-						joinedTables.append(" on t").append(tableAliasNumber).append(".parent_id = t").append(ownerInfo.dynamicEntityTableAliasNumber.intValue()).append(".bizId and t");
-						joinedTables.append(tableAliasNumber).append(".attributeName = '").append(simpleBinding);
+						joinedTables.append("\nleft join ").append(dynamicRelationPersistentIdentifier).append(" t").append(tableAliasNumber);
+						joinedTables.append(" on t").append(tableAliasNumber).append('.').append(ChildBean.CHILD_PARENT_ID).append(" = t").append(ownerInfo.dynamicEntityTableAliasNumber.intValue()).append('.').append(Bean.DOCUMENT_ID);
+						joinedTables.append(" and t").append(tableAliasNumber).append('.').append(AppConstants.ATTRIBUTE_NAME_ATTRIBUTE_NAME).append(" = '").append(simpleBinding);
 						tableAliasNumber++;
 
 						// If relation target document is dynamic join ADM_DynamicEntity
 						if (relatedDocument.isDynamic()) {
 							// Add entity left join
-							joinedTables.append("'\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
-							joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(tableAliasNumber - 1).append(".relatedId");
+							joinedTables.append("'\nleft join ").append(dynamicEntityPersistentIdentifier).append(" t").append(tableAliasNumber);
+							joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+							joinedTables.append(tableAliasNumber - 1).append('.').append(AppConstants.RELATED_ID_ATTRIBUTE_NAME);
 	
 							info.dynamicEntityTableAliasNumber = Integer.valueOf(tableAliasNumber);
 						}
@@ -348,7 +480,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 						else {
 							// Add entity left join
 							joinedTables.append("'\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
-							joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.dynamicRelationTableAliasNumber).append(".relatedId");
+							joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+							joinedTables.append(info.dynamicRelationTableAliasNumber).append('.').append(AppConstants.RELATED_ID_ATTRIBUTE_NAME);
 							info.staticTableAliasNumber = Integer.valueOf(tableAliasNumber);
 						}
 						
@@ -364,7 +497,8 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					else {
 						// Add entity left join
 						joinedTables.append("\nleft join ").append(persistent.getPersistentIdentifier()).append(" t").append(tableAliasNumber);
-						joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(ownerInfo.staticTableAliasNumber.intValue()).append('.').append(simpleBinding).append("_id");
+						joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+						joinedTables.append(ownerInfo.staticTableAliasNumber.intValue()).append('.').append(simpleBinding).append("_id");
 						info.staticTableAliasNumber = Integer.valueOf(tableAliasNumber);
 
 						tableAliasNumber++;
@@ -411,7 +545,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 			if (dynamicAttribute || (info.relatedDocument.isDynamic())) {
 				if (info.fieldsIndex == null) {
 					info.fieldsIndex = Integer.valueOf(fieldIndex++);
-					projectedColumns.append(", t").append(info.dynamicEntityTableAliasNumber).append(".fields as f").append(fieldAliasNumber++);
+					projectedColumns.append(", t").append(info.dynamicEntityTableAliasNumber).append('.').append(AppConstants.FIELDS_ATTRIBUTE_NAME).append(" as f").append(fieldAliasNumber++);
 				}
 				addField(a, projection, info.fieldsIndex.intValue());
 			}
@@ -457,8 +591,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		if (dynamicAttribute) {
 			if ((info.staticTableAliasNumber != null) && (info.dynamicEntityTableAliasNumber == null)) {
 				// Add dynamic entity left join from static table
-				joinedTables.append("\nleft join ADM_DynamicEntity t").append(tableAliasNumber);
-				joinedTables.append(" on t").append(tableAliasNumber).append(".bizId = t").append(info.staticTableAliasNumber).append(".bizId");
+				joinedTables.append("\nleft join ").append(dynamicEntityPersistentIdentifier).append(" t").append(tableAliasNumber);
+				joinedTables.append(" on t").append(tableAliasNumber).append('.').append(Bean.DOCUMENT_ID).append(" = t");
+				joinedTables.append(info.staticTableAliasNumber).append('.').append(Bean.DOCUMENT_ID);
 
 				info.dynamicEntityTableAliasNumber = Integer.valueOf(tableAliasNumber);
 				tableAliasNumber++;
@@ -479,5 +614,23 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				tableAliasNumber++;
 			}
 		}
+	}
+	
+	/**
+	 * Get the Persistent configuration for the DynamicEntity document for a customer
+	 * @param c	The customer
+	 * @return	The Persistent configuration
+	 */
+	public static @Nonnull Persistent getDynamicEntityPersistent(@Nonnull Customer c) {
+		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME).getPersistent();
+	}
+	
+	/**
+	 * Get the Persistent configuration for the DynamicRelation document for a customer
+	 * @param c	The customer
+	 * @return	The Persistent configuration
+	 */
+	public static @Nonnull Persistent getDynamicRelationPersistent(@Nonnull Customer c) {
+		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_RELATION_DOCUMENT_NAME).getPersistent();
 	}
 }

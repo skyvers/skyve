@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_tabGeneral" title="Configuration" xmlns="http://www.skyve.org/xml/view" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<component name="_emailNotConfiguredBanner" />
+	<component name="_backupsNotConfiguredBanner" />
+	<component name="_availableDiskSpaceAlarmNotConfiguredBanner" />
+	<component name="_selfRegistrationNotConfiguredBanner" />
+	
+	<form border="true" borderTitle="admin.configuration.edit.general.passwordComplexity.borderTitle">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="2" />
+		<column responsiveWidth="3" />
+		<column responsiveWidth="2" />
+		<column />
+		<row>
+			<item>
+				<spinner binding="passwordMinLength" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="passwordRequireLowercase" triState="false" />
+			</item>
+			<item>
+				<checkBox binding="passwordRequireUppercase" triState="false" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="passwordRequireNumeric" triState="false" />
+			</item>
+			<item>
+				<checkBox binding="passwordRequireSpecial" triState="false" />
+			</item>
+		</row>
+		<row>
+			<item colspan="4" align="centre">
+				<blurb>
+					<![CDATA[
+						<span style="color: #666666;">{i18n:admin.configuration.general.securityNote}</span>
+					]]>
+				</blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="passwordExpiryDays" disabled="true" />
+			</item>
+			<item>
+				<textField binding="passwordAccountLockoutThreshold" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="passwordHistoryRetention" disabled="true" />
+			</item>
+			<item>
+				<textField binding="passwordAccountLockoutDuration" disabled="true" />
+			</item>
+		</row>
+	</form>
+	
+	<!-- test email has a different component for desktop and external -->
+	<component name="_testEmail" />
+	<vbox border="true" borderTitle="admin.configuration.edit.general.testEmail.borderTitle" shrinkWrap="height" invisible="emailConfigured">
+		<form>
+			<column/>
+			<row>
+				<item>
+					<blurb pixelHeight="20">
+						<![CDATA[<em>{i18n:admin.configuration.email.notConfiguredWarning}</em>]]>
+					</blurb>
+				</item>
+			</row>
+		</form>
+	</vbox>
+	
+	<!-- password reset has a different component for desktop and external -->
+	<component name="_passwordReset" />
+	<vbox border="true" borderTitle="admin.configuration.edit.general.passwordReset.borderTitle" shrinkWrap="height" invisible="emailConfigured">
+		<form>
+			<column/>
+			<row>
+				<item>
+					<blurb pixelHeight="20">
+						<![CDATA[<em>{i18n:admin.configuration.edit.general.passwordReset.emailNotConfigured}</em>]]>
+					</blurb>
+				</item>
+			</row>
+		</form>
+	</vbox>
+	
+	<!-- TFA has a different component for desktop and external -->
+	<component name="_twoFactorAuthentication" />
+	
+	<form border="true" borderTitle="admin.configuration.edit.general.userSelfRegistration.borderTitle">
+		<column/>
+		<column/>
+		<column/>
+		<row>
+			<item showLabel="true" label="User Self-Registration Enabled">
+				<blurb>
+					<![CDATA[<em>{startup.accountAllowUserSelfRegistration}</em>]]>
+				</blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="userSelfRegistrationGroup" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="selfRegistrationActivationExpiryHours" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="admin.configuration.edit.general.anonymousPublicUser.borderTitle">
+		<column responsiveWidth="3"/>
+		<column />
+		<column responsiveWidth="1"/>
+		<row>
+			<item>
+				<default binding="publicUser" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="admin.configuration.edit.general.availableDiskSpaceAlarmLevel.borderTitle">
+		<column responsiveWidth="3"/>
+		<column />
+		<column responsiveWidth="3"/>
+		<column />
+		<row>
+			<item>
+				<default binding="availableDiskSpaceAlarmLevelPercentage" />
+			</item>
+			<item>
+				<default binding="availableDiskSpaceAlarmLevelMB" />
+			</item>
+		</row>
+	</form>
+</view>

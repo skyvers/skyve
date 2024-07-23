@@ -1,15 +1,15 @@
 package org.skyve.impl.web.faces.converters.decimal;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
-import javax.faces.convert.ConverterException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class Decimal10Test {
+import jakarta.faces.convert.ConverterException;
 
+public class Decimal10Test {
 	private Decimal10Converter converter;
 
 	@Before

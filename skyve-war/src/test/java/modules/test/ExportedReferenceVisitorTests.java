@@ -1,7 +1,7 @@
 package modules.test;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.ExportedReferenceVisitor.Dereferencer;
 import org.skyve.util.Util;
 
@@ -10,6 +10,7 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
+
 	@Test
 	public void testDereferencerOnHierarchical() throws Exception {
 		Hierarchical root = Util.constructRandomInstance(u, m, hd, 1);

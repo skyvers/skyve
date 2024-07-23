@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlPanelGroup;
-
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -25,6 +22,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlPanelGroup;
+
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	// Overridden to set the grid styling
 	@Override
@@ -37,7 +37,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		HtmlPanelGroup result = (HtmlPanelGroup) super.view(component, createView);
 		// Change from a span with nowrap to a responsive div
 		result.setLayout("block");
-		result.setStyle("flex-grow:1"); // to ensure it takes up all the space it can in the sidebarWrapper div
+		result.setStyle("flex-grow:1; max-width:100%"); // to ensure it takes up all the space it can in the sidebarWrapper div
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid" : "ui-g");
 
 		return result;
@@ -70,31 +70,6 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		result.setStyle(null);
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-col-12" : "ui-g-12");
 		return result;
-	}
-	
-	@Override
-	protected void setSizeAndTextAlignStyle(UIComponent component, 
-												String styleAttributeNameOverride,
-												String existingStyle, 
-												Integer pixelWidth, 
-												Integer responsiveWidth,
-												Integer percentageWidth,
-												Integer pixelHeight, 
-												Integer percentageHeight, 
-												Integer defaultPercentageWidth,
-												HorizontalAlignment textAlign) {
-		// Ensure no default percentage width is ever set for this renderer.
-		// Leave this to the responsive shit.
-		super.setSizeAndTextAlignStyle(component,
-										styleAttributeNameOverride,
-										existingStyle, 
-										pixelWidth, 
-										responsiveWidth, 
-										percentageWidth, 
-										pixelHeight, 
-										percentageHeight, 
-										null,
-										textAlign);
 	}
 	
 	// Add floating label support to other input widgets

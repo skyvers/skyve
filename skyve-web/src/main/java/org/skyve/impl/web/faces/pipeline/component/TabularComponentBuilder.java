@@ -1,27 +1,11 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
-import javax.el.MethodExpression;
-import javax.el.ValueExpression;
-import javax.faces.component.UICommand;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIComponentBase;
-import javax.faces.component.UIInput;
-import javax.faces.component.UIOutput;
-import javax.faces.component.UIPanel;
-import javax.faces.component.UISelectItems;
-import javax.faces.component.html.HtmlInputHidden;
-import javax.faces.component.html.HtmlInputText;
-import javax.faces.component.html.HtmlOutputLink;
-import javax.faces.component.html.HtmlOutputText;
-import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.component.html.HtmlSelectOneMenu;
-import javax.faces.convert.Converter;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
@@ -60,6 +44,7 @@ import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.signature.Signature;
+import org.primefaces.component.slider.Slider;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
@@ -181,11 +166,30 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Icons;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
-public class TabularComponentBuilder extends ComponentBuilder {
-	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"fa fa-plus-circle skyveEmptyListAddIcon\"></span> to add a new Item.";
+import jakarta.el.MethodExpression;
+import jakarta.el.ValueExpression;
+import jakarta.faces.component.UICommand;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIComponentBase;
+import jakarta.faces.component.UIInput;
+import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.UIPanel;
+import jakarta.faces.component.UISelectItems;
+import jakarta.faces.component.html.HtmlInputHidden;
+import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLink;
+import jakarta.faces.component.html.HtmlOutputText;
+import jakarta.faces.component.html.HtmlPanelGrid;
+import jakarta.faces.component.html.HtmlPanelGroup;
+import jakarta.faces.component.html.HtmlSelectOneMenu;
+import jakarta.faces.convert.Converter;
+
+public abstract class TabularComponentBuilder extends ComponentBuilder {
+	public static final String EMPTY_DATA_TABLE_CAN_ADD_MESSAGE = "No Items to show. Click <span class=\"" + Icons.FONT_ADD + " skyveEmptyListAddIcon\"></span> to add a new Item.";
 	public static final String EMPTY_DATA_TABLE_MESSAGE = "No Items to show.";
 	public static final String SINGLE_ACTION_COLUMN_WIDTH = "60";
 	public static final Integer SINGLE_ACTION_COLUMN_WIDTH_INTEGER = Integer.valueOf(60);
@@ -607,6 +611,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setEscape(false);
 
 		setTextAlign(result, textAlignment);
+		// Note No default percentage width of 100% so that horizontal alignment of labels and blurbs works in form items.
 		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
 		setInvisible(result, invisibleConditionName, null);
 
@@ -902,7 +907,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(button, null);
 		button.setValue(null);
 		button.setTitle("Toggle filters");
-		button.setIcon("fa fa-filter");
+		button.setIcon(Icons.FONT_FILTER);
 		button.setOnclick(String.format("SKYVE.PF.toggleFilters('%s'); return false;", dataTableId));
 		return button;
 	}
@@ -913,15 +918,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 														boolean inline,
 														String dataWidgetBinding,
 														String disabledConditionName) {
-		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(button, null);
-		button.setValue(null);
-		button.setTitle("Add a new " + singularDocumentAlias);
-		button.setIcon("fa fa-plus");
-		action(button, ImplicitActionName.Add, null, dataWidgetBinding, dataWidgetVar, inline, null);
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(null);
+		result.setTitle("Add a new " + singularDocumentAlias);
+		result.setIcon(Icons.FONT_ADD);
+		action(result, ImplicitActionName.Add, null, dataWidgetBinding, dataWidgetVar, inline, null);
+		result.setProcess(process);
 		// if we are in an inline data grid, update the grid on a new record
 		if (inline) {
-			button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
+			result.setUpdate("@namingcontainer"); // update the data table - the closest naming container
+		}
+		else { // else default update
+			result.setUpdate(update);
 		}
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String[] createDisabled = (disableAddConditionName == null) ?
@@ -933,23 +942,25 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										new String[] {disableAddConditionName, disabledConditionName});
 		ValueExpression disabled = createOredValueExpressionFromConditions(createDisabled);
 		if (disabled != null) {
-			button.setValueExpression("disabled", disabled);
+			result.setValueExpression("disabled", disabled);
 		}
-		return button;
+		
+		return result;
 	}
 
 	protected CommandButton createDataGridRemoveButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, String dataWidgetBinding, String disabledConditionName) {
-		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(button, null);
-		button.setValue(null);
-		button.setTitle("Remove this " + singularDocumentAlias);
-		button.setIcon("fa fa-minus");
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(null);
+		result.setTitle("Remove this " + singularDocumentAlias);
+		result.setIcon(Icons.FONT_REMOVE);
+		result.setProcess(process);
 		// We cannot just update the data table ever when removing a row as
 		// the grid may go invisible if the last row is removed.
-		// There is no performance shortcut we can do as we dont know what is going on
-		button.setUpdate(update); // update all forms (by default)
+		// There is no performance shortcut we can do as we don't know what is going on
+		result.setUpdate(update); // update all forms (by default)
 
-		action(button, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
+		action(result, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
 		String disableRemoveConditionName = grid.getDisableRemoveConditionName();
 		String[] removeDisabled = (disableRemoveConditionName == null) ?
 									((disabledConditionName == null) ?
@@ -959,19 +970,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										new String[] {disableRemoveConditionName} :
 										new String[] {disableRemoveConditionName, disabledConditionName});
 		if (removeDisabled != null) {
-			button.setValueExpression("disabled",
+			result.setValueExpression("disabled",
 										createOredValueExpressionFromConditions(removeDisabled));
 		}
-		return button;
+		return result;
 	}
 
 	protected CommandButton createDataGridZoomButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, boolean inline, String dataWidgetBinding, String disabledConditionName) {
-		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		setId(button, null);
-		button.setValue(null);
-		button.setTitle("Edit this " + singularDocumentAlias);
-		button.setIcon("fa fa-chevron-right");
-		action(button, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
+		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(result, null);
+		result.setValue(null);
+		result.setTitle("Edit this " + singularDocumentAlias);
+		result.setIcon(Icons.FONT_ZOOM_IN);
+		result.setProcess(process);
+		result.setUpdate(update);
+		action(result, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
 		String disableZoomConditionName = grid.getDisableZoomConditionName();
 		String[] zoomDisabled = (disableZoomConditionName == null) ?
 									((disabledConditionName == null) ?
@@ -981,10 +994,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										new String[] {disableZoomConditionName} :
 										new String[] {disableZoomConditionName, disabledConditionName});
 		if (zoomDisabled != null) {
-			button.setValueExpression("disabled",
+			result.setValueExpression("disabled",
 										createOredValueExpressionFromConditions(zoomDisabled));
 		}
-		return button;
+		return result;
 	}
 
 	@Override
@@ -1061,11 +1074,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		mapDiv.setLayout("block");
 		mapDiv.setStyle("margin:0;padding:0;height:100%;width:100%");
 		setId(mapDiv, null);
-
-		UIOutput output = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		output.setValue("Loading Map...");
-		mapDiv.getChildren().add(output);
-
 		result.getChildren().add(mapDiv);
 
 		return result;
@@ -1111,8 +1119,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											null,
 											null,
 											null,
-											null,
-											true);
+											null);
 		textField.setId(id + "_value");
 		toAddTo.add(textField);
 		editableGeometry(toAddTo,
@@ -1128,8 +1135,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * Add the buttons and overlays etc
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
-	 *				<p:commandButton id="s03" icon="fa fa-globe" title="Map" type="button" />
-	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="false" showCloseIcon="true" modal="true" style="width:50%;height:300px" onShow="SKYVE.PF.gmap({elementId:'poo',geometryBinding:'boundry',disabled:false})">
+	 *				<p:commandButton id="s03" icon="fa-solid fa-globe" title="Map" type="button" />
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="false" showCloseIcon="true" modal="true" style="width:50%;height:310px" onShow="SKYVE.PF.gmap({elementId:'poo',geometryBinding:'boundry',disabled:false})">
 	 *					<h:panelGroup layout="block" style="height:280px">
 	 *						<h:panelGroup id="poo" layout="block" style="margin:0;padding:0;height:100%;width:100%">
 	 *							Loading Map
@@ -1147,10 +1154,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton mapButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(mapButton, null);
 		String mapButtonId = mapButton.getId();
-		mapButton.setIcon("fa fa-globe");
+		mapButton.setIcon(Icons.FONT_MAP);
 		mapButton.setTitle("Map");
 		mapButton.setValue(null);
-		mapButton.setType("button");
+		mapButton.setType("button"); // no process or update required
 		setDisabled(mapButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
 		setSizeAndTextAlignStyle(mapButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
@@ -1162,7 +1169,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-		overlay.setStyle("width:50%;height:300px");
+		overlay.setStyle("width:50%;height:310px");
 
 		MapDisplay display = new MapDisplay();
 		display.setPixelHeight(Integer.valueOf(280));
@@ -1361,7 +1368,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		if (managedBean != null) {
-			BeanMapAdapter<? extends Bean> currentBean = managedBean.getCurrentBean();
+			BeanMapAdapter currentBean = managedBean.getCurrentBean();
 			if (currentBean != null) {
 				Bean bean = currentBean.getBean();
 				model.setBean(bean);
@@ -1863,8 +1870,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			setId(button, null);
 			button.setValue(null);
 			button.setTitle("New record");
-			button.setIcon("fa fa-plus");
-			button.setType("button");
+			button.setIcon(Icons.FONT_NEW);
+			button.setType("button"); // no process or update required
 			ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
 			if (disabled != null) {
 				button.setValueExpression("disabled", disabled);
@@ -1906,8 +1913,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(button, null);
 		button.setValue(null);
 		button.setTitle("View Detail");
-		button.setIcon("fa fa-chevron-right");
-		button.setType("button");
+		button.setIcon(Icons.FONT_ZOOM_IN);
+		button.setType("button"); // no process or update required
 		if (zoomDisabledConditionName != null) {
 			button.setValueExpression("disabled",
 					createValueExpressionFromCondition(zoomDisabledConditionName, null));
@@ -1944,7 +1951,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// Add Zoom In menu item
 		UIMenuItem item = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
 		item.setValue("View Detail");
-		item.setIcon("fa fa-chevron-right");
+		item.setIcon(Icons.FONT_ZOOM_IN);
 		item.setUrl("#");
 		script.append("var s=PF('").append(listGridId).append("').selection[0];SKYVE.PF.pushHistory('");
 		script.append("?a=").append(WebAction.e.toString()).append("&m='+s.substring(s.indexOf('.') + 1)+");
@@ -1959,7 +1966,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// Add zoom In New Tab menu item
 		item = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
 		item.setValue("Popout Detail");
-		item.setIcon("fa fa-share-square-o");
+		item.setIcon("fa-solid fa-share-from-square");
 		item.setUrl("#");
 		script.setLength(0);
 		script.append("var s=PF('").append(listGridId).append("').selection[0];window.open('");
@@ -2000,7 +2007,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		if (managedBean != null) {
-			BeanMapAdapter<? extends Bean> currentBean = managedBean.getCurrentBean();
+			BeanMapAdapter currentBean = managedBean.getCurrentBean();
 			if (currentBean != null) {
 				Bean bean = currentBean.getBean();
 				model.setBean(bean);
@@ -2178,8 +2185,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											textAlignment,
 											colour.getDisabledConditionName(),
 											formDisabledConditionName,
-											colour.getPixelWidth(),
-											true);
+											colour.getPixelWidth());
 		return new EventSourceComponent(result, result);
 	}
 
@@ -2221,7 +2227,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
-		result.setColumns(5);
+		boolean showMarkup = (! Boolean.FALSE.equals(image.getShowMarkup()));
+		result.setColumns(showMarkup ? 6 : 5);
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
@@ -2245,7 +2252,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								sanitisedBinding,
 								image.getDisabledConditionName(),
 								formDisabledConditionName,
-								true);
+								true,
+								showMarkup);
 		}
 
 		return result;
@@ -2286,6 +2294,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								sanitisedBinding,
 								link.getDisabledConditionName(),
 								formDisabledConditionName,
+								false,
 								false);
 		}
 
@@ -2297,9 +2306,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 *					<p:signature id="one_signature" style="width:400px;height:200px" rendered="#{empty skyve.currentBean['image']}" />
 	 *					<p:graphicImage id="one_image" style="width:400px;height:200px;border:1px gray" rendered="#{not empty skyve.currentBean['image']}" />
 	 *					<h:panelGrid columns="1">
-	 *						<p:commandButton id="one_sign" value="Sign" icon="fa fa-upload" title="Submit Signature" style="width:75px" action="#{skyve.sign('one', 'image')}" process="@this" update="one" rendered="#{empty skyve.currentBean['image']}" />
-	 *						<p:commandButton id="one_client" value="Clear" icon="fa fa-trash" title="Clear Signature" style="width:75px"  type="button" onclick="SKYVE.PF.getById('one_signature').signature('clear')" rendered="#{empty skyve.currentBean['image']}" />
-	 *						<p:commandButton id="one_server" value="Clear" icon="fa fa-trash" title="Clear Signature" style="width:75px" action="#{skyve.clear('image')}" process="@this" update="one" rendered="#{not empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_sign" value="Sign" icon="fa-solid fa-upload" title="Submit Signature" style="width:75px" action="#{skyve.sign('one', 'image')}" process="@this" update="one" rendered="#{empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_client" value="Clear" icon="fa-solid fa-trash" title="Clear Signature" style="width:75px"  type="button" onclick="SKYVE.PF.getById('one_signature').signature('clear')" rendered="#{empty skyve.currentBean['image']}" />
+	 *						<p:commandButton id="one_server" value="Clear" icon="fa-solid fa-trash" title="Clear Signature" style="width:75px" action="#{skyve.clear('image')}" process="@this" update="one" rendered="#{not empty skyve.currentBean['image']}" />
 	 *					</h:panelGrid>
 	 *				</h:panelGrid>
 	 * See LayoutBuilder.contentSignatureLayout() for the outer panel grid.
@@ -2384,12 +2393,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Sign");
-		button.setIcon("fa fa-upload");
+		button.setIcon(Icons.FONT_UPLOAD);
 		button.setTitle("Submit Signature");
 		button.setStyle("width:75px");
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
-		button.setProcess("@this");
-		button.setUpdate(id);
+		button.setProcess("@this"); // process the button
+		button.setUpdate(id); // update the signature widget
 		// action
 		sb.setLength(0);
 		sb.append("#{").append(managedBeanName).append(".sign('").append(clientId).append("','").append(binding).append("',");
@@ -2421,13 +2430,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		toAddTo.add(button);
 
+		// client-side clear button if we have no content sitting in the server state
 		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Clear");
-		button.setIcon("fa fa-trash");
+		button.setIcon(Icons.FONT_CLEAR);
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
-		button.setType("button");
+		button.setType("button"); // no process or update required
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
 		// onclick
 		sb.setLength(0);
@@ -2440,15 +2450,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		toAddTo.add(button);
 
+		// server-side clear button if we have some content in the signature
 		button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue("Clear");
-		button.setIcon("fa fa-trash");
+		button.setIcon(Icons.FONT_CLEAR);
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
 		setDisabled(button, disabledConditionName, formDisabledConditionName);
-		button.setProcess("@this");
-		button.setUpdate(id);
+		button.setProcess("@this"); // process the button
+		button.setUpdate(id); // update the signature widget
 		// action
 		sb.setLength(0);
 		sb.append("#{").append(managedBeanName).append(".clear('").append(binding).append("')}");
@@ -2469,11 +2480,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * 			<h:panelGrid> (from caller)
 	 * 				...
 	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
-	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
-	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
-	 *					<iframe id="s01_iframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/{content/image}Upload.xhtml')" />
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
+	 *					<iframe id="s01_overlayiframe" src="/skyve/{content/image}Upload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
-	 *				<p:commandButton id="s05" icon="fa fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
+	 *				<p:commandButton id="s05" icon="fa-solid fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
 	 *				...
 	 *			</h:panelGrid>
 	 *
@@ -2486,18 +2497,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String sanitisedBinding,
 									String disabledConditionName,
 									String formDisabledConditionName,
-									boolean image) {
+									boolean image,
+									boolean showMarkup) {
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, false, null, null);
-		setId(hidden, String.format("%s_%s", id, sanitisedBinding));
+		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
 		toAddTo.add(hidden);
 
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
-		uploadButton.setIcon("fa fa-upload");
-		uploadButton.setTitle("Upload Content");
+		uploadButton.setIcon(Icons.FONT_UPLOAD);
+		uploadButton.setTitle(image ? "Upload Image" : "Upload Content");
 		uploadButton.setValue(null);
-		uploadButton.setType("button");
+		uploadButton.setType("button"); // no process or update required
 		setDisabled(uploadButton, disabledConditionName, formDisabledConditionName);
 		// for admin theme
 		setSizeAndTextAlignStyle(uploadButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
@@ -2530,7 +2542,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the transparent modal mask to sit over the top of the overlay panel
-			overlay.setStyle("width:50%;height:300px");
+			overlay.setStyle("width:50%;height:310px");
 			overlay.setAppendTo("@(body)"); // append to <body/> so overlay can always pop
 			// clear the iframe src on hide so there is no flash next open
 			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s')", id));
@@ -2548,16 +2560,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:%s;border:none\"></iframe>", id, image ? "100%" : "285px"));
 		setId(iframe, null);
 		panel.getChildren().add(iframe);
 
 		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(clearButton, null);
-		clearButton.setIcon("fa fa-trash");
+		clearButton.setIcon(Icons.FONT_CLEAR);
 		clearButton.setTitle("Clear Content");
 		clearButton.setValue(null);
-		clearButton.setType("button");
+		clearButton.setType("button"); // no process or update required
 		if (image) {
 			clearButton.setOnclick(String.format("SKYVE.PF.clearContentImage('%s')", sanitisedBinding));
 		}
@@ -2568,6 +2580,50 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// for admin theme
 		setSizeAndTextAlignStyle(clearButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
 		toAddTo.add(clearButton);
+		
+		// Markup button (if required)
+		if (showMarkup) {
+			CommandButton markupButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+			setId(markupButton, null);
+			markupButton.setIcon(Icons.FONT_EDIT);
+			markupButton.setTitle("Mark Up Image");
+			markupButton.setValue(null);
+			markupButton.setType("button"); // no process or update required
+			setDisabled(markupButton, disabledConditionName, formDisabledConditionName);
+			// for admin theme
+			setSizeAndTextAlignStyle(markupButton, null, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null, null);
+			toAddTo.add(markupButton);
+	
+			var = sanitisedBinding + "Markup";
+			value.setLength(0);
+			value.append("if($('[id$=\"_").append(sanitisedBinding).append("_hidden\"]').val().length==0){return false}else{PF('" + var + "').show();PF('" + var + "').toggleMaximize()}"); 
+			markupButton.setOnclick(value.toString());
+	
+			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+			setId(dialog, null);
+			dialog.setWidgetVar(var);
+			dialog.setModal(true);
+			dialog.setResponsive(true);
+			dialog.setFitViewport(true);
+			dialog.setHeader("Mark Up Image");
+			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
+			// clear the iframe src on hide so there is no flash next open
+			dialog.setOnHide("SKYVE.PF.contentMarkupOnHide('" + id + "');PF('" + var + "').toggleMaximize()");
+			
+			// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
+			value.setLength(0);
+			value.append("#{'SKYVE.PF.contentMarkupOnShow(\\'").append(id).append("\\',\\'").append(sanitisedBinding).append("\\',\\''.concat(");
+			value.append(managedBeanName).append(".getContentMarkupUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
+			dialog.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+			toAddTo.add(dialog);
+
+			// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
+			iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+			iframe.setEscape(false);
+			iframe.setValue("<iframe id=\"" + id + "_markupiframe\" src=\"\" style=\"width:100%;height:calc(100% - 10px);border:none\"></iframe>");
+			setId(iframe, null);
+			dialog.getChildren().add(iframe);
+		}
 	}
 
 	@Override
@@ -2639,8 +2695,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					                textAlignment,
 					                password.getDisabledConditionName(),
 					                formDisabledConditionName,
-					                password.getPixelWidth(),
-					                true);
+					                password.getPixelWidth());
 		result.setRedisplay(true);
 		return new EventSourceComponent(result, result);
 	}
@@ -2699,7 +2754,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String title,
 											boolean required,
 											HorizontalAlignment textAlignment,
-											Converter facesConverter) {
+											Converter<?> facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -2718,6 +2773,103 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									facesConverter,
 									spinner.getPixelWidth());
 		return new EventSourceComponent(result, result);
+	}
+
+	@Override
+	public EventSourceComponent slider(EventSourceComponent component,
+											String dataWidgetVar,
+											org.skyve.impl.metadata.view.widget.bound.input.Slider slider,
+											String formDisabledConditionName,
+											String title,
+											boolean required,
+											Converter<?> facesConverter) {
+		if (component != null) {
+			return component;
+		}
+
+		boolean vertical = Boolean.TRUE.equals(slider.getVertical());
+		
+		// Table to hold it all
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		result.setColumns(vertical ? 4 : 1);
+		if (! vertical) {
+			result.setColumnClasses("center");
+			result.setStyle("width:100%");
+		}
+		List<UIComponent> toAddTo = result.getChildren();
+		
+		// Hidden component bound to data
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, slider.getBinding(), null, false, null, null);
+		toAddTo.add(hidden);
+		
+		// Display value
+		HtmlOutputText display = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		setId(display, null);
+		display.setValueExpression("value", hidden.getValueExpression("value"));
+
+		// Slider
+		Slider sliderComponent = (Slider) input(Slider.COMPONENT_TYPE,
+										dataWidgetVar,
+										slider.getBinding(),
+										title,
+										required,
+										slider.getDisabledConditionName(),
+										formDisabledConditionName);
+		sliderComponent.setFor(hidden.getId());
+		sliderComponent.setDisplay(display.getId());
+		sliderComponent.setDisplayTemplate("{value}");
+		if (vertical) {
+			sliderComponent.setType("vertical");
+		}
+		Double min = slider.getMin();
+		if (min != null) {
+			sliderComponent.setMinValue(min.doubleValue());
+		}
+		Double max = slider.getMax();
+		if (max != null) {
+			sliderComponent.setMaxValue(max.doubleValue());
+		}
+
+		// Convert discrete values and precision into steps.
+		Integer precision = slider.getRoundingPrecision();
+		Integer numberOfDiscreteValues = slider.getNumberOfDiscreteValues();
+		if ((numberOfDiscreteValues != null) && (min != null) && (max != null)) {
+			double range = max.doubleValue() - min.doubleValue();
+			double step = range / numberOfDiscreteValues.doubleValue();
+			if (precision != null) {
+				step = new BigDecimal(step).setScale(precision.intValue(), RoundingMode.HALF_UP).doubleValue();
+			}
+			sliderComponent.setStep(step);
+		}
+		else {
+			sliderComponent.setStep(1.0);
+		}
+
+		if (facesConverter != null) {
+			sliderComponent.setConverter(facesConverter);
+		}
+		// NB Text alignment set with a style class
+		setSizeAndTextAlignStyle(sliderComponent, null, null, slider.getPixelWidth(), null, null, slider.getPixelHeight(), null, null, null);
+
+		// TODO - slider.getChangedActions() - there is 1 ajax event called slide end
+		// <p:ajax event="slideEnd" listener="#{sliderBean.onSlideEnd}" update="@form" />
+		// public void onSlideEnd(SlideEndEvent event) {
+		//   int value = event.getValue();
+		// }
+
+		// Add all to table
+		toAddTo.add(sliderComponent);
+		// Add a spacer between the vertical slider and the display value
+		if (vertical) {
+			Spacer spacer = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
+			setId(spacer, null);
+			spacer.setWidth("10px");
+			toAddTo.add(spacer);
+		}
+		toAddTo.add(display);
+		
+		return new EventSourceComponent(result, sliderComponent);
 	}
 
 	@Override
@@ -2743,8 +2895,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											formDisabledConditionName,
 											length,
 											text.getPixelWidth(),
-											text.getPixelHeight(),
-											true);
+											text.getPixelHeight());
 		KeyboardType keyboardType = text.getKeyboardType();
 		if (keyboardType != null) {
 			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
@@ -2764,7 +2915,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										Integer length,
 										org.skyve.domain.types.converters.Converter<?> converter,
 										Format<?> format,
-										Converter facesConverter) {
+										Converter<?> facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -2811,8 +2962,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								mutableFormat,
 								facesConverter,
 								text.getKeyboardType(),
-								text.getPixelWidth(),
-								true);
+								text.getPixelWidth());
         }
         else if (complete != null) {
         	result = complete(dataWidgetVar,
@@ -2840,8 +2990,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								(mutableFormat == null) ? null : mutableFormat.getTextCase(),
 								facesConverter,
 								text.getKeyboardType(),
-								text.getPixelWidth(),
-								true);
+								text.getPixelWidth());
         }
 
         return new EventSourceComponent(result, result);
@@ -3048,7 +3197,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		setValueOrValueExpression(title, result::setHeader, "header", result);
 		setInvisible(result, invisible, null);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, NINETY_EIGHT, null);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, null);
 		setId(result, widgetId);
 		
 		if (collapsible != null) {
@@ -3072,8 +3221,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									HorizontalAlignment textAlignment,
 									String disabled,
 									String formDisabled,
-									Integer pixelWidth,
-									boolean applyDefaultWidth) {
+									Integer pixelWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
 		
@@ -3084,7 +3232,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		passThroughAttributes.put("autocapitalize", "none");
 		passThroughAttributes.put("autocorrect", "none");
 		
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -3098,10 +3246,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String formDisabled,
 									Integer maxLength,
 									TextCase textCase,
-									Converter converter,
+									Converter<?> converter,
 									KeyboardType keyboardType,
-									Integer pixelWidth,
-									boolean applyDefaultWidth) {
+									Integer pixelWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE,
 												dataWidgetVar,
 												binding,
@@ -3123,7 +3270,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			passThroughAttributes.put("inputmode", keyboardType.toString());
 		}
 		String existingStyle = determineTextTransformStyle(textCase);
-		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -3137,10 +3284,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String formDisabled,
 									Integer maxLength,
 									Format<?> format,
-									Converter converter,
+									Converter<?> converter,
 									KeyboardType keyboardType,
-									Integer pixelWidth,
-									boolean applyDefaultWidth) {
+									Integer pixelWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE,
 												dataWidgetVar,
 												binding,
@@ -3163,7 +3309,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			Map<String, Object> passThroughAttributes = result.getPassThroughAttributes();
 			passThroughAttributes.put("inputmode", keyboardType.toString());
 		}
-		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, existingStyle, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -3235,7 +3381,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								Double step,
 								String disabled,
 								String formDisabled,
-								Converter converter,
+								Converter<?> converter,
 								Integer pixelWidth) {
 		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 
@@ -3272,7 +3418,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									boolean mobile,
 									String disabled,
 									String formDisabled,
-									Converter converter) {
+									Converter<?> converter) {
 		DatePicker result = (DatePicker) input(DatePicker.COMPONENT_TYPE, dataWidgetVar, binding, title, required, disabled, formDisabled);
 		if (! mobile) {
 			result.setShowIcon(true);
@@ -3280,6 +3426,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		result.setShowButtonBar(true);
 
+		// NB we would like a relative year range for the year drop down in the date picker but it doesn't work.
+		// prime docs (not faces) talks about using "-20:+20" for 20 years each side of current date for result.setYearRange()
+		// but this doesn't work.
+		// Using absolute range like "1900:2050" works but this isn't very useful.
+		
 		String converterName = converter.getClass().getSimpleName();
 		if (DD_MM_YYYY.class.getSimpleName().equals(converterName)) {
 			result.setPattern(DD_MM_YYYY.PATTERN);
@@ -3518,8 +3669,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String formDisabled,
 										Integer maxLength,
 										Integer pixelWidth,
-										Integer pixelHeight,
-										boolean applyDefaultWidth) {
+										Integer pixelHeight) {
 		InputTextarea result = (InputTextarea) input(InputTextarea.COMPONENT_TYPE,
 														dataWidgetVar,
 														binding,
@@ -3533,7 +3683,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (maxLength != null) {
 			result.setMaxlength(maxLength.intValue());
 		}
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, pixelHeight, null, null, textAlignment);
 		return result;
 	}
 
@@ -3742,7 +3892,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// NB yes this is backwards coz its inserted
 		href.insert(0, '?').insert(0, reportFormat).insert(0, '.').insert(0, reportName).insert(0, "report/");
 
-		return linkButton((iconStyleClass == null) ? "fa fa-newspaper-o" : iconStyleClass,
+		return linkButton((iconStyleClass == null) ? Icons.FONT_REPORT : iconStyleClass,
 							null,
 							null,
 							title,
@@ -3796,9 +3946,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	/**
 	 * Add the buttons and overlay
-	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
-	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
-	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *			    <p:commandButton id="s03" icon="fa-solid fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:310px">
+	 *					<iframe id="s01_overlayiframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 */
 	private UIComponent uploadButton(String title,
@@ -3822,8 +3972,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String refreshId = refresh.getId();
 		refresh.setName(refreshId);
 		refresh.setActionExpression(methodExpressionForRerender(actionName, false));
-		refresh.setProcess("@none");
-		refresh.setUpdate(update);
+		refresh.setProcess(process); // default process
+		refresh.setUpdate(update); // default update
 		children.add(refresh);
 
 		// Upload button that the overlay panel is attached to
@@ -3831,9 +3981,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
 		uploadButton.setValue(title);
-		uploadButton.setIcon((iconStyleClass == null) ? "fa fa-upload" : iconStyleClass);
+		uploadButton.setIcon((iconStyleClass == null) ? Icons.FONT_UPLOAD : iconStyleClass);
 		uploadButton.setTitle(tooltip);
-		uploadButton.setType("button");
+		uploadButton.setType("button"); // no process or update required
 		setSizeAndTextAlignStyle(uploadButton, null, null, pixelWidth, null, null, pixelHeight, null, null, null);
 		setDisabled(uploadButton, disabled, formDisabled);
 		setConfirmation(uploadButton, confirmationText);
@@ -3848,7 +3998,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		overlay.setDynamic(false);
 		overlay.setShowCloseIcon(true);
 		overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
-		overlay.setStyle("width:50%;height:300px");
+		overlay.setStyle("width:50%;height:310px");
 		// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
 		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
 
@@ -3860,10 +4010,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		children.add(overlay);
 
-		// <iframe id="s01_iframe" src="" style="width:100%;height:280px;border:none"></iframe>
+		// <iframe id="s01_overlayiframe" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
 		setId(iframe, null);
 		overlay.getChildren().add(iframe);
 
@@ -4103,7 +4253,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(image, null);
 		String expression = String.format("#{%s.getContentUrl('%s', true)}", managedBeanName, binding);
 		image.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
-		image.setStyle("width:100%;height:100%;object-fit:contain;");
+		image.setStyle("width:100%;height:100%;object-fit:contain;cursor:pointer");
+		image.setOnclick("window.open(this.src, '_blank')");
 		result.getChildren().add(image);
 
 		return result;
@@ -4161,8 +4312,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										HorizontalAlignment textAlignment,
 										String disabled,
 										String formDisabled,
-										Integer pixelWidth,
-										boolean applyDefaultWidth) {
+										Integer pixelWidth) {
 		ColorPicker result = (ColorPicker) input(ColorPicker.COMPONENT_TYPE,
 													dataWidgetVar,
 													binding,
@@ -4170,7 +4320,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													required,
 													disabled,
 													formDisabled);
-		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null, textAlignment);
+		setSizeAndTextAlignStyle(result, null, null, pixelWidth, null, null, null, null, null, textAlignment);
 		return result;
 	}
 
@@ -4281,7 +4431,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									null,
 									null,
 									// width cannot be set correctly on this component when laid out in a table
-									null, // applyDefaultWidth ? ONE_HUNDRED : null);
+									null,
 									textAlignment);
 		
 		return result;
@@ -4454,7 +4604,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
             dragHandleColumn.setResponsivePriority(1);
 
             final HtmlPanelGroup dragHandle = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
-			dragHandle.setStyleClass("fa fa-sort");
+			dragHandle.setStyleClass(Icons.FONT_ORDERED);
             dragHandleColumn.getChildren().add(dragHandle);
 
             result.getChildren().add(dragHandleColumn);

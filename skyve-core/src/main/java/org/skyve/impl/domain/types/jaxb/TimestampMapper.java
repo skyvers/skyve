@@ -2,9 +2,9 @@ package org.skyve.impl.domain.types.jaxb;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 import org.skyve.domain.types.Timestamp;
+
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "dateTime")
 //@XmlJavaTypeAdapter(TimestampMapper.class)

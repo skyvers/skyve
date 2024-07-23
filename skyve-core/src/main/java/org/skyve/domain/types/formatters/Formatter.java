@@ -1,6 +1,6 @@
 package org.skyve.domain.types.formatters;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Specify a class that can create a formatted String from a value of a certain type.

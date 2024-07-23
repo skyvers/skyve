@@ -19,18 +19,16 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 import javax.cache.management.CacheStatisticsMXBean;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.EntityTransaction;
-import javax.persistence.RollbackException;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
+import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.MappingException;
 import org.hibernate.ScrollMode;
@@ -50,6 +48,7 @@ import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
+import org.hibernate.hql.internal.ast.QuerySyntaxException;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.integrator.spi.IntegratorService;
 import org.hibernate.internal.SessionImpl;
@@ -74,8 +73,8 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
-import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
@@ -127,11 +126,17 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DynamicPersistence;
+import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.RollbackException;
 
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
@@ -278,7 +283,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			 */
 			@Override
 			public Iterable<Integrator> getIntegrators() {
-				List<Integrator> result = new ArrayList<>();
+				List<Integrator> result = new ArrayList<>(1);
+				
 				result.add(new Integrator() {
 					@Override
 					public void integrate(@SuppressWarnings("hiding") Metadata metadata,
@@ -287,6 +293,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 						HibernateListener listener = new HibernateListener();
 						final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
 
+						// For Bizlet callbacks
+						eventListenerRegistry.appendListeners(EventType.POST_LOAD, listener);
+						eventListenerRegistry.appendListeners(EventType.PRE_DELETE, listener);
+						eventListenerRegistry.appendListeners(EventType.POST_DELETE, listener);
+						
 						// For CMS Update callbacks
 						eventListenerRegistry.appendListeners(EventType.POST_UPDATE, listener);
 						eventListenerRegistry.appendListeners(EventType.POST_INSERT, listener);
@@ -296,11 +307,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 						// For ordering collection elements when initialised
 						eventListenerRegistry.appendListeners(EventType.INIT_COLLECTION, listener);
-
-						// For collection mutation callbacks
-						// NB this didn't work - got the event name from the hibernate envers doco - maybe in a new version of hibernate
-//						cfg.setListeners("pre-collection-update", new PreCollectionUpdateEventListener[] {hibernateListener});
-//						cfg.setListeners("pre-collection-remove", new PreCollectionRemoveEventListener[] {hibernateListener});
 					}
 					
 					@Override
@@ -463,7 +469,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 	private void treatPersistenceThrowable(Throwable t, OperationType operationType, PersistentBean bean) {
 t.printStackTrace();
-		if (t instanceof javax.persistence.OptimisticLockException) {
+		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean.isPersisted()) {
 				try {
 					session.refresh(bean);
@@ -503,6 +509,14 @@ t.printStackTrace();
 			throw (MetaDataException) t.getCause();
 		}
 		else {
+			if (UtilImpl.DEV_MODE) {
+				if (t instanceof QuerySyntaxException) {
+					String m = t.getMessage();
+					if ((m != null) && m.contains("is not mapped")) {
+						throw new DomainException("Entity is not mapped.  Is domain generation required or are there compile errors?", t);
+					}
+				}
+			}
 			throw new DomainException(t);
 		}
 	}
@@ -532,7 +546,28 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope) {
+	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
+		try {
+			setDocumentPermissionScopes(scope);
+			return function.apply(this);
+		}
+		finally {
+			resetDocumentPermissionScopes();
+		}
+	}
+
+	@Override
+	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
+		try {
+			setDocumentPermissionScopes(scope);
+			consumer.accept(this);
+		}
+		finally {
+			resetDocumentPermissionScopes();
+		}
+	}
+	
+	private void setDocumentPermissionScopes(DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
@@ -552,9 +587,8 @@ t.printStackTrace();
 			}
 		}
 	}
-
-	@Override
-	public void resetDocumentPermissionScopes() {
+	
+	private void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 
@@ -612,36 +646,45 @@ t.printStackTrace();
 
 		String entityName = getDocumentEntityName(filterDocument.getOwningModuleName(), filterDocument.getName());
 		
-		String noneFilterName = new StringBuilder(32).append(entityName).append("NoneFilter").toString();
-		String customerFilterName = new StringBuilder(32).append(entityName).append("CustomerFilter").toString();
-		String dataGroupIdFilterName = new StringBuilder(32).append(entityName).append("DataGroupIdFilter").toString();
-		String userIdFilterName = new StringBuilder(32).append(entityName).append("UserIdFilter").toString();
-		session.disableFilter(noneFilterName);
-		session.disableFilter(customerFilterName);
-		session.disableFilter(dataGroupIdFilterName);
-		session.disableFilter(userIdFilterName);
-		
-		if (DocumentPermissionScope.none.equals(scope)) {
-			session.enableFilter(noneFilterName);
-		}
-		// Only apply the customer filter if we are in multi-tenant mode
-		if (UtilImpl.CUSTOMER == null) {
-			if (DocumentPermissionScope.customer.equals(scope) ||
-					DocumentPermissionScope.dataGroup.equals(scope) ||
-					DocumentPermissionScope.user.equals(scope)) {
-				Filter filter = session.enableFilter(customerFilterName);
-				filter.setParameter("customerParam", customer.getName());
+		// Catch HibernateException here which may mean that gen domain needs to be run.
+		try {
+			String noneFilterName = new StringBuilder(32).append(entityName).append("NoneFilter").toString();
+			String customerFilterName = new StringBuilder(32).append(entityName).append("CustomerFilter").toString();
+			String dataGroupIdFilterName = new StringBuilder(32).append(entityName).append("DataGroupIdFilter").toString();
+			String userIdFilterName = new StringBuilder(32).append(entityName).append("UserIdFilter").toString();
+			session.disableFilter(noneFilterName);
+			session.disableFilter(customerFilterName);
+			session.disableFilter(dataGroupIdFilterName);
+			session.disableFilter(userIdFilterName);
+			
+			if (DocumentPermissionScope.none.equals(scope)) {
+				session.enableFilter(noneFilterName);
+			}
+			// Only apply the customer filter if we are in multi-tenant mode
+			if (UtilImpl.CUSTOMER == null) {
+				if (DocumentPermissionScope.customer.equals(scope) ||
+						DocumentPermissionScope.dataGroup.equals(scope) ||
+						DocumentPermissionScope.user.equals(scope)) {
+					Filter filter = session.enableFilter(customerFilterName);
+					filter.setParameter("customerParam", customer.getName());
+				}
+			}
+			if ((userDataGroupId != null) && 
+					(DocumentPermissionScope.dataGroup.equals(scope) ||
+						DocumentPermissionScope.user.equals(scope))) {
+				Filter filter = session.enableFilter(dataGroupIdFilterName);
+				filter.setParameter("dataGroupIdParam", userDataGroupId);
+			}
+			if (DocumentPermissionScope.user.equals(scope)) {
+				Filter filter = session.enableFilter(userIdFilterName);
+				filter.setParameter("userIdParam", user.getId());
 			}
 		}
-		if ((userDataGroupId != null) && 
-				(DocumentPermissionScope.dataGroup.equals(scope) ||
-					DocumentPermissionScope.user.equals(scope))) {
-			Filter filter = session.enableFilter(dataGroupIdFilterName);
-			filter.setParameter("dataGroupIdParam", userDataGroupId);
-		}
-		if (DocumentPermissionScope.user.equals(scope)) {
-			Filter filter = session.enableFilter(userIdFilterName);
-			filter.setParameter("userIdParam", user.getId());
+		catch (HibernateException e) {
+			if (UtilImpl.DEV_MODE) {
+				throw new DomainException("Unable to set hibernate filters - Is domain generation required or are there compile errors?", e);
+			}
+			throw e;
 		}
 	}
 	
@@ -701,6 +744,12 @@ t.printStackTrace();
 	// So we have to ensure its robust as all fuck
 	@Override
 	public final void commit(boolean close) {
+		commit(close, true);
+	}
+	
+	// this variant is used by BackupUtil.executeScript() where the ADM_)Uniqueness table 
+	// may not exist after a script - eg drop script
+	public final void commit(boolean close, boolean removeUniqueHashes) {
 		boolean rollbackOnly = false;
 		try {
 			if (em != null) { // can be null after a relogin
@@ -715,20 +764,22 @@ t.printStackTrace();
 					}
 					else {
 						try {
-							// remove all inserted unique hashes (can only do if we have an em)
-							try {
-								final Persistent persistent = new Persistent();
-								persistent.setName(UniquenessEntity.TABLE_NAME);
-								final String persistentIdentifier = persistent.getPersistentIdentifier();
-								for (String hash : uniqueHashes) {
-									StringBuilder query = new StringBuilder(64);
-									query.append("delete from ").append(persistentIdentifier).append(" where ");
-									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
-									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+							// remove all inserted unique hashes if we were told to (can only do if we have an em)
+							if (removeUniqueHashes) {
+								try {
+									final Persistent persistent = new Persistent();
+									persistent.setName(UniquenessEntity.TABLE_NAME);
+									final String persistentIdentifier = persistent.getPersistentIdentifier();
+									for (String hash : uniqueHashes) {
+										StringBuilder query = new StringBuilder(64);
+										query.append("delete from ").append(persistentIdentifier).append(" where ");
+										query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+										newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+									}
 								}
-							}
-							finally {
-								uniqueHashes.clear();
+								finally {
+									uniqueHashes.clear();
+								}
 							}
 						}
 						finally {
@@ -955,6 +1006,7 @@ t.printStackTrace();
 						// This implements persistence by reachability for dynamic -> static beans in mixed graphs
 						if (beansToMerge != null) {
 							if ((owningRelation != null) && // not the top-level bean or parent
+									(owningDocument != null) && // not the top-level bean or parent
 									(persistentBean != beanToSave) && // not a reference to the top level bean
 									(! document.isDynamic()) && // bean is not dynamic
 										owningRelation.isPersistent() && // persistent relation
@@ -1500,9 +1552,10 @@ t.printStackTrace();
 								@SuppressWarnings("unchecked")
 								List<Bean> unmergedCollection = (List<Bean>) BindUtil.get(unmergedPart, attributeName);
 	
-								// ensure that we do not try to add the elements
-								// of a collection to itself
-								if (mergedCollection != unmergedCollection) {
+								// ensure that we do not try to add the elements of a collection to itself
+								if ((mergedCollection != null) && 
+										(unmergedCollection != null) &&
+										(mergedCollection != unmergedCollection)) {
 									mergedCollection.clear();
 									mergedCollection.addAll(unmergedCollection);
 								}
@@ -1829,7 +1882,7 @@ if (document.isDynamic()) return;
 													Document owningDocument,
 													Relation owningRelation,
 													Bean visitedBean) throws Exception {
-							if (owningRelation == null) { // top level bean or parent
+							if ((owningRelation == null) || (owningDocument == null)) { // top level bean or parent
 								return true;
 							}
 							
@@ -1944,7 +1997,8 @@ if (document.isDynamic()) return;
 				// Need to check aggregation FKs
 				// Need to check collection joining table element_id FKs
 				// but do NOT need to check child collection parent_ids as they point back
-				if (! CollectionType.child.equals(type)) {
+				// and do NOT need to check embedded associations as they have no *_id FKs
+				if (! (CollectionType.child.equals(type) || AssociationType.embedded.equals(type))) {
 					// Check composed collections if we are deleting a composed collection element
 					// directly using p.delete(), otherwise,
 					// if preRemove() is being fired, we should NOT check composed collections or associations
@@ -2224,8 +2278,7 @@ if (document.isDynamic()) return;
 				}
 			}
 		}
-		catch (@SuppressWarnings("unused") StaleObjectStateException e) // thrown from session.load() with LockMode.UPGRADE
-		{
+		catch (@SuppressWarnings("unused") StaleObjectStateException e) { // thrown from session.load() with LockMode.UPGRADE
 			// Database was updated by another user.
 			// The select for update is by [bizId] and [bizVersion] and other transaction changed the bizVersion
 			// so it cannot be found.
@@ -2250,7 +2303,7 @@ if (document.isDynamic()) return;
 	public void postLoad(PersistentBean loadedBean)
 	throws Exception {
 		// Inject any dependencies
-		BeanProvider.injectFields(loadedBean);
+		UtilImpl.inject(loadedBean);
 
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(loadedBean.getBizModule());
@@ -2577,7 +2630,6 @@ public void doWorkOnConnection(Session session) {
 	}
 	
 	private static final Integer NEW_VERSION = Integer.valueOf(0);
-	private static final String CHILD_PARENT_ID = ChildBean.PARENT_NAME + "_id";
 	
 	@Override
 	public void upsertBeanTuple(PersistentBean bean) {
@@ -2627,7 +2679,7 @@ public void doWorkOnConnection(Session session) {
 					query.append(',').append(HierarchicalBean.PARENT_ID).append("=:").append(HierarchicalBean.PARENT_ID);
 				}
 				else {
-					query.append(',').append(CHILD_PARENT_ID).append("=:").append(CHILD_PARENT_ID);
+					query.append(',').append(ChildBean.CHILD_PARENT_ID).append("=:").append(ChildBean.CHILD_PARENT_ID);
 				}
 			}
 
@@ -2680,8 +2732,8 @@ public void doWorkOnConnection(Session session) {
 					values.append(",:").append(HierarchicalBean.PARENT_ID);
 				}
 				else {
-					columns.append(',').append(CHILD_PARENT_ID);
-					values.append(",:").append(CHILD_PARENT_ID);
+					columns.append(',').append(ChildBean.CHILD_PARENT_ID);
+					values.append(",:").append(ChildBean.CHILD_PARENT_ID);
 				}
 			}
 			
@@ -2757,7 +2809,7 @@ public void doWorkOnConnection(Session session) {
 			}
 			else {
 				Bean parent = ((ChildBean<?>) bean).getParent();
-				sql.putParameter(CHILD_PARENT_ID, (parent == null) ? null : parent.getBizId(), false);
+				sql.putParameter(ChildBean.CHILD_PARENT_ID, (parent == null) ? null : parent.getBizId(), false);
 			}
 		}
 
@@ -2860,31 +2912,32 @@ public void doWorkOnConnection(Session session) {
 										" from bean " + owningBean, e);
 		}
 		
-		
-		for (Bean elementBean : elementBeans) {
-			query.append("select * from ").append(persistentIdentifier).append('_').append(collectionName);
-			query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
-			query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
-			query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
-
-			SQL sql = newSQL(query.toString());
-			sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
-			sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
-
-			boolean notExists = sql.tupleResults().isEmpty();
-			query.setLength(0);
-			if (notExists) {
-				query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
-				query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
-				query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
-				query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
-
-				sql = newSQL(query.toString());
+		if (elementBeans != null) {
+			for (Bean elementBean : elementBeans) {
+				query.append("select * from ").append(persistentIdentifier).append('_').append(collectionName);
+				query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
+				query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
+				query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
+	
+				SQL sql = newSQL(query.toString());
 				sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
 				sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
-
-				sql.execute();
+	
+				boolean notExists = sql.tupleResults().isEmpty();
 				query.setLength(0);
+				if (notExists) {
+					query.append("insert into ").append(persistentIdentifier).append('_').append(collectionName);
+					query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
+					query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+					query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
+	
+					sql = newSQL(query.toString());
+					sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
+					sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
+	
+					sql.execute();
+					query.setLength(0);
+				}
 			}
 		}
 	}
@@ -2916,12 +2969,14 @@ public void doWorkOnConnection(Session session) {
 										" from bean " + owningBean, e);
 		}
 		
-		for (Bean elementBean : elementBeans) {
-			SQL sql = newSQL(query.toString());
-			sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
-			sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
-
-			sql.execute();
+		if (elementBeans != null) {
+			for (Bean elementBean : elementBeans) {
+				SQL sql = newSQL(query.toString());
+				sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
+				sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
+	
+				sql.execute();
+			}
 		}
 	}
 

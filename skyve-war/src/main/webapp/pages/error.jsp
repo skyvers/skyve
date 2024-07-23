@@ -6,14 +6,18 @@
 <%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.impl.web.UserAgent"%>
 <%@page import="org.skyve.impl.web.WebUtil"%>
+<%@page import="org.skyve.impl.web.filter.ResponseHeaderFilter"%>
 <%
+	// The web container error processing does not pass the error page the web app's filters 
+	ResponseHeaderFilter.applySecurityHeaders(response);
+	
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = WebUtil.getRefererHeader(request);
 	Principal p = request.getUserPrincipal();
 	User user = null;
 	try {
-		user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+		user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName());
 	}
 	catch (SkyveException e) {
 		// The principal name is not a user in the database - continue on...
@@ -67,7 +71,7 @@
 		            		</div>
 		            	</div>
 						<div class="field">
-							<a href="<%=request.getContextPath()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
+							<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.loginError.retry", locale)%></a>
 						</div>
 						<div class="field">
 							<a href="mailto:<%=org.skyve.util.Util.getSupportEmailAddress()%>?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.error.noMessage", locale) : exception.getLocalizedMessage()%> for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.error.notLoggedIn", locale)%> at <%=new java.util.Date()%>"

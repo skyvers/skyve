@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -94,26 +96,29 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 
         try {
             Weld weld = bootstrapSkyve();
-
-            GeneratorConfig config = new FlutterGenerator.GeneratorConfig();
-            config.setUxui(uxui);
-            config.setProjectName(projectName);
-            config.setProjectPath(projectPath);
-            config.setCustomerName(customer);
-
-            modocWhitelist.forEach(config::addModocWhitelistEntry);
-
-            FlutterGenerator generator = new FlutterGenerator(config);
-            generator.generate();
-
-            weld.shutdown();
+            try {
+	            GeneratorConfig config = new FlutterGenerator.GeneratorConfig();
+	            config.setUxui(uxui);
+	            config.setProjectName(projectName);
+	            config.setProjectPath(projectPath);
+	            config.setCustomerName(customer);
+	
+	            modocWhitelist.forEach(config::addModocWhitelistEntry);
+	
+	            FlutterGenerator generator = new FlutterGenerator(config);
+	            generator.generate();
+            }
+	        finally {
+                weld.shutdown();
+            }
         } catch (Exception e) {
             getLog().error(e);
             throw new MojoExecutionException("Error while generating project", e);
         }
     }
 
-    private Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
+    @SuppressWarnings("resource") // NB for weld use
+	private Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
         configureClasspath(srcDir);
 
         String output = project.getBuild()
@@ -128,7 +133,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 
         Weld weld = new Weld();
         weld.addPackage(true, SkyveCDIProducer.class);
-//        weld.addPackage(true, WeldMarker.class); // class is in ejb project...
+//        weld.addPackage(true, WeldMarker.class); // class is in war project...
         weld.initialize();
 
         Class<BeforeShutdownImpl> bsi = BeforeShutdownImpl.class;
@@ -169,18 +174,16 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
                     // this should play a bit nicer while having the project
                     // open in another editor.
                     debug("Deleting contents of: " + root);
-                    List<Path> dirContents = Files.list(root)
-                                                  .collect(toList());
-
-                    for (Path path : dirContents) {
-                        debug("Deleting: " + path);
-                        if (path.toFile()
-                                .isDirectory()) {
-                            org.terracotta.utilities.io.Files.deleteTree(path);
-                        } else {
-                            path.toFile()
-                                .delete();
-                        }
+                    try (Stream<Path> dirContents = Files.list(root)) {
+	                    for (Path path : dirContents.collect(toList())) {
+	                        debug("Deleting: " + path);
+	                        File file = path.toFile();
+	                        if (file.isDirectory()) {
+	                            FileUtils.deleteDirectory(path.toFile());
+	                        } else {
+	                            file.delete();
+	                        }
+	                    }
                     }
                 } catch (IOException e) {
                     getLog().error(e);

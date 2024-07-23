@@ -3,11 +3,11 @@ package org.skyve.metadata.view.model.chart;
 import java.time.Month;
 import java.time.format.TextStyle;
 
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.CORE;
 import org.skyve.impl.util.XMLMetaData;
+
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * Bucket a DateOnly, DateTime, TimeOnly or Timestamp (or any extension of java.util.Date)

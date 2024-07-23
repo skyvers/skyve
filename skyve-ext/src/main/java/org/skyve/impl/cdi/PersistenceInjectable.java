@@ -1,8 +1,8 @@
 package org.skyve.impl.cdi;
 
 import java.util.List;
-
-import javax.enterprise.inject.Alternative;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -15,6 +15,8 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
+
+import jakarta.enterprise.inject.Alternative;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.
@@ -249,15 +251,15 @@ public class PersistenceInjectable implements Persistence {
 	}
 
 	@Override
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope) {
-		CORE.getPersistence().setDocumentPermissionScopes(scope);
+	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
+		return CORE.getPersistence().withDocumentPermissionScopes(scope, function);
 	}
 
 	@Override
-	public void resetDocumentPermissionScopes() {
-		CORE.getPersistence().resetDocumentPermissionScopes();
+	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
+		CORE.getPersistence().withDocumentPermissionScopes(scope, consumer);
 	}
-
+	
 	@Override
 	public SQL newSQL(String query) {
 		return CORE.getPersistence().newSQL(query);

@@ -1,16 +1,17 @@
 package modules.admin.domain;
 
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import org.skyve.CORE;
@@ -41,6 +42,7 @@ import org.skyve.util.Util;
  */
 @XmlType
 @XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public abstract class User extends AbstractPersistentBean implements org.skyve.domain.app.admin.User {
 	/**
 	 * For Serialization
@@ -170,6 +172,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 			to confirm the new user name and password and membership of groups.
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum WizardState implements Enumeration {
 		confirmContact("confirmContact", "confirmContact"),
 		createContact("createContact", "createContact"),
@@ -241,6 +244,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Groups
 	 **/
 	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum GroupSelection implements Enumeration {
 		existingGroups("existingGroups", "Existing groups"),
 		newGroup("newGroup", "New group");

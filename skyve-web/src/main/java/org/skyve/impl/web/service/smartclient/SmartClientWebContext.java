@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.ViewWebContext;
 import org.skyve.util.Util;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public final class SmartClientWebContext extends ViewWebContext {
 	private static final long serialVersionUID = 7657798607012186366L;

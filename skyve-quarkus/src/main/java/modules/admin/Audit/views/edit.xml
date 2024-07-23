@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit" 
+		title="admin.audit.edit.title" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+		xmlns="http://www.skyve.org/xml/view" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <form border="true" borderTitle="admin.audit.edit.versionDetails.borderTitle" disabled="true">
+        <column responsiveWidth="3" />
+        <column responsiveWidth="6" />
+        <column />
+        <row>
+            <item showLabel="true" label="User">
+            	<blurb>{sourceVersion.userName}</blurb>
+            </item>
+		</row>
+        <row>
+            <item showLabel="true" label="Timestamp">
+            	<blurb>{sourceVersion.timestamp}</blurb>
+            </item>
+		</row>
+		<row>
+            <item showLabel="true" label="Operation">
+            	<blurb>{sourceVersion.operation}</blurb>
+            </item>
+        </row>
+        <row>
+            <item showLabel="true" label="Module">
+            	<blurb>{sourceVersion.auditModuleName}</blurb>
+            </item>
+		</row>
+		<row>
+            <item showLabel="true" label="Document">
+            	<blurb>{sourceVersion.auditDocumentName}</blurb>
+            </item>
+        </row>
+        <row>
+            <item showLabel="true" label="Description">
+            	<blurb>{sourceVersion.auditBizKey}</blurb>
+            </item>
+        </row>
+    </form>
+    <actions>
+		<cancel />
+    </actions>
+</view>

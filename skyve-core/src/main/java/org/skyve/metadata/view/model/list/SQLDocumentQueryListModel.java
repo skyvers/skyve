@@ -11,7 +11,8 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 	private SQL summarySQL;
 	private SQLFilter filter;
 	
-	protected void setSQL(SQL sql) {
+	protected SQLDocumentQueryListModel(SQL sql) {
+		super(null); // this is wrong
 		this.inputSQL = sql;
 	}
 
@@ -91,6 +92,7 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 			detailSQL = inputSQL;//query.constructDocumentQuery(null, getSelectedTagId());
 		}
 		if (summarySQL == null) {
+			@SuppressWarnings("unused")
 			AggregateFunction summary = getSummary();
 			summarySQL = inputSQL;//query.constructDocumentQuery((summary == null) ? AggregateFunction.Count : summary, getSelectedTagId());
 		}

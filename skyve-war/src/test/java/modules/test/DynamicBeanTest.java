@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -32,6 +32,9 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.admin.domain.Contact;
+import modules.test.AllAttributesDynamicPersistent.TestDynamicImage;
+import modules.test.AllAttributesDynamicPersistent.TestListModel;
+import modules.test.AllAttributesDynamicPersistent.TestServerSideAction;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllDynamicAttributesPersistent;
 
@@ -187,6 +190,8 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		// Id collection to scalar
 		@SuppressWarnings("unchecked")
 		List<? extends Bean> elements = (List<? extends Bean>) Binder.get(bean, collectionPropertyName);
+		// its a test - let in NPE
+		@SuppressWarnings("null")
 		String bizId = elements.get(1).getBizId();
 		binding = Binder.createCompoundBinding(Binder.createIdBinding(collectionPropertyName, bizId), AllAttributesPersistent.normalIntegerPropertyName);
 		Binder.set(bean, binding, INTEGER);
@@ -229,13 +234,13 @@ public class DynamicBeanTest extends AbstractSkyveTest {
 		Object dataFactory = CORE.getRepository().getDataFactory(c, aadpd);
 		Assert.assertNotNull(dataFactory);
 		
-		ServerSideAction<Bean> action = aadpd.getServerSideAction(c, "ServerSideAction", true);
+		ServerSideAction<Bean> action = aadpd.getServerSideAction(c, TestServerSideAction.class.getSimpleName(), true);
 		Assert.assertNotNull(action);
 
-		DynamicImage<Bean> image = aadpd.getDynamicImage(c, "DynamicImage");
+		DynamicImage<Bean> image = aadpd.getDynamicImage(c, TestDynamicImage.class.getSimpleName());
 		Assert.assertNotNull(image);
 
-		ListModel<Bean> model = aadpd.getListModel(c, "ListModel", true);
+		ListModel<Bean> model = aadpd.getListModel(c, TestListModel.class.getSimpleName(), false);
 		Assert.assertNotNull(model);
 	}
 	

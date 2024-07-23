@@ -17,7 +17,6 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -26,9 +25,13 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.JSON;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public class ContentChecker {
 	private int missingContentCount = 0;
@@ -37,14 +40,14 @@ public class ContentChecker {
 	public void checkContent() throws Exception {
 		Customer customer = CORE.getCustomer();
 		String customerName = customer.getName();
-
+		String dynamicEntityPersistentIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
+		
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 
 			try (ContentManager cm = EXT.newContentManager()) {
 				missingContentCount = 0;
 				erroneousContentCount = 0;
-
 				for (Table table : BackupUtil.getTables()) {
 					if (! hasContent(table)) {
 						continue;
@@ -52,19 +55,19 @@ public class ContentChecker {
 
 					StringBuilder sql = new StringBuilder(128);
 					try (Statement statement = connection.createStatement()) {
-						sql.append("select * from ").append(table.name);
+						sql.append("select * from ").append(table.persistentIdentifier);
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
 						try (ResultSet resultSet = statement.getResultSet()) {
-							UtilImpl.LOGGER.info("Checking content for " + table.name);
+							UtilImpl.LOGGER.info("Checking content for " + table.persistentIdentifier);
 
 							while (resultSet.next()) {
 								for (String name : table.fields.keySet()) {
-									AttributeType attributeType = table.fields.get(name);
+									AttributeType attributeType = table.fields.get(name).getLeft();
 									if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 										String stringValue = resultSet.getString(name);
 										if (! resultSet.wasNull()) {
-											checkContent(stringValue, cm, name, table.name, attributeType, customer);
+											checkContent(stringValue, cm, name, table.persistentIdentifier, attributeType, customer, false);
 										}
 									}
 								}
@@ -81,7 +84,7 @@ public class ContentChecker {
 				try (Statement statement = connection.createStatement()) {
 					// Iterate through all DynamicEntities looking for content/image attribute values
 					StringBuilder sql = new StringBuilder(128);
-					sql.append("select bizId, moduleName, documentName, fields from ").append(RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME);
+					sql.append("select bizId, moduleName, documentName, fields from ").append(dynamicEntityPersistentIdentifier);
 					if (UtilImpl.CUSTOMER == null) {
 						sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 					}
@@ -105,7 +108,7 @@ public class ContentChecker {
 									String fieldName = a.getName();
 									String contentId = (String) fieldsJSON.get(fieldName);
 									if (contentId != null) {
-										checkContent(contentId, cm, fieldName, RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME, t, customer);
+										checkContent(contentId, cm, fieldName, dynamicEntityPersistentIdentifier, t, customer, true);
 									}
 								}
 							}
@@ -123,14 +126,15 @@ public class ContentChecker {
 	private void checkContent(String contentId,
 								ContentManager cm,
 								String fieldName,
-								String tableName,
+								String persistentIdentifier,
 								AttributeType attributeType,
-								Customer customer) {
+								Customer customer,
+								boolean dynamicDocument) {
 		AttachmentContent content;
 		try {
 			content = cm.getAttachment(contentId);
 			if (content == null) {
-				UtilImpl.LOGGER.severe("Detected missing content " + contentId + " for field name " + fieldName + " for table " + tableName);
+				UtilImpl.LOGGER.severe("Detected missing content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
 
 				// Construct what would be the file path.
 				final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME).toFile();
@@ -145,8 +149,13 @@ public class ContentChecker {
 			}
 			else {
 				String attributeName = content.getAttributeName();
-				if (! fieldName.equals(attributeName)) {
-					UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Attribute Name " + attributeName + " does not match content field name " + fieldName);
+				String noEmbeddedPrefixFieldName = fieldName;
+				int embeddedPrefixHyphenIndex = fieldName.lastIndexOf('_');
+				if (embeddedPrefixHyphenIndex >= 0) {
+					noEmbeddedPrefixFieldName = fieldName.substring(embeddedPrefixHyphenIndex + 1);
+				}
+				if (! noEmbeddedPrefixFieldName.equals(attributeName)) {
+					UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not match content field name " + noEmbeddedPrefixFieldName);
 					erroneousContentCount++;
 				}
 				else {
@@ -157,49 +166,52 @@ public class ContentChecker {
 						Document d = m.getDocument(customer, bizDocument);
 						Persistent p = d.getPersistent();
 						if (p == null) {
-							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Document " + bizModule + "." + bizDocument + " is not persistent");
+							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " is not persistent");
 							erroneousContentCount++;
 						}
-						else if (! tableName.equals(RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME) && 
-									(! tableName.equals(p.getPersistentIdentifier()))) {
-							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Document " + bizModule + "." + bizDocument + " has a persistent identifier of " + p.getPersistentIdentifier());
+						else if ((embeddedPrefixHyphenIndex < 0) && // not content through an embedded association
+									(! dynamicDocument) && // not a dynamic entity
+									(! persistentIdentifier.equals(p.getPersistentIdentifier()))) {
+							UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " has a persistent identifier of " + p.getPersistentIdentifier());
 							erroneousContentCount++;
 						}
 						else {
 							Attribute a = d.getPolymorphicAttribute(customer, attributeName);
 
 							if (a == null) {
-								UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Attribute Name " + attributeName + " does not exist for document " + bizModule + "." + bizDocument);
+								UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + attributeName + " does not exist for document " + bizModule + "." + bizDocument);
 								erroneousContentCount++;
 							}
 							else {
 								AttributeType type = a.getAttributeType();
 								if (type != attributeType) {
-									UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Attribute Name " + fieldName + " is not a(n) " + attributeType + " for document " + bizModule + "." + bizDocument);
+									UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Attribute Name " + fieldName + " is not a(n) " + attributeType + " for document " + bizModule + "." + bizDocument);
 									erroneousContentCount++;
 								}
 							}
 						}
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
-						UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + tableName + ": Content Document " + bizModule + "." + bizDocument + " does not exist for customer " + customer.getName());
+						UtilImpl.LOGGER.severe("Detected error in content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier + ": Content Document " + bizModule + "." + bizDocument + " does not exist for customer " + customer.getName());
 						erroneousContentCount++;
 					}
 				}
 			}
 		}
 		catch (Exception e) {
-			UtilImpl.LOGGER.severe("Error checking content " + contentId + " for field name " + fieldName + " for table " + tableName);
+			UtilImpl.LOGGER.severe("Error checking content " + contentId + " for field name " + fieldName + " for table " + persistentIdentifier);
 			e.printStackTrace();
 		}
 	}
 	
 	private Collection<Table> tablesForAllCustomers = null;
 	
-	public String bogusContentReference(String contentId) throws Exception {
+	public @Nullable String bogusContentReference(@Nonnull String contentId, @Nonnull Customer customer) throws Exception {
 		if (tablesForAllCustomers == null) {
 			tablesForAllCustomers = BackupUtil.getTablesForAllCustomers();
 		}
+		String dynamicEntityPersistentIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
+
 		
 		Persistence p = CORE.getPersistence();
 		StringBuilder sql = new StringBuilder(128);
@@ -208,10 +220,10 @@ public class ContentChecker {
 			sql.setLength(0);
 
 			for (String name : table.fields.keySet()) {
-				AttributeType attributeType = table.fields.get(name);
+				AttributeType attributeType = table.fields.get(name).getLeft();
 				if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 					if (sql.length() == 0) {
-						sql.append("select bizId from ").append(table.name).append(" where ");
+						sql.append("select bizId from ").append(table.persistentIdentifier).append(" where ");
 					}
 					else {
 						sql.append(" or ");
@@ -223,7 +235,7 @@ public class ContentChecker {
 			if (sql.length() > 0) {
 				String rowBizId = p.newSQL(sql.toString()).putParameter("contentId", contentId, false).scalarResult(String.class);
 				if (rowBizId != null) {
-					return table.name + '#' + rowBizId;
+					return table.agnosticIdentifier + '#' + rowBizId;
 				}
 			}
 		}
@@ -232,7 +244,7 @@ public class ContentChecker {
 		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		// Find any DynamicEntity with the given contentId as a value in the fields JSON
 		StringBuilder like = new StringBuilder(64).append("%\":\"").append(contentId).append("\"%");
-		SQL q = p.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from " + RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME + " where fields like :like");
+		SQL q = p.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from " + dynamicEntityPersistentIdentifier + " where fields like :like");
 		List<Object[]> rows = q.putParameter("like", like.toString(), false).tupleResults();
 		for (Object[] row : rows) {
 			// Determine the attribute name from the fields JSON, 
@@ -245,13 +257,13 @@ public class ContentChecker {
 			if (previousDoubleQuoteIndex >= 0) {
 				String attributeName = fields.substring(previousDoubleQuoteIndex + 1);
 				Customer c = r.getCustomer((String) row[1]);
-				Module m = c.getModule((String) row[2]);
+				Module m = r.getModule(c, (String) row[2]);
 				Document d = m.getDocument(c, (String) row[3]);
 				Attribute a = d.getPolymorphicAttribute(c, attributeName);
 				if (a != null) {
 					AttributeType t = a.getAttributeType();
 					if ((t == AttributeType.content) || (t == AttributeType.image)) {
-						return RDBMSDynamicPersistence.DYNAMIC_ENTITY_TABLE_NAME + '#' + row[0];
+						return dynamicEntityPersistentIdentifier + '#' + row[0];
 					}
 				}
 			}
@@ -260,9 +272,9 @@ public class ContentChecker {
 		return null;
 	}
 	
-	private static boolean hasContent(Table table) {
+	private static boolean hasContent(@Nonnull Table table) {
 		for (String name : table.fields.keySet()) {
-			AttributeType attributeType = table.fields.get(name);
+			AttributeType attributeType = table.fields.get(name).getLeft();
 			if (AttributeType.content.equals(attributeType) || AttributeType.image.equals(attributeType)) {
 				return true;
 			}

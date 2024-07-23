@@ -26,6 +26,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
@@ -38,6 +39,8 @@ import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
+
+import com.google.common.base.MoreObjects;
 
 public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	private static final long serialVersionUID = -5291187014833234045L;
@@ -229,21 +232,23 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 					columns.add(column);
 					columnIndex.increment();
 				}
-				else if (includeAssociationBizKeys && attribute instanceof Association) {
+				else if (includeAssociationBizKeys && (attribute instanceof Association)) {
 					final Association association = (Association) attribute;
-
-					final MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
-					column.setEditable(false);
-					column.setBinding(BindUtil.createCompoundBinding(association.getName(), Bean.BIZ_KEY));
-					if (orderNotApplied.booleanValue()) {
-						column.setSortOrder(SortDirection.ascending);
-						orderNotApplied.setValue(false);
+					// Don't include embedded associations since there is no bizKey
+					if (AssociationType.embedded != association.getType()) {
+						final MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
+						column.setEditable(false);
+						column.setBinding(BindUtil.createCompoundBinding(association.getName(), Bean.BIZ_KEY));
+						if (orderNotApplied.booleanValue()) {
+							column.setSortOrder(SortDirection.ascending);
+							orderNotApplied.setValue(false);
+						}
+						if (columnIndex.intValue() > 7) {
+							column.setHidden(true);
+						}
+						columns.add(column);
+						columnIndex.increment();
 					}
-					if (columnIndex.intValue() > 7) {
-						column.setHidden(true);
-					}
-					columns.add(column);
-					columnIndex.increment();
 				}
 /*
 Commented this out as it inadvertently creates dependencies on first-level associations on the referenced document.
@@ -380,4 +385,12 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
 	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .toString();
+    }
 }

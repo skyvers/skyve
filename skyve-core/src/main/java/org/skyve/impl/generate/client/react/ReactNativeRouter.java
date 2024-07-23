@@ -111,9 +111,9 @@ public class ReactNativeRouter {
 											String itemQueryName,
 											String icon16,
 											String iconStyleClass) {
-				String moduleName = itemModule.getName();
-				String modelName = item.getModelName();
-				String componentName = ((modelName == null) ? itemQueryName : modelName) + "Cal";
+				//String moduleName = itemModule.getName();
+				//String modelName = item.getModelName();
+				//String componentName = ((modelName == null) ? itemQueryName : modelName) + "Cal";
 				//processItem(new ReactCalendarView(generator, moduleName, componentName), null);
 			}
 
@@ -171,9 +171,9 @@ public class ReactNativeRouter {
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
-				String moduleName = itemModule.getName();
-				String modelName = item.getModelName();
-				String componentName = ((modelName == null) ? itemQueryName : modelName) + "Map";
+				//String moduleName = itemModule.getName();
+				//String modelName = item.getModelName();
+				//String componentName = ((modelName == null) ? itemQueryName : modelName) + "Map";
 				//processItem(new ReactMapView(generator, moduleName, componentName), null);
 			}
 
@@ -185,15 +185,15 @@ public class ReactNativeRouter {
 										String itemQueryName,
 										String icon16,
 										String iconStyleClass) {
-				String moduleName = itemModule.getName();
-				String modelName = item.getModelName();
-				String componentName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
+				//String moduleName = itemModule.getName();
+				//String modelName = item.getModelName();
+				//String componentName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
 				//processItem(new ReactTreeView(generator, moduleName, componentName), null);
 			}
 		}.render(c);
 	}
 
-	private void processItem(ReactComponent component, String[] params) {
+	private void processItem(ReactComponent component, @SuppressWarnings("unused") String[] params) {
 		String moduleName = component.moduleName;
 		String componentName = component.componentName;
 

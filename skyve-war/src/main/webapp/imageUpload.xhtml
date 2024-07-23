@@ -11,6 +11,7 @@
 		</f:metadata>
 		<h:head>
 			<title>#{_skyveImage.i18n['page.contentUpload.title']}</title>
+			<base href="#{_skyveImage.baseHref}" />
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -23,6 +24,11 @@
 					background-image: url(images/filedrop.png);
 					background-position: right bottom;
 					background-repeat: no-repeat;
+				}
+				@media(max-width: 640px) {
+					.ui-fileupload-buttonbar .ui-button {
+						padding: 20px !important;
+					}
 				}
 				<!-- Place the cropper at 50% of width and matching height -->
 				.square {
@@ -41,8 +47,8 @@
 					height: 100%;
 				}
 			</style>
-			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
-			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{_skyveImage.webResourceFileVersion}" />
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
+			<link type="text/css" rel="stylesheet" href="skyve/css/prime-min.css?v=#{_skyveImage.webResourceFileVersion}" />
 			<link rel="stylesheet" href="croppie/croppie.css?v=#{_skyveImage.webResourceFileVersion}" />
 			<script src="croppie/exif-min.js?v=#{_skyveImage.webResourceFileVersion}"></script>
 			<script src="croppie/croppie-min.js?v=#{_skyveImage.webResourceFileVersion}"></script>
@@ -71,10 +77,10 @@
 				<!-- Upload the cropped image as a blob emulating an ajax form post -->
 				function uploadCropped(blob) {
 					var formData = new FormData(document.getElementById('form'));
-					formData.append('javax.faces.partial.ajax', 'true');
-					formData.append('javax.faces.partial.execute', 'upload');
-					formData.append('javax.faces.source', 'upload');
-					formData.append('javax.faces.partial.render', 'messages');
+					formData.append('jakarta.faces.partial.ajax', 'true');
+					formData.append('jakarta.faces.partial.execute', 'upload');
+					formData.append('jakarta.faces.source', 'upload');
+					formData.append('jakarta.faces.partial.render', 'messages');
 					formData.append('upload', blob, fileName);
 
 					$.ajax({
@@ -123,7 +129,13 @@
 			</script>
 		</h:head>
 		<h:body style="height:2000px">
-			<h:form id="form" enctype="multipart/form-data" prependId="false">
+			<p:staticMessage severity="error"
+								summary="You cannot access this function"
+								detail="Click &lt;a href=&quot;javascript:void(0)&quot; onclick=&quot;window.top.location=''&quot;&gt;here&lt;/a&gt;"
+								rendered="#{not _skyveImage.canAccess}"
+								escape="false"
+								style="width:100%; height:50px" />
+			<h:form id="form" enctype="multipart/form-data" prependId="false" rendered="#{_skyveImage.canAccess}">
 				<h:inputHidden id="_c" value="#{_skyveImage.context}" />
 				<h:inputHidden id="_b" value="#{_skyveImage.binding}" />
 				<h:inputHidden id="_n" value="#{_skyveImage.contentBinding}" />

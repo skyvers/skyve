@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DocumentNumber"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_DocumentNumber" />
+	<singularAlias>Document Number</singularAlias>
+	<pluralAlias>Document Numbers</pluralAlias>
+	<iconStyleClass>fa fa-list-ol</iconStyleClass>
+	<bizKey expression="{moduleName}.{documentName}.{sequenceName}"/>
+	<implements>
+		<interface>org.skyve.domain.app.admin.DocumentNumber</interface>
+	</implements>
+	<attributes>
+		<text name="moduleName" required="true">
+			<displayName>Module Name</displayName>
+			<description>The name of the module.</description>
+			<length>500</length>
+		</text>
+		<text name="documentName" required="true">
+			<displayName>Document Name</displayName>
+			<description>The name of the document.</description>
+			<length>500</length>
+		</text>
+		<text name="sequenceName" required="true">
+			<displayName>Sequence</displayName>
+			<description>The name of the field or sequence.</description>
+			<length>500</length>
+		</text>
+		<text name="documentNumber" required="true">
+			<displayName>Number</displayName>
+			<description>The last used number for the document (the next number used will increment this).</description>
+			<length>500</length>
+		</text>
+	</attributes>
+	<uniqueConstraints>
+		<constraint name="uniqueSequence" scope="customer">
+			<message>The combination which defines the sequence for deriving numbers for {documentName} has already been used and the document number could not be assigned. Please try again.</message>
+			<fieldReferences>
+				<ref>moduleName</ref>
+				<ref>documentName</ref>
+				<ref>sequenceName</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

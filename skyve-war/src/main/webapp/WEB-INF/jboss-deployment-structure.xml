@@ -1,0 +1,12 @@
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.1">
+	<deployment>
+		<dependencies>
+			<system export="true">
+				<paths>
+					<path name="org/w3c/dom/css" />
+					<path name="org/w3c/dom/xpath" />
+				</paths>
+			</system>
+		</dependencies>
+	</deployment>
+</jboss-deployment-structure>

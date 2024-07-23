@@ -27,7 +27,8 @@ public class FluentViewDocumentAggregateAccess extends FluentViewUserAccess<Flue
 	/**
 	 * Returns a FluentViewDocumentAggregateAccess from a runtime metadata.
 	 */
-	protected FluentViewDocumentAggregateAccess from(Set<String> uxuis) {
+	protected FluentViewDocumentAggregateAccess from(String documentName, Set<String> uxuis) {
+		documentName(documentName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
 	}

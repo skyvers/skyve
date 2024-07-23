@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="JobSchedule" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_JobSchedule" />
+	<singularAlias>Job Schedule Entry</singularAlias>
+	<pluralAlias>Job Schedule</pluralAlias>
+	<iconStyleClass>fa fa-cogs</iconStyleClass>
+	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
+	<bizKey>
+		return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
+	</bizKey>
+	<attributes>
+		<text name="jobName" required="true">
+			<displayName>admin.jobSchedule.jobName.displayName</displayName>
+			<domain>variant</domain>
+			<length>100</length>
+		</text>
+		<text name="cronExpression" required="true">
+			<displayName>admin.jobSchedule.cronExppression.displayName</displayName>
+			<length>128</length>
+		</text>
+		
+		<text name="allMinutes" persistent="false">
+			<displayName>admin.jobSchedule.allMinutes.displayName</displayName>
+			<domain>constant</domain>
+			<length>1</length>
+		</text>
+		<boolean name="minute0" persistent="false">
+			<displayName>admin.jobSchedule.minute0.displayName</displayName>
+		</boolean>
+		<boolean name="minute1" persistent="false">
+			<displayName>admin.jobSchedule.minute1.displayName</displayName>
+		</boolean>
+		<boolean name="minute2" persistent="false">
+			<displayName>admin.jobSchedule.minute2.displayName</displayName>
+		</boolean>
+		<boolean name="minute3" persistent="false">
+			<displayName>admin.jobSchedule.minute3.displayName</displayName>
+		</boolean>
+		<boolean name="minute4" persistent="false">
+			<displayName>admin.jobSchedule.minute4.displayName</displayName>
+		</boolean>
+		<boolean name="minute5" persistent="false">
+			<displayName>admin.jobSchedule.minute5.displayName</displayName>
+		</boolean>
+		<boolean name="minute6" persistent="false">
+			<displayName>admin.jobSchedule.minute6.displayName</displayName>
+		</boolean>
+		<boolean name="minute7" persistent="false">
+			<displayName>admin.jobSchedule.minute7.displayName</displayName>
+		</boolean>
+		<boolean name="minute8" persistent="false">
+			<displayName>admin.jobSchedule.minute8.displayName</displayName>
+		</boolean>
+		<boolean name="minute9" persistent="false">
+			<displayName>admin.jobSchedule.minute9.displayName</displayName>
+		</boolean>
+		<boolean name="minute10" persistent="false">
+			<displayName>admin.jobSchedule.minute10.displayName</displayName>
+		</boolean>
+		<boolean name="minute11" persistent="false">
+			<displayName>admin.jobSchedule.minute11.displayName</displayName>
+		</boolean>
+		<boolean name="minute12" persistent="false">
+			<displayName>admin.jobSchedule.minute12.displayName</displayName>
+		</boolean>
+		<boolean name="minute13" persistent="false">
+			<displayName>admin.jobSchedule.minute13.displayName</displayName>
+		</boolean>
+		<boolean name="minute14" persistent="false">
+			<displayName>admin.jobSchedule.minute14.displayName</displayName>
+		</boolean>
+		<boolean name="minute15" persistent="false">
+			<displayName>admin.jobSchedule.minute15.displayName</displayName>
+		</boolean>
+		<boolean name="minute16" persistent="false">
+			<displayName>admin.jobSchedule.minute16.displayName</displayName>
+		</boolean>
+		<boolean name="minute17" persistent="false">
+			<displayName>admin.jobSchedule.minute17.displayName</displayName>
+		</boolean>
+		<boolean name="minute18" persistent="false">
+			<displayName>admin.jobSchedule.minute18.displayName</displayName>
+		</boolean>
+		<boolean name="minute19" persistent="false">
+			<displayName>admin.jobSchedule.minute19.displayName</displayName>
+		</boolean>
+		<boolean name="minute20" persistent="false">
+			<displayName>admin.jobSchedule.minute20.displayName</displayName>
+		</boolean>
+		<boolean name="minute21" persistent="false">
+			<displayName>admin.jobSchedule.minute21.displayName</displayName>
+		</boolean>
+		<boolean name="minute22" persistent="false">
+			<displayName>admin.jobSchedule.minute22.displayName</displayName>
+		</boolean>
+		<boolean name="minute23" persistent="false">
+			<displayName>admin.jobSchedule.minute23.displayName</displayName>
+		</boolean>
+		<boolean name="minute24" persistent="false">
+			<displayName>admin.jobSchedule.minute24.displayName</displayName>
+		</boolean>
+		<boolean name="minute25" persistent="false">
+			<displayName>admin.jobSchedule.minute25.displayName</displayName>
+		</boolean>
+		<boolean name="minute26" persistent="false">
+			<displayName>admin.jobSchedule.minute26.displayName</displayName>
+		</boolean>
+		<boolean name="minute27" persistent="false">
+			<displayName>admin.jobSchedule.minute27.displayName</displayName>
+		</boolean>
+		<boolean name="minute28" persistent="false">
+			<displayName>admin.jobSchedule.minute28.displayName</displayName>
+		</boolean>
+		<boolean name="minute29" persistent="false">
+			<displayName>admin.jobSchedule.minute29.displayName</displayName>
+		</boolean>
+		<boolean name="minute30" persistent="false">
+			<displayName>admin.jobSchedule.minute30.displayName</displayName>
+		</boolean>
+		<boolean name="minute31" persistent="false">
+			<displayName>admin.jobSchedule.minute31.displayName</displayName>
+		</boolean>
+		<boolean name="minute32" persistent="false">
+			<displayName>admin.jobSchedule.minute32.displayName</displayName>
+		</boolean>
+		<boolean name="minute33" persistent="false">
+			<displayName>admin.jobSchedule.minute33.displayName</displayName>
+		</boolean>
+		<boolean name="minute34" persistent="false">
+			<displayName>admin.jobSchedule.minute34.displayName</displayName>
+		</boolean>
+		<boolean name="minute35" persistent="false">
+			<displayName>admin.jobSchedule.minute35.displayName</displayName>
+		</boolean>
+		<boolean name="minute36" persistent="false">
+			<displayName>admin.jobSchedule.minute36.displayName</displayName>
+		</boolean>
+		<boolean name="minute37" persistent="false">
+			<displayName>admin.jobSchedule.minute37.displayName</displayName>
+		</boolean>
+		<boolean name="minute38" persistent="false">
+			<displayName>admin.jobSchedule.minute38.displayName</displayName>
+		</boolean>
+		<boolean name="minute39" persistent="false">
+			<displayName>admin.jobSchedule.minute39.displayName</displayName>
+		</boolean>
+		<boolean name="minute40" persistent="false">
+			<displayName>admin.jobSchedule.minute40.displayName</displayName>
+		</boolean>
+		<boolean name="minute41" persistent="false">
+			<displayName>admin.jobSchedule.minute41.displayName</displayName>
+		</boolean>
+		<boolean name="minute42" persistent="false">
+			<displayName>admin.jobSchedule.minute42.displayName</displayName>
+		</boolean>
+		<boolean name="minute43" persistent="false">
+			<displayName>admin.jobSchedule.minute43.displayName</displayName>
+		</boolean>
+		<boolean name="minute44" persistent="false">
+			<displayName>admin.jobSchedule.minute44.displayName</displayName>
+		</boolean>
+		<boolean name="minute45" persistent="false">
+			<displayName>admin.jobSchedule.minute45.displayName</displayName>
+		</boolean>
+		<boolean name="minute46" persistent="false">
+			<displayName>admin.jobSchedule.minute46.displayName</displayName>
+		</boolean>
+		<boolean name="minute47" persistent="false">
+			<displayName>admin.jobSchedule.minute47.displayName</displayName>
+		</boolean>
+		<boolean name="minute48" persistent="false">
+			<displayName>admin.jobSchedule.minute48.displayName</displayName>
+		</boolean>
+		<boolean name="minute49" persistent="false">
+			<displayName>admin.jobSchedule.minute49.displayName</displayName>
+		</boolean>
+		<boolean name="minute50" persistent="false">
+			<displayName>admin.jobSchedule.minute50.displayName</displayName>
+		</boolean>
+		<boolean name="minute51" persistent="false">
+			<displayName>admin.jobSchedule.minute51.displayName</displayName>
+		</boolean>
+		<boolean name="minute52" persistent="false">
+			<displayName>admin.jobSchedule.minute52.displayName</displayName>
+		</boolean>
+		<boolean name="minute53" persistent="false">
+			<displayName>admin.jobSchedule.minute53.displayName</displayName>
+		</boolean>
+		<boolean name="minute54" persistent="false">
+			<displayName>admin.jobSchedule.minute54.displayName</displayName>
+		</boolean>
+		<boolean name="minute55" persistent="false">
+			<displayName>admin.jobSchedule.minute55.displayName</displayName>
+		</boolean>
+		<boolean name="minute56" persistent="false">
+			<displayName>admin.jobSchedule.minute56.displayName</displayName>
+		</boolean>
+		<boolean name="minute57" persistent="false">
+			<displayName>admin.jobSchedule.minute57.displayName</displayName>
+		</boolean>
+		<boolean name="minute58" persistent="false">
+			<displayName>admin.jobSchedule.minute58.displayName</displayName>
+		</boolean>
+		<boolean name="minute59" persistent="false">
+			<displayName>admin.jobSchedule.minute59.displayName</displayName>
+		</boolean>
+		<text name="allHours" persistent="false">
+			<displayName>admin.jobSchedule.allHours.displayName</displayName>
+			<domain>constant</domain>
+			<length>1</length>
+		</text>
+		<boolean name="hour0" persistent="false">
+			<displayName>admin.jobSchedule.hour0.displayName</displayName>
+		</boolean>
+		<boolean name="hour1" persistent="false">
+			<displayName>admin.jobSchedule.hour1.displayName</displayName>
+		</boolean>
+		<boolean name="hour2" persistent="false">
+			<displayName>admin.jobSchedule.hour2.displayName</displayName>
+		</boolean>
+		<boolean name="hour3" persistent="false">
+			<displayName>admin.jobSchedule.hour3.displayName</displayName>
+		</boolean>
+		<boolean name="hour4" persistent="false">
+			<displayName>admin.jobSchedule.hour4.displayName</displayName>
+		</boolean>
+		<boolean name="hour5" persistent="false">
+			<displayName>admin.jobSchedule.hour5.displayName</displayName>
+		</boolean>
+		<boolean name="hour6" persistent="false">
+			<displayName>admin.jobSchedule.hour6.displayName</displayName>
+		</boolean>
+		<boolean name="hour7" persistent="false">
+			<displayName>admin.jobSchedule.hour7.displayName</displayName>
+		</boolean>
+		<boolean name="hour8" persistent="false">
+			<displayName>admin.jobSchedule.hour8.displayName</displayName>
+		</boolean>
+		<boolean name="hour9" persistent="false">
+			<displayName>admin.jobSchedule.hour9.displayName</displayName>
+		</boolean>
+		<boolean name="hour10" persistent="false">
+			<displayName>admin.jobSchedule.hour10.displayName</displayName>
+		</boolean>
+		<boolean name="hour11" persistent="false">
+			<displayName>admin.jobSchedule.hour11.displayName</displayName>
+		</boolean>
+		<boolean name="hour12" persistent="false">
+			<displayName>admin.jobSchedule.hour12.displayName</displayName>
+		</boolean>
+		<boolean name="hour13" persistent="false">
+			<displayName>admin.jobSchedule.hour13.displayName</displayName>
+		</boolean>
+		<boolean name="hour14" persistent="false">
+			<displayName>admin.jobSchedule.hour14.displayName</displayName>
+		</boolean>
+		<boolean name="hour15" persistent="false">
+			<displayName>admin.jobSchedule.hour15.displayName</displayName>
+		</boolean>
+		<boolean name="hour16" persistent="false">
+			<displayName>admin.jobSchedule.hour16.displayName</displayName>
+		</boolean>
+		<boolean name="hour17" persistent="false">
+			<displayName>admin.jobSchedule.hour17.displayName</displayName>
+		</boolean>
+		<boolean name="hour18" persistent="false">
+			<displayName>admin.jobSchedule.hour18.displayName</displayName>
+		</boolean>
+		<boolean name="hour19" persistent="false">
+			<displayName>admin.jobSchedule.hour19.displayName</displayName>
+		</boolean>
+		<boolean name="hour20" persistent="false">
+			<displayName>admin.jobSchedule.hour20.displayName</displayName>
+		</boolean>
+		<boolean name="hour21" persistent="false">
+			<displayName>admin.jobSchedule.hour21.displayName</displayName>
+		</boolean>
+		<boolean name="hour22" persistent="false">
+			<displayName>admin.jobSchedule.hour22.displayName</displayName>
+		</boolean>
+		<boolean name="hour23" persistent="false">
+			<displayName>admin.jobSchedule.hour23.displayName</displayName>
+		</boolean>
+		<text name="allDays" persistent="false">
+			<displayName>admin.jobSchedule.allDays.displayName</displayName>
+			<domain>constant</domain>
+			<length>2</length>
+		</text>
+		<boolean name="day1" persistent="false">
+			<displayName>admin.jobSchedule.day1.displayName</displayName>
+		</boolean>
+		<boolean name="day2" persistent="false">
+			<displayName>admin.jobSchedule.day2.displayName</displayName>
+		</boolean>
+		<boolean name="day3" persistent="false">
+			<displayName>admin.jobSchedule.day3.displayName</displayName>
+		</boolean>
+		<boolean name="day4" persistent="false">
+			<displayName>admin.jobSchedule.day4.displayName</displayName>
+		</boolean>
+		<boolean name="day5" persistent="false">
+			<displayName>admin.jobSchedule.day5.displayName</displayName>
+		</boolean>
+		<boolean name="day6" persistent="false">
+			<displayName>admin.jobSchedule.day6.displayName</displayName>
+		</boolean>
+		<boolean name="day7" persistent="false">
+			<displayName>admin.jobSchedule.day7.displayName</displayName>
+		</boolean>
+		<boolean name="day8" persistent="false">
+			<displayName>admin.jobSchedule.day8.displayName</displayName>
+		</boolean>
+		<boolean name="day9" persistent="false">
+			<displayName>admin.jobSchedule.day9.displayName</displayName>
+		</boolean>
+		<boolean name="day10" persistent="false">
+			<displayName>admin.jobSchedule.day10.displayName</displayName>
+		</boolean>
+		<boolean name="day11" persistent="false">
+			<displayName>admin.jobSchedule.day11.displayName</displayName>
+		</boolean>
+		<boolean name="day12" persistent="false">
+			<displayName>admin.jobSchedule.day12.displayName</displayName>
+		</boolean>
+		<boolean name="day13" persistent="false">
+			<displayName>admin.jobSchedule.day13.displayName</displayName>
+		</boolean>
+		<boolean name="day14" persistent="false">
+			<displayName>admin.jobSchedule.day14.displayName</displayName>
+		</boolean>
+		<boolean name="day15" persistent="false">
+			<displayName>admin.jobSchedule.day15.displayName</displayName>
+		</boolean>
+		<boolean name="day16" persistent="false">
+			<displayName>admin.jobSchedule.day16.displayName</displayName>
+		</boolean>
+		<boolean name="day17" persistent="false">
+			<displayName>admin.jobSchedule.day17.displayName</displayName>
+		</boolean>
+		<boolean name="day18" persistent="false">
+			<displayName>admin.jobSchedule.day18.displayName</displayName>
+		</boolean>
+		<boolean name="day19" persistent="false">
+			<displayName>admin.jobSchedule.day19.displayName</displayName>
+		</boolean>
+		<boolean name="day20" persistent="false">
+			<displayName>admin.jobSchedule.day20.displayName</displayName>
+		</boolean>
+		<boolean name="day21" persistent="false">
+			<displayName>admin.jobSchedule.day21.displayName</displayName>
+		</boolean>
+		<boolean name="day22" persistent="false">
+			<displayName>admin.jobSchedule.day22.displayName</displayName>
+		</boolean>
+		<boolean name="day23" persistent="false">
+			<displayName>admin.jobSchedule.day23.displayName</displayName>
+		</boolean>
+		<boolean name="day24" persistent="false">
+			<displayName>admin.jobSchedule.day24.displayName</displayName>
+		</boolean>
+		<boolean name="day25" persistent="false">
+			<displayName>admin.jobSchedule.day25.displayName</displayName>
+		</boolean>
+		<boolean name="day26" persistent="false">
+			<displayName>admin.jobSchedule.day26.displayName</displayName>
+		</boolean>
+		<boolean name="day27" persistent="false">
+			<displayName>admin.jobSchedule.day27.displayName</displayName>
+		</boolean>
+		<boolean name="day28" persistent="false">
+			<displayName>admin.jobSchedule.day28.displayName</displayName>
+		</boolean>
+		<boolean name="day29" persistent="false">
+			<displayName>admin.jobSchedule.day29.displayName</displayName>
+		</boolean>
+		<boolean name="day30" persistent="false">
+			<displayName>admin.jobSchedule.day30.displayName</displayName>
+		</boolean>
+		<boolean name="day31" persistent="false">
+			<displayName>admin.jobSchedule.day31.displayName</displayName>
+		</boolean>
+		<text name="allMonths" persistent="false">
+			<displayName>admin.jobSchedule.allMonths.displayName</displayName>
+			<domain>constant</domain>
+			<length>1</length>
+		</text>
+		<boolean name="month1" persistent="false">
+			<displayName>admin.jobSchedule.month1.displayName</displayName>
+		</boolean>
+		<boolean name="month2" persistent="false">
+			<displayName>admin.jobSchedule.month2.displayName</displayName>
+		</boolean>
+		<boolean name="month3" persistent="false">
+			<displayName>admin.jobSchedule.month3.displayName</displayName>
+		</boolean>
+		<boolean name="month4" persistent="false">
+			<displayName>admin.jobSchedule.month4.displayName</displayName>
+		</boolean>
+		<boolean name="month5" persistent="false">
+			<displayName>admin.jobSchedule.month5.displayName</displayName>
+		</boolean>
+		<boolean name="month6" persistent="false">
+			<displayName>admin.jobSchedule.month6.displayName</displayName>
+		</boolean>
+		<boolean name="month7" persistent="false">
+			<displayName>admin.jobSchedule.month7.displayName</displayName>
+		</boolean>
+		<boolean name="month8" persistent="false">
+			<displayName>admin.jobSchedule.month8.displayName</displayName>
+		</boolean>
+		<boolean name="month9" persistent="false">
+			<displayName>admin.jobSchedule.month9.displayName</displayName>
+		</boolean>
+		<boolean name="month10" persistent="false">
+			<displayName>admin.jobSchedule.month10.displayName</displayName>
+		</boolean>
+		<boolean name="month11" persistent="false">
+			<displayName>admin.jobSchedule.month11.displayName</displayName>
+		</boolean>
+		<boolean name="month12" persistent="false">
+			<displayName>admin.jobSchedule.month12.displayName</displayName>
+		</boolean>
+		<text name="allWeekdays" persistent="false">
+			<displayName>admin.jobSchedule.allWeekdays.displayName</displayName>
+			<domain>constant</domain>
+			<length>1</length>
+		</text>
+		<boolean name="weekday1" persistent="false">
+			<displayName>admin.jobSchedule.weekday1.displayName</displayName>
+		</boolean>
+		<boolean name="weekday2" persistent="false">
+			<displayName>admin.jobSchedule.weekday2.displayName</displayName>
+		</boolean>
+		<boolean name="weekday3" persistent="false">
+			<displayName>admin.jobSchedule.weekday3.displayName</displayName>
+		</boolean>
+		<boolean name="weekday4" persistent="false">
+			<displayName>admin.jobSchedule.weekday4.displayName</displayName>
+		</boolean>
+		<boolean name="weekday5" persistent="false">
+			<displayName>admin.jobSchedule.weekday5.displayName</displayName>
+		</boolean>
+		<boolean name="weekday6" persistent="false">
+			<displayName>admin.jobSchedule.weekday6.displayName</displayName>
+		</boolean>
+		<boolean name="weekday7" persistent="false">
+			<displayName>admin.jobSchedule.weekday7.displayName</displayName>
+		</boolean>
+		<dateTime name="startTime">
+			<displayName>admin.jobSchedule.startTime.displayName</displayName>
+			<description>admin.jobSchedule.startTime.description</description>
+		</dateTime>
+		<dateTime name="endTime">
+			<displayName>admin.jobSchedule.endTime.displayName</displayName>
+			<description>admin.jobSchedule.endTime.description</description>
+		</dateTime>
+		<association name="runAs" type="aggregation" required="true">
+			<displayName>admin.jobSchedule.association.runAs.displayName</displayName>
+			<description>admin.jobSchedule.association.runAs.description</description>
+			<documentName>UserProxy</documentName>
+			<queryName>qActiveUserProxies</queryName>
+		</association>
+
+		<boolean name="jobScheduledImmediately" persistent="false">
+			<displayName>admin.jobSchedule.jobScheduledImmediately.displayName</displayName>
+			<description>admin.jobSchedule.jobScheduledImmediately.description</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disabled">
+			<documentation>Whether or not this schedule is disabled.</documentation>
+			<displayName>admin.jobSchedule.disabled.displayName</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		
+		<!-- transient fields -->
+		<memo name="scheduleString" persistent="false">
+			<displayName>Schedule</displayName>
+		</memo>
+	</attributes>
+	<conditions>
+		<condition name="scheduledImmediately">
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(getJobScheduledImmediately())]]>
+			</expression>
+		</condition>
+		<condition name="jobScheduler">
+			<description>Whether this instance is configured to run schedule jobs</description>
+			<expression>
+				<![CDATA[
+					org.skyve.impl.util.UtilImpl.JOB_SCHEDULER
+				]]>
+			</expression>
+		</condition>
+		<condition name="selectedMinutes" usage="view">
+			<description>True when Selected Minutes.</description>
+			<expression>"X".equals(getAllMinutes())</expression>
+		</condition>
+		<condition name="selectedHours" usage="view">
+			<description>True when Selected Hours.</description>
+			<expression>"X".equals(getAllHours())</expression>
+		</condition>
+		<condition name="selectedDays" usage="view">
+			<description>True when Selected Days.</description>
+			<expression>"X".equals(getAllDays())</expression>
+		</condition>
+		<condition name="selectedMonths" usage="view">
+			<description>True when Selected Months.</description>
+			<expression>"X".equals(getAllMonths())</expression>
+		</condition>
+		<condition name="selectedWeekdays" usage="view">
+			<description>True when Selected Weekdays.</description>
+			<expression>"X".equals(getAllWeekdays())</expression>
+		</condition>
+	</conditions>
+</document>

@@ -1,12 +1,12 @@
 package org.skyve.impl.web.faces.converters.select;
 
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
 
-public class TriStateCheckboxBooleanConverter implements Converter {
+public class TriStateCheckboxBooleanConverter implements Converter<Boolean> {
 	@Override
-	public Object getAsObject(FacesContext context, UIComponent component, String value) {
+	public Boolean getAsObject(FacesContext context, UIComponent component, String value) {
 		if ("1".equals(value)) {
 			return Boolean.TRUE;
 		}
@@ -18,7 +18,7 @@ public class TriStateCheckboxBooleanConverter implements Converter {
 	}
 
 	@Override
-	public String getAsString(FacesContext context, UIComponent component, Object value) {
+	public String getAsString(FacesContext context, UIComponent component, Boolean value) {
 		if (Boolean.TRUE.equals(value)) {
 			return "1";
 		}

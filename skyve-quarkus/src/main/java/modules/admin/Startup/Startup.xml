@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Startup" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		This document provides a visual way to edit the JSON configuration
+		and is shown to the administrator by default on first login.
+	</documentation>
+	<singularAlias>Startup Configuration</singularAlias>
+	<pluralAlias>Startup Configuration</pluralAlias>
+	<iconStyleClass>fa fa-sliders</iconStyleClass>
+	<attributes>
+		<boolean name="dontShowAgain">
+			<documentation>Allow the user to bypass the setup screen and set the showSetup value to false.</documentation>
+			<displayName>Don't show this again</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+	
+		<!-- environment settings -->
+		<text name="environmentIdentifier">
+			<displayName>Identifier</displayName>
+			<description>
+				<![CDATA[
+					The description of this environment, e.g. Test, UAT. Leave this blank for production.
+					<br/>
+					<em>Note: If this is blank, the bootstrap user (if configured) will not be created for 
+					this instance until this is set to a non-blank value.</em>
+				]]>
+			</description>
+			<length>200</length>
+		</text>
+		<text name="environmentSupportEmail">
+			<displayName>Support Email Address</displayName>
+			<description>Email address for system support</description>
+			<length>200</length>
+			<validator type="email"/>
+		</text>
+		
+		<!-- map settings -->
+		<enum name="mapType" required="true">
+			<displayName>Type</displayName>
+			<description>Which map technology would you like to use for this Skyve application? Note: Google Maps requires an API key.</description>
+			<defaultValue>leaflet</defaultValue>
+			<values>
+				<value name="gmap" code="gmap" description="Google Maps"/>
+				<value name="leaflet" code="leaflet" description="Open Street Map"/>
+			</values>
+		</enum>
+		<integer name="mapZoom" required="true">
+			<displayName>Zoom</displayName>
+			<description>What should the default zoom level be when opening a new map (value between 1-19)?</description>
+			<defaultValue>1</defaultValue>
+			<validator min="1" max="19"/>
+		</integer>
+		<text name="mapLayer" required="true">
+			<displayName>Layers</displayName>
+			<description>Google Map or Leaflet layer to show the map backdrop</description>
+			<length>200</length>
+		</text>
+		<geometry name="mapCentre">
+			<displayName>Centre</displayName>
+			<description>Where to centre a new map when it opens</description>
+		</geometry>
+		
+		<!-- mail settings -->
+		<text name="mailServerUrl" required="true">
+			<displayName>Server URL</displayName>
+			<description>URL or IP address of the SMTP server to use</description>
+			<length>200</length>
+		</text>
+		<integer name="mailPort" required="true">
+			<displayName>Server Port</displayName>
+			<description>Which port should be used to access the mail server? This is usually 25, 465 or 587 depending if it is secure or insecure.</description>
+			<defaultValue>25</defaultValue>
+			<validator min="1" max="65535"/>
+		</integer>
+		<text name="mailUsername">
+			<displayName>Username</displayName>
+			<description>Mail server username</description>
+			<length>200</length>
+		</text>
+		<text name="mailPassword">
+			<displayName>Password</displayName>
+			<description>Mail server password</description>
+			<length>200</length>
+		</text>
+		<text name="mailSender" required="true">
+			<displayName>Default Sender</displayName>
+			<description>Default send from email address</description>
+			<length>200</length>
+		</text>
+		<boolean name="mailBogusSend">
+			<displayName>Test Mode</displayName>
+			<description>If true, email is disabled and just logged, it will never be sent</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<text name="mailTestRecipient">
+			<displayName>Test Mail Recipient</displayName>
+			<description>All emails will only be sent to this email address if specified</description>
+			<length>200</length>
+			<validator type="email"/>
+		</text>
+			
+		<!-- api settings -->
+		<text name="apiGoogleMapsKey">
+			<displayName>Google Maps Key</displayName>
+			<description>If using Google Maps for your map type, specify your map key here</description>
+			<length>200</length>
+		</text>
+		<text name="apiGoogleRecaptchaKey">
+			<displayName>Google Recaptcha Site Key</displayName>
+			<description>
+				<![CDATA[
+					To enable the forgot password function, this application must be registered 
+					for Google Recaptcha and the site key must be specified here.
+				]]>
+			</description>
+			<length>200</length>
+		</text>
+		
+		<!-- account settings -->
+		<boolean name="accountAllowUserSelfRegistration" persistent="false">
+			<displayName>admin.startup.accountAllowUserSelfRegistration.displayName</displayName>
+			<description>admin.startup.accountAllowUserSelfRegistration.description</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		
+		<!-- sms settings -->
+		<text name="apiTwilioSID">
+			<displayName>Account SID</displayName>
+			<length>200</length>
+		</text>
+		<text name="apiTwilioAuthToken">
+			<displayName>Account Auth Token</displayName>
+			<length>200</length>
+		</text>
+		<text name="apiTwilioDefaultSendNumber">
+			<displayName>Default Send Number</displayName>
+			<description></description>
+			<length>20</length>
+		</text>
+		
+		<!-- backup settings -->
+		<enum name="backupType" required="true">
+			<displayName>Type</displayName>
+			<description>Which external backup provider should be used this Skyve application? Note: additional charges may apply.</description>
+			<defaultValue>none</defaultValue>
+			<values>
+				<value name="none" code="none" description="None (Internal Backups)"/>
+				<value name="azure" code="org.skyve.impl.backup.AzureBlobStorageBackup" description="Azure Blob Storage"/>
+			</values>
+		</enum>
+		<text name="backupConnectionString">
+			<displayName>Connection String</displayName>
+			<description>
+				<![CDATA[
+					The connection string to the external backup location, e.g. 
+					<code style='white-space: pre-wrap;'>DefaultEndpointsProtocol=https;AccountName=ACCOUNT_NAME;AccountKey=ACCOUNT_KEY;EndpointSuffix=core.windows.net</code>.
+				]]>
+			</description>
+			<length>200</length>
+		</text>
+		<text name="backupDirectoryName">
+			<displayName>Directory Name</displayName>
+			<description>
+				<![CDATA[
+					The name of the top-level backup directory, e.g. <code>application-name</code>, this will be 
+					created if it does not exist.<br/>
+					This must be a valid DNS name, starting with a letter or number, containing only letters, numbers
+					and the dash character. Every dash must be immediately preceeded and followed by a ltter or number.<br/>
+					Must be from 3 to 63 characters long.
+				]]>
+			</description>
+			<length>63</length>
+			<validator regularExpression="^[a-z0-9]+(-[a-z0-9]+)*$" 
+				validationMessage="This must be a valid DNS name, starting with a letter or number, containing only letters, numbers and the dash character. Every dash must be immediately preceeded and followed by a ltter or number."/>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="backupTypeAzure" usage="view">
+			<description>True when the selected backup type is Azure Blob Storage</description>
+			<expression>BackupType.azure == getBackupType()</expression>
+		</condition>
+		<condition name="mapTypeGmap" usage="view">
+			<description>True when the selected map type is Google Maps</description>
+			<expression>MapType.gmap == getMapType()</expression>
+		</condition>
+		<condition name="singleTenant" usage="view">
+			<description>True when this application has a default customer specified (is single tenant)</description>
+			<expression>org.skyve.impl.util.UtilImpl.CUSTOMER != null</expression>
+		</condition>
+	</conditions>
+</document>

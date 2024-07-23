@@ -10,21 +10,25 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ReportParameters;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -137,6 +141,9 @@ public final class JasperReportUtil {
 				// if we have a bizId then assume its persistent and load it
 				if (id != null) {
 					reportBean = AbstractPersistence.get().retrieve(document, id);
+					if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId())) {
+						throw new SecurityException("read this data", user.getName());
+					}
 				}
 			}
 			result = JasperFillManager.fillReport(jasperReport, parameters, new SkyveDataSource(user, reportBean));
@@ -216,7 +223,9 @@ public final class JasperReportUtil {
 					// if we have a bizId then assume its persistent and load it
 					if (id != null) {
 						reportBean = AbstractPersistence.get().retrieve(reportParameter.getDocument(), id);
-					}
+						if (! user.canReadBean(id, reportBean.getBizModule(), reportBean.getBizDocument(), reportBean.getBizCustomer(), reportBean.getBizDataGroupId(), reportBean.getBizUserId()))
+							throw new SecurityException("read this data", user.getName());
+						}
 				}
 				result.add(JasperFillManager.fillReport(jasperReport,
 															reportParameter.getParameters(),
@@ -231,7 +240,7 @@ public final class JasperReportUtil {
 		return result;
 	}
 
-	private static String preProcess(Customer customer, ReportParameters reportParameters) {
+	private static String preProcess(@Nonnull Customer customer, @Nonnull ReportParameters reportParameters) {
 		return preProcess(customer, reportParameters.getDocument(), reportParameters.getReportName(), reportParameters.getParameters());
 	}
 
@@ -244,12 +253,16 @@ public final class JasperReportUtil {
 	 * @param parameters
 	 * @return report file name
 	 */
-	private static String preProcess(Customer customer,
-										Document document,
-										String reportName,
-										Map<String, Object> parameters) {
+	private static @Nonnull String preProcess(@Nonnull Customer customer,
+												@Nonnull Document document,
+												@Nonnull String reportName,
+												@Nonnull Map<String, Object> parameters) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		String result = repository.getReportFileName(customer, document, reportName);
+		if (result == null) {
+			throw new MetaDataException("Report " + reportName + " in document " + document.getOwningModuleName() + '.' + document.getName() + 
+											" for customer " + customer.getName() + " does not exist.");
+		}
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(UtilImpl.getAbsoluteBasePath()).append(ProvidedRepository.CUSTOMERS_NAMESPACE);
 		sb.append(customer.getName()).append('/').append(ProvidedRepository.RESOURCES_NAMESPACE);
@@ -379,14 +392,25 @@ public final class JasperReportUtil {
 		return result;
 	}
 
-	public static ListModel<Bean> getQueryListModel(Module module, String documentOrQueryOrModelName) {
-		final Customer customer = CORE.getCustomer();
-		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
+	public static ListModel<Bean> getQueryListModel(Module module, String documentOrQueryName, String uxui) {
+		final String moduleName = module.getName();
+		final User user = CORE.getUser();
+		final Customer customer = user.getCustomer();
+		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryName);
 		if (query == null) {
-			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+			user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui);
+			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+		}
+		else {
+			user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui);
 		}
 		if (query == null) {
-			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
+			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryName);
+		}
+
+        final Document drivingDocument = module.getDocument(customer, query.getDocumentName());
+		if (! user.canReadDocument(drivingDocument)) {
+			throw new SecurityException("read this data", user.getName());
 		}
 
 		return EXT.newListModel(query);

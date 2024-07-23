@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Tag" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Tag" />
+	<singularAlias>Tag</singularAlias>
+	<pluralAlias>Tags</pluralAlias>
+	<iconStyleClass>fa fa-tag</iconStyleClass>
+	<bizKey expression="Tag {name}"/>
+	<implements>
+		<interface>org.skyve.domain.app.admin.Tag</interface>
+	</implements>
+	<attributes>
+		<text name="name" required="true">
+			<displayName>admin.tag.name.displayName</displayName>
+			<length>256</length>
+		</text>
+		<boolean name="visible">
+			<displayName>admin.tag.visible.displayName</displayName>
+		</boolean>
+		<enum name="combinationsOperator" persistent="false" trackChanges="false">
+			<displayName>admin.tag.combinationsOperator.displayName</displayName>
+			<values>
+				<value code="Union"/>
+				<value code="Except"/>
+				<value code="Intersect"/>
+			</values>
+		</enum>
+		<memo name="combinationExplanation" persistent="false" trackChanges="false">
+			<displayName>admin.tag.combinationExplanation.displayName</displayName>
+		</memo>
+		<longInteger name="totalTagged" persistent="false" trackChanges="false">
+			<displayName>admin.tag.totalTagged.displayName</displayName>
+		</longInteger>
+		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
+			<displayName>admin.tag.association.copyToUser.displayName</displayName>
+			<documentName>UserProxy</documentName>
+			<queryName>qActiveUserProxies</queryName>
+		</association>
+		<text name="copyToUserTagName" persistent="false" trackChanges="false">
+			<displayName>admin.tag.copyToUserTagName.displayName</displayName>
+			<length>256</length>
+		</text>
+		<text name="uploadModuleName" >
+			<displayName>admin.tag.uploadModuleName.displayName</displayName>
+			<description>admin.tag.uploadModuleName.description</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="uploadDocumentName" >
+			<displayName>admin.tag.uploadDocumentName.displayName</displayName>
+			<description>admin.tag.uploadDocumentName.displayName</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="attributeName" >
+			<displayName>admin.tag.attributeName.displayName</displayName>
+			<description>admin.tag.attributeName.description</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<boolean name="fileHasHeaders">
+			<displayName>admin.tag.fileHasHeaders.displayName</displayName>
+		</boolean>
+		<longInteger name="uploaded" persistent="false" trackChanges="false">
+			<displayName>admin.tag.uploaded.displayName</displayName>
+		</longInteger>
+		<longInteger name="uploadMatched" persistent="false" trackChanges="false">
+			<displayName>admin.tag.uploadMatched.displayName</displayName>
+		</longInteger>
+		<longInteger name="uploadTagged" persistent="false" trackChanges="false">
+			<displayName>admin.tag.uploadTagged.displayName</displayName>
+		</longInteger>
+		<enum name="filterOperator">
+			<displayName>admin.tag.filterOperator.displayName</displayName>
+			<values>
+				<value code="equals" description="Equals"/>
+				<value code="like" description="Like"/>
+				<value code="contains" description="Contains"/>
+			</values>
+		</enum>
+		<enum name="filterAction">
+			<displayName>admin.tag.filterAction.displayName</displayName>
+			<values>
+				<value code="tag" description="Tag records that match" />
+				<value code="unTag" description="UnTag records that match"/>
+			</values>
+		</enum>
+		<text name="actionModuleName" >
+			<displayName>admin.tag.actionModuleName.displayName</displayName>
+			<description>admin.tag.actionModuleName.description</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="actionDocumentName" >
+			<displayName>admin.tag.actionDocumentName.displayName</displayName>
+			<description>admin.tag.actionDocumentName.description</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<boolean name="unTagSuccessful">
+			<displayName>admin.tag.unTagSuccessful.displayName</displayName>
+		</boolean>
+		<boolean name="notification">
+			<displayName>admin.tag.notification.displayName</displayName>
+		</boolean>
+		<integer name="filterColumn">
+			<displayName>admin.tag.filterColumn.displayName</displayName>
+		</integer>
+		<association type="aggregation" name="operandTag" persistent="false" trackChanges="false">
+			<displayName>admin.tag.association.operandTag.displayName</displayName>
+			<description>admin.tag.association.operandTag.description</description>
+			<domain>dynamic</domain>
+			<documentName>Tag</documentName>
+		</association>
+		<longInteger name="operandTagCount" persistent="false" trackChanges="false">
+			<displayName>admin.tag.operandTagCount.displayName</displayName>
+		</longInteger>
+		
+		<text name="documentCondition">
+			<displayName>admin.tag.documentCondition.displayName</displayName>
+			<description>admin.tag.documentCondition.description</description>
+			<domain>dynamic</domain>
+			<length>1000</length>
+		</text>
+		<text name="documentAction">
+			<displayName>admin.tag.documentAction.displayName</displayName>
+			<description>admin.tag.documentAction.description</description>
+			<domain>dynamic</domain>
+			<length>1000</length>
+		</text>
+		<memo name="documentActionResults" persistent="false" trackChanges="false">
+			<displayName>admin.tag.documentActionResults.displayName</displayName>
+		</memo>
+		<enum name="evictOption" persistent="false" trackChanges="false" audited="false" documentRef="DataMaintenance" attributeRef="evictOption">
+			<displayName>admin.tag.evictOption.displayName</displayName>
+			<description><![CDATA[admin.tag.evictOption.description]]></description>
+			<defaultValue>bean</defaultValue>
+		</enum>		
+	</attributes>
+	<conditions>
+		<condition name="actionSet">
+			<description>Action Set</description>
+			<expression>
+				<![CDATA[getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null]]>
+			</expression>
+		</condition>
+		<condition name="attributeSet">
+			<description>Attribute Set</description>
+			<expression>
+				<![CDATA[getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null]]>
+			</expression>
+		</condition>
+		<condition name="showExplanation">
+			<description>Whether to show the explanation</description>
+			<expression>
+				<![CDATA[getCombinationExplanation()!=null && getCombinationExplanation().trim().length()>0]]>
+			</expression>
+		</condition>
+		<condition name="allowCombination">
+			<description>Whether to allow access to the PerformCombination action button</description>
+			<expression>
+				<![CDATA[
+					combinationsOperator!=null && operandTag!=null
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
@@ -26,6 +24,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+import jakarta.inject.Inject;
 import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.Audit;
@@ -38,10 +37,11 @@ public class UserDashboardExtension extends UserDashboard {
 
 	private static final long serialVersionUID = -6841455574804123970L;
 
-	private static final String DEFAULT_ICON_CLASS = "fa fa-file-o";
+	private static final String DEFAULT_ICON_CLASS = "fa-regular fa-file";
 	private static final int TILE_COUNT_LIMIT = 6;
-	private final Set<Tile> tiles = new HashSet<>();
 	
+	private final Set<Tile> tiles = new HashSet<>();
+
 	// used for 14 day dashboard calculations
 	public static final Long TWO_WEEKS_AGO = Long.valueOf(System.currentTimeMillis() - 1209600000L);
 
@@ -57,7 +57,7 @@ public class UserDashboardExtension extends UserDashboard {
 
 		return CORE.getUser().canReadDocument(document);
 	}
-  
+
 	@Inject
 	private transient Persistence persistence;
 
@@ -75,50 +75,47 @@ public class UserDashboardExtension extends UserDashboard {
 	 * @return The HTML markup for the favourites
 	 */
 	private void createFavourites() {
-
 		UserExtension currentUser = ModulesUtil.currentAdminUser();
 
 		// temporarily elevate user permissions to view Audit records
-		persistence.setDocumentPermissionScopes(DocumentPermissionScope.customer);
+		persistence.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			// favourites for the most common record saved by me (which hasn't been deleted)
+			if (tiles.size() < TILE_COUNT_LIMIT) {
+				createTilesCommon(popularUpdates(currentUser), Operation.update, 1, "Popular by me");
+			}
 
-		// favourites for the most common record saved by me (which hasn't been deleted)
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-			createTilesCommon(popularUpdates(currentUser), Operation.update, 1, "Popular by me");
-		}
+			// favourite for the most recent record saved by me (which hasn't been deleted)
+			if (tiles.size() < TILE_COUNT_LIMIT) {
+				createTilesRecent(recentUpdates(currentUser), Operation.update, 1, "Recent by me");
+			}
 
-		// favourite for the most recent record saved by me (which hasn't been deleted)
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-			createTilesRecent(recentUpdates(currentUser), Operation.update, 1, "Recent by me");
-		}
+			if (tiles.size() < TILE_COUNT_LIMIT) {
+				createTilesRecent(recentInsertDocuments(currentUser), Operation.insert, 1, "Recently created");
+			}
 
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-			createTilesRecent(recentInsertDocuments(currentUser), Operation.insert, 1, "Recently created");
-		}
-
-		if (tiles.size() < TILE_COUNT_LIMIT) {
-			// add favourites to home documents for all modules the user has access to
-			Customer customer = persistence.getUser().getCustomer();
-			for (Module module : customer.getModules()) {
-				// check if user has access to the home document
-				Document document = module.getDocument(customer, module.getHomeDocumentName());
-				if (ViewType.list.equals(module.getHomeRef())) {
-					if (CORE.getUser().canCreateDocument(document)) {
-						String reason = "Suggested for creation";
-						addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null,
-								reason));
-					}
-				} else {
-					// exclude user dashboard - we are already here
-					if (!UserDashboard.DOCUMENT_NAME.equals(document.getName()) && CORE.getUser().canAccessDocument(document)) {
-						String reason = "Suggested for viewing";
-						addTile(createTile(Operation.update, module.getName(), module.getHomeDocumentName(), null,
-								reason));
+			if (tiles.size() < TILE_COUNT_LIMIT) {
+				// add favourites to home documents for all modules the user has access to
+				Customer customer = p.getUser().getCustomer();
+				for (Module module : customer.getModules()) {
+					// check if user has access to the home document
+					Document document = module.getDocument(customer, module.getHomeDocumentName());
+					if (ViewType.list.equals(module.getHomeRef())) {
+						if (CORE.getUser().canCreateDocument(document)) {
+							String reason = "Suggested for creation";
+							addTile(createTile(Operation.insert, module.getName(), module.getHomeDocumentName(), null,
+									reason));
+						}
+					} else {
+						// exclude user dashboard - we are already here
+						if (!UserDashboard.DOCUMENT_NAME.equals(document.getName()) && CORE.getUser().canAccessDocument(document)) {
+							String reason = "Suggested for viewing";
+							addTile(createTile(Operation.update, module.getName(), module.getHomeDocumentName(), null,
+									reason));
+						}
 					}
 				}
 			}
-		}
-
-		persistence.resetDocumentPermissionScopes();
+		});
 
 		// render the tiles for display
 		for (Tile tile : tiles) {
@@ -214,8 +211,7 @@ public class UserDashboardExtension extends UserDashboard {
 					break;
 				}
 			}
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
+		} catch (@SuppressWarnings("unused") Exception e) {
 			// TODO: handle exception
 			Util.LOGGER.warning("Failed to create " + reason + " tile.");
 		}
@@ -324,7 +320,6 @@ public class UserDashboardExtension extends UserDashboard {
 		String iconClass = (document.getIconStyleClass() == null ? DEFAULT_ICON_CLASS : document.getIconStyleClass());
 		String singularAlias = document.getLocalisedSingularAlias();
 
-
 		Tile.Operation tileOperation = Tile.Operation.view;
 
 		switch (operation) {
@@ -334,7 +329,7 @@ public class UserDashboardExtension extends UserDashboard {
 				tileOperation = Tile.Operation.delete;
 
 				// clear the link if the user does not have delete permission
-				if (! user.canDeleteDocument(document)) {
+				if (!user.canDeleteDocument(document)) {
 					link.setLength(0);
 				}
 				break;
@@ -344,7 +339,7 @@ public class UserDashboardExtension extends UserDashboard {
 				tileOperation = Tile.Operation.insert;
 
 				// clear the link if the user does not have create permission
-				if (! user.canCreateDocument(document)) {
+				if (!user.canCreateDocument(document)) {
 					link.setLength(0);
 				}
 				break;
@@ -355,17 +350,16 @@ public class UserDashboardExtension extends UserDashboard {
 					actionClass = "fa-chevron-right";
 
 					// clear the link if the user does not have read permission
-					if (! user.canReadDocument(document)) {
+					if (!user.canReadDocument(document)) {
 						link.setLength(0);
 					}
-				}
-				else {
+				} else {
 					action = operation.toLocalisedDescription();
 					actionClass = "fa-angle-up";
 					tileOperation = Tile.Operation.update;
 
 					// clear the link if the user does not have update permission
-					if (! user.canUpdateDocument(document)) {
+					if (!user.canUpdateDocument(document)) {
 						link.setLength(0);
 					}
 				}
@@ -375,7 +369,7 @@ public class UserDashboardExtension extends UserDashboard {
 				actionClass = "fa-chevron-right";
 
 				// clear the link if the user does not have read permission
-				if (! user.canReadDocument(document)) {
+				if (!user.canReadDocument(document)) {
 					link.setLength(0);
 				}
 		}

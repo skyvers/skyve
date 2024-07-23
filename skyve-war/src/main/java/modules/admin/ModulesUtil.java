@@ -3,28 +3,21 @@ package modules.admin;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.SkyveException;
-import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
-import org.skyve.impl.bizport.StandardGenerator;
-import org.skyve.impl.bizport.StandardLoader;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Persistent;
@@ -32,7 +25,6 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
@@ -287,7 +279,7 @@ public class ModulesUtil {
 			}
 
 			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = new GregorianCalendar();
+			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(newDate);
 			calendar.setLenient(false);
 
@@ -331,7 +323,7 @@ public class ModulesUtil {
 	public static DateOnly lastDayOfMonth(DateOnly date) {
 		if (date != null) {
 			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = new GregorianCalendar();
+			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(newDate);
 			calendar.setLenient(false);
 
@@ -364,7 +356,7 @@ public class ModulesUtil {
 	public static DateOnly lastDayOfYear(DateOnly date) {
 		if (date != null) {
 			DateOnly newDate = new DateOnly(date.getTime());
-			Calendar calendar = new GregorianCalendar();
+			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(newDate);
 			calendar.setLenient(false);
 
@@ -397,7 +389,7 @@ public class ModulesUtil {
 	 */
 	@SuppressWarnings("deprecation")
 	public static DateOnly firstDayOfMonth(DateOnly date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -423,7 +415,7 @@ public class ModulesUtil {
 	 * @return - the date of the first day of that year
 	 */
 	public static DateOnly firstDayOfYear(DateOnly date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -451,7 +443,7 @@ public class ModulesUtil {
 	 * @return - the resulting date
 	 */
 	public static DateOnly addDaysDateOnly(DateOnly date, int daysToAdd) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -913,97 +905,6 @@ public class ModulesUtil {
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Generic bizport export method.
-	 *
-	 * @param moduleName
-	 *        - the module to be exported
-	 * @param documentName
-	 *        - the document to be exported
-	 * @param b
-	 *        - the top-level bean to export
-	 * @return - the reference to the Bizportable
-	 */
-	public static BizPortWorkbook standardBeanBizExport(String modName, String docName, Bean b) {
-
-		String documentName = docName;
-		String moduleName = modName;
-
-		BizPortWorkbook result = EXT.newBizPortWorkbook(false);
-
-		if (b != null) {
-			moduleName = b.getBizModule();
-			documentName = b.getBizDocument();
-		}
-
-		Persistence persistence = CORE.getPersistence();
-		Customer customer = persistence.getUser().getCustomer();
-		Module module = customer.getModule(moduleName);
-
-		// Project
-		Document document = module.getDocument(customer, documentName);
-		StandardGenerator bgBean = EXT.newBizPortStandardGenerator(customer, document);
-		bgBean.generateStructure(result);
-
-		result.materialise();
-
-		// System.out.println("BIZPORTING PROJECT " );
-		DocumentQuery query = persistence.newDocumentQuery(moduleName, documentName);
-		if (b != null) {
-			// filter for this project if provided
-			query.getFilter().addEquals(Bean.DOCUMENT_ID, b.getBizId());
-		}
-		try (AutoClosingIterable<Bean> i = query.beanIterable()) {
-			bgBean.generateData(result, i);
-		}
-		catch (SkyveException e) {
-			throw e;
-		}
-		catch (Exception e) {
-			throw new DomainException(e);
-		}
-
-		return result;
-	}
-
-	public static void standardBeanBizImport(BizPortWorkbook workbook, UploadException problems) throws Exception {
-		final Persistence persistence = CORE.getPersistence();
-		final Customer customer = persistence.getUser().getCustomer();
-		StandardLoader loader = new StandardLoader(workbook, problems);
-		List<Bean> bs = loader.populate(persistence);
-
-		for (String key : loader.getBeanKeys()) {
-			Bean bean = loader.getBean(key);
-			Module module = customer.getModule(bean.getBizModule());
-			Document document = module.getDocument(customer, bean.getBizDocument());
-
-			try {
-				persistence.preMerge(document, (PersistentBean) bean);
-			} catch (DomainException e) {
-				loader.addError(customer, bean, e);
-			}
-		}
-
-		// throw if we have errors found
-		if (problems.hasErrors()) {
-			throw problems;
-		}
-
-		// do the insert as 1 operation, bugging out if we encounter any errors
-		PersistentBean pb = null;
-		try {
-			for (Bean b : bs) {
-				pb = (PersistentBean) b;
-				pb = persistence.save(pb);
-			}
-		} catch (DomainException e) {
-			if (pb != null) {
-				loader.addError(customer, pb, e);
-			}
-			throw problems;
-		}
 	}
 
 	/** short-hand way of finding a bean using a legacy key */

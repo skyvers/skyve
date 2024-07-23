@@ -7,16 +7,15 @@ import java.util.logging.Level;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
@@ -28,13 +27,13 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
-public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
-	private FacesView<T> facesView;
+public class CompleteAction extends FacesAction<List<String>> {
+	private FacesView facesView;
 	private String query;
 	private String binding;
 	private CompleteType complete;
 	
-	public CompleteAction(FacesView<T> facesView,
+	public CompleteAction(FacesView facesView,
 							String query,
 							String binding,
 							CompleteType complete) {
@@ -95,15 +94,9 @@ public class CompleteAction<T extends Bean> extends FacesAction<List<String>> {
 		List<String> result = Collections.emptyList();
 
 		if (complete == CompleteType.previous) {
-			final String userName = user.getName();
-			if (! user.canAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName())) {
-				UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + formModuleName + '.' + formDocumentName + " for " + binding);
-				UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-				throw new AccessException("the previous data", userName);
-			}
-			
+			user.checkAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName());
 	    	if (! user.canReadDocument(document)) {
-				throw new SecurityException("read this data", userName);
+				throw new SecurityException("read this data", user.getName());
 			}
 
 			if (document.isPersistable()) { // persistent document

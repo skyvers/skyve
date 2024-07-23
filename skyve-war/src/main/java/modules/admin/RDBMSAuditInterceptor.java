@@ -148,10 +148,18 @@ public class RDBMSAuditInterceptor extends Interceptor {
 			AuditJSONGenerator generator = new AuditJSONGenerator(c);
 			generator.visit(ad, bean, c);
 			a.setAuditDetail(generator.toJSON());
+			
 			a.setAuditModuleName(bean.getBizModule());
 			a.setAuditDocumentName(bean.getBizDocument());
 			a.setAuditBizId(bean.getBizId());
-			a.setAuditBizKey(bean.getBizKey());
+			
+			int bizKeyLength = AbstractPersistence.getBizKeyLength();
+			String bizKey = bean.getBizKey();
+			if (bizKey.length() > bizKeyLength) {
+				bizKey = bizKey.substring(0, bizKeyLength);
+			}
+			a.setAuditBizKey(bizKey);
+			
 			if (originalInsert) {
 				OptimisticLock lock = bean.getBizLock();
 				long millis = lock.getTimestamp().getTime();

@@ -1,19 +1,19 @@
 package org.skyve.impl.web.faces.converters.timestamp;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.ConverterException;
-
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl;
 
-public class MMM_DD_YYYY extends org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY implements Converter {
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.convert.ConverterException;
 
+public class MMM_DD_YYYY extends org.skyve.domain.types.converters.timestamp.MMM_DD_YYYY
+							implements Converter<Timestamp> {
 	@Override
-	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
+	public Timestamp getAsObject(FacesContext fc, UIComponent component, String value) {
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
@@ -28,12 +28,12 @@ public class MMM_DD_YYYY extends org.skyve.domain.types.converters.timestamp.MMM
 	}
 
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, Object value) {
+	public String getAsString(FacesContext fc, UIComponent component, Timestamp value) {
 		if (value == null) {
 			return "";
 		}
 		try {
-			return toDisplayValue((Timestamp) value);
+			return toDisplayValue(value);
 		}
 		catch (@SuppressWarnings("unused") Exception e) {
 			return "";

@@ -29,7 +29,7 @@ public class ReactNativeLayoutRenderer extends LayoutRenderer {
 	@Override
 	public List<RenderedComponent> toolbarLayouts(List<RenderedComponent> components) {
 		RenderedComponent result = new RenderedComponent();
-		StringBuilder output = result.getOutput();
+		//StringBuilder output = result.getOutput();
 		//output.append("toolbarLayout");
 		return Collections.singletonList(result);
 	}

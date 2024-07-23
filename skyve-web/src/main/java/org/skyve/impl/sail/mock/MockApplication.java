@@ -4,35 +4,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
 
-import javax.el.ExpressionFactory;
-import javax.faces.FacesException;
-import javax.faces.application.Application;
-import javax.faces.application.NavigationHandler;
-import javax.faces.application.StateManager;
-import javax.faces.application.ViewHandler;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIForm;
-import javax.faces.component.UIOutput;
-import javax.faces.component.UIParameter;
-import javax.faces.component.UISelectItems;
-import javax.faces.component.behavior.Behavior;
-import javax.faces.component.html.HtmlForm;
-import javax.faces.component.html.HtmlInputHidden;
-import javax.faces.component.html.HtmlInputText;
-import javax.faces.component.html.HtmlOutputLink;
-import javax.faces.component.html.HtmlOutputText;
-import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.el.MethodBinding;
-import javax.faces.el.PropertyResolver;
-import javax.faces.el.ReferenceSyntaxException;
-import javax.faces.el.ValueBinding;
-import javax.faces.el.VariableResolver;
-import javax.faces.event.ActionListener;
-import javax.faces.validator.Validator;
-
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
@@ -92,7 +63,30 @@ import org.skyve.impl.web.faces.components.Map;
 import org.skyve.impl.web.faces.components.SetUxUi;
 import org.skyve.impl.web.faces.components.View;
 
-@SuppressWarnings("deprecation") // This super class has a whole bunch of deprecated shit in it
+import jakarta.el.ExpressionFactory;
+import jakarta.faces.FacesException;
+import jakarta.faces.application.Application;
+import jakarta.faces.application.NavigationHandler;
+import jakarta.faces.application.StateManager;
+import jakarta.faces.application.ViewHandler;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.UIForm;
+import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.UIParameter;
+import jakarta.faces.component.UISelectItems;
+import jakarta.faces.component.behavior.Behavior;
+import jakarta.faces.component.html.HtmlForm;
+import jakarta.faces.component.html.HtmlInputHidden;
+import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLink;
+import jakarta.faces.component.html.HtmlOutputText;
+import jakarta.faces.component.html.HtmlPanelGrid;
+import jakarta.faces.component.html.HtmlPanelGroup;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.convert.Converter;
+import jakarta.faces.event.ActionListener;
+import jakarta.faces.validator.Validator;
+
 public class MockApplication extends Application {
 	private ExpressionFactory ef = new MockExpressionFactory();
 	
@@ -390,26 +384,6 @@ public class MockApplication extends Application {
 	}
 
 	@Override
-	public PropertyResolver getPropertyResolver() {
-		return null;
-	}
-
-	@Override
-	public void setPropertyResolver(PropertyResolver resolver) {
-		// nothing to see here
-	}
-
-	@Override
-	public VariableResolver getVariableResolver() {
-		return null;
-	}
-
-	@Override
-	public void setVariableResolver(VariableResolver resolver) {
-		// nothing to see here
-	}
-
-	@Override
 	public ViewHandler getViewHandler() {
 		return null;
 	}
@@ -435,12 +409,6 @@ public class MockApplication extends Application {
 	}
 
 	@Override
-	public UIComponent createComponent(ValueBinding componentBinding, FacesContext context, String componentType)
-	throws FacesException {
-		return null;
-	}
-
-	@Override
 	public Iterator<String> getComponentTypes() {
 		return null;
 	}
@@ -456,7 +424,7 @@ public class MockApplication extends Application {
 	}
 
 	@Override
-	public Converter createConverter(String converterId) {
+	public Converter<?> createConverter(String converterId) {
 		return null;
 	}
 
@@ -476,11 +444,6 @@ public class MockApplication extends Application {
 	}
 
 	@Override
-	public MethodBinding createMethodBinding(String ref, Class<?>[] params) throws ReferenceSyntaxException {
-		return null;
-	}
-
-	@Override
 	public Iterator<Locale> getSupportedLocales() {
 		return null;
 	}
@@ -496,17 +459,12 @@ public class MockApplication extends Application {
 	}
 
 	@Override
-	public Validator createValidator(String validatorId) throws FacesException {
+	public Validator<?> createValidator(String validatorId) throws FacesException {
 		return null;
 	}
 
 	@Override
 	public Iterator<String> getValidatorIds() {
-		return null;
-	}
-
-	@Override
-	public ValueBinding createValueBinding(String ref) throws ReferenceSyntaxException {
 		return null;
 	}
 }

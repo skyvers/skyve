@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="create"
+	title="New Report" xmlns:c="http://www.skyve.org/xml/common"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form>
+		<column />
+		<row>
+			<item align="centre">
+				<blurb>
+						<![CDATA[
+							<div style="margin: 0;" class="ui-messages ui-widget" aria-live="polite">
+								<div style="margin: 0;" class="ui-messages-info ui-corner-all">
+									<span class="ui-messages-warning-icon"></span>
+									<ul>
+										<li role="alert" aria-atomic="true">
+											<span class="ui-messages-warning-detail">
+												{i18n:admin.reportTemplate.create.switchModeToCreateReport}
+											</span>
+										</li>
+									</ul>
+								</div>
+							</div>				
+						]]>
+					</blurb>
+			</item>
+		</row>
+	</form>
+
+	<actions>
+		<cancel />
+	</actions>
+</view>

@@ -4,20 +4,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.FacesContext;
-
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.ViewWebContext;
 import org.skyve.util.Util;
+
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.application.FacesMessage.Severity;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class FacesWebContext extends ViewWebContext {
 	private static final long serialVersionUID = -1539528185277420146L;
 
 	public FacesWebContext() {
 		super(UUID.randomUUID().toString(),
-				FacesContext.getCurrentInstance().getExternalContext().getRequest(),
+				(HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest(),
 				FacesContext.getCurrentInstance().getExternalContext().getResponse());
 	}
 

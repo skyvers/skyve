@@ -9,7 +9,7 @@
 	<persistent name="WHO_Office" />
 	<singularAlias>Office</singularAlias>
 	<pluralAlias>Offices</pluralAlias>
-	<iconStyleClass>fa fa-building</iconStyleClass>
+	<iconStyleClass>fa-regular fa-building</iconStyleClass>
 	<bizKey expression="{buildingName} {streetAddress} {suburb}"/>
 	<attributes>
 		<text name="levelUnit">

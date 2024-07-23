@@ -11,9 +11,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class UserProxyExtensionTest extends AbstractH2Test {
+public class UserProxyExtensionTest extends AbstractH2TestForJUnit4 {
 
 	@Test
 	@SuppressWarnings({ "deprecation", "static-method" })

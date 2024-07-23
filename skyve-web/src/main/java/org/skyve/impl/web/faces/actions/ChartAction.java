@@ -34,8 +34,8 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.charts.PrimeFacesChartPostProcessor;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -45,12 +45,12 @@ import org.skyve.metadata.view.model.chart.MetaDataChartModel;
 /**
  * Create a PF chart model from a Skyve model.
  */
-public class ChartAction<T extends Bean> extends FacesAction<ChartModel> {
-	private FacesView<T> facesView;
+public class ChartAction extends FacesAction<ChartModel> {
+	private FacesView facesView;
 	private Object model;
 	private ChartType type;
 	
-	public ChartAction(FacesView<T> facesView, Object model, ChartType type) {
+	public ChartAction(FacesView facesView, Object model, ChartType type) {
 		this.facesView = facesView;
 		this.model = model;
 		this.type = type;

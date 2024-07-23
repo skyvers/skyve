@@ -8,19 +8,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.AccessException;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
@@ -40,6 +34,11 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Service for complete mechanism.
@@ -76,8 +75,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					persistence.begin();
 					Principal userPrincipal = request.getUserPrincipal();
 					User user = WebUtil.processUserPrincipalForRequest(request,
-																		(userPrincipal == null) ? null : userPrincipal.getName(),
-																		true);
+																		(userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -91,10 +89,10 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					
 					// NB This can be a compound binding but will be reduced to the last component attribute name below
 					String attributeName = UtilImpl.processStringValue(request.getParameter("_attr"));
+					attributeName = BindUtil.unsanitiseBinding(attributeName);
 					if (attributeName == null) {
 						throw new ServletException("Mal-formed URL");
 					}
-					attributeName = BindUtil.unsanitiseBinding(attributeName);
 					final String binding = attributeName;
 					
 					String webId = UtilImpl.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME));
@@ -108,13 +106,9 @@ public class SmartClientCompleteServlet extends HttpServlet {
 						complete = CompleteType.valueOf(request.getParameter(AbstractWebContext.ACTION_NAME));
 
 			        	AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
-			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
-			        	bean = webContext.getCurrentBean();
-
-				    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
-				    	if (formBinding != null) {
-				    		formBinding = BindUtil.unsanitiseBinding(formBinding);
-				    		bean = (Bean) BindUtil.get(bean, formBinding);
+			        	bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+			        	if (bean == null) { // should never happen
+				    		throw new ServletException("Bean is null");
 				    	}
 				    	formModuleName = bean.getBizModule();
 				    	formDocumentName = bean.getBizDocument();
@@ -170,11 +164,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					if (complete == CompleteType.previous) {
 						final String userName = user.getName();
 						final UxUi uxui = UserAgent.getUxUi(request);
-						if (! user.canAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName())) {
-							UtilImpl.LOGGER.warning("User " + userName + " cannot access document view previous complete " + formModuleName + '.' + formDocumentName + " for " + binding);
-							UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-							throw new AccessException("the previous data", userName);
-						}
+						user.checkAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName());
 
 						if (! user.canReadDocument(document)) {
 							throw new SecurityException("read this data", userName);

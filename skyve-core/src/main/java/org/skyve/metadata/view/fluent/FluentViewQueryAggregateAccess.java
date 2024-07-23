@@ -27,7 +27,8 @@ public class FluentViewQueryAggregateAccess extends FluentViewUserAccess<FluentV
 	/**
 	 * Returns a FluentViewQueryAggregateAccess from a runtime metadata.
 	 */
-	protected FluentViewQueryAggregateAccess from(Set<String> uxuis) {
+	protected FluentViewQueryAggregateAccess from(String queryName, Set<String> uxuis) {
+		queryName(queryName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
 	}

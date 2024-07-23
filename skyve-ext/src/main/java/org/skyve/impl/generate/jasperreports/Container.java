@@ -9,7 +9,6 @@ import java.util.List;
  * @author Robert
  */
 public class Container {
-
 	private ContainerType containerType;
 
 	private Boolean horizontal = Boolean.FALSE;
@@ -139,21 +138,21 @@ public class Container {
 		this.height = height;
 	}
 
-	public void addHeight(Integer height){
+	public void addHeight(@SuppressWarnings("hiding") Integer height){
 		if(this.height==null){
 			this.height = height;
 		} 
 		else if(height!=null){
-			this.height= this.height.intValue() + height.intValue();
+			this.height= Integer.valueOf(this.height.intValue() + height.intValue());
 		}
 	}
 
-	public void addWidth(Integer width){
+	public void addWidth(@SuppressWarnings("hiding") Integer width){
 		if(this.width==null){
 			this.width = width;
 		} 
 		else if(width!=null){
-			this.width= this.width.intValue() + width.intValue();
+			this.width= Integer.valueOf(this.width.intValue() + width.intValue());
 		}
 	}
 
@@ -194,12 +193,12 @@ public class Container {
 	 * 
 	 * @param left
 	 */
-	public void addLeft(Integer left){
+	public void addLeft(@SuppressWarnings("hiding") Integer left){
 		if(this.left==null){
 			this.left = left;
 		} 
 		else if(left!=null){
-			this.left = this.left.intValue() + left.intValue();
+			this.left = Integer.valueOf(this.left.intValue() + left.intValue());
 		}
 	}
 	
@@ -257,5 +256,4 @@ public class Container {
 		c.setParent(this);
 		this.containers.add(c);
 	}
-	
 }

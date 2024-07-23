@@ -27,4 +27,13 @@ public class Decimal10Test {
 		Assert.assertFalse(Decimal10.ONE_HUNDRED.approximately(Decimal10.ONE, 0.1));
 		Assert.assertFalse(new Decimal10(Double.MAX_VALUE).add(Decimal10.ONE_HUNDRED).approximately(Decimal10.ONE, 1.0));
 	}
+	
+	@Test
+	@SuppressWarnings("static-method")
+	public void testNoEngineeringNotation() {
+		String value = "1234567890.1234567890";
+		Assert.assertEquals(value, new Decimal10(value).toString());
+		value = "-1234567890.1234567890";
+		Assert.assertEquals(value, new Decimal10(value).toString());
+	}
 }

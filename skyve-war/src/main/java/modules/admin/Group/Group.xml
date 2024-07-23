@@ -8,7 +8,7 @@
 	</persistent>
 	<singularAlias>Group</singularAlias>
 	<pluralAlias>Groups</pluralAlias>
-	<iconStyleClass>fa fa-users</iconStyleClass>
+	<iconStyleClass>fa-solid fa-users</iconStyleClass>
 	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" required="true" usage="domain">

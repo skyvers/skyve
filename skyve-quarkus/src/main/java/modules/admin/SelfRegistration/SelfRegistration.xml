@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="SelfRegistration"
+          xmlns="http://www.skyve.org/xml/document"
+          xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <singularAlias>Self Registration</singularAlias>
+    <pluralAlias>Self Registrations</pluralAlias>
+    <bizKey expression="{user}" />
+    <attributes>
+        <text name="activateUrl" persistent="false" audited="false" trackChanges="false">
+            <displayName>admin.selfRegistration.activateUrl.displayName</displayName>
+            <length>2083</length>
+        </text>
+        <text name="confirmEmail">
+			<displayName>admin.selfRegistration.confirmEmail.displayName</displayName>
+			<length>500</length>
+			<validator type="email" />
+		</text>
+        <text name="confirmPassword" persistent="false" audited="false" trackChanges="true">
+            <documentation>Confirm password checked during user registration to bypass change password
+                validation in the UserBizlet.</documentation>
+            <displayName>admin.selfRegistration.confirmPassword.displayName</displayName>
+            <length>30</length>
+        </text>
+        <text name="loginUrl" persistent="false" audited="false" trackChanges="false">
+            <displayName>admin.selfRegistration.loginUrl.displayName</displayName>
+            <length>2083</length>
+        </text>
+        <text name="loginMessage" persistent="false" audited="false" trackChanges="false">
+            <documentation>Transient field to allow login message to be overridden</documentation>
+            <displayName>admin.selfRegistration.loginMessage.displayName</displayName>
+            <length>2000</length>
+        </text>
+        <dateTime name="registrationDate">
+            <documentation>The date and time that this self registration was completed.</documentation>
+            <displayName>admin.selfRegistration.registrationDate.displayName</displayName>
+        </dateTime>
+        <association name="user" type="aggregation" required="true">
+        	<documentation>The new user to create for this registration</documentation>
+            <displayName>admin.selfRegistration.association.user.displayName</displayName>
+            <documentName>User</documentName>
+        </association>
+    </attributes>
+    <conditions>
+    	<condition name="confirmEmailInvalid" usage="view">
+    		<description>True if the entered confirm email address is invalid (does not conform to the regular expression).</description>
+    		<expression>((SelfRegistrationExtension)this).confirmEmailInvalid()</expression>
+    	</condition>
+    	<condition name="emailInvalid" usage="view">
+    		<description>True if the entered email address is invalid (does not conform to the regular expression).</description>
+    		<expression>((SelfRegistrationExtension)this).emailInvalid()</expression>
+    	</condition>	
+        <condition name="registrationComplete">
+            <description>Whether or not the registration process has finished.</description>
+            <expression><![CDATA[getUser() != null && getUser().isPersisted()]]></expression>
+        </condition>
+        <condition name="selfRegistrationAllowed">
+            <description>Whether or not self registration is allowed.</description>
+            <expression>
+                <![CDATA[
+					org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION
+				]]>
+            </expression>
+        </condition>
+    </conditions>
+</document>

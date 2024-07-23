@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
@@ -58,6 +60,7 @@ import freemarker.core.HTMLOutputFormat;
 import freemarker.core.TemplateConfiguration;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 public final class FreemarkerReportUtil {
@@ -301,17 +304,15 @@ public final class FreemarkerReportUtil {
 	public static void generatePDFFromHTML(InputStream in, OutputStream outputStream)
 	throws Exception {
 		ITextRenderer renderer = new ITextRenderer();
-		ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice());
-		callback.setSharedContext(renderer.getSharedContext());
+		ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice(),
+				renderer.getSharedContext().getDotsPerPixel());
 		renderer.getSharedContext().setUserAgentCallback(callback);
 
 		loadFonts(renderer);
 
 		org.w3c.dom.Document doc = XMLResource.load(in).getDocument();
 
-		renderer.setDocument(doc, "/");
-		renderer.layout();
-		renderer.createPDF(outputStream);
+		renderer.createPDF(doc, outputStream);
 	}
 
 	/**
@@ -325,17 +326,15 @@ public final class FreemarkerReportUtil {
 	throws Exception {
 		try (OutputStream os = new FileOutputStream(outputFile)) {
 			ITextRenderer renderer = new ITextRenderer();
-			ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice());
-			callback.setSharedContext(renderer.getSharedContext());
+			ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice(),
+					renderer.getSharedContext().getDotsPerPixel());
 			renderer.getSharedContext().setUserAgentCallback(callback);
 
 			loadFonts(renderer);
 
 			org.w3c.dom.Document doc = XMLResource.load(new InputSource(url)).getDocument();
 
-			renderer.setDocument(doc, url);
-			renderer.layout();
-			renderer.createPDF(os);
+			renderer.createPDF(doc, os);
 		}
 	}
 
@@ -347,10 +346,14 @@ public final class FreemarkerReportUtil {
 
 	public static Template getTemplate(final String templateName)
 	throws Exception {
-		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-		Template t = cfg.getTemplate(templateName);
-		CORE.getPersistence().resetDocumentPermissionScopes();
-		return t;
+		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			try {
+				return cfg.getTemplate(templateName);
+			}
+			catch (IOException e) {
+				throw new DomainException(e);
+			}
+		});
 	}
 
 	/**
@@ -439,10 +442,15 @@ public final class FreemarkerReportUtil {
 		Template template = getTemplate(reportName);
 
 		try (StringWriter sw = new StringWriter()) {
-			CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-			template.process(root, sw);
-			CORE.getPersistence().resetDocumentPermissionScopes();
-			return sw.toString();
+			return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+				try {
+					template.process(root, sw);
+				}
+				catch (TemplateException | IOException e) {
+					throw new DomainException(e);
+				}
+				return sw.toString();
+			});
 		}
 	}
 
@@ -543,22 +551,22 @@ public final class FreemarkerReportUtil {
 	 * @return The ReportTemplate, if one is found
 	 */
 	private static ReportTemplate retrieveReportTemplate(final String templateName) {
-		CORE.getPersistence().setDocumentPermissionScopes(DocumentPermissionScope.customer);
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
-		q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, templateName);
-		ReportTemplate template = q.beanResult();
-		CORE.getPersistence().resetDocumentPermissionScopes();
+		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
+			q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, templateName);
+			ReportTemplate template = q.beanResult();
+			if (template == null) {
+				throw new DomainException(String.format("No report template with the name '%s' could be found", templateName));
+			}
 
-		if (template == null) {
-			throw new DomainException(String.format("No report template with the name '%s' could be found", templateName));
-		}
-
-		return template;
+			return template;
+		});
 	}
 
+	@ParametersAreNonnullByDefault
 	private static class ResourceLoaderUserAgent extends ITextUserAgent {
-		public ResourceLoaderUserAgent(ITextOutputDevice outputDevice) {
-			super(outputDevice);
+		private ResourceLoaderUserAgent(ITextOutputDevice outputDevice, int dotsPerPixel) {
+			super(outputDevice, dotsPerPixel);
 		}
 
 		@Override

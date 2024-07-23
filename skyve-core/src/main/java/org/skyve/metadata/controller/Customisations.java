@@ -1,11 +1,11 @@
 package org.skyve.metadata.controller;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.report.ReportFormat;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Enables the customisation of certain Skyve functions.

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UniqueConstraintOptimisation" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Unique constraint to test if SQL is issued.
+		]]>
+	</documentation>
+	<persistent name="TEST_UniqueConstraintOptimisation" />
+	<singularAlias>All Unique Constraint Optimisation</singularAlias>
+	<pluralAlias>All Unique Constraint Optimisation</pluralAlias>
+	<bizKey expression="{uc1}/{uc2}" />
+	<attributes>
+		<text name="uc1">
+			<displayName>Text</displayName>
+			<length>1</length>
+		</text>
+		<text name="uc2">
+			<displayName>Text</displayName>
+			<length>1</length>
+		</text>
+		<text name="uc3" trackChanges="false">
+			<displayName>Text</displayName>
+			<length>1</length>
+		</text>
+		<association name="nonPersistentAssociation" type="aggregation" persistent="false">
+			<displayName>Non Persistent Association</displayName>
+			<documentName>UniqueConstraintOptimisation</documentName>
+		</association>
+		<association name="persistentAssociation" type="aggregation">
+			<displayName>Persistent Association</displayName>
+			<documentName>UniqueConstraintOptimisation</documentName>
+		</association>
+	</attributes>
+	<uniqueConstraints>
+		<constraint name="uc1uc2c" scope="customer">
+			<message>UC1/UC2</message>
+			<fieldReferences>
+				<ref>uc1</ref>
+				<ref>uc2</ref>
+			</fieldReferences>
+		</constraint>
+		<constraint name="uc3c" scope="customer">
+			<message>UC3</message>
+			<fieldReferences>
+				<ref>uc3</ref>
+			</fieldReferences>
+		</constraint>
+		<constraint name="pac" scope="customer">
+			<message>Persistent Association</message>
+			<fieldReferences>
+				<ref>persistentAssociation</ref>
+			</fieldReferences>
+		</constraint>
+		<constraint name="flagc" scope="customer">
+			<message>Flag</message>
+			<fieldReferences>
+				<ref>bizFlagComment</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

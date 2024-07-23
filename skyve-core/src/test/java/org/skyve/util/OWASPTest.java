@@ -3,8 +3,8 @@ package org.skyve.util;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 public class OWASPTest {
@@ -23,7 +23,7 @@ public class OWASPTest {
 	}
 
 	@Test
-	@Ignore("Relaxed sanitiser currently strips data urls, to be enabled once updated")
+	@Disabled("Relaxed sanitiser currently strips data urls, to be enabled once updated")
 	@SuppressWarnings("static-method")
 	public void testSanitiseRelaxedAllowsImageSrcDataUrl() {
 		// setup the test data

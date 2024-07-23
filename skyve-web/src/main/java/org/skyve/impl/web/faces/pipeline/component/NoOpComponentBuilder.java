@@ -2,8 +2,6 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
 
-import javax.faces.component.UIComponent;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -36,6 +34,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
@@ -52,6 +51,8 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
+
+import jakarta.faces.component.UIComponent;
 
 public class NoOpComponentBuilder extends ComponentBuilder {
 	@Override
@@ -455,7 +456,18 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 											String title,
 											boolean required,
 											HorizontalAlignment textAlignment,
-											javax.faces.convert.Converter facesConverter) {
+											jakarta.faces.convert.Converter<?> facesConverter) {
+		return component;
+	}
+
+	@Override
+	public EventSourceComponent slider(EventSourceComponent component,
+											String dataWidgetVar,
+											Slider spinner,
+											String formDisabledConditionName,
+											String title,
+											boolean required,
+											jakarta.faces.convert.Converter<?> facesConverter) {
 		return component;
 	}
 
@@ -482,7 +494,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										Integer length,
 										Converter<?> converter,
 										Format<?> format,
-										javax.faces.convert.Converter facesConverter) {
+										jakarta.faces.convert.Converter<?> facesConverter) {
 		return component;
 	}
 

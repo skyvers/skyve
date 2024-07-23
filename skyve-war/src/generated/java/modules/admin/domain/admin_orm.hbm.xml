@@ -196,39 +196,10 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
-		<property name="modDocName" length="100" />
-		<property name="injectBootstrapUser" />
-		<property name="schemaName" length="1024" />
-		<property name="notification" />
 		<property name="dailyBackupRetention" />
 		<property name="weeklyBackupRetention" />
 		<property name="monthlyBackupRetention" />
 		<property name="yearlyBackupRetention" />
-		<property name="restorePreProcess" length="39">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.DataMaintenance$RestorePreProcess</param>
-			</type>
-		</property>
-		<property name="contentRestoreOption" length="23">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.DataMaintenance$ContentRestoreOption</param>
-			</type>
-		</property>
-		<property name="restoreIndexingOption" length="7">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.DataMaintenance$RestoreIndexingOption</param>
-			</type>
-		</property>
-		<property name="auditModuleName" length="128" />
-		<property name="auditDocumentName" length="128" />
-		<property name="auditOperation" length="1">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.Audit$Operation</param>
-			</type>
-		</property>
-		<property name="auditTimestampStart" type="Timestamp" />
-		<property name="auditTimestampEnd" type="Timestamp" />
-		<many-to-one name="auditUser" entity-name="adminUserProxy" column="auditUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_DataMaintenance_auditUser"/>
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -574,6 +545,11 @@
 		<property name="queryName" length="100" />
 		<property name="name" length="256" />
 		<property name="snapshot" type="text" />
+		<property name="type" length="3">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Snapshot$Type</param>
+			</type>
+		</property>
 		<property name="ordinal" />
 		<filter name="adminSnapshotNoneFilter" condition="1=0"/>
 		<filter name="adminSnapshotCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -667,7 +643,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
-		<property name="password" length="100" />
+		<property name="password" length="255" />
 		<property name="createdDateTime" type="DateTime" />
 		<property name="homeModule" length="30" />
 		<property name="legacyId" length="100" />
@@ -728,8 +704,8 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
-		<property name="year" />
-		<property name="month" />
+		<property name="hitYear" />
+		<property name="hitMonth" />
 		<property name="userAgentHeader" length="400" />
 		<property name="device" length="1">
 			<type name="Enum">

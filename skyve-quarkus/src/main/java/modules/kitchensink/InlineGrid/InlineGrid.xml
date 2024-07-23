@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="InlineGrid" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Inline Grid</singularAlias>
+	<pluralAlias>Inline Grids</pluralAlias>
+	<parentDocument>KitchenSink</parentDocument>
+	<bizKey expression="Inline Grid" />
+	<attributes>
+		<enum name="constantEnum">
+			<displayName>ConstantEnum</displayName>
+			<values>
+				<value code="one" description="One (1)!" />
+				<value code="two" description="Two (2)!" />
+				<value code="three" description="Three (3)!" />
+			</values>
+		</enum>
+		<text name="constantDomain">
+			<displayName>ConstantDomain</displayName>
+			<domain>constant</domain>
+			<length>5</length>
+		</text>
+		<text name="variantDomain">
+			<displayName>VariantDomain</displayName>
+			<domain>variant</domain>
+			<length>5</length>
+		</text>
+		<text name="dynamicDomain">
+			<displayName>DynamicDomain</displayName>
+			<domain>dynamic</domain>
+			<length>5</length>
+		</text>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+			<defaultValue>{el:false}</defaultValue>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+			<defaultValue>{el:'#000000'}</defaultValue>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+			<defaultValue>{el:newDateOnly()}</defaultValue>
+		</date>
+		<decimal5 name="decimal5">
+			<displayName>Decimal 5</displayName>
+			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
+			<converterName>Decimal5TimeDuration</converterName>
+		</decimal5>
+	</attributes>
+</document>

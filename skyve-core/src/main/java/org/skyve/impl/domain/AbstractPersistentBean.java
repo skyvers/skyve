@@ -2,20 +2,16 @@ package org.skyve.impl.domain;
 
 import java.util.UUID;
 
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PostLoad;
-import javax.persistence.PostRemove;
-import javax.persistence.PreRemove;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.types.jaxb.OptimisticLockMapper;
-import org.skyve.impl.persistence.AbstractPersistence;
+
+import jakarta.persistence.MappedSuperclass;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * 
@@ -166,22 +162,5 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	 */
 	public String getBizKeyBizIdString() {
 		return String.format("%s (%s)", bizKey, bizId);
-	}
-
-	// Need the callback because an element removed from a collection will be deleted and only this event will pick it up
-	@PreRemove
-	private void preRemove() throws Exception {
-		AbstractPersistence.get().preRemove(this);
-	}
-
-	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up
-	@PostRemove
-	private void postRemove() throws Exception {
-		AbstractPersistence.get().postRemove(this);
-	}
-
-	@PostLoad
-	private void postLoad() throws Exception {
-		AbstractPersistence.get().postLoad(this);
 	}
 }

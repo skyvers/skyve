@@ -4,17 +4,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Principal;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
-import org.skyve.impl.domain.messages.AccessException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -31,6 +24,12 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Generates views based on bizhub's XML view spec.
@@ -94,8 +93,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				persistence.begin();
 				Principal userPrincipal = request.getUserPrincipal();
 				User user = WebUtil.processUserPrincipalForRequest(request, 
-																	(userPrincipal == null) ? null : userPrincipal.getName(),
-																	true);
+																	(userPrincipal == null) ? null : userPrincipal.getName());
 				if (user == null) {
 					throw new SessionEndedException(request.getLocale());
 				}
@@ -112,12 +110,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				String uxuiName = uxui.getName();
 				UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
 
-				if (! user.canAccess(UserAccess.singular(moduleName, documentName), uxuiName)) {
-					final String userName = user.getName();
-					UtilImpl.LOGGER.warning("User " + userName + " cannot access document view " + moduleName + '.' + documentName);
-					UtilImpl.LOGGER.info("If this user already has a document privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-					throw new AccessException("this page", userName);
-				}
+				user.checkAccess(UserAccess.singular(moduleName, documentName), uxuiName);
 
 				Module module = customer.getModule(moduleName);
 				Document document = module.getDocument(customer, documentName);

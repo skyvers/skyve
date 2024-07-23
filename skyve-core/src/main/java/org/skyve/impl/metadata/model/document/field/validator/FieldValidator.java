@@ -1,8 +1,5 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
-
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.impl.util.UtilImpl;
@@ -10,6 +7,9 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public abstract class FieldValidator<T extends Object> extends Validator<T> implements SerializableMetaData {

@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.QueryTimeoutException;
-
 import org.hibernate.query.NativeQuery;
 import org.apache.commons.beanutils.DynaBean;
 import org.hibernate.Session;
@@ -39,6 +37,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
+
+import jakarta.persistence.QueryTimeoutException;
 
 class HibernateSQL extends AbstractSQL {
 	private AbstractHibernatePersistence persistence;

@@ -14,7 +14,7 @@
 	<persistent name="ADM_ReportTemplate"/>
 	<singularAlias>Report Template</singularAlias>
 	<pluralAlias>Report Templates</pluralAlias>
-	<iconStyleClass>fa fa-file-pdf-o</iconStyleClass>
+	<iconStyleClass>fa-solid fa-file-pdf</iconStyleClass>
 	<bizKey>
 		return getName() != null ? String.format("Report - %s", getName()) : "New Report Template";
 	</bizKey>
@@ -148,6 +148,7 @@
 			<queryName>qActiveUserProxies</queryName>
 		</association>
 		<collection name="usersToEmail" type="aggregation">
+			<documentation>The collection of users that will be recipients of this report.</documentation>
 			<displayName>Users to Email</displayName>
 			<documentName>UserProxy</documentName>
 			<minCardinality>0</minCardinality>
@@ -448,6 +449,13 @@
 			<displayName>New Recipient</displayName>
 			<documentName>UserProxy</documentName>
 		</association>
+		<collection name="editUsersToEmail" type="aggregation" audited="false" persistent="false" usage="view">
+			<documentation>The collection of recipients shown in the view so users have permission to 
+				remove. Modifies the underlying usersToEmail persistent collection.</documentation>
+			<displayName>Users to Email</displayName>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 	<conditions>
 		<condition name="created" usage="view">
@@ -529,6 +537,17 @@
 			<description>True when the user wants to generate new markup</description>
 			<expression>getGenerateExisting() == GenerateExisting.generate</expression>
 		</condition>
+		<condition name="validAccess" usage="view">
+            <description>
+                Controls whether this report template should be accessible and visible to the 
+                current user, specifically if the user has the DevOps role.
+            </description>
+            <expression>
+                <![CDATA[
+					isUserInOwningModuleRole("DevOps")
+				]]>
+            </expression>
+        </condition>
 	</conditions>
 	<uniqueConstraints>
 		<constraint name="UniqueName" scope="customer">

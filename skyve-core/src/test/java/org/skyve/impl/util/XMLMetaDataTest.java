@@ -1,12 +1,13 @@
 package org.skyve.impl.util;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
@@ -30,8 +31,7 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 
 /**
- * This test depends on the schemas being up to date from skyve-ee/src/skyve/schemas into
- * src/test/resources/schemas in this project.
+ * This test depends on the schemas being up to date from skyve-war/src/main/java/schemas into skyve-core/src/test/resources/schemas.
  */
 public class XMLMetaDataTest {
 
@@ -551,6 +551,9 @@ public class XMLMetaDataTest {
 		// System.out.println(result);
 
 		assertThat(result.contains("name=\"test\""), is(true));
+		assertThat("XML should not contain 'textSearchRoles'", result.contains("<textSearchRoles"), is(false));
+		assertThat("XML should not contain 'flagRoles'", result.contains("<flagRoles"), is(false));
+		assertThat("XML should not contain 'switchModeRoles'", result.contains("<switchModeRoles"), is(false));
 		assertThat("XML should not contain 'interceptors'", result.contains("<interceptors"), is(false));
 		assertThat("XML should not contain 'observers'", result.contains("<observers"), is(false));
 	}

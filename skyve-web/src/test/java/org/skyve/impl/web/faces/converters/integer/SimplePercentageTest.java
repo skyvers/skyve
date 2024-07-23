@@ -1,15 +1,15 @@
 package org.skyve.impl.web.faces.converters.integer;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-
-import javax.faces.convert.ConverterException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class SimplePercentageTest {
+import jakarta.faces.convert.ConverterException;
 
+public class SimplePercentageTest {
 	private SimplePercentage converter;
 
 	@Before

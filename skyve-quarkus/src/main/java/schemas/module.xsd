@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/module" xmlns:tns="http://www.skyve.org/xml/module" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common">
+
+  <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
+
+  <xs:import namespace="http://www.skyve.org/xml/view" schemaLocation="view.xsd"/>
+
+  <xs:element name="bizQL" type="tns:bizQL"/>
+
+  <xs:element name="calendar" type="tns:calendar"/>
+
+  <xs:element name="column" type="tns:metaDataQueryProjectedColumnMetaData"/>
+
+  <xs:element name="content" type="tns:metaDataQueryContentColumnMetaData"/>
+
+  <xs:element name="documentAggregate" type="tns:moduleRoleDocumentAggregateUserAccessMetaData"/>
+
+  <xs:element name="edit" type="tns:edit"/>
+
+  <xs:element name="group" type="tns:groupMetaData"/>
+
+  <xs:element name="item" type="tns:itemMetaData"/>
+
+  <xs:element name="link" type="tns:link"/>
+
+  <xs:element name="list" type="tns:list"/>
+
+  <xs:element name="map" type="tns:map"/>
+
+  <xs:element name="modelAggregate" type="tns:moduleRoleModelAggregateUserAccessMetaData"/>
+
+  <xs:element name="module" type="tns:module"/>
+
+  <xs:element name="previousComplete" type="tns:moduleRolePreviousCompleteUserAccessMetaData"/>
+
+  <xs:element name="query" type="tns:query"/>
+
+  <xs:element name="queryAggregate" type="tns:moduleRoleQueryAggregateUserAccessMetaData"/>
+
+  <xs:element name="singular" type="tns:moduleRoleSingularUserAccessMetaData"/>
+
+  <xs:element name="sql" type="tns:sql"/>
+
+  <xs:element name="tree" type="tns:tree"/>
+
+  <xs:complexType name="module">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="homeRef" type="ns2:viewType" form="qualified" minOccurs="0"/>
+          <xs:element name="homeDocument" type="xs:string" form="qualified"/>
+          <xs:element name="jobs" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="job" type="tns:job" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="documents" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="document" type="tns:document" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="roles" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="role" type="tns:role" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="menu" type="tns:menuMetaData" form="qualified"/>
+          <xs:element name="queries" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:query"/>
+                  <xs:element ref="tns:bizQL"/>
+                  <xs:element ref="tns:sql"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="prototype" type="xs:boolean"/>
+        <xs:attribute name="formLabelLayout" type="ns1:formLabelLayout"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="job">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence/>
+        <xs:attribute name="displayName" type="xs:string" use="required"/>
+        <xs:attribute name="className" type="xs:string" use="required"/>
+        <xs:attribute name="description" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="document">
+    <xs:sequence/>
+    <xs:attribute name="ref" type="xs:string" use="required"/>
+    <xs:attribute name="defaultQueryName" type="xs:string"/>
+    <xs:attribute name="moduleRef" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="role">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified"/>
+          <xs:element name="privileges" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="document" type="tns:documentPrivilegeMetaData" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="accesses" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:singular"/>
+                  <xs:element ref="tns:documentAggregate"/>
+                  <xs:element ref="tns:modelAggregate"/>
+                  <xs:element ref="tns:previousComplete"/>
+                  <xs:element ref="tns:queryAggregate"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="documentPrivilegeMetaData">
+    <xs:sequence>
+      <xs:element name="action" type="tns:actionPrivilegeMetaData" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="contentRestriction" type="tns:contentRestriction" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="contentPermission" type="tns:contentPermission" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="permission" type="tns:documentPermission" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="actionPrivilegeMetaData">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="contentRestriction">
+    <xs:sequence>
+      <xs:element name="documentName" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="attribute" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="contentPermission">
+    <xs:sequence>
+      <xs:element name="documentName" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="attribute" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleSingularUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleDocumentAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleUserAccessMetaData" abstract="true">
+    <xs:sequence>
+      <xs:element name="uxui" type="tns:moduleRoleUserAccessUxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleUserAccessUxUiMetadata">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleQueryAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="query" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRoleModelAggregateUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="model" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRolePreviousCompleteUserAccessMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:moduleRoleDocumentAggregateUserAccessMetaData">
+        <xs:sequence/>
+        <xs:attribute name="binding" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="menuMetaData">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:item"/>
+        <xs:element ref="tns:edit"/>
+        <xs:element ref="tns:list"/>
+        <xs:element ref="tns:map"/>
+        <xs:element ref="tns:calendar"/>
+        <xs:element ref="tns:tree"/>
+        <xs:element ref="tns:link"/>
+        <xs:element ref="tns:group"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="itemMetaData" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="tns:actionMetaData">
+        <xs:sequence>
+          <xs:element name="role" type="tns:grantedTo" form="qualified" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="actionMetaData">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="uxui" type="tns:applicableTo" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="grantedTo">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="applicableTo">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="groupMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:actionMetaData">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="tns:edit"/>
+            <xs:element ref="tns:list"/>
+            <xs:element ref="tns:map"/>
+            <xs:element ref="tns:calendar"/>
+            <xs:element ref="tns:tree"/>
+            <xs:element ref="tns:link"/>
+            <xs:element ref="tns:group"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="edit">
+    <xs:complexContent>
+      <xs:extension base="tns:itemMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="list">
+    <xs:complexContent>
+      <xs:extension base="tns:itemMetaData">
+        <xs:sequence/>
+        <xs:attribute name="autoPopulate" type="xs:boolean"/>
+        <xs:attribute name="document" type="xs:string"/>
+        <xs:attribute name="model" type="xs:string"/>
+        <xs:attribute name="query" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="map">
+    <xs:complexContent>
+      <xs:extension base="tns:itemMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string"/>
+        <xs:attribute name="geometryBinding" type="xs:string"/>
+        <xs:attribute name="model" type="xs:string"/>
+        <xs:attribute name="query" type="xs:string"/>
+        <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
+        <xs:attribute name="showRefreshControls" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="calendar">
+    <xs:complexContent>
+      <xs:extension base="tns:itemMetaData">
+        <xs:sequence/>
+        <xs:attribute name="document" type="xs:string"/>
+        <xs:attribute name="endBinding" type="xs:string" use="required"/>
+        <xs:attribute name="model" type="xs:string"/>
+        <xs:attribute name="query" type="xs:string"/>
+        <xs:attribute name="startBinding" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="tree">
+    <xs:complexContent>
+      <xs:extension base="tns:itemMetaData">
+        <xs:sequence/>
+        <xs:attribute name="autoPopulate" type="xs:boolean"/>
+        <xs:attribute name="document" type="xs:string"/>
+        <xs:attribute name="model" type="xs:string"/>
+        <xs:attribute name="query" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="link">
+    <xs:complexContent>
+      <xs:extension base="tns:itemMetaData">
+        <xs:sequence/>
+        <xs:attribute name="href" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="query">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractQuery">
+        <xs:sequence>
+          <xs:element name="from" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="filter" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="columns" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:column"/>
+                  <xs:element ref="tns:content"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="documentName" type="xs:string" use="required"/>
+        <xs:attribute name="polymorphic" type="xs:boolean"/>
+        <xs:attribute name="aggregate" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractQuery" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified"/>
+        </xs:sequence>
+        <xs:attribute name="timeoutInSeconds" type="xs:int"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="metaDataQueryProjectedColumnMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:metaDataQueryColumnMetaData">
+        <xs:sequence>
+          <xs:element name="projected" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="expression" type="xs:string" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="sortable" type="xs:boolean"/>
+        <xs:attribute name="filterable" type="xs:boolean"/>
+        <xs:attribute name="editable" type="xs:boolean"/>
+        <xs:attribute name="escape" type="xs:boolean"/>
+        <xs:attribute name="sanitise" type="ns2:sanitisation"/>
+        <xs:attribute name="formatter" type="ns1:formatterName"/>
+        <xs:attribute name="customFormatter" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="metaDataQueryColumnMetaData" abstract="true">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" form="qualified" minOccurs="0"/>
+      <xs:element name="filterOperator" type="ns1:filterOperator" form="qualified" minOccurs="0"/>
+      <xs:element name="filterExpression" type="xs:string" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="displayName" type="xs:string"/>
+    <xs:attribute name="sortOrder" type="ns1:sortDirection"/>
+    <xs:attribute name="hidden" type="xs:boolean"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="alignment" type="ns2:horizontalAlignment"/>
+  </xs:complexType>
+
+  <xs:complexType name="metaDataQueryContentColumnMetaData">
+    <xs:complexContent>
+      <xs:extension base="tns:metaDataQueryColumnMetaData">
+        <xs:sequence/>
+        <xs:attribute name="display" type="tns:displayType" use="required"/>
+        <xs:attribute name="pixelHeight" type="xs:int"/>
+        <xs:attribute name="emptyThumbnailRelativeFile" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="bizQL">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractQuery">
+        <xs:sequence>
+          <xs:element name="query" type="xs:string" form="qualified"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="sql">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractQuery">
+        <xs:sequence>
+          <xs:element name="query" type="xs:string" form="qualified"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="documentPermission">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="_____"/>
+      <xs:enumeration value="CRUDG"/>
+      <xs:enumeration value="CRU_G"/>
+      <xs:enumeration value="CR__G"/>
+      <xs:enumeration value="_R__G"/>
+      <xs:enumeration value="_RU_G"/>
+      <xs:enumeration value="_RUDG"/>
+      <xs:enumeration value="_R_DG"/>
+      <xs:enumeration value="CR_DG"/>
+      <xs:enumeration value="CRUDC"/>
+      <xs:enumeration value="CRU_C"/>
+      <xs:enumeration value="CR__C"/>
+      <xs:enumeration value="_R__C"/>
+      <xs:enumeration value="_RU_C"/>
+      <xs:enumeration value="_RUDC"/>
+      <xs:enumeration value="_R_DC"/>
+      <xs:enumeration value="CRUDD"/>
+      <xs:enumeration value="CRU_D"/>
+      <xs:enumeration value="CR__D"/>
+      <xs:enumeration value="_R__D"/>
+      <xs:enumeration value="_RU_D"/>
+      <xs:enumeration value="_RUDD"/>
+      <xs:enumeration value="_R_DD"/>
+      <xs:enumeration value="CR_DD"/>
+      <xs:enumeration value="CRUDU"/>
+      <xs:enumeration value="CRU_U"/>
+      <xs:enumeration value="CR__U"/>
+      <xs:enumeration value="_R__U"/>
+      <xs:enumeration value="_RU_U"/>
+      <xs:enumeration value="_RUDU"/>
+      <xs:enumeration value="_R_DU"/>
+      <xs:enumeration value="CR_DU"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="displayType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="thumbnail"/>
+      <xs:enumeration value="link"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

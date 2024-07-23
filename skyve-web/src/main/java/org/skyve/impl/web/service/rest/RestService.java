@@ -2,21 +2,6 @@ package org.skyve.impl.web.service.rest;
 
 import java.util.List;
 
-import javax.enterprise.context.RequestScoped;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -26,8 +11,8 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.NoResultsException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.filter.rest.AbstractRestFilter;
 import org.skyve.metadata.customer.Customer;
@@ -40,7 +25,23 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
+import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/api")
 @RequestScoped
@@ -323,6 +324,14 @@ public class RestService {
 			}
 	        
 	        List<Bean> beans = qm.fetch().getRows();
+	        
+	        // Nullify flag comment if not given permissions
+	        if (! u.canFlag()) {
+	        	for (Bean bean : beans) {
+	        		BindUtil.set(bean, PersistentBean.FLAG_COMMENT_NAME, null);
+	        	}
+	        }
+	        
 	        result = JSON.marshall(c, beans, qm.getProjections());
 		}
 		catch (Throwable t) {
@@ -360,10 +369,11 @@ public class RestService {
 					throw new SecurityException(content.getBizModule() + '.' + content.getBizDocument() + '.' + content.getAttributeName(), u.getName());
 				}
 
-				result = content.getContentBytes();
+				Thumbnail thumbnail = new Thumbnail(content); 
+				result = thumbnail.getBytes();
 				
 				// Set headers
-				MimeType mimeType = content.getMimeType();
+				MimeType mimeType = thumbnail.getMimeType();
 				response.setContentType(mimeType.toString());
 				response.setCharacterEncoding(Util.UTF8);
 				String fileName = content.getFileName();
@@ -407,13 +417,13 @@ public class RestService {
 
 			response.setContentType(MediaType.APPLICATION_JSON);
 			final User u = CORE.getUser();
-			if (!u.canAccessContent(id,
-					module,
-					document,
-					customer,
-					u.getDataGroupId(),
-					id,
-					attributeName)) {
+			if (! u.canAccessContent(id,
+										module,
+										document,
+										customer,
+										u.getDataGroupId(),
+										id,
+										attributeName)) {
 				throw new SecurityException(module + '.' + document + '.' + attributeName, u.getName());
 			}
 
@@ -425,24 +435,23 @@ public class RestService {
 
 			try (final ContentManager cm = EXT.newContentManager()) {
 				final Base64 base64Codec = new Base64();
-				final AttachmentContent content = new AttachmentContent(
-						customer,
-						module,
-						document,
-						u.getDataGroupId(),
-						u.getId(),
-						id,
-						attributeName,
-						MimeType.valueOf(mimeType),
-						base64Codec.decode(encodedContent));
-
+				final AttachmentContent content = new AttachmentContent(customer,
+																			module,
+																			document,
+																			u.getDataGroupId(),
+																			u.getId(),
+																			id,
+																			attributeName,
+																			MimeType.valueOf(mimeType),
+																			base64Codec.decode(encodedContent));
 				cm.put(content);
 				BindUtil.set(bean, attributeName, content.getContentId());
 				CORE.getPersistence().save(bean);
 
 				return content.getContentId();
 			}
-		} catch (Throwable t) {
+		}
+		catch (Throwable t) {
 			t.printStackTrace();
 			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
 		}

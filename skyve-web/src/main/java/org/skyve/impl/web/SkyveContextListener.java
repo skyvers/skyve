@@ -13,14 +13,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.faces.FacesException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.SessionCookieConfig;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpointConfig;
-
 import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
@@ -48,17 +40,31 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
+import org.skyve.impl.web.filter.DevLoginFilter;
+import org.skyve.impl.web.filter.ResponseHeaderFilter;
+import org.skyve.job.JobScheduler;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.util.Util;
 
+import jakarta.faces.FacesException;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.websocket.server.ServerContainer;
+import jakarta.websocket.server.ServerEndpointConfig;
+
 public class SkyveContextListener implements ServletContextListener {
+	private static final String DEV_LOGIN_FILTER_CLASS_NAME = DevLoginFilter.class.getName();
+	private static final String RESPONSE_HEADER_FILTER_CLASS_NAME = ResponseHeaderFilter.class.getName();
+
 	@Override
 	public void contextInitialized(ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
-
 		populateUtilImpl(ctx);
 
 		final Caching caching = EXT.getCaching();
@@ -97,7 +103,8 @@ public class SkyveContextListener implements ServletContextListener {
 			
 			EXT.getReporting().startup();
 
-			EXT.getJobScheduler().startup();
+			JobScheduler jobScheduler = EXT.getJobScheduler();
+			jobScheduler.startup();
 
 			TwoFactorAuthConfigurationSingleton.getInstance().startup();
 
@@ -124,15 +131,24 @@ public class SkyveContextListener implements ServletContextListener {
 			if (UtilImpl.CUSTOMER != null) {
 				// if a default customer is specified, only notify that one
 				CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
+				if (internalCustomer == null) {
+					throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+				}
 				internalCustomer.notifyStartup();
 			}
 			else {
 				// notify all customers
 				for (String customerName : repository.getAllCustomerNames()) {
 					CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+					if (internalCustomer == null) {
+						throw new IllegalStateException("Customer " + customerName + " does not exist.");
+					}
 					internalCustomer.notifyStartup();
 				}
 			}
+			
+			// Validate Skyve meta-data
+			jobScheduler.validateMetaData();
 		}
 		// in case of error, close the caches to relinquish resources and file locks
 		catch (Throwable t) {
@@ -170,6 +186,28 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		UtilImpl.ARCHIVE_NAME = archiveName;
 
+		// Determine if the DevLoginFilter is in the web.xml, this is used to influence the SpringSecurityConfig
+		// Ensure a filter called SecurityHeadersFilter of type org.skyve.impl.web.filter.ResponseHeaderFilter exists
+		boolean securityHeadersFilterExists = false;
+		for (Entry<String, ? extends FilterRegistration> entry : ctx.getFilterRegistrations().entrySet()) {
+			FilterRegistration reg = entry.getValue();
+			String className = reg.getClassName();
+			if (DEV_LOGIN_FILTER_CLASS_NAME.equals(className)) {
+				UtilImpl.DEV_LOGIN_FILTER_USED = true;
+				UtilImpl.LOGGER.warning("****************************************************************************************************");
+				UtilImpl.LOGGER.warning("DevLoginFilter is in use - Skyve will opening services that should not be open in a legit deployment");
+				UtilImpl.LOGGER.warning("****************************************************************************************************");
+			}
+			else if (RESPONSE_HEADER_FILTER_CLASS_NAME.equals(className)) {
+				if (ResponseHeaderFilter.SECURITY_HEADERS_FILTER_NAME.equals(reg.getName())) {
+					securityHeadersFilterExists = true;
+				}
+			}
+		}
+		if (! securityHeadersFilterExists) {
+			throw new IllegalStateException("A Filter <filter-name>SecurityHeadersFilter</filter-name> of <filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class> is required in web.xml.");
+		}
+		
 		Map<String, Object> properties = null;
 		try (FileInputStream fis = new FileInputStream(UtilImpl.PROPERTIES_FILE_PATH)) {
 			final VariableExpander variableExpander = new VariableExpander();
@@ -702,6 +740,9 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString("api", "googleRecaptchaSiteKey", api, false);
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString("api", "googleRecaptchaSecretKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getString("api", "cloudflareTurnstileSiteKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getString("api", "cloudflareTurnstileSecretKey", api, false);
 		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
@@ -799,59 +840,70 @@ public class SkyveContextListener implements ServletContextListener {
 					try {
 						try {
 							try {
-								// Notify any observers of the shutdown.
-								ProvidedRepository repository = ProvidedRepositoryFactory.get();
-								if (UtilImpl.CUSTOMER != null) {
-									// if a default customer is specified, only notify that one
-									CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
-									internalCustomer.notifyShutdown();
-								}
-								else {
-									// notify all customers
-									for (String customerName : repository.getAllCustomerNames()) {
-										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+								try {
+									// Notify any observers of the shutdown.
+									ProvidedRepository repository = ProvidedRepositoryFactory.get();
+									if (UtilImpl.CUSTOMER != null) {
+										// if a default customer is specified, only notify that one
+										CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(UtilImpl.CUSTOMER);
+										if (internalCustomer == null) {
+											throw new IllegalStateException("UtilImpl.CUSTOMER " + UtilImpl.CUSTOMER + " does not exist.");
+										}
 										internalCustomer.notifyShutdown();
 									}
+									else {
+										// notify all customers
+										for (String customerName : repository.getAllCustomerNames()) {
+											CustomerImpl internalCustomer = (CustomerImpl) repository.getCustomer(customerName);
+											if (internalCustomer == null) {
+												throw new IllegalStateException("Customer " + customerName + " does not exist.");
+											}
+											internalCustomer.notifyShutdown();
+										}
+									}
+								}
+								finally {
+									// Ensure Two Factor Auth Configuration is finalized
+									TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
 								}
 							}
 							finally {
-								// Ensure Two Factor Auth Configuration is finalized
-								TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
+								EXT.getJobScheduler().shutdown();
 							}
 						}
 						finally {
-							EXT.getJobScheduler().shutdown();
+							EXT.getReporting().shutdown();
 						}
 					}
 					finally {
-						EXT.getReporting().shutdown();
+						// Ensure the caches are destroyed even in the event of other failures first
+						// so that resources and file locks are relinquished.
+						EXT.getCaching().shutdown();
 					}
 				}
 				finally {
-					// Ensure the caches are destroyed even in the event of other failures first
-					// so that resources and file locks are relinquished.
-					EXT.getCaching().shutdown();
+					// Ensure the content manager is destroyed so that resources and files locks are relinquished
+					@SuppressWarnings("resource")
+					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
+					if (cm != null) { // can be null if it wasn't initialised correctly.
+						try {
+							cm.close();
+							cm.shutdown();
+						}
+						catch (Exception e) {
+							UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 			finally {
-				// Ensure the content manager is destroyed so that resources and files locks are relinquished
-				@SuppressWarnings("resource")
-				AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
-				if (cm != null) { // can be null if it wasn't initialised correctly.
-					try {
-						cm.close();
-						cm.shutdown();
-					}
-					catch (Exception e) {
-						UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
-						e.printStackTrace();
-					}
-				}
+				// Ensure the add-in manager is stopped
+				EXT.getAddInManager().shutdown();
 			}
 		}
 		finally {
-			// Ensure the add-in manager is stopped
-			EXT.getAddInManager().shutdown();
+			ProvidedRepositoryFactory.set(null);
 		}
 	}
 

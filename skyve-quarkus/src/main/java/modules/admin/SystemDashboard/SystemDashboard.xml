@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="SystemDashboard" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>System Dashboard</singularAlias>
+	<pluralAlias>System Dashboard</pluralAlias>
+	<iconStyleClass>fa fa-area-chart</iconStyleClass>
+	<attributes>
+		<collection type="aggregation" name="status">
+			<displayName>Status</displayName>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

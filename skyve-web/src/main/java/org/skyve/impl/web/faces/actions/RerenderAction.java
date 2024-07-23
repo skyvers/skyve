@@ -8,19 +8,19 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
-public class RerenderAction<T extends Bean> extends FacesAction<Void> {
-	private FacesView<T> facesView;
+public class RerenderAction extends FacesAction<Void> {
+	private FacesView facesView;
 	private String source;
 	private boolean validate;
 	
-	public RerenderAction(FacesView<T> facesView, String source, boolean validate) {
+	public RerenderAction(FacesView facesView, String source, boolean validate) {
 		this.facesView = facesView;
 		this.source = source;
 		this.validate = validate;

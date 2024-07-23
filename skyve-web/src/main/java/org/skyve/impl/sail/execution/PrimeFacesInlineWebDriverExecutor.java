@@ -2,8 +2,6 @@ package org.skyve.impl.sail.execution;
 
 import java.util.List;
 
-import javax.faces.component.UIComponent;
-
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.inputmask.InputMask;
@@ -71,6 +69,8 @@ import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
+
+import jakarta.faces.component.UIComponent;
 
 public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
@@ -457,15 +457,18 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		Module m = c.getModule(context.getModuleName());
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-		String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
-		d = m.getDocument(c, newDocumentName);
-		String newModuleName = d.getOwningModuleName();
-		
-		// Push it
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(newModuleName);
-		push.setDocumentName(newDocumentName);
-		push.execute(this);
+		Relation relation = (Relation) target.getAttribute();
+		if (relation != null) { // should always be
+			String newDocumentName = relation.getDocumentName();
+			d = m.getDocument(c, newDocumentName);
+			String newModuleName = d.getOwningModuleName();
+			
+			// Push it
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(newModuleName);
+			push.setDocumentName(newDocumentName);
+			push.execute(this);
+		}
 	}
 	
 	@Override
@@ -550,15 +553,18 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			Module m = c.getModule(context.getModuleName());
 			Document d = m.getDocument(c, context.getDocumentName());
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-			String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
-			d = m.getDocument(c, newDocumentName);
-			String newModuleName = d.getOwningModuleName();
-			
-			// Push it
-			PushEditContext push = new PushEditContext();
-			push.setModuleName(newModuleName);
-			push.setDocumentName(newDocumentName);
-			push.execute(this);
+			Relation relation = (Relation) target.getAttribute();
+			if (relation != null) { // should always be
+				String newDocumentName = relation.getDocumentName();
+				d = m.getDocument(c, newDocumentName);
+				String newModuleName = d.getOwningModuleName();
+				
+				// Push it
+				PushEditContext push = new PushEditContext();
+				push.setModuleName(newModuleName);
+				push.setDocumentName(newDocumentName);
+				push.execute(this);
+			}
 		}
 	}
 

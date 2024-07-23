@@ -2,8 +2,6 @@ package org.skyve.impl.persistence;
 
 import java.util.Collection;
 
-import javax.inject.Inject;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -13,6 +11,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
+
+import jakarta.inject.Inject;
 
 /**
  * Base class that can be used by service layer classes to reduce boilerplate database retrieval code.

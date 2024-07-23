@@ -10,7 +10,7 @@
 	<persistent name="ADM_ReportDataset"/>
 	<singularAlias>Report Dataset</singularAlias>
 	<pluralAlias>Report Datasets</pluralAlias>
-	<iconStyleClass>fa fa-table</iconStyleClass>
+	<iconStyleClass>fa-solid fa-table</iconStyleClass>
 	<parentDocument>ReportTemplate</parentDocument>
 	<bizKey expression="Query - {parent.name} {datasetType}" />
 	<implements>
@@ -26,6 +26,7 @@
 			<displayName>Dataset Type</displayName>
 			<description>The type of this dataset; if it is a BizQL or SQL query, a fixed constant value or a dataset Class.</description>
 			<defaultValue>bizQL</defaultValue>
+			<domain>variant</domain>
 		</enum>
 		<memo name="query" required="true">
 			<displayName>Query</displayName>

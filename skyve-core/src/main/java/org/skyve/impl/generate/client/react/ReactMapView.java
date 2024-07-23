@@ -9,7 +9,9 @@ import org.skyve.metadata.view.model.list.ListModel;
 
 
 public class ReactMapView extends ReactComponent {
+	@SuppressWarnings("unused")
 	private ListModel<Bean> model;
+	@SuppressWarnings("unused")
 	private MetaDataQueryDefinition query;
 	
 	public ReactMapView(ReactGenerator generator, String moduleName, String componentName) {

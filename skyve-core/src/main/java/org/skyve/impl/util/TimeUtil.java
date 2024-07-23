@@ -3,12 +3,12 @@ package org.skyve.impl.util;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -28,7 +28,7 @@ public class TimeUtil {
 	 * See {@link Time#clearTimeComponent}
 	 */
 	public static final void clearTimeComponent(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
 		calendar.set(Calendar.MILLISECOND, 0);
@@ -41,8 +41,20 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#clearMillisecondComponent}
 	 */
+	public static final void clearSecondAndMillisecondComponent(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		// NB clear() does not work in JDK 1.3.1
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		date.setTime(calendar.getTime().getTime());
+	} // clearTimeComponent
+
+	/**
+	 * See {@link Time#clearMillisecondComponent}
+	 */
 	public static final void clearMillisecondComponent(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
 		calendar.set(Calendar.MILLISECOND, 0);
@@ -53,7 +65,7 @@ public class TimeUtil {
 	 * See {@link Time#clearDateComponent}
 	 */
 	public static void clearDateComponent(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -66,7 +78,7 @@ public class TimeUtil {
 	 * See {@link Time#setTime}
 	 */
 	public static final void setTime(Date date, int hours24, int minutes, int seconds) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
 		calendar.set(Calendar.MILLISECOND, 0);
@@ -80,7 +92,7 @@ public class TimeUtil {
 	 * See {@link Time#setTime}
 	 */
 	public static final void setTime(Date date, TimeOnly time) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(time);
 		int hours = calendar.get(Calendar.HOUR_OF_DAY);
 		int minutes= calendar.get(Calendar.MINUTE);
@@ -94,7 +106,7 @@ public class TimeUtil {
 	 * See {@link Time#setDate}
 	 */
 	public static final void setDate(Date date, int dayOfMonth, int monthStartingAt1, int year) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 		calendar.set(Calendar.MONTH, monthStartingAt1 - 1);
@@ -106,7 +118,7 @@ public class TimeUtil {
 	 * See {@link Time#getYear}
 	 */
 	public static final int getYear(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
 		return calendar.get(Calendar.YEAR);
@@ -116,7 +128,7 @@ public class TimeUtil {
 	 * See {@link Time#getMonthStartingFrom1}
 	 */
 	public static final int getMonthStartingFrom1(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
 		return calendar.get(Calendar.MONTH) + 1;
@@ -126,7 +138,7 @@ public class TimeUtil {
 	 * See {@link Time#getMonthStartingFrom0}
 	 */
 	public static final int getMonthStartingFrom0(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
 		return calendar.get(Calendar.MONTH);
@@ -136,7 +148,7 @@ public class TimeUtil {
 	 * See {@link Time#getDay}
 	 */
 	public static final int getDay(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
 		return calendar.get(Calendar.DAY_OF_MONTH);
@@ -146,7 +158,7 @@ public class TimeUtil {
 	 * See {@link Time#isLeapYear}
 	 */
 	public static final boolean isLeapYear(int year) {
-		return new GregorianCalendar().isLeapYear(year);
+		return Year.isLeap(year);
 	}
 	
 	/**
@@ -160,7 +172,7 @@ public class TimeUtil {
 	 * See {@link Time#addHours}
 	 */
 	public static final void addHours(Date date, int numberOfHours) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -174,7 +186,7 @@ public class TimeUtil {
 	 * See {@link Time#addMinutes}
 	 */
 	public static final void addMinutes(Date date, int numberOfMinutes) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -188,7 +200,7 @@ public class TimeUtil {
 	 * See {@link Time#addSeconds}
 	 */
 	public static final void addSeconds(Date date, int numberOfSeconds) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 
@@ -202,7 +214,7 @@ public class TimeUtil {
 	 * See {@link Time#addDays}
 	 */
 	public static final void addDays(Date date, int numberOfDays) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 		// NB clear() does not work in JDK 1.3.1
@@ -220,7 +232,7 @@ public class TimeUtil {
 	 * See {@link Time#addMonths}
 	 */
 	public static final void addMonths(Date date, int numberOfMonths) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
 		// NB clear() does not work in JDK 1.3.1
@@ -238,7 +250,7 @@ public class TimeUtil {
 	 * See {@link Time#getFinancialYear}
 	 */
 	public static final int getFinancialYear(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		int year = calendar.get(Calendar.YEAR);
 		int month = calendar.get(Calendar.MONTH);
@@ -273,7 +285,7 @@ public class TimeUtil {
 	 * See {@link Time#numberOfDaysBetween}
 	 */
 	public static final int numberOfDaysBetween(Date startDate, Date endDate) {
-		Calendar startDateCalendar = new GregorianCalendar();
+		Calendar startDateCalendar = Calendar.getInstance();
 		startDateCalendar.setTime(startDate);
 		startDateCalendar.setLenient(false);
 		// NB clear() does not work in JDK 1.3.1
@@ -282,7 +294,7 @@ public class TimeUtil {
 		startDateCalendar.set(Calendar.MINUTE, 0);
 		startDateCalendar.set(Calendar.HOUR_OF_DAY, 0);
 
-		Calendar endDateCalendar = new GregorianCalendar();
+		Calendar endDateCalendar = Calendar.getInstance();
 		endDateCalendar.setTime(endDate);
 		endDateCalendar.setLenient(false);
 		// NB clear() does not work in JDK 1.3.1
@@ -332,7 +344,7 @@ public class TimeUtil {
 	 * See {@link Time#findNextDayOfWeek}
 	 */
 	public static final Date findNextDayOfWeek(Date date, int dayOfWeek) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		while (calendar.get(Calendar.DAY_OF_WEEK) != dayOfWeek) {
 			calendar.add(Calendar.DAY_OF_WEEK, 1);
@@ -347,7 +359,7 @@ public class TimeUtil {
 	 * See {@link Time#ensureWorkDay}
 	 */
 	public static final Date ensureWorkDay(Date date) {
-		Calendar calendar = new GregorianCalendar();
+		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 		if (dayOfWeek == Calendar.SATURDAY) {

@@ -7,21 +7,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.security.Principal;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.Download;
@@ -31,6 +25,13 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class DownloadServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -51,8 +52,8 @@ public class DownloadServlet extends HttpServlet {
 				try {
 					try {
 						persistence.begin();
-				    	Principal userPrincipal = request.getUserPrincipal();
-				    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+						HttpSession session = request.getSession(false);
+						User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 						if (user == null) {
 							throw new SessionEndedException(request.getLocale());
 						}
@@ -115,7 +116,7 @@ public class DownloadServlet extends HttpServlet {
 											Disposition.attachment.toString() : 
 											disposition.toString());
 							header.append("; filename=\"").append(result.getFileName()).append('"');
-							response.setHeader("Content-Disposition",  header.toString());
+							response.setHeader("Content-Disposition", header.toString());
 			            }
 			
 			            if (bytes != null) {

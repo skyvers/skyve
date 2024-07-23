@@ -6,7 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 import org.skyve.bizport.BizPortWorkbook;
@@ -30,12 +32,12 @@ import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.controller.Upload;
-import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.HTMLResources;
 import org.skyve.metadata.customer.InterceptorMetaData;
 import org.skyve.metadata.customer.LoginResources;
+import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.UIResources;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -50,8 +52,13 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.WebContext;
+
+import com.google.common.base.MoreObjects;
+
+import jakarta.servlet.http.HttpSession;
 
 public class CustomerImpl implements Customer {
 	private static final long serialVersionUID = 2926460705821800439L;
@@ -108,6 +115,9 @@ public class CustomerImpl implements Customer {
 	private LinkedHashMap<String, FormLabelLayout> moduleEntries = new LinkedHashMap<>();
 	private String homeModuleName;
 	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
+	private Set<String> textSearchRoles = new TreeSet<>();
+	private Set<String> flagRoles = new TreeSet<>();
+	private Set<String> switchModeRoles = new TreeSet<>();
 	private boolean allowModuleRoles = true;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
@@ -537,15 +547,27 @@ public class CustomerImpl implements Customer {
 		}
 	}
 
-	public void notifyPreRestore() {
+	public void notifyBeforeRestore() {
 		for (ObserverMetaData observer : observers.values()) {
-			observer.getObserver().preRestore(this);
+			observer.getObserver().beforeRestore(this);
 		}
 	}
 
-	public void notifyPostRestore() {
+	public void notifyAfterRestore() {
+		for (ObserverMetaData observer : reversedObservers) {
+			observer.getObserver().afterRestore(this);
+		}
+	}
+
+	public void notifyLogin(User user, HttpSession session) {
 		for (ObserverMetaData observer : observers.values()) {
-			observer.getObserver().postRestore(this);
+			observer.getObserver().login(user, session);
+		}
+	}
+
+	public void notifyLogout(User user, HttpSession session) {
+		for (ObserverMetaData observer : reversedObservers) {
+			observer.getObserver().logout(user, session);
 		}
 	}
 
@@ -914,5 +936,25 @@ public class CustomerImpl implements Customer {
 			interceptor.getInterceptor().afterPostRender(result, webContext);
 		}
 	}
+
+	public Set<String> getTextSearchRoles() {
+		return textSearchRoles;
+	}
+	
+	public Set<String> getFlagRoles() {
+		return flagRoles;
+	}
+
+	public Set<String> getSwitchModeRoles() {
+		return switchModeRoles;
+	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .toString();
+    }
 }
        

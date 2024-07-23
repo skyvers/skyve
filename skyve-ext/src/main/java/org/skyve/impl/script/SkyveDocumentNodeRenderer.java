@@ -21,6 +21,7 @@ import org.commonmark.node.Text;
 import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlWriter;
+import org.skyve.util.Icons;
 
 public class SkyveDocumentNodeRenderer implements NodeRenderer {
 
@@ -41,7 +42,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	private static final String PERSISTENT = "<persistent name=\"%s\" />";
 	private static final String SINGULAR_ALIAS = "<singularAlias>%s</singularAlias>";
 	private static final String PLURAL_ALIAS = "<pluralAlias>%ss</pluralAlias>";
-	private static final String ICON = "<iconStyleClass>fa fa-file-o</iconStyleClass>";
+	private static final String ICON = "<iconStyleClass>" + Icons.FONT_DOCUMENT + "</iconStyleClass>";
 	private static final String BIZKEY = "<bizKey expression=\"%s\"/>";
 
 	public SkyveDocumentNodeRenderer(HtmlNodeRendererContext context) {

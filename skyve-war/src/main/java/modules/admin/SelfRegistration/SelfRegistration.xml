@@ -11,12 +11,12 @@
             <displayName>admin.selfRegistration.activateUrl.displayName</displayName>
             <length>2083</length>
         </text>
-        <text name="confirmEmail">
+        <text name="confirmEmail" sensitivity="personal">
 			<displayName>admin.selfRegistration.confirmEmail.displayName</displayName>
 			<length>500</length>
 			<validator type="email" />
 		</text>
-        <text name="confirmPassword" persistent="false" audited="false" trackChanges="true">
+        <text name="confirmPassword" persistent="false" audited="false" trackChanges="true" sensitivity="secret">
             <documentation>Confirm password checked during user registration to bypass change password
                 validation in the UserBizlet.</documentation>
             <displayName>admin.selfRegistration.confirmPassword.displayName</displayName>
@@ -59,6 +59,22 @@
             <expression>
                 <![CDATA[
 					org.skyve.impl.util.UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION
+				]]>
+            </expression>
+        </condition>
+        <condition name="showGoogleRecaptcha">
+            <description>Whether to show google recaptcha.</description>
+            <expression>
+                <![CDATA[
+					org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null
+				]]>
+            </expression>
+        </condition>
+        <condition name="showCloudflareTurnstile">
+            <description>Whether to show cloudflare turnstile.</description>
+            <expression>
+                <![CDATA[
+					org.skyve.impl.util.UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null
 				]]>
             </expression>
         </condition>

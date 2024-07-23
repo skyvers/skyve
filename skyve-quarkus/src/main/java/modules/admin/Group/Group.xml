@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Group"
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_SecurityGroup">
+		<cache>reference</cache>
+	</persistent>
+	<singularAlias>Group</singularAlias>
+	<pluralAlias>Groups</pluralAlias>
+	<iconStyleClass>fa fa-users</iconStyleClass>
+	<bizKey expression="{name}"/>
+	<attributes>
+		<text name="name" required="true" usage="domain">
+			<displayName>admin.group.name.displayName</displayName>
+			<length>30</length>
+		</text>
+		<text name="description" usage="domain">
+			<displayName>admin.group.description.displayName</displayName>
+			<length>255</length>
+		</text>
+		<collection name="roles" type="child" usage="domain">
+			<displayName>admin.group.collection.roles.displayName</displayName>
+			<domain>dynamic</domain>
+			<documentName>GroupRole</documentName>
+			<minCardinality>1</minCardinality>
+			<ordering>
+				<order by="roleName" sort="ascending" />
+			</ordering>
+			<unique name="UniqueGroupRole">
+				<message>admin.group.collection.roles.unique.message</message>
+				<fieldReferences>
+					<ref>roleName</ref>
+				</fieldReferences>
+			</unique>
+		</collection>
+		<collection name="candidateRoles" type="child" audited="false" persistent="false" trackChanges="false" usage="view">
+			<documentation>
+				Holds the possible roles that can be assigned to this group.
+			</documentation>
+			<displayName>admin.group.candidateRoles.displayName</displayName>
+			<domain>dynamic</domain>
+			<documentName>GroupRole</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+	<uniqueConstraints>
+		<constraint name="UniqueName" scope="customer">
+			<message>The group {name} already exists.</message>
+			<fieldReferences>
+				<ref>name</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

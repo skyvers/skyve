@@ -4,12 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
@@ -20,6 +14,12 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.repository.ProvidedRepository;
+
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlRootElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "bizlet")
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 

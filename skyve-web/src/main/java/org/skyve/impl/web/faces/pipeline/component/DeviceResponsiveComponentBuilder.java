@@ -1,10 +1,10 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
-import javax.faces.component.UIComponent;
-
 import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.web.UserAgentType;
+
+import jakarta.faces.component.UIComponent;
 
 public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder {
 	/**

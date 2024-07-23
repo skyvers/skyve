@@ -12,9 +12,9 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture;
 
 import modules.admin.domain.Communication;
-import util.AbstractH2Test;
+import util.AbstractH2TestForJUnit4;
 
-public class CommunicationBizletTest extends AbstractH2Test {
+public class CommunicationBizletTest extends AbstractH2TestForJUnit4 {
 
 	@SuppressWarnings({ "deprecation", "static-method" })
 	@Test

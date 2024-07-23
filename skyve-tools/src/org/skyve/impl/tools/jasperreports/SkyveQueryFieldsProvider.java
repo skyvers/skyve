@@ -55,9 +55,11 @@ public class SkyveQueryFieldsProvider implements FieldsProvider {
     			field.setName(BindUtil.sanitiseBinding(binding));
     			
     			Attribute attribute = BindUtil.getMetaDataForBinding(customer, owningModule, document, binding).getAttribute();
-    			Class<?> propertyType = attribute.getAttributeType().getImplementingType();
-    			field.setValueClass(propertyType);
-    			field.setValueClassName(propertyType.getName());
+    			if (attribute != null) {
+	    			Class<?> propertyType = attribute.getAttributeType().getImplementingType();
+	    			field.setValueClass(propertyType);
+	    			field.setValueClassName(propertyType.getName());
+    			}
     			result[i] = field;
     		}
     

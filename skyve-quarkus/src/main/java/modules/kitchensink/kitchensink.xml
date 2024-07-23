@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module name="kitchensink"
+			title="Kitchen Sink"
+			xmlns="http://www.skyve.org/xml/module"
+			xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<homeRef>edit</homeRef>
+	<homeDocument>KitchenSink</homeDocument>
+	<documents>
+		<document ref="KitchenSink" />
+		<document ref="ContainerGrid" />
+		<document ref="InlineGrid" />
+		<document ref="ListAttributes" />
+		<document ref="OrderedGrid" />
+		<document ref="DataRepeater" />
+		<document ref="LookupDescription" />
+	</documents>
+	<roles>
+		<role name="dev">
+			<description>Dev</description>
+			<privileges>
+				<document name="KitchenSink" permission="_____" />
+				<document name="ContainerGrid" permission="CRUDD" />
+				<document name="InlineGrid" permission="CRUDD" />
+				<document name="ListAttributes" permission="CRUDD" />
+				<document name="OrderedGrid" permission="CRUDD" />
+				<document name="DataRepeater" permission="CRUDD" />
+				<document name="LookupDescription" permission="CRUDD" />
+			</privileges>
+		</role>
+	</roles>
+	<menu>
+		<edit name="Kitchen Sink" document="KitchenSink">
+			<role name="dev" />
+		</edit>
+		<link href="#" name="Calendar">
+			<role name="dev" />
+		</link>
+		<list name="List" document="ListAttributes">
+			<role name="dev" />
+		</list>
+		<link href="#" name="Map">
+			<role name="dev" />
+		</link>
+		<link href="#" name="Tree">
+			<role name="dev" />
+		</link>
+		<list name="Lookup values" document="LookupDescription">
+			<role name="dev" />
+		</list>
+	</menu>
+</module>

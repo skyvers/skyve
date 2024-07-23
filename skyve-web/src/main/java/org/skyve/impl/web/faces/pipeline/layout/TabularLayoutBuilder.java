@@ -3,10 +3,6 @@ package org.skyve.impl.web.faces.pipeline.layout;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.component.html.HtmlPanelGroup;
-
 import org.primefaces.component.column.Column;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
@@ -24,6 +20,10 @@ import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlPanelGrid;
+import jakarta.faces.component.html.HtmlPanelGroup;
 
 public class TabularLayoutBuilder extends LayoutBuilder {
 	@Override
@@ -281,6 +281,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										boolean widgetRequired,
 										String widgetInvisible,
 										String widgetHelpText,
+										Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		Integer rowspan = currentFormItem.getRowspan();
@@ -397,7 +398,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 									percentageWidth, 
 									pixelHeight, 
 									percentageHeight, 
-									NINETY_EIGHT,
+									null,
 									null);
 		setId(result, widgetId);
 		result.setStyleClass("ui-panelgrid-blank");
@@ -421,7 +422,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 									percentageWidth, 
 									pixelHeight, 
 									percentageHeight, 
-									NINETY_EIGHT,
+									null,
 									null);
 		setId(result, widgetId);			
 		return result;

@@ -1,9 +1,5 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 import org.apache.commons.validator.GenericValidator;
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.ISBNValidator;
@@ -21,6 +17,10 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
+
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)

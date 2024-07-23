@@ -8,4 +8,9 @@ public interface Relation extends Attribute {
 	 * @return
 	 */
 	public String getDocumentName();
+	
+	@Override
+	default boolean isScalar() {
+		return false;
+	}
 }

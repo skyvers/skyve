@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/router" xmlns:tns="http://www.skyve.org/xml/router" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common">
+
+  <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
+
+  <xs:import namespace="http://www.skyve.org/xml/view" schemaLocation="view.xsd"/>
+
+  <xs:element name="route" type="tns:route"/>
+
+  <xs:element name="router" type="tns:router"/>
+
+  <xs:complexType name="router">
+    <xs:sequence>
+      <xs:element name="uxui" type="tns:uxUiMetadata" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="unsecured" type="xs:string" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="uxuiSelectorClassName" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="uxUiMetadata">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element ref="tns:route" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="route">
+    <xs:sequence>
+      <xs:element name="criteria" type="tns:routeCriteria" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="outcome" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="routeCriteria">
+    <xs:sequence/>
+    <xs:attribute name="customer" type="xs:string"/>
+    <xs:attribute name="dataGroupId" type="xs:string"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="userId" type="xs:string"/>
+    <xs:attribute name="viewType" type="ns2:viewType"/>
+    <xs:attribute name="webAction" type="ns1:webAction"/>
+  </xs:complexType>
+</xs:schema>
+

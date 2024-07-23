@@ -23,8 +23,10 @@
 		
 			<base href="#{desktop.baseHref}" />
 			<ui:include src="/WEB-INF/pages/includes/favicon.xhtml" />
+			<!-- 4.7 is disabled by default
 			<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
-			<link type="text/css" rel="stylesheet" href="fontawesome-6.1.1/css/all.min.css" />
+			-->
+			<link type="text/css" rel="stylesheet" href="fontawesome-6.5.1/css/all.min.css" />
 
 			<title>${project.description}</title>
 			<!-- normally commented out for security reasons
@@ -36,7 +38,7 @@
 			<o:socket id="socket" widgetVar="socket" channel="skyve" user="#{sessionScope['user'].id}" onmessage="function(message) { isc.BizUtil.onPushMessage(message) }" />
 			<p:growl id="growl" widgetVar="growl" globalOnly="true" escape="false" />
 			<h:form prependId="false">
-				<p:remoteCommand name="setUxUi" actionListener="#{desktop.setUxUi('external')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
+				<p:remoteCommand name="setUxUi" action="#{desktop.setUxUi('external')}" ignoreAutoUpdate="true" onsuccess="location.reload()" process="@this" update="@none" />
 			</h:form>
 			<table class="logo" align="center">
 				<tbody>
@@ -68,19 +70,18 @@
 			<script type="text/javascript" src="#{desktop.smartClientDir}/system/modules/ISC_RichTextEditor.js"></script>
 			<script type="text/javascript" src="#{desktop.smartClientDir}/skins/#{desktop.skin}/load_skin.js"></script>
 			<h:outputText value="#{desktop.localeScript}" escape="false" />
-			<script type="text/javascript" src="desktop/skyve-min.js?v=#{desktop.webResourceFileVersion}"></script>
+			<script type="text/javascript" src="skyve/desktop/skyve-min.js?v=#{desktop.webResourceFileVersion}"></script>
 			<c:if test="#{desktop.mapType eq 'gmap'}">
-				<script type="text/javascript" src="desktop/skyve-gmap-min.js?v=#{desktop.webResourceFileVersion}"></script>
+				<script type="text/javascript" src="skyve/desktop/skyve-gmap-min.js?v=#{desktop.webResourceFileVersion}"></script>
 			</c:if>
 			<c:if test="#{desktop.mapType eq 'leaflet'}">
-				<script type="text/javascript" src="desktop/skyve-leaflet-min.js?v=#{desktop.webResourceFileVersion}"></script>
+				<script type="text/javascript" src="skyve/desktop/skyve-leaflet-min.js?v=#{desktop.webResourceFileVersion}"></script>
 			</c:if>
 			<script type="text/javascript">
-				SKYVE.Util.setTouchCookie();
 				isc.Canvas.resizeControls(4);
 				isc.Canvas.resizeFonts(2);
-				#{desktop.menuScript} #{desktop.dataSourceScript}
 				#{desktop.apiScript}
+				#{desktop.menuScript} #{desktop.dataSourceScript}
 				#{desktop.uiScript}
 				#{desktop.bannerScript}
 			</script>

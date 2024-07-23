@@ -8,7 +8,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.beanutils.LazyDynaMap;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -316,7 +315,7 @@ public abstract class AbstractBean implements Bean {
 	 * @see BeanProvider#injectFields(Object)
 	 */
 	protected Object readResolve() throws Exception {
-	    BeanProvider.injectFields(this);
+	    UtilImpl.inject(this);
 	    return this;
 	}
 }

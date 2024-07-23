@@ -3,9 +3,6 @@ package org.skyve.metadata.model.document;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.PersistentMetaData;
@@ -15,6 +12,7 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
@@ -22,6 +20,9 @@ import org.skyve.metadata.view.model.chart.ChartModel;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * 
@@ -37,6 +38,8 @@ public interface Document extends Model, PersistentMetaData {
 	
 	public @Nullable String getBizKeyExpression();
 	
+	public @Nullable Sensitivity getBizKeySensitity();
+
 	/**
 	 * Set the bizKey for static/dynamic beans.
 	 * 
@@ -91,12 +94,6 @@ public interface Document extends Model, PersistentMetaData {
 	 * 
 	 * @return
 	 */
-	public Set<String> getReferencedDocumentNames();
-	
-	/**
-	 * 
-	 * @return
-	 */
 	public Set<String> getReferenceNames();
 	
 	/**
@@ -117,13 +114,6 @@ public interface Document extends Model, PersistentMetaData {
 	 */
 	public Set<String> getDefinedActionNames();
 
-	/**
-	 * 
-	 * @param customer
-	 * @return
-	 */
-	public Set<Document> getReferencedDocuments(Customer customer);
-	
 	/**
 	 * 
 	 * @return

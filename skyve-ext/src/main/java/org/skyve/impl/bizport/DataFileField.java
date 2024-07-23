@@ -14,7 +14,6 @@ import org.skyve.metadata.model.Attribute;
  *
  */
 public class DataFileField {
-	
 	public static enum LoadAction {
 		SET_VALUE, LOOKUP_EQUALS, LOOKUP_LIKE, LOOKUP_CONTAINS, CONFIRM_VALUE
 	}
@@ -22,16 +21,16 @@ public class DataFileField {
 	// the index of this field (e.g. the column number)
 	private Integer index;
 	
-	//the binding to load to
+	// the binding to load to
 	private String binding;
 	
-	//whether a value is required
+	// whether a value is required
 	private boolean required = false;
 	
-	//the action to do with the value
+	// the action to do with the value
 	private LoadAction loadAction;
 	
-	//whether to treat a numeric value as 0
+	// whether to treat a numeric value as 0
 	private boolean treatEmptyNumericAsZero = false;
 	
 	private Converter<?> converter;
@@ -127,5 +126,4 @@ public class DataFileField {
 		this.index = Integer.valueOf(index);
 		this.converter = converter;
 	}
-
 }

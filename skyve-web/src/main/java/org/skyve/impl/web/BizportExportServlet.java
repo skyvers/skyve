@@ -6,17 +6,12 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.BizExportAction;
@@ -24,6 +19,11 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class BizportExportServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -45,7 +45,7 @@ public class BizportExportServlet extends HttpServlet {
 					try {
 						persistence.begin();
 				    	Principal userPrincipal = request.getUserPrincipal();
-				    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+				    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 						if (user == null) {
 							throw new SessionEndedException(request.getLocale());
 						}
@@ -81,14 +81,17 @@ public class BizportExportServlet extends HttpServlet {
 			            
 			            if (result != null) {
 							switch (result.getFormat()) {
-							case xls:
-								response.setContentType(MimeType.excel.toString());
-								response.setCharacterEncoding(Util.UTF8);
-								response.setHeader("Content-Disposition", "attachment; filename=\"bizport.xls\"");
-								break;
-							case xlsx:
-								break;
-							default:
+								case xls:
+									response.setContentType(MimeType.excel.toString());
+									response.setCharacterEncoding(Util.UTF8);
+									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xls\"");
+									break;
+								case xlsx:
+									response.setContentType(MimeType.xlsx.toString());
+									response.setCharacterEncoding(Util.UTF8);
+									response.setHeader("Content-Disposition", "attachment; filename=\"" + resourceName + "-export.xlsx\"");
+									break;
+								default:
 							}
 			            }
 			

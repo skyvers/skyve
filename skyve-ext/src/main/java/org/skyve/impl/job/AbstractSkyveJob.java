@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.quartz.InterruptableJob;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -17,6 +16,7 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.job.JobStatus;
 import org.skyve.metadata.MetaData;
@@ -143,7 +143,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			persistence.setUser(user);
 			persistence.setAsyncThread(true);
 			persistence.begin();
-			BeanProvider.injectFields(this);
+			UtilImpl.inject(this);
 			Util.LOGGER.info("Execute job " + displayName);
 			execute();
 			if (JobStatus.cancelled == status) { // job was cancelled - log and rollback

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ListAttributes" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="KS_ListAttributes" />
+	<singularAlias>List Attributes</singularAlias>
+	<pluralAlias>List Attributes</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<enum name="constantEnum">
+			<displayName>ConstantEnum</displayName>
+			<values>
+				<value code="one" description="One (1)!" />
+				<value code="two" description="Two (2)!" />
+				<value code="three" description="Three (3)!" />
+			</values>
+		</enum>
+		<text name="constantDomain">
+			<displayName>ConstantDomain</displayName>
+			<domain>constant</domain>
+			<length>5</length>
+		</text>
+		<text name="variantDomain">
+			<displayName>VariantDomain</displayName>
+			<domain>variant</domain>
+			<length>5</length>
+		</text>
+		<text name="dynamicDomain">
+			<displayName>DynamicDomain</displayName>
+			<domain>dynamic</domain>
+			<length>5</length>
+		</text>
+		<boolean name="booleanFlag">
+			<displayName>Boolean Flag</displayName>
+			<defaultValue>{el:false}</defaultValue>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+			<defaultValue>{el:'#000000'}</defaultValue>
+		</colour>
+		<date name="date">
+			<displayName>Date</displayName>
+			<defaultValue>{el:newDateOnly()}</defaultValue>
+		</date>
+		<dateTime name="dateTime">
+			<displayName>Date Time</displayName>
+			<defaultValue>{el:newDateTime()}</defaultValue>
+		</dateTime>
+		<decimal10 name="decimal10">
+			<displayName>Decimal 10</displayName>
+			<defaultValue>{el:Decimal10.ZERO}</defaultValue>
+		</decimal10>
+		<decimal2 name="decimal2">
+			<displayName>Decimal 2</displayName>
+			<defaultValue>{el:Decimal2.ZERO}</defaultValue>
+		</decimal2>
+		<decimal5 name="decimal5">
+			<displayName>Decimal 5</displayName>
+			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
+		</decimal5>
+<!-- 
+		<geometry name="geometry">
+			<displayName>Geometry</displayName>
+			<defaultValue>{el:newGeometry('POINT(0 0)')}</defaultValue>
+		</geometry>
+-->
+		<id name="id">
+			<displayName>Id</displayName>
+		</id>
+		<integer name="normalInteger">
+			<displayName>Integer</displayName>
+		</integer>
+		<longInteger name="longInteger">
+			<displayName>Long Integer</displayName>
+		</longInteger>
+		<markup name="markup">
+			<displayName>Markup</displayName>
+		</markup>
+		<memo name="memo">
+			<displayName>Memo</displayName>
+			<defaultValue>Test {el:newGeometry('POINT(0 0)')}</defaultValue>
+		</memo>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<length>255</length>
+		</text>
+		<time name="time">
+			<displayName>Time</displayName>
+		</time>
+		<timestamp name="timestamp">
+			<displayName>Timestamp</displayName>
+		</timestamp>
+	</attributes>
+	<conditions>
+		<condition name="condition">
+			<expression>
+				<![CDATA[
+					true
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

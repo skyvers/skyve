@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		name="_enterMarkup" title="New Report Template"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd">
+	<!-- enter markup component view -->
+	
+	<vbox border="true" borderTitle="Template Details" responsiveWidth="12" shrinkWrap="height">
+	<!-- freemaker report attributes -->
+	<form responsiveWidth="12" visible="typeFreemarker">
+		<column responsiveWidth="2" />
+		<column />
+		<column responsiveWidth="2" />
+		<row>
+			<item>
+				<textArea binding="template" minPixelHeight="300" />
+			</item>
+		</row>
+	</form>
+	
+	<!-- jasper report attributes -->
+	<form responsiveWidth="12" visible="typeJasper">
+		<column responsiveWidth="2" />
+		<column responsiveWidth="6" />
+		<column responsiveWidth="6" />
+		<row>
+        	<item colspan="3">
+        		<blurb visible="typeJasper" escape="false">
+        			<![CDATA[
+        				<span style="line-height: 1.5">
+	        				{i18n:admin.reportTemplate.edit.markupHint} 
+        				</span>
+        			]]>
+        		</blurb>
+        	</item>
+        </row>
+		<row>
+			<item required="true">
+				<combo binding="moduleName" visible="typeJasper">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</combo>
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<combo binding="documentName" visible="typeJasper" />
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<textField binding="reportName" visible="typeJasper" />
+			</item>
+		</row>
+		<row>
+			<item required="true">
+				<combo binding="mode" visible="typeJasper" />
+			</item>
+		</row>
+	</form>
+	
+	<!-- common attributes -->
+	<form responsiveWidth="12">
+		<column responsiveWidth="2" />
+		<column responsiveWidth="6" />
+		<column responsiveWidth="6" />
+		<row>
+			<item>
+				<checkBox binding="includeFragment" triState="false" visible="typeFreemarker" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<radio binding="outputFormat" vertical="false" />
+			</item>
+		</row>
+	</form>
+	</vbox>
+	
+	<dataGrid title="Datasets" binding="datasets" visible="typeFreemarker">
+		<boundColumn binding="datasetType" />
+		<boundColumn binding="datasetName" />
+		<boundColumn binding="query" />
+	</dataGrid>
+	
+    <dataGrid title="Report Parameters" binding="parameters" visible="typeJasper">
+        <boundColumn binding="name"/>
+        <boundColumn binding="description"/>
+        <boundColumn binding="type"/>
+        <boundColumn binding="required"/>
+        <boundColumn binding="testValueString"/>
+    </dataGrid>
+
+	<actions>
+		<cancel/>
+		
+		<action className="Back" displayName="Back" clientValidation="false" iconStyleClass="fa fa-arrow-left" invisible="enterDetails" />
+		<action className="Next" displayName="Next" clientValidation="false" iconStyleClass="fa fa-arrow-right" invisible="notShowNext" />
+		<save visible="enterMarkup"/>
+	</actions>
+	<newParameters />
+</view>
