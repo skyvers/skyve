@@ -517,10 +517,7 @@ public class StartupExtension extends Startup {
 			}
 
 			if (!properties.isEmpty()) {
-				String json = JSON.marshall(customer, properties);
-				Util.LOGGER.info(String.format("Override json: %s", json));
-
-				return json;
+				return JSON.marshall(customer, properties);
 			}
 		}
 
@@ -564,6 +561,7 @@ public class StartupExtension extends Startup {
 		String json = this.marshall(properties);
 		if (StringUtils.isNotBlank(json)) {
 			this.writeConfiguration(json);
+			Util.LOGGER.info("Wrote updated properties to override json");
 		}
 	}
 }
