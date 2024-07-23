@@ -2,22 +2,21 @@ package com.drekitek;
 
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
-import javax.faces.context.FacesContext;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.beans.Desktop;
+import org.skyve.impl.web.faces.views.DesktopView;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Named;
 import modules.admin.domain.Snapshot;
 
 @RequestScoped
-@ManagedBean(name = "drektop")
-public class DrekitekDesktop extends Desktop {
+@Named("drektop")
+public class DrekitekDesktopView extends DesktopView {
 	private static final long serialVersionUID = 5770380530929766391L;
 
 	private String snapshotScript;

@@ -1,5 +1,5 @@
-The drekitek branch is a customisation of skyve master branch to add client-side snapshot definitions.
-It should not be merged back into the master branch.
+The drekitek branch is a customisation of skyve wip/vue-list-grid branch to add client-side snapshot definitions.
+It should not be merged back into the master branch or any other branch.
 
 drekitek.xhtml
 	A DrekListGrid extension was inlined in drekitek.xhtml (a copy of desktop/home.xhtml).
@@ -8,7 +8,7 @@ drekitek.xhtml
 				window.refreshPageAfterSnapshotReorder = function() {
 					location.reload();
 				};
-DrekitekDesktop.java
+DrekitekDesktopView.java
 	The backing bean for drekitek.xhtml and generates out the snapshots to be stored client side.
 router.xml contains the routing to drekitek.xhtml
 	<uxui name="desktop">
@@ -18,11 +18,13 @@ DrekitekSmartClientViewRenderer.java
 	Is plumbed in in web.xml.
 	Updates the standard output from BizListGrid to DrekListGrid
 web.xml
-	Adds the to SmartClientGeneratorServlet via
+	Adds the DrekitekSmartClientViewRenderer to SmartClientGeneratorServlet via
 		<init-param>
 			<param-name>renderer</param-name>
 			<param-value>com.drekitek.DrekitekSmartClientViewRenderer</param-value>
 		</init-param>
+SkyveComponentBuilderChain.java
+	Adds the VueListGridComponentBuilder to the chain.
 Reorder.java
 	admin.Snapshots action
 	Added a push to execute refreshPageAfterSnapshotReorder function in browser
