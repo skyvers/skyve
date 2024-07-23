@@ -29,6 +29,12 @@
 			<artifactId>hibernate-jcache</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<!-- H2GIS (and H2) -->
+		<dependency>
+			<groupId>org.orbisgis</groupId>
+			<artifactId>h2gis</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
