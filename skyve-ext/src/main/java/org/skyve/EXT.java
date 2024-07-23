@@ -359,15 +359,16 @@ public class EXT {
 		// Note Sessions are thread-safe
 		Set<String> userIds = message.getUserIds();
 		boolean broadcast = userIds.isEmpty();
+		String payload = JSON.marshall(message.getItems());
 		for (Session session : PushMessage.SESSIONS) {
 			if (session.isOpen()) {
 				if (broadcast) {
-					session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
+					session.getAsyncRemote().sendText(payload);
 				}
 				else {
 					Object userId = session.getUserProperties().get("user");
 					if ((userId == null) || userIds.contains(userId)) {
-						session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
+						session.getAsyncRemote().sendText(payload);
 					}
 				}
 			}
