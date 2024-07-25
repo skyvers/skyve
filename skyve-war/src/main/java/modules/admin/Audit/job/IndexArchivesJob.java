@@ -253,6 +253,12 @@ public class IndexArchivesJob extends CancellableJob {
         return unindexed;
     }
 
+    /**
+     * List the .archive files in the configured archive directory.
+     * 
+     * @return
+     * @throws IOException
+     */
     private List<File> listArchiveFiles() throws IOException {
         Path dir = Util.getArchiveDirectory();
 
@@ -260,7 +266,7 @@ public class IndexArchivesJob extends CancellableJob {
             return s.map(Path::toFile)
                     .filter(File::isFile)
                     .filter(f -> f.getName()
-                                  .endsWith(ArchiveAuditsJob.ARCHIVE_FILE_SUFFIX))
+                                  .endsWith(ExportAuditsToArchiveJob.ARCHIVE_FILE_SUFFIX))
                     .collect(toList());
         }
     }

@@ -28,7 +28,7 @@ import jakarta.inject.Inject;
 import modules.admin.Audit.job.support.FileLockRepo;
 import modules.admin.domain.Audit;
 
-public class ArchiveAuditsJob extends CancellableJob {
+public class ExportAuditsToArchiveJob extends CancellableJob {
 
     private static final char LF = '\n';
     private static final int LOCK_FAILURE = -999;
@@ -48,7 +48,7 @@ public class ArchiveAuditsJob extends CancellableJob {
     private final Logger logger = LogManager.getLogger();
     private Instant targetEndTime;
 
-    public ArchiveAuditsJob() {
+    public ExportAuditsToArchiveJob() {
         targetEndTime = Instant.now()
                                .plus(Duration.ofSeconds(RUNTIME_SECONDS));
     }
