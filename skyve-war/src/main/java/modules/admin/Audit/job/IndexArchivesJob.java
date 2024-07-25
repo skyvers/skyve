@@ -107,7 +107,7 @@ public class IndexArchivesJob extends CancellableJob {
 
         File file = indexableFile.file();
         long startOffset = indexableFile.startOffset();
-        String msg = String.format("Indexing %s starting at %d", file, startOffset);
+        String msg = String.format("Indexing %s starting at %d", file.getName(), startOffset);
         logger.debug(msg);
         getLog().add(msg);
 
@@ -135,7 +135,7 @@ public class IndexArchivesJob extends CancellableJob {
      * @return
      */
     private Analyzer newAnalyzer() {
-        
+
         try {
             return CustomAnalyzer.builder()
                                  .addTokenFilter(LowerCaseFilterFactory.NAME)
@@ -195,6 +195,7 @@ public class IndexArchivesJob extends CancellableJob {
     private List<IndexableFile> identifyUnindexed() throws IOException, ParseException {
 
         List<File> archives = listArchiveFiles();
+        logger.debug("{} archive files found in {}", archives.size(), getIndexPath());
 
         List<IndexableFile> unindexed = new ArrayList<>();
 
@@ -253,11 +254,13 @@ public class IndexArchivesJob extends CancellableJob {
     }
 
     private List<File> listArchiveFiles() throws IOException {
-        Path dir = Path.of(Util.getArchiveDirectory());
+        Path dir = Util.getArchiveDirectory();
 
         try (Stream<Path> s = Files.list(dir)) {
             return s.map(Path::toFile)
                     .filter(File::isFile)
+                    .filter(f -> f.getName()
+                                  .endsWith(ArchiveAuditsJob.ARCHIVE_FILE_SUFFIX))
                     .collect(toList());
         }
     }
@@ -269,7 +272,8 @@ public class IndexArchivesJob extends CancellableJob {
      */
     public static Path getIndexPath() {
 
-        return Path.of(Util.getArchiveDirectory(), INDEX_DIR);
+        return Util.getArchiveDirectory()
+                   .resolve(INDEX_DIR);
     }
 
     private static record IndexableFile(File file, long startOffset) {

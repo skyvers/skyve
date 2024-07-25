@@ -39,14 +39,18 @@ public class ArchiveAuditsJob extends CancellableJob {
     @Inject
     private transient FileLockRepo repo;
 
+    public static final String ARCHIVE_FILE_SUFFIX = ".archive";
+
     // TODO make configurable
     private static final int BATCH_SIZE = 100;
+    private static final int RUNTIME_SECONDS = 120;
+
     private final Logger logger = LogManager.getLogger();
     private Instant targetEndTime;
 
     public ArchiveAuditsJob() {
         targetEndTime = Instant.now()
-                               .plus(Duration.ofSeconds(120));
+                               .plus(Duration.ofSeconds(RUNTIME_SECONDS));
     }
 
     @Override
@@ -155,14 +159,14 @@ public class ArchiveAuditsJob extends CancellableJob {
     }
 
     private File getFile() {
-        Path dir = Path.of(Util.getArchiveDirectory());
+        Path dir = Util.getArchiveDirectory();
         dir.toFile()
            .mkdirs();
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                                                  .withZone(ZoneOffset.UTC);
         String datePart = dtf.format(Instant.now());
-        String fileName = "audits-" + datePart;
+        String fileName = "audits-" + datePart + ARCHIVE_FILE_SUFFIX;
 
         return dir.resolve(fileName)
                   .toFile();

@@ -157,6 +157,9 @@ public class UtilImpl {
 	// Where to look for add-ins - defaults to <content.directory>/addins/
 	public static String ADDINS_DIRECTORY = null;
 
+    // Where to store/retrieve archive documents (Audits, etc)
+    public static String ARCHIVE_DIRECTORY = null;
+
 	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.
 	// You can calculate this as concurrentThreads * memory usage determined by targetSize below

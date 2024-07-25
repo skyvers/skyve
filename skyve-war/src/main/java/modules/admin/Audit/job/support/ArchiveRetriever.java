@@ -162,8 +162,8 @@ public class ArchiveRetriever {
     }
 
     private Path getArchiveFilePath(String fileName) {
-        Path p = Path.of(Util.getArchiveDirectory(), fileName);
 
+        Path p = Util.getArchiveDirectory().resolve(fileName);
         if (Files.isRegularFile(p)) {
             return p;
         }

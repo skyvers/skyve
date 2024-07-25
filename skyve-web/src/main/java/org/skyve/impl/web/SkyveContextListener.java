@@ -371,7 +371,16 @@ public class SkyveContextListener implements ServletContextListener {
 				testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
 			}
 		}
-		
+
+        Map<String, Object> archive = getObject(null, "archive", properties, false);
+        if (archive != null) {
+            UtilImpl.ARCHIVE_DIRECTORY = getString("archive", "directory", archive, false);
+            if (UtilImpl.ARCHIVE_DIRECTORY != null) {
+                UtilImpl.ARCHIVE_DIRECTORY = cleanupDirectory(UtilImpl.ARCHIVE_DIRECTORY);
+                // No call to testWritableDirectory
+            }
+        }
+
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
 		if (thumbnail != null) {
