@@ -159,6 +159,8 @@ public class UtilImpl {
 
     // Where to store/retrieve archive documents (Audits, etc)
     public static String ARCHIVE_DIRECTORY = null;
+    public static int ARCHIVE_EXPORT_RUNTIME_SEC = 120;
+    public static int ARCHIVE_EXPORT_BATCH_SIZE = 100;
 
 	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.

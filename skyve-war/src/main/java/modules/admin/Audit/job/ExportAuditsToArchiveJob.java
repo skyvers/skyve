@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
@@ -41,16 +42,12 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
 
     public static final String ARCHIVE_FILE_SUFFIX = ".archive";
 
-    // TODO make configurable
-    private static final int BATCH_SIZE = 100;
-    private static final int RUNTIME_SECONDS = 120;
-
     private final Logger logger = LogManager.getLogger();
     private Instant targetEndTime;
 
     public ExportAuditsToArchiveJob() {
         targetEndTime = Instant.now()
-                               .plus(Duration.ofSeconds(RUNTIME_SECONDS));
+                               .plus(Duration.ofSeconds(UtilImpl.ARCHIVE_EXPORT_RUNTIME_SEC));
     }
 
     @Override
@@ -65,7 +62,7 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
         for (int batchNum = 0; true; ++batchNum) {
             logger.debug("Exporting batch #{}", batchNum);
 
-            int num = executeOneBatch(BATCH_SIZE);
+            int num = executeOneBatch(UtilImpl.ARCHIVE_EXPORT_BATCH_SIZE);
 
             if (num == LOCK_FAILURE) {
                 // Couldn't get write lock, try again
