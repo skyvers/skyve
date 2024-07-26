@@ -117,6 +117,18 @@
 			</item>
 		</row>
 	</form>
+	<vbox border="true" borderTitle="Geolocation Tracker">
+		<form>
+			<column responsiveWidth="3"/>
+			<column />
+			<row>
+				<item>
+					<combo binding="listType"/>
+				</item>
+			</row>
+		</form>
+		<listMembership binding="countryCodes" candidatesHeading="Available Country Codes" membersHeading="Selected Country Codes"/>
+	</vbox>
 	<form border="true" borderTitle="admin.configuration.edit.general.anonymousPublicUser.borderTitle">
 		<column responsiveWidth="3"/>
 		<column />
