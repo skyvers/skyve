@@ -1,6 +1,7 @@
 package modules.admin.Audit.models;
 
 import static java.util.stream.Collectors.toCollection;
+import static modules.admin.Audit.job.support.ArchiveUtils.getIndexPath;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -49,7 +50,6 @@ import org.skyve.web.SortParameter;
 
 import com.google.common.base.Stopwatch;
 
-import modules.admin.Audit.job.IndexArchivesJob;
 import modules.admin.Audit.job.support.AuditDocumentConverter;
 import modules.admin.domain.Audit;
 
@@ -275,7 +275,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         public LuceneResultsIterable(int startRow, int endRow) throws IOException {
 
             // open index
-            Path auditArchiveIndexPath = IndexArchivesJob.getIndexPath();
+            Path auditArchiveIndexPath = getIndexPath();
             lriLogger.debug("Using index at {}", auditArchiveIndexPath);
             directory = FSDirectory.open(auditArchiveIndexPath);
             dirReader = DirectoryReader.open(directory);

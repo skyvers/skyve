@@ -2,6 +2,7 @@ package modules.admin.Audit.job;
 
 import static java.util.stream.Collectors.toList;
 import static modules.admin.Audit.job.support.ArchiveUtils.excerptLine;
+import static modules.admin.Audit.job.support.ArchiveUtils.getIndexPath;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +53,7 @@ import modules.admin.domain.Audit;
 
 public class IndexArchivesJob extends CancellableJob {
 
-    private static final String INDEX_DIR = "index";
+
     private static final Logger logger = LogManager.getLogger();
 
     // Fields added to each Audit document index entry
@@ -192,9 +193,9 @@ public class IndexArchivesJob extends CancellableJob {
      */
     public Bean unmarshallBean(String line) {
         try {
-            Bean entryBean = (Bean) JSON.unmarshall(CORE.getUser(), line);
-            logger.trace("Unmarshalled {}", entryBean);
-            return entryBean;
+            Bean bean = (Bean) JSON.unmarshall(CORE.getUser(), line);
+            logger.trace("Unmarshalled {}", bean);
+            return bean;
         } catch (Exception e) {
             logger.atFatal()
                   .withThrowable(e)
@@ -297,17 +298,6 @@ public class IndexArchivesJob extends CancellableJob {
                                   .endsWith(ExportAuditsToArchiveJob.ARCHIVE_FILE_SUFFIX))
                     .collect(toList());
         }
-    }
-
-    /**
-     * TODO put somewhere more appropriate
-     * 
-     * @return
-     */
-    public static Path getIndexPath() {
-
-        return Util.getArchiveDirectory()
-                   .resolve(INDEX_DIR);
     }
 
     private static record IndexableFile(File file, long startOffset) {

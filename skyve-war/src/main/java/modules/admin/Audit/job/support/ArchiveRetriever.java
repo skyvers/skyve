@@ -1,6 +1,6 @@
 package modules.admin.Audit.job.support;
-
 import static java.util.Collections.emptyList;
+import static modules.admin.Audit.job.support.ArchiveUtils.getIndexPath;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -101,7 +101,7 @@ public class ArchiveRetriever {
      */
     private List<ArchiveEntry> searchIndex(LuceneFilter filter, int maxResults) throws IOException {
 
-        Path auditArchiveIndexPath = IndexArchivesJob.getIndexPath();
+        Path auditArchiveIndexPath = getIndexPath();
         logger.debug("Searching for {}; using index at {}", filter, auditArchiveIndexPath);
 
         try (Directory directory = FSDirectory.open(auditArchiveIndexPath);
