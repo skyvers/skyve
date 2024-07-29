@@ -38,8 +38,7 @@ public class SessionFilter extends AbstractRestFilter {
 	
 		    	Principal userPrincipal = httpRequest.getUserPrincipal();
 				User user = WebUtil.processUserPrincipalForRequest(httpRequest, 
-																	(userPrincipal == null) ? null : userPrincipal.getName(),
-																	true);
+																	(userPrincipal == null) ? null : userPrincipal.getName());
 				if (user == null) {
 			    	error(persistence, httpResponse, HttpServletResponse.SC_UNAUTHORIZED, realm, new SessionEndedException(httpRequest.getLocale()).getMessage());
 			    	return;

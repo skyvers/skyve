@@ -157,18 +157,6 @@ public class QuartzJobScheduler implements JobScheduler {
 							.build();
 		JOB_SCHEDULER.scheduleJob(detail, trigger);
 
-		// Initialise validate metadata in a 1 shot immediate job
-		detail = JobBuilder.newJob(ValidateMetaDataJob.class)
-							.withIdentity("Validate MetaData", Scheduler.DEFAULT_GROUP)
-							.storeDurably(false)
-							.build();
-		trigger = TriggerBuilder.newTrigger()
-									.forJob(detail)
-									.withIdentity("Validate MetaData trigger", Scheduler.DEFAULT_GROUP)
-									.startNow()
-									.build();
-		JOB_SCHEDULER.scheduleJob(detail, trigger);
-
 		// Initialise the CMS in a 1 shot immediate job
 		detail = JobBuilder.newJob(ContentStartupJob.class)
 							.withIdentity("CMS Startup", Scheduler.DEFAULT_GROUP)
@@ -559,6 +547,26 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 		catch (UnableToInterruptJobException e) {
 			throw new DomainException("Cannot cancel job " + instanceId, e);
+		}
+	}
+	
+	@Override
+	public void validateMetaData() {
+		// Initialise validate metadata in a 1 shot immediate job
+		try {
+			JobDetail detail = JobBuilder.newJob(ValidateMetaDataJob.class)
+											.withIdentity("Validate MetaData", Scheduler.DEFAULT_GROUP)
+											.storeDurably(false)
+											.build();
+			Trigger trigger = TriggerBuilder.newTrigger()
+												.forJob(detail)
+												.withIdentity("Validate MetaData trigger", Scheduler.DEFAULT_GROUP)
+												.startNow()
+												.build();
+			JOB_SCHEDULER.scheduleJob(detail, trigger);
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("Could not schedule validate meta data job", e);
 		}
 	}
 }

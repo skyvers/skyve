@@ -506,8 +506,16 @@ public class TestUtil {
 	 * @param regularExpression The regular expression to comply to
 	 * @return A regex compliant random string, or null
 	 */
-	private static String randomRegex(String regularExpression, Integer length) {
-		Generex generex = new Generex(regularExpression);
+	static String randomRegex(String regularExpression, Integer length) {
+		// strip anchors as they are not supported
+		String expression = regularExpression;
+		if (regularExpression.startsWith("^") && regularExpression.endsWith("$")) {
+			expression = expression.substring(1);
+			expression = expression.substring(0, expression.length() - 1);
+		}
+
+		Generex generex = new Generex(expression);
+		
 		// Generate random String matching the regex
 		try {
 			String result = generex.random();
@@ -517,10 +525,6 @@ public class TestUtil {
 				result = StringUtils.truncate(result, length.intValue());
 			}
 
-			// strip boundaries
-			if (result.startsWith("^") && result.endsWith("$")) {
-				return StringUtils.substringBetween(result, "^", "$");
-			}
 			return result;
 		} catch (@SuppressWarnings("unused") Exception e) {
 			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);

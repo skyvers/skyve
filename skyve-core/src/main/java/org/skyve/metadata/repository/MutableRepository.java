@@ -91,7 +91,7 @@ public interface MutableRepository {
 
 	/**
 	 * Puts a UX/UI agnostic view meta-data into this repository.
-	 * @param document	The document the document is for.
+	 * @param document	The document the view is for.
 	 * @param view	The view meta-data to put.
 	 * @return	The converted view.
 	 */

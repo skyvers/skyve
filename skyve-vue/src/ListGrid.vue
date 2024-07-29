@@ -94,6 +94,26 @@ export default {
                 edited: null,
                 deleted: null
             }
+		},
+        showAdd: {
+            type: Boolean,
+            default: true
+        },
+        showZoom: {
+            type: Boolean,
+            default: true
+        },
+        showFilter: {
+            type: Boolean,
+            default: true
+        },
+        showSummary: {
+            type: Boolean,
+            default: true
+        },
+        showSnap: {
+            type: Boolean,
+            default: true
         }
     },
     data() {
@@ -676,7 +696,7 @@ export default {
                 />
 
                 <!-- Snapshot CRUD control -->
-                <SnapshotPicker
+                <SnapshotPicker v-if="showSnap"
                     :documentQuery="dataSource"
                     :snapshotState="snapshotState"
                     @snapshotChanged="snapshotChanged"
@@ -684,7 +704,7 @@ export default {
                 />
 
                 <!-- Match Any/All Operator -->
-                <Dropdown
+                <Dropdown v-if="showFilter"
                     v-model="selectedTopLevelOperator"
                     :options="topLevelOperators"
                     optionLabel="label"
@@ -710,7 +730,7 @@ export default {
         >
             <template
                 #filter="{ filterModel }"
-                v-if="col.filterable"
+                v-if="showFilter && col.filterable"
             >
                 <span v-if="col.type == 'boolean'">
                     <label :for="'bool-' + col.field">{{ col.header }}</label>
@@ -781,19 +801,19 @@ export default {
         <Column>
             <!-- Final column with New Doc & Zoom In controls -->
             <template #header>
-                <Button
+                <Button v-if="showAdd"
                     icon="pi pi-plus"
                     @click="() => zoomInto()"
                 />
             </template>
             <template #body="{ data }">
-                <Button
+                <Button v-if="showZoom"
                     icon="pi pi-chevron-right"
                     @click="() => zoomInto(data.bizId)"
                 />
             </template>
         </Column>
-        <template #footer>
+        <template #footer v-if="showSummary">
             <Dropdown
                 :pt:wrapper:style="{ maxHeight: 'none' }"
                 v-model="summarySelection"

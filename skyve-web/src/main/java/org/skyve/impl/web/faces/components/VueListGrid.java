@@ -361,6 +361,11 @@ public class VueListGrid extends HtmlPanelGroup {
         private String document;
         private String model;
         private String contextId;
+        private Boolean showAdd = true;
+        private Boolean showZoom = true;
+        private Boolean showFilter = true;
+        private Boolean showSummary = true;
+        private Boolean showSnap = true;      
         private List<ColumnDefinition> columns = new ArrayList<>();
         private ClientActions actions = new ClientActions();
 
@@ -422,6 +427,46 @@ public class VueListGrid extends HtmlPanelGroup {
 
         public void setActions(ClientActions actions) {
             this.actions = actions;
+        }
+        
+        public Boolean getShowAdd() {
+            return showAdd;
+        }
+
+        public void setShowAdd(Boolean showAdd) {
+            this.showAdd = showAdd;
+        }
+
+        public Boolean getShowZoom() {
+            return showZoom;
+        }
+
+        public void setShowZoom(Boolean showZoom) {
+            this.showZoom = showZoom;
+        }
+
+        public Boolean getShowFilter() {
+            return showFilter;
+        }
+
+        public void setShowFilter(Boolean showFilter) {
+            this.showFilter = showFilter;
+        }
+
+        public Boolean getShowSummary() {
+            return showSummary;
+        }
+
+        public void setShowSummary(Boolean showSummary) {
+            this.showSummary = showSummary;
+        }
+
+        public Boolean getShowSnap() {
+            return showSnap;
+        }
+
+        public void setShowSnap(Boolean showSnap) {
+            this.showSnap = showSnap;
         }
 
         @Override

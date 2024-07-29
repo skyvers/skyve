@@ -1146,6 +1146,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the captcha type of startup is Cloudflare Turnstile
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCloudflareTurnstile() {
+		return (getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.cloudflareTurnstile == getStartup().getCaptchaType());
+	}
+
+	/**
+	 * {@link #isCloudflareTurnstile} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCloudflareTurnstile() {
+		return (! isCloudflareTurnstile());
+	}
+
+	/**
 	 * emailConfigured
 	 *
 	 * @return The condition
@@ -1165,6 +1184,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the captcha type of startup is Google Recaptcha
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isGoogleRecaptcha() {
+		return (getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.googleRecaptcha == getStartup().getCaptchaType());
+	}
+
+	/**
+	 * {@link #isGoogleRecaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotGoogleRecaptcha() {
+		return (! isGoogleRecaptcha());
+	}
+
+	/**
 	 * True when the selected startup map type is Google Maps
 	 *
 	 * @return The condition
@@ -1181,6 +1219,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotMapTypeGmap() {
 		return (! isMapTypeGmap());
+	}
+
+	/**
+	 * True when no captcha type is selected in startup
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isNoCaptcha() {
+		return (getStartup().getCaptchaType() == null);
+	}
+
+	/**
+	 * {@link #isNoCaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotNoCaptcha() {
+		return (! isNoCaptcha());
 	}
 
 	/**

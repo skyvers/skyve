@@ -20,6 +20,8 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import net.coobird.thumbnailator.Thumbnails;
 
 /**
@@ -59,7 +61,7 @@ public class Thumbnail {
 	 * @param file	The image file.
 	 */
 	public Thumbnail(File file) throws IOException {
-		bytes = ImageUtil.image(file);
+		bytes = FileUtil.bytes(file);
 		mimeType = MimeType.fromFileName(file.getName());
 	}
 
@@ -67,9 +69,8 @@ public class Thumbnail {
 	 * Content constructor
 	 * @param content	The attachment.
 	 */
-	public Thumbnail(AttachmentContent content) throws IOException {
-		bytes = content.getContentBytes();
-		mimeType = content.getMimeType();
+	public Thumbnail(AttachmentContent content) throws InterruptedException, IOException {
+		this(content, 0, 0);
 	}
 
 	/**
@@ -107,7 +108,7 @@ public class Thumbnail {
 		// Get the thumb nail and finally remove our lock on this file.
 		try {
 			try (FileInputStream fis = new FileInputStream(file); BufferedInputStream bis = new BufferedInputStream(fis)) {
-				process(file.getName(), bis, width, height);
+				process(file.getName(), bis, null, width, height);
 			}
 		}
 		finally {
@@ -123,12 +124,20 @@ public class Thumbnail {
 	 * thumb nail file creation and access is hobbled to one thread per attachment at a time.
 	 * 
 	 * @param content	The attachment
-	 * @param width	The required width
-	 * @param height	The required height
+	 * @param width	The required width (if <= 0 this will not be processed)
+	 * @param height	The required height	(if <=0 this will not be processed)
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
 	public Thumbnail(AttachmentContent content, int width, int height) throws InterruptedException, IOException {
+		// No processing required - ie no resize and no SVG burning, just return content bytes and mime type.
+		String markup = content.getMarkup();
+		if (((width <= 0) || (height <= 0)) && (markup == null)) {
+			bytes = content.getContentBytes();
+			mimeType = content.getMimeType();
+			return;
+		}
+
 		// Wait until we are below max concurrency
 		while (CONCURRENT.size() > UtilImpl.THUMBNAIL_CONCURRENT_THREADS) {
 			Thread.sleep(10);
@@ -146,7 +155,7 @@ public class Thumbnail {
 		// Get the thumb nail and finally remove our lock on this file.
 		try {
 			try (InputStream is = content.getContentStream()) {
-				process(content.getFileName(), is, width, height);
+				process(content.getFileName(), is, markup, width, height);
 			}
 		}
 		finally {
@@ -170,11 +179,15 @@ public class Thumbnail {
 		return mimeType;
 	}
 	
-	private void process(String fileName, InputStream is, int width, int height) throws IOException {
+	private void process(@Nonnull String fileName,
+							@Nonnull InputStream is,
+							@Nullable String markup,
+							int width,
+							int height) throws IOException {
 		// Return an SVG file directly, no need to make a Thumbnail
 		// SVG files in an <img/> or as a background image in CSS do not run script tags in browsers.
 		if (MimeType.svg == MimeType.fromFileName(fileName)) {
-			bytes = ImageUtil.image(is);
+			bytes = FileUtil.bytes(is);
 			mimeType = MimeType.svg;
 			return;
 		}
@@ -199,7 +212,7 @@ public class Thumbnail {
 			// Check if a png thumb nail file exists and use that
 			pngFile = new File(folder, new StringBuilder(13).append(width).append('x').append(height).append(".png").toString());
 			if (pngFile.exists()) {
-				bytes = ImageUtil.image(pngFile);
+				bytes = FileUtil.bytes(pngFile);
 				mimeType = MimeType.png;
 				return;
 			}
@@ -217,7 +230,22 @@ public class Thumbnail {
 			}
 		}
 		else {
-			image = Thumbnails.of(image).size(width, height).keepAspectRatio(true).asBufferedImage();
+			// Burn the markup into the image
+			if (markup != null) {
+				try {
+					ImageUtil.burnSvg(image, markup);
+				}
+				catch (Exception e) {
+					UtilImpl.LOGGER.warning("Could not burn markup onto image - markis = " + markup);
+					e.printStackTrace();
+				}
+			}
+
+			// Resize after burning
+			if ((width > 0) && (height > 0)) {
+				image = Thumbnails.of(image).size(width, height).keepAspectRatio(true).asBufferedImage();
+			}
+			
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 				// Create the thumb nail
 				Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);

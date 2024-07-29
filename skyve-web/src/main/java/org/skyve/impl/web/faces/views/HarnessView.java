@@ -4,14 +4,17 @@ import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.Repository;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
@@ -24,6 +27,7 @@ import org.skyve.web.WebContext;
 import jakarta.faces.FacesException;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 public abstract class HarnessView extends LocalisableView {
 	private static final long serialVersionUID = 2805839690076647L;
@@ -249,14 +253,17 @@ public abstract class HarnessView extends LocalisableView {
 	
 	@SuppressWarnings("static-method")
 	public void setUser(String customerName, String userName) {
-		User user = null;
-		Repository repository = CORE.getRepository();
+		UserImpl user = null;
+		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		if (ec.getUserPrincipal() == null) { // not logged in
 			user = repository.retrieveUser(new StringBuilder(64).append(customerName).append('/').append(userName).toString());
 		}
 		else {
 			user = repository.retrieveUser(ec.getUserPrincipal().toString());
+		}
+		if (user != null) {
+			WebUtil.setSessionId(user, (HttpServletRequest) ec.getRequest());
 		}
 		ec.getSessionMap().put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 

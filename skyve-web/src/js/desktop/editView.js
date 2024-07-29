@@ -2484,7 +2484,6 @@ isc.BizDynamicImage.addMethods({
 		}
 
 		var b = this._view._b;
-		var bizId = this._view._vm.getValue('bizId');
 
 		var w = this.imageWidth ? this.imageWidth : (this.getVisibleWidth() - 20); // -20 for padding etc
 		var h = this.imageHeight ? this.imageHeight : (this.getVisibleHeight() - 20); // -20 for padding etc
@@ -2504,9 +2503,6 @@ isc.BizDynamicImage.addMethods({
 		}
 		if (b) {
 			src += "&_b=" + b.replaceAll('_', '.');
-		}
-		if (bizId) {
-			src += "&bizId=" + bizId;
 		}
 		src += "&_ts=" + new Date().getTime();
 		

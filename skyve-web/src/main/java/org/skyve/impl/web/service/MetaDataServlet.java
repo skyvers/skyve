@@ -226,7 +226,7 @@ public class MetaDataServlet extends HttpServlet {
 				try {
 					persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -1573,6 +1573,10 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"contentImage\"");
 				processInputWidget(image);
 				processEditable(image);
+				Boolean showMarkup = image.getShowMarkup();
+				if (showMarkup != null) {
+					result.append(",\"showMarkup\":").append(showMarkup);
+				}
 				processSize(image);
 				processDecorated(image);
 				result.append('}');

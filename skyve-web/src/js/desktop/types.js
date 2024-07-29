@@ -1545,7 +1545,7 @@ isc.BizContentLinkItem.addMethods({
 		if (config.editable) {
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',
-				members: [this._link, isc.LayoutSpacer.create({width:3}), isc.BizUtil.createUploadButton(this, false)]
+				members: [this._link, isc.LayoutSpacer.create({width:3}), isc.BizUtil.createUploadButton(this, false, false)]
 			});
 		}
 		else {
@@ -1623,7 +1623,14 @@ isc.BizContentImageItem.addMethods({
 		    showFocused: false,
 		    showFocusedAsOver: false,
 		    showRollOver: false,
-		    src: "[SKIN]blank.gif"
+		    src: "[SKIN]blank.gif",
+			cursor: 'pointer',
+			click: function(event) {
+				var src = this.src;
+				// remove the width and height parameters to get the full image, not a Thumbnail
+				src = src.replace(/&_w=\d*/, '').replace(/&_h=\d*/, '');
+				window.open(src, '_blank')
+			}
 		});
 
 		if (config.editable) {
@@ -1631,7 +1638,7 @@ isc.BizContentImageItem.addMethods({
 				width: 1, // make minimum width of button
 				height: (config.height ? config.height : '100%'),
 				defaultLayoutAlign: 'center', 
-				members: [isc.BizUtil.createUploadButton(this, true)]
+				members: [isc.BizUtil.createUploadButton(this, true, config.showMarkup)]
 			});
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',

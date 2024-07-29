@@ -1,5 +1,8 @@
 package org.skyve.bizport;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Uniquely defines a sheet with the Excel workbook.
  * There are 2 types of sheets - document sheets and collection sheets.
@@ -7,16 +10,16 @@ package org.skyve.bizport;
  * Collection sheets have a key of owning module name, owning document name and collection attribute name.
  */
 public final class SheetKey implements Comparable<SheetKey> {
-	private String moduleName;
-	private String documentName;
-	private String collectionBinding;
+	@Nonnull private String moduleName;
+	@Nonnull private String documentName;
+	@Nullable private String collectionBinding;
 
 	/**
 	 * 
 	 * @param moduleName
 	 * @param documentName
 	 */
-	public SheetKey(String moduleName, String documentName) {
+	public SheetKey(@Nonnull String moduleName, @Nonnull String documentName) {
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 	}
@@ -27,7 +30,7 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 * @param drivingDocumentName
 	 * @param collectionBinding
 	 */
-	public SheetKey(String drivingModuleName, String drivingDocumentName, String collectionBinding) {
+	public SheetKey(@Nonnull String drivingModuleName, @Nonnull String drivingDocumentName, @Nonnull String collectionBinding) {
 		this.moduleName = drivingModuleName;
 		this.documentName = drivingDocumentName;
 		this.collectionBinding = collectionBinding;
@@ -37,7 +40,7 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 * 
 	 * @return
 	 */
-	public String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
@@ -45,7 +48,7 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 * 
 	 * @return
 	 */
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
@@ -53,7 +56,7 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 * 
 	 * @return
 	 */
-	public String getCollectionBinding() {
+	public @Nullable String getCollectionBinding() {
 		return collectionBinding;
 	}
 	
@@ -62,7 +65,8 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 * the collection attribute name.
 	 */
 	@Override
-	public int compareTo(SheetKey o) {
+	@SuppressWarnings("null") // collection binding null checks are correct below
+	public int compareTo(@Nullable SheetKey o) {
 		if (o == null) {
 			return 1;
 		}
@@ -94,7 +98,7 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 * 
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (o instanceof SheetKey) {
 			return (compareTo((SheetKey) o) == 0);
 		}
@@ -115,7 +119,7 @@ public final class SheetKey implements Comparable<SheetKey> {
 	 * 
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder result = new StringBuilder(64);
 		result.append(moduleName).append('.').append(documentName);
 		if (collectionBinding != null) {

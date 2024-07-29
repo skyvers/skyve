@@ -17,7 +17,7 @@
 	Principal p = request.getUserPrincipal();
 	User user = null;
 	try {
-		user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+		user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName());
 	}
 	catch (SkyveException e) {
 		// The principal name is not a user in the database - continue on...

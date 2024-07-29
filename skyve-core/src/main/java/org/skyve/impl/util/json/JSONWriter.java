@@ -263,7 +263,7 @@ public class JSONWriter {
 				for (String name : propertyNames) {
 					Object value = null;
 					try {
-						value = BindUtil.getSerialized(customer, bean, name);
+						value = BindUtil.get(bean, name);
 					}
 					catch (@SuppressWarnings("unused") Exception e) {
 						// do nothing - we try and get bogus properties from map beans in the list views - summary rows for instance

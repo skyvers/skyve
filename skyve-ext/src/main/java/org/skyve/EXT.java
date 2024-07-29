@@ -1,6 +1,7 @@
 package org.skyve;
 
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,6 +15,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jfree.chart.JFreeChart;
 import org.skyve.addin.AddInManager;
 import org.skyve.bizport.BizPortSheet;
@@ -34,6 +36,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
+import org.skyve.impl.bizport.StandardLoader;
 import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
@@ -58,6 +61,7 @@ import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -73,6 +77,7 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
+import jakarta.annotation.Nonnull;
 import jakarta.websocket.Session;
 
 /**
@@ -91,7 +96,7 @@ public class EXT {
 	 * For Scheduling Jobs, Background Tasks and Reports.
 	 * @return A JobScheduler
 	 */
-	public static JobScheduler getJobScheduler() {
+	public static @Nonnull JobScheduler getJobScheduler() {
 		return QuartzJobScheduler.get();
 	}
 	
@@ -99,7 +104,7 @@ public class EXT {
 	 * For tag operations.
 	 * @return A tag manager
 	 */
-	public static TagManager getTagManager() {
+	public static @Nonnull TagManager getTagManager() {
 		return DefaultTagManager.get();
 	}
 	
@@ -107,7 +112,7 @@ public class EXT {
 	 * Get a reporting service.
 	 * @return	A reporting service.
 	 */
-	public static Reporting getReporting() {
+	public static @Nonnull Reporting getReporting() {
 		return DefaultReporting.get();
 	}
 	
@@ -115,7 +120,7 @@ public class EXT {
 	 * Get a cache manager
 	 * @ return A cache manager
 	 */
-	public static Caching getCaching() {
+	public static @Nonnull Caching getCaching() {
 		return DefaultCaching.get();
 	}
 	
@@ -123,7 +128,7 @@ public class EXT {
 	 * Get an add-in manager
 	 * @ return An add-in manager
 	 */
-	public static AddInManager getAddInManager() {
+	public static @Nonnull AddInManager getAddInManager() {
 		return PF4JAddInManager.get();
 	}
 
@@ -132,7 +137,7 @@ public class EXT {
 	 * 
 	 * @return The new workbook.
 	 */
-	public static BizPortWorkbook newBizPortWorkbook(boolean ooxmlFormat) {
+	public static @Nonnull BizPortWorkbook newBizPortWorkbook(boolean ooxmlFormat) {
 		return new POIWorkbook(ooxmlFormat);
 	}
 
@@ -149,7 +154,7 @@ public class EXT {
 	 *            will automatically throw <code>e</code> if any errors are
 	 *            added to it.
 	 */
-	public static BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, UploadException e) {
+	public static @Nonnull BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, UploadException e) {
 		return new POIWorkbook(customer, workbook, e);
 	}
 
@@ -161,7 +166,7 @@ public class EXT {
 	 * @param title
 	 *            The title of the sheet, used to name the excel sheet tab.
 	 */
-	public static BizPortSheet newBizPortSheet(String title) {
+	public static @Nonnull BizPortSheet newBizPortSheet(String title) {
 		return new POISheet(title);
 	}
 
@@ -178,8 +183,145 @@ public class EXT {
 	 *            generation. Each binding will stop the recursive generation
 	 *            processing when it is satisfied.
 	 */
-	public static StandardGenerator newBizPortStandardGenerator(Customer customer, Document document, String... exclusions) {
+	public static @Nonnull StandardGenerator newBizPortStandardGenerator(@Nonnull Customer customer, @Nonnull Document document, @Nonnull String... exclusions) {
 		return new StandardGenerator(customer, document, exclusions);
+	}
+	
+	/**
+	 * Create a new standard loader based on the wookrbook provided.
+	 * 
+	 * @param workbook	The workbook to load.
+	 * @param problems	A fresh UploadException that can be thrown to provide messages.
+	 * @return	The StandardLoader.
+	 */
+	public static @Nonnull StandardLoader newBizPortStandardLoader(@Nonnull BizPortWorkbook workbook, @Nonnull UploadException problems) {
+		return new StandardLoader(workbook, problems);
+	}
+	
+	/**
+	 * Export all persisted instances of the given document from the data store.
+	 * 
+	 * @param document	The document to export.
+	 * @return	A workbook.
+	 */
+	public static @Nonnull BizPortWorkbook standardBizExport(@Nonnull final Document document) {
+		BizPortWorkbook result = EXT.newBizPortWorkbook(true);
+		Customer c = CORE.getCustomer();
+		StandardGenerator jenny = EXT.newBizPortStandardGenerator(c, document);
+		jenny.generateStructure(result);
+		result.materialise();
+		DocumentQuery query = CORE.getPersistence().newDocumentQuery(document);
+		try (AutoClosingIterable<Bean> i = query.beanIterable()) {
+			jenny.generateData(result, i);
+		}
+		catch (SkyveException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Convenience constructor for {@link #standardBizExport(Document)}.
+	 */
+	public static @Nonnull BizPortWorkbook standardBizExport(@Nonnull final String moduleName,
+																@Nonnull final String documentName) {
+		Customer c = CORE.getCustomer();
+		Module m = c.getModule(moduleName);
+		Document d = m.getDocument(c, documentName);
+		return standardBizExport(d);
+	}
+
+	/**
+	 * Export the bean given to a woorkbook.
+	 * Just the one bean and its object graph are exported.
+	 * Hierarchical beans are exported with their children.
+	 * 
+	 * @param bean	The bean to export.
+	 * @return	The workbook.
+	 */
+	public static @Nonnull BizPortWorkbook standardBizExport(@Nonnull final Bean bean) {
+		BizPortWorkbook result = EXT.newBizPortWorkbook(true);
+		Customer c = CORE.getCustomer();
+		Module m = c.getModule(bean.getBizModule());
+		Document d = m.getDocument(c, bean.getBizDocument());
+		StandardGenerator jenny = EXT.newBizPortStandardGenerator(c, d);
+		jenny.generateStructure(result);
+		result.materialise();
+		jenny.generateData(result, bean);
+
+		return result;
+	}
+
+	/**
+	 * Import a workbook from an InputStream.
+	 * 
+	 * @param is	The input stream of the workbook.
+	 * @param problems	A fresh UploadException that can be thrown to provide messages.
+	 * @throws Exception	When something unforseen goes wrong
+	 */
+	public static void standardBizImport(@Nonnull InputStream is, @Nonnull UploadException problems) throws Exception {
+		final Customer c = CORE.getCustomer();
+		try (Workbook wb = WorkbookFactory.create(is)) {
+			BizPortWorkbook workbook = EXT.newBizPortWorkbook(c, wb, problems);
+			standardBizImport(workbook, problems);
+		}
+	}
+
+	/**
+	 * Import a workbook.
+	 * 
+	 * @param workbook	The workbook to import.
+	 * @param problems	A fresh UploadException that can be thrown to provide messages.
+	 * @throws Exception	When something unforseen goes wrong
+	 */
+	public static void standardBizImport(@Nonnull BizPortWorkbook workbook, @Nonnull UploadException problems) throws Exception {
+		final Persistence p = CORE.getPersistence();
+		final Customer c = p.getUser().getCustomer();
+
+		StandardLoader loader = EXT.newBizPortStandardLoader(workbook, problems);
+		List<Bean> beans = loader.populate(p);
+
+		for (String key : loader.getBeanKeys()) {
+			Bean bean = loader.getBean(key);
+			if (bean == null) {
+				loader.addError(c, bean, new IllegalStateException("Bean with key " + key + " not found"));
+			}
+			else {
+				Module module = c.getModule(bean.getBizModule());
+				Document document = module.getDocument(c, bean.getBizDocument());
+	
+				try {
+					p.preMerge(document, (PersistentBean) bean);
+				}
+				catch (DomainException e) {
+					loader.addError(c, bean, e);
+				}
+			}
+		}
+
+		// throw if we have errors found
+		if (problems.hasErrors()) {
+			throw problems;
+		}
+
+		// do the insert as 1 operation, bugging out and adding 1 error only if there is a problem
+		PersistentBean persistentBean = null;
+		try {
+			for (Bean bean : beans) {
+				persistentBean = (PersistentBean) bean;
+				persistentBean = p.save(persistentBean);
+			}
+		}
+		catch (DomainException e) {
+			if (persistentBean != null) {
+				loader.addError(c, persistentBean, e);
+			}
+			throw problems;
+		}
 	}
 
 	/**
@@ -197,7 +339,7 @@ public class EXT {
 	 * @param mail	The email to write.
 	 * @param out	The stream to write to.
 	 */
-	public static void writeMail(Mail mail, OutputStream out) {
+	public static void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {
 		MailUtil.writeMail(mail, out);
 	}
 
@@ -206,26 +348,27 @@ public class EXT {
 	 * 
 	 * @param mail	The email to send.
 	 */
-	public static void sendMail(Mail mail) {
+	public static void sendMail(@Nonnull Mail mail) {
 		MailUtil.sendMail(mail);
 	}
 
 	/**
 	 * Push a message to connected client user interfaces.
 	 */
-	public static void push(PushMessage message) {
+	public static void push(@Nonnull PushMessage message) {
 		// Note Sessions are thread-safe
 		Set<String> userIds = message.getUserIds();
 		boolean broadcast = userIds.isEmpty();
+		String payload = JSON.marshall(message.getItems());
 		for (Session session : PushMessage.SESSIONS) {
 			if (session.isOpen()) {
 				if (broadcast) {
-					session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
+					session.getAsyncRemote().sendText(payload);
 				}
 				else {
 					Object userId = session.getUserProperties().get("user");
 					if ((userId == null) || userIds.contains(userId)) {
-						session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
+						session.getAsyncRemote().sendText(payload);
 					}
 				}
 			}
@@ -234,40 +377,51 @@ public class EXT {
 	
 	/**
 	 * Generate an image of a chart.
-	 * @param data
-	 * @param pixelWidth
-	 * @param pixelHeight
-	 * @return
+	 * 
+	 * @param type	The chart type
+	 * @param data	The chart data
+	 * @param pixelWidth	Required width of the image
+	 * @param pixelHeight	Required height of the image
+	 * @return	A buffered image of the chart.
 	 */
-	public static BufferedImage chartImage(ChartType type, ChartData data, int pixelWidth, int pixelHeight) {
+	public static @Nonnull BufferedImage chartImage(@Nonnull ChartType type,
+														@Nonnull ChartData data,
+														int pixelWidth,
+														int pixelHeight) {
 		return new JFreeChartGenerator(data, pixelWidth, pixelHeight).image(type);
 	}
 	
 	/**
 	 * Generate a chart.
-	 * @param data
-	 * @param pixelWidth
-	 * @param pixelHeight
-	 * @return
+	 * 
+	 * @param type	The chart type
+	 * @param data	The chart data
+	 * @param pixelWidth	Required width of the image
+	 * @param pixelHeight	Required height of the image
+	 * @return	A chart.
 	 */
-	public static JFreeChart chart(ChartType type, ChartData data, int pixelWidth, int pixelHeight) {
+	public static @Nonnull JFreeChart chart(@Nonnull ChartType type,
+												@Nonnull ChartData data,
+												int pixelWidth,
+												int pixelHeight) {
 		return new JFreeChartGenerator(data, pixelWidth, pixelHeight).chart(type);
 	}
 	
 	/**
 	 * Create a new chart generator.
-	 * @param data
-	 * @param pixelWidth
-	 * @param pixelHeight
-	 * @return
+	 * 
+	 * @param data	The chart data
+	 * @param pixelWidth	Required width of the image
+	 * @param pixelHeight	Required height of the image
+	 * @return A chart generator.
 	 */
-	public static JFreeChartGenerator newChartGenerator(ChartData data, int pixelWidth, int pixelHeight) {
+	public static @Nonnull JFreeChartGenerator newChartGenerator(@Nonnull ChartData data, int pixelWidth, int pixelHeight) {
 		return new JFreeChartGenerator(data, pixelWidth, pixelHeight);
 	}
 	
 	/**
 	 * Get a JDBC connection from the skyve data store definition. 
-	 * Skyve uses a container provided JNDI data source or driver/url/user/pass combinationfor connections. 
+	 * Skyve uses a container provided JNDI data source or driver/url/user/pass combination for connections. 
 	 * All servlet and Java EE App stacks can provision this service. 
 	 * The connection pool used by skyve is configured in each web app in the json config.
 	 * This method should be used sparingly. For SQL queries,
@@ -276,7 +430,7 @@ public class EXT {
 	 * 
 	 * @return a database connection from the container supplied pool.
 	 */
-	public static Connection getDataStoreConnection(DataStore dataStore) {
+	public static @Nonnull Connection getDataStoreConnection(@Nonnull DataStore dataStore) {
 		Connection result = null;
 		try {
 			String jndiDataSourceName = dataStore.getJndiDataSourceName();
@@ -301,9 +455,7 @@ public class EXT {
 				result = ds.getConnection();
 			}
 
-			if (result != null) {
-				result.setAutoCommit(false);
-			}
+			result.setAutoCommit(false);
 		}
 		catch (SQLException e) {
 			throw new DomainException("Could not get a database connection", e);
@@ -318,14 +470,24 @@ public class EXT {
 		return result;
 	}
 	
-	// Not a CDI provider as it is auto-closeable 
-	public static Connection getDataStoreConnection() {
+	/**
+	 * Get a connection to the default data store.
+	 * Note that this is not a CDI provider as it is auto-closeable.
+	 * 
+	 * @return A connection.
+	 */
+	public static @Nonnull Connection getDataStoreConnection() {
 		return getDataStoreConnection(UtilImpl.DATA_STORE);
 	}
 
-	// Not a CDI provider as it is auto-closeable 
+	/**
+	 * Get a new content manager instance for the content implementation.
+	 * Note that this is not a CDI provider as it is auto-closeable.
+	 * 
+	 * @return A content manger.
+	 */
 	@SuppressWarnings("resource")
-	public static ContentManager newContentManager() {
+	public static @Nonnull ContentManager newContentManager() {
 		final ContentManager result = (AbstractContentManager.IMPLEMENTATION_CLASS == null) ?
 										PF4JAddInManager.get().getExtension(ContentManager.class) :
 										AbstractContentManager.get();
@@ -335,16 +497,34 @@ public class EXT {
 		return result;
 	}
 
-	// NB Not a CDI provider as it is auto-closeable 
-	public static SQLDataAccess newSQLDataAccess() {
+	/**
+	 * Get a new SQL Data Access instance for the default data store.
+	 * Note that this is not a CDI provider as it is auto-closeable.
+	 * 
+	 * @return A SQLDataAccess.
+	 */
+	public static @Nonnull SQLDataAccess newSQLDataAccess() {
 		return new SQLDataAccessImpl(UtilImpl.DATA_STORE);
 	}
 	
-	public static SQLDataAccess newSQLDataAccess(DataStore dataStore) {
+	/**
+	 * Get a new SQL Data Access instance for the given data store.
+	 * Note that this is not a CDI provider as it is auto-closeable.
+	 * 
+	 * @return A SQLDataAccess.
+	 */
+	public static @Nonnull SQLDataAccess newSQLDataAccess(@Nonnull DataStore dataStore) {
 		return new SQLDataAccessImpl(dataStore);
 	}
 	
-	public static <T extends Bean> ListModel<T> newListModel(MetaDataQueryDefinition query) {
+	/**
+	 * Get a new list model for the given metadata query.
+	 * 
+	 * @param <T>	The type of model driving document bean implementation 
+	 * @param query	The metadata query.
+	 * @return	The new model.
+	 */
+	public static @Nonnull <T extends Bean> ListModel<T> newListModel(@Nonnull MetaDataQueryDefinition query) {
 		Customer c = CORE.getCustomer();
 		Module m = query.getDocumentModule(c);
 		Document d = m.getDocument(c, query.getDocumentName());
@@ -373,10 +553,11 @@ public class EXT {
 	
 	/**
 	 * Provide a hash of a clear text password.
+	 * 
 	 * @param clearText
 	 * @return	The encoded password.
 	 */
-	public static String hashPassword(String clearText) {
+	public static @Nonnull String hashPassword(@Nonnull String clearText) {
 		String result = null;
 
 		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
@@ -402,11 +583,12 @@ public class EXT {
 
 	/**
 	 * Check a hash against a clear text password.
+	 * 
 	 * @param	clearText
 	 * @param	The encoded password.
 	 * @return	true if it matches, or false if it doesn't
 	 */
-	public static boolean checkPassword(String clearText, String hashedPassword) {
+	public static boolean checkPassword(@Nonnull String clearText, @Nonnull String hashedPassword) {
 		DelegatingPasswordEncoder dpe = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
 		dpe.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
 		return dpe.matches(clearText, hashedPassword);
@@ -415,10 +597,10 @@ public class EXT {
 	/**
 	 * Inject a bootstrap user according to the settings in the .json Bootstrap stanza
 	 * 
-	 * @param p
-	 * @throws Exception
+	 * @param p	The Pdersistence to use.
+	 * @throws Exception	When something unforeseen occurs.
 	 */
-	public static void bootstrap(Persistence p) throws Exception {
+	public static void bootstrap(@Nonnull Persistence p) throws Exception {
 		User u = p.getUser();
 		Customer c = u.getCustomer();
 		Module adminMod = c.getModule(AppConstants.ADMIN_MODULE_NAME);

@@ -10,7 +10,7 @@ import org.skyve.EXT;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
-import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -35,10 +35,13 @@ import modules.admin.domain.User;
 
 /**
  * Common extension point for Junit 4 and 5 Abstract H2 Tests.
+ * Note:- The skyve maven AssembleMojo uses skyve-ext MavenSkyveProject.copySkyveTestFiles()
+ * to substitute the appropriate customer name. 
  */
 abstract class InternalBaseH2Test {
 	protected static final String USER = "TestUser";
 	protected static final String PASSWORD = "TestPassword0!";
+	// This value is substituted in AssembleMojo uses MavenSkyveProject.copySkyveTestFiles()
 	protected static final String CUSTOMER = "bizhub";
 
 	private static final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
@@ -113,7 +116,7 @@ abstract class InternalBaseH2Test {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = true;
 		UtilImpl.CONFIGURATION = new TreeMap<>();
 
-		ProvidedRepositoryFactory.set(new LocalDesignRepository());
+		ProvidedRepositoryFactory.set(new DefaultRepository());
 
 		final SuperUser user = new SuperUser();
 		user.setCustomerName(CUSTOMER);

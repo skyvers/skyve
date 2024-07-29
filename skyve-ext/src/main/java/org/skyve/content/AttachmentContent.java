@@ -28,6 +28,7 @@ public class AttachmentContent extends Content {
 	private Date lastModified;
 	private transient File file;
 	private byte[] bytes;
+	private String markup; // Editable markup, usually SVG on a raster image
 
 	private AttachmentContent(String bizCustomer, 
 								String bizModule, 
@@ -37,7 +38,8 @@ public class AttachmentContent extends Content {
 								String bizId,
 								String attributeName,
 								String fileName,
-								String contentType) {
+								String contentType,
+								String markup) {
 		super(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId);
 		if ((attributeName == null) || (attributeName.indexOf('.') >= 0)) {
 			throw new IllegalArgumentException("No complex/compound bindings allowed in AttachmentContent - use the correct Document and attribute combination");
@@ -71,6 +73,7 @@ public class AttachmentContent extends Content {
 				this.contentType = mimeType.toString();
 			}
 		}
+		this.markup = markup;
 	}
 
 	/**
@@ -87,7 +90,8 @@ public class AttachmentContent extends Content {
 				forUpdate.bizId,
 				forUpdate.attributeName,
 				forUpdate.fileName,
-				forUpdate.contentType);
+				forUpdate.contentType,
+				forUpdate.markup);
 		this.bytes = new byte[0];
 		this.contentId = forUpdate.contentId;
 	}
@@ -124,7 +128,47 @@ public class AttachmentContent extends Content {
 				bizId,
 				attributeName,
 				fileName,
-				(mimeType == null) ? null : mimeType.toString());
+				(mimeType == null) ? null : mimeType.toString(),
+				null);
+		this.bytes = bytes;
+	}
+
+	/**
+	 * Bytes filename mime type markup constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param mimeType
+	 * @param bytes
+	 * @param markup
+	 */
+	public AttachmentContent(String bizCustomer, 
+								String bizModule, 
+								String bizDocument, 
+								String bizDataGroupId, 
+								String bizUserId,
+								String bizId,
+								String attributeName,
+								String fileName,
+								MimeType mimeType,
+								byte[] bytes,
+								String markup) {
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(mimeType == null) ? null : mimeType.toString(),
+				markup);
 		this.bytes = bytes;
 	}
 
@@ -158,7 +202,45 @@ public class AttachmentContent extends Content {
 				bizId,
 				attributeName,
 				null,
-				(mimeType == null) ? null : mimeType.toString());
+				(mimeType == null) ? null : mimeType.toString(),
+				null);
+		this.bytes = bytes;
+	}
+
+	/**
+	 * Bytes mime type markup constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param mimeType
+	 * @param bytes
+	 * @param markup
+	 */
+	public AttachmentContent(String bizCustomer, 
+								String bizModule, 
+								String bizDocument, 
+								String bizDataGroupId, 
+								String bizUserId,
+								String bizId,
+								String attributeName,
+								MimeType mimeType,
+								byte[] bytes,
+								String markup) {
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				null,
+				(mimeType == null) ? null : mimeType.toString(),
+				markup);
 		this.bytes = bytes;
 	}
 
@@ -192,10 +274,48 @@ public class AttachmentContent extends Content {
 				bizId,
 				attributeName,
 				fileName,
-				(String) null);
+				(String) null,
+				null);
 		this.bytes = bytes;
 	}
 	
+	/**
+	 * Bytes filename markup constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param bytes
+	 * @param markup
+	 */
+	public AttachmentContent(String bizCustomer, 
+								String bizModule, 
+								String bizDocument, 
+								String bizDataGroupId, 
+								String bizUserId,
+								String bizId,
+								String attributeName,
+								String fileName,
+								byte[] bytes,
+								String markup) {
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(String) null,
+				markup);
+		this.bytes = bytes;
+	}
+
 	/**
 	 * File filename mime type constructor.
 	 * 
@@ -228,10 +348,50 @@ public class AttachmentContent extends Content {
 				bizId,
 				attributeName,
 				fileName,
-				(mimeType == null) ? null : mimeType.toString());
+				(mimeType == null) ? null : mimeType.toString(),
+				null);
 		this.file = file;
 	}
 	
+	/**
+	 * File filename mime type markup constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param mimeType
+	 * @param file
+	 * @param markup
+	 */
+	public AttachmentContent(String bizCustomer, 
+								String bizModule, 
+								String bizDocument, 
+								String bizDataGroupId, 
+								String bizUserId,
+								String bizId,
+								String attributeName,
+								String fileName,
+								MimeType mimeType,
+								File file,
+								String markup) {
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(mimeType == null) ? null : mimeType.toString(),
+				markup);
+		this.file = file;
+	}
+
 	/**
 	 * File mime type constructor.
 	 * 
@@ -262,10 +422,48 @@ public class AttachmentContent extends Content {
 				bizId,
 				attributeName,
 				null,
-				(mimeType == null) ? null : mimeType.toString());
+				(mimeType == null) ? null : mimeType.toString(),
+				null);
 		this.file = file;
 	}
 	
+	/**
+	 * File mime type markup constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param mimeType
+	 * @param file
+	 * @param markup
+	 */
+	public AttachmentContent(String bizCustomer, 
+								String bizModule, 
+								String bizDocument, 
+								String bizDataGroupId, 
+								String bizUserId,
+								String bizId,
+								String attributeName,
+								MimeType mimeType,
+								File file,
+								String markup) {
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				null,
+				(mimeType == null) ? null : mimeType.toString(),
+				markup);
+		this.file = file;
+	}
+
 	/**
 	 * File filename constructor.
 	 * 
@@ -296,7 +494,45 @@ public class AttachmentContent extends Content {
 				bizId,
 				attributeName,
 				fileName,
-				(String) null);
+				(String) null,
+				null);
+		this.file = file;
+	}
+
+	/**
+	 * File filename markup constructor.
+	 * 
+	 * @param bizCustomer
+	 * @param bizModule
+	 * @param bizDocument
+	 * @param bizDataGroupId
+	 * @param bizUserId
+	 * @param bizId
+	 * @param attributeName
+	 * @param fileName
+	 * @param file
+	 * @param markup
+	 */
+	public AttachmentContent(String bizCustomer, 
+								String bizModule, 
+								String bizDocument, 
+								String bizDataGroupId, 
+								String bizUserId,
+								String bizId,
+								String attributeName,
+								String fileName,
+								File file,
+								String markup) {
+		this(bizCustomer,
+				bizModule,
+				bizDocument,
+				bizDataGroupId,
+				bizUserId,
+				bizId,
+				attributeName,
+				fileName,
+				(String) null,
+				markup);
 		this.file = file;
 	}
 
@@ -364,6 +600,18 @@ public class AttachmentContent extends Content {
 	public final void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
+	
+	/**
+	 * Markup to be overlaid on the content as edits - eg SVG on raster image content.
+	 * @return	The markup.
+	 */
+	public String getMarkup() {
+		return markup;
+	}
+
+	public void setMarkup(String markup) {
+		this.markup = markup;
+	}
 
 	/**
 	 * The content stream.
@@ -390,7 +638,7 @@ public class AttachmentContent extends Content {
 	public final byte[] getContentBytes() throws IOException {
 		if (bytes == null) {
 			try (InputStream is = getContentStream()) {
-				bytes = FileUtil.getFileBytes(is);
+				bytes = FileUtil.bytes(is);
 			}
 		}
 		
@@ -408,7 +656,7 @@ public class AttachmentContent extends Content {
 			try {
 				getContentBytes();
 				file = null;
-			} 
+			}
 			catch (IOException e) {
 				e.printStackTrace();
 				throw new InvalidObjectException(e.getLocalizedMessage());

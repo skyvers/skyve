@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -121,6 +122,8 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
 
 public class SmartClientViewRenderer extends ViewRenderer {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(170);
@@ -1154,7 +1157,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (queryName != null) { // its a query
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
-			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, null);
+			dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user,
+																				customer,
+																				query,
+																				null,
+																				null,
+																				currentUxUi,
+																				false,
+																				ds,
+																				new TreeSet<>());
 			code.insert(0, ds);
 		}
 		else {
@@ -1168,7 +1179,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																					currentUxUi,
 																					false,
 																					ds, 
-																					null);
+																					new TreeSet<>());
 				code.insert(0, ds);
 			}
 			else {
@@ -1413,7 +1424,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																	currentUxUi,
 																	false,
 																	ds,
-																	null);
+																	new TreeSet<>());
 				code.insert(0, ds);
 			}
 			dataWidgetColumnInputWidget = null;
@@ -1562,6 +1573,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		disabled(image.getDisabledConditionName(), code);
 		invisible(image.getInvisibleConditionName(), code);
 		editable(image.getEditable(), code);
+		code.append("showMarkup:").append((! Boolean.FALSE.equals(image.getShowMarkup())) ? "true," : "false,");
 	}
 
 	@Override
@@ -1695,7 +1707,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 															currentUxUi,
 															false,
 															ds,
-															null);
+															new TreeSet<>());
 		code.insert(0, ds);
 	}
 
@@ -1809,7 +1821,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		Integer numberOfDiscreteValues = slider.getNumberOfDiscreteValues();
 		if (numberOfDiscreteValues != null) {
-			code.append("numValues:").append(numberOfDiscreteValues).append(',');
+			code.append("numValues:").append(numberOfDiscreteValues.intValue() + 1).append(',');
 		}
 		Integer roundingPrecision = slider.getRoundingPrecision();
 		if ((roundingPrecision != null) && (roundingPrecision.intValue() != 0)) {
@@ -3160,7 +3172,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 														// indicates that this is for configuration in the harness page
 														boolean config,
 														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) {
+														@Nonnull Set<String> visitedQueryNames) {
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
 		
@@ -3176,21 +3188,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			// NB 4 tokens, not 3
 			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(owningDocument.getName()).append("__").append(modelName).toString();
 		}
-		if (visitedQueryNames == null) {
+
+		// Short circuit duplicate recursive data source column traversals
+		if (visitedQueryNames.contains(dataSourceId)) {
+			return dataSourceId;
+		}
+		// NB Add the visited query name here before processing the query columns in case 1 of the query columns is a reference using the same query/datasource
+		visitedQueryNames.add(dataSourceId);
+
+		if (config) {
+			toAppendTo.append('{');
+		}
+		else {
 			toAppendTo.append("if(window.").append(dataSourceId);
 			toAppendTo.append("){}else{isc.RestDataSource.create({dataFormat:'json',jsonPrefix:'',jsonSuffix:'',dataURL:'smartlist',defaultTextMatchStyle:'substring',");
 			toAppendTo.append("operationBindings:[{operationType:'fetch',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'update',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'add',dataProtocol:'postParams'},");
 			toAppendTo.append("{operationType:'remove',dataProtocol:'postParams'}],");
-		}
-		else {
-			if (visitedQueryNames.contains(dataSourceId)) {
-				return dataSourceId;
-			}
-			// NB Add the visited query name here before processing the query columns in case 1 of the query columns is a reference using the same query/datasource
-			visitedQueryNames.add(dataSourceId);
-			toAppendTo.append('{');
 		}
 		toAppendTo.append("ID:'").append(dataSourceId);
 		toAppendTo.append("',modoc:'");
@@ -3334,11 +3349,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			toAppendTo.append(",cellHeight:").append(cellHeight);
 		}
 		
-		if (visitedQueryNames == null) {
-			toAppendTo.append("});}\n");
+		if (config) {
+			toAppendTo.append("},\n");
 		}
 		else {
-			toAppendTo.append("},\n");
+			toAppendTo.append("});}\n");
 		}
 		
 		// Add any child datasources found

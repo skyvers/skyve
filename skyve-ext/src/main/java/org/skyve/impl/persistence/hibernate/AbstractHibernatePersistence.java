@@ -1006,6 +1006,7 @@ t.printStackTrace();
 						// This implements persistence by reachability for dynamic -> static beans in mixed graphs
 						if (beansToMerge != null) {
 							if ((owningRelation != null) && // not the top-level bean or parent
+									(owningDocument != null) && // not the top-level bean or parent
 									(persistentBean != beanToSave) && // not a reference to the top level bean
 									(! document.isDynamic()) && // bean is not dynamic
 										owningRelation.isPersistent() && // persistent relation
@@ -1881,7 +1882,7 @@ if (document.isDynamic()) return;
 													Document owningDocument,
 													Relation owningRelation,
 													Bean visitedBean) throws Exception {
-							if (owningRelation == null) { // top level bean or parent
+							if ((owningRelation == null) || (owningDocument == null)) { // top level bean or parent
 								return true;
 							}
 							
@@ -2277,8 +2278,7 @@ if (document.isDynamic()) return;
 				}
 			}
 		}
-		catch (@SuppressWarnings("unused") StaleObjectStateException e) // thrown from session.load() with LockMode.UPGRADE
-		{
+		catch (@SuppressWarnings("unused") StaleObjectStateException e) { // thrown from session.load() with LockMode.UPGRADE
 			// Database was updated by another user.
 			// The select for update is by [bizId] and [bizVersion] and other transaction changed the bizVersion
 			// so it cannot be found.

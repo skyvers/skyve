@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.h2.util.JdbcUtils;
+import org.h2.util.Utils.ClassFactory;
+import org.h2gis.functions.factory.H2GISFunctions;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.relational.Database;
@@ -61,6 +64,21 @@ public class DDLDelegate {
 				}
 			};
 
+			if (RDBMS.h2.equals(skyveDialect.getRDBMS())) {
+				JdbcUtils.addClassFactory(new ClassFactory() {
+					@Override
+					public boolean match(String name) {
+						return true;
+					}
+
+					@Override
+					public Class<?> loadClass(String name) throws ClassNotFoundException {
+						return Thread.currentThread().getContextClassLoader().loadClass(name);
+					}
+				});
+				H2GISFunctions.load(connection);
+			}
+			
 			SqlStringGenerationContext sqlStringGenerationContext = SqlStringGenerationContextImpl.fromConfigurationMap(
 																			standardRegistry.getService(JdbcEnvironment.class),
 																			metadata.getDatabase(),

@@ -98,7 +98,7 @@ public class ChartServlet extends HttpServlet {
 				try {
 					persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}
@@ -147,14 +147,12 @@ public class ChartServlet extends HttpServlet {
 		User user = CORE.getUser();
 		String moduleName = bean.getBizModule();
 		String documentName = bean.getBizDocument();
-		String modelName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODEL_NAME)));
 		UxUi uxui = UserAgent.getUxUi(request);
 		String uxuiName = uxui.getName();
-		user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuiName);
 
 		Customer customer = CORE.getCustomer();
-		Module module = customer.getModule(bean.getBizModule());
-		Document document = module.getDocument(customer, bean.getBizDocument());
+		Module module = customer.getModule(moduleName);
+		Document document = module.getDocument(customer, documentName);
 		UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
 
 		View view = document.getView(uxuiName,
@@ -165,8 +163,11 @@ public class ChartServlet extends HttpServlet {
 
 		ChartData data = null;
 		// Check for an inline model builder
+		String modelName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODEL_NAME)));
 		ChartBuilderMetaData builder = (ChartBuilderMetaData) view.getInlineModel(modelName);
 		if (builder == null) {
+			// Check access since we know this is not an inline model
+			user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuiName);
 			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);
 			data = model.getChartData();

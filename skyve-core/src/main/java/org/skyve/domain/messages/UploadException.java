@@ -27,7 +27,7 @@ public class UploadException extends SkyveException {
 	* @return True if any errors or warning problems
 	*/
 	public boolean hasProblems() {
-		return (!(errors.isEmpty() && warnings.isEmpty()));
+		return (! (errors.isEmpty() && warnings.isEmpty()));
 	}
 
 	/**
@@ -36,7 +36,7 @@ public class UploadException extends SkyveException {
 	 * @return True if there are errors in this upload
 	 */
 	public boolean hasErrors() {
-		return (!errors.isEmpty());
+		return (! errors.isEmpty());
 	}
 
 	public void addErrors(List<Problem> problems) {

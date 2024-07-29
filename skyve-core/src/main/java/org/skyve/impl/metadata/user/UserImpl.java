@@ -29,6 +29,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nonnull;
+
 public class UserImpl implements User {
 	private static final long serialVersionUID = -8485741818564437957L;
 
@@ -40,6 +42,7 @@ public class UserImpl implements User {
 	public static final String DATA_ADMINISTRATOR_ROLE = "admin.DataAdministrator";
 
 	private String id;
+	private String sessionId;
 	private String name;
 	private String languageTag;
 	private String passwordHash;
@@ -117,6 +120,20 @@ public class UserImpl implements User {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public String getSessionId() {
+		return sessionId;
+	}
+
+
+	/**
+	 * Set the session ID of the session this user is in.
+	 * @param sessionId	The session ID to set.
+	 */
+	public void setSessionId(@Nonnull String sessionId) {
+		this.sessionId = sessionId;
 	}
 
 	@Override

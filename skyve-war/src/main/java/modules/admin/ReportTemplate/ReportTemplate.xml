@@ -148,6 +148,7 @@
 			<queryName>qActiveUserProxies</queryName>
 		</association>
 		<collection name="usersToEmail" type="aggregation">
+			<documentation>The collection of users that will be recipients of this report.</documentation>
 			<displayName>Users to Email</displayName>
 			<documentName>UserProxy</documentName>
 			<minCardinality>0</minCardinality>
@@ -448,6 +449,13 @@
 			<displayName>New Recipient</displayName>
 			<documentName>UserProxy</documentName>
 		</association>
+		<collection name="editUsersToEmail" type="aggregation" audited="false" persistent="false" usage="view">
+			<documentation>The collection of recipients shown in the view so users have permission to 
+				remove. Modifies the underlying usersToEmail persistent collection.</documentation>
+			<displayName>Users to Email</displayName>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 	<conditions>
 		<condition name="created" usage="view">

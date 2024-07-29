@@ -16,6 +16,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -33,22 +34,24 @@ class Table {
 	static final ImmutablePair<AttributeType, Sensitivity> ASSOCIATION = ImmutablePair.of(AttributeType.association, Sensitivity.none);
 	static final ImmutablePair<AttributeType, Sensitivity> INTEGER = ImmutablePair.of(AttributeType.integer, Sensitivity.none);
 
-	String name;
+	String agnosticIdentifier;
+	String persistentIdentifier;
 	LinkedHashMap<String, Pair<AttributeType, Sensitivity>> fields = new LinkedHashMap<>();
 	TreeMap<String, IndexType> indexes = new TreeMap<>();
 	
-	Table(String name) {
-		this.name = name;
+	Table(String agnosticIdentifier, String persistentIdentifier) {
+		this.agnosticIdentifier = agnosticIdentifier;
+		this.persistentIdentifier = persistentIdentifier;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return ((obj instanceof Table) && (name != null) && name.equals(((Table) obj).name));
+		return ((obj instanceof Table) && (agnosticIdentifier != null) && agnosticIdentifier.equals(((Table) obj).agnosticIdentifier));
 	}
 
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return agnosticIdentifier.hashCode();
 	}
 
 	void addFieldsFromDocument(Customer customer, Document document) {
@@ -123,7 +126,8 @@ class Table {
 								fields.put(attributeName + "_type", TEXT);
 							}
 							
-							fields.put(attributeName + "_id", ImmutablePair.of(attribute.getAttributeType(), Sensitivity.none));
+							fields.put(attributeName + "_id", ImmutablePair.of(attributeType, Sensitivity.none));
+							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + attributeName + "_id -> " + attributeType);
 						}
 					}
 				}
@@ -150,6 +154,7 @@ class Table {
 						Pair<AttributeType, Sensitivity> pair = fields.get(fieldName);
 						if (pair == null) {
 							fields.put(fieldName, MutablePair.of(attributeType, sensitivity));
+							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(agnosticIdentifier + " - Put " + fieldName + " -> " + attributeType);
 						}
 						else {
 							Sensitivity existing = pair.getRight();
@@ -165,7 +170,7 @@ class Table {
 	
 	public String toJSON() throws Exception {
 		Map<String, Object> result = new TreeMap<>();
-		result.put("name", name);
+		result.put("name", agnosticIdentifier);
 		List<Map<String, Object>> fieldList = new ArrayList<>(fields.size());
 		for (String key : fields.keySet()) {
 			Pair<AttributeType, Sensitivity> pair = fields.get(key);
@@ -177,7 +182,7 @@ class Table {
 		result.put("fields", fieldList);
 		if (this instanceof JoinTable) {
 			JoinTable join = (JoinTable) this;
-			result.put("ownerTableName", join.ownerTableName);
+			result.put("ownerTableName", join.ownerAgnosticIdentifier);
 			result.put("ordered", Boolean.valueOf(join.ordered));
 		}
 		return JSON.marshall(result);
@@ -186,12 +191,26 @@ class Table {
 	@SuppressWarnings("unchecked")
 	public static Table fromJSON(String json) throws Exception {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(null, json);
-		String tableName = (String) map.get("name");
-		String ownerTableName = (String) map.get("ownerTableName");
+
+		String agnosticIdentifier = (String) map.get("name");
+		String persistentIdentifier = agnosticIdentifier;
+		String ownerAgnosticIdentifier = (String) map.get("ownerTableName");
+		String ownerPersistentIdentifier = ownerAgnosticIdentifier;
+
+		if ((UtilImpl.CATALOG != null) || (UtilImpl.SCHEMA != null)) {
+			if (agnosticIdentifier.indexOf('.') < 0) { // no schema or catalog
+				persistentIdentifier = Persistent.determinePersistentIdentifier(agnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+			}
+			if ((ownerAgnosticIdentifier != null) && (ownerAgnosticIdentifier.indexOf('.') < 0)) { // no schema or catalog
+				ownerPersistentIdentifier = Persistent.determinePersistentIdentifier(ownerAgnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+			}
+		}
+		
 		Boolean ordered = (Boolean) map.get("ordered");
-		Table result = (ownerTableName == null) ? 
-							new Table(tableName) :
-							new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(ordered));
+		Table result = (ownerAgnosticIdentifier == null) ? 
+						new Table(agnosticIdentifier, persistentIdentifier) :
+						new JoinTable(agnosticIdentifier, persistentIdentifier, ownerAgnosticIdentifier, ownerPersistentIdentifier, Boolean.TRUE.equals(ordered));
+
 		List<Map<String, Object>> fieldList = (List<Map<String, Object>>) map.get("fields");
 		for (Map<String, Object> field : fieldList) {
 			for (String key : field.keySet()) {

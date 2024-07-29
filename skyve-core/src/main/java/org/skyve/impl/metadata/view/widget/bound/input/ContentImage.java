@@ -36,6 +36,7 @@ public class ContentImage extends InputWidget implements Editable, RelativeSize,
 	private static final long serialVersionUID = 314857374179338882L;
 
 	private Boolean editable;
+	private Boolean showMarkup;
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
 	private Integer sm;
@@ -68,6 +69,15 @@ public class ContentImage extends InputWidget implements Editable, RelativeSize,
 	@XmlAttribute(name = "editable", required = false)
 	public void setEditable(Boolean editable) {
 		this.editable = editable;
+	}
+
+	public Boolean getShowMarkup() {
+		return showMarkup;
+	}
+
+	@XmlAttribute(name = "showMarkup", required = false)
+	public void setShowMarkup(Boolean showMarkup) {
+		this.showMarkup = showMarkup;
 	}
 
 	@Override

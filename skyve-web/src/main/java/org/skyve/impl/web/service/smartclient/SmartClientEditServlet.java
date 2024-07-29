@@ -186,7 +186,7 @@ public class SmartClientEditServlet extends HttpServlet {
 					
 			    	persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
-			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 					if (user == null) {
 						throw new SessionEndedException(request.getLocale());
 					}

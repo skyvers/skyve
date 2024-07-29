@@ -103,7 +103,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		persistence.begin();
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
     	Principal userPrincipal = request.getUserPrincipal();
-    	WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
+    	WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 	}
 
 	private static void restore(FacesView view, ExternalContext ec)

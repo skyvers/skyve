@@ -178,10 +178,10 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	}
 
 	/**
-	 * 
+	 * The String value in plain format - no engineering notation
 	 */
 	@Override
 	public final String toString() {
-		return (value == null) ? "null" : value.toString();
+		return (value == null) ? "null" : value.toPlainString();
 	}
 }

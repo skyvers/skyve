@@ -4,6 +4,7 @@
 			<system export="true">
 				<paths>
 					<path name="org/w3c/dom/css" />
+					<path name="org/w3c/dom/xpath" />
 				</paths>
 			</system>
 		</dependencies>

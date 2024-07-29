@@ -5,7 +5,6 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.web.WebContext;
 
-import modules.admin.ModulesUtil;
 import modules.admin.domain.DataMaintenance;
 
 public class DataMaintenanceExportAction extends BizExportAction {
@@ -22,6 +21,6 @@ public class DataMaintenanceExportAction extends BizExportAction {
 		}
 
 		String[] refs = modocName.split("\\.");
-		return ModulesUtil.standardBeanBizExport(refs[0], refs[1], null);
+		return EXT.standardBizExport(refs[0], refs[1]);
 	}
 }

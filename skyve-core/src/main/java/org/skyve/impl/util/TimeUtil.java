@@ -41,6 +41,18 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#clearMillisecondComponent}
 	 */
+	public static final void clearSecondAndMillisecondComponent(Date date) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		// NB clear() does not work in JDK 1.3.1
+		calendar.set(Calendar.MILLISECOND, 0);
+		calendar.set(Calendar.SECOND, 0);
+		date.setTime(calendar.getTime().getTime());
+	} // clearTimeComponent
+
+	/**
+	 * See {@link Time#clearMillisecondComponent}
+	 */
 	public static final void clearMillisecondComponent(Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
