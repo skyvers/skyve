@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -199,6 +201,23 @@ public class TestUtil {
 		}
 
 		return bean;
+	}
+
+	public static List<String> retreiveExcludedUpdateAttributes(Module module, Document document) {
+		String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
+		Util.LOGGER.fine("Looking for factory class " + className);
+		try {
+			Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
+			if (c.isAnnotationPresent(SkyveFactory.class)) {
+				Util.LOGGER.fine("Found class " + c.getName());
+				SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
+				return Arrays.asList(annotation.excludedUpdateAttributes());
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Could not find factory class for: " + e.getMessage());
+		}
+		return Collections.emptyList();
 	}
 
 	/**

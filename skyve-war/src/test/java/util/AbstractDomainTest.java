@@ -277,6 +277,12 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes(customer));
 
+		// remove any excluded attributes
+		List<String> excludedAttributes = TestUtil.retreiveExcludedUpdateAttributes(module, document);
+		if (!excludedAttributes.isEmpty()) {
+			allAttributes.removeIf(a -> excludedAttributes.contains(a.getName()));
+		}
+
 		// randomise the attributes in the collection
 		Collections.shuffle(allAttributes);
 
