@@ -1,6 +1,7 @@
 package modules.admin.Audit.job;
 
 import static java.util.stream.Collectors.toList;
+import static modules.admin.Audit.job.support.ArchiveUtils.excerptLine;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.job.CancellableJob;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
@@ -119,14 +121,27 @@ public class IndexArchivesJob extends CancellableJob {
                 // Read every line out starting from the given offset
                 // or until the job is cancelled
                 try (BufferedLineReader blr = new BufferedLineReader(file.toPath(), startOffset)) {
+
                     for (Line line = blr.readLine(); line != null && !isCancelled(); line = blr.readLine()) {
 
-                        indexLine(file.getName(), line, iwriter);
+                        try {
+                            indexLine(file.getName(), line, iwriter);
+                        } catch (Exception e) {
+                            String errMsg = String.format("Error indexing record at byte offset %d in %s; line excerpt: '%s'",
+                                    line.offset(), file.getName(), excerptLine(line.line()));
+                            logger.atFatal()
+                                  .withThrowable(e)
+                                  .log(errMsg);
+                            getLog().add(errMsg);
+                            // Give up indexing this file, but we will attempt to continue 
+                            // indexing any others
+                            break;
+                        }
+
                     }
                 }
             }
         }
-
     }
 
     /**
@@ -154,25 +169,38 @@ public class IndexArchivesJob extends CancellableJob {
         String line = lineRecord.line()
                                 .trim();
 
-        Audit entryBean;
-        try {
-            entryBean = (Audit) JSON.unmarshall(CORE.getUser(), line);
-            logger.trace("Unmarshalled {}", entryBean);
-        } catch (Exception e) {
-            logger.atFatal()
-                  .withThrowable(e)
-                  .log("Could not index entry at {} in {}: ", offset, fileName, line);
-            throw new RuntimeException(e);
-        }
+        Bean entryBean = unmarshallBean(line);
 
         // Convert the Audit document and add to index
-        Document doc = converter.convert(entryBean);
+        // TODO add some flexibility here with multiple converters
+        Document doc = converter.convert((Audit) entryBean);
         doc.add(new StoredField(FILENAME_FIELD, fileName));
         doc.add(new StoredField(OFFSET_FIELD, offset));
         iwriter.addDocument(doc);
 
         // Record progress through the file
         updateProgress(fileName, lineRecord.end(), iwriter);
+    }
+
+    /**
+     * Unmarshall
+     * 
+     * @param fileName
+     * @param offset
+     * @param line
+     * @return
+     */
+    public Bean unmarshallBean(String line) {
+        try {
+            Bean entryBean = (Bean) JSON.unmarshall(CORE.getUser(), line);
+            logger.trace("Unmarshalled {}", entryBean);
+            return entryBean;
+        } catch (Exception e) {
+            logger.atFatal()
+                  .withThrowable(e)
+                  .log("Could not unmarshall archive entry: {}", line);
+            throw new RuntimeException("Could not unmarshall record", e);
+        }
     }
 
     private void updateProgress(String fileName, Long offset, IndexWriter iwriter) throws IOException {
@@ -283,6 +311,6 @@ public class IndexArchivesJob extends CancellableJob {
     }
 
     private static record IndexableFile(File file, long startOffset) {
-
     }
+
 }
