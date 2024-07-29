@@ -203,7 +203,15 @@ public class TestUtil {
 		return bean;
 	}
 
-	public static List<String> retreiveExcludedUpdateAttributes(Module module, Document document) {
+	/**
+	 * Retrieves the list of attribute names that are marked for generated update
+	 * test exclusion in the documents factory
+	 * 
+	 * @param module   The module of the document
+	 * @param document The document to retrieve the excluded attributes for
+	 * @return The list of excluded attribute names
+	 */
+	public static List<String> retrieveExcludedUpdateAttributes(Module module, Document document) {
 		String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
 		Util.LOGGER.fine("Looking for factory class " + className);
 		try {
@@ -215,7 +223,7 @@ public class TestUtil {
 			}
 		}
 		catch (Exception e) {
-			System.err.println("Could not find factory class for: " + e.getMessage());
+			Util.LOGGER.fine("Could not find factory class for: " + e.getMessage());
 		}
 		return Collections.emptyList();
 	}
