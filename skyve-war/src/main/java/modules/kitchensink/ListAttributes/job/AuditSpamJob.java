@@ -1,12 +1,12 @@
 package modules.kitchensink.ListAttributes.job;
 
-import java.util.Collection;
+import static org.apache.commons.lang3.RandomUtils.nextInt;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.domain.Bean;
-import org.skyve.job.IteratingJob;
+import org.skyve.job.CancellableJob;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 
@@ -17,43 +17,52 @@ import modules.kitchensink.domain.ListAttributes;
 /**
  * FIXME Delete this. This is some temporary testing nonsense to created a pile of ADM_Audit entries.
  */
-public class AuditSpamJob extends IteratingJob<ListAttributes> {
+public class AuditSpamJob extends CancellableJob {
 
     protected final Logger logger = LogManager.getLogger();
 
-    private static final int REPEAT_COUNT = 30;
+    private static final int REPEAT_COUNT = 10;
 
     @Inject
     private transient Persistence persistence;
 
-    @Override
-    protected Collection<ListAttributes> getElements() {
-
-        return persistence.newDocumentQuery(ListAttributes.MODULE_NAME, ListAttributes.DOCUMENT_NAME)
-                          .beanResults();
-    }
-
-    @Override
-    protected void operation(ListAttributes element) throws Exception {
-
-        logger.trace("Updating {}", element);
-        for (int i = REPEAT_COUNT; i > 0; --i) {
-            element.setNormalInteger(RandomUtils.nextInt(0, 10_000));
-            element.setMemo(randomPhrase());
-            persistence.save(element);
-        }
-    }
-
-    @Override
-    protected int getCommitFrequency() {
-        return 1;
-    }
+    private int createCount = 100_000;
 
     @Override
     public void execute() throws Exception {
         logAuditCount();
 
-        super.execute();
+        persistence.begin();
+
+        RateCounter counter = new RateCounter();
+
+        while (--createCount >= 0) {
+            if (isCancelled()) {
+                getLog().add("Job cancelled");
+                break;
+            }
+
+            ListAttributes la = ListAttributes.newInstance();
+
+            for (int i = 0; i < REPEAT_COUNT; ++i) {
+                la.setText(randomWord());
+                la.setNormalInteger(nextInt(0, 10_000));
+                la = persistence.save(la);
+                logger.trace("Updating {}", la);
+
+                counter.click();
+            }
+
+            persistence.delete(la);
+
+            if (createCount % 10 == 0) {
+                logger.debug("createCount: {}; rate: {}", createCount, counter.rate());
+                persistence.commit(false);
+                persistence.evictAllCached();
+                persistence.begin();
+            }
+
+        }
 
         logAuditCount();
     }
@@ -82,9 +91,10 @@ public class AuditSpamJob extends IteratingJob<ListAttributes> {
     private String randomPhrase() {
 
         int r = RandomUtils.nextInt(0, 100) + 1;
-        if (r > 99) {
+        /* if (r > 99) {
             return randomWords(1_700_000);
-        } else if (r > 90) {
+        } else */
+        if (r > 90) {
             return randomWords(110_000);
         } else if (r > 70) {
             return randomWords(50_000);
@@ -119,6 +129,27 @@ public class AuditSpamJob extends IteratingJob<ListAttributes> {
     private String randomWord() {
 
         return words[RandomUtils.nextInt(0, words.length)];
+    }
+
+    private static class RateCounter {
+
+        private final long startTime = System.currentTimeMillis();
+        private int count = 0;
+
+        public void click() {
+            ++count;
+        }
+
+        public long ellapsedMillis() {
+            return System.currentTimeMillis() - startTime;
+        }
+
+        public double rate() {
+
+            double seconds = ((double) ellapsedMillis()) / 60_000;
+
+            return count / seconds;
+        }
     }
 
     private final String[] words = { "acid", "acorn", "acre", "acts", "afar", "affix", "aged", "agent", "agile", "aging", "agony",

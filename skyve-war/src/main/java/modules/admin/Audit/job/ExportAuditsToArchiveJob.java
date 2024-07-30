@@ -1,5 +1,8 @@
 package modules.admin.Audit.job;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,7 +12,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -17,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
@@ -56,6 +60,7 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
         String targetTimeStr = DateTimeFormatter.ISO_LOCAL_TIME.withZone(ZoneId.systemDefault())
                                                                .format(targetEndTime);
         getLog().add("Job started; target end time=" + targetTimeStr);
+        getLog().add("Using batch size: " + UtilImpl.ARCHIVE_EXPORT_BATCH_SIZE);
         logAuditCount();
 
         int recordsArchived = 0;
@@ -98,11 +103,10 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
      * @throws InterruptedException
      * @throws Exception
      */
-    public int executeOneBatch(int batchSize) throws IOException, InterruptedException {
+    private int executeOneBatch(int batchSize) throws IOException, InterruptedException {
 
         File file = getFile();
         getLog().add("Writing audit entries to " + file.getName());
-        logger.debug("Writing to " + file.getCanonicalPath() + "; current length=" + file.length());
 
         Lock lock = repo.getLockFor(file)
                         .writeLock();
@@ -122,26 +126,30 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
     }
 
     private int writeBatch(int batchSize, File file) throws IOException {
-        Collection<String> ids = getElementIds(batchSize);
-        if (ids.isEmpty()) {
+
+        List<DynamicBean> audits = getElements(batchSize);
+
+        if (audits.isEmpty()) {
             return 0;
         }
 
+        Customer c = CORE.getCustomer();
         persistence.begin();
 
-        try (FileWriter fw = new FileWriter(file, true)) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, UTF_8, true))) {
 
-            Customer c = CORE.getCustomer();
-            for (String bizId : ids) {
+            for (DynamicBean currAudit : audits) {
 
-                Audit element = persistence.retrieve(Audit.MODULE_NAME, Audit.DOCUMENT_NAME, bizId);
-                logger.trace("Archiving {}", element.getBizId());
+                logger.trace("Archiving {}", currAudit.getBizId());
 
-                String entry = JSON.marshall(c, element);
-                fw.write(entry);
-                fw.write(LF);
+                String entry = JSON.marshall(c, currAudit);
 
-                persistence.delete(element);
+                writer.write(entry);
+                writer.write(LF);
+
+                persistence.newSQL("delete from ADM_Audit where bizId = :id")
+                           .putParameter("id", currAudit.getBizId(), false)
+                           .execute();
             }
         } catch (IOException e) {
             logger.atFatal()
@@ -151,8 +159,9 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
         }
 
         persistence.commit(false);
+        persistence.evictAllCached();
 
-        return ids.size();
+        return audits.size();
     }
 
     private File getFile() {
@@ -169,11 +178,10 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
                   .toFile();
     }
 
-    protected Collection<String> getElementIds(int howMany) {
+    protected List<DynamicBean> getElements(int howMany) {
         return persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME)
                           .setMaxResults(howMany)
-                          .addBoundProjection(Bean.DOCUMENT_ID)
-                          .scalarResults(String.class);
+                          .projectedResults();
     }
 
     private void logAuditCount() {
