@@ -11,6 +11,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
+import org.skyve.util.Thumbnail;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -178,34 +179,44 @@ public class ContentDirective implements TemplateDirectiveModel {
 			String content = (String) Binder.get(beanParam, attributeParam);
 			if (content != null) {
 				AttachmentContent ac = cm.getAttachment(content);
-				byte[] fileBytes = ac.getContentBytes();
-
-				StringBuilder s = new StringBuilder();
-				s.append("<img src='data:").append(ac.getMimeType().toString());
-				s.append(";base64,").append(Base64.getEncoder().encodeToString(fileBytes)).append('\'');
-
-				s.append(" alt='").append(attributeParam).append("'");
-
-				if (heightParam != null) {
-					s.append(" height='").append(heightParam).append("'");
+				if (ac != null) {
+					Thumbnail image = null;
+					if ((widthParam != null) && (heightParam != null)) { // a thumbnail image
+						image = new Thumbnail(ac, Integer.parseInt(widthParam), Integer.parseInt(heightParam));
+					}
+					else { // full content
+						image = new Thumbnail(ac);
+					}
+	
+					byte[] fileBytes = image.getBytes();
+	
+					StringBuilder s = new StringBuilder();
+					s.append("<img src='data:").append(ac.getMimeType().toString());
+					s.append(";base64,").append(Base64.getEncoder().encodeToString(fileBytes)).append('\'');
+	
+					s.append(" alt='").append(attributeParam).append("'");
+	
+					if (heightParam != null) {
+						s.append(" height='").append(heightParam).append("'");
+					}
+	
+					if (widthParam != null) {
+						s.append(" width='").append(widthParam).append("'");
+					}
+	
+					if (classParam != null) {
+						s.append(" class='").append(classParam).append("'");
+					}
+	
+					if (styleParam != null) {
+						s.append(" style='").append(styleParam).append("'");
+					}
+	
+					s.append(" />");
+	
+					// System.out.println("@content output: " + s.toString());
+					out.write(s.toString());
 				}
-
-				if (widthParam != null) {
-					s.append(" width='").append(widthParam).append("'");
-				}
-
-				if (classParam != null) {
-					s.append(" class='").append(classParam).append("'");
-				}
-
-				if (styleParam != null) {
-					s.append(" style='").append(styleParam).append("'");
-				}
-
-				s.append(" />");
-
-				// System.out.println("@content output: " + s.toString());
-				out.write(s.toString());
 			}
 		}
 		catch (Exception e) {
