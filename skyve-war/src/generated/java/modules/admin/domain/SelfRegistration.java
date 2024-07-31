@@ -56,6 +56,9 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public static final String registrationDatePropertyName = "registrationDate";
 
 	/** @hidden */
+	public static final String passSilentlyPropertyName = "passSilently";
+
+	/** @hidden */
 	public static final String userPropertyName = "user";
 
 	/**
@@ -94,6 +97,14 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 * The date and time that this self registration was completed.
 	 **/
 	private DateTime registrationDate;
+
+	/**
+	 * Silent Pass
+	 * <br/>
+	 * Flag used when registration should pass but not actually create a user. 
+				Used for suspected bot registrations.
+	 **/
+	private Boolean passSilently = Boolean.valueOf(false);
 
 	/**
 	 * User
@@ -251,6 +262,23 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #passSilently} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getPassSilently() {
+		return passSilently;
+	}
+
+	/**
+	 * {@link #passSilently} mutator.
+	 * @param passSilently	The new value.
+	 **/
+	@XmlElement
+	public void setPassSilently(Boolean passSilently) {
+		this.passSilently = passSilently;
+	}
+
+	/**
 	 * {@link #user} accessor.
 	 * @return	The value.
 	 **/
@@ -315,7 +343,7 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isRegistrationComplete() {
-		return (getUser() != null && getUser().isPersisted());
+		return (getUser() != null && getUser().isPersisted() || Boolean.TRUE.equals(passSilently));
 	}
 
 	/**

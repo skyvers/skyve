@@ -1,11 +1,18 @@
 package modules.admin.SelfRegistration.actions;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringTokenizer;
+
 import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.cdi.GeoIpService;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -15,6 +22,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Group.GroupExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
@@ -28,8 +36,15 @@ import modules.admin.domain.User;
  */
 public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
+	private static final String WHITE_LIST = "whiteList";
+
+	private static final String BLACK_LIST = "blackList";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
+	@Inject
+	private transient GeoIpService geoIpService;
+	
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -46,7 +61,40 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					throw new ValidationException("Captcha is not valid");
 				}
 			}
-
+			// check the country and if it is on the blacklist, fail
+			HttpServletRequest request = (HttpServletRequest) webContext.getHttpServletRequest();
+			String clientIpAddress = getClientIpAddress(request);
+			LOGGER.info("Checking country for ip " + clientIpAddress);
+			Optional<String> countryCode = geoIpService.getCountryCodeForIp(clientIpAddress);
+			if (countryCode.isPresent()) {
+				LOGGER.info("Registration request from country " + countryCode.get());
+				if(UtilImpl.COUNTRY_CODES != null) {
+					List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("//|"));
+					// Is country on list
+					boolean found = countryList.stream()
+							.anyMatch(s -> s.equalsIgnoreCase(countryCode.get()));
+					if (found) {
+						// Check if the list is a blacklist and ban the country if it is
+						if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(BLACK_LIST)) {
+							LOGGER.warn(
+									"Self-registration failed because country was on the blacklist. Suspect bot submission for "
+											+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
+							bean.setPassSilently(Boolean.TRUE);
+							return new ServerSideActionResult<>(bean);
+						}
+					} else if(!found) {
+						// Check if the list is a white list and ban the country if the list is a white list
+						if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(WHITE_LIST)) {
+							LOGGER.warn(
+									"Self-registration failed because country was not on the whitelist. Suspect bot submission for "
+											+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
+							bean.setPassSilently(Boolean.TRUE);
+							return new ServerSideActionResult<>(bean);
+						}
+					}
+				}
+			}
+			
 			// validate the email and confirm email match
 			bean.validateConfirmEmail();
 
@@ -112,7 +160,19 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 		}
 		return new ServerSideActionResult<>(bean);
 	}
+	
+	private static String getClientIpAddress(HttpServletRequest request) {
+		String xForwardedForHeader = request.getHeader("X-Forwarded-For");
+		if (xForwardedForHeader == null) {
+			return request.getRemoteAddr();
+		}
 
+		// As of https://en.wikipedia.org/wiki/X-Forwarded-For
+		// The general format of the field is: X-Forwarded-For: client, proxy1, proxy2 ...
+		// we only want the client
+		return new StringTokenizer(xForwardedForHeader, ",").nextToken().trim();
+	}
+	
 	private static void encodePassword(User user) throws Exception {
 		user.setPassword(EXT.hashPassword(user.getPassword()));
 	}
