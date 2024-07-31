@@ -25,7 +25,6 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -302,10 +301,12 @@ public class StandardLoader {
 		List<Association> associations = new ArrayList<>();
 		
 		// determine the association bindings
+		List<? extends Attribute> allAttributes = document.getAllAttributes(customer);
 		for (String binding : sheet.getColumnBindings()) {
-			Reference reference = document.getReferenceByName(binding);
-			if (reference instanceof Association) {
-				associations.add((Association) reference);
+			for (Attribute a : allAttributes) {
+				if ((a instanceof Association) && binding.equals(a.getName())) {
+					associations.add((Association) a);
+				}
 			}
 		}
 		
