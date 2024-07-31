@@ -39,11 +39,13 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -498,6 +500,9 @@ public class WebUtil {
 										" looks tampered with because it does not start with " + Util.getSkyveContextUrl() + 
 										". This looks like a doctored request because Referrer-Policy should be same-origin!");
 				result = null;
+			}
+			else {
+				result = OWASP.sanitise(Sanitisation.text, result); // protect reflected XSS in referer header
 			}
 		}
 		return result;
