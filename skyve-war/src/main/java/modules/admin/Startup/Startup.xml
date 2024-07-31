@@ -155,6 +155,35 @@
 			</description>
 			<length>200</length>
 		</text>
+		
+		<!-- GeoIp settings -->
+		<text name="ipInfoKey" audited="false" sensitivity="secret">
+			<displayName>IPInfo Key</displayName>
+			<description>
+				<![CDATA[
+					IPInfo key can be provided to allow for added security by allowing/disallowing certain countries
+				]]>
+			</description>
+			<length>200</length>
+		</text>
+		<enum name="countryListType" audited="false" trackChanges="false">
+			<displayName>Country List Type</displayName>
+			<description>This determines whether the countries selected should be allowed(whitelist) or blocked(blacklist) from accessing the application</description>
+			<values>
+				<value code="blackList" description="Black List" />
+				<value code="whiteList" description="White List" />
+			</values>
+		</enum>
+		<memo name="countryCodesCSV" audited="false" trackChanges="false">
+			<displayName>Country Codes</displayName>
+			<description>A comma-separated list of country codes that will be whitelisted/blacklisted by the application</description>
+		</memo>
+		<collection type="aggregation" name="countryCodes" persistent="false" audited="false" trackChanges="false">
+			<displayName>Country Codes</displayName>
+			<domain>dynamic</domain>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 
 		<!-- account settings -->
 		<boolean name="accountAllowUserSelfRegistration" persistent="false">

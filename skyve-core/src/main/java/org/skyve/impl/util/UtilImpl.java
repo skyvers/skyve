@@ -269,6 +269,9 @@ public class UtilImpl {
 	public static String CLOUDFLARE_TURNSTILE_SITE_KEY = null;
 	public static String CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
 	public static String CKEDITOR_CONFIG_FILE_URL = "";
+	public static String COUNTRY_CODES = "";
+	public static String COUNTRY_LIST_TYPE = "";
+	public static String IP_INFO_KEY = "";
 
 	// null = prod, could be dev, test, uat or another arbitrary environment
 	public static String ENVIRONMENT_IDENTIFIER = null;

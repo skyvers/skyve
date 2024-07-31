@@ -6,7 +6,6 @@ import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,10 +25,8 @@ import org.skyve.util.Util;
  * 
  * @depend - - - PasswordComplexityModel
  * @depend - - - TwoFactorType
- * @depend - - - ListType
  * @navhas n publicUser 0..1 UserProxy
  * @navhas n emailToContact 0..1 Contact
- * @navhas n countryCodes 0..n Generic
  * @navhas n startup 0..1 Startup
  * @navhas n userSelfRegistrationGroup 0..1 Group
  * @stereotype "persistent"
@@ -105,15 +102,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String publicUserPropertyName = "publicUser";
-
-	/** @hidden */
-	public static final String listTypePropertyName = "listType";
-
-	/** @hidden */
-	public static final String countryCodesCSVPropertyName = "countryCodesCSV";
-
-	/** @hidden */
-	public static final String countryCodesPropertyName = "countryCodes";
 
 	/** @hidden */
 	public static final String emailFromPropertyName = "emailFrom";
@@ -301,78 +289,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
-	 * List Type
-	 * <br/>
-	 * This determines whether the country codes provided should be allowed(whitelist) or blocked(blacklist)
-	 **/
-	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum ListType implements Enumeration {
-		blackList("blackList", "blackList"),
-		whiteList("whiteList", "whiteList");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues = Stream.of(values()).map(ListType::toDomainValue).collect(Collectors.toUnmodifiableList());
-
-		private ListType(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toLocalisedDescription() {
-			return Util.i18n(description);
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static ListType fromCode(String code) {
-			ListType result = null;
-
-			for (ListType value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static ListType fromLocalisedDescription(String description) {
-			ListType result = null;
-
-			for (ListType value : values()) {
-				if (value.toLocalisedDescription().equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			return domainValues;
-		}
-	}
-
-	/**
 	 * Minimum Password Length
 	 * <br/>
 	 * The minimum number of characters for new passwords
@@ -503,25 +419,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * The anonymous public user asserted on all public pages.
 	 **/
 	private UserProxyExtension publicUser = null;
-
-	/**
-	 * List Type
-	 * <br/>
-	 * This determines whether the country codes provided should be allowed(whitelist) or blocked(blacklist)
-	 **/
-	private ListType listType;
-
-	/**
-	 * Country Codes
-	 * <br/>
-	 * A comma-separated list of country codes that will be whitelisted/blacklisted by the application
-	 **/
-	private String countryCodesCSV;
-
-	/**
-	 * Country Codes
-	 **/
-	private List<Generic> countryCodes = new ArrayList<>();
 
 	/**
 	 * Email From
@@ -973,102 +870,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 			preset(publicUserPropertyName, publicUser);
 			this.publicUser = publicUser;
 		}
-	}
-
-	/**
-	 * {@link #listType} accessor.
-	 * @return	The value.
-	 **/
-	public ListType getListType() {
-		return listType;
-	}
-
-	/**
-	 * {@link #listType} mutator.
-	 * @param listType	The new value.
-	 **/
-	@XmlElement
-	public void setListType(ListType listType) {
-		preset(listTypePropertyName, listType);
-		this.listType = listType;
-	}
-
-	/**
-	 * {@link #countryCodesCSV} accessor.
-	 * @return	The value.
-	 **/
-	public String getCountryCodesCSV() {
-		return countryCodesCSV;
-	}
-
-	/**
-	 * {@link #countryCodesCSV} mutator.
-	 * @param countryCodesCSV	The new value.
-	 **/
-	@XmlElement
-	public void setCountryCodesCSV(String countryCodesCSV) {
-		preset(countryCodesCSVPropertyName, countryCodesCSV);
-		this.countryCodesCSV = countryCodesCSV;
-	}
-
-	/**
-	 * {@link #countryCodes} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Generic> getCountryCodes() {
-		return countryCodes;
-	}
-
-	/**
-	 * {@link #countryCodes} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Generic getCountryCodesElementById(String bizId) {
-		return getElementById(countryCodes, bizId);
-	}
-
-	/**
-	 * {@link #countryCodes} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setCountryCodesElementById(String bizId, Generic element) {
-		setElementById(countryCodes, element);
-	}
-
-	/**
-	 * {@link #countryCodes} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addCountryCodesElement(Generic element) {
-		return countryCodes.add(element);
-	}
-
-	/**
-	 * {@link #countryCodes} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addCountryCodesElement(int index, Generic element) {
-		countryCodes.add(index, element);
-	}
-
-	/**
-	 * {@link #countryCodes} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeCountryCodesElement(Generic element) {
-		return countryCodes.remove(element);
-	}
-
-	/**
-	 * {@link #countryCodes} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeCountryCodesElement(int index) {
-		return countryCodes.remove(index);
 	}
 
 	/**

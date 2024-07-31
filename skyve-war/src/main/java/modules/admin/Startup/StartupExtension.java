@@ -4,8 +4,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -22,9 +25,14 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import jakarta.inject.Inject;
+import modules.admin.domain.Generic;
 import modules.admin.domain.Startup;
 
 public class StartupExtension extends Startup {
+
+	private static final String WHITE_LIST = "whiteList";
+
+	private static final String BLACK_LIST = "blackList";
 
 	@Inject
 	private transient Customer customer;
@@ -40,6 +48,9 @@ public class StartupExtension extends Startup {
 	static final String API_GOOGLE_RECAPTCHA_SECRET_KEY = "googleRecaptchaSecretKey";
 	static final String API_CLOUDFLARE_TURNSTILE_SITE_KEY = "cloudflareTurnstileSiteKey";
 	static final String API_CLOUDFLARE_TURNSTILE_SECRET_KEY = "cloudflareTurnstileSecretKey";
+	static final String API_IP_INFO = "ipInfoKey";
+	static final String COUNTRY_CODES = "countryCodes";
+	static final String API_COUNTRY_LIST_TYPE = "countryListType";
 
 	static final String BACKUP_STANZA_KEY = "backup";
 	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
@@ -75,6 +86,31 @@ public class StartupExtension extends Startup {
 		setApiGoogleRecaptchaSecretKey(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY);
 		setApiCloudflareTurnstileSiteKey(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY);
 		setApiCloudflareTurnstileSecretKey(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY);
+		setCountryCodesCSV(UtilImpl.COUNTRY_CODES);
+		
+		// Update listmembership with country codes from csv
+		List<String> codes = Arrays.asList(getCountryCodesCSV()
+				.split("\\|"));
+		for(String code : codes) {
+			Generic newGeneric = Generic.newInstance();
+			newGeneric.setText5001(code);
+			// Get country name for code
+			Locale locale = new Locale("", code);
+			String countryName = locale.getDisplayCountry();
+			newGeneric.setText5002(countryName);
+			getCountryCodes().add(newGeneric);
+		}
+		
+		// Check country list type
+		if(UtilImpl.COUNTRY_LIST_TYPE == null) {
+			setCountryListType(null);
+		} else if( UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(BLACK_LIST)) {
+			setCountryListType(CountryListType.blackList);
+		} else if( UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(WHITE_LIST)) {
+			setCountryListType(CountryListType.whiteList);
+		} else {
+			setCountryListType(null);
+		}
 		
 		boolean googleRecaptchaValuesSet = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null;
 		boolean cloudflareTurnstileValuesSet = UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null;
@@ -312,6 +348,29 @@ public class StartupExtension extends Startup {
 				UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
 				api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
 				UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+		}
+		
+		if (getCountryCodesCSV() != null
+				&& !StringUtils.equals(UtilImpl.COUNTRY_CODES, getCountryCodesCSV())) {
+			api.put(COUNTRY_CODES, getCountryCodesCSV());
+			UtilImpl.COUNTRY_CODES = getCountryCodesCSV();
+		}
+		
+		// Set country list type in json
+		if (getCountryListType() != null) {
+			String listType = null;
+			if(CountryListType.blackList.equals(getCountryListType())) {
+				listType=BLACK_LIST;
+			}else if(CountryListType.whiteList.equals(getCountryListType())){
+				listType=WHITE_LIST;
+			}
+			if(!StringUtils.equalsIgnoreCase(UtilImpl.COUNTRY_LIST_TYPE, listType)){
+				api.put(API_COUNTRY_LIST_TYPE, listType);
+				UtilImpl.COUNTRY_LIST_TYPE = listType;
+			}
+		} else {
+			api.put(API_COUNTRY_LIST_TYPE, null);
+			UtilImpl.COUNTRY_LIST_TYPE = null;
 		}
 
 		return api;

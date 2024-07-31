@@ -164,6 +164,11 @@
 	            </item>
 	        </row>
 	        <row>
+	            <item>
+	                <textField binding="ipInfoKey"/>
+	            </item>
+	        </row>
+	        <row>
 	        	<item>
 	        		<spacer />
 	        	</item>
@@ -179,6 +184,18 @@
 	        	</item>
 	        </row>
 	    </form>
+	    <vbox border="true" borderTitle="Geolocation Tracker" widgetId="geolocationTracker">
+		<form>
+			<column responsiveWidth="3"/>
+			<column />
+			<row>
+				<item>
+					<combo binding="countryListType"/>
+				</item>
+			</row>
+		</form>
+		<listMembership binding="countryCodes" candidatesHeading="Available Country Codes" membersHeading="Selected Country Codes"/>
+	</vbox>
     </vbox>
 
     <vbox border="true" borderTitle="admin.startup.accountSettings.frameset.title">

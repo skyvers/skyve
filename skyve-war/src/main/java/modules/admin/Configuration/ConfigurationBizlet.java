@@ -1,11 +1,8 @@
 package modules.admin.Configuration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -164,33 +161,16 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			if (bean.getTwoFactorType() == null) {
 				bean.setTwoFactorType(TwoFactorType.off);
 			}
-			
-			// Populate the country codes collection
-			// Check the country codes csv and set the countryCodes attribute with a generic for each code in the csv
-			if (bean.getCountryCodesCSV() != null) {
-				List<String> setCodes = new ArrayList<>(Arrays.asList(bean.getCountryCodesCSV()
-						.split(",")));
-				ArrayList<Generic> genericList = new ArrayList<>();
-				for(String code : setCodes) {
-					Generic newGeneric = Generic.newInstance();
-					newGeneric.setText5001(code);
-					newGeneric.setBizId(code);
-					genericList.add(newGeneric);
-					// Set the configuration document countryCodes with the generic list
-					bean.addCountryCodesElement(newGeneric);
-				}
-			}
-			
 		} else if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			// validate
-			ValidationUtil.validateBeanAgainstBizlet(new StartupBizlet(), bean.getStartup());
-			bean.getStartup().saveConfiguration();
-			
+			StartupExtension startup = bean.getStartup();
 			//set the country codes csv with the selected values
-			String selectedCodes = bean.getCountryCodes().stream()
+			String selectedCodes = startup.getCountryCodes().stream()
 					.map(Generic::getText5001)
-					.collect(Collectors.joining(","));
-			bean.setCountryCodesCSV(selectedCodes);
+					.collect(Collectors.joining("|"));
+			startup.setCountryCodesCSV(selectedCodes);
+			ValidationUtil.validateBeanAgainstBizlet(new StartupBizlet(), startup);
+			startup.saveConfiguration();
 		}
 
 		return super.preExecute(actionName, bean, parentBean, webContext);
@@ -288,30 +268,4 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 			}
 		}
 	}
-
-	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName,
-			ConfigurationExtension bean) throws Exception {
-		List<DomainValue> domainValues = new ArrayList<>();
-		if(Configuration.countryCodesPropertyName.equals(attributeName)) {
-			// return a domain value for each country code
-			ArrayList<String> countryCodesList = new ArrayList<>(Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA3));
-			ArrayList<Generic> genericList = new ArrayList<>();
-			for(String code : countryCodesList) {
-				Generic newGeneric = Generic.newInstance();
-				newGeneric.setText5001(code);
-				genericList.add(newGeneric);
-				domainValues.add(new DomainValue(newGeneric.getText5001()));
-			}
-			return domainValues;
-		}
-		return super.getDynamicDomainValues(attributeName, bean);
-	}
-
-	@Override
-	public ConfigurationExtension resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
-		// TODO Auto-generated method stub
-		return super.resolve(bizId, conversationBean, webContext);
-	}
-	
 }

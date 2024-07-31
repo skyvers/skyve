@@ -116,26 +116,8 @@
 			<description>admin.configuration.association.publicUser.description</description>
 			<documentName>UserProxy</documentName>
 		</association>
-		<enum name="listType">
-			<displayName>List Type</displayName>
-			<description>This determines whether the country codes provided should be allowed(whitelist) or blocked(blacklist)</description>
-			<values>
-				<value code="blackList" />
-				<value code="whiteList"/>
-			</values>
-		</enum>
-		<memo name="countryCodesCSV">
-			<displayName>Country Codes</displayName>
-			<description>A comma-separated list of country codes that will be whitelisted/blacklisted by the application</description>
-		</memo>
 		
 		<!-- non-persistent configuration attributes -->
-		<collection type="aggregation" name="countryCodes" audited="false" persistent="false" trackChanges="false">
-			<displayName>Country Codes</displayName>
-			<domain>dynamic</domain>
-			<documentName>Generic</documentName>
-			<minCardinality>0</minCardinality>
-		</collection>
 		<text name="emailFrom" persistent="false">
 			<displayName>admin.configuration.emailFrom.displayName</displayName>
 			<length>254</length>
