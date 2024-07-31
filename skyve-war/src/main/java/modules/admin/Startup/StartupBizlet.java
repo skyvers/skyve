@@ -1,9 +1,9 @@
 package modules.admin.Startup;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -11,13 +11,29 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.web.WebContext;
 
-import modules.admin.domain.Generic;
 import modules.admin.domain.Startup;
 
 public class StartupBizlet extends Bizlet<StartupExtension> {
 
 	public static final String MAP_LAYER_GMAP = "google.maps.MapTypeId.ROADMAP";
 	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
+
+	@Override
+	public List<DomainValue> getDynamicDomainValues(String attributeName, StartupExtension bean) throws Exception {
+		if (Startup.countryCodesPropertyName.equals(attributeName)) {
+			// return a domain value for each country
+			return Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2)
+					.stream()
+					.map(code -> {
+						Locale locale = new Locale("", code);
+						return new DomainValue(code, locale.getDisplayCountry());
+					})
+					.sorted(Comparator.comparing(DomainValue::getLocalisedDescription))
+					.collect(Collectors.toList());
+		}
+
+		return super.getDynamicDomainValues(attributeName, bean);
+	}
 
 	@Override
 	public StartupExtension newInstance(StartupExtension bean) throws Exception {
@@ -100,32 +116,4 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 
 		super.validate(bean, e);
 	}
-
-	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, StartupExtension bean) throws Exception {
-		List<DomainValue> domainValues = new ArrayList<>();
-		if(Startup.countryCodesPropertyName.equals(attributeName)) {
-			// return a domain value for each country code
-			ArrayList<String> countryCodesList = new ArrayList<>(Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2));
-			ArrayList<Generic> genericList = new ArrayList<>();
-			for(String code : countryCodesList) {
-				Generic newGeneric = Generic.newInstance();
-				newGeneric.setText5001(code);
-				// Get country name for code
-				Locale locale = new Locale("", code);
-				String countryName = locale.getDisplayCountry();
-				newGeneric.setText5002(countryName);
-				genericList.add(newGeneric);
-			}
-			// Sort list of generics alphabetically
-			genericList.sort(Comparator.comparing(Generic::getText5002));
-			for(Generic generic : genericList) {
-				domainValues.add(new DomainValue(generic.getText5001(), generic.getText5002()));
-			}
-			return domainValues;
-		}
-		return super.getDynamicDomainValues(attributeName, bean);
-	}
-	
-
 }

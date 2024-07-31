@@ -155,29 +155,23 @@
 			</description>
 			<length>200</length>
 		</text>
-		
-		<!-- GeoIp settings -->
-		<text name="ipInfoKey" audited="false" sensitivity="secret">
-			<displayName>IPInfo Key</displayName>
+		<text name="apiIpInfoToken" audited="false" sensitivity="secret">
+			<displayName>IPInfo Token</displayName>
 			<description>
 				<![CDATA[
-					IPInfo key can be provided to allow for added security by allowing/disallowing certain countries
+					By supplying an IPinfo API token, you can allow/disallow countries for registration and password reset.
 				]]>
 			</description>
-			<length>200</length>
+			<length>15</length>
 		</text>
 		<enum name="countryListType" audited="false" trackChanges="false">
 			<displayName>Country List Type</displayName>
-			<description>This determines whether the countries selected should be allowed(whitelist) or blocked(blacklist) from accessing the application</description>
+			<description>This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.</description>
 			<values>
-				<value code="blackList" description="Black List" />
-				<value code="whiteList" description="White List" />
+				<value code="blacklist" description="Blacklist" />
+				<value code="whitelist" description="Whitelist" />
 			</values>
 		</enum>
-		<memo name="countryCodesCSV" audited="false" trackChanges="false">
-			<displayName>Country Codes</displayName>
-			<description>A comma-separated list of country codes that will be whitelisted/blacklisted by the application</description>
-		</memo>
 		<collection type="aggregation" name="countryCodes" persistent="false" audited="false" trackChanges="false">
 			<displayName>Country Codes</displayName>
 			<domain>dynamic</domain>
@@ -260,6 +254,12 @@
 			<description>True when the captcha type is Google Recaptcha</description>
 			<expression>
 				<![CDATA[getCaptchaType() != null && CaptchaType.googleRecaptcha == getCaptchaType()]]>
+			</expression>
+		</condition>
+		<condition name="hasIpInfoToken" usage="view">
+			<description>True when an IPinfo token has been set</description>
+			<expression>
+				<![CDATA[getApiIpInfoToken() != null]]>
 			</expression>
 		</condition>
 		<condition name="cloudflareTurnstile" usage="both">

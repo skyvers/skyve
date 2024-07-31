@@ -164,11 +164,6 @@
 	            </item>
 	        </row>
 	        <row>
-	            <item>
-	                <textField binding="ipInfoKey"/>
-	            </item>
-	        </row>
-	        <row>
 	        	<item>
 	        		<spacer />
 	        	</item>
@@ -183,19 +178,33 @@
 	        		</blurb>
 	        	</item>
 	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiIpInfoToken">
+	                	<onChangedHandlers>
+	                		<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity,formCountryList</c:property>
+	        					</properties>
+	        				</rerender>
+	                	</onChangedHandlers>
+	                </textField>
+	            </item>
+	        </row>
 	    </form>
-	    <vbox border="true" borderTitle="Geolocation Tracker" widgetId="geolocationTracker">
-		<form>
-			<column responsiveWidth="3"/>
-			<column />
-			<row>
-				<item>
-					<combo binding="countryListType"/>
-				</item>
-			</row>
-		</form>
-		<listMembership binding="countryCodes" candidatesHeading="Available Country Codes" membersHeading="Selected Country Codes"/>
-	</vbox>
+	    <vbox widgetId="formCountryList" visible="hasIpInfoToken">
+		    <form responsiveWidth="12">
+		        <column responsiveWidth="3"/>
+		        <column/>
+		        <column responsiveWidth="2"/>
+		        <row>
+					<item>
+						<combo binding="countryListType"/>
+					</item>
+				</row>
+	        </form>
+	        <listMembership binding="countryCodes" candidatesHeading="Available Country Codes" membersHeading="Selected Country Codes" />
+        </vbox>
     </vbox>
 
     <vbox border="true" borderTitle="admin.startup.accountSettings.frameset.title">

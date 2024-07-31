@@ -30,7 +30,7 @@ public class GeoIpService {
 	@SuppressWarnings("static-method")
 	public Optional<String> getCountryCodeForIp(final String ipAddress) {
 		HttpClient client = HttpClient.newHttpClient();
-		String token = UtilImpl.IP_INFO_KEY;
+		String token = UtilImpl.IP_INFO_TOKEN;
 		String requestUrl = String.format(IPINFO_API_URL, ipAddress, token);
 
 		HttpRequest request = HttpRequest.newBuilder()

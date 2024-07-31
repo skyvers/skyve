@@ -111,13 +111,10 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String apiCloudflareTurnstileSecretKeyPropertyName = "apiCloudflareTurnstileSecretKey";
 
 	/** @hidden */
-	public static final String ipInfoKeyPropertyName = "ipInfoKey";
+	public static final String apiIpInfoTokenPropertyName = "apiIpInfoToken";
 
 	/** @hidden */
 	public static final String countryListTypePropertyName = "countryListType";
-
-	/** @hidden */
-	public static final String countryCodesCSVPropertyName = "countryCodesCSV";
 
 	/** @hidden */
 	public static final String countryCodesPropertyName = "countryCodes";
@@ -290,13 +287,13 @@ public abstract class Startup extends AbstractTransientBean {
 	/**
 	 * Country List Type
 	 * <br/>
-	 * This determines whether the countries selected should be allowed(whitelist) or blocked(blacklist) from accessing the application
+	 * This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public static enum CountryListType implements Enumeration {
-		blackList("blackList", "Black List"),
-		whiteList("whiteList", "White List");
+		blacklist("blacklist", "Blacklist"),
+		whitelist("whitelist", "Whitelist");
 
 		private String code;
 		private String description;
@@ -575,25 +572,18 @@ public abstract class Startup extends AbstractTransientBean {
 	private String apiCloudflareTurnstileSecretKey;
 
 	/**
-	 * IPInfo Key
+	 * IPInfo Token
 	 * <br/>
-	 * IPInfo key can be provided to allow for added security by allowing/disallowing certain countries
+	 * By supplying an IPinfo API token, you can allow/disallow countries for registration and password reset.
 	 **/
-	private String ipInfoKey;
+	private String apiIpInfoToken;
 
 	/**
 	 * Country List Type
 	 * <br/>
-	 * This determines whether the countries selected should be allowed(whitelist) or blocked(blacklist) from accessing the application
+	 * This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.
 	 **/
 	private CountryListType countryListType;
-
-	/**
-	 * Country Codes
-	 * <br/>
-	 * A comma-separated list of country codes that will be whitelisted/blacklisted by the application
-	 **/
-	private String countryCodesCSV;
 
 	/**
 	 * Country Codes
@@ -1047,21 +1037,21 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #ipInfoKey} accessor.
+	 * {@link #apiIpInfoToken} accessor.
 	 * @return	The value.
 	 **/
-	public String getIpInfoKey() {
-		return ipInfoKey;
+	public String getApiIpInfoToken() {
+		return apiIpInfoToken;
 	}
 
 	/**
-	 * {@link #ipInfoKey} mutator.
-	 * @param ipInfoKey	The new value.
+	 * {@link #apiIpInfoToken} mutator.
+	 * @param apiIpInfoToken	The new value.
 	 **/
 	@XmlElement
-	public void setIpInfoKey(String ipInfoKey) {
-		preset(ipInfoKeyPropertyName, ipInfoKey);
-		this.ipInfoKey = ipInfoKey;
+	public void setApiIpInfoToken(String apiIpInfoToken) {
+		preset(apiIpInfoTokenPropertyName, apiIpInfoToken);
+		this.apiIpInfoToken = apiIpInfoToken;
 	}
 
 	/**
@@ -1079,23 +1069,6 @@ public abstract class Startup extends AbstractTransientBean {
 	@XmlElement
 	public void setCountryListType(CountryListType countryListType) {
 		this.countryListType = countryListType;
-	}
-
-	/**
-	 * {@link #countryCodesCSV} accessor.
-	 * @return	The value.
-	 **/
-	public String getCountryCodesCSV() {
-		return countryCodesCSV;
-	}
-
-	/**
-	 * {@link #countryCodesCSV} mutator.
-	 * @param countryCodesCSV	The new value.
-	 **/
-	@XmlElement
-	public void setCountryCodesCSV(String countryCodesCSV) {
-		this.countryCodesCSV = countryCodesCSV;
 	}
 
 	/**
@@ -1339,6 +1312,25 @@ public abstract class Startup extends AbstractTransientBean {
 	 */
 	public boolean isNotGoogleRecaptcha() {
 		return (! isGoogleRecaptcha());
+	}
+
+	/**
+	 * True when an IPinfo token has been set
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasIpInfoToken() {
+		return (getApiIpInfoToken() != null);
+	}
+
+	/**
+	 * {@link #isHasIpInfoToken} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasIpInfoToken() {
+		return (! isHasIpInfoToken());
 	}
 
 	/**

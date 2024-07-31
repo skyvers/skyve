@@ -1203,6 +1203,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when an IPinfo token has been set
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasIpInfoToken() {
+		return (getStartup().getApiIpInfoToken() != null);
+	}
+
+	/**
+	 * {@link #isHasIpInfoToken} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasIpInfoToken() {
+		return (! isHasIpInfoToken());
+	}
+
+	/**
 	 * True when the selected startup map type is Google Maps
 	 *
 	 * @return The condition

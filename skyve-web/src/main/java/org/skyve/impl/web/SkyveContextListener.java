@@ -747,6 +747,11 @@ public class SkyveContextListener implements ServletContextListener {
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
 		}
+		if (api != null) {
+			UtilImpl.COUNTRY_CODES = getString("api", "countryCodes", api, false);
+			UtilImpl.COUNTRY_LIST_TYPE = getString("api", "countryListType", api, false);
+			UtilImpl.IP_INFO_TOKEN = getString("api", "ipInfoToken", api, false);
+		}
 		
 		Map<String, Object> bootstrap = getObject(null, "bootstrap", properties, false);
 		if (bootstrap != null) {
