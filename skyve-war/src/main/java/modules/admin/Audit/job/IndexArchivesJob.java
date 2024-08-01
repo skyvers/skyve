@@ -53,12 +53,12 @@ import modules.admin.domain.Audit;
 
 public class IndexArchivesJob extends CancellableJob {
 
-
     private static final Logger logger = LogManager.getLogger();
 
     // Fields added to each Audit document index entry
     public static String FILENAME_FIELD = "_filename";
     public static String OFFSET_FIELD = "_offset";
+    public static String LENGTH_FIELD = "_length";
 
     // Fields used to record indexing progress of each file
     private static String PROGRESS_FILENAME_FIELD = "_progress_filename";
@@ -177,6 +177,7 @@ public class IndexArchivesJob extends CancellableJob {
         Document doc = converter.convert((Audit) entryBean);
         doc.add(new StoredField(FILENAME_FIELD, fileName));
         doc.add(new StoredField(OFFSET_FIELD, offset));
+        doc.add(new StoredField(LENGTH_FIELD, lineRecord.length()));
         iwriter.addDocument(doc);
 
         // Record progress through the file

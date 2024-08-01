@@ -1,13 +1,17 @@
 package modules.admin.Audit.job.support;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.right;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 import org.skyve.util.Util;
 
 public class ArchiveUtils {
+
+    public static Charset ARCHIVE_CHARSET = UTF_8;
 
     /**
      * How much of the start and end of a string to include in the excerpt.

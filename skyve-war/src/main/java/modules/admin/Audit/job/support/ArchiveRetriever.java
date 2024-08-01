@@ -1,5 +1,7 @@
 package modules.admin.Audit.job.support;
+
 import static java.util.Collections.emptyList;
+import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
 import static modules.admin.Audit.job.support.ArchiveUtils.getIndexPath;
 
 import java.io.IOException;
@@ -77,13 +79,13 @@ public class ArchiveRetriever {
         try {
             List<ArchiveEntry> entries = searchIndex(filter, maxResults);
 
-            List<T> audits = new ArrayList<>(entries.size());
+            List<T> beans = new ArrayList<>(entries.size());
             for (ArchiveEntry entry : entries) {
                 T a = retrieveBean(entry);
-                audits.add(a);
+                beans.add(a);
             }
 
-            return audits;
+            return beans;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -91,9 +93,9 @@ public class ArchiveRetriever {
     }
 
     /**
-     * Search the audit archive index using the provided filter, returning the file
-     * and offset where each result record can be found; or and empty list if nothing
-     * is found.
+     * Search the archive index using the provided filter, returning the file
+     * and offset where each result record can be found; or an empty list 
+     * if nothing is found.
      * 
      * @param bizId
      * @return
@@ -126,9 +128,12 @@ public class ArchiveRetriever {
                 long offset = doc.getField(IndexArchivesJob.OFFSET_FIELD)
                                  .numericValue()
                                  .longValue();
+                long length = doc.getField(IndexArchivesJob.LENGTH_FIELD)
+                                 .numericValue()
+                                 .longValue();
                 String fileName = doc.get(IndexArchivesJob.FILENAME_FIELD);
 
-                ArchiveEntry entry = new ArchiveEntry(fileName, offset);
+                ArchiveEntry entry = new ArchiveEntry(fileName, offset, length);
                 entries.add(entry);
             }
 
@@ -141,7 +146,7 @@ public class ArchiveRetriever {
     private <T extends Bean> T retrieveBean(ArchiveEntry entry) {
 
         try {
-            String line = readLine(getArchiveFilePath(entry.fileName()), entry.offset());
+            String line = readLine(getArchiveFilePath(entry.fileName()), entry.offset(), entry.length());
             return (T) JSON.unmarshall(CORE.getUser(), line);
         } catch (Exception e) {
             logger.atFatal()
@@ -151,19 +156,33 @@ public class ArchiveRetriever {
         }
     }
 
-    private String readLine(Path filePath, long offset) throws IOException {
+    /**
+     * Read from the given file, starting at the provided offset, reading in the given
+     * number of bytes. Converting the results to a String (utf8) for returning. 
+     */
+    private String readLine(Path filePath, long offset, long length) throws IOException {
 
-        logger.trace("Retrieving line from {} at {}", filePath, offset);
+        logger.trace("Retrieving {} bytes from {} at {}", length, filePath, offset);
+
+        // If this throws an ArithmeticException this record is longer than Integer.MAX_VALUE (2GB)
+        // and can't be handled with a plain old byte array. The data on disk and in the index is 
+        // fine, but this method isn't written to handle that much data and will need to be updated
+        int lengthAsInt = Math.toIntExact(length);
 
         try (RandomAccessFile raf = new RandomAccessFile(filePath.toFile(), READ_ONLY)) {
+
             raf.seek(offset);
-            return raf.readLine();
+            byte[] bytes = new byte[lengthAsInt];
+            raf.readFully(bytes);
+
+            return new String(bytes, ARCHIVE_CHARSET);
         }
     }
 
     private Path getArchiveFilePath(String fileName) {
 
-        Path p = Util.getArchiveDirectory().resolve(fileName);
+        Path p = Util.getArchiveDirectory()
+                     .resolve(fileName);
         if (Files.isRegularFile(p)) {
             return p;
         }
@@ -171,6 +190,6 @@ public class ArchiveRetriever {
         throw new IllegalArgumentException("Archive file path '" + fileName + "' is not valid");
     }
 
-    private record ArchiveEntry(String fileName, long offset) {
+    private record ArchiveEntry(String fileName, long offset, long length) {
     }
 }

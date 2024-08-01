@@ -1,6 +1,6 @@
 package modules.admin.Audit.job.support;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +25,16 @@ public class BufferedLineReader implements AutoCloseable {
      * @param end The byte offset where the <i>next</i> line begins
      */
     public static record Line(String line, long offset, long end) {
+
+        /**
+         * The length (in bytes) of this line; not including any line feed character
+         * that may follow the line.
+         * 
+         * @return
+         */
+        public long length() {
+            return this.end() - this.offset() - 1;
+        }
     }
 
     /**
@@ -107,7 +117,7 @@ public class BufferedLineReader implements AutoCloseable {
     }
 
     private Line createLine(ByteArrayOutputStream baos) {
-        return new Line(baos.toString(UTF_8), lineOffset, readPosition);
+        return new Line(baos.toString(ARCHIVE_CHARSET), lineOffset, readPosition);
     }
 
     @Override

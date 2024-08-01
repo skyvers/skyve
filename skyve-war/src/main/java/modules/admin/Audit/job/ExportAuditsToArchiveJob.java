@@ -1,6 +1,6 @@
 package modules.admin.Audit.job;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -136,7 +135,7 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
         Customer c = CORE.getCustomer();
         persistence.begin();
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, UTF_8, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, ARCHIVE_CHARSET, true))) {
 
             for (DynamicBean currAudit : audits) {
 
@@ -170,7 +169,7 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
            .mkdirs();
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                                 .withZone(ZoneOffset.UTC);
+                                                 .withZone(ZoneId.systemDefault());
         String datePart = dtf.format(Instant.now());
         String fileName = "audits-" + datePart + ARCHIVE_FILE_SUFFIX;
 
