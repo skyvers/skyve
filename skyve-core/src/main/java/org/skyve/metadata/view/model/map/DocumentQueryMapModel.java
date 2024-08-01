@@ -25,7 +25,7 @@ public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	private DocumentQuery documentQuery; // from query
 
 	/**
-	 * Use this constructor when the driving document is explicitly set in postConstruct call.
+	 * Use this constructor when the medadata query is explicitly set in postConstruct call.
 	 */
 	protected DocumentQueryMapModel() {
 		// nothing to see here
