@@ -29,7 +29,7 @@
 				<label value="{disp:loggedInUser} *:" />
 			</item>
 			<item showLabel="false">
-				<textField binding="loggedInUser" />
+				<textField binding="loggedInUser.bizKey" />
 			</item>
 		</row>
 		<row>
