@@ -24,6 +24,13 @@ public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	private MetaDataQueryDefinition query;
 	private DocumentQuery documentQuery; // from query
 
+	/**
+	 * Use this constructor when the driving document is explicitly set in postConstruct call.
+	 */
+	protected DocumentQueryMapModel() {
+		// nothing to see here
+	}
+
 	public DocumentQueryMapModel(MetaDataQueryDefinition query) {
 		this.query = query;
 	}
@@ -43,5 +50,14 @@ public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 		}
 		
 		return new MapResult(items, null);
+	}
+
+	/**
+	 * Used to set the query in postConstruct() of subclasses.
+	 * 
+	 * @param query
+	 */
+	protected void setQuery(MetaDataQueryDefinition query) {
+		this.query = query;
 	}
 }
