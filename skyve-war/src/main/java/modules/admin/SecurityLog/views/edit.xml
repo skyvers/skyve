@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view xmlns="http://www.skyve.org/xml/view"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="edit"
+	title="{bizKey}"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
+	<form border="true" borderTitle="Security Log Details"
+		disabled="true">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="6" />
+		<column />
+		<row>
+			<item align="right">
+				<label value="{disp:timestamp} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="timestamp" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:threadID} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="threadID" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:loggedInUser} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="loggedInUser" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:exceptionType} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="exceptionType" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:exceptionMessage} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="exceptionMessage" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:sourceIP} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="sourceIP" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:provenance} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="provenance" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<cancel />
+	</actions>
+</view>

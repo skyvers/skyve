@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://www.skyve.org/xml/document"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="SecurityLog"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd">
+	<persistent name="ADM_SecurityLog" />
+	<singularAlias>Security Log</singularAlias>
+	<pluralAlias>Security Logs</pluralAlias>
+	<iconStyleClass>fa-solid fa-book</iconStyleClass>
+	<description>
+		<![CDATA[
+			The Security Log consists of a list of records of {@link SecurityException}, {@link AccessExceptions}, so that intrusions can be detected in near real time.
+			<br/>
+			If email is configured, emails are sent to the support email address specified in the project JSON for each event raised.
+		]]>
+	</description>
+	<bizKey expression="Security Log - {timestamp}" />
+	<attributes>
+		<timestamp name="timestamp" required="true">
+			<displayName>Timestamp</displayName>
+			<description>When the exception was raised</description>
+			<defaultValue>{TIMESTAMP}</defaultValue>
+		</timestamp>
+		<id name="threadID" required="true">
+			<displayName>Thread ID</displayName>
+			<description>Thread ID when the exception was raised</description>
+		</id>
+		<association name="loggedInUser" type="aggregation" required="true">
+			<displayName>Logged In User</displayName>
+			<description>Logged in user when exception was raised</description>
+			<documentName>UserProxy</documentName>
+		</association>
+		<enum name="exceptionType" required="true">
+			<displayName>Exception Type</displayName>
+			<description>Type of exception raised</description>
+			<values>
+				<value code="Security Exception"/>
+				<value code="Access Exception"/>
+			</values>
+		</enum>
+		<memo name="exceptionMessage" required="true">
+			<displayName>Exception Message</displayName>
+			<description>Exception message from exception raised</description>
+		</memo>
+		<text name="sourceIP">
+			<displayName>Source IP</displayName>
+			<description>Source Ip when exception was raised</description>
+			<length>45</length>
+		</text>
+		<text name="provenance">
+			<displayName>Provenance</displayName>
+			<description>First line of the stack trace of exception raised</description>
+			<length>45</length>
+		</text>
+	</attributes>
+</document>
