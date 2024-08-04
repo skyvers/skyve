@@ -519,9 +519,16 @@ public class BackupJob extends CancellableJob {
 	 */
 	private static int getSensitivityLevel(Bean bean) {
 		if (bean != null) {
-			Object sensitivityInput = BindUtil.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
-			if (sensitivityInput != null) {
-				return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
+			// If the job is run from the JobSchedule UI bean is an instanceof JobSchedule,
+			// which does not have the attribute, so BindUtil will throw an exception.
+			// In this case swallow the exception and use the default.
+			try {
+				Object sensitivityInput = BindUtil.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
+				if (sensitivityInput != null) {
+					return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
+				}
+			} catch (Exception e) {
+				Util.LOGGER.info(AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME + " not found, using default as 0");
 			}
 		}
 		
@@ -535,8 +542,15 @@ public class BackupJob extends CancellableJob {
 	 */
 	private static boolean getIncludeContent(Bean bean) {
 		if (bean != null) {
-			Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
-			return Boolean.TRUE.equals(includeContent);
+			// If the job is run from the JobSchedule UI bean is an instanceof JobSchedule,
+			// which does not have the attribute, so BindUtil will throw an exception.
+			// In this case swallow the exception and use the default.
+			try {
+				Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
+				return Boolean.TRUE.equals(includeContent);
+			} catch (Exception e) {
+				Util.LOGGER.info(AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME + " not found, using default as true");
+			}
 		}
 		
 		return true; // content included by default
@@ -549,8 +563,15 @@ public class BackupJob extends CancellableJob {
 	 */
 	private static boolean getIncludeAuditLog(Bean bean) {
 		if (bean != null) {
-			Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
-			return Boolean.TRUE.equals(includeAudits);
+			// If the job is run from the JobSchedule UI bean is an instanceof JobSchedule,
+			// which does not have the attribute, so BindUtil will throw an exception.
+			// In this case swallow the exception and use the default.
+			try {
+				Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
+				return Boolean.TRUE.equals(includeAudits);
+			} catch (Exception e) {
+				Util.LOGGER.info(AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME + " not found, using default as true");
+			}
 		}
 		
 		return true; // audits included by default

@@ -31,6 +31,12 @@ public @interface SkyveFactory {
 	Class<? extends ServerSideAction<?>>[] excludedActions() default {};
 
 	/**
+	 * List of Attribute names to exclude in the generated testUpdate. If testDomain
+	 * is set to true, this will be ignored as the update test will be excluded.
+	 */
+	String[] excludedUpdateAttributes() default {};
+
+	/**
 	 * <em>Optional</em> array of {@link DataMap} annotations which define filename
 	 * overrides for attributes.
 	 */
