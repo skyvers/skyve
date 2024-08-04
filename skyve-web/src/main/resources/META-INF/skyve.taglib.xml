@@ -265,9 +265,9 @@
 		</attribute>
 	</tag>
 	<tag>
-		<tag-name>vueListGrid</tag-name>
+		<tag-name>vueListGridScript</tag-name>
 		<component>
-			<component-type>org.skyve.impl.web.faces.components.VueListGrid</component-type>
+			<component-type>org.skyve.impl.web.faces.components.VueListGridScript</component-type>
 			<renderer-type>jakarta.faces.Text</renderer-type>
 		</component>
 		<attribute>

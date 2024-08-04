@@ -20,11 +20,7 @@
 
     <script>
         function someTestSelectedAction(id) {
-            return new Promise((resolve) => {
-
-                console.warn('onSelectedIdAction', ...id);
-                setTimeout(resolve, 500);
-            });
+            console.warn('onSelectedIdAction', ...id);
         }
     </script>
 

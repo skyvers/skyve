@@ -581,12 +581,12 @@ export default {
         },
         onRowClick(event) {
             if (this.actions.selected) {
-                this.loading = true;
-                callRemoteCommand(this.actions.selected, { bizId: event.data.bizId })
-                    .finally(() => {
-                        this.loading = false;
-                    });
+				// Don't use the ListGrid loading style here as the view loading indicator is invoked by <remoteCommand/>
+				callRemoteCommand(this.actions.selected, {bizId: event.data.bizId});
             }
+			else {
+			    this.zoomInto(event.data.bizId);
+			}
         },
         zoomInto(bizId) {
             openDocInSameWindow({
@@ -672,7 +672,8 @@ export default {
         @state-save="stateSave"
         contextMenu
         v-model:contextMenuSelection="selectedRow"
-        @rowContextmenu="onRowContextMenu"
+        v-model:selection="selectedRow"
+        @row-contextmenu="onRowContextMenu"
         @row-click="onRowClick"
         sortMode="multiple"
         v-model:multiSortMeta="multiSortMeta"

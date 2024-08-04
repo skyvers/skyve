@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -11,9 +12,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.primefaces.component.remotecommand.RemoteCommand;
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.web.faces.components.VueListGrid;
-import org.skyve.impl.web.faces.components.VueListGrid.Actions;
+import org.skyve.impl.web.faces.components.VueListGridScript;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -22,6 +23,7 @@ import org.skyve.web.WebContext;
 import jakarta.el.MethodExpression;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIOutput;
+import jakarta.faces.component.html.HtmlPanelGroup;
 
 public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
@@ -29,22 +31,28 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
     @Override
     public UIComponent listGrid(UIComponent component,
-            String moduleName,
-            String modelDocumentName,
-            String modelName,
-            String uxui,
-            ListModel<Bean> model,
-            Document owningDocument,
-            String title,
-            ListGrid grid,
-            boolean aggregateQuery) {
+						            String moduleName,
+						            String modelDocumentName,
+						            String modelName,
+						            String uxui,
+						            ListModel<Bean> model,
+						            Document owningDocument,
+						            String title,
+						            ListGrid grid,
+						            boolean aggregateQuery) {
 
         if (component != null) {
             return component;
         }
 
-        VueListGrid result = (VueListGrid) a.createComponent(VueListGrid.COMPONENT_TYPE);
-        Map<String, Object> attributes = result.getAttributes();
+        HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+        result.setLayout("block");
+        setId(result, null);
+        String id = result.getId();
+        List<UIComponent> children = result.getChildren();
+        
+        VueListGridScript script = (VueListGridScript) a.createComponent(VueListGridScript.COMPONENT_TYPE);
+        Map<String, Object> attributes = script.getAttributes();
 
         BiConsumer<String, Object> put = (key, value) -> {
             if (value != null)
@@ -68,45 +76,56 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
         Optional.ofNullable(managedBean)
                 .map(FacesView::getWebContext)
                 .map(WebContext::getWebId)
-                .ifPresent(id -> put.accept("contextId", id));
+                .ifPresent(contextId -> put.accept("contextId", contextId));
+        put.accept("containerId", id);
+        children.add(script);
+        
 
-        Actions actions = new VueListGrid.Actions();
-        put.accept(Actions.KEY, actions);
+        String selectedIdBinding = grid.getSelectedIdBinding();
+        if (selectedIdBinding != null) {
+	        put.accept("selectedIdBinding", grid.getSelectedIdBinding());
 
-        RemoteCommand selectedCommand = createSelectedCommand(modelName, grid);
-        actions.setSelectedCommand(selectedCommand);
+	        RemoteCommand selectedCommand = (RemoteCommand) a.createComponent(RemoteCommand.COMPONENT_TYPE);
+	        selectedCommand.setName(id + "_selected");
+
+	        String actionName = null;
+	        List<EventAction> selectedActions = grid.getSelectedActions();
+			if (selectedActions != null) {
+				ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
+				if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
+					selectedCommand.setProcess((actionAttributes.process == null) ? "@this" : actionAttributes.process);
+					selectedCommand.setUpdate((actionAttributes.update == null) ? "@none" : actionAttributes.update);
+				}
+				else {
+					actionName = actionAttributes.actionName;
+					attributes.put("actionName", actionName);
+					if (Boolean.TRUE.toString().equals(actionAttributes.actionName) ||
+							Boolean.FALSE.toString().equals(actionAttributes.actionName)) {
+						attributes.put("source", modelName);
+					}
+					selectedCommand.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
+					selectedCommand.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
+				}
+			}
+	        else {
+	        	selectedCommand.setProcess("@this");
+				selectedCommand.setUpdate("@none");
+	        }
+
+	        MethodExpression expr = createSelectedExpression(grid.getSelectedIdBinding(), actionName, modelName);
+	        selectedCommand.setActionExpression(expr);
+	        
+	        put.accept("selectedRemoteCommand", selectedCommand.getName());
+	        
+	        children.add(selectedCommand);
+        }
+
         // TODO edited
         // TODO deleted
 
         log.debug("Created VueListGrid component with attributes: {}", attributes);
 
         return result;
-    }
-
-    private RemoteCommand createSelectedCommand(String modelName, ListGrid grid) {
-        RemoteCommand selectedCommand = new RemoteCommand();
-        selectedCommand.setName("selected");
-
-        ActionFacesAttributes actionAttributes = determineActionFacesAttributes(grid.getSelectedActions());
-
-        if (actionAttributes.actionName == null && grid.getSelectedIdBinding() == null) {
-            // In this case no selected action is needed
-            return null;
-        }
-
-        MethodExpression expr = createSelectedExpression(grid.getSelectedIdBinding(), actionAttributes.actionName, modelName);
-        selectedCommand.setActionExpression(expr);
-
-        // Stolen from TabularComponentBuilder.addDataTableSelection()
-        if (actionAttributes.actionName == null) {
-            selectedCommand.setProcess((actionAttributes.process == null) ? "@this" : actionAttributes.process);
-            selectedCommand.setUpdate((actionAttributes.update == null) ? "@none" : actionAttributes.update);
-        } else {
-            selectedCommand.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
-            selectedCommand.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
-        }
-
-        return selectedCommand;
     }
 
     /**
