@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.panel.Panel;
@@ -89,8 +87,6 @@ import jakarta.inject.Named;
 public class FacesView extends HarnessView {
 	private static final long serialVersionUID = 3331890232012703780L;
 	
-	private static final Logger logger = LogManager.getLogger(FacesView.class);
-
 	// NB whatever state is added here needs to be handled by hydrate/dehydrate
 
 	// This is set from a request attribute (the attribute is set in home.jsp)
@@ -498,37 +494,40 @@ public class FacesView extends HarnessView {
 				action(actionName, null, null);
 			}
 		}
-    }
+	}
 
-    /**
-     * Fired from JS with, eg:
-     * `xyz_altSelectGridRow([{name:'bizId', value:'abcd-0000'})`
-     * 
-     * @param bizId
-     */
-    public void altSelectGridRow(String bizId, String selectedIdBinding, String actionName, String source) {
+	/**
+	 * Fired from JS with, eg:
+	 * `selectGridRow([{name:'bizId', value:'abcd-0000'})`
+	 * 
+	 * Set the selected row bizId and fire an action or rerender.
+	 * 
+	 * if actionName is null - do nothing - just set the selected row.
+	 * else if actionName is "true" - rerender with validation.
+	 * else if actionName is "false" - rerender with no validation.
+	 * else run the action.
+	 */
+	public void selectGridRow(String bizId, String selectedIdBinding, String actionName, String source) {
+		if ((bizId != null) && (selectedIdBinding != null)) {
+			new FacesAction<Void>() {
+				@Override
+				public Void callback() throws Exception {
+					Bean bean = getCurrentBean().getBean();
+					BindUtil.set(bean, selectedIdBinding, bizId);
+					return null;
+				}
+			}.execute();
+		}
 
-        if (bizId != null && selectedIdBinding != null) {
-            new FacesAction<Void>() {
-                @Override
-                public Void callback() throws Exception {
-                    Bean bean = getCurrentBean().getBean();
-                    logger.debug("Setting {} on {} to {}", selectedIdBinding, bean, bizId);
-                    BindUtil.set(bean, selectedIdBinding, bizId);
-                    return null;
-                }
-            }.execute();
-        }
-
-        if (actionName != null) {
-            if (TRUE.toString().equals(actionName)
-                    || FALSE.toString().equals(actionName)) {
-                rerender(source, Boolean.parseBoolean(actionName));
-            } else {
-                action(actionName, null, null);
-            }
-        }
-    }
+		if (actionName != null) {
+			if (TRUE.toString().equals(actionName) || FALSE.toString().equals(actionName)) {
+				rerender(source, Boolean.parseBoolean(actionName));
+			}
+			else {
+				action(actionName, null, null);
+			}
+		}
+	}
 
 	/**
 	 * Used to ensure the DataTable renderer highlights the row correctly

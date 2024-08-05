@@ -33,18 +33,16 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 
 import jakarta.faces.application.ResourceDependency;
-import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.context.FacesContext;
 
-@SuppressWarnings("unused")
-@FacesComponent(VueListGridScript.COMPONENT_TYPE)
+/**
+ * This pseudo-component is used programmatically to ensure that skyvevue resources are brought into the page.
+ * This component isn't in the skyve.taglib.xml and has no @Component annotation and is not meant to be used on an XHTML page. 
+ */
 @ResourceDependency(library = "skyvevue", name = "index.js")
 @ResourceDependency(library = "skyvevue", name = "index.css")
 public class VueListGridScript extends UIOutput {
-	@SuppressWarnings("hiding")
-	public static final String COMPONENT_TYPE = "org.skyve.impl.web.faces.components.VueListGridScript";
-
 	private String containerId;
 
 	private String moduleName;
@@ -54,8 +52,88 @@ public class VueListGridScript extends UIOutput {
 
 	private String contextId;
 
-	private String selectedIdBinding;
+	private boolean showAdd;
+	private boolean showZoom;
+	private boolean showFilter;
+	private boolean showSummary;
+	private boolean showSnap;
+	
 	private String selectedRemoteCommand;
+	
+	/**
+	 * This exists so that Faces can instantiate the view tree and reinstate the attributes.
+	 */
+	public VueListGridScript() {
+		// nothing to see here
+	}
+	
+	/**
+	 * This is called to set state.
+	 * 
+	 * @param containerId
+	 * @param moduleName
+	 * @param documentName
+	 * @param queryName
+	 * @param modelName
+	 * @param contextId
+	 * @param showAdd
+	 * @param showZoom
+	 * @param showFilter
+	 * @param showSummary
+	 * @param showSnap
+	 * @param selectedRemoteCommand
+	 */
+	public VueListGridScript(String containerId,
+								String moduleName,
+								String documentName,
+								String queryName,
+								String modelName,
+								String contextId,
+								boolean showAdd,
+								boolean showZoom,
+								boolean showFilter,
+								boolean showSummary,
+								boolean showSnap,
+								String selectedRemoteCommand) {
+		Map<String, Object> attributes = getAttributes();
+
+		this.containerId = containerId;
+		attributes.put("containerId", containerId);
+
+		this.moduleName = moduleName;
+		attributes.put("moduleName", moduleName);
+		this.documentName = documentName;
+		attributes.put("documentName", documentName);
+		this.queryName = queryName;
+		if (queryName != null) {
+			attributes.put("queryName", queryName);
+		}
+		this.modelName = modelName;
+		if (modelName != null) {
+			attributes.put("modelName", modelName);
+		}
+		
+		this.contextId = contextId;
+		if (contextId != null) {
+			attributes.put("contextId", contextId);
+		}
+
+		this.showAdd = showAdd;
+		attributes.put("showAdd", Boolean.valueOf(showAdd));
+		this.showZoom = showZoom;
+		attributes.put("showZoom", Boolean.valueOf(showZoom));
+		this.showFilter = showFilter;
+		attributes.put("showFilter", Boolean.valueOf(showFilter));
+		this.showSummary = showSummary;
+		attributes.put("showSummary", Boolean.valueOf(showSummary));
+		this.showSnap = showSnap;
+		attributes.put("showSnap", Boolean.valueOf(showSnap));
+
+		this.selectedRemoteCommand = selectedRemoteCommand;
+		if (selectedRemoteCommand != null) {
+			attributes.put("selectedRemoteCommand", selectedRemoteCommand);
+		}
+	}
 
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
@@ -63,7 +141,8 @@ public class VueListGridScript extends UIOutput {
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {
 			grabAttributes(attributes);
 			createScriptOutput();
-		} else if (getValue() == null) {
+		}
+		else if (getValue() == null) {
 			grabAttributes(attributes);
 			createScriptOutput();
 		}
@@ -73,12 +152,20 @@ public class VueListGridScript extends UIOutput {
 
 	private void grabAttributes(Map<String, Object> attributes) {
 		this.containerId = (String) attributes.get("containerId");
-		this.moduleName = (String) attributes.get("module");
-		this.documentName = (String) attributes.get("document");
-		this.queryName = (String) attributes.get("query");
-		this.modelName = (String) attributes.get("model");
+
+		this.moduleName = (String) attributes.get("moduleName");
+		this.documentName = (String) attributes.get("documentName");
+		this.queryName = (String) attributes.get("queryName");
+		this.modelName = (String) attributes.get("modelName");
+		
 		this.contextId = (String) attributes.get("contextId");
-		this.selectedIdBinding = (String) attributes.get("selectedIdBinding");
+		
+		this.showAdd = ((Boolean) attributes.get("showAdd")).booleanValue();
+		this.showZoom = ((Boolean) attributes.get("showZoom")).booleanValue();
+		this.showFilter = ((Boolean) attributes.get("showFilter")).booleanValue();
+		this.showSummary = ((Boolean) attributes.get("showSummary")).booleanValue();
+		this.showSnap = ((Boolean) attributes.get("showSnap")).booleanValue();
+		
 		this.selectedRemoteCommand = (String) attributes.get("selectedRemoteCommand");
 	}
 
@@ -95,6 +182,11 @@ public class VueListGridScript extends UIOutput {
 		params.setQuery(queryName);
 		params.setModel(modelName);
 		params.setContextId(contextId);
+		params.setShowAdd(showAdd);
+		params.setShowZoom(showZoom);
+		params.setShowFilter(showFilter);
+		params.setShowSummary(showSummary);
+		params.setShowSnap(showSnap);
 		params.actions = ClientActions.fromActions(this);
 
 		final List<MetaDataQueryColumn> columns;
@@ -105,7 +197,8 @@ public class VueListGridScript extends UIOutput {
 			}
 
 			columns = queryDefn.getColumns();
-		} else {
+		}
+		else {
 			ListModel<Bean> listModel = document.getListModel(customer, modelName, true);
 			columns = listModel.getColumns();
 			document = listModel.getDrivingDocument();
@@ -113,8 +206,13 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		for (MetaDataQueryColumn mdQueryColumn : columns) {
-			SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(user, customer, module,
-					document, mdQueryColumn, true, queryName);
+			SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(user,
+																									customer,
+																									module,
+																									document,
+																									mdQueryColumn,
+																									true,
+																									queryName);
 			String binding = mdQueryColumn.getBinding();
 			TargetMetaData tmd = Binder.getMetaDataForBinding(customer, module, document, binding);
 
@@ -127,8 +225,13 @@ public class VueListGridScript extends UIOutput {
 		String paramsString = mapper.writeValueAsString(params);
 
 		StringJoiner sj = new StringJoiner(" \n");
-		sj.add("<script>").add("  setTimeout(() => {")
-				.add("    SKYVE.listgrid(").add(paramsString).add("    );").add("  }, 0);").add("</script>");
+		sj.add("<script>")
+			.add("  setTimeout(() => {")
+			.add("    SKYVE.listgrid(")
+			.add(paramsString)
+			.add("    );")
+			.add("  }, 0);")
+			.add("</script>");
 
 		setValue(sj.toString());
 	}
@@ -142,18 +245,28 @@ public class VueListGridScript extends UIOutput {
 		private final TargetMetaData targetMetaData;
 		private final Customer customer;
 
-		private static final Map<String, String> attributeTypeConversions = //
-				new ImmutableMap.Builder<String, String>().put("decimal2", "numeric").put("decimal5", "numeric")
-						.put("decimal10", "numeric").put("integer", "numeric").put("longInteger", "numeric")
-						.put("enumeration", "enum").put("bool", "boolean").put("colour", "text").put("geometry", "text")
-						.put("memo", "text").put("markup", "text").put("id", "text").build();
+		private static final Map<String, String> attributeTypeConversions =
+				new ImmutableMap.Builder<String, String>().put("decimal2", "numeric")
+															.put("decimal5", "numeric")
+															.put("decimal10", "numeric")
+															.put("integer", "numeric")
+															.put("longInteger", "numeric")
+															.put("enumeration", "enum")
+															.put("bool", "boolean")
+															.put("colour", "text")
+															.put("geometry", "text")
+															.put("memo", "text")
+															.put("markup", "text")
+															.put("id", "text")
+															.build();
 
-		private static final Map<Class<?>, String> implicitTypeConversions = //
-				new ImmutableMap.Builder<Class<?>, String>().put(String.class, "text").put(Integer.class, "numeric")
-						.put(Boolean.class, "boolean").build();
+		private static final Map<Class<?>, String> implicitTypeConversions =
+				new ImmutableMap.Builder<Class<?>, String>().put(String.class, "text").put(Integer.class, "numeric").put(Boolean.class, "boolean").build();
 
-		public ColumnMetaData(MetaDataQueryColumn mdQueryColumn, SmartClientQueryColumnDefinition scQueryColumnDefn,
-				TargetMetaData targetMetaData, Customer customer) {
+		public ColumnMetaData(MetaDataQueryColumn mdQueryColumn,
+								SmartClientQueryColumnDefinition scQueryColumnDefn,
+								TargetMetaData targetMetaData,
+								Customer customer) {
 			this.mdQueryColumn = mdQueryColumn;
 			this.scQueryColumnDefn = scQueryColumnDefn;
 			this.targetMetaData = targetMetaData;
@@ -190,14 +303,12 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		public String getConverterName() {
-
 			return Optional.ofNullable(targetMetaData.getAttribute()).filter(ConvertableField.class::isInstance)
 					.map(ConvertableField.class::cast).map(cf -> cf.getConverterForCustomer(customer))
 					.map(ConverterName::valueOf).map(ConverterName::name).orElse(null);
 		}
 
 		public boolean isSortable() {
-
 			if (mdQueryColumn instanceof MetaDataQueryProjectedColumn mdcpc) {
 				return mdcpc.isSortable();
 			}
@@ -227,6 +338,7 @@ public class VueListGridScript extends UIOutput {
 	 * to the browser.
 	 */
 	@JsonInclude(Include.NON_EMPTY)
+	@SuppressWarnings("unused")
 	private static class ListGridParams {
 		private String containerId;
 		private String module;
@@ -234,11 +346,11 @@ public class VueListGridScript extends UIOutput {
 		private String document;
 		private String model;
 		private String contextId;
-		private Boolean showAdd = Boolean.TRUE;
-		private Boolean showZoom = Boolean.TRUE;
-		private Boolean showFilter = Boolean.TRUE;
-		private Boolean showSummary = Boolean.TRUE;
-		private Boolean showSnap = Boolean.TRUE;
+		private boolean showAdd = true;
+		private boolean showZoom = true;
+		private boolean showFilter = true;
+		private boolean showSummary = true;
+		private boolean showSnap = true;
 		private List<ColumnDefinition> columns = new ArrayList<>();
 		private ClientActions actions = new ClientActions();
 
@@ -302,43 +414,43 @@ public class VueListGridScript extends UIOutput {
 			this.actions = actions;
 		}
 
-		public Boolean getShowAdd() {
+		public boolean isShowAdd() {
 			return showAdd;
 		}
 
-		public void setShowAdd(Boolean showAdd) {
+		public void setShowAdd(boolean showAdd) {
 			this.showAdd = showAdd;
 		}
 
-		public Boolean getShowZoom() {
+		public boolean isShowZoom() {
 			return showZoom;
 		}
 
-		public void setShowZoom(Boolean showZoom) {
+		public void setShowZoom(boolean showZoom) {
 			this.showZoom = showZoom;
 		}
 
-		public Boolean getShowFilter() {
+		public boolean isShowFilter() {
 			return showFilter;
 		}
 
-		public void setShowFilter(Boolean showFilter) {
+		public void setShowFilter(boolean showFilter) {
 			this.showFilter = showFilter;
 		}
 
-		public Boolean getShowSummary() {
+		public boolean isShowSummary() {
 			return showSummary;
 		}
 
-		public void setShowSummary(Boolean showSummary) {
+		public void setShowSummary(boolean showSummary) {
 			this.showSummary = showSummary;
 		}
 
-		public Boolean getShowSnap() {
+		public boolean isShowSnap() {
 			return showSnap;
 		}
 
-		public void setShowSnap(Boolean showSnap) {
+		public void setShowSnap(boolean showSnap) {
 			this.showSnap = showSnap;
 		}
 
@@ -346,11 +458,13 @@ public class VueListGridScript extends UIOutput {
 		public String toString() {
 			return MoreObjects.toStringHelper(this).add("containerId", containerId).add("module", module)
 					.add("query", query).add("document", document).add("contextId", contextId).add("columns", columns)
-					.add("actions", actions).toString();
+					.add("actions", actions).add("showAdd", showAdd).add("showZoom", showZoom)
+					.add("showFilter", showFilter).add("showSummary", showSummary).add("showSnap", showSnap).toString();
 		}
 	}
 
 	@JsonInclude
+	@SuppressWarnings("unused")
 	private static class ClientActions {
 		private String selected;
 		private String edited;
@@ -399,6 +513,7 @@ public class VueListGridScript extends UIOutput {
 	}
 
 	@JsonInclude(Include.NON_EMPTY)
+	@SuppressWarnings("unused")
 	private static class ColumnDefinition {
 		private String field;
 		private String header;
@@ -460,6 +575,7 @@ public class VueListGridScript extends UIOutput {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static class EnumValue {
 		private String value;
 		private String label;

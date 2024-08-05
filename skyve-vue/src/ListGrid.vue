@@ -584,7 +584,7 @@ export default {
 				// Don't use the ListGrid loading style here as the view loading indicator is invoked by <remoteCommand/>
 				callRemoteCommand(this.actions.selected, {bizId: event.data.bizId});
             }
-			else {
+			else if (this.showZoom) {
 			    this.zoomInto(event.data.bizId);
 			}
         },

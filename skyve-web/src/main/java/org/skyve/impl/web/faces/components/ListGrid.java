@@ -55,23 +55,15 @@ public class ListGrid extends HtmlPanelGroup {
 			final String modelName = (String) attributes.get("model");
 			final String managedBeanName = (String) attributes.get("managedBean");
 			Object createRenderedAttribute = attributes.get("createRendered");
-			final Boolean createRendered = Boolean.valueOf((createRenderedAttribute == null) || 
-															String.valueOf(true).equals(createRenderedAttribute) || // literal "true"
-															Boolean.TRUE.equals(createRenderedAttribute)); // evaluated EL expression
+			final Boolean createRendered = getBooleanObjectAttribute(createRenderedAttribute);
 			Object createDisabledAttribute = attributes.get("createDisabled");
-			final boolean createDisabled = String.valueOf(true).equals(createDisabledAttribute) || // literal "true"
-											Boolean.TRUE.equals(createDisabledAttribute); // evaluated EL Expression
+			final boolean createDisabled = getBooleanAttribute(createDisabledAttribute);
 			Object zoomRenderedAttribute = attributes.get("zoomRendered");
-			final Boolean zoomRendered = Boolean.valueOf((zoomRenderedAttribute == null) ||
-															String.valueOf(true).equals(zoomRenderedAttribute) || // literal "true"
-															Boolean.TRUE.equals(zoomRenderedAttribute)); // evaluated EL expression
+			final Boolean zoomRendered = getBooleanObjectAttribute(zoomRenderedAttribute);
 			Object zoomDisabledAttribute = attributes.get("zoomDisabled");
-			final boolean zoomDisabled = String.valueOf(true).equals(zoomDisabledAttribute) || // literal "true"
-											Boolean.TRUE.equals(zoomDisabledAttribute); // evaluated EL expression
+			final boolean zoomDisabled = getBooleanAttribute(zoomDisabledAttribute);
 			Object filterRenderedAttribute = attributes.get("filterRendered");
-			final Boolean filterRendered = Boolean.valueOf((filterRenderedAttribute == null) ||
-															String.valueOf(true).equals(filterRenderedAttribute) || // literal "true"
-															Boolean.TRUE.equals(filterRenderedAttribute)); // evaluated EL expression
+			final Boolean filterRendered = getBooleanObjectAttribute(filterRenderedAttribute);
 			final String componentBuilderClassString = (String) attributes.get("componentBuilderClass");
 			final ComponentBuilder componentBuilder = newComponentBuilder(componentBuilderClassString);
 
@@ -189,5 +181,16 @@ public class ListGrid extends HtmlPanelGroup {
 		catch (Exception e) {
 			throw new DomainException("Cannot instantiate the component builder " + componentBuilderClassString, e);
 		}
+	}
+	
+	public static Boolean getBooleanObjectAttribute(Object renderedAttributeValue) {
+		return Boolean.valueOf((renderedAttributeValue == null) || 
+														String.valueOf(true).equals(renderedAttributeValue) || // literal "true"
+														Boolean.TRUE.equals(renderedAttributeValue)); // evaluated EL expression
+	}
+
+	public static boolean getBooleanAttribute(Object disabledAttributeValue) {
+		return String.valueOf(true).equals(disabledAttributeValue) || // literal "true"
+				Boolean.TRUE.equals(disabledAttributeValue); // evaluated EL Expression
 	}
 }

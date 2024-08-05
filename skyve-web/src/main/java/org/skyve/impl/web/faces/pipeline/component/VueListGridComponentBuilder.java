@@ -1,22 +1,17 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.UnaryOperator;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.primefaces.component.remotecommand.RemoteCommand;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.components.VueListGridScript;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebContext;
 
@@ -26,70 +21,72 @@ import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.html.HtmlPanelGroup;
 
 public class VueListGridComponentBuilder extends NoOpComponentBuilder {
+	@Override
+	public UIComponent listGrid(UIComponent component,
+									String moduleName,
+									String modelDocumentName,
+									String modelName,
+									String uxui,
+									ListModel<Bean> model,
+									Document owningDocument,
+									String title,
+									ListGrid grid,
+									boolean aggregateQuery) {
+		if (component != null) {
+			return component;
+		}
 
-    private static final Logger log = LogManager.getLogger(VueListGridComponentBuilder.class);
+		Document drivingDocument = model.getDrivingDocument();
+		User user = CORE.getUser();
+		boolean canCreateDocument = user.canCreateDocument(drivingDocument);
+		
+		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
+		result.setLayout("block");
+		setId(result, null);
+		String id = result.getId();
+		List<UIComponent> children = result.getChildren();
 
-    @Override
-    public UIComponent listGrid(UIComponent component,
-						            String moduleName,
-						            String modelDocumentName,
-						            String modelName,
-						            String uxui,
-						            ListModel<Bean> model,
-						            Document owningDocument,
-						            String title,
-						            ListGrid grid,
-						            boolean aggregateQuery) {
+		String finalModuleName = null;
+		String finalDocumentName = null;
+		String queryName = grid.getQueryName();
+		String finalModelName = null;
+		String contextId = null;
+		boolean showAdd = canCreateDocument && (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
+		boolean showZoom = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowZoom()));
+		boolean showFilter = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowFilter()));
+		boolean showSummary = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowSummary()));
+		boolean showSnap = (! Boolean.FALSE.equals(grid.getShowSnap()));
+		String selectedRemoteCommand = null;
 
-        if (component != null) {
-            return component;
-        }
+		final Document docToUse;
 
-        HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
-        result.setLayout("block");
-        setId(result, null);
-        String id = result.getId();
-        List<UIComponent> children = result.getChildren();
-        
-        VueListGridScript script = (VueListGridScript) a.createComponent(VueListGridScript.COMPONENT_TYPE);
-        Map<String, Object> attributes = script.getAttributes();
+		// Only set one of "query" or "model", preferring query
+		if (queryName != null) {
+			docToUse = model.getDrivingDocument();
+		}
+		else {
+			finalModelName = modelName;
+			docToUse = owningDocument;
+		}
 
-        BiConsumer<String, Object> put = (key, value) -> {
-            if (value != null)
-                attributes.put(key, value);
-        };
+		finalModuleName = docToUse.getOwningModuleName();
+		finalDocumentName = docToUse.getName();
 
-        final Document docToUse;
+		if (managedBean != null) {
+			WebContext webContext = managedBean.getWebContext();
+			if (webContext != null) {
+				contextId = webContext.getWebId();
+			}
+		}
 
-        // Only set one of "query" or "model", preferring query
-        String queryName = grid.getQueryName();
-        if (isNotBlank(queryName)) {
-            put.accept("query", queryName);
-            docToUse = model.getDrivingDocument();
-        } else {
-            put.accept("model", modelName);
-            docToUse = owningDocument;
-        }
+		String selectedIdBinding = grid.getSelectedIdBinding();
+		if (selectedIdBinding != null) {
+			RemoteCommand selectedCommand = (RemoteCommand) a.createComponent(RemoteCommand.COMPONENT_TYPE);
+			selectedRemoteCommand = id + "_selected";
+			selectedCommand.setName(selectedRemoteCommand);
 
-        put.accept("module", docToUse.getOwningModuleName());
-        put.accept("document", docToUse.getName());
-        Optional.ofNullable(managedBean)
-                .map(FacesView::getWebContext)
-                .map(WebContext::getWebId)
-                .ifPresent(contextId -> put.accept("contextId", contextId));
-        put.accept("containerId", id);
-        children.add(script);
-        
-
-        String selectedIdBinding = grid.getSelectedIdBinding();
-        if (selectedIdBinding != null) {
-	        put.accept("selectedIdBinding", grid.getSelectedIdBinding());
-
-	        RemoteCommand selectedCommand = (RemoteCommand) a.createComponent(RemoteCommand.COMPONENT_TYPE);
-	        selectedCommand.setName(id + "_selected");
-
-	        String actionName = null;
-	        List<EventAction> selectedActions = grid.getSelectedActions();
+			String actionName = null;
+			List<EventAction> selectedActions = grid.getSelectedActions();
 			if (selectedActions != null) {
 				ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
 				if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
@@ -98,66 +95,74 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 				}
 				else {
 					actionName = actionAttributes.actionName;
-					attributes.put("actionName", actionName);
-					if (Boolean.TRUE.toString().equals(actionAttributes.actionName) ||
-							Boolean.FALSE.toString().equals(actionAttributes.actionName)) {
-						attributes.put("source", modelName);
-					}
 					selectedCommand.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
 					selectedCommand.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
 				}
 			}
-	        else {
-	        	selectedCommand.setProcess("@this");
+			else {
+				selectedCommand.setProcess("@this");
 				selectedCommand.setUpdate("@none");
-	        }
+			}
 
-	        MethodExpression expr = createSelectedExpression(grid.getSelectedIdBinding(), actionName, modelName);
-	        selectedCommand.setActionExpression(expr);
-	        
-	        put.accept("selectedRemoteCommand", selectedCommand.getName());
-	        
-	        children.add(selectedCommand);
-        }
+			MethodExpression expr = createSelectedExpression(selectedIdBinding, actionName, modelName);
+			selectedCommand.setActionExpression(expr);
 
-        // TODO edited
-        // TODO deleted
+			children.add(selectedCommand);
+		}
 
-        log.debug("Created VueListGrid component with attributes: {}", attributes);
+		// TODO edited
+		// TODO deleted
 
-        return result;
-    }
+		VueListGridScript script = new VueListGridScript(id,
+															finalModuleName,
+															finalDocumentName,
+															queryName,
+															finalModelName,
+															contextId,
+															showAdd,
+															showZoom,
+															showFilter,
+															showSummary,
+															showSnap,
+															selectedRemoteCommand);
+		children.add(script);
 
-    /**
-     * @see FacesView#altSelectGridRow()
-     * @param selectedIdBinding
-     * @param actionName
-     * @param source
-     * @return
-     */
-    private MethodExpression createSelectedExpression(String selectedIdBinding, String actionName, String source) {
+		return result;
+	}
 
-        UnaryOperator<String> addApostrophes = s -> s == null ? null : "'" + s + "'";
+	/**
+	 * @see FacesView#altSelectGridRow()
+	 * @param selectedIdBinding
+	 * @param actionName
+	 * @param modelName
+	 * @return	The method expression
+	 */
+	private MethodExpression createSelectedExpression(String selectedIdBinding, String actionName, String modelName) {
+		// Note source should only be defined when this is a rerender
+		String source = null;
+		if (Boolean.TRUE.toString().equals(actionName) || Boolean.FALSE.toString().equals(actionName)) {
+			source = modelName;
+		}
 
-        String exprSting = String.format("${%s.altSelectGridRow(param.bizId, %s, %s, %s)}",
-                managedBeanName,
-                addApostrophes.apply(selectedIdBinding),
-                addApostrophes.apply(actionName),
-                addApostrophes.apply(source));
+		UnaryOperator<String> addApostrophes = s -> s == null ? null : "'" + s + "'";
 
-        log.debug("Creating selected expression: '{}'", exprSting);
+		String exprSting = String.format("${%s.altSelectGridRow(param.bizId, %s, %s, %s)}",
+											managedBeanName,
+											addApostrophes.apply(selectedIdBinding),
+											addApostrophes.apply(actionName),
+											addApostrophes.apply(source));
 
-        return ef.createMethodExpression(elc, exprSting, null,
-                new Class[] { String.class, String.class, String.class, String.class });
-    }
+		return ef.createMethodExpression(elc, exprSting, null,
+				new Class[] { String.class, String.class, String.class, String.class });
+	}
 
-    @Override
-    public UIComponent listGridContextMenu(UIComponent component, String listGridId, ListGrid listGrid) {
+	@Override
+	public UIComponent listGridContextMenu(UIComponent component, String listGridId, ListGrid listGrid) {
 
-        UIOutput empty = new UIOutput();
-        empty.setValue("");
-        empty.setRendered(false);
+		UIOutput empty = new UIOutput();
+		empty.setValue("");
+		empty.setRendered(false);
 
-        return empty;
-    }
+		return empty;
+	}
 }
