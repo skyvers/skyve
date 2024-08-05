@@ -45,9 +45,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 				bean.setSailModuleName(moduleName);
 			}
 		}
-		
-		bean.loadStartupConfiguration();
-		
+
 		bean.setSessionCount(Integer.valueOf(StateUtil.getSessionCount()));
 		
 		return bean;
