@@ -1,7 +1,5 @@
 package org.skyve.impl.web.service.smartclient;
 
-import static java.lang.Boolean.FALSE;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -317,7 +315,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 				.filter(b -> b)
 				.findAny();
 
-		if (invalid.orElse(FALSE)) {
+		if (invalid.orElse(Boolean.FALSE)) {
 			throw new DomainException("Invalid snapshot value provided");
 		}
 	}

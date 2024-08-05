@@ -71,6 +71,7 @@ import jakarta.faces.component.html.HtmlOutputLink;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
+	public static final String COMPONENT_BUILDER_CLASS_KEY = "componentBuilderClass";
 
 	public static class EventSourceComponent {
 		private UIComponent component;

@@ -30,7 +30,9 @@ window.SKYVE ??= {};
 // JS create method
 window.SKYVE.listgrid = function (gridConfig) {
 	if (window[gridConfig.containerId]) {
-		window[gridConfig.containerId].unmount();
+		if (window[gridConfig.containerId].unmount) {
+			window[gridConfig.containerId].unmount();
+		}
 	}
 	
 	const grid = createApp(ListGrid, gridConfig);
