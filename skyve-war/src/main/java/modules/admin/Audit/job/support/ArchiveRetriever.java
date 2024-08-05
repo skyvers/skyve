@@ -147,7 +147,9 @@ public class ArchiveRetriever {
 
         try {
             String line = readLine(getArchiveFilePath(entry.fileName()), entry.offset(), entry.length());
-            return (T) JSON.unmarshall(CORE.getUser(), line);
+            T bean = (T) JSON.unmarshall(CORE.getUser(), line);
+            bean.originalValues().clear();
+            return bean;
         } catch (Exception e) {
             logger.atFatal()
                   .withThrowable(e)
