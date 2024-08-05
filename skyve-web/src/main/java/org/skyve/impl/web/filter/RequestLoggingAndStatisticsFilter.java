@@ -59,6 +59,8 @@ public class RequestLoggingAndStatisticsFilter implements Filter {
 	        	}
 	        }
         }
+
+		// TODO Set request & response
  
         if (UtilImpl.HTTP_TRACE) {
 			UtilImpl.LOGGER.info("*********************************** REQUEST ************************************");

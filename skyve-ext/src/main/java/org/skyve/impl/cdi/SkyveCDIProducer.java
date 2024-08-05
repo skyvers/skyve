@@ -3,6 +3,7 @@ package org.skyve.impl.cdi;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.skyve.CORE;
 import org.skyve.addin.AddInManager;
 import org.skyve.cache.Caching;
 import org.skyve.domain.number.NumberGenerator;
@@ -37,7 +38,7 @@ public class SkyveCDIProducer implements Serializable {
 
 	@Produces
 	public static Map<String, Object> getStash() {
-		return new StashInjectable();
+		return CORE.getStash();
 	}
 	
 	@Produces

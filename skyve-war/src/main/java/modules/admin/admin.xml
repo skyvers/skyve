@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<module xmlns="http://www.skyve.org/xml/module" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" title="Admin" prototype="true" name="admin" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module name="admin" title="Admin" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" prototype="true">
     <homeRef>edit</homeRef>
     <homeDocument>UserDashboard</homeDocument>
     <jobs>
-        <job displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" name="jPerformDocumentActionForTag"/>
-        <job displayName="Delete all tagged data for Tag" className="modules.admin.Tag.DeleteAllTaggedDataForTagJob" name="jDeleteAllTaggedDataForTag"/>
-        <job displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" name="jProcessCommunicationsForTag"/>
-        <job displayName="Truncate Audit Log" className="modules.admin.DataMaintenance.TruncateAuditLogJob" name="jTruncateAuditLog"/>
-        <job displayName="Scheduled Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" name="jBackup"/>
-        <job displayName="Adhoc Backup all data and content" className="org.skyve.impl.backup.BackupJob" name="jAdhocBackup"/>
-        <job displayName="Restore all data and content" className="org.skyve.impl.backup.RestoreJob" name="jRestore"/>
-        <job displayName="Reindex all data and attachments" className="org.skyve.impl.backup.ReindexJob" name="jReindex"/>
-        <job displayName="Reindex all attachments" className="org.skyve.impl.backup.ReindexAttachmentsJob" name="jReindexAttachments"/>
-        <job displayName="Reindex all data" className="org.skyve.impl.backup.ReindexBeansJob" name="jReindexBeans"/>
-        <job displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob" name="jRefreshDocumentTuples"/>
-        <job displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob" name="jBulkUserCreation"/>
-        <job displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob" name="jGenerateTestData"/>
-        <job displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob" name="jAvailableDiskSpaceAlarm"/>
+        <job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
+		<job name="jDeleteAllTaggedDataForTag" displayName="Delete all tagged data for Tag" className="modules.admin.Tag.DeleteAllTaggedDataForTagJob"/>
+		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
+		<job name="jTruncateAuditLog" displayName="Truncate Audit Log" className="modules.admin.DataMaintenance.TruncateAuditLogJob" />
+		<job name="jBackup" displayName="Scheduled Backup all data and content" className="modules.admin.DataMaintenance.BackupJob" />
+		<job name="jAdhocBackup" displayName="Adhoc Backup all data and content" className="org.skyve.impl.backup.BackupJob" />
+		<job name="jRestore" displayName="Restore all data and content" className="org.skyve.impl.backup.RestoreJob" />
+		<job name="jReindex" displayName="Reindex all data and attachments" className="org.skyve.impl.backup.ReindexJob" />
+		<job name="jReindexAttachments" displayName="Reindex all attachments" className="org.skyve.impl.backup.ReindexAttachmentsJob" />
+		<job name="jReindexBeans" displayName="Reindex all data" className="org.skyve.impl.backup.ReindexBeansJob" />
+		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
+		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
+		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
 		<job name="jChangePasswordNotification" displayName="Change password notification" className="modules.admin.ChangePassword.ChangePasswordNotificationJob"/>    	
     </jobs>
     <documents>
@@ -124,11 +124,16 @@
             <accesses/>
         </role>
         <role name="BasicUser">
-            <documentation><![CDATA[The intention of Basic User role is to provide basic capability to back-office users.
+            <documentation>
+				The intention of Basic User role is to provide basic capability to back-office users.
+				
 				The role is for a typical office situation where users collaborate within the "Customer" scope on key application areas.
+				
 				For example, shared contact management, common document number serials 
 				and the ability to use Skyve's basic personal efficiency and automation capabilities, Tags, Snapshots, Communication and view dashboards.
-				BasicUser can know of the existence of other users and refer to them, but cannot change their user record.]]></documentation>
+				
+				BasicUser can know of the existence of other users and refer to them, but cannot change their user record.			
+			</documentation>
             <description><![CDATA[admin.adminRoles.basicUser.description]]></description>
             <privileges>
                 <document name="ChangePassword" permission="_____">
@@ -232,8 +237,6 @@
                     <action name="DownloadResults"/>
                     <action name="DownloadSAIL"/>
                     <action name="DownloadClientSAIL"/>
-                    <action name="ApplyStartupConfiguration"/>
-                    <action name="AddAPIKey"/>
                     <action name="GenerateTestData"/>
                     <action name="DeleteTestData"/>
                 </document>
@@ -307,8 +310,10 @@
             <accesses/>
         </role>
         <role name="JobMaintainer">
-            <documentation><![CDATA[Allows atomic control over the ability to schedule jobs and review job progress.]]></documentation>
-            <description><![CDATA[admin.adminRoles.jobMaintainer.description]]></description>
+			<documentation>
+				Allows atomic control over the ability to schedule jobs and review job progress.
+			</documentation>            
+			<description><![CDATA[admin.adminRoles.jobMaintainer.description]]></description>
             <privileges>
                 <document name="ChangePassword" permission="_____">
                     <action name="MakePasswordChange"/>
@@ -329,8 +334,10 @@
             <accesses/>
         </role>
         <role name="SecurityAdministrator">
-            <documentation><![CDATA[Administration of users and permissions.]]></documentation>
-            <description><![CDATA[admin.adminRoles.securityAdministrator.description]]></description>
+            <documentation>
+				Administration of users and permissions.
+			</documentation>
+			<description>admin.adminRoles.securityAdministrator.description</description>
             <privileges>
                 <document name="Audit" permission="_R__C">
                     <action name="SourceVersionChanged"/>
@@ -403,8 +410,10 @@
             </accesses>
         </role>
         <role name="ViewUser">
-            <documentation><![CDATA[The view user is intended as a read-only office user, with visibility as per Basic User role.]]></documentation>
-            <description><![CDATA[admin.adminRoles.viewUser.description]]></description>
+            <documentation>
+			The view user is intended as a read-only office user, with visibility as per Basic User role.
+			</documentation>
+			<description>admin.adminRoles.viewUser.description</description>
             <privileges>
                 <document name="ChangePassword" permission="_____">
                     <action name="MakePasswordChange"/>
@@ -809,8 +818,8 @@
             </columns>
         </query>
         <query documentName="ReportTemplate" name="qEnabledReports">
-            <documentation><![CDATA[Shows all enabled reports which are not fragments, and makes sure 
-        		the logged in user has the role if the report is restricted to a specific role.]]></documentation>
+            <documentation>Shows all enabled reports which are not fragments, and makes sure 
+        		the logged in user has the role if the report is restricted to a specific role.</documentation>
             <description><![CDATA[All Reports]]></description>
             <filter><![CDATA[bean.includeFragment = false AND bean.enabled = true
 				AND (
