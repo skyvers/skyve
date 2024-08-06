@@ -246,3 +246,7 @@ WILDCAT depends upon the following libraries:
 	* Spring Security
 		https://spring.io/projects/spring-security
 		https://github.com/spring-projects/spring-security/blob/master/license.txt (Apache v2)
+		
+	* uuid-creator
+		https://github.com/f4b6a3/uuid-creator
+		https://github.com/f4b6a3/uuid-creator/blob/master/LICENSE (MIT)

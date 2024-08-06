@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +38,7 @@ import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.util.TimeUtil;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -183,7 +183,7 @@ public class TestUtil {
 						new Coordinate(RANDOM.nextInt(10), RANDOM.nextInt(10))));
 				break;
 			case id:
-				BindUtil.set(bean, name, UUID.randomUUID().toString());
+				BindUtil.set(bean, name, UUIDv7.create().toString());
 				break;
 			case markup:
 			case memo:
@@ -321,7 +321,7 @@ public class TestUtil {
 					BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
 					break;
 				case id:
-					BindUtil.set(result, name, UUID.randomUUID().toString());
+					BindUtil.set(result, name, UUIDv7.create().toString());
 					break;
 				case markup:
 				case memo:

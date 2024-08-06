@@ -1,8 +1,7 @@
 package org.skyve.impl.domain;
 
-import java.util.UUID;
-
 import org.skyve.domain.TransientBean;
+import org.skyve.impl.util.UUIDv7;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -12,7 +11,7 @@ import jakarta.xml.bind.annotation.XmlType;
 public abstract class AbstractTransientBean extends AbstractBean implements TransientBean {
 	private static final long serialVersionUID = -6469229627937972374L;
 
-	private String bizId = UUID.randomUUID().toString();
+	private String bizId = UUIDv7.create().toString();
 
 	private String bizCustomer;
 

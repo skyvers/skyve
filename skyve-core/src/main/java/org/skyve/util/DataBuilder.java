@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -19,6 +18,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -580,7 +580,7 @@ public class DataBuilder {
 						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(RANDOM.nextInt(180) - RANDOM.nextInt(180), RANDOM.nextInt(90) - RANDOM.nextInt(90))));
 						break;
 					case id:
-						BindUtil.set(result, name, UUID.randomUUID().toString());
+						BindUtil.set(result, name, UUIDv7.create().toString());
 						break;
 					case markup:
 					case memo:
