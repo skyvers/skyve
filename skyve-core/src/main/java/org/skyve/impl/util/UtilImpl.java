@@ -1,14 +1,18 @@
 package org.skyve.impl.util;
 
+import static java.util.Collections.emptyList;
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
@@ -158,9 +162,7 @@ public class UtilImpl {
 	public static String ADDINS_DIRECTORY = null;
 
     // Where to store/retrieve archive documents (Audits, etc)
-    public static String ARCHIVE_DIRECTORY = null;
-    public static int ARCHIVE_EXPORT_RUNTIME_SEC = 300;
-    public static int ARCHIVE_EXPORT_BATCH_SIZE = 100;
+    public static ArchiveConfig ARCHIVE_CONFIG = new ArchiveConfig(-1, -1, emptyList());;
 
 	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.
@@ -692,4 +694,44 @@ public class UtilImpl {
 
 		return path;
 	}
+
+    public static record ArchiveConfig(int exportRuntimeSec, int exportBatchSize, List<ArchiveDocConfig> docConfigs) {
+
+        protected static final String ARCHIVE_DIR = "archive";
+        protected static final String INDEX_DIR = "index";
+
+        public Optional<ArchiveDocConfig> findArchiveDocConfig(String module, String document) {
+
+            if (docConfigs == null || module == null || document == null) {
+                return Optional.empty();
+            }
+
+            return docConfigs.stream()
+                             .filter(adc -> module.equals(adc.module()))
+                             .filter(adc -> document.equals(adc.document()))
+                             .findFirst();
+        }
+
+        public static record ArchiveDocConfig(String module, String document, String directory) {
+
+            /**
+             * The directory we will store exported documents in <em>.archive</em> files
+             * 
+             * @return
+             */
+            public Path getArchiveDirectory() {
+                return Path.of(CONTENT_DIRECTORY, ARCHIVE_DIR, this.directory);
+            }
+
+            /**
+             * The directory (within the archive directory) where the lucene index is located.
+             * 
+             * @return
+             */
+            public Path getIndexDirectory() {
+                return getArchiveDirectory().resolve(INDEX_DIR);
+            }
+        }
+    }
+
 }

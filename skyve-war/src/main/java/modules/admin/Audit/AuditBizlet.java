@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import jakarta.inject.Inject;
@@ -49,7 +51,7 @@ public class AuditBizlet extends Bizlet<Audit> {
                 String bizId = lesserVersions.get(0)
                                              .getCode();
 
-                Optional<Audit> comparison = retriever.retrieveByBizId(bizId);
+                Optional<Audit> comparison = retriever.retrieveByBizId(getAuditDocConfig(), bizId);
                 bean.setComparisonVersion(comparison.orElse(null));
             }
         } else {
@@ -82,7 +84,7 @@ public class AuditBizlet extends Bizlet<Audit> {
         LuceneFilter filter = new LuceneFilter();
         filter.addEquals(Audit.auditBizIdPropertyName, audit.getAuditBizId());
 
-        List<Audit> audits = new ArrayList<>(retriever.retrieveAll(filter, 500));
+        List<Audit> audits = new ArrayList<>(retriever.retrieveAll(getAuditDocConfig(), filter, 500));
 
         if (forComparison) {
             // f.addLessThan(Audit.millisPropertyName, audit.getMillis());
@@ -104,9 +106,16 @@ public class AuditBizlet extends Bizlet<Audit> {
         return result;
     }
 
+    private ArchiveDocConfig getAuditDocConfig() {
+
+        return Util.getArchiveConfig()
+                   .findArchiveDocConfig(Audit.MODULE_NAME, Audit.DOCUMENT_NAME)
+                   .get();
+    }
+
     @Override
     public Audit resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
-        return retriever.<Audit> retrieveByBizId(bizId)
+        return retriever.<Audit> retrieveByBizId(getAuditDocConfig(), bizId)
                         .orElse(null);
     }
 }

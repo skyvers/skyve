@@ -1,6 +1,9 @@
 package modules.admin.Audit.job;
 
+import static java.time.Instant.now;
 import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
+import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_FILE_SUFFIX;
+import static org.apache.commons.lang3.StringUtils.toRootLowerCase;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,23 +18,25 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
-import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import com.google.common.base.MoreObjects;
+
 import jakarta.inject.Inject;
 import modules.admin.Audit.job.support.FileLockRepo;
-import modules.admin.domain.Audit;
 
+// FIXME rename
 public class ExportAuditsToArchiveJob extends CancellableJob {
 
     private static final char LF = '\n';
@@ -43,157 +48,263 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
     @Inject
     private transient FileLockRepo repo;
 
-    public static final String ARCHIVE_FILE_SUFFIX = ".archive";
-
     private final Logger logger = LogManager.getLogger();
-    private Instant targetEndTime;
+    private final Instant targetEndTime;
+    private final int batchSize;
 
     public ExportAuditsToArchiveJob() {
-        targetEndTime = Instant.now()
-                               .plus(Duration.ofSeconds(UtilImpl.ARCHIVE_EXPORT_RUNTIME_SEC));
+        targetEndTime = now().plus(Duration.ofSeconds(Util.getArchiveConfig()
+                                                          .exportRuntimeSec()));
+        batchSize = Util.getArchiveConfig()
+                        .exportBatchSize();
     }
 
     @Override
     public void execute() throws Exception {
+        logger.debug("Starting {} with config {}", this, Util.getArchiveConfig());
+
+        if (batchSize <= 0) {
+            getLog().add("Invalid batch size configured, job ending");
+            return;
+        }
 
         String targetTimeStr = DateTimeFormatter.ISO_LOCAL_TIME.withZone(ZoneId.systemDefault())
                                                                .format(targetEndTime);
-        getLog().add("Job started; target end time=" + targetTimeStr);
-        getLog().add("Using batch size: " + UtilImpl.ARCHIVE_EXPORT_BATCH_SIZE);
-        logAuditCount();
+        getLog().add("Job started; target end time: " + targetTimeStr);
+        getLog().add("Using batch size: " + batchSize);
 
         int recordsArchived = 0;
-        for (int batchNum = 0; true; ++batchNum) {
-            logger.debug("Exporting batch #{}", batchNum);
 
-            int num = executeOneBatch(UtilImpl.ARCHIVE_EXPORT_BATCH_SIZE);
-
-            if (num == LOCK_FAILURE) {
-                // Couldn't get write lock, try again
-            } else if (num <= 0) {
-                // No rows written, we're done
-                logger.debug("0 rows archived");
-                break;
-            } else {
-                logger.debug("{} rows archived", num);
-                recordsArchived += num;
-            }
+        List<ArchiveDocConfig> docConfigs = Util.getArchiveConfig()
+                                                .docConfigs();
+        for (ArchiveDocConfig archiveDocConfig : docConfigs) {
 
             if (isCancelled()) {
-                getLog().add("Job cancelled");
                 break;
             }
 
-            if (targetEndTime.isBefore(Instant.now())) {
-                getLog().add("Time's up");
+            if (timesUp()) {
                 break;
             }
+
+            Document doc = getDocument(archiveDocConfig.module(), archiveDocConfig.document());
+            JobSubstance js = new JobSubstance(doc, archiveDocConfig);
+
+            logger.debug("Running {}", js);
+            int archiveCount = js.execute();
+            logger.debug("{} archived {} documents", js, archiveCount);
+
+            recordsArchived += archiveCount;
         }
 
-        getLog().add("Done; archived " + recordsArchived + " rows");
-        logAuditCount();
+        if (isCancelled()) {
+            getLog().add("Job cancelled");
+        } else if (timesUp()) {
+            getLog().add("Time's up");
+        }
+
+        getLog().add("Done; archived " + recordsArchived + " documents");
     }
 
     /**
-     * Execute one batch of writing records to file and deleting from the RDBMS
+     * Has this job run out of time (i.e. have we pass targetEndTime)?
      * 
-     * @param batchSize
-     * @return the number of records written/delete
-     * @throws InterruptedException
-     * @throws Exception
+     * @return
      */
-    private int executeOneBatch(int batchSize) throws IOException, InterruptedException {
+    public boolean timesUp() {
+        return now().isAfter(targetEndTime);
+    }
 
-        File file = getFile();
-        getLog().add("Writing audit entries to " + file.getName());
+    private Document getDocument(String module, String document) {
+        Customer customer = CORE.getUser()
+                                .getCustomer();
 
-        Lock lock = repo.getLockFor(file)
-                        .writeLock();
+        return customer.getModule(module)
+                       .getDocument(customer, document);
+    }
 
-        if (lock.tryLock(10, TimeUnit.SECONDS)) {
-            // Acquire a write lock and write the batch out
-            try {
-                return writeBatch(batchSize, file);
-            } finally {
-                lock.unlock();
+    private class JobSubstance {
+
+        private final Document document;
+        private final ArchiveDocConfig config;
+        private final String deleteStatement;
+
+        public JobSubstance(Document doc, ArchiveDocConfig config) {
+            this.document = doc;
+            this.config = config;
+            this.deleteStatement = createDeleteStatement();
+        }
+
+        public int execute() throws IOException, InterruptedException {
+
+            int exportCount = 0;
+
+            // Loop until time is up, or
+            // zero records are exported, or
+            // the job is cancelled
+            for (int batchNum = 0; true; ++batchNum) {
+                logger.debug("Exporting batch #{}", batchNum);
+
+                int num = executeOneBatch();
+
+                if (num == LOCK_FAILURE) {
+                    // Couldn't get write lock, try again
+                } else if (num <= 0) {
+                    // No rows written, we're done
+                    logger.debug("0 rows archived");
+                    break;
+                } else {
+                    logger.debug("{} rows archived", num);
+                    exportCount += num;
+                }
+
+                if (isCancelled()) {
+                    break;
+                }
+
+                if (timesUp()) {
+                    break;
+                }
+            }
+
+            return exportCount;
+        }
+
+        /**
+         * Avoid logging the same message repeatedly to the Job log. Only
+         * add the message if it's not the same as the last message in the
+         * log.
+         * 
+         * @param msg
+         */
+        private void logOnce(String msg) {
+
+            List<String> log = getLog();
+            if (log.isEmpty()) {
+                log.add(msg);
+                return;
+            }
+
+            String lastMsg = log.get(log.size() - 1);
+            if (lastMsg == null || !StringUtils.equals(msg, lastMsg)) {
+                log.add(msg);
             }
         }
 
-        // Couldn't get a lock
-        logger.warn("Unable to acquire write lock on {}", file);
-        return LOCK_FAILURE;
-    }
+        /**
+         * Execute one batch of writing records to file and deleting from the RDBMS
+         * 
+         * @param batchSize
+         * @return the number of records written/delete
+         * @throws InterruptedException
+         * @throws Exception
+         */
+        private int executeOneBatch() throws IOException, InterruptedException {
 
-    private int writeBatch(int batchSize, File file) throws IOException {
+            File file = getArchiveFile();
+            logOnce("Exporting documents to " + file.getName());
+            logger.trace("Exporting documents to {}", file);
 
-        List<DynamicBean> audits = getElements(batchSize);
+            Lock lock = repo.getLockFor(file)
+                            .writeLock();
 
-        if (audits.isEmpty()) {
-            return 0;
-        }
-
-        Customer c = CORE.getCustomer();
-        persistence.begin();
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, ARCHIVE_CHARSET, true))) {
-
-            for (DynamicBean currAudit : audits) {
-
-                logger.trace("Archiving {}", currAudit.getBizId());
-
-                String entry = JSON.marshall(c, currAudit);
-
-                writer.write(entry);
-                writer.write(LF);
-
-                persistence.newSQL("delete from ADM_Audit where bizId = :id")
-                           .putParameter("id", currAudit.getBizId(), false)
-                           .execute();
+            if (lock.tryLock(10, TimeUnit.SECONDS)) {
+                // Acquire a write lock and write the batch out
+                try {
+                    return writeBatch(file);
+                } finally {
+                    lock.unlock();
+                }
             }
-        } catch (IOException e) {
-            logger.atFatal()
-                  .withThrowable(e)
-                  .log("Writing to audit archive '" + file + "' failed");
-            throw e;
+
+            // Couldn't get a lock
+            logger.warn("Unable to acquire write lock on {}", file);
+            return LOCK_FAILURE;
         }
 
-        persistence.commit(false);
-        persistence.evictAllCached();
+        private int writeBatch(File file) throws IOException {
 
-        return audits.size();
-    }
+            List<DynamicBean> documents = getDocumentsToExport(batchSize);
+            if (documents.isEmpty()) {
+                return 0;
+            }
 
-    private File getFile() {
-        Path dir = Util.getArchiveDirectory();
-        dir.toFile()
-           .mkdirs();
+            Customer c = CORE.getCustomer();
+            persistence.begin();
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                                 .withZone(ZoneId.systemDefault());
-        String datePart = dtf.format(Instant.now());
-        String fileName = "audits-" + datePart + ARCHIVE_FILE_SUFFIX;
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, ARCHIVE_CHARSET, true))) {
 
-        return dir.resolve(fileName)
-                  .toFile();
-    }
+                for (DynamicBean currDoc : documents) {
 
-    protected List<DynamicBean> getElements(int howMany) {
-        return persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME)
-                          .setMaxResults(howMany)
-                          .projectedResults();
-    }
+                    logger.trace("Archiving {}", currDoc.getBizId());
 
-    private void logAuditCount() {
-        Long count = countAuditEntries();
-        String msg = String.format("%,d audit logs", count);
-        getLog().add(msg);
-        logger.debug(msg);
-    }
+                    String entry = JSON.marshall(c, currDoc);
 
-    private Long countAuditEntries() {
-        return persistence.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME)
-                          .addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "count")
-                          .scalarResult(Long.class);
+                    writer.write(entry);
+                    writer.write(LF);
+
+                    deleteDocument(currDoc);
+                }
+            } catch (IOException e) {
+                logger.atFatal()
+                      .withThrowable(e)
+                      .log("Writing to audit archive '{}' failed", file);
+                throw e;
+            }
+
+            persistence.commit(false);
+            persistence.evictAllCached();
+
+            return documents.size();
+        }
+
+        public void deleteDocument(DynamicBean currAudit) {
+
+            persistence.newSQL(deleteStatement)
+                       .putParameter("id", currAudit.getBizId(), false)
+                       .execute();
+        }
+
+        public String createDeleteStatement() {
+            String table = document.getPersistent()
+                                   .getPersistentIdentifier();
+            String sql = "delete from " + table + " where bizId = :id";
+            logger.trace("Using delete stament {}", sql);
+            return sql;
+        }
+
+        private File getArchiveFile() {
+            Path dir = config.getArchiveDirectory();
+            dir.toFile()
+               .mkdirs();
+
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                                     .withZone(ZoneId.systemDefault());
+            String datePart = dtf.format(now());
+            String fileName = archiveFileNamePrefix() + "-" + datePart + ARCHIVE_FILE_SUFFIX;
+
+            return dir.resolve(fileName)
+                      .toFile();
+        }
+
+        private String archiveFileNamePrefix() {
+
+            return toRootLowerCase(document.getName());
+        }
+
+        private List<DynamicBean> getDocumentsToExport(int howMany) {
+            return persistence.newDocumentQuery(document)
+                              .setMaxResults(howMany)
+                              .projectedResults();
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                              .add("document", document)
+                              .add("config", config)
+                              .toString();
+        }
     }
 
 }

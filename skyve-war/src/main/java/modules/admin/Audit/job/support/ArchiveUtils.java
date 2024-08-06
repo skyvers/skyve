@@ -5,9 +5,10 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.right;
 
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 
-import org.skyve.util.Util;
+import org.skyve.CORE;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 
 public class ArchiveUtils {
 
@@ -18,15 +19,13 @@ public class ArchiveUtils {
      */
     private static final int EXCERPT_LENGTH = 100;
 
-    /**
-     * Directory within the archive directory (itself inside the content dir) where
-     * the lucene index lives.
-     */
-    private static final String INDEX_DIR = "index";
+    public static final String ARCHIVE_FILE_SUFFIX = ".archive";
 
     /**
-     * Create an excerpt of the provided string, showing the start and end of it, seperated by <em>[...]</em>. Returns the original
-     * string if it's not long enough to warrant an excerpt. Returns the String <em>"null"</em> for a null lineValue;
+     * Create an excerpt of the provided string, showing the start and end of it,
+     * seperated by <em>[...]</em>. Returns the original string if it's not long
+     * enough to warrant an excerpt. Returns the String <em>"null"</em> for a
+     * null lineValue.
      * 
      * @param line Line/String to excerpt
      * @return
@@ -39,15 +38,13 @@ public class ArchiveUtils {
         return left(line, EXCERPT_LENGTH) + " … " + right(line, EXCERPT_LENGTH);
     }
 
-    /**
-     * Get the path of the archive index. The default is <em>archive/index</em>
-     * within the content directory.
-     * 
-     * @return Path to the archive index
-     */
-    public static Path getIndexPath() {
 
-        return Util.getArchiveDirectory()
-                   .resolve(INDEX_DIR);
+    public static Document getDocument(String module, String document) {
+        Customer customer = CORE.getUser()
+                                .getCustomer();
+
+        return customer.getModule(module)
+                       .getDocument(customer, document);
     }
+
 }

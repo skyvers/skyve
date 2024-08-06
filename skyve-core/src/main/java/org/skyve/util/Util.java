@@ -1,10 +1,7 @@
 package org.skyve.util;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.awt.ComponentOrientation;
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +16,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -275,15 +273,8 @@ public class Util {
 		return (UtilImpl.THUMBNAIL_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_THUMBNAILS/") : UtilImpl.THUMBNAIL_DIRECTORY;
 	}
 
-    public static Path getArchiveDirectory() {
-
-        String dirName = "archive";
-
-        if (isNotBlank(UtilImpl.ARCHIVE_DIRECTORY)) {
-            dirName = UtilImpl.ARCHIVE_DIRECTORY;
-        }
-
-        return Path.of(UtilImpl.CONTENT_DIRECTORY, dirName);
+    public static ArchiveConfig getArchiveConfig() {
+        return UtilImpl.ARCHIVE_CONFIG;
     }
 
 	public static String getModuleDirectory() {
@@ -506,4 +497,5 @@ public class Util {
     public static String getContentAnchorWithImageUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, int width, int height) {
     	return getContentAnchorUrl(bizModule, bizDocument, binding, contentId, targetNewWindow, getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
+
 }

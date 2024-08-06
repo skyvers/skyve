@@ -2,7 +2,6 @@ package modules.admin.Audit.job.support;
 
 import static java.util.Collections.emptyList;
 import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
-import static modules.admin.Audit.job.support.ArchiveUtils.getIndexPath;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -23,8 +22,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.util.JSON;
-import org.skyve.util.Util;
 
 import jakarta.inject.Singleton;
 import modules.admin.Audit.job.IndexArchivesJob;
@@ -41,7 +40,7 @@ public class ArchiveRetriever {
     private static final String READ_ONLY = "r";
 
     /**
-     * Retrieve 0 or 1 archived bean entry via that <em>Bean</em>'s bizId. If the bean has
+     * Retrieve 0 or 1 archived beans via that <em>Bean</em>'s bizId. If the bean has
      * been archived more than once which instance is returned is not defined (though
      * they should be identical). Requires the Bean's bizId to have been stored in a
      * field called "bizId".
@@ -50,13 +49,13 @@ public class ArchiveRetriever {
      * @return an Optional containing the requested Bean, or an empty optional
      *         if it could not be found.
      */
-    public <T extends Bean> Optional<T> retrieveByBizId(String bizId) {
+    public <T extends Bean> Optional<T> retrieveByBizId(ArchiveDocConfig docConfig, String bizId) {
 
         try {
-            LuceneFilter lf = new LuceneFilter();
-            lf.addEquals(Bean.DOCUMENT_ID, bizId);
+            LuceneFilter filter = new LuceneFilter();
+            filter.addEquals(Bean.DOCUMENT_ID, bizId);
 
-            List<ArchiveEntry> entries = searchIndex(lf, 1);
+            List<ArchiveEntry> entries = searchIndex(docConfig, filter, 1);
             if (entries.isEmpty()) {
                 return Optional.empty();
             }
@@ -74,10 +73,10 @@ public class ArchiveRetriever {
      * @param filter Filter to use to search the index
      * @return a list of results (empty if none are found)
      */
-    public <T extends Bean> List<T> retrieveAll(LuceneFilter filter, int maxResults) {
+    public <T extends Bean> List<T> retrieveAll(ArchiveDocConfig docConfig, LuceneFilter filter, int maxResults) {
 
         try {
-            List<ArchiveEntry> entries = searchIndex(filter, maxResults);
+            List<ArchiveEntry> entries = searchIndex(docConfig, filter, maxResults);
 
             List<T> beans = new ArrayList<>(entries.size());
             for (ArchiveEntry entry : entries) {
@@ -94,16 +93,16 @@ public class ArchiveRetriever {
 
     /**
      * Search the archive index using the provided filter, returning the file
-     * and offset where each result record can be found; or an empty list 
+     * and offset where each result record can be found; or an empty list
      * if nothing is found.
      * 
      * @param bizId
      * @return
      * @throws IOException
      */
-    private List<ArchiveEntry> searchIndex(LuceneFilter filter, int maxResults) throws IOException {
+    private List<ArchiveEntry> searchIndex(ArchiveDocConfig docConfig, LuceneFilter filter, int maxResults) throws IOException {
 
-        Path auditArchiveIndexPath = getIndexPath();
+        Path auditArchiveIndexPath = docConfig.getIndexDirectory();
         logger.debug("Searching for {}; using index at {}", filter, auditArchiveIndexPath);
 
         try (Directory directory = FSDirectory.open(auditArchiveIndexPath);
@@ -133,7 +132,7 @@ public class ArchiveRetriever {
                                  .longValue();
                 String fileName = doc.get(IndexArchivesJob.FILENAME_FIELD);
 
-                ArchiveEntry entry = new ArchiveEntry(fileName, offset, length);
+                ArchiveEntry entry = new ArchiveEntry(docConfig, fileName, offset, length);
                 entries.add(entry);
             }
 
@@ -146,9 +145,11 @@ public class ArchiveRetriever {
     private <T extends Bean> T retrieveBean(ArchiveEntry entry) {
 
         try {
-            String line = readLine(getArchiveFilePath(entry.fileName()), entry.offset(), entry.length());
+            Path archiveFilePath = getArchiveFilePath(entry);
+            String line = readLine(archiveFilePath, entry.offset(), entry.length());
             T bean = (T) JSON.unmarshall(CORE.getUser(), line);
-            bean.originalValues().clear();
+            bean.originalValues()
+                .clear();
             return bean;
         } catch (Exception e) {
             logger.atFatal()
@@ -160,14 +161,14 @@ public class ArchiveRetriever {
 
     /**
      * Read from the given file, starting at the provided offset, reading in the given
-     * number of bytes. Converting the results to a String (utf8) for returning. 
+     * number of bytes. Converting the results to a String (utf8) for returning.
      */
     private String readLine(Path filePath, long offset, long length) throws IOException {
 
         logger.trace("Retrieving {} bytes from {} at {}", length, filePath, offset);
 
         // If this throws an ArithmeticException this record is longer than Integer.MAX_VALUE (2GB)
-        // and can't be handled with a plain old byte array. The data on disk and in the index is 
+        // and can't be handled with a plain old byte array. The data on disk and in the index is
         // fine, but this method isn't written to handle that much data and will need to be updated
         int lengthAsInt = Math.toIntExact(length);
 
@@ -181,17 +182,19 @@ public class ArchiveRetriever {
         }
     }
 
-    private Path getArchiveFilePath(String fileName) {
+    private Path getArchiveFilePath(ArchiveEntry entry) {
 
-        Path p = Util.getArchiveDirectory()
-                     .resolve(fileName);
+        Path p = entry.docConfig()
+                      .getArchiveDirectory()
+                      .resolve(entry.fileName());
+
         if (Files.isRegularFile(p)) {
             return p;
         }
 
-        throw new IllegalArgumentException("Archive file path '" + fileName + "' is not valid");
+        throw new IllegalArgumentException("Archive file path '" + p + "' is not valid");
     }
 
-    private record ArchiveEntry(String fileName, long offset, long length) {
+    private record ArchiveEntry(ArchiveDocConfig docConfig, String fileName, long offset, long length) {
     }
 }

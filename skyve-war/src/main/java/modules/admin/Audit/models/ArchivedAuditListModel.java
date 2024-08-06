@@ -1,7 +1,6 @@
 package modules.admin.Audit.models;
 
 import static java.util.stream.Collectors.toCollection;
-import static modules.admin.Audit.job.support.ArchiveUtils.getIndexPath;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -46,6 +45,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
 
 import com.google.common.base.Stopwatch;
@@ -105,7 +105,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
 
     @Override
     public String getDescription() {
-        return "Query the lucene index etc";
+        return "The list of all Audits.";
     }
 
     @Override
@@ -275,7 +275,10 @@ public class ArchivedAuditListModel<U extends Bean> extends ListModel<U> {
         public LuceneResultsIterable(int startRow, int endRow) throws IOException {
 
             // open index
-            Path auditArchiveIndexPath = getIndexPath();
+            Path auditArchiveIndexPath = Util.getArchiveConfig()
+                                             .findArchiveDocConfig(Audit.MODULE_NAME, Audit.DOCUMENT_NAME)
+                                             .get()
+                                             .getIndexDirectory();
             lriLogger.debug("Using index at {}", auditArchiveIndexPath);
             directory = FSDirectory.open(auditArchiveIndexPath);
             dirReader = DirectoryReader.open(directory);

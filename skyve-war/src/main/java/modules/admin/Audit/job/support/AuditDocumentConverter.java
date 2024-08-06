@@ -16,7 +16,7 @@ import org.skyve.domain.Bean;
 
 import modules.admin.domain.Audit;
 
-public class AuditDocumentConverter {
+public class AuditDocumentConverter implements DocumentConverter {
 
     /**
      * If we use the same field name for the SortedDocValuesField as we do for
@@ -44,7 +44,10 @@ public class AuditDocumentConverter {
         return new SortedDocValuesField(toSortBinding(binding), new BytesRef(value));
     }
 
-    public Document convert(Audit audit) {
+    @Override
+    public Document convert(Bean bean) {
+
+        Audit audit = (Audit) bean;
 
         Document doc = new Document();
 
@@ -102,6 +105,12 @@ public class AuditDocumentConverter {
         } catch (ParseException e) {
             throw new RuntimeException("Unable to parse date string: " + dateStr, e);
         }
+    }
+
+    @Override
+    public boolean handles(String module, String document) {
+
+        return Audit.MODULE_NAME.equals(module) && Audit.DOCUMENT_NAME.equals(document);
     }
 
 }

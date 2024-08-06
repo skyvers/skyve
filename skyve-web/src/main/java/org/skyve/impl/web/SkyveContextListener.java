@@ -3,12 +3,13 @@ package org.skyve.impl.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -38,6 +39,8 @@ import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
@@ -373,21 +376,7 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
-        Map<String, Object> archiveProps = getObject(null, "archive", properties, false);
-        if (archiveProps != null) {
-            UtilImpl.ARCHIVE_DIRECTORY = getString("archive", "directory", archiveProps, false);
-            if (UtilImpl.ARCHIVE_DIRECTORY != null) {
-                UtilImpl.ARCHIVE_DIRECTORY = cleanupDirectory(UtilImpl.ARCHIVE_DIRECTORY);
-                // No call to testWritableDirectory
-            }
-            
-            Optional.ofNullable(getNumber("archive", "exportRuntimeSec", archiveProps, false))
-                    .map(Number::intValue)
-                    .ifPresent(n -> UtilImpl.ARCHIVE_EXPORT_RUNTIME_SEC = n);
-            Optional.ofNullable(getNumber("archive", "exportBatchSize", archiveProps, false))
-                    .map(Number::intValue)
-                    .ifPresent(n -> UtilImpl.ARCHIVE_EXPORT_BATCH_SIZE = n);
-        }
+        configureArchiveProperties(properties);
 
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
@@ -779,7 +768,38 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
 	}
-	
+
+	private static void configureArchiveProperties(Map<String, Object> properties) {
+        String archKey = "archive";
+
+        Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
+        if (archiveProps == null) {
+            return;
+        }
+
+        if (!getBoolean(archKey, "enabled", archiveProps)) {
+            return;
+        }
+
+        Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
+        Integer batchSize = getNumber(archKey, "exportBatchSize", archiveProps, false).intValue();
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> docProps = (List<Map<String, String>>) get(archKey, "documents", archiveProps, true);
+
+        List<ArchiveConfig.ArchiveDocConfig> docConfigs = new ArrayList<>();
+        for (Map<String, String> docProp : docProps) {
+
+            String module = docProp.get("module");
+            String document = docProp.get("document");
+            String directory = docProp.get("directory");
+
+            docConfigs.add(new ArchiveDocConfig(module, document, directory));
+        }
+
+        UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs));
+    }
+
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {
 			Object override = overrides.get(key);
