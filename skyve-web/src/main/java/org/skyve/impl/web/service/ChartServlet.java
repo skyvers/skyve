@@ -106,7 +106,7 @@ public class ChartServlet extends HttpServlet {
 
 					String dataSourceName = request.getParameter(DATA_SOURCE_NAME);
 					String result = (dataSourceName == null) ? 
-										processChartModel(request, response) :
+							processChartModel(request) :
 										processListModel(request);
 					if (result != null) {
 						pw.print(result);
@@ -138,10 +138,10 @@ public class ChartServlet extends HttpServlet {
 		doGet(request, response);
 	}
 	
-	private static String processChartModel(HttpServletRequest request, HttpServletResponse response)
+	private static String processChartModel(HttpServletRequest request)
 	throws Exception {
 		String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 		User user = CORE.getUser();

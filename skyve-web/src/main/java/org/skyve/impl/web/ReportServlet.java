@@ -141,7 +141,7 @@ public class ReportServlet extends HttpServlet {
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
 			String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -353,7 +353,7 @@ public class ReportServlet extends HttpServlet {
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
 					String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-					AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+					AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
 					drivingDocument = model.getDrivingDocument();

@@ -50,6 +50,8 @@ import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.tag.DefaultTagManager;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.HttpServletRequestResponse;
+import org.skyve.impl.web.WebContainer;
 import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -78,6 +80,8 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.Session;
 
 /**
@@ -655,5 +659,16 @@ public class EXT {
 												UtilImpl.BOOTSTRAP_CUSTOMER,
 												UtilImpl.BOOTSTRAP_USER));
 		}
-	}	
+	}
+
+	/**
+	 * Get the {@link HttpServletRequest} & {@link HttpServletResponse} from the current transaction.
+	 * <br/>
+	 * Can return null if called from a job or other background task.
+	 * 
+	 * @return An object containing both the request & response
+	 */
+	public static HttpServletRequestResponse getHttpServletRequestResponse() {
+		return WebContainer.getHttpServletRequestResponse();
+	}
 }

@@ -89,7 +89,7 @@ public class DynamicImageServlet extends HttpServlet {
 				}
 		        
 				String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-	        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+				AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 	        	if (webContext == null) {
 	        		throw new ConversationEndedException(request.getLocale());
 	        	}

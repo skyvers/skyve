@@ -68,21 +68,9 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 	private transient String action;
 
 	private transient Bean currentBean;
-	
-	/**
-	 * The web request to process - This is transient, not part of the encoded context.
-	 */
-	private transient Object request;
-	
-	/**
-	 * The web response to generate - This is transient, not part of the encoded context.
-	 */
-	private transient Object response;
-	
-	protected AbstractWebContext(String key, Object request, Object response) {
+
+	protected AbstractWebContext(String key) {
 		this.key = key;
-		this.request = request;
-		this.response = response;
 	}
 	
 	@Override
@@ -151,24 +139,6 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 
 	public void setConversation(AbstractPersistence conversation) {
 		this.conversation = conversation;
-	}
-	
-	@Override
-	public final Object getHttpServletRequest() {
-		return request;
-	}
-	@Override
-	public final void setHttpServletRequest(Object request) {
-		this.request = request;
-	}
-
-	@Override
-	public final Object getHttpServletResponse() {
-		return response;
-	}
-	@Override
-	public final void setHttpServletResponse(Object response) {
-		this.response = response;
 	}
 
 	/**

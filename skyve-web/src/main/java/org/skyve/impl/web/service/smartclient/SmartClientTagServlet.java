@@ -107,7 +107,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+						AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						UxUi uxui = UserAgent.getUxUi(request);
@@ -126,7 +126,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+						AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						UxUi uxui = UserAgent.getUxUi(request);

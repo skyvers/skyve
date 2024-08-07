@@ -139,7 +139,7 @@ public class SmartClientListServlet extends HttpServlet {
 				try {
 					// use the view's conversation if it was sent down from the client
 					String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
+					AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
 				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");

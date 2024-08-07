@@ -162,7 +162,7 @@ public class SmartClientEditServlet extends HttpServlet {
 					AbstractWebContext webContext = null;
 			        String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        if (webId != null) {
-			        	webContext = StateUtil.getCachedConversation(webId, request, response);
+						webContext = StateUtil.getCachedConversation(webId, request);
 			        	if (webContext == null) {
 			        		throw new ConversationEndedException(request.getLocale());
 			        	}
@@ -172,7 +172,8 @@ public class SmartClientEditServlet extends HttpServlet {
 			        }
 			    	else {
 			            // Create and inject any dependencies
-			            webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request, response);
+						webContext = new SmartClientWebContext(UUID.randomUUID()
+								.toString(), request);
 
 			    		UtilImpl.LOGGER.info("START NEW CONVERSATION!!!!");
 			            persistence = AbstractPersistence.get();

@@ -105,7 +105,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 			        try {
 						complete = CompleteType.valueOf(request.getParameter(AbstractWebContext.ACTION_NAME));
 
-			        	AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request, response);
+						AbstractWebContext webContext = StateUtil.getCachedConversation(webId, request);
 			        	bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 			        	if (bean == null) { // should never happen
 				    		throw new ServletException("Bean is null");

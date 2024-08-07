@@ -97,10 +97,10 @@ public class MapServlet extends HttpServlet {
 					else {
 						String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 						if (modelName != null) {
-							result = processModel(request, response);
+							result = processModel(request);
 						}
 						else {
-							result = processCollection(request, response);
+							result = processCollection(request);
 						}
 					}
 
@@ -163,12 +163,12 @@ public class MapServlet extends HttpServlet {
 		return JSON.marshall(customer, model.getResult(mapBounds(request)));
 	}
 	
-	private static String processCollection(HttpServletRequest request, HttpServletResponse response)
+	private static String processCollection(HttpServletRequest request)
 	throws Exception {
 		// Get the bean from the conversation
 		Customer customer = CORE.getCustomer();
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-    	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		
 		// Run a ReferenceMapModel on the given collection and convert to JSON
@@ -180,11 +180,11 @@ public class MapServlet extends HttpServlet {
 		return JSON.marshall(customer, model.getResult(mapBounds(request)));
 	}
 
-	private static String processModel(HttpServletRequest request, HttpServletResponse response)
+	private static String processModel(HttpServletRequest request)
 	throws Exception {
 		// Get the bean from the conversation
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 		// Check if we have access
