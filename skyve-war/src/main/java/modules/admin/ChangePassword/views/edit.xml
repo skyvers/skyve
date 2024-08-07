@@ -4,8 +4,8 @@
 		xmlns="http://www.skyve.org/xml/view" 
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form border="true" percentageWidth="60" responsiveWidth="12">
-		<column percentageWidth="50" responsiveWidth="4" />
+	<form percentageWidth="60" responsiveWidth="12" widgetId="widPart1">
+		<column percentageWidth="50" responsiveWidth="4"/>
 		<column />
 		<row>
 			<!-- Old password is required in this view (only not required for reset password function) -->
@@ -13,9 +13,21 @@
 				<password binding="oldPassword" />
 			</item>
 		</row>
+	</form>
+		
+	<form percentageWidth="60" responsiveWidth="12" widgetId="widPart2">
+		<column percentageWidth="50" responsiveWidth="4" />
+		<column />
 		<row>
 			<item>
-				<password binding="newPassword" />
+				<password binding="newPassword">
+					<onBlurHandlers>
+						<rerender clientValidation="false" />
+					</onBlurHandlers>
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</password>
 			</item>
 		</row>
 		<row>
@@ -40,7 +52,7 @@
 			</item>
 		</row>
 	</form>
-	<actions>
+	<actions widgetId="widActionPanel">
 		<action className="MakePasswordChange" displayName="admin.changePassword.actions.makePasswordChange.displayName" toolTip="admin.changePassword.actions.makePasswordChange.toolTip"
 			relativeIconFileName="icons/document/password16.png" iconStyleClass="fa-solid fa-lock" inActionPanel="false" />
 	</actions>

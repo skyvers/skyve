@@ -219,6 +219,13 @@
 			<scope>runtime</scope>
 		</dependency>
 		
+		<!-- Password strength indicator -->
+		<dependency>
+		  <groupId>com.nulab-inc</groupId>
+		  <artifactId>zxcvbn</artifactId>
+		  <version>1.9.0</version>
+		</dependency>
+		
 		<!-- Test dependencies -->
 		<!--JUnit Jupiter Engine to depend on the JUnit5 engine and JUnit 5 API -->
 		<dependency>
