@@ -15,42 +15,48 @@
 		]]>
 	</description>
 	<bizKey expression="Security Log - {timestamp}" />
+	<implements>
+		<interface>org.skyve.domain.app.admin.SecurityLog</interface>
+	</implements>
 	<attributes>
 		<timestamp name="timestamp" required="true">
 			<displayName>Timestamp</displayName>
 			<description>When the exception was raised</description>
 			<defaultValue>{TIMESTAMP}</defaultValue>
 		</timestamp>
-		<id name="threadID" required="true">
+		<longInteger name="threadID" required="true">
 			<displayName>Thread ID</displayName>
 			<description>Thread ID when the exception was raised</description>
-		</id>
-		<association name="loggedInUser" type="aggregation" required="true">
-			<displayName>Logged In User</displayName>
-			<description>Logged in user when exception was raised</description>
-			<documentName>UserProxy</documentName>
-		</association>
-		<enum name="exceptionType" required="true">
-			<displayName>Exception Type</displayName>
-			<description>Type of exception raised</description>
-			<values>
-				<value code="Security Exception"/>
-				<value code="Access Exception"/>
-			</values>
-		</enum>
-		<memo name="exceptionMessage" required="true">
-			<displayName>Exception Message</displayName>
-			<description>Exception message from exception raised</description>
-		</memo>
+		</longInteger>
 		<text name="sourceIP">
 			<displayName>Source IP</displayName>
 			<description>Source Ip when exception was raised</description>
 			<length>45</length>
 		</text>
+		<id name="username">
+			<displayName>Username</displayName>
+			<description>The username the security exception was raised for</description>
+		</id>
+		<id name="loggedInUserId" required="true">
+			<displayName>Logged In User ID</displayName>
+			<description>Logged in user ID when exception was raised</description>
+		</id>
+		<id name="resource">
+			<displayName>Resource</displayName>
+			<description>The resource the security exception was raised for</description>
+		</id>
 		<text name="provenance">
 			<displayName>Provenance</displayName>
 			<description>First line of the stack trace of exception raised</description>
 			<length>45</length>
 		</text>
+		<enum name="exceptionType" implementingEnumClassName="org.skyve.domain.app.admin.SecurityLog$ExceptionType" required="true">
+			<displayName>Exception Type</displayName>
+			<description>Type of exception raised</description>
+		</enum>
+		<memo name="exceptionMessage" required="true">
+			<displayName>Exception Message</displayName>
+			<description>Exception message from exception raised</description>
+		</memo>
 	</attributes>
 </document>

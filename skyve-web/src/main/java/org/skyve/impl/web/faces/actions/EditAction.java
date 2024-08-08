@@ -7,6 +7,7 @@ import java.util.logging.Level;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
@@ -70,7 +71,8 @@ public class EditAction extends FacesAction<Void> {
 				final String bizModule = current.getBizModule();
 				final String bizDocument = current.getBizDocument();
 
-				user.checkAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
+				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi()
+						.getName());
 				
 				facesView.setBizModuleParameter(bizModule);
 				facesView.setBizDocumentParameter(bizDocument);
@@ -85,7 +87,8 @@ public class EditAction extends FacesAction<Void> {
 					throw new IllegalStateException("bizDocument is required");
 				}
 
-				user.checkAccess(UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
+				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi()
+						.getName());
 
 				Module module = customer.getModule(bizModule);
 				Document document = module.getDocument(customer, bizDocument);

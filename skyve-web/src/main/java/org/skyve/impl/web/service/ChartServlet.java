@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
@@ -167,7 +168,7 @@ public class ChartServlet extends HttpServlet {
 		ChartBuilderMetaData builder = (ChartBuilderMetaData) view.getInlineModel(modelName);
 		if (builder == null) {
 			// Check access since we know this is not an inline model
-			user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuiName);
+			EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxuiName);
 			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);
 			data = model.getChartData();
@@ -204,12 +205,12 @@ public class ChartServlet extends HttpServlet {
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 		// not a query, must be a document
 		if (query == null) {
-			user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 		}
 		// a query
 		else {
-			user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 		}
 		if (query == null) {
 			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);

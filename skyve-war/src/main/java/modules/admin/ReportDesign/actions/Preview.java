@@ -79,7 +79,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 			final String documentName = document.getName();
 
 			// Check access
-			user.checkAccess(UserAccess.singular(moduleName, documentName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui.getName());
 
 			// Check create
 			if (! user.canCreateDocument(document)) {

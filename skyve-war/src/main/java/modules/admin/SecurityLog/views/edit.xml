@@ -26,10 +26,42 @@
 		</row>
 		<row>
 			<item align="right">
-				<label value="{disp:loggedInUser} *:" />
+				<label value="{disp:sourceIP} *:" />
 			</item>
 			<item showLabel="false">
-				<textField binding="loggedInUser.bizKey" />
+				<textField binding="sourceIP" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:username} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="username" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:loggedInUserId} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="loggedInUserId" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:resource} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="resource" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:provenance} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="provenance" />
 			</item>
 		</row>
 		<row>
@@ -46,22 +78,6 @@
 			</item>
 			<item showLabel="false">
 				<textField binding="exceptionMessage" />
-			</item>
-		</row>
-		<row>
-			<item align="right">
-				<label value="{disp:sourceIP} *:" />
-			</item>
-			<item showLabel="false">
-				<textField binding="sourceIP" />
-			</item>
-		</row>
-		<row>
-			<item align="right">
-				<label value="{disp:provenance} *:" />
-			</item>
-			<item showLabel="false">
-				<textField binding="provenance" />
 			</item>
 		</row>
 	</form>

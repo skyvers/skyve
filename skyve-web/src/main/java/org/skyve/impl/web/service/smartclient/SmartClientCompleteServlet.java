@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -164,7 +165,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					if (complete == CompleteType.previous) {
 						final String userName = user.getName();
 						final UxUi uxui = UserAgent.getUxUi(request);
-						user.checkAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName());
+						EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding),
+								uxui.getName());
 
 						if (! user.canReadDocument(document)) {
 							throw new SecurityException("read this data", userName);

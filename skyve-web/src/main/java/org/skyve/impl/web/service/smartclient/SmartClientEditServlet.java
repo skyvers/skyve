@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -260,7 +261,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			processBean = formBean;
 		    		}
 			    	
-					user.checkAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName());
+					EXT.checkAccess(user, UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName());
 
 					if (! user.canAccessDocument(processDocument)) {
 						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(), user.getName());

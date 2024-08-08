@@ -232,8 +232,7 @@ public class ImageMarkupView extends LocalisableView {
 			// This was it will default to what is in the web.xml theme expression
 			request.removeAttribute(AbstractWebContext.UXUI);
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBindingParameter);
-			user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
-
+			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 			
 			// Check document access
 			Customer customer = user.getCustomer();

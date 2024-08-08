@@ -183,7 +183,7 @@ public class SmartClientListServlet extends HttpServlet {
 						if (dataSource.contains("__")) {
 							final String documentName = tokens[1];
 							final String modelName = tokens[3];
-							user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+							EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 							
 							drivingDocument = module.getDocument(customer, documentName);
 							model = drivingDocument.getListModel(customer, modelName, true);
@@ -199,11 +199,12 @@ public class SmartClientListServlet extends HttpServlet {
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
-								user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
+								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName),
+										uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 							}
 							else {
-								user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
+								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);

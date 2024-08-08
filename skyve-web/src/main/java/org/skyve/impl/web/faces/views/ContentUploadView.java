@@ -5,6 +5,7 @@ import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
@@ -165,7 +166,7 @@ public class ContentUploadView extends AbstractUploadView {
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getUxUi(request);
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBinding);
-			user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
+			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 			// Check document access
 			Customer customer = user.getCustomer();

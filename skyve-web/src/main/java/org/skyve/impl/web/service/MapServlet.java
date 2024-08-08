@@ -13,6 +13,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
@@ -141,11 +142,11 @@ public class MapServlet extends HttpServlet {
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryName);
 		UxUi uxui = UserAgent.getUxUi(request);
 		if (query == null) {
-			user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 		}
 		else {
-			user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui.getName());
 		}
 		if (query == null) {
 			throw new ServletException(documentOrQueryName + " does not reference a valid query");
@@ -193,7 +194,7 @@ public class MapServlet extends HttpServlet {
 		final String documentName = bean.getBizDocument();
 		final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 		UxUi uxui = UserAgent.getUxUi(request);
-		user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+		EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 
 		// Invoke the model
 		Customer customer = user.getCustomer();

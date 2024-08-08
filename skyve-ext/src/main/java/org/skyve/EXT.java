@@ -27,6 +27,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.messages.AccessException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.UploadException;
@@ -59,6 +60,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.model.chart.ChartData;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -670,5 +672,78 @@ public class EXT {
 	 */
 	public static HttpServletRequestResponse getHttpServletRequestResponse() {
 		return WebContainer.getHttpServletRequestResponse();
+	}
+
+	/**
+	 * Does the given user in given router UX/UI have access to the given UserAccess.
+	 * 
+	 * @param user The user to test
+	 * @param access The user access to test
+	 * @param uxui The UX/UI name to test for
+	 */
+	public static void checkAccess(@Nonnull User user, @Nonnull UserAccess access, @Nonnull String uxui) {
+		if (!user.canAccess(access, uxui)) {
+			final String userName = user.getName();
+			final String moduleName = access.getModuleName();
+			final String documentName = access.getDocumentName();
+			final String component = access.getComponent();
+			final StringBuilder warning = new StringBuilder(256);
+			final String resource;
+			warning.append("User ").append(userName).append(" cannot access ");
+			if (access.isContent()) {
+				warning.append("content for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" with binding ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this content";
+			}
+			else if (access.isDocumentAggregate()) {
+				warning.append("default query for document ").append(moduleName).append('.').append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this query";
+			}
+			else if (access.isDynamicImage()) {
+				warning.append("dynamic image for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" with binding ").append(component);
+				warning.append(" and UX/UI ").append(uxui);
+				resource = "this dynamic image";
+			}
+			else if (access.isModelAggregate()) {
+				warning.append("model for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this model";
+			}
+			else if (access.isPreviousComplete()) {
+				warning.append("previous complete for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" with binding ").append(component);
+				warning.append(" and UX/UI ").append(uxui);
+				resource = "this previous data";
+			}
+			else if (access.isQueryAggregate()) {
+				warning.append("query for module ").append(moduleName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this query";
+			}
+			else if (access.isReport()) {
+				warning.append("report for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this report";
+			}
+			else if (access.isSingular()) {
+				warning.append("view for document ").append(moduleName).append('.').append(documentName);
+				warning.append(" named ").append(component);
+				warning.append(" with UX/UI ").append(uxui);
+				resource = "this view";
+			}
+			else {
+				throw new IllegalStateException(access.toString() + " not catered for");
+			}
+
+			UtilImpl.LOGGER.warning(warning.toString());
+			UtilImpl.LOGGER.info("If this user already has a document or action privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
+			throw new AccessException(resource, userName);
+		}
 	}
 }

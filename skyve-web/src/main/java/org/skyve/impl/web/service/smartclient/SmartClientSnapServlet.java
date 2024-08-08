@@ -7,6 +7,7 @@ import java.security.Principal;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
@@ -111,18 +112,20 @@ public class SmartClientSnapServlet extends HttpServlet {
 							String documentName = documentOrQueryOrModelName.substring(0, __Index);
 							String modelName = documentOrQueryOrModelName.substring(__Index + 2);
 
-							user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+							EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 						}
 						// query type of request
 						else {
 							MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 							// not a query, must be a document
 							if (query == null) {
-								user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName),
+										uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 							}
 							else {
-								user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName),
+										uxui.getName());
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);

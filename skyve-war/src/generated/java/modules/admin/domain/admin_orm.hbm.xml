@@ -543,12 +543,7 @@
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="timestamp" type="Timestamp" />
 		<property name="threadID" length="36" />
-		<many-to-one name="loggedInUser" entity-name="adminUserProxy" column="loggedInUser_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityLog_loggedInUser"/>
-		<property name="exceptionType" length="18">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.SecurityLog$ExceptionType</param>
-			</type>
-		</property>
+		<property name="loggedInUserId" length="100" />
 		<property name="exceptionMessage" type="text" />
 		<property name="sourceIP" length="45" />
 		<property name="provenance" length="45" />
