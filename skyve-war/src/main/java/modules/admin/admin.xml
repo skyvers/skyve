@@ -17,7 +17,6 @@
 		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
-		<job name="jChangePasswordNotification" displayName="Change password notification" className="modules.admin.ChangePassword.ChangePasswordNotificationJob"/>    	
     </jobs>
     <documents>
         <document ref="Audit" defaultQueryName="qAudits"/>
