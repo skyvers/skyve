@@ -30,7 +30,7 @@ public class SecurityException extends DomainException {
 	}
 
 	/**
-	 * Creates a {@link SecurityLog} entry and emails a link to it (if email is configured)
+	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user
 	 *
 	 * @author Simeon Solomou
 	 */

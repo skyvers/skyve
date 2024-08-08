@@ -1,7 +1,6 @@
 package modules.admin.SystemDashboard.models;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -66,15 +65,11 @@ public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
 
 	@Override
 	public List<Bean> getRows() throws Exception {
-		SystemDashboard bean = getBean();
-		if (bean != null) {
-			DocumentQuery q = CORE.getPersistence()
-					.newDocumentQuery(SecurityLog.MODULE_NAME, SecurityLog.DOCUMENT_NAME);
-			q.addBoundOrdering(SecurityLog.timestampPropertyName, SortDirection.descending);
-			q.setMaxResults(5);
-			return q.beanResults();
-		}
-		return Collections.emptyList();
+		DocumentQuery q = CORE.getPersistence()
+				.newDocumentQuery(SecurityLog.MODULE_NAME, SecurityLog.DOCUMENT_NAME);
+		q.addBoundOrdering(SecurityLog.timestampPropertyName, SortDirection.descending);
+		q.setMaxResults(5);
+		return q.beanResults();
 	}
 
 	@Override
