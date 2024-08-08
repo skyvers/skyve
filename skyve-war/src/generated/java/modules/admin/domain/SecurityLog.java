@@ -2,25 +2,17 @@ package modules.admin.domain;
 
 import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlEnum;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSchemaType;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import modules.admin.UserProxy.UserProxyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.ExpressionEvaluator;
-import org.skyve.util.Util;
 
 /**
  * Security Log
@@ -30,13 +22,12 @@ import org.skyve.util.Util;
 			If email is configured, emails are sent to the support email address specified in the project JSON for each event raised.
  * 
  * @depend - - - ExceptionType
- * @navhas n loggedInUser 1 UserProxy
  * @stereotype "persistent"
  */
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public class SecurityLog extends AbstractPersistentBean {
+public class SecurityLog extends AbstractPersistentBean implements org.skyve.domain.app.admin.SecurityLog {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -56,7 +47,13 @@ public class SecurityLog extends AbstractPersistentBean {
 	public static final String threadIDPropertyName = "threadID";
 
 	/** @hidden */
-	public static final String loggedInUserPropertyName = "loggedInUser";
+	public static final String sourceIPPropertyName = "sourceIP";
+
+	/** @hidden */
+	public static final String usernamePropertyName = "username";
+
+	/** @hidden */
+	public static final String loggedInUserIdPropertyName = "loggedInUserId";
 
 	/** @hidden */
 	public static final String exceptionTypePropertyName = "exceptionType";
@@ -65,82 +62,7 @@ public class SecurityLog extends AbstractPersistentBean {
 	public static final String exceptionMessagePropertyName = "exceptionMessage";
 
 	/** @hidden */
-	public static final String sourceIPPropertyName = "sourceIP";
-
-	/** @hidden */
 	public static final String provenancePropertyName = "provenance";
-
-	/**
-	 * Exception Type
-	 * <br/>
-	 * Type of exception raised
-	 **/
-	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum ExceptionType implements Enumeration {
-		securityException("Security Exception", "Security Exception"),
-		accessException("Access Exception", "Access Exception");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues = Stream.of(values()).map(ExceptionType::toDomainValue).collect(Collectors.toUnmodifiableList());
-
-		private ExceptionType(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toLocalisedDescription() {
-			return Util.i18n(description);
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static ExceptionType fromCode(String code) {
-			ExceptionType result = null;
-
-			for (ExceptionType value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static ExceptionType fromLocalisedDescription(String description) {
-			ExceptionType result = null;
-
-			for (ExceptionType value : values()) {
-				if (value.toLocalisedDescription().equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			return domainValues;
-		}
-	}
 
 	/**
 	 * Timestamp
@@ -154,14 +76,28 @@ public class SecurityLog extends AbstractPersistentBean {
 	 * <br/>
 	 * Thread ID when the exception was raised
 	 **/
-	private String threadID;
+	private Long threadID;
 
 	/**
-	 * Logged In User
+	 * Source IP
 	 * <br/>
-	 * Logged in user when exception was raised
+	 * Source IP when exception was raised
 	 **/
-	private UserProxyExtension loggedInUser = null;
+	private String sourceIP;
+
+	/**
+	 * Username
+	 * <br/>
+	 * The username the security exception was raised for
+	 **/
+	private String username;
+
+	/**
+	 * Logged In User ID
+	 * <br/>
+	 * Logged in user ID when exception was raised
+	 **/
+	private String loggedInUserId;
 
 	/**
 	 * Exception Type
@@ -176,13 +112,6 @@ public class SecurityLog extends AbstractPersistentBean {
 	 * Exception message from exception raised
 	 **/
 	private String exceptionMessage;
-
-	/**
-	 * Source IP
-	 * <br/>
-	 * Source Ip when exception was raised
-	 **/
-	private String sourceIP;
 
 	/**
 	 * Provenance
@@ -256,7 +185,7 @@ public class SecurityLog extends AbstractPersistentBean {
 	 * {@link #threadID} accessor.
 	 * @return	The value.
 	 **/
-	public String getThreadID() {
+	public Long getThreadID() {
 		return threadID;
 	}
 
@@ -265,29 +194,63 @@ public class SecurityLog extends AbstractPersistentBean {
 	 * @param threadID	The new value.
 	 **/
 	@XmlElement
-	public void setThreadID(String threadID) {
+	public void setThreadID(Long threadID) {
 		preset(threadIDPropertyName, threadID);
 		this.threadID = threadID;
 	}
 
 	/**
-	 * {@link #loggedInUser} accessor.
+	 * {@link #sourceIP} accessor.
 	 * @return	The value.
 	 **/
-	public UserProxyExtension getLoggedInUser() {
-		return loggedInUser;
+	public String getSourceIP() {
+		return sourceIP;
 	}
 
 	/**
-	 * {@link #loggedInUser} mutator.
-	 * @param loggedInUser	The new value.
+	 * {@link #sourceIP} mutator.
+	 * @param sourceIP	The new value.
 	 **/
 	@XmlElement
-	public void setLoggedInUser(UserProxyExtension loggedInUser) {
-		if (this.loggedInUser != loggedInUser) {
-			preset(loggedInUserPropertyName, loggedInUser);
-			this.loggedInUser = loggedInUser;
-		}
+	public void setSourceIP(String sourceIP) {
+		preset(sourceIPPropertyName, sourceIP);
+		this.sourceIP = sourceIP;
+	}
+
+	/**
+	 * {@link #username} accessor.
+	 * @return	The value.
+	 **/
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * {@link #username} mutator.
+	 * @param username	The new value.
+	 **/
+	@XmlElement
+	public void setUsername(String username) {
+		preset(usernamePropertyName, username);
+		this.username = username;
+	}
+
+	/**
+	 * {@link #loggedInUserId} accessor.
+	 * @return	The value.
+	 **/
+	public String getLoggedInUserId() {
+		return loggedInUserId;
+	}
+
+	/**
+	 * {@link #loggedInUserId} mutator.
+	 * @param loggedInUserId	The new value.
+	 **/
+	@XmlElement
+	public void setLoggedInUserId(String loggedInUserId) {
+		preset(loggedInUserIdPropertyName, loggedInUserId);
+		this.loggedInUserId = loggedInUserId;
 	}
 
 	/**
@@ -324,24 +287,6 @@ public class SecurityLog extends AbstractPersistentBean {
 	public void setExceptionMessage(String exceptionMessage) {
 		preset(exceptionMessagePropertyName, exceptionMessage);
 		this.exceptionMessage = exceptionMessage;
-	}
-
-	/**
-	 * {@link #sourceIP} accessor.
-	 * @return	The value.
-	 **/
-	public String getSourceIP() {
-		return sourceIP;
-	}
-
-	/**
-	 * {@link #sourceIP} mutator.
-	 * @param sourceIP	The new value.
-	 **/
-	@XmlElement
-	public void setSourceIP(String sourceIP) {
-		preset(sourceIPPropertyName, sourceIP);
-		this.sourceIP = sourceIP;
 	}
 
 	/**

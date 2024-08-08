@@ -49,7 +49,7 @@
         <document ref="ReportManager"/>
         <document ref="ReportParameter"/>
         <document ref="ReportTemplate" defaultQueryName="qReportTemplates"/>
-        <document ref="SecurityLog"/>
+        <document ref="SecurityLog" defaultQueryName="qSecurityLogs"/>
         <document ref="SelfRegistration"/>
         <document ref="SelfRegistrationActivation"/>
         <document ref="Snapshot" defaultQueryName="qSnapshots"/>
@@ -865,6 +865,15 @@
                 <column binding="templateName"/>
                 <column binding="restrictToRole" hidden="true"/>
                 <column binding="template" hidden="true"/>
+            </columns>
+        </query>
+        <query documentName="SecurityLog" name="qSecurityLogs">
+            <description><![CDATA[All Security Logs]]></description>
+            <columns>
+                <column binding="timestamp" sortOrder="descending"/>
+                <column binding="username"/>
+                <column binding="exceptionType"/>
+                <column binding="exceptionMessage"/>
             </columns>
         </query>
     </queries>

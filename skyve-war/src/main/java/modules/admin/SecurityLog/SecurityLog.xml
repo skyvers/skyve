@@ -30,7 +30,7 @@
 		</longInteger>
 		<text name="sourceIP">
 			<displayName>Source IP</displayName>
-			<description>Source Ip when exception was raised</description>
+			<description>Source IP when exception was raised</description>
 			<length>45</length>
 		</text>
 		<id name="username">
@@ -41,15 +41,6 @@
 			<displayName>Logged In User ID</displayName>
 			<description>Logged in user ID when exception was raised</description>
 		</id>
-		<id name="resource">
-			<displayName>Resource</displayName>
-			<description>The resource the security exception was raised for</description>
-		</id>
-		<text name="provenance">
-			<displayName>Provenance</displayName>
-			<description>First line of the stack trace of exception raised</description>
-			<length>45</length>
-		</text>
 		<enum name="exceptionType" implementingEnumClassName="org.skyve.domain.app.admin.SecurityLog$ExceptionType" required="true">
 			<displayName>Exception Type</displayName>
 			<description>Type of exception raised</description>
@@ -57,6 +48,10 @@
 		<memo name="exceptionMessage" required="true">
 			<displayName>Exception Message</displayName>
 			<description>Exception message from exception raised</description>
+		</memo>
+		<memo name="provenance">
+			<displayName>Provenance</displayName>
+			<description>First line of the stack trace of exception raised</description>
 		</memo>
 	</attributes>
 </document>

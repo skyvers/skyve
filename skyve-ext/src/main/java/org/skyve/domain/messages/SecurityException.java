@@ -26,17 +26,15 @@ public class SecurityException extends DomainException {
 
 	public SecurityException(String resource, String userName) {
 		super(userName + " does not have access to " + resource);
-		log(resource, userName);
+		log();
 	}
 
 	/**
 	 * Creates a {@link SecurityLog} entry and emails a link to it (if email is configured)
 	 *
-	 * @param resource
-	 * @param userName
 	 * @author Simeon Solomou
 	 */
-	private void log(String resource, String userName) {
+	private void log() {
 		// Get current persistence
 		Persistence p = CORE.getPersistence();
 		User user = p.getUser();
@@ -73,16 +71,10 @@ public class SecurityException extends DomainException {
 				}
 
 				// Username
-				sl.setUsername(userName);
+				sl.setUsername(user.getName());
 
 				// Logged in user (ID)
 				sl.setLoggedInUserId(user.getId());
-
-				// Resource
-				sl.setResource(userName);
-
-				// Provenance
-				sl.setProvenance(SecurityUtil.getProvenance(this));
 
 				// Exception type
 				if (this instanceof AccessException) {
@@ -93,6 +85,9 @@ public class SecurityException extends DomainException {
 
 				// Exception message
 				sl.setExceptionMessage(this.getMessage());
+				
+				// Provenance
+				sl.setProvenance(SecurityUtil.getProvenance(this));
 
 				try {
 					// Upsert
@@ -151,16 +146,15 @@ public class SecurityException extends DomainException {
 
 		// Format email content
 		StringBuilder body = new StringBuilder();
-		body.append("A security exception as been logged:\n\n");
-		body.append("Timestamp: ").append(sl.getTimestamp()).append("\n");
-		body.append("Thread ID: ").append(sl.getThreadID()).append("\n");
-		body.append("Source IP: ").append(sl.getSourceIP()).append("\n");
-		body.append("Username: ").append(sl.getUsername()).append("\n");
-		body.append("Logged in User ID: ").append(sl.getLoggedInUserId()).append("\n");
-		body.append("Resource: ").append(sl.getResource()).append("\n");
-		body.append("Provenance: ").append(sl.getProvenance()).append("\n");
-		body.append("Exception Type: ").append(sl.getExceptionType()).append("\n");
-		body.append("Exception Message: ").append(sl.getExceptionMessage()).append("\n");
+		body.append("A security exception has been logged:<br/><br/>");
+		body.append("Timestamp: ").append(sl.getTimestamp()).append("<br/>");
+		body.append("Thread ID: ").append(sl.getThreadID()).append("<br/>");
+		body.append("Source IP: ").append(sl.getSourceIP()).append("<br/>");
+		body.append("Username: ").append(sl.getUsername()).append("<br/>");
+		body.append("Logged in User ID: ").append(sl.getLoggedInUserId()).append("<br/>");
+		body.append("Exception Type: ").append(sl.getExceptionType().toLocalisedDescription()).append("<br/>");
+		body.append("Exception Message: ").append(sl.getExceptionMessage()).append("<br/>");
+		body.append("Provenance: ").append(sl.getProvenance()).append("<br/>");
 
 		// Send
 		EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)

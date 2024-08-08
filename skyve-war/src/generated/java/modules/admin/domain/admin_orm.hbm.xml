@@ -542,11 +542,17 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="timestamp" type="Timestamp" />
-		<property name="threadID" length="36" />
-		<property name="loggedInUserId" length="100" />
-		<property name="exceptionMessage" type="text" />
+		<property name="threadID" />
 		<property name="sourceIP" length="45" />
-		<property name="provenance" length="45" />
+		<property name="username" length="36" />
+		<property name="loggedInUserId" length="36" />
+		<property name="exceptionType" length="18">
+			<type name="Enum">
+				<param name="enumClass">org.skyve.domain.app.admin.SecurityLog$ExceptionType</param>
+			</type>
+		</property>
+		<property name="exceptionMessage" type="text" />
+		<property name="provenance" type="text" />
 		<filter name="adminSecurityLogNoneFilter" condition="1=0"/>
 		<filter name="adminSecurityLogCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminSecurityLogDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

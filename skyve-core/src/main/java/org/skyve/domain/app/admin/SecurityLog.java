@@ -19,8 +19,8 @@ public interface SecurityLog extends PersistentBean {
 
 	@XmlEnum
 	public static enum ExceptionType implements Enumeration {
-		securityException("securityException", "Security Exception"), 
-		accessException("accessException", "Access Exception");
+		securityException("Security Exception", "Security Exception"), 
+		accessException("Access Exception", "Access Exception");
 
 		private String code;
 		private String description;
@@ -106,17 +106,15 @@ public interface SecurityLog extends PersistentBean {
 	String getSourceIP();
 	String getUsername();
 	String getLoggedInUserId();
-	String getResource();
-	String getProvenance();
 	ExceptionType getExceptionType();
 	String getExceptionMessage();
+	String getProvenance();
 
 	void setTimestamp(Timestamp timestamp);
 	void setThreadID(Long threadID);
 	void setSourceIP(String sourceIP);
 	void setUsername(String username);
 	void setLoggedInUserId(String bizId);
-	void setResource(String resource);
 	void setProvenance(String provenance);
 	void setExceptionType(ExceptionType exceptionType);
 	void setExceptionMessage(String exceptionMessage);

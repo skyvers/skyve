@@ -50,26 +50,10 @@
 		</row>
 		<row>
 			<item align="right">
-				<label value="{disp:resource} *:" />
-			</item>
-			<item showLabel="false">
-				<textField binding="resource" />
-			</item>
-		</row>
-		<row>
-			<item align="right">
-				<label value="{disp:provenance} *:" />
-			</item>
-			<item showLabel="false">
-				<textField binding="provenance" />
-			</item>
-		</row>
-		<row>
-			<item align="right">
 				<label value="{disp:exceptionType} *:" />
 			</item>
 			<item showLabel="false">
-				<textField binding="exceptionType" />
+				<combo binding="exceptionType" />
 			</item>
 		</row>
 		<row>
@@ -78,6 +62,14 @@
 			</item>
 			<item showLabel="false">
 				<textField binding="exceptionMessage" />
+			</item>
+		</row>
+		<row>
+			<item align="right">
+				<label value="{disp:provenance} *:" />
+			</item>
+			<item showLabel="false">
+				<textField binding="provenance" />
 			</item>
 		</row>
 	</form>
