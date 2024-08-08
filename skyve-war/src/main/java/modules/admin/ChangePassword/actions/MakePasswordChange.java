@@ -11,10 +11,12 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.Configuration.ConfigurationExtension;
@@ -132,6 +134,17 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		// Ensure the user doesn't need to change their password any more.
 		((UserImpl) user).setPasswordChangeRequired(false);
 		
+		boolean emailConfigured = Configuration.newInstance()
+				.isEmailConfigured();
+		if (emailConfigured) {
+			// Send email notification
+			final JobMetaData changePasswordNotificationJobMetadata = module.getJob("jChangePasswordNotification");
+			EXT.getJobScheduler()
+					.runOneShotJob(changePasswordNotificationJobMetadata, userBean, user);
+		} else {
+			Util.LOGGER.warning("Cannot send change password notification as email is not configured");
+		}
+
 		return new ServerSideActionResult<>(bean); // stay on the same form
 	}
 }
