@@ -17,11 +17,14 @@ import org.skyve.util.ExpressionEvaluator;
 /**
  * Security Log
  * <br/>
- * The Security Log consists of a list of records of {@link SecurityException}, {@link AccessExceptions}, so that intrusions can be detected in near real time.
+ * The Security Log consists of a list of records of security events in the system, so that intrusions can be detected in near real time.
+			<br/>
+			A SecurityLog instance is created automatically for every {@link AccessException} or {@link SecurityException} thrown.
+			<br/>
+			A SecurityLog instance can be manually created via static extension method <code>log</code>.
 			<br/>
 			If email is configured, emails are sent to the support email address specified in the project JSON for each event raised.
  * 
- * @depend - - - ExceptionType
  * @stereotype "persistent"
  */
 @XmlType
@@ -56,10 +59,10 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	public static final String loggedInUserIdPropertyName = "loggedInUserId";
 
 	/** @hidden */
-	public static final String exceptionTypePropertyName = "exceptionType";
+	public static final String eventTypePropertyName = "eventType";
 
 	/** @hidden */
-	public static final String exceptionMessagePropertyName = "exceptionMessage";
+	public static final String eventMessagePropertyName = "eventMessage";
 
 	/** @hidden */
 	public static final String provenancePropertyName = "provenance";
@@ -100,18 +103,18 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	private String loggedInUserId;
 
 	/**
-	 * Exception Type
+	 * Event Type
 	 * <br/>
-	 * Type of exception raised
+	 * Type of security event raised. If raised with an exception, this is the exception name.
 	 **/
-	private ExceptionType exceptionType;
+	private String eventType;
 
 	/**
-	 * Exception Message
+	 * Event Message
 	 * <br/>
-	 * Exception message from exception raised
+	 * Details about the security event. If an exception, this is the message from raised exception
 	 **/
-	private String exceptionMessage;
+	private String eventMessage;
 
 	/**
 	 * Provenance
@@ -254,39 +257,39 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	}
 
 	/**
-	 * {@link #exceptionType} accessor.
+	 * {@link #eventType} accessor.
 	 * @return	The value.
 	 **/
-	public ExceptionType getExceptionType() {
-		return exceptionType;
+	public String getEventType() {
+		return eventType;
 	}
 
 	/**
-	 * {@link #exceptionType} mutator.
-	 * @param exceptionType	The new value.
+	 * {@link #eventType} mutator.
+	 * @param eventType	The new value.
 	 **/
 	@XmlElement
-	public void setExceptionType(ExceptionType exceptionType) {
-		preset(exceptionTypePropertyName, exceptionType);
-		this.exceptionType = exceptionType;
+	public void setEventType(String eventType) {
+		preset(eventTypePropertyName, eventType);
+		this.eventType = eventType;
 	}
 
 	/**
-	 * {@link #exceptionMessage} accessor.
+	 * {@link #eventMessage} accessor.
 	 * @return	The value.
 	 **/
-	public String getExceptionMessage() {
-		return exceptionMessage;
+	public String getEventMessage() {
+		return eventMessage;
 	}
 
 	/**
-	 * {@link #exceptionMessage} mutator.
-	 * @param exceptionMessage	The new value.
+	 * {@link #eventMessage} mutator.
+	 * @param eventMessage	The new value.
 	 **/
 	@XmlElement
-	public void setExceptionMessage(String exceptionMessage) {
-		preset(exceptionMessagePropertyName, exceptionMessage);
-		this.exceptionMessage = exceptionMessage;
+	public void setEventMessage(String eventMessage) {
+		preset(eventMessagePropertyName, eventMessage);
+		this.eventMessage = eventMessage;
 	}
 
 	/**

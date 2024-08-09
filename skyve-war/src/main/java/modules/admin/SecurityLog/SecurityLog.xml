@@ -9,7 +9,11 @@
 	<iconStyleClass>fa-solid fa-book</iconStyleClass>
 	<description>
 		<![CDATA[
-			The Security Log consists of a list of records of {@link SecurityException}, {@link AccessExceptions}, so that intrusions can be detected in near real time.
+			The Security Log consists of a list of records of security events in the system, so that intrusions can be detected in near real time.
+			<br/>
+			A SecurityLog instance is created automatically for every {@link AccessException} or {@link SecurityException} thrown.
+			<br/>
+			A SecurityLog instance can be manually created via <code>log</code> method in {@link SecurityUtil}.
 			<br/>
 			If email is configured, emails are sent to the support email address specified in the project JSON for each event raised.
 		]]>
@@ -24,7 +28,7 @@
 			<description>When the exception was raised</description>
 			<defaultValue>{TIMESTAMP}</defaultValue>
 		</timestamp>
-		<longInteger name="threadID" required="true">
+		<longInteger name="threadID">
 			<displayName>Thread ID</displayName>
 			<description>Thread ID when the exception was raised</description>
 		</longInteger>
@@ -33,21 +37,23 @@
 			<description>Source IP when exception was raised</description>
 			<length>45</length>
 		</text>
-		<id name="username">
+		<text name="username" required="true">
 			<displayName>Username</displayName>
 			<description>The username the security exception was raised for</description>
-		</id>
+			<length>254</length>
+		</text>
 		<id name="loggedInUserId" required="true">
 			<displayName>Logged In User ID</displayName>
 			<description>Logged in user ID when exception was raised</description>
 		</id>
-		<enum name="exceptionType" implementingEnumClassName="org.skyve.domain.app.admin.SecurityLog$ExceptionType" required="true">
-			<displayName>Exception Type</displayName>
-			<description>Type of exception raised</description>
-		</enum>
-		<memo name="exceptionMessage" required="true">
-			<displayName>Exception Message</displayName>
-			<description>Exception message from exception raised</description>
+		<text name="eventType" required="true">
+			<displayName>Event Type</displayName>
+			<description>Type of security event raised. If raised with an exception, this is the exception name.</description>
+			<length>500</length>
+		</text>
+		<memo name="eventMessage" required="true">
+			<displayName>Event Message</displayName>
+			<description>Details about the security event. If an exception, this is the message from raised exception</description>
 		</memo>
 		<memo name="provenance">
 			<displayName>Provenance</displayName>

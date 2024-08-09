@@ -37,8 +37,8 @@ public class RecentSecurityLogModel extends InMemoryListModel<SystemDashboard> {
 		// Add columns
 		defineColumn(SecurityLog.timestampPropertyName, "Security Log");
 		defineColumn(SecurityLog.usernamePropertyName, "Username");
-		defineColumn(SecurityLog.exceptionTypePropertyName, "Exception Type");
-		defineColumn(SecurityLog.exceptionMessagePropertyName, "Exception Message");
+		defineColumn(SecurityLog.eventTypePropertyName, "Event Type");
+		defineColumn(SecurityLog.eventMessagePropertyName, "Event Message");
 
 		super.postConstruct(customer, runtime);
 	}

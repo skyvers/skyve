@@ -871,8 +871,8 @@
             <columns>
                 <column binding="timestamp" sortOrder="descending"/>
                 <column binding="username"/>
-                <column binding="exceptionType"/>
-                <column binding="exceptionMessage"/>
+                <column binding="eventType"/>
+                <column binding="eventMessage"/>
             </columns>
         </query>
     </queries>
