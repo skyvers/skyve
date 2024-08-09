@@ -58,7 +58,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 			JobDataMap map = context.getMergedJobDataMap();
 			String webId = map.getString(AbstractWebContext.CONTEXT_NAME);
 			user = (User) map.get(AbstractSkyveJob.USER_JOB_PARAMETER_KEY);
-        	webContext = StateUtil.getCachedConversation(webId, null, null);
+			webContext = StateUtil.getCachedConversation(webId, null);
 			@SuppressWarnings("unchecked")
 			T t = (T) webContext.getCurrentBean();
 			bean = t;

@@ -18,8 +18,9 @@ public class FacesWebContext extends ViewWebContext {
 
 	public FacesWebContext() {
 		super(UUID.randomUUID().toString(),
-				(HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest(),
-				FacesContext.getCurrentInstance().getExternalContext().getResponse());
+				(HttpServletRequest) FacesContext.getCurrentInstance()
+						.getExternalContext()
+						.getRequest());
 	}
 
 	@Override

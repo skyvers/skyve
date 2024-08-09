@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Principal;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -89,7 +90,7 @@ public class DynamicImageServlet extends HttpServlet {
 				}
 		        
 				String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-	        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+				AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 	        	if (webContext == null) {
 	        		throw new ConversationEndedException(request.getLocale());
 	        	}
@@ -112,7 +113,7 @@ public class DynamicImageServlet extends HttpServlet {
 				Document document = customer.getModule(moduleName).getDocument(customer, documentName);
 				
 				UxUi uxui = UserAgent.getUxUi(request);
-				user.checkAccess(UserAccess.dynamicImage(moduleName, documentName, imageName), uxui.getName());
+				EXT.checkAccess(user, UserAccess.dynamicImage(moduleName, documentName, imageName), uxui.getName());
 
 				DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageName);
 				BufferedImage image = dynamicImage.getImage(bean,

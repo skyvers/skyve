@@ -21,6 +21,7 @@ public final class AppConstants {
 	public static final String REPORT_DATASET_DOCUMENT_NAME = "ReportDataset";
 	public static final String REPORT_PARAMETER_DOCUMENT_NAME = "ReportParameter";
 	public static final String REPORT_TEMPLATE_DOCUMENT_NAME = "ReportTemplate";
+	public static final String SECURITY_LOG_DOCUMENT_NAME = "SecurityLog";
 	public static final String SELF_REGISTRATION_DOCUMENT_NAME = "SelfRegistration";
 	public static final String SNAPSHOT_DOCUMENT_NAME = "Snapshot";
 	public static final String SUBSCRIPTION_DOCUMENT_NAME = "Subscription";

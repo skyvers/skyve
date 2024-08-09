@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -162,7 +163,7 @@ public class SmartClientEditServlet extends HttpServlet {
 					AbstractWebContext webContext = null;
 			        String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        if (webId != null) {
-			        	webContext = StateUtil.getCachedConversation(webId, request, response);
+						webContext = StateUtil.getCachedConversation(webId, request);
 			        	if (webContext == null) {
 			        		throw new ConversationEndedException(request.getLocale());
 			        	}
@@ -172,7 +173,8 @@ public class SmartClientEditServlet extends HttpServlet {
 			        }
 			    	else {
 			            // Create and inject any dependencies
-			            webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request, response);
+						webContext = new SmartClientWebContext(UUID.randomUUID()
+								.toString(), request);
 
 			    		UtilImpl.LOGGER.info("START NEW CONVERSATION!!!!");
 			            persistence = AbstractPersistence.get();
@@ -259,7 +261,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			processBean = formBean;
 		    		}
 			    	
-					user.checkAccess(UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName());
+					EXT.checkAccess(user, UserAccess.singular(processModule.getName(), processDocument.getName()), uxui.getName());
 
 					if (! user.canAccessDocument(processDocument)) {
 						throw new SecurityException(processDocument.getName() + " in module " + processModule.getName(), user.getName());

@@ -4,8 +4,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.skyve.domain.messages.AccessException;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
@@ -231,72 +229,6 @@ public interface User extends NamedMetaData {
 	 * @return	true if the user is able to access the application in this way.
 	 */
 	boolean canAccess(@Nonnull UserAccess access, @Nonnull String uxui);
-	
-	default void checkAccess(@Nonnull UserAccess access, @Nonnull String uxui) {
-		if (! canAccess(access, uxui)) {
-			final String userName = getName();
-			final String moduleName = access.getModuleName();
-			final String documentName = access.getDocumentName();
-			final String component = access.getComponent();
-			final StringBuilder warning = new StringBuilder(256);
-			final String resource;
-			warning.append("User ").append(userName).append(" cannot access ");
-			if (access.isContent()) {
-				warning.append("content for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
-				resource = "this content";
-			}
-			else if (access.isDocumentAggregate()) {
-				warning.append("default query for document ").append(moduleName).append('.').append(component);
-				warning.append(" with UX/UI ").append(uxui);
-				resource = "this query";
-			}
-			else if (access.isDynamicImage()) {
-				warning.append("dynamic image for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" and UX/UI ").append(uxui);
-				resource = "this dynamic image";
-			}
-			else if (access.isModelAggregate()) {
-				warning.append("model for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
-				resource = "this model";
-			}
-			else if (access.isPreviousComplete()) {
-				warning.append("previous complete for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" with binding ").append(component);
-				warning.append(" and UX/UI ").append(uxui);
-				resource = "this previous data";
-			}
-			else if (access.isQueryAggregate()) {
-				warning.append("query for module ").append(moduleName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
-				resource = "this query";
-			}
-			else if (access.isReport()) {
-				warning.append("report for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
-				resource = "this report";
-			}
-			else if (access.isSingular()) {
-				warning.append("view for document ").append(moduleName).append('.').append(documentName);
-				warning.append(" named ").append(component);
-				warning.append(" with UX/UI ").append(uxui);
-				resource = "this view";
-			}
-			else {
-				throw new IllegalStateException(access.toString() + " not catered for");
-			}
-
-			UtilImpl.LOGGER.warning(warning.toString());
-			UtilImpl.LOGGER.info("If this user already has a document or action privilege, check if they were navigated to this page/resource programatically or by means other than the menu or views and need to be granted access via an <accesses> stanza in the module or view XML.");
-			throw new AccessException(resource, userName);
-		}
-	}
 	
 	/**
 	 * User (session) attributes. Keep this small since the user is in the web session.

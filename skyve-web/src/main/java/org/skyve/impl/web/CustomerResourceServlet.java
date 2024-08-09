@@ -431,7 +431,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			// Check that the user has access - use the full binding here
 			// NB If you can text search you should already be able to see anything you have access to
 			if (! user.canTextSearch()) {
-				user.checkAccess(UserAccess.content(moduleName, documentName, binding), uxui);
+				EXT.checkAccess(user, UserAccess.content(moduleName, documentName, binding), uxui);
 			}
 			
 			// Check that user has content access - Use the content module and document and the target attribute name
