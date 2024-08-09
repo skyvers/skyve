@@ -146,28 +146,6 @@
 			<displayName>admin.controlPanel.tabIndex.displayName</displayName>
 		</integer>
 		
-		<!-- Setup Settings -->
-		<collection type="aggregation" name="startupProperties" persistent="false" audited="false">
-			<displayName>admin.controlPanel.collection.startupProperties.displayName</displayName>
-			<description>admin.controlPanel.collection.startupProperties.description</description>
-			<documentName>Generic</documentName>
-			<minCardinality>0</minCardinality>
-		</collection>
-		<collection type="aggregation" name="originalStartupProperties" persistent="false" audited="false">
-			<displayName>admin.controlPanel.collection.originalStartupProperties.displayName</displayName>
-			<description>admin.controlPanel.collection.originalStartupProperties.description</description>
-			<documentName>Generic</documentName>
-			<minCardinality>0</minCardinality>
-		</collection>
-		<association type="aggregation" name="newProperty" persistent="false" audited="false">
-			<displayName>admin.controlPanel.association.newProperty.displayName</displayName>
-			<documentName>Generic</documentName>
-		</association>
-		<boolean name="addKeyNotSupported" persistent="false" audited="false">
-			<displayName>admin.controlPanel.addKeyNotSupported.displayName</displayName>
-			<description>admin.controlPanel.addkeyNotSupported.description</description>
-		</boolean>
-		
 		<!-- Cache and session -->
 		<text name="selectedCache" usage="view" audited="false" trackChanges="false">
 			<displayName>admin.controlPanel.selectedCache.displayName</displayName>
@@ -222,13 +200,6 @@
 			<expression>
 				<![CDATA[
 					org.skyve.impl.util.UtilImpl.ENVIRONMENT_IDENTIFIER==null
-				]]>
-			</expression>
-		</condition>	
-		<condition name="allowAddAPIKey">
-			<expression>
-				<![CDATA[
-				Boolean.TRUE.equals(addKeyNotSupported)
 				]]>
 			</expression>
 		</condition>

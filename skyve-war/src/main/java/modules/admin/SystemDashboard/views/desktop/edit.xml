@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="admin.systemDashboard.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="admin.systemDashboard.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<hbox minPixelHeight="300">
 		<vbox border="true" borderTitle="System Activity" percentageHeight="100">
@@ -18,6 +18,10 @@
 		<chart type="pie" modelName="ActivityContextModel"/>
 		<chart type="bar" modelName="ActivityModel"/>
 	</hbox>
-	<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" title="System Jobs" />
-	<listGrid continueConversation="false" model="RecentSecurityLogModel" disabled="true" title="Recent Security Logs" />
+	<vbox border="true" borderTitle="System Jobs">
+		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
+	</vbox>
+	<vbox border="true" borderTitle="Recent Security Logs">
+		<listGrid continueConversation="false" model="RecentSecurityLogModel" />
+	</vbox>
 </view>

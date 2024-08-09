@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Principal;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
@@ -110,7 +111,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				String uxuiName = uxui.getName();
 				UtilImpl.LOGGER.info("UX/UI = " + uxuiName);
 
-				user.checkAccess(UserAccess.singular(moduleName, documentName), uxuiName);
+				EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxuiName);
 
 				Module module = customer.getModule(moduleName);
 				Document document = module.getDocument(customer, documentName);

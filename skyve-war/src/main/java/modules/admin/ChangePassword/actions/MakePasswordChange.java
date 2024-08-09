@@ -16,6 +16,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -144,6 +145,9 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		} else {
 			Util.LOGGER.warning("Cannot send change password notification as email is not configured");
 		}
+
+		// Log security event
+		SecurityUtil.log("Change Password", "User has changed password");
 
 		return new ServerSideActionResult<>(bean); // stay on the same form
 	}

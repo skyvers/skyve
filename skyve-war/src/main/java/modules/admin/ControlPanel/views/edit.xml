@@ -312,50 +312,6 @@
 		<tab title="admin.controlPanel.edit.userRememberMeTokens.tabTitle">
 			<listGrid query="qUserTokens" continueConversation="false" />
 		</tab>
-		<tab title="admin.controlPanel.edit.startupConfiguration.tabTitle" visible="false">
-			<vbox>
-				<form>
-					<column />
-					<row>
-						<item>
-							<button action="ApplyStartupConfiguration" pixelWidth="150" />
-						</item>
-					</row>
-				</form>
-				<dataGrid binding="startupProperties" showRemove="false" inline="true" showZoom="false">
-					<boundColumn binding="text5001" title="admin.controlPanel.startupProperties.key.title" editable="false" />
-					<boundColumn binding="text5002" title="admin.controlPanel.startupProperties.value.title" />
-					<boundColumn binding="text5003" title="admin.controlPanel.startupProperties.description.title" editable="false" />
-				</dataGrid>
-				<form border="true" borderTitle="admin.controlPanel.edit.startupConfiguration.addApiKey.borderTitle" visible="allowAddAPIKey">
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
-					<row>
-						<item label="admin.controlPanel.edit.apiKeyName.label">
-							<textField binding="newProperty.text5001" />
-						</item>
-						<item label="admin.controlPanel.edit.keyValue.label">
-							<textField binding="newProperty.text5002" />
-						</item>
-						<item>
-							<button action="AddAPIKey" />
-						</item>
-					</row>
-				</form>
-				<form border="true" borderTitle="admin.controlPanel.edit.startupConfiguration.addApiKey.borderTitle" invisible="allowAddAPIKey">
-					<column />
-					<column />
-					<row>
-						<item>
-							<blurb><![CDATA[<em>{i18n:admin.controlPanel.edit.startupConfiguration.addApiKey.complexConfigurationNotSupportedWarning}</em>]]></blurb>
-						</item>
-					</row>
-				</form>
-			</vbox>
-		</tab>
 	</tabPane>
 	<actions>
 		<action className="CacheStats" displayName="admin.controlPanel.actions.cacheStats.actionName" clientValidation="false" inActionPanel="false" />
@@ -369,10 +325,6 @@
 		<action className="ExecuteSAIL" displayName="admin.controlPanel.actions.executeSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.executeSail.toolTip" />
 		<download className="DownloadResults" displayName="admin.controlPanel.actions.downloadResults.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadResults.toolTip"/>
 		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
-		<action className="ApplyStartupConfiguration" displayName="admin.controlPanel.acitons.applyStartupConfiguration.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.applyStartupConfiguration.toolTip"
-			iconStyleClass="fa-solid fa-exclamation" />
-		<action className="AddAPIKey" displayName="admin.controlPanel.actions.addApiKey.actionName" inActionPanel="false" enabled="allowAddAPIKey"
-			iconStyleClass="fa-solid fa-plus"/>
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-trash-can" clientValidation="false" />
 	</actions>

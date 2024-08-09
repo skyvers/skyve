@@ -60,18 +60,6 @@ public interface WebContext {
 	 * @param action
 	 */
 	public void setAction(String action);
-	
-	/**
-	 * The web request to process - This is transient, not part of the encoded context.
-	 */
-	public Object getHttpServletRequest();
-	public void setHttpServletRequest(Object request);
-	
-	/**
-	 * The web response to generate - This is transient, not part of the encoded context.
-	 */
-	public Object getHttpServletResponse();
-	public void setHttpServletResponse(Object response);
 
 	// TODO - implement view push/pop/replace/parent refresh
 	// This class should have methods to accomplish the following

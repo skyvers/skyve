@@ -14,7 +14,8 @@ public final class MockWebContext extends AbstractWebContext {
 	private static final long serialVersionUID = 2494440501288342409L;
 
 	public MockWebContext() {
-		super(UUID.randomUUID().toString(), null, null);
+		super(UUID.randomUUID()
+				.toString());
 		sessionId = UUID.randomUUID().toString();
 	}
 

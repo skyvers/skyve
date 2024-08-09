@@ -25,11 +25,8 @@ import org.skyve.util.Util;
  * @depend - - - SailUserAgentType
  * @depend - - - SailTestStrategy
  * @depend - - - SailExecutor
- * @navhas n newProperty 0..1 Generic
  * @navhas n sailUser 0..1 UserProxy
- * @navhas n originalStartupProperties 0..n Generic
  * @navhas n testDocumentNames 0..n ModuleDocument
- * @navhas n startupProperties 0..n Generic
  * @stereotype "transient"
  */
 @XmlType
@@ -122,18 +119,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String tabIndexPropertyName = "tabIndex";
-
-	/** @hidden */
-	public static final String startupPropertiesPropertyName = "startupProperties";
-
-	/** @hidden */
-	public static final String originalStartupPropertiesPropertyName = "originalStartupProperties";
-
-	/** @hidden */
-	public static final String newPropertyPropertyName = "newProperty";
-
-	/** @hidden */
-	public static final String addKeyNotSupportedPropertyName = "addKeyNotSupported";
 
 	/** @hidden */
 	public static final String selectedCachePropertyName = "selectedCache";
@@ -518,32 +503,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 			 	This is set to the results tab when there is results to display.
 	 **/
 	private Integer tabIndex;
-
-	/**
-	 * Startup
-	 * <br/>
-	 * Startup Configuration
-	 **/
-	private List<Generic> startupProperties = new ChangeTrackingArrayList<>("startupProperties", this);
-
-	/**
-	 * Original Startup values
-	 * <br/>
-	 * Startup Configuration
-	 **/
-	private List<Generic> originalStartupProperties = new ChangeTrackingArrayList<>("originalStartupProperties", this);
-
-	/**
-	 * New Property
-	 **/
-	private Generic newProperty = null;
-
-	/**
-	 * Add Key Not Supported
-	 * <br/>
-	 * admin.controlPanel.addkeyNotSupported.description
-	 **/
-	private Boolean addKeyNotSupported;
 
 	/**
 	 * Cache
@@ -1076,164 +1035,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #startupProperties} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Generic> getStartupProperties() {
-		return startupProperties;
-	}
-
-	/**
-	 * {@link #startupProperties} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Generic getStartupPropertiesElementById(String bizId) {
-		return getElementById(startupProperties, bizId);
-	}
-
-	/**
-	 * {@link #startupProperties} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setStartupPropertiesElementById(String bizId, Generic element) {
-		setElementById(startupProperties, element);
-	}
-
-	/**
-	 * {@link #startupProperties} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addStartupPropertiesElement(Generic element) {
-		return startupProperties.add(element);
-	}
-
-	/**
-	 * {@link #startupProperties} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addStartupPropertiesElement(int index, Generic element) {
-		startupProperties.add(index, element);
-	}
-
-	/**
-	 * {@link #startupProperties} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeStartupPropertiesElement(Generic element) {
-		return startupProperties.remove(element);
-	}
-
-	/**
-	 * {@link #startupProperties} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeStartupPropertiesElement(int index) {
-		return startupProperties.remove(index);
-	}
-
-	/**
-	 * {@link #originalStartupProperties} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Generic> getOriginalStartupProperties() {
-		return originalStartupProperties;
-	}
-
-	/**
-	 * {@link #originalStartupProperties} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Generic getOriginalStartupPropertiesElementById(String bizId) {
-		return getElementById(originalStartupProperties, bizId);
-	}
-
-	/**
-	 * {@link #originalStartupProperties} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setOriginalStartupPropertiesElementById(String bizId, Generic element) {
-		setElementById(originalStartupProperties, element);
-	}
-
-	/**
-	 * {@link #originalStartupProperties} add.
-	 * @param element	The element to add.
-	 **/
-	public boolean addOriginalStartupPropertiesElement(Generic element) {
-		return originalStartupProperties.add(element);
-	}
-
-	/**
-	 * {@link #originalStartupProperties} add.
-	 * @param index	The index in the list to add the element to.
-	 * @param element	The element to add.
-	 **/
-	public void addOriginalStartupPropertiesElement(int index, Generic element) {
-		originalStartupProperties.add(index, element);
-	}
-
-	/**
-	 * {@link #originalStartupProperties} remove.
-	 * @param element	The element to remove.
-	 **/
-	public boolean removeOriginalStartupPropertiesElement(Generic element) {
-		return originalStartupProperties.remove(element);
-	}
-
-	/**
-	 * {@link #originalStartupProperties} remove.
-	 * @param index	The index in the list to remove the element from.
-	 **/
-	public Generic removeOriginalStartupPropertiesElement(int index) {
-		return originalStartupProperties.remove(index);
-	}
-
-	/**
-	 * {@link #newProperty} accessor.
-	 * @return	The value.
-	 **/
-	public Generic getNewProperty() {
-		return newProperty;
-	}
-
-	/**
-	 * {@link #newProperty} mutator.
-	 * @param newProperty	The new value.
-	 **/
-	@XmlElement
-	public void setNewProperty(Generic newProperty) {
-		if (this.newProperty != newProperty) {
-			preset(newPropertyPropertyName, newProperty);
-			this.newProperty = newProperty;
-		}
-	}
-
-	/**
-	 * {@link #addKeyNotSupported} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getAddKeyNotSupported() {
-		return addKeyNotSupported;
-	}
-
-	/**
-	 * {@link #addKeyNotSupported} mutator.
-	 * @param addKeyNotSupported	The new value.
-	 **/
-	@XmlElement
-	public void setAddKeyNotSupported(Boolean addKeyNotSupported) {
-		preset(addKeyNotSupportedPropertyName, addKeyNotSupported);
-		this.addKeyNotSupported = addKeyNotSupported;
-	}
-
-	/**
 	 * {@link #selectedCache} accessor.
 	 * @return	The value.
 	 **/
@@ -1397,25 +1198,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 **/
 	public ModuleDocument removeTestDocumentNamesElement(int index) {
 		return testDocumentNames.remove(index);
-	}
-
-	/**
-	 * allowAddAPIKey
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isAllowAddAPIKey() {
-		return (Boolean.TRUE.equals(addKeyNotSupported));
-	}
-
-	/**
-	 * {@link #isAllowAddAPIKey} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotAllowAddAPIKey() {
-		return (! isAllowAddAPIKey());
 	}
 
 	/**
