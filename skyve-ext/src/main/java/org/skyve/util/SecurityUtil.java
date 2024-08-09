@@ -23,7 +23,9 @@ public class SecurityUtil {
 	 * @param exception The exception raised for this security event
 	 */
 	public static void log(@Nonnull Exception exception) {
-		String eventType = exception.getClass().getSimpleName();
+		String eventType = exception.getClass()
+				.getSimpleName()
+				.replaceAll("([a-z])([A-Z]+)", "$1 $2");
 		String eventMessage = exception.getMessage();
 
 		log(eventType, eventMessage, exception);
