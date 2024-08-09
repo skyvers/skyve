@@ -33,9 +33,10 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.app.admin.DataMaintenance;
+import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -518,17 +519,10 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 */
 	private static int getSensitivityLevel(Bean bean) {
-		if (bean != null) {
-			// If the job is run from the JobSchedule UI bean is an instanceof JobSchedule,
-			// which does not have the attribute, so BindUtil will throw an exception.
-			// In this case swallow the exception and use the default.
-			try {
-				Object sensitivityInput = BindUtil.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
-				if (sensitivityInput != null) {
-					return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
-				}
-			} catch (Exception e) {
-				Util.LOGGER.info(AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME + " not found, using default as 0");
+		if (bean instanceof DataMaintenance dataMaintenance) {
+			DataSensitivity sensitivityInput = dataMaintenance.getDataSensitivity();
+			if (sensitivityInput != null) {
+				return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
 			}
 		}
 		
@@ -541,16 +535,9 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 */
 	private static boolean getIncludeContent(Bean bean) {
-		if (bean != null) {
-			// If the job is run from the JobSchedule UI bean is an instanceof JobSchedule,
-			// which does not have the attribute, so BindUtil will throw an exception.
-			// In this case swallow the exception and use the default.
-			try {
-				Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
-				return Boolean.TRUE.equals(includeContent);
-			} catch (Exception e) {
-				Util.LOGGER.info(AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME + " not found, using default as true");
-			}
+		if (bean instanceof DataMaintenance dataMaintenance) {
+			Boolean includeContent = dataMaintenance.getIncludeContent();
+			return Boolean.TRUE.equals(includeContent);
 		}
 		
 		return true; // content included by default
@@ -562,16 +549,9 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 */
 	private static boolean getIncludeAuditLog(Bean bean) {
-		if (bean != null) {
-			// If the job is run from the JobSchedule UI bean is an instanceof JobSchedule,
-			// which does not have the attribute, so BindUtil will throw an exception.
-			// In this case swallow the exception and use the default.
-			try {
-				Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
-				return Boolean.TRUE.equals(includeAudits);
-			} catch (Exception e) {
-				Util.LOGGER.info(AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME + " not found, using default as true");
-			}
+		if (bean instanceof DataMaintenance dataMaintenance) {
+			Boolean includeAudits = dataMaintenance.getIncludeAuditLog();
+			return Boolean.TRUE.equals(includeAudits);
 		}
 		
 		return true; // audits included by default

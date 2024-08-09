@@ -41,7 +41,7 @@ import org.skyve.util.Util;
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public abstract class DataMaintenance extends AbstractPersistentBean {
+public abstract class DataMaintenance extends AbstractPersistentBean implements org.skyve.domain.app.admin.DataMaintenance {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -511,84 +511,6 @@ public abstract class DataMaintenance extends AbstractPersistentBean {
 			EvictOption result = null;
 
 			for (EvictOption value : values()) {
-				if (value.toLocalisedDescription().equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			return domainValues;
-		}
-	}
-
-	/**
-	 * Sensitivity
-	 * <br/>
-	 * Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.
-	 * <br/>
-	 * Determines which attributes are redacted during an ad-hoc backup.
-	 **/
-	@XmlEnum
-	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum DataSensitivity implements Enumeration {
-		none("none", "None"),
-		internal("internal", "Internal"),
-		confidential("confidential", "Confidential"),
-		restricted("restricted", "Restricted"),
-		personal("personal", "Personal"),
-		secret("secret", "Secret");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues = Stream.of(values()).map(DataSensitivity::toDomainValue).collect(Collectors.toUnmodifiableList());
-
-		private DataSensitivity(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toLocalisedDescription() {
-			return Util.i18n(description);
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static DataSensitivity fromCode(String code) {
-			DataSensitivity result = null;
-
-			for (DataSensitivity value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static DataSensitivity fromLocalisedDescription(String description) {
-			DataSensitivity result = null;
-
-			for (DataSensitivity value : values()) {
 				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;

@@ -7,6 +7,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
 import org.skyve.impl.backup.BackupJob;
 import org.skyve.impl.backup.RestoreJob;
 import org.skyve.impl.metadata.model.document.field.Field;
@@ -20,7 +21,6 @@ import org.skyve.util.Util;
 
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.ContentRestoreOption;
-import modules.admin.domain.DataMaintenance.DataSensitivity;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
 import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;

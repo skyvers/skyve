@@ -11,6 +11,9 @@
 	<pluralAlias>Data Maintenance</pluralAlias>
 	<iconStyleClass>fa-solid fa-wrench</iconStyleClass>
 	<bizKey expression="Data Maintenance"/>
+	<implements>
+		<interface>org.skyve.domain.app.admin.DataMaintenance</interface>
+	</implements>
 	<attributes>
 		<!-- import / export -->
 		<text name="modDocName" audited="false" persistent="false" usage="both">
@@ -180,29 +183,21 @@
 		</boolean>
 		
 		<!-- Data Sensitivity -->
-		<enum name="dataSensitivity" audited="false" persistent="false" trackChanges="false" usage="both">
+		<enum name="dataSensitivity" implementingEnumClassName="org.skyve.domain.app.admin.DataMaintenance$DataSensitivity" audited="false" persistent="false" trackChanges="false" usage="both">
 			<documentation><![CDATA[Determines which attributes are redacted during an ad-hoc backup.]]></documentation>
-			<displayName>Sensitivity</displayName>
-			<description>Determines which attributes are redacted in backup. Attributes with greater than or equal to sensitivity level selected are redacted.</description>
-			<values>
-				<value code="none" name="none" description="None" />
-				<value code="internal" name="internal" description="Internal" />
-				<value code="confidential" name="confidential" description="Confidential" />
-				<value code="restricted" name="restricted" description="Restricted" />
-				<value code="personal" name="personal" description="Personal" />
-				<value code="secret" name="secret" description="Secret" />
-			</values>
+			<displayName>admin.dataMaintenance.dataSensitivity.displayName</displayName>
+			<description>admin.dataMaintenance.dataSensitivity.description</description>
 		</enum>
 		<boolean name="includeContent" audited="false" persistent="false" trackChanges="false" usage="both">
 			<documentation><![CDATA[Determines if content is to be included in the generated backup.]]></documentation>
-			<displayName>Content</displayName>
-			<description>Determines if content is included in the backup file.</description>
+			<displayName>admin.dataMaintenance.includeContent.displayName</displayName>
+			<description>admin.dataMaintenance.includeContent.description</description>
 			<defaultValue>true</defaultValue>
 		</boolean>
 		<boolean name="includeAuditLog" audited="false" persistent="false" trackChanges="false" usage="both">
 			<documentation><![CDATA[Determines if the audit log is to be included in the generated backup.]]></documentation>
-			<displayName>Audit Log</displayName>
-			<description>Determines if the audit log is to be included in the backup file.</description>
+			<displayName>admin.dataMaintenance.includeAuditLog.displayName</displayName>
+			<description>admin.dataMaintenance.includeAuditLog.description</description>
 			<defaultValue>true</defaultValue>
 		</boolean>
 	</attributes>
