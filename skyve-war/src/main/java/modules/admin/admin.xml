@@ -17,6 +17,7 @@
 		<job name="jRefreshDocumentTuples" displayName="Refresh Persisted Document Data" className="modules.admin.DataMaintenance.RefreshDocumentTuplesJob"/>
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
+		<job name="jAvailableDiskSpaceAlarm" displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob"/>
     </jobs>
     <documents>
         <document ref="Audit" defaultQueryName="qAudits"/>
