@@ -26,9 +26,12 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Group.GroupExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
+import modules.admin.Startup.StartupExtension;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
+import modules.admin.domain.Startup;
 import modules.admin.domain.User;
+import modules.admin.domain.Startup.CountryListType;
 
 /**
  * Action to register a new user, giving them appropriate permissions and sending a
@@ -36,9 +39,9 @@ import modules.admin.domain.User;
  */
 public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
-	private static final String WHITE_LIST = "whiteList";
+	private static final String WHITE_LIST = CountryListType.whitelist.name();
 
-	private static final String BLACK_LIST = "blackList";
+	private static final String BLACK_LIST = CountryListType.blacklist.name();
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
@@ -62,34 +65,37 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				}
 			}
 			// check the country and if it is on the blacklist, fail
-			HttpServletRequest request = (HttpServletRequest) webContext.getHttpServletRequest();
-			String clientIpAddress = getClientIpAddress(request);
-			LOGGER.info("Checking country for ip " + clientIpAddress);
-			Optional<String> countryCode = geoIpService.getCountryCodeForIp(clientIpAddress);
-			if (countryCode.isPresent()) {
-				LOGGER.info("Registration request from country " + countryCode.get());
-				if(UtilImpl.COUNTRY_CODES != null) {
-					List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("//|"));
-					// Is country on list
-					boolean found = countryList.stream()
-							.anyMatch(s -> s.equalsIgnoreCase(countryCode.get()));
-					if (found) {
-						// Check if the list is a blacklist and ban the country if it is
-						if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(BLACK_LIST)) {
-							LOGGER.warn(
-									"Self-registration failed because country was on the blacklist. Suspect bot submission for "
-											+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
-							bean.setPassSilently(Boolean.TRUE);
-							return new ServerSideActionResult<>(bean);
-						}
-					} else if(!found) {
-						// Check if the list is a white list and ban the country if the list is a white list
-						if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(WHITE_LIST)) {
-							LOGGER.warn(
-									"Self-registration failed because country was not on the whitelist. Suspect bot submission for "
-											+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
-							bean.setPassSilently(Boolean.TRUE);
-							return new ServerSideActionResult<>(bean);
+			StartupExtension startup = Startup.newInstance();
+			if(startup.isHasIpInfoToken()) {
+				HttpServletRequest request = (HttpServletRequest) webContext.getHttpServletRequest();
+				String clientIpAddress = getClientIpAddress(request);
+				LOGGER.info("Checking country for ip " + clientIpAddress);
+				Optional<String> countryCode = geoIpService.getCountryCodeForIp(clientIpAddress);
+				if (countryCode.isPresent()) {
+					LOGGER.info("Registration request from country " + countryCode.get());
+					if(UtilImpl.COUNTRY_CODES != null) {
+						List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("//|"));
+						// Is country on list
+						boolean found = countryList.stream()
+								.anyMatch(s -> s.equalsIgnoreCase(countryCode.get()));
+						if (found) {
+							// Check if the list is a blacklist and ban the country if it is
+							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(BLACK_LIST)) {
+								LOGGER.warn(
+										"Self-registration failed because country was on the blacklist. Suspect bot submission for "
+												+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
+								bean.setPassSilently(Boolean.TRUE);
+								return new ServerSideActionResult<>(bean);
+							}
+						} else if(!found) {
+							// Check if the list is a white list and ban the country if the list is a white list
+							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(WHITE_LIST)) {
+								LOGGER.warn(
+										"Self-registration failed because country was not on the whitelist. Suspect bot submission for "
+												+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
+								bean.setPassSilently(Boolean.TRUE);
+								return new ServerSideActionResult<>(bean);
+							}
 						}
 					}
 				}
