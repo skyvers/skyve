@@ -90,7 +90,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
 
 	/** @hidden */
-	public static final String passwordResetTokenCreationDateTimePropertyName = "passwordResetTokenCreationDateTime";
+	public static final String passwordResetTokenCreationTimestampPropertyName = "passwordResetTokenCreationTimestamp";
 
 	/** @hidden */
 	public static final String passwordHistoryPropertyName = "passwordHistory";
@@ -399,7 +399,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * <br/>
 	 * Used in WebUtil.resetPassword to evaluate token expiry.
 	 **/
-	private Timestamp passwordResetTokenCreationDateTime;
+	private Timestamp passwordResetTokenCreationTimestamp;
 
 	/**
 	 * Password History
@@ -812,23 +812,23 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * {@link #passwordResetTokenCreationDateTime} accessor.
+	 * {@link #passwordResetTokenCreationTimestamp} accessor.
 	 * @return	The value.
 	 **/
-	public Timestamp getPasswordResetTokenCreationDateTime() {
-		return passwordResetTokenCreationDateTime;
+	public Timestamp getPasswordResetTokenCreationTimestamp() {
+		return passwordResetTokenCreationTimestamp;
 	}
 
 	/**
-	 * {@link #passwordResetTokenCreationDateTime} mutator.
-	 * @param passwordResetTokenCreationDateTime	The new value.
+	 * {@link #passwordResetTokenCreationTimestamp} mutator.
+	 * @param passwordResetTokenCreationTimestamp	The new value.
 	 **/
 	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
-	public void setPasswordResetTokenCreationDateTime(Timestamp passwordResetTokenCreationDateTime) {
-		preset(passwordResetTokenCreationDateTimePropertyName, passwordResetTokenCreationDateTime);
-		this.passwordResetTokenCreationDateTime = passwordResetTokenCreationDateTime;
+	public void setPasswordResetTokenCreationTimestamp(Timestamp passwordResetTokenCreationTimestamp) {
+		preset(passwordResetTokenCreationTimestampPropertyName, passwordResetTokenCreationTimestamp);
+		this.passwordResetTokenCreationTimestamp = passwordResetTokenCreationTimestamp;
 	}
 
 	/**

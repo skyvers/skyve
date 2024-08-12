@@ -646,7 +646,7 @@
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
 		<property name="passwordResetToken" length="56" />
-		<property name="passwordResetTokenCreationDateTime" type="Timestamp" />
+		<property name="passwordResetTokenCreationTimestamp" type="Timestamp" />
 		<property name="passwordHistory" type="text" />
 		<property name="authenticationFailures" />
 		<property name="lastAuthenticationFailure" type="Timestamp" />
