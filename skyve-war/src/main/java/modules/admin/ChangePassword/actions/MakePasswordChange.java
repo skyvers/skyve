@@ -6,6 +6,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.security.HIBPPasswordValidator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -15,6 +16,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.Configuration.ConfigurationExtension;
@@ -37,7 +39,6 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		// check for suitable complexity
 		ConfigurationExtension configuration = Configuration.newInstance();
-
 		if (!configuration.meetsComplexity(newPassword)) {
 			StringBuilder sb = new StringBuilder("The password you have entered is not sufficiently complex. ");
 			sb.append(configuration.getPasswordRuleDescription());
@@ -47,11 +48,28 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			throw new ValidationException(message);
 		}
 
-		if (! newPassword.equals(confirmPassword)) { // these 2 are mandatory in the document
+		if (configuration.isHibpEnabled()) {
+			try {
+				// validate if password is PWNED
+				if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
+					Message message = new Message(ChangePassword.newPasswordPropertyName,
+							"The password you have entered has been breached. "
+									+ "Please re-enter and confirm the password.");
+
+					throw new ValidationException(message);
+				}
+			} catch (ValidationException ve) {
+				throw ve;
+			} catch (Exception e) {
+				Util.LOGGER.severe("HaveIBeenPwned API call failed");
+				e.printStackTrace();
+			}
+		}
+
+		if (!newPassword.equals(confirmPassword)) { // these 2 are mandatory in the document
 			Message message = new Message(ChangePassword.newPasswordPropertyName,
 					"You did not type the same password.  Please re-enter and confirm the password.");
 			message.addBinding(ChangePassword.confirmPasswordPropertyName);
-			throw new ValidationException(message);
 		}
 
 		Document userDocument = module.getDocument(customer, modules.admin.domain.User.DOCUMENT_NAME);

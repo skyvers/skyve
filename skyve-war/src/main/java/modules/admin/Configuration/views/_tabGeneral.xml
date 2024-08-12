@@ -60,6 +60,11 @@
 				<textField binding="passwordAccountLockoutDuration" disabled="true" />
 			</item>
 		</row>
+		<row>
+			<item>
+				<checkBox binding="haveIBeenPwnedEnabled" triState="false" />
+			</item>
+		</row>
 	</form>
 	
 	<!-- test email has a different component for desktop and external -->

@@ -66,6 +66,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String passwordRuleDescriptionPropertyName = "passwordRuleDescription";
 
 	/** @hidden */
+	public static final String haveIBeenPwnedEnabledPropertyName = "haveIBeenPwnedEnabled";
+
+	/** @hidden */
 	public static final String fromEmailPropertyName = "fromEmail";
 
 	/** @hidden */
@@ -330,6 +333,15 @@ public abstract class Configuration extends AbstractPersistentBean {
 				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.
 	 **/
 	private String passwordRuleDescription;
+
+	/**
+	 * HaveIBeenPwned API enabled
+	 * <br/>
+	 * The HaveIBeenPwned API checks whether a password has been compromised in known data breaches.
+	 * <br/>
+	 * Determines whether or not HaveIBeenPwned API is used as part of password validation.
+	 **/
+	private Boolean haveIBeenPwnedEnabled = Boolean.valueOf(true);
 
 	/**
 	 * Sender/From Email Address
@@ -646,6 +658,24 @@ public abstract class Configuration extends AbstractPersistentBean {
 	@XmlElement
 	public void setPasswordRuleDescription(String passwordRuleDescription) {
 		this.passwordRuleDescription = passwordRuleDescription;
+	}
+
+	/**
+	 * {@link #haveIBeenPwnedEnabled} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getHaveIBeenPwnedEnabled() {
+		return haveIBeenPwnedEnabled;
+	}
+
+	/**
+	 * {@link #haveIBeenPwnedEnabled} mutator.
+	 * @param haveIBeenPwnedEnabled	The new value.
+	 **/
+	@XmlElement
+	public void setHaveIBeenPwnedEnabled(Boolean haveIBeenPwnedEnabled) {
+		preset(haveIBeenPwnedEnabledPropertyName, haveIBeenPwnedEnabled);
+		this.haveIBeenPwnedEnabled = haveIBeenPwnedEnabled;
 	}
 
 	/**
@@ -1200,6 +1230,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotGoogleRecaptcha() {
 		return (! isGoogleRecaptcha());
+	}
+
+	/**
+	 * True when HaveIBeenPwned API is enabled
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHibpEnabled() {
+		return (Boolean.TRUE.equals(haveIBeenPwnedEnabled));
+	}
+
+	/**
+	 * {@link #isHibpEnabled} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHibpEnabled() {
+		return (! isHibpEnabled());
 	}
 
 	/**
