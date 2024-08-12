@@ -68,6 +68,11 @@
 			<displayName>admin.configuration.selfRegistrationActivationExpiryHours.displayName</displayName>
 			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
 		</integer>
+		<integer name="passwordResetTokenExpiryMinutes">
+			<displayName>Password Reset Token Expiry (minutes)</displayName>
+			<description>Clear this setting to have tokens that never expire.</description>
+			<defaultValue>15</defaultValue>
+		</integer>
 		
 		<boolean name="allowUserSelfRegistration" required="false" deprecated="true">
 			<displayName>This option is now a startup property found in the project JSON file.</displayName>

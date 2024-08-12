@@ -90,6 +90,9 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
 
 	/** @hidden */
+	public static final String passwordResetTokenCreationDateTimePropertyName = "passwordResetTokenCreationDateTime";
+
+	/** @hidden */
 	public static final String passwordHistoryPropertyName = "passwordHistory";
 
 	/** @hidden */
@@ -388,6 +391,15 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.
 	 **/
 	private String passwordResetToken;
+
+	/**
+	 * Password Reset Token Creation Timestamp
+	 * <br/>
+	 * When the password reset token was created.
+	 * <br/>
+	 * Used in WebUtil.resetPassword to evaluate token expiry.
+	 **/
+	private Timestamp passwordResetTokenCreationDateTime;
 
 	/**
 	 * Password History
@@ -797,6 +809,26 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setPasswordResetToken(String passwordResetToken) {
 		preset(passwordResetTokenPropertyName, passwordResetToken);
 		this.passwordResetToken = passwordResetToken;
+	}
+
+	/**
+	 * {@link #passwordResetTokenCreationDateTime} accessor.
+	 * @return	The value.
+	 **/
+	public Timestamp getPasswordResetTokenCreationDateTime() {
+		return passwordResetTokenCreationDateTime;
+	}
+
+	/**
+	 * {@link #passwordResetTokenCreationDateTime} mutator.
+	 * @param passwordResetTokenCreationDateTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	public void setPasswordResetTokenCreationDateTime(Timestamp passwordResetTokenCreationDateTime) {
+		preset(passwordResetTokenCreationDateTimePropertyName, passwordResetTokenCreationDateTime);
+		this.passwordResetTokenCreationDateTime = passwordResetTokenCreationDateTime;
 	}
 
 	/**

@@ -81,6 +81,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
 
 	/** @hidden */
+	public static final String passwordResetTokenExpiryMinutesPropertyName = "passwordResetTokenExpiryMinutes";
+
+	/** @hidden */
 	@Deprecated
 	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
 
@@ -365,6 +368,13 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * Clear this setting to have codes that never expire.
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
+
+	/**
+	 * Password Reset Token Expiry (minutes)
+	 * <br/>
+	 * Clear this setting to have tokens that never expire.
+	 **/
+	private Integer passwordResetTokenExpiryMinutes = Integer.valueOf(15);
 
 	/**
 	 * This option is now a startup property found in the project JSON file.
@@ -738,6 +748,24 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
 		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
 		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #passwordResetTokenExpiryMinutes} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getPasswordResetTokenExpiryMinutes() {
+		return passwordResetTokenExpiryMinutes;
+	}
+
+	/**
+	 * {@link #passwordResetTokenExpiryMinutes} mutator.
+	 * @param passwordResetTokenExpiryMinutes	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordResetTokenExpiryMinutes(Integer passwordResetTokenExpiryMinutes) {
+		preset(passwordResetTokenExpiryMinutesPropertyName, passwordResetTokenExpiryMinutes);
+		this.passwordResetTokenExpiryMinutes = passwordResetTokenExpiryMinutes;
 	}
 
 	/**
