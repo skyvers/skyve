@@ -460,6 +460,12 @@
 				<artifactId>cron-utils</artifactId>
 				<version>${cronutils.version}</version>
 			</dependency>
+			<!-- for JSON parsing -->
+			<dependency>
+			    <groupId>net.minidev</groupId>
+			    <artifactId>json-smart</artifactId>
+			    <version>2.5.1</version>
+			</dependency>
 
 			<!-- Test dependencies -->
 			<dependency>
