@@ -120,7 +120,7 @@
 		</form>
 	</vbox>
 
-	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title">
+	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title" widgetId="securitySettings">
 		<form responsiveWidth="12" widgetId="formSecurity">
 	        <column responsiveWidth="3"/>
 	        <column/>
@@ -181,10 +181,17 @@
 	        <row>
 	            <item>
 	                <textField binding="apiIpInfoToken">
+	                	<onBlurHandlers>
+	                		<rerender>
+	        					<properties>
+	        						<c:property key="update">securitySettings</c:property>
+	        					</properties>
+	        				</rerender>
+	                	</onBlurHandlers>
 	                	<onChangedHandlers>
 	                		<rerender>
 	        					<properties>
-	        						<c:property key="update">formSecurity,formCountryList</c:property>
+	        						<c:property key="update">securitySettings</c:property>
 	        					</properties>
 	        				</rerender>
 	                	</onChangedHandlers>
