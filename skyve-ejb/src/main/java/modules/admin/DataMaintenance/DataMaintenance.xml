@@ -171,6 +171,11 @@
 			<defaultWidget><v:checkBox triState="false" /></defaultWidget>
 			<defaultValue>false</defaultValue>
 		</boolean>
+		<text name="newBackupName" audited="false" persistent="false" trackChanges="false">
+			<displayName>admin.dataMaintenance.newBackupName.displayName</displayName>
+			<description>admin.dataMaintenance.newBackupName.description</description>
+			<length>1024</length>
+		</text>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">
