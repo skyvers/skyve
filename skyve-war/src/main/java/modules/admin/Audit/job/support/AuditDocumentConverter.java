@@ -1,11 +1,7 @@
 package modules.admin.Audit.job.support;
 
-import java.text.ParseException;
-import java.util.Date;
 import java.util.Optional;
 
-import org.apache.lucene.document.DateTools;
-import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.SortedDocValuesField;
@@ -18,30 +14,9 @@ import modules.admin.domain.Audit;
 
 public class AuditDocumentConverter implements DocumentConverter {
 
-    /**
-     * If we use the same field name for the SortedDocValuesField as we do for
-     * the stored field we run into this error:
-     * 
-     * <pre>
-     * Term [4f 66 66 69 63 65] exists in doc values but not in the terms index
-     * </pre>
-     * 
-     * I believe this is because the terms in the stored field have gone through the
-     * analyzer's filter (lowercase, most likely). Storing the sort field under
-     * a different name sidesteps the issues.
-     * 
-     * @see https://github.com/apache/lucene/issues/12067
-     * 
-     * @param binding
-     * @return
-     */
-    public static String toSortBinding(String binding) {
-        return binding + "_sort";
-    }
-
     private static SortedDocValuesField sortField(String binding, String value) {
 
-        return new SortedDocValuesField(toSortBinding(binding), new BytesRef(value));
+        return new SortedDocValuesField(DocumentConverter.toSortBinding(binding), new BytesRef(value));
     }
 
     @Override
@@ -55,7 +30,7 @@ public class AuditDocumentConverter implements DocumentConverter {
         // StringField: String indexed verbatim as a single token
 
         // timestamp
-        String timestampStr = dateToString(audit.getTimestamp());
+        String timestampStr = DocumentConverter.dateToString(audit.getTimestamp());
         doc.add(new StringField(Audit.timestampPropertyName, timestampStr, Store.YES));
         doc.add(sortField(Audit.timestampPropertyName, timestampStr));
 
@@ -93,18 +68,6 @@ public class AuditDocumentConverter implements DocumentConverter {
         doc.add(sortField(Audit.auditBizIdPropertyName, audit.getAuditBizId()));
 
         return doc;
-    }
-
-    public static String dateToString(Date date) {
-        return DateTools.dateToString(date, Resolution.MILLISECOND);
-    }
-
-    public static Date stringToDate(String dateStr) {
-        try {
-            return DateTools.stringToDate(dateStr);
-        } catch (ParseException e) {
-            throw new RuntimeException("Unable to parse date string: " + dateStr, e);
-        }
     }
 
     @Override
