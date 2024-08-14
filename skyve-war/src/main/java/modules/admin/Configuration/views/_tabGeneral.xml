@@ -62,7 +62,7 @@
 		</row>
 		<row>
 			<item>
-				<checkBox binding="haveIBeenPwnedEnabled" triState="false" />
+				<checkBox binding="checkForBreachedPassword" triState="false" />
 			</item>
 		</row>
 	</form>

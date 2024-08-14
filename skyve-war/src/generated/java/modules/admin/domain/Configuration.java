@@ -66,7 +66,7 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String passwordRuleDescriptionPropertyName = "passwordRuleDescription";
 
 	/** @hidden */
-	public static final String haveIBeenPwnedEnabledPropertyName = "haveIBeenPwnedEnabled";
+	public static final String checkForBreachedPasswordPropertyName = "checkForBreachedPassword";
 
 	/** @hidden */
 	public static final String fromEmailPropertyName = "fromEmail";
@@ -335,13 +335,13 @@ public abstract class Configuration extends AbstractPersistentBean {
 	private String passwordRuleDescription;
 
 	/**
-	 * HaveIBeenPwned API enabled
+	 * Check for breached password
 	 * <br/>
-	 * The HaveIBeenPwned API checks whether a password has been compromised in known data breaches.
+	 * When users try to create or change a password, this checks whether the new password has been compromised in known data breaches (requires internet access).
 	 * <br/>
 	 * Determines whether or not HaveIBeenPwned API is used as part of password validation.
 	 **/
-	private Boolean haveIBeenPwnedEnabled = Boolean.valueOf(true);
+	private Boolean checkForBreachedPassword = Boolean.valueOf(true);
 
 	/**
 	 * Sender/From Email Address
@@ -661,21 +661,21 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #haveIBeenPwnedEnabled} accessor.
+	 * {@link #checkForBreachedPassword} accessor.
 	 * @return	The value.
 	 **/
-	public Boolean getHaveIBeenPwnedEnabled() {
-		return haveIBeenPwnedEnabled;
+	public Boolean getCheckForBreachedPassword() {
+		return checkForBreachedPassword;
 	}
 
 	/**
-	 * {@link #haveIBeenPwnedEnabled} mutator.
-	 * @param haveIBeenPwnedEnabled	The new value.
+	 * {@link #checkForBreachedPassword} mutator.
+	 * @param checkForBreachedPassword	The new value.
 	 **/
 	@XmlElement
-	public void setHaveIBeenPwnedEnabled(Boolean haveIBeenPwnedEnabled) {
-		preset(haveIBeenPwnedEnabledPropertyName, haveIBeenPwnedEnabled);
-		this.haveIBeenPwnedEnabled = haveIBeenPwnedEnabled;
+	public void setCheckForBreachedPassword(Boolean checkForBreachedPassword) {
+		preset(checkForBreachedPasswordPropertyName, checkForBreachedPassword);
+		this.checkForBreachedPassword = checkForBreachedPassword;
 	}
 
 	/**
@@ -1176,6 +1176,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when checks for breached passwords is enabled
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCheckForBreachedPasswordsEnabled() {
+		return (Boolean.TRUE.equals(checkForBreachedPassword));
+	}
+
+	/**
+	 * {@link #isCheckForBreachedPasswordsEnabled} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCheckForBreachedPasswordsEnabled() {
+		return (! isCheckForBreachedPasswordsEnabled());
+	}
+
+	/**
 	 * True when the captcha type of startup is Cloudflare Turnstile
 	 *
 	 * @return The condition
@@ -1230,25 +1249,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotGoogleRecaptcha() {
 		return (! isGoogleRecaptcha());
-	}
-
-	/**
-	 * True when HaveIBeenPwned API is enabled
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isHibpEnabled() {
-		return (Boolean.TRUE.equals(haveIBeenPwnedEnabled));
-	}
-
-	/**
-	 * {@link #isHibpEnabled} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotHibpEnabled() {
-		return (! isHibpEnabled());
 	}
 
 	/**

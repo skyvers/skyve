@@ -43,10 +43,10 @@
 			<displayName>admin.configuration.passwordRuleDescription</displayName>
 			<length>250</length>
 		</text>
-		<boolean name="haveIBeenPwnedEnabled">
+		<boolean name="checkForBreachedPassword">
 			<documentation>Determines whether or not HaveIBeenPwned API is used as part of password validation.</documentation>
-			<displayName>HaveIBeenPwned API enabled</displayName>
-			<description>The HaveIBeenPwned API checks whether a password has been compromised in known data breaches.</description>
+			<displayName>Check for breached password</displayName>
+			<description>When users try to create or change a password, this checks whether the new password has been compromised in known data breaches (requires internet access).</description>
 			<defaultValue>true</defaultValue>
 		</boolean>
 		
@@ -269,9 +269,9 @@
 				<![CDATA[getStartup().getCaptchaType() == null]]>
 			</expression>
 		</condition>
-		<condition name="hibpEnabled" usage="domain">
-			<description>True when HaveIBeenPwned API is enabled</description>
-			<expression>Boolean.TRUE.equals(haveIBeenPwnedEnabled)</expression>
+		<condition name="checkForBreachedPasswordsEnabled" usage="domain">
+			<description>True when checks for breached passwords is enabled</description>
+			<expression>Boolean.TRUE.equals(checkForBreachedPassword)</expression>
 		</condition>
 	</conditions>
 </document>

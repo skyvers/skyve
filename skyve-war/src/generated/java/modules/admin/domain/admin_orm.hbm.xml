@@ -116,7 +116,7 @@
 		<property name="passwordRequireUppercase" />
 		<property name="passwordRequireNumeric" />
 		<property name="passwordRequireSpecial" />
-		<property name="haveIBeenPwnedEnabled" />
+		<property name="checkForBreachedPassword" />
 		<property name="fromEmail" length="254" />
 		<property name="passwordResetEmailSubject" length="250" />
 		<property name="passwordResetEmailBody" type="text" />

@@ -8,6 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
+
 /**
  * REST client to pass new passwords to <code>HaveIBeenPwned</code> API.
  * 
@@ -18,34 +22,41 @@ public class HIBPPasswordValidator {
 	private static final String HIBP_API_URL = "https://api.pwnedpasswords.com/range/";
 
 	/**
-	 * Returns true if the passed password has been breached.
+	 * Returns true if the passed password has been breached, using <code>IHaveBeenPwned</code> API.
 	 * 
-	 * @param password
+	 * @param password The password to validate
 	 * @return true if password has been pwned
 	 * @throws Exception
 	 */
-	public static boolean isPasswordPwned(String password) throws Exception {
-		// Hash the password
-		String sha1Hash = hashPassword(password);
+	public static boolean isPasswordPwned(@Nonnull String password) {
+		try {
+			// Hash the password
+			String sha1Hash = hashPassword(password);
 
-		// Get prefix
-		String prefix = sha1Hash.substring(0, 5);
+			// Get prefix
+			String prefix = sha1Hash.substring(0, 5);
 
-		// ]Query the HaveIBeenPwned API with the prefix
-		HttpClient client = HttpClient.newHttpClient();
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(HIBP_API_URL + prefix))
-				.GET()
-				.build();
+			// ]Query the HaveIBeenPwned API with the prefix
+			HttpClient client = HttpClient.newHttpClient();
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(HIBP_API_URL + prefix))
+					.GET()
+					.build();
 
-		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-		// Check if the hash suffix is present in the response
-		String body = response.body();
-		String suffix = sha1Hash.substring(5)
-				.toUpperCase();
-		
-		return isHashSuffixPresent(body, suffix);
+			// Check if the hash suffix is present in the response
+			String body = response.body();
+			String suffix = sha1Hash.substring(5)
+					.toUpperCase();
+			
+			return isHashSuffixPresent(body, suffix);
+		} catch (Exception e) {
+			Util.LOGGER.warning("HaveIBeenPwned API call failed");
+			e.printStackTrace();
+		}
+
+		return false;
 	}
 
 	/**
@@ -69,6 +80,13 @@ public class HIBPPasswordValidator {
 				.toUpperCase();
 	}
 
+	/**
+	 * Returns true if the passed <code>suffix</code> matches any of those in the API <code>response</code>.
+	 * 
+	 * @param response List of hash suffixes
+	 * @param suffix Suffix to match
+	 * @return true if there is a match
+	 */
 	private static boolean isHashSuffixPresent(String response, String suffix) {
 		String[] lines = response.split("\r\n");
 		for (String line : lines) {

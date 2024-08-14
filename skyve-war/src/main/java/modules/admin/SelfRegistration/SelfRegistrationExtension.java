@@ -4,14 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.GenericValidator;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.impl.security.HIBPPasswordValidator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 import modules.admin.Configuration.ConfigurationExtension;
-import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.SelfRegistration;
@@ -70,32 +68,32 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	 * Validates that the password and confirmPassword entered during a SelfRegistration
 	 * match.
 	 * 
-	 * @throws exception
+	 * @throws A {@link ValidationException} if there are any problems.
 	 */
 	public void validateConfirmPassword() {
-		User user = getUser();
 		if (getUser() != null) {
-			String password = user.getPassword();
-			String confirmPassword = user.getConfirmPassword();
-
 			ValidationException ve = new ValidationException();
-			if (StringUtils.isEmpty(password)) {
+			if (StringUtils.isEmpty(getUser().getPassword())) {
 				Message message = new Message(Binder.createCompoundBinding(SelfRegistration.userPropertyName, User.passwordPropertyName), PASSWORD_REQUIRED);
 				ve.getMessages().add(message);
 			}
-			if (StringUtils.isEmpty(confirmPassword)) {
+
+			if (StringUtils.isEmpty(getConfirmPassword())) {
 				Message message = new Message(SelfRegistration.confirmPasswordPropertyName, CONFIRM_PASSWORD_REQUIRED);
 				ve.getMessages().add(message);
 			}
+
 			if (!ve.getMessages().isEmpty()) {
 				throw ve;
 			}
 			
 			// if both aren't null, check that they are the same
-			if (!password.equals(confirmPassword)) {
+			if (!getUser().getPassword()
+					.equals(getConfirmPassword())) {
 				Message message = new Message(SelfRegistration.confirmPasswordPropertyName, PASSWORD_MISMATCH);
 				ve.getMessages().add(message);
 			}
+
 			if (!ve.getMessages().isEmpty()) {
 				throw ve;
 			}
@@ -103,7 +101,7 @@ public class SelfRegistrationExtension extends SelfRegistration {
 			// if they are the same, check the password is suitably complex
 			// check for suitable complexity
 			ConfigurationExtension configuration = Configuration.newInstance();
-			if (!configuration.meetsComplexity(password)) {
+			if (!configuration.meetsComplexity(getUser().getPassword())) {
 				StringBuilder sb = new StringBuilder(64);
 				sb.append("The password you have entered is not sufficiently complex.\n");
 				sb.append(configuration.getPasswordRuleDescription());
@@ -112,22 +110,6 @@ public class SelfRegistrationExtension extends SelfRegistration {
 				ve.getMessages().add(message);
 			}
 			
-			if (configuration.isHibpEnabled()) {
-				try {
-					// validate if password is PWNED
-					if (HIBPPasswordValidator.isPasswordPwned(password)) {
-						Message message = new Message(ChangePassword.newPasswordPropertyName,
-								"The password you have entered has been breached. "
-										+ "Please re-enter and confirm the password.");
-						ve.getMessages().add(message);
-
-					}
-				} catch (Exception e) {
-					Util.LOGGER.severe("HaveIBeenPwned API call failed");
-					e.printStackTrace();
-				}
-			}
-
 			if(!ve.getMessages().isEmpty()) {
 				throw ve;
 			}

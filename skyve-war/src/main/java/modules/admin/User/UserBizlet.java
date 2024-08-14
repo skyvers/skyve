@@ -8,6 +8,7 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.security.HIBPPasswordValidator;
@@ -21,7 +22,6 @@ import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.Configuration.ConfigurationExtension;
@@ -91,6 +91,19 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				bean.setNewGroup(Group.newInstance());
 			} else {
 				bean.setNewGroup(null);
+			}
+		}
+
+		if (User.newPasswordPropertyName.equals(source)) {
+			String newPassword = bean.getNewPassword();
+			if (newPassword != null) {
+				Configuration c = Configuration.newInstance();
+				if (c.isCheckForBreachedPasswordsEnabled()) {
+					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
+						webContext.growl(MessageSeverity.warn,
+								"WARNING: The password you have entered has been compromised in a data breach. For security, we recommend selecting a stronger password.");
+					}
+				}
 			}
 		}
 
@@ -258,13 +271,15 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		}
 	}
 
-	public static void validateUserNameAndPassword(UserExtension user, ValidationException ve) throws Exception {
+	public static void validateUserNameAndPassword(UserExtension user, ValidationException e) throws Exception {
 
 		// validate username is not null, not too short and unique
 		if (user.getUserName() == null) {
-			ve.getMessages().add(new Message(User.userNamePropertyName, "Username is required."));
+			e.getMessages()
+					.add(new Message(User.userNamePropertyName, "Username is required."));
 		} else if (!user.isPersisted() && user.getUserName().length() < ConfigurationExtension.MINIMUM_USERNAME_LENGTH) {
-			ve.getMessages().add(new Message(User.userNamePropertyName, "Username is too short."));
+			e.getMessages()
+					.add(new Message(User.userNamePropertyName, "Username is too short."));
 		} else {
 			Persistence pers = CORE.getPersistence();
 			DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -273,7 +288,8 @@ public class UserBizlet extends Bizlet<UserExtension> {
 
 			List<User> otherUsers = q.beanResults();
 			if (!otherUsers.isEmpty()) {
-				ve.getMessages().add(new Message(User.userNamePropertyName, "This username is already being used - try again."));
+				e.getMessages()
+						.add(new Message(User.userNamePropertyName, "This username is already being used - try again."));
 			} else {
 
 				// validate password
@@ -285,13 +301,15 @@ public class UserBizlet extends Bizlet<UserExtension> {
 					if (hashedPassword == null) {
 						Message message = new Message(User.newPasswordPropertyName, "A password is required.");
 						message.addBinding(User.confirmPasswordPropertyName);
-						ve.getMessages().add(message);
+						e.getMessages()
+								.add(message);
 					}
 				} else {
 					if ((newPassword == null) || (confirmPassword == null)) {
 						Message message = new Message(User.newPasswordPropertyName, "New Password and Confirm Password are required to change the password.");
 						message.addBinding(User.confirmPasswordPropertyName);
-						ve.getMessages().add(message);
+						e.getMessages()
+								.add(message);
 					} else if (newPassword.equals(confirmPassword)) {
 
 						// check for suitable complexity
@@ -302,23 +320,8 @@ public class UserBizlet extends Bizlet<UserExtension> {
 							sb.append(configuration.getPasswordRuleDescription());
 							sb.append(" Please re-enter and confirm the password.");
 							Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
-							ve.getMessages().add(message);
-						}
-						
-						if (configuration.isHibpEnabled()) {
-							try {
-								// validate if password is PWNED
-								if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
-									Message message = new Message(ChangePassword.newPasswordPropertyName,
-											"The password you have entered has been breached. "
-													+ "Please re-enter and confirm the password.");
-									ve.getMessages().add(message);
-
-								}
-							} catch (Exception e) {
-								Util.LOGGER.severe("HaveIBeenPwned API call failed");
-								e.printStackTrace();
-							}
+							e.getMessages()
+									.add(message);
 						}
 
 						hashedPassword = EXT.hashPassword(newPassword);
@@ -336,7 +339,8 @@ public class UserBizlet extends Bizlet<UserExtension> {
 					} else {
 						Message message = new Message(User.newPasswordPropertyName, "You did not type the same password.  Please re-enter the password again.");
 						message.addBinding(User.confirmPasswordPropertyName);
-						ve.getMessages().add(message);
+						e.getMessages()
+								.add(message);
 					}
 				}
 			}
