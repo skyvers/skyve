@@ -26,7 +26,6 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.types.DateTime;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -327,7 +326,7 @@ public class WebUtil {
 				org.skyve.domain.types.Timestamp now = new org.skyve.domain.types.Timestamp();
 				for (PersistentBean user: users) {
 					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME, passwordResetToken);
-					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_CREATION_DATE_TIME_ATTRIBUTE_NAME, now);
+					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_CREATION_TIMESTAMP_ATTRIBUTE_NAME, now);
 					p.upsertBeanTuple(user);
 					if (firstUser == null) {
 						firstUser = user;
@@ -443,13 +442,13 @@ public class WebUtil {
 							.prepareStatement(String.format("select %s, %s, %s from ADM_SecurityUser where %s = ?",
 									Bean.CUSTOMER_NAME,
 									AppConstants.USER_NAME_ATTRIBUTE_NAME,
-									AppConstants.PASSWORD_RESET_TOKEN_CREATION_DATE_TIME_ATTRIBUTE_NAME,
+									AppConstants.PASSWORD_RESET_TOKEN_CREATION_TIMESTAMP_ATTRIBUTE_NAME,
 									AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME))) {
 						s.setString(1, passwordResetToken);
 
 						try (ResultSet rs = s.executeQuery()) {
 							if (!rs.isBeforeFirst()) {
-								return "Reset link used is invalid";
+								return Util.i18n("exception.passwordResetLinkInvalid");
 							}
 							while (rs.next()) {
 								customerName = rs.getString(1);
@@ -472,7 +471,7 @@ public class WebUtil {
 									org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
 									errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
 								} else {
-									return "Token has expired - please reset password again";
+									return Util.i18n("exception.passwordResetTokenExpired");
 								}
 							}
 						}

@@ -72,6 +72,7 @@
 			<displayName>Password Reset Token Expiry (minutes)</displayName>
 			<description>Clear this setting to have tokens that never expire.</description>
 			<defaultValue>15</defaultValue>
+			<validator min="1" />
 		</integer>
 		
 		<boolean name="allowUserSelfRegistration" required="false" deprecated="true">
