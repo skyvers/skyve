@@ -45,12 +45,27 @@
 	},
 	// Archive process settings
 	"archive": {
-		// Directory within the content.directory to store archived documents
-		"directory": "archive",
 		// Preferred limit on how long the export job should run for
-		"exportRuntimeSec": 120,
+		"exportRuntimeSec": 300,
 		// Number of documents to be written to file in each batch by the export job
-		"exportBatchSize": 100
+		"exportBatchSize": 100,
+		// Cache settings used when retrieving documents from the archive
+		"cache": {
+			"heapSizeEntries": 120,
+			"offHeapSizeMB": 0,
+			"expiryPolicy": "timeToLive",
+			"expiryTimeMinutes": 15
+		},
+		// Here you define the document(s) to export out of the RDBMS
+		"documents": [
+			{
+				// Identify the document type
+				"module": "admin",
+				"document": "Audit",
+				// Directory within ${content.directory}/archive/ to store archived documents
+				"directory": "audit-archive"
+			}
+		]
 	},
 	// File upload settings
 	// If null or not specified,

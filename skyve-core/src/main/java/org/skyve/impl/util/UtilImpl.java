@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
+import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
@@ -162,7 +163,7 @@ public class UtilImpl {
 	public static String ADDINS_DIRECTORY = null;
 
     // Where to store/retrieve archive documents (Audits, etc)
-    public static ArchiveConfig ARCHIVE_CONFIG = new ArchiveConfig(-1, -1, emptyList());;
+    public static ArchiveConfig ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
 
 	// The number of threads that are allowed to serve thumb nails at once.
 	// Too many threads can cause out of memory errors.
@@ -695,10 +696,16 @@ public class UtilImpl {
 		return path;
 	}
 
-    public static record ArchiveConfig(int exportRuntimeSec, int exportBatchSize, List<ArchiveDocConfig> docConfigs) {
+    public static record ArchiveConfig(
+            int exportRuntimeSec,
+            int exportBatchSize,
+            List<ArchiveDocConfig> docConfigs,
+            ArchivedDocumentCacheConfig cacheConfig) {
 
         protected static final String ARCHIVE_DIR = "archive";
         protected static final String INDEX_DIR = "index";
+
+        public static final ArchiveConfig DISABLED = new ArchiveConfig(-1, -1, emptyList(), ArchivedDocumentCacheConfig.DEFAULT);
 
         public Optional<ArchiveDocConfig> findArchiveDocConfig(String module, String document) {
 

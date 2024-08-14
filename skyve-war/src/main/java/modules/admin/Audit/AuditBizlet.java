@@ -94,9 +94,8 @@ public class AuditBizlet extends Bizlet<Audit> {
         // q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
         Collections.sort(audits, comparing(Audit::getMillis).reversed());
 
-        // Delete spurious 'insert' records ()
-        Audit oldestInsert = audits.get(audits.size() - 1);
-        audits.removeIf(a -> a.getOperation() == Operation.insert && a != oldestInsert);
+        // Delete spurious 'insert' records
+        removeExtraInserts(audits);
 
         List<DomainValue> result = new ArrayList<>(audits.size());
         for (Audit version : audits) {
@@ -104,6 +103,23 @@ public class AuditBizlet extends Bizlet<Audit> {
         }
 
         return result;
+    }
+
+    /**
+     * Remove all but the older Insert operations. This method relies on the
+     * provided list of audits being sorted newest to oldest.
+     * 
+     * @param audits The list of audits, must be sorted so the older audit
+     *        is at the end of the list
+     */
+    protected void removeExtraInserts(List<Audit> audits) {
+
+        if (audits.size() <= 1) {
+            return;
+        }
+
+        Audit oldestInsert = audits.get(audits.size() - 1);
+        audits.removeIf(a -> a.getOperation() == Operation.insert && a != oldestInsert);
     }
 
     private ArchiveDocConfig getAuditDocConfig() {

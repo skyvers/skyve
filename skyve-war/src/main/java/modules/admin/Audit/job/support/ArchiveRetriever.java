@@ -1,15 +1,18 @@
 package modules.admin.Audit.job.support;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,10 +23,15 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.ehcache.Cache;
 import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.cache.ArchivedDocumentCacheConfig;
+import org.skyve.cache.Caching;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.util.JSON;
+import org.skyve.util.Util;
 
 import jakarta.inject.Singleton;
 import modules.admin.Audit.job.IndexArchivesJob;
@@ -144,6 +152,36 @@ public class ArchiveRetriever {
     @SuppressWarnings("unchecked")
     private <T extends Bean> T retrieveBean(ArchiveEntry entry) {
 
+        Cache<Serializable, Bean> cache = getCache();
+
+        Bean cachedBean = cache.get(entry.cacheKey());
+        if (cachedBean != null) {
+            logger.trace("Returning cached bean {} for {}", cachedBean, entry.cacheKey());
+            return (T) cachedBean;
+        }
+
+        Bean bean = loadBeanFromFile(entry);
+        cache.put(entry.cacheKey(), bean);
+
+        return (T) bean;
+    }
+
+    private synchronized Cache<Serializable, Bean> getCache() {
+        Caching caching = EXT.getCaching();
+        Cache<Serializable, Bean> cache = caching.getEHCache(ArchivedDocumentCacheConfig.CACHE_NAME, Serializable.class,
+                Bean.class);
+
+        if (cache == null) {
+            cache = caching.createEHCache(Util.getArchiveConfig()
+                                              .cacheConfig());
+            logger.debug("Created cache {}", cache);
+        }
+
+        return cache;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends Bean> T loadBeanFromFile(ArchiveEntry entry) {
         try {
             Path archiveFilePath = getArchiveFilePath(entry);
             String line = readLine(archiveFilePath, entry.offset(), entry.length());
@@ -196,5 +234,12 @@ public class ArchiveRetriever {
     }
 
     private record ArchiveEntry(ArchiveDocConfig docConfig, String fileName, long offset, long length) {
+
+        public String cacheKey() {
+
+            return Stream.of(docConfig.module(), docConfig.document(), fileName, offset, length)
+                         .map(String::valueOf)
+                         .collect(joining("-"));
+        }
     }
 }

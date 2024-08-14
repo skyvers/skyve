@@ -83,6 +83,11 @@ public class IndexArchivesJob extends CancellableJob {
         ArchiveConfig config = Util.getArchiveConfig();
         logger.trace("Starting {} with config {}", this, config);
 
+        if (config.exportBatchSize() <= 0) {
+            getLog().add("Invalid batch size configured, job ending");
+            return;
+        }
+
         for (ArchiveDocConfig docConfig : config.docConfigs()) {
 
             if (isCancelled()) {

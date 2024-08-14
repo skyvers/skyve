@@ -36,8 +36,7 @@ import com.google.common.base.MoreObjects;
 import jakarta.inject.Inject;
 import modules.admin.Audit.job.support.FileLockRepo;
 
-// FIXME rename
-public class ExportAuditsToArchiveJob extends CancellableJob {
+public class ExportDocumentsToArchiveJob extends CancellableJob {
 
     private static final char LF = '\n';
     private static final int LOCK_FAILURE = -999;
@@ -52,7 +51,7 @@ public class ExportAuditsToArchiveJob extends CancellableJob {
     private final Instant targetEndTime;
     private final int batchSize;
 
-    public ExportAuditsToArchiveJob() {
+    public ExportDocumentsToArchiveJob() {
         targetEndTime = now().plus(Duration.ofSeconds(Util.getArchiveConfig()
                                                           .exportRuntimeSec()));
         batchSize = Util.getArchiveConfig()

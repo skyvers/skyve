@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -19,6 +20,7 @@ import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
 import org.skyve.cache.Caching;
@@ -769,15 +771,11 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureArchiveProperties(Map<String, Object> properties) {
+    private static void configureArchiveProperties(Map<String, Object> properties) {
         String archKey = "archive";
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
         if (archiveProps == null) {
-            return;
-        }
-
-        if (!getBoolean(archKey, "enabled", archiveProps)) {
             return;
         }
 
@@ -797,7 +795,36 @@ public class SkyveContextListener implements ServletContextListener {
             docConfigs.add(new ArchiveDocConfig(module, document, directory));
         }
 
-        UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs));
+        // Setup the archive doc cache, with some defaults
+        ArchivedDocumentCacheConfig cacheConfig = ArchivedDocumentCacheConfig.DEFAULT;
+
+        Map<String, Object> cacheProps = getObject(archKey, "cache", archiveProps, false);
+        if (cacheProps != null) {
+
+            final String cacheKey = archKey + ".cache";
+
+            long heapSizeEntries = Optional.ofNullable(getNumber(cacheKey, "heapSizeEntries", cacheProps, false))
+                                           .map(Number::longValue)
+                                           .orElse(100l);
+            long offHeapSizeMB = Optional.ofNullable(getNumber(cacheKey, "offHeapSizeMB", cacheProps, false))
+                                         .map(Number::longValue)
+                                         .orElse(10l);
+            long expiryInMinutes = Optional.ofNullable(getNumber(cacheKey, "expiryTimeMinutes", cacheProps, false))
+                                           .map(Number::longValue)
+                                           .orElse(10l);
+
+            CacheExpiryPolicy expiryPolicy = Optional.ofNullable(getString(cacheKey, "expiryPolicy", cacheProps, false))
+                                                     .map(CacheExpiryPolicy::valueOf)
+                                                     .orElse(CacheExpiryPolicy.timeToIdle);
+
+            cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, offHeapSizeMB, expiryPolicy, expiryInMinutes);
+        }
+
+        UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs), cacheConfig);
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(ArchivedDocumentCacheConfig.DEFAULT);
     }
 
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
