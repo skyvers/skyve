@@ -82,6 +82,7 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.Session;
@@ -670,7 +671,7 @@ public class EXT {
 	 * 
 	 * @return An object containing both the request & response
 	 */
-	public static HttpServletRequestResponse getHttpServletRequestResponse() {
+	public static @Nullable HttpServletRequestResponse getHttpServletRequestResponse() {
 		return WebContainer.getHttpServletRequestResponse();
 	}
 

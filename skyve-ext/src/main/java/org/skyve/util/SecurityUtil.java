@@ -13,6 +13,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class SecurityUtil {
@@ -23,12 +24,15 @@ public class SecurityUtil {
 	 * @param exception The exception raised for this security event
 	 */
 	public static void log(@Nonnull Exception exception) {
+		// Get human-readable exception name
 		String eventType = exception.getClass()
 				.getSimpleName()
 				.replaceAll("([a-z])([A-Z]+)", "$1 $2");
-		String eventMessage = exception.getMessage();
 
-		log(eventType, eventMessage, exception);
+		String eventMessage = exception.getMessage();
+		String provenance = getProvenance(exception);
+
+		log(eventType, eventMessage, provenance);
 	}
 
 	/**
@@ -46,11 +50,11 @@ public class SecurityUtil {
 	 *
 	 * @param eventType The type of security event
 	 * @param eventMessage What is this security event
-	 * @param exception Optionally provide an exception to extract provenance
+	 * @param provenance The first line of the stack trace
 	 * 
 	 * @author Simeon Solomou
 	 */
-	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, Exception exception) {
+	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance) {
 		// Get current persistence
 		Persistence p = CORE.getPersistence();
 		User user = p.getUser();
@@ -68,10 +72,14 @@ public class SecurityUtil {
 				// Timestamp
 				sl.setTimestamp(new Timestamp());
 
-				// Thread ID
-				Long threadID = Long.valueOf(Thread.currentThread()
-						.getId());
-				sl.setThreadID(threadID);
+				Thread currentThread = Thread.currentThread();
+				if (currentThread != null) {
+					// Thread ID
+					sl.setThreadId(Long.valueOf(currentThread.getId()));
+
+					// Thread Name
+					sl.setThreadName(currentThread.getName());
+				}
 
 				// Source IP
 				HttpServletRequestResponse requestResponse = EXT.getHttpServletRequestResponse();
@@ -98,10 +106,8 @@ public class SecurityUtil {
 				// Event message
 				sl.setEventMessage(eventMessage);
 
-				if (exception != null) {
-					// Provenance
-					sl.setProvenance(getProvenance(exception));
-				}
+				// Provenance
+				sl.setProvenance(provenance);
 
 				try {
 					// Upsert
@@ -162,7 +168,8 @@ public class SecurityUtil {
 		StringBuilder body = new StringBuilder();
 		body.append("A security exception has been logged:<br/><br/>");
 		body.append("Timestamp: ").append(sl.getTimestamp()).append("<br/>");
-		body.append("Thread ID: ").append(sl.getThreadID()).append("<br/>");
+		body.append("Thread ID: ").append(sl.getThreadId()).append("<br/>");
+		body.append("Thread Name: ").append(sl.getThreadName()).append("<br/>");
 		body.append("Source IP: ").append(sl.getSourceIP()).append("<br/>");
 		body.append("Username: ").append(sl.getUsername()).append("<br/>");
 		body.append("Logged in User ID: ").append(sl.getLoggedInUserId()).append("<br/>");
@@ -184,27 +191,37 @@ public class SecurityUtil {
 	 * @return source IP
 	 */
 	public static String getSourceIpAddress(HttpServletRequest request) {
-		String xForwardedForHeader = request.getHeader("X-Forwarded-For");
-		if (xForwardedForHeader == null) {
-			return request.getRemoteAddr();
-		}
+		// Check "Forwarded" header
+	    String forwardedHeader = request.getHeader("Forwarded");
+	    if (forwardedHeader != null) {
+	        // Parse the "Forwarded" header for the 'for' field
+	        for (String part : forwardedHeader.split(";")) {
+	            if (part.trim().startsWith("for=")) {
+	                return part.substring(4).split(",")[0].trim();
+	            }
+	        }
+	    }
+	    
+	    // Check "X-Forwarded-For" header
+	    String xForwardedForHeader = request.getHeader("X-Forwarded-For");
+	    if (xForwardedForHeader != null) {
+	    	StringTokenizer tokenizer = new StringTokenizer(xForwardedForHeader, ",");
+			if (tokenizer.hasNext()) {
+                return tokenizer.nextToken().trim();
+            }
+	    }
 
-		// As of https://en.wikipedia.org/wiki/X-Forwarded-For
-		// The general format of the field is: X-Forwarded-For: client, proxy1, proxy2 ...
-		// we only want the client
-		return new StringTokenizer(xForwardedForHeader, ",").nextToken()
-				.trim();
+		// If none are present, return the remote address
+		return request.getRemoteAddr();
 	}
 
 	/**
 	 * Returns the first line of the stack trace for the parsed {@link Exception}
-	 * <br/>
-	 * Returns null if no stack trace exists
 	 * 
 	 * @param e
 	 * @return provenance
 	 */
-	public static String getProvenance(Exception e) {
+	public static @Nullable String getProvenance(Exception e) {
 		StackTraceElement[] stackTrace = e.getStackTrace();
 		if (stackTrace.length > 0) {
 			StackTraceElement firstElement = stackTrace[0];

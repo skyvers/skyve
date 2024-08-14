@@ -6,6 +6,7 @@ import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -33,8 +34,15 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
-		HttpServletRequest request = EXT.getHttpServletRequestResponse()
-				.getRequest();
+
+		HttpServletRequestResponse requestResponse = EXT.getHttpServletRequestResponse();
+		HttpServletRequest request = null;
+		if (requestResponse != null) {
+			request = requestResponse.getRequest();
+		}
+		if (request == null) {
+			throw new IllegalStateException("HttpServletRequest is null");
+		}
 
 		if (bean.getUser() != null && bean.getUser().getContact() != null) {
 			// Get and validate the recaptcha response from the request parameters if captcha is set

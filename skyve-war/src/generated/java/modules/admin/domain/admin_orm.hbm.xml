@@ -542,7 +542,8 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="timestamp" type="Timestamp" />
-		<property name="threadID" />
+		<property name="threadId" />
+		<property name="threadName" length="255" />
 		<property name="sourceIP" length="45" />
 		<property name="username" length="254" />
 		<property name="loggedInUserId" length="36" />

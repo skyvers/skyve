@@ -21,7 +21,7 @@ import org.skyve.util.ExpressionEvaluator;
 			<br/>
 			A SecurityLog instance is created automatically for every {@link AccessException} or {@link SecurityException} thrown.
 			<br/>
-			A SecurityLog instance can be manually created via static extension method <code>log</code>.
+			A SecurityLog instance can be manually created via <code>log</code> method in {@link SecurityUtil}.
 			<br/>
 			If email is configured, emails are sent to the support email address specified in the project JSON for each event raised.
  * 
@@ -47,7 +47,10 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	public static final String timestampPropertyName = "timestamp";
 
 	/** @hidden */
-	public static final String threadIDPropertyName = "threadID";
+	public static final String threadIdPropertyName = "threadId";
+
+	/** @hidden */
+	public static final String threadNamePropertyName = "threadName";
 
 	/** @hidden */
 	public static final String sourceIPPropertyName = "sourceIP";
@@ -79,7 +82,14 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	 * <br/>
 	 * Thread ID when the exception was raised
 	 **/
-	private Long threadID;
+	private Long threadId;
+
+	/**
+	 * Thread Name
+	 * <br/>
+	 * Thread name when the exception was raised
+	 **/
+	private String threadName;
 
 	/**
 	 * Source IP
@@ -185,21 +195,39 @@ public class SecurityLog extends AbstractPersistentBean implements org.skyve.dom
 	}
 
 	/**
-	 * {@link #threadID} accessor.
+	 * {@link #threadId} accessor.
 	 * @return	The value.
 	 **/
-	public Long getThreadID() {
-		return threadID;
+	public Long getThreadId() {
+		return threadId;
 	}
 
 	/**
-	 * {@link #threadID} mutator.
-	 * @param threadID	The new value.
+	 * {@link #threadId} mutator.
+	 * @param threadId	The new value.
 	 **/
 	@XmlElement
-	public void setThreadID(Long threadID) {
-		preset(threadIDPropertyName, threadID);
-		this.threadID = threadID;
+	public void setThreadId(Long threadId) {
+		preset(threadIdPropertyName, threadId);
+		this.threadId = threadId;
+	}
+
+	/**
+	 * {@link #threadName} accessor.
+	 * @return	The value.
+	 **/
+	public String getThreadName() {
+		return threadName;
+	}
+
+	/**
+	 * {@link #threadName} mutator.
+	 * @param threadName	The new value.
+	 **/
+	@XmlElement
+	public void setThreadName(String threadName) {
+		preset(threadNamePropertyName, threadName);
+		this.threadName = threadName;
 	}
 
 	/**

@@ -5,25 +5,27 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 
 public interface SecurityLog extends PersistentBean {
 
 	public static SecurityLog newInstance() {
 		try {
-			return CORE.getUser()
-					.getCustomer()
-					.getModule(AppConstants.ADMIN_MODULE_NAME)
-					.getDocument(CORE.getUser().getCustomer(), AppConstants.SECURITY_LOG_DOCUMENT_NAME)
-					.newInstance(CORE.getUser());
-		} catch (RuntimeException e) {
-			throw e;
+			org.skyve.metadata.user.User user = CORE.getUser();
+			Customer customer = user.getCustomer();
+			org.skyve.metadata.module.Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+			Document document = module.getDocument(customer, AppConstants.SECURITY_LOG_DOCUMENT_NAME);
+
+			return document.newInstance(user);
 		} catch (Exception e) {
-			throw new DomainException(e);
+			throw new DomainException("Could not instantiate a new SecurityLog", e);
 		}
 	}
 
 	Timestamp getTimestamp();
-	Long getThreadID();
+	Long getThreadId();
+	String getThreadName();
 	String getSourceIP();
 	String getUsername();
 	String getLoggedInUserId();
@@ -32,7 +34,8 @@ public interface SecurityLog extends PersistentBean {
 	String getProvenance();
 
 	void setTimestamp(Timestamp timestamp);
-	void setThreadID(Long threadID);
+	void setThreadId(Long threadId);
+	void setThreadName(String threadName);
 	void setSourceIP(String sourceIP);
 	void setUsername(String username);
 	void setLoggedInUserId(String bizId);
