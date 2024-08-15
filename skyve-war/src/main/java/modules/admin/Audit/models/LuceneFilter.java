@@ -21,6 +21,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanQuery.Builder;
+import org.apache.lucene.search.FieldExistsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermInSetQuery;
 import org.apache.lucene.search.TermQuery;
@@ -109,16 +110,14 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addNull(String binding) {
-        // FIXME doesn't work
-        TermRangeQuery trq = TermRangeQuery.newStringRange(binding, null, null, true, true);
-        clauses.add(new BooleanClause(trq, MUST_NOT));
+        Query query = new FieldExistsQuery(binding);
+        clauses.add(new BooleanClause(query, MUST_NOT));
     }
 
     @Override
     public void addNotNull(String binding) {
-        // FIXME doesn't work
-        TermRangeQuery trq = TermRangeQuery.newStringRange(binding, null, null, true, true);
-        clauses.add(new BooleanClause(trq, MUST));
+        Query query = new FieldExistsQuery(binding);
+        clauses.add(new BooleanClause(query, MUST));
     }
 
     @Override
@@ -413,7 +412,8 @@ public class LuceneFilter implements Filter {
     }
 
     /**
-     * TODO we may need some rounding functions for the range stuff, unless skyve handles it.
+     * We're reliant here on Skyve having rounded the date to the correct
+     * temporal resolution (for equals-like queries anyway).
      * 
      * @param d
      * @return
