@@ -58,11 +58,6 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     }
 
     @Override
-    public String getDescription() {
-        return "The list of all Audits.";
-    }
-
-    @Override
     public Filter getFilter() {
 
         return filter;
@@ -125,13 +120,12 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                     props.put(binding, rowCount);
                 }
             } else {
-                // We probably can't support the other aggregations, and
-                // they don't really make sense for the Audit list model
+                // We probably can't support the other aggregations types
                 logger.warn("Aggregate function {} not supported by {}", getSummary(), this);
             }
         }
 
-        return new DynamicBean("admin", "Audit", props);
+        return new DynamicBean(getModule(), getDocument(), props);
     }
 
     private Result executeQuery() throws IOException {

@@ -36,6 +36,11 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
             Audit.auditBizIdPropertyName);
 
     @Override
+    public String getDescription() {
+        return "The list of all Audits.";
+    }
+
+    @Override
     protected String toSortBinding(String binding) {
         return DocumentConverter.toSortBinding(binding);
     }
