@@ -30,12 +30,12 @@ import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.cache.Caching;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
+import org.skyve.metadata.view.model.list.LuceneFilter;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import jakarta.inject.Singleton;
 import modules.admin.Audit.job.IndexArchivesJob;
-import modules.admin.Audit.models.LuceneFilter;
 
 /**
  * Utility class for retrieving Beans archived to file.

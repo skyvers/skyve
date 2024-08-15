@@ -1,4 +1,4 @@
-package modules.admin.Audit.models;
+package org.skyve.metadata.view.model.list;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -11,8 +11,6 @@ import java.util.SortedMap;
 import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
@@ -32,19 +30,18 @@ import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
-import org.skyve.metadata.view.model.list.Filter;
-import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Util;
 import org.skyve.web.SortParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
 public abstract class ArchivedDocumentListModel<U extends Bean> extends ListModel<U> {
 
-    private final Logger logger = LogManager.getLogger();
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private LuceneFilter filter = new LuceneFilter();
 
@@ -90,7 +87,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             return p;
         } catch (IndexNotFoundException e) {
             logger.atWarn()
-                  .withThrowable(e)
+                  .setCause(e)
                   .log("No index found, returning empty Page");
 
             Page p = emptyPage();
@@ -156,7 +153,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             return defaultSort;
         }
 
-        logger.debug("SortParameters: {}", () -> Arrays.asList(params));
+        logger.atDebug()
+              .addArgument(() -> Arrays.asList(params))
+              .log("SortParameters: {}");
 
         List<SortField> sortFields = new ArrayList<>(params.length);
 
@@ -266,7 +265,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      */
     private class LuceneResultsIterable implements AutoClosingIterable<Bean> {
 
-        private final Logger lriLogger = LogManager.getLogger();
+        private final Logger lriLogger = LoggerFactory.getLogger(getClass());
 
         private int readNextRowIdx = 0;
         private final ScoreDoc[] scoreDocs;
@@ -317,7 +316,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
                 ac.close();
             } catch (Exception e) {
                 lriLogger.atWarn()
-                         .withThrowable(e)
+                         .setCause(e)
                          .log("Could not close {}", ac);
             }
         }

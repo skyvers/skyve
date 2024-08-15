@@ -1,4 +1,4 @@
-package modules.admin.Audit.models;
+package org.skyve.metadata.view.model.list;
 
 import static org.apache.commons.lang3.StringUtils.toRootLowerCase;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
@@ -30,7 +30,6 @@ import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.BytesRef;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.types.Decimal;
-import org.skyve.metadata.view.model.list.Filter;
 
 import com.google.common.base.MoreObjects;
 
