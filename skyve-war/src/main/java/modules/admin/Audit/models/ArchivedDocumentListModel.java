@@ -25,7 +25,6 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
@@ -49,9 +48,13 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
     private LuceneFilter filter = new LuceneFilter();
 
+    protected org.skyve.metadata.model.document.Document drivingDocument;
+
     @Override
     public void postConstruct(Customer customer, boolean runtime) {
-        //
+
+        drivingDocument = customer.getModule(getModule())
+                                  .getDocument(customer, getDocument());
     }
 
     @Override
@@ -232,15 +235,23 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
     @Override
     public org.skyve.metadata.model.document.Document getDrivingDocument() {
-        Customer customer = CORE.getUser()
-                                .getCustomer();
-
-        return customer.getModule(getModule())
-                       .getDocument(customer, getDocument());
+        return drivingDocument;
     }
 
+    /**
+     * Get the module for the driving document, also used
+     * to find the ArchiveDocConfig.
+     * 
+     * @return
+     */
     protected abstract String getModule();
 
+    /**
+     * Get the document for the driving document, also used
+     * to find the ArchiveDocConfig.
+     * 
+     * @return
+     */
     protected abstract String getDocument();
 
     /**
