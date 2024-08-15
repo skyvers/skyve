@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
+import org.apache.lucene.document.DoubleField;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
 import org.apache.lucene.index.Term;
@@ -150,8 +151,8 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addEquals(String binding, Decimal value) {
-        // TODO handle Decimal
-        throw new UnsupportedOperationException();
+        Query eq = DoubleField.newExactQuery(binding, value.doubleValue());
+        clauses.add(new BooleanClause(eq, MUST));
     }
 
     @Override
@@ -193,8 +194,8 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addNotEquals(String binding, Decimal value) {
-        // TODO handle Decimal
-        throw new UnsupportedOperationException();
+        Query eq = DoubleField.newExactQuery(binding, value.doubleValue());
+        clauses.add(new BooleanClause(eq, MUST_NOT));
     }
 
     @Override
@@ -287,8 +288,11 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addGreaterThan(String binding, Decimal value) {
-        // TODO handle Decimal
-        throw new UnsupportedOperationException();
+        Query gt = DoubleField.newRangeQuery(binding, value.doubleValue(), Double.MAX_VALUE);
+        clauses.add(new BooleanClause(gt, MUST));
+        
+        Query ne = DoubleField.newExactQuery(binding, value.doubleValue());
+        clauses.add(new BooleanClause(ne, MUST_NOT));
     }
 
     @Override
@@ -317,8 +321,8 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addGreaterThanOrEqualTo(String binding, Decimal value) {
-        // TODO handle Decimal
-        throw new UnsupportedOperationException();
+        Query gte = DoubleField.newRangeQuery(binding, value.doubleValue(), Double.MAX_VALUE);
+        clauses.add(new BooleanClause(gte, MUST));
     }
 
     @Override
@@ -356,8 +360,11 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addLessThan(String binding, Decimal value) {
-        // TODO handle Decimal
-        throw new UnsupportedOperationException();
+        Query lt = DoubleField.newRangeQuery(binding, Double.MIN_VALUE, value.doubleValue());
+        clauses.add(new BooleanClause(lt, MUST));
+
+        Query ne = DoubleField.newExactQuery(binding, value.doubleValue());
+        clauses.add(new BooleanClause(ne, MUST_NOT));
     }
 
     @Override
@@ -387,8 +394,8 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addLessThanOrEqualTo(String binding, Decimal value) {
-        // TODO handle Decimals
-        throw new UnsupportedOperationException();
+        Query lt = DoubleField.newRangeQuery(binding, Double.MIN_VALUE, value.doubleValue());
+        clauses.add(new BooleanClause(lt, MUST));
     }
 
     @Override
@@ -430,8 +437,8 @@ public class LuceneFilter implements Filter {
 
     @Override
     public void addBetween(String binding, Decimal start, Decimal end) {
-        // TODO handle Decimals
-        throw new UnsupportedOperationException();
+        Query between = DoubleField.newRangeQuery(binding, start.doubleValue(), end.doubleValue());
+        clauses.add(new BooleanClause(between, MUST));
     }
 
     @Override
