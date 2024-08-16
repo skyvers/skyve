@@ -1,4 +1,4 @@
-package org.skyve.impl.web.service.smartclient;
+package org.skyve.impl.snapshot;
 
 import org.skyve.metadata.FilterOperator;
 

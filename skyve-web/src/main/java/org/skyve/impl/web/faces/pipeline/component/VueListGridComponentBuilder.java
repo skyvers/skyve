@@ -131,7 +131,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	/**
-	 * @see FacesView#altSelectGridRow()
+	 * @see FacesView#selectGridRow()
 	 * @param selectedIdBinding
 	 * @param actionName
 	 * @param modelName
@@ -146,7 +146,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
 		UnaryOperator<String> addApostrophes = s -> s == null ? null : "'" + s + "'";
 
-		String exprSting = String.format("${%s.altSelectGridRow(param.bizId, %s, %s, %s)}",
+		String exprSting = String.format("${%s.selectGridRow(param.bizId, %s, %s, %s)}",
 											managedBeanName,
 											addApostrophes.apply(selectedIdBinding),
 											addApostrophes.apply(actionName),

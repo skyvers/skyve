@@ -123,6 +123,7 @@ export default {
             value: [],
             totalRecords: 0,
             filters: {},
+            smartClientCriteria: null,
             firstRow: 0,
             pageSize: 25,
             errorText: '',
@@ -296,7 +297,10 @@ export default {
                 fd.append('_sortBy', sortCol);
             }
 
-            if (this.skyveCriteria.length > 0) {
+            if (!! this.smartClientCriteria) {
+                fd.append('criteria', JSON.stringify(this.smartClientCriteria));
+            }
+            else if (this.skyveCriteria.length > 0) {
                 fd.append('_constructor', 'AdvancedCriteria');
                 fd.append('operator', this.selectedTopLevelOperator);
 
@@ -375,6 +379,8 @@ export default {
 
             return {
                 "filters": this.filters,
+                "smartClientCriteria": this.smartClientCriteria,
+				"operator": this.selectedTopLevelOperator,
                 "visibleColumns": visibleColNames,
                 "summarySelection": this.summarySelection,
                 "sortColumns": this.sortColumns,
@@ -501,6 +507,7 @@ export default {
             this.pageSize = event.rows ?? 25;
             this.sortColumn = event.sortField ?? '';
             this.filters = event.filters ?? {};
+            this.smartClientCriteria = event.smartClientCriteria;
         },
         /**
          * Initialise/clear the filter state, optionally setting some 
@@ -519,6 +526,7 @@ export default {
             }
 
             this.filters = Object.assign(defaultFilters, incomingFilters);
+            this.smartClientCriteria = null;
         },
         snapshotChanged(newSnapshot) {
 
@@ -526,11 +534,13 @@ export default {
             this.setStorageItem(SNAP_KEY_PREFIX, newSnapshot?.bizId);
 
             if (snapstate) {
-
                 // Filters
                 const incomingFilters = snapstate.filters ?? {};
                 this.initFilters(incomingFilters);
+                this.smartClientCriteria = snapstate.smartClientCriteria;
 
+				this.selectedTopLevelOperator = snapstate.operator ?? 'and';
+				
                 // Visible columns
                 const visibleCols = snapstate.visibleColumns ?? [];
                 this.selectedColumns = [];
@@ -683,7 +693,6 @@ export default {
                 {{ title }}
             </div>
             <div class="flex flex-column md:flex-row gap-2">
-
                 <!-- Multi select for choosing visible columns -->
                 <MultiSelect
                     v-model="selectedColumns"
@@ -711,6 +720,11 @@ export default {
                     optionLabel="label"
                     optionValue="value"
                 />
+                <div v-if="!! smartClientCriteria" style="height: 50px; padding-top: 16px; text-align: center;">
+                    <span class="pi pi-exclamation-triangle" />
+                    &nbsp;
+                    <span>Snapshot cannot be displayed or updated</span>
+                </div>
             </div>
         </template>
         <template #empty> No data found.</template>

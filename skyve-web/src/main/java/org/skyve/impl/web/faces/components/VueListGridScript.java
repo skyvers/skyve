@@ -15,7 +15,9 @@ import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -290,7 +292,12 @@ public class VueListGridScript extends UIOutput {
 				return implicitTypeConversions.getOrDefault(implicitAttrType, "text");
 			}
 
-			return flattenType(attribute.getAttributeType().name());
+			AttributeType type = attribute.getAttributeType();
+			// Treat constant domains like enumerations
+			if ((AttributeType.text.equals(type)) && DomainType.constant.equals(attribute.getDomainType())) {
+				type = AttributeType.enumeration;
+			}
+			return flattenType(type.name());
 		}
 
 		private static String flattenType(String inType) {

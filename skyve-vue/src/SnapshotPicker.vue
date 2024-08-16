@@ -50,7 +50,7 @@ export default {
                 {
                     label: 'New Snapshot',
                     icon: PrimeIcons.PLUS,
-                    command: this.cofirmCreate
+                    command: this.confirmCreate
                 },
                 {
                     label: 'No Snapshot',
@@ -71,6 +71,8 @@ export default {
                         optionalAction = {
                             label: 'Update Snapshot',
                             icon: PrimeIcons.PENCIL,
+                            // If smartClientCriteria is defined on the snapshot then update is disabled
+                            disabled: !! currSnap.snapshot?.smartClientCriteria,
                             command: () => this.updateSnapshot(currSnap)
                         };
                     } else {
@@ -78,7 +80,7 @@ export default {
                             label: 'Select Snapshot',
                             icon: PrimeIcons.CHECK,
                             command: () => this.chooseSnapshot(currSnap)
-                        }
+                        };
                     }
 
                     let result = {
@@ -122,7 +124,7 @@ export default {
         chooseSnapshot(snapshot) {
             this.selectedSnapshot = snapshot ?? null;
         },
-        cofirmCreate() {
+        confirmCreate() {
             this.showDialog = true;
         },
         async createSnapshot() {

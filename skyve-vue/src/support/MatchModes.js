@@ -5,25 +5,22 @@ const FilterMatchMode = {
     CONTAINS: 'iContains',
     NOT_CONTAINS: 'iNotContains',
     ENDS_WITH: 'iEndsWith',
-    EQUALS: 'iEquals',
-    NOT_EQUALS: 'iNotEqual',
+    TEXT_EQUALS: 'iEquals',
+    TEXT_NOT_EQUALS: 'iNotEqual',
 
+    EQUALS: 'equals',
+    NOT_EQUALS: 'notEqual',
     LESS_THAN: 'lessThan',
     LESS_THAN_OR_EQUAL_TO: 'lessOrEqual',
     GREATER_THAN: 'greaterThan',
     GREATER_THAN_OR_EQUAL_TO: 'greaterOrEqual',
-
-    DATE_IS: 'equals',
-    DATE_IS_NOT: 'notEqual',
-    DATE_BEFORE: 'lessThan',
-    DATE_AFTER: 'greaterThan'
 };
 
 const _DATE_MODES = [
-    { label: 'Equals', value: FilterMatchMode.DATE_IS },
-    { label: 'Not Equals', value: FilterMatchMode.DATE_IS_NOT },
-    { label: 'Before', value: FilterMatchMode.DATE_BEFORE },
-    { label: 'After', value: FilterMatchMode.DATE_AFTER },
+    { label: 'Equals', value: FilterMatchMode.EQUALS },
+    { label: 'Not Equals', value: FilterMatchMode.NOT_EQUALS },
+    { label: 'Before', value: FilterMatchMode.LESS_THAN },
+    { label: 'After', value: FilterMatchMode.GREATER_THAN },
 ];
 
 export const MatchModes = {
@@ -34,8 +31,8 @@ export const MatchModes = {
         { label: 'Contains', value: FilterMatchMode.CONTAINS },
         { label: 'Not Contains', value: FilterMatchMode.NOT_CONTAINS },
         { label: 'Ends With', value: FilterMatchMode.ENDS_WITH },
-        { label: 'Equals', value: FilterMatchMode.EQUALS },
-        { label: 'Not Equals', value: FilterMatchMode.NOT_EQUALS },
+        { label: 'Equals', value: FilterMatchMode.TEXT_EQUALS },
+        { label: 'Not Equals', value: FilterMatchMode.TEXT_NOT_EQUALS },
     ],
     numeric: [
         { label: 'Less Than', value: FilterMatchMode.LESS_THAN },

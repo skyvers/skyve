@@ -597,18 +597,18 @@ public class FacesView extends HarnessView {
 			if (filterCriteria != null) {
 				filterParameters = new ArrayList<>(filterCriteria.size());
 				parameters = new ArrayList<>(filterCriteria.size());
-				for (List<String> filterCriterium : filterCriteria) {
-					if (filterCriterium.size() == 3) {
+				for (List<String> filterCriterion : filterCriteria) {
+					if (filterCriterion.size() == 3) {
 						FilterParameterImpl param = new FilterParameterImpl();
-						param.setFilterBinding(filterCriterium.get(0));
-						param.setOperator(FilterOperator.valueOf(filterCriterium.get(1)));
-						param.setValue(filterCriterium.get(2));
+						param.setFilterBinding(filterCriterion.get(0));
+						param.setOperator(FilterOperator.valueOf(filterCriterion.get(1)));
+						param.setValue(filterCriterion.get(2));
 						filterParameters.add(param);
 					}
 					else {
 						ParameterImpl param = new ParameterImpl();
-						param.setName(filterCriterium.get(0));
-						param.setValue(filterCriterium.get(1));
+						param.setName(filterCriterion.get(0));
+						param.setValue(filterCriterion.get(1));
 						parameters.add(param);
 					}
 				}
