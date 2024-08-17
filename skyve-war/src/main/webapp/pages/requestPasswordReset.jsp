@@ -55,7 +55,7 @@
 		else {
 			UtilImpl.LOGGER.severe("Recaptcha failed validation");
 		}
-	} else if(!googleRecaptchaUsed && !cloudflareTurnstileUsed){
+	} else if (!googleRecaptchaUsed && !cloudflareTurnstileUsed) {
 		try {
 			WebUtil.requestPasswordReset(customerValue, emailValue);
 			mailSent = true;
@@ -66,7 +66,7 @@
 									String.format("Password Reset Request Failed for customer=%s and email=%s", customerValue, emailValue),
 									e);
 		}
-	} else{
+	} else {
 		UtilImpl.LOGGER.severe("Recaptcha likely unfilled");
 	}
 %>
