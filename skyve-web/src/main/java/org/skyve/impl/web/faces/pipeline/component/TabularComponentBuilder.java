@@ -539,7 +539,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								confirmationText,
 								action.getDisabledConditionName(),
 								formDisabledConditionName,
-								action.getInvisibleConditionName());
+								action.getInvisibleConditionName(),
+								false);
 	}
 
 	@Override
@@ -3122,7 +3123,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								confirmationText,
 								action.getDisabledConditionName(),
 								null,
-								action.getInvisibleConditionName());
+								action.getInvisibleConditionName(),
+								false);
 	}
 
 	@Override
@@ -3951,7 +3953,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *					<iframe id="s01_overlayiframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
 	 *			    </p:overlayPanel>
 	 */
-	private UIComponent uploadButton(String title,
+	protected UIComponent uploadButton(String title,
 										String iconStyleClass,
 										String tooltip,
 										String actionName,
@@ -3961,12 +3963,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String confirmationText,
 										String disabled,
 										String formDisabled,
-										String invisible) {
+										String invisible,
+										boolean useDialog) {
 		// A span as the top item so it can flow correctly in the action panel
 		HtmlPanelGroup result = panelGroup(false, false, false, invisible, null);
 		List<UIComponent> children = result.getChildren();
 
-		// Refresh remote command that calls rerender when the overlay panel is closed
+		// Refresh remote command that calls rerender when the panel is closed
 		RemoteCommand refresh = (RemoteCommand) a.createComponent(RemoteCommand.COMPONENT_TYPE);
 		setId(refresh, null);
 		String refreshId = refresh.getId();
@@ -3976,7 +3979,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		refresh.setUpdate(update); // default update
 		children.add(refresh);
 
-		// Upload button that the overlay panel is attached to
+		// Upload button that the panel is attached to
 		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(uploadButton, null);
 		String uploadButtonId = uploadButton.getId();
@@ -3989,33 +3992,55 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		setConfirmation(uploadButton, confirmationText);
 		children.add(uploadButton);
 
-		// Overlay panel attached to the upload button that houses the iframe
-		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
-		setId(overlay, null);
-		String overlayId = overlay.getId();
-		overlay.setWidgetVar(overlayId + "Overlay");
-		overlay.setFor(uploadButtonId);
-		overlay.setDynamic(false);
-		overlay.setShowCloseIcon(true);
-		overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
-		overlay.setStyle("width:50%;height:310px");
-		// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-		overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", overlayId, refreshId));
+		UIPanel panel = null;
+		String panelId = null;
+		if (useDialog) {
+			// Dialog attached to the upload button that houses the iframe
+			Dialog dialog = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
+			setId(dialog, null);
+			panelId = dialog.getId();
+			String var = panelId + "Dialog";
+			dialog.setWidgetVar(var);
+			dialog.setModal(true);
+			dialog.setResponsive(true);
+			dialog.setFitViewport(true);
+			dialog.setHeader("Upload");
+			dialog.setAppendTo("@(body)"); // append to <body/> so dialog can always pop (didn't work in tabs)
+			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
+			dialog.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", panelId, refreshId));
+			panel = dialog;
+
+			uploadButton.setOnclick("PF('" + var + "').show();PF('" + var + "').toggleMaximize()");
+		} else {
+			// Overlay panel attached to the upload button that houses the iframe
+			OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+			setId(overlay, null);
+			panelId = overlay.getId();
+			overlay.setWidgetVar(panelId + "Overlay");
+			overlay.setFor(uploadButtonId);
+			overlay.setDynamic(false);
+			overlay.setShowCloseIcon(true);
+			overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
+			overlay.setStyle("width:50%;height:310px");
+			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
+			overlay.setOnHide(String.format("SKYVE.PF.contentOverlayOnHide('%s');%s()", panelId, refreshId));
+			panel = overlay;
+		}
 
 		// show the overlay, reset the fileUpload.xhtml iframe
 		StringBuilder value = new StringBuilder(64);
-		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(overlayId).append("\\',\\''.concat(");
+		value.append("#{'SKYVE.PF.contentOverlayOnShow(\\'").append(panelId).append("\\',\\''.concat(");
 		value.append(managedBeanName).append(".getFileUploadUrl('").append(actionName).append("')).concat('\\')')}");
-		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+		panel.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
 
-		children.add(overlay);
+		children.add(panel);
 
 		// <iframe id="s01_overlayiframe" src="" style="width:100%;height:280px;border:none"></iframe>
 		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		iframe.setEscape(false);
-		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", overlayId));
+		iframe.setValue(String.format("<iframe id=\"%s_overlayiframe\" src=\"\" style=\"width:100%%;height:285px;border:none\"></iframe>", panelId));
 		setId(iframe, null);
-		overlay.getChildren().add(iframe);
+		panel.getChildren().add(iframe);
 
 		return result;
 	}
