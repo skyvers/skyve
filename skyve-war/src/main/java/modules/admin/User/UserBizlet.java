@@ -22,6 +22,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.Configuration.ConfigurationExtension;
@@ -100,8 +101,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				Configuration c = Configuration.newInstance();
 				if (c.isCheckForBreachedPasswordsEnabled()) {
 					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
-						webContext.growl(MessageSeverity.warn,
-								"WARNING: The password you have entered has been compromised in a data breach. For security, we recommend selecting a stronger password.");
+						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
 					}
 				}
 			}

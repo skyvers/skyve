@@ -90,8 +90,7 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 				Configuration c = Configuration.newInstance();
 				if (c.isCheckForBreachedPasswordsEnabled()) {
 					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
-						webContext.growl(MessageSeverity.warn,
-								"WARNING: The password you have entered has been compromised in a data breach. For security, we recommend selecting a stronger password.");
+						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
 					}
 				}
 			}

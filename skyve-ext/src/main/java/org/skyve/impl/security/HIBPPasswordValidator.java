@@ -36,7 +36,7 @@ public class HIBPPasswordValidator {
 			// Get prefix
 			String prefix = sha1Hash.substring(0, 5);
 
-			// ]Query the HaveIBeenPwned API with the prefix
+			// Query the HaveIBeenPwned API with the prefix
 			HttpClient client = HttpClient.newHttpClient();
 			HttpRequest request = HttpRequest.newBuilder()
 					.uri(URI.create(HIBP_API_URL + prefix))
