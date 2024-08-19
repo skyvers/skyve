@@ -235,9 +235,12 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 			result.append('\'');
 		}
 		appendEditorProperties(result, false, pixelHeight, emptyThumbnailRelativeFile);
-		if (valueMap != null) {
-			result.append(",valueMap:").append(valueMap);
-		}
+
+        if (valueMap != null) {
+            result.append(",valueMap:")
+                  .append(getValueMapAsString());
+        }
+
 		if (required) {
         	result.append(",bizRequired:true,requiredMessage:'");
         	result.append(OWASP.escapeJsString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');

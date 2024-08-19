@@ -116,7 +116,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         	result.append(OWASP.escapeJsString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
         }
         if (valueMap != null) {
-            result.append(",valueMap:").append(valueMap);
+            result.append(",valueMap:").append(getValueMapAsString());
         }
         if (align != null) {
         	result.append(",align:'").append(align.toAlignmentString()).append('\'');

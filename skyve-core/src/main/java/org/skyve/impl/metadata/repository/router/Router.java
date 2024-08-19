@@ -85,8 +85,8 @@ public class Router implements ConvertableMetaData<Router> {
 				if (routeCriteria.isEmpty()) { // if no criteria defined then its a match
 					return route;
 				}
-				for (RouteCriteria routeCriterium : routeCriteria) {
-					if (routeCriterium.matches(criteria)) {
+				for (RouteCriteria routeCriterion : routeCriteria) {
+					if (routeCriterion.matches(criteria)) {
 						return route;
 					}
 				}

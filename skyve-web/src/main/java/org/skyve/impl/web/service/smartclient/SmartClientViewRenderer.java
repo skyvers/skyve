@@ -97,6 +97,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;

@@ -24,22 +24,18 @@
 	String customerValue = request.getParameter("customer");
 	String emailValue = request.getParameter("email");
 	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
-	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null || UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
 	String siteKey = null;
-	boolean googleRecaptchaUsed = false;
-	boolean cloudflareTurnstileUsed = false;
-	if(recaptchaSet){
-		siteKey = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null ? UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY : UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
-		if(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null){
-			googleRecaptchaUsed = true;
-		}else{
-			cloudflareTurnstileUsed = true;
-		}
+	if (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null) {
+		siteKey = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
+	}
+	else if (UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null) {
+		siteKey = UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
 	}
 	
-	boolean postback = (emailValue != null) && (captcha != null);
+	boolean postback = (emailValue != null);
 	if (postback) {
-		if (WebUtil.validateRecaptcha(captcha)) {
+		// Only validate if we have a captcha rendered
+		if ((siteKey == null) || WebUtil.validateRecaptcha(captcha)) {
 			try {
 				WebUtil.requestPasswordReset(customerValue, emailValue);
 			}
@@ -125,9 +121,9 @@
 			});
 			-->
 		</script>
-		<% if (googleRecaptchaUsed) { %>
+		<% if (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null) { %>
 			<script src='https://www.google.com/recaptcha/api.js'></script>
-		<% } else if(cloudflareTurnstileUsed) {%>
+		<% } else if (UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null) {%>
 			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
 		<% } %>
 	</head>
@@ -154,10 +150,9 @@
 		    		<form method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 			    		<div class="ui segment">
 
-			    		<div class="ui header">
-			    			<%=Util.i18n("page.requestPasswordReset.banner", locale)%>
-			    		</div>
-
+				    		<div class="ui header">
+				    			<%=	Util.i18n("page.requestPasswordReset.banner", locale)%>
+				    		</div>	
 			    			<div class="field">
 								<%=Util.i18n("page.requestPasswordReset.message", locale)%>
 			    			</div>
@@ -178,20 +173,22 @@
 									<% } %>
 			                    </div>
 			                </div>
-
-			                <div class="field">
-			                	<!-- A table to brute force the captcha to centre as it is an iframe -->
-								<table>
-									<tr>
-										<td style="width:50%" />
-										<td>
-											<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
-										</td>
-										<td style="width:50%" />
-									</tr>
-								</table>
-			                </div>
-		                	<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" class="ui fluid large blue submit button" />
+							<% if (siteKey != null) { %>
+								<div class="field">
+									<!-- A table to brute force the captcha to centre as it is an iframe -->
+									<table>
+										<tr>
+											<td style="width:50%" />
+											<td>
+												<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
+											</td>
+											<td style="width:50%" />
+										</tr>
+									</table>
+								</div>
+							<% } %>
+							
+							<input type="submit" value="<%=Util.i18n("page.requestPasswordReset.submit.label", locale)%>" class="ui fluid large blue submit button" />
 			                
 			                <div style="margin-top: 5px;">
 			                	<% if (UtilImpl.CUSTOMER == null) { %>

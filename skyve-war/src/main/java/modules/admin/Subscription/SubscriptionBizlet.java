@@ -2,12 +2,12 @@ package modules.admin.Subscription;
 
 import java.math.BigInteger;
 import java.util.Date;
-import java.util.UUID;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
@@ -46,7 +46,7 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 
 			SQL sqlInsert = persistence.newSQL(sqlInsertString.toString());
 
-			String bizId = UUID.randomUUID().toString();
+			String bizId = UUIDv7.create().toString();
 			Integer bizVersion = Integer.valueOf(0);
 			OptimisticLock lock = new OptimisticLock(SUBSCRIPTION_PUBLIC_USERNAME, new Date());
 			String bizLock = lock.toString();

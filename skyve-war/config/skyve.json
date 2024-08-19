@@ -254,10 +254,12 @@
 	},
 	// API Settings
 	"api": {
-		//to obtain a google maps API key - go to https://developers.google.com/maps/documentation/javascript/get-api-key
+		// to obtain a google maps API key - go to https://developers.google.com/maps/documentation/javascript/get-api-key
 		"googleMapsV3Key": null,
 		"googleRecaptchaSiteKey": null,
 		"googleRecaptchaSecretKey": null,
+		"cloudflareTurnstileSiteKey": null,
+		"cloudflareTurnstileSecretKey": null,
 		"ckEditorConfigFileUrl": null
 	},
 	// Account settings

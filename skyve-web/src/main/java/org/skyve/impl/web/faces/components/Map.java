@@ -32,7 +32,7 @@ public class Map extends HtmlPanelGroup {
 			final String geometryBinding = (String) attributes.get("geometryBinding");
 			final String managedBeanName = (String) attributes.get("managedBean");
 
-			String classString = (String) attributes.get("componentBuilderClass");
+			String classString = (String) attributes.get(ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY);
 			ComponentBuilder tempComponentBuilder = null;
 			try {
 				if (classString == null) {

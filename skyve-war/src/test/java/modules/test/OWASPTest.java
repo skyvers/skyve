@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
@@ -79,6 +80,10 @@ public class OWASPTest extends AbstractSkyveTest {
 	@SuppressWarnings("static-method")
 	public void testSanitiseUUIDs() throws Exception {
 		String uuid = UUID.randomUUID().toString();
+		Assert.assertEquals("Sanitise should leave UUIDs alone",
+								uuid,
+								OWASP.sanitise(Sanitisation.text, uuid));
+		uuid = UUIDv7.create().toString();
 		Assert.assertEquals("Sanitise should leave UUIDs alone",
 								uuid,
 								OWASP.sanitise(Sanitisation.text, uuid));

@@ -43,6 +43,7 @@
 		<property name="text" length="255" />
 		<property name="time" type="TimeOnly" />
 		<property name="timestamp" type="Timestamp" />
+		<property name="image" length="36" />
 		<filter name="kitchensinkListAttributesNoneFilter" condition="1=0"/>
 		<filter name="kitchensinkListAttributesCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="kitchensinkListAttributesDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

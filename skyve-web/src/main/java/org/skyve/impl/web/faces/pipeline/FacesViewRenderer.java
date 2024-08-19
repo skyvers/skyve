@@ -1218,16 +1218,27 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
 		UIComponent listGridParent = current;
 
-		UIComponent c = cb.listGrid(null,
-										module.getName(),
-										getCurrentListWidgetModelDocumentName(),
-										getCurrentListWidgetModelName(),
-										currentUxUi,
-										getCurrentListWidgetModel(),
-										document,
-										title,
-										grid,
-										aggregateQuery);
+		// Use the component builder specified by the listGrid property if it exists
+		String componentBuilderClass = grid.getProperties().get(ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY);
+		ComponentBuilder componentBuilder = cb;
+		if (componentBuilderClass != null) {
+			componentBuilder = org.skyve.impl.web.faces.components.ListGrid.newComponentBuilder(componentBuilderClass);
+	        componentBuilder.setManagedBeanName(cb.managedBeanName);
+	    	componentBuilder.setProcess(cb.process);
+	    	componentBuilder.setUpdate(cb.update);
+	    	componentBuilder.setUserAgentType(cb.userAgentType);
+		}
+		
+		UIComponent c = componentBuilder.listGrid(null,
+													module.getName(),
+													getCurrentListWidgetModelDocumentName(),
+													getCurrentListWidgetModelName(),
+													currentUxUi,
+													getCurrentListWidgetModel(),
+													document,
+													title,
+													grid,
+													aggregateQuery);
 		addToContainer(c,
 						grid.getPixelWidth(),
 						grid.getResponsiveWidth(),
@@ -1239,7 +1250,7 @@ public class FacesViewRenderer extends ViewRenderer {
 						grid.getInvisibleConditionName());
 
 		if ((! aggregateQuery) && (! grid.getContinueConversation()) && (! Boolean.FALSE.equals(grid.getShowZoom()))) {
-			listGridParent.getChildren().add(cb.listGridContextMenu(null, c.getId(), grid));
+			listGridParent.getChildren().add(componentBuilder.listGridContextMenu(null, c.getId(), grid));
 		}
 	}
 

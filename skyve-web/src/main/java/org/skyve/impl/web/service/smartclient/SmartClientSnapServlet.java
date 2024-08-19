@@ -10,12 +10,14 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.snapshot.SnapshotAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
@@ -28,7 +30,6 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
-import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
@@ -42,7 +43,7 @@ import jakarta.servlet.http.HttpSession;
 
 public class SmartClientSnapServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
+	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
@@ -93,6 +94,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 					// Don't sanitise this one as it is JSON - TODO should use a JSON sanitiser on it.
 					String snapshot = Util.processStringValue(request.getParameter("s"));
 					String dataSource = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter("d")));
+					boolean smartClientRequest = "sc".equals(Util.processStringValue(request.getParameter("t")));
 
 					String moduleName = null;
 					String documentOrQueryOrModelName = null;
@@ -133,15 +135,16 @@ public class SmartClientSnapServlet extends HttpServlet {
 					HttpSession session = request.getSession();
 
 					if ("L".equals(action)) {
-						list(moduleName, documentOrQueryOrModelName, sb);
+						String result = list(moduleName, documentOrQueryOrModelName, smartClientRequest);
+						sb.append(result);
 					}
 					else if ("U".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
-						update(snapId, snapshot);
+						update(snapId, snapshot, smartClientRequest);
 					}
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
-						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot);
+						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot, smartClientRequest);
 						sb.append("{\"bizId\":\"");
 						sb.append(snapId);
 						sb.append("\"}");
@@ -188,20 +191,22 @@ public class SmartClientSnapServlet extends HttpServlet {
 		}
 	}
 
-	private static void list(String moduleName,
+	private static String list(String moduleName,
 								String queryName,
-								StringBuilder sb)
+								boolean smartClientRequest)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME);
-		q.addBoundProjection(Bean.DOCUMENT_ID);
-		q.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME);
-		q.addBoundProjection(AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
-		DocumentFilter f = q.getFilter();
-		f.addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);
-		f.addEquals(AppConstants.QUERY_NAME_ATTRIBUTE_NAME, queryName);
-		q.addBoundOrdering(AppConstants.ORDINAL_ATTRIBUTE_NAME);
-		q.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
+		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME)
+							.addBoundProjection(Bean.DOCUMENT_ID)
+							.addBoundProjection(AppConstants.NAME_ATTRIBUTE_NAME)
+							.addBoundProjection(AppConstants.SNAPSHOT_ATTRIBUTE_NAME)
+							.addBoundOrdering(AppConstants.ORDINAL_ATTRIBUTE_NAME)
+							.addBoundOrdering(AppConstants.NAME_ATTRIBUTE_NAME);
+		q.getFilter()
+			.addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName)
+			.addEquals(AppConstants.QUERY_NAME_ATTRIBUTE_NAME, queryName);
+		
+		StringBuilder sb = new StringBuilder();
 
 		// Snapshots array
 		sb.append('[');
@@ -211,21 +216,45 @@ public class SmartClientSnapServlet extends HttpServlet {
 			String escapedDescription = OWASP.escapeJsString((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
 			String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
 
-			sb.append("{\"").append(Bean.DOCUMENT_ID).append("\":\"").append(escapedCode);
-			sb.append("\",\"").append(AppConstants.NAME_ATTRIBUTE_NAME).append("\":\"").append(escapedDescription);
-			sb.append("\",\"").append(AppConstants.SNAPSHOT_ATTRIBUTE_NAME).append("\":").append(snapshot).append("},");
+			snapshot = smartClientRequest ? SnapshotAdapter.toSmartClient(snapshot) : SnapshotAdapter.toVue(snapshot);
+			if (snapshot == null) { // not a valid snapshot
+				continue;
+			}
+			
+			sb.append("{\"")
+					.append(Bean.DOCUMENT_ID)
+					.append("\":\"")
+					.append(escapedCode);
+			sb.append("\",\"")
+					.append(AppConstants.NAME_ATTRIBUTE_NAME)
+					.append("\":\"")
+					.append(escapedDescription);
+			sb.append("\",\"")
+					.append(AppConstants.SNAPSHOT_ATTRIBUTE_NAME)
+					.append("\":")
+					.append(snapshot)
+					.append("},");
 		}
 		if (! results.isEmpty()) {
 			sb.setLength(sb.length() - 1); // remove last comma
 		}
 		sb.append(']');
+
+		return sb.toString();
 	}
 
 	private static String create(String snapModuleName,
 									String snapQueryName,
 									String snapName,
-									String snapshot)
+									String snapshot,
+									boolean smartClientRequest)
 	throws Exception {
+		// Validate snapshot definition
+		SnapshotAdapter snapshotAdapater = smartClientRequest ? SnapshotAdapter.SMART_CLIENT : SnapshotAdapter.VUE;
+		if (snapshotAdapater.fromClientPayload(snapshot) == null) { // not valid
+			throw new DomainException("Snapshot definition is not valid");
+		}
+
 		Persistence p = CORE.getPersistence();
 		User user = p.getUser();
 		Customer customer = user.getCustomer();
@@ -243,8 +272,14 @@ public class SmartClientSnapServlet extends HttpServlet {
 		return snap.getBizId();
 	}
 
-	private static void update(String snapId, String snapshot)
+	private static void update(String snapId, String snapshot, boolean smartClientRequest)
 	throws Exception {
+		// Validate snapshot definition
+		SnapshotAdapter snapshotAdapater = smartClientRequest ? SnapshotAdapter.SMART_CLIENT : SnapshotAdapter.VUE;
+		if (snapshotAdapater.fromClientPayload(snapshot) == null) { // not valid
+			throw new DomainException("Snapshot definition is not valid");
+		}
+
 		Persistence p = CORE.getPersistence();
 		PersistentBean snap = p.retrieveAndLock(AppConstants.ADMIN_MODULE_NAME,
 													AppConstants.SNAPSHOT_DOCUMENT_NAME,

@@ -1,10 +1,9 @@
 package org.skyve.impl.domain;
 
-import java.util.UUID;
-
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.types.jaxb.OptimisticLockMapper;
+import org.skyve.impl.util.UUIDv7;
 
 import jakarta.persistence.MappedSuperclass;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -25,7 +24,7 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	 */
 	private static final long serialVersionUID = -3598872446903601438L;
 
-	private String bizId = UUID.randomUUID().toString();
+	private String bizId = UUIDv7.create().toString();
 
 	private Integer bizVersion;
 
