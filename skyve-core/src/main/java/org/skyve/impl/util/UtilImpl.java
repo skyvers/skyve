@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.hibernate.internal.util.SerializationHelper;
@@ -563,7 +562,7 @@ public class UtilImpl {
 		}
 		else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
-			bean.setBizId(UUID.randomUUID().toString());
+			bean.setBizId(UUIDv7.create().toString());
 			bean.setBizLock(null);
 			bean.setBizVersion(null);
 
