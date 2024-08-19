@@ -2,7 +2,6 @@ package org.skyve.impl.util;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -113,7 +112,7 @@ public class WebStatsUtil {
 				query.append(" (bizId, bizVersion, bizCustomer, bizLock, bizUserId, userName, hitYear, hitMonth, userAgentHeader, device, numberOfHits, bizKey) values ");
 				query.append("(:bizId, 0, :bizCustomer, :bizLock, :bizUserId, :userName, :hitYear, :hitMonth, :userAgentHeader, :device, 1, :bizKey)");
 				sql = persistence.newSQL(query.toString());
-				sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
+				sql.putParameter(Bean.DOCUMENT_ID, UUIDv7.create().toString(), false);
 				sql.putParameter(Bean.CUSTOMER_NAME, user.getCustomer().getName(), false);
 				sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(user.getName(), now).toString(), false);
 				sql.putParameter(Bean.USER_ID, user.getId(), false);

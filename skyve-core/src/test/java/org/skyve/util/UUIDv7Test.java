@@ -17,7 +17,8 @@ public class UUIDv7Test {
 
     private final int iterationCount = 100_000;
 
-    @Test
+	@Test
+    @SuppressWarnings("boxing")
     public void duplicateTest() {
 
         Set<String> generated = new TreeSet<>();
@@ -30,7 +31,8 @@ public class UUIDv7Test {
         assertThat(generated.size(), is(iterationCount));
     }
 
-    @Test
+    @SuppressWarnings("boxing")
+	@Test
     public void sameTimeTest() {
 
         Instant now = Instant.now();
@@ -57,8 +59,9 @@ public class UUIDv7Test {
         assertThat(timePrefix.size(), is(1));
     }
 
-    @Test
-    public void testToInstant() {
+ 	@Test
+    @SuppressWarnings("static-method")
+ 	public void testToInstant() {
 
         Instant now = Instant.now();
 
