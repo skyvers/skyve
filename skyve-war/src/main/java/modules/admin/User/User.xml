@@ -73,6 +73,11 @@
 			<description>admin.user.passwordResetToken.description</description>
 			<length>56</length>
 		</text>
+		<timestamp name="passwordResetTokenCreationTimestamp" usage="domain">
+			<documentation>Used in WebUtil.resetPassword to evaluate token expiry.</documentation>
+			<displayName>Password Reset Token Creation Timestamp</displayName>
+			<description>When the password reset token was created.</description>
+		</timestamp>
 		<memo name="passwordHistory" audited="false" trackChanges="false" sensitivity="secret">
 			<documentation>
 				A tab separated list of previous password hashes used
