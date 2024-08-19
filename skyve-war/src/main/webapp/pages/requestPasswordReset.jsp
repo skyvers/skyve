@@ -38,10 +38,12 @@
 	}
 	
 	boolean postback = (emailValue != null) && (captcha != null);
+	boolean mailSent = false;
 	if (postback) {
 		if (WebUtil.validateRecaptcha(captcha)) {
 			try {
 				WebUtil.requestPasswordReset(customerValue, emailValue);
+				mailSent = true;
 			}
 			catch (Exception e) {
 				// don't stop - we need to give nothing away
@@ -53,6 +55,19 @@
 		else {
 			UtilImpl.LOGGER.severe("Recaptcha failed validation");
 		}
+	} else if (!googleRecaptchaUsed && !cloudflareTurnstileUsed) {
+		try {
+			WebUtil.requestPasswordReset(customerValue, emailValue);
+			mailSent = true;
+		}
+		catch (Exception e) {
+			// don't stop - we need to give nothing away
+			UtilImpl.LOGGER.log(Level.SEVERE, 
+									String.format("Password Reset Request Failed for customer=%s and email=%s", customerValue, emailValue),
+									e);
+		}
+	} else {
+		UtilImpl.LOGGER.severe("Recaptcha likely unfilled");
 	}
 %>
 <!DOCTYPE html>
@@ -138,7 +153,7 @@
 		    		<%@include file="fragments/logo.html" %>
 		    	</div>
 		    	
-		    	<% if (postback) { %>
+		    	<% if (mailSent) { %>
 			    	<div class="ui large form">
 			            <div class="ui segment">
 			            	<div class="ui header">
