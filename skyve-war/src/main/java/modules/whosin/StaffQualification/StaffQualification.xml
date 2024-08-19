@@ -42,5 +42,10 @@
 		<date name="dateExpiry">
 			<displayName>Date of Expiry (if applicable)</displayName>
 		</date>
+		<text name="level">
+			<displayName>Level</displayName>
+			<domain>dynamic</domain>
+			<length>10</length>
+		</text>
 	</attributes>
 </document>

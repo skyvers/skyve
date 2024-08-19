@@ -64,6 +64,9 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 	/** @hidden */
 	public static final String dateExpiryPropertyName = "dateExpiry";
 
+	/** @hidden */
+	public static final String levelPropertyName = "level";
+
 	/**
 	 * Type
 	 **/
@@ -169,6 +172,11 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 	 * Date of Expiry (if applicable)
 	 **/
 	private DateOnly dateExpiry;
+
+	/**
+	 * Level
+	 **/
+	private String level;
 
 	private Staff parent;
 
@@ -325,6 +333,24 @@ public class StaffQualification extends AbstractPersistentBean implements ChildB
 	public void setDateExpiry(DateOnly dateExpiry) {
 		preset(dateExpiryPropertyName, dateExpiry);
 		this.dateExpiry = dateExpiry;
+	}
+
+	/**
+	 * {@link #level} accessor.
+	 * @return	The value.
+	 **/
+	public String getLevel() {
+		return level;
+	}
+
+	/**
+	 * {@link #level} mutator.
+	 * @param level	The new value.
+	 **/
+	@XmlElement
+	public void setLevel(String level) {
+		preset(levelPropertyName, level);
+		this.level = level;
 	}
 
 	@Override

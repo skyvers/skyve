@@ -88,6 +88,7 @@
 		<property name="description" type="text" />
 		<property name="dateAttained" type="DateOnly" />
 		<property name="dateExpiry" type="DateOnly" />
+		<property name="level" length="10" />
 		<filter name="whosinStaffQualificationNoneFilter" condition="1=0"/>
 		<filter name="whosinStaffQualificationCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="whosinStaffQualificationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

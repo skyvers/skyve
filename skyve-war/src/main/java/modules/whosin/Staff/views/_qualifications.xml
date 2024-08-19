@@ -12,9 +12,14 @@
 				</item>
 			</row>
 		</form>
-		<dataGrid binding="qualifications">
+		<dataGrid binding="qualifications" inline="true">
 			<boundColumn binding="name" />
 			<boundColumn binding="type" />
+			<boundColumn binding="level">
+				<input>
+					<combo binding="level"/>
+				</input>
+			</boundColumn>
 			<boundColumn binding="issuingOrganisation" />
 			<boundColumn binding="description" />
 			<boundColumn binding="dateAttained" />
