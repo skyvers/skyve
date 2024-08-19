@@ -91,6 +91,34 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 * Use a dialog instead of an overlay panel for phones.
 	 */
 	@Override
+	public UIComponent upload(UIComponent component, 
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								Action action) {
+		if (component != null) {
+			return component;
+		}
+
+		return uploadButton(label,
+								iconStyleClass,
+								toolTip,
+								action.getName(),
+								null,
+								null,
+								action.getClientValidation(),
+								confirmationText,
+								action.getDisabledConditionName(),
+								null,
+								action.getInvisibleConditionName(),
+								UserAgentType.phone.equals(userAgentType));
+	}
+
+	/**
+	 * Use a dialog instead of an overlay panel for phones.
+	 */
+	@Override
 	public UIComponent uploadButton(UIComponent component,
 									String label, 
 									String iconStyleClass, 
