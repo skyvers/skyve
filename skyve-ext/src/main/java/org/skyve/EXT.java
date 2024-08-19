@@ -576,7 +576,7 @@ public class EXT {
 			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else if ("argon2".equals(passwordHashingAlgorithm)) {
-			result = "{argon2}" + new Argon2PasswordEncoder(16, 32, 1, 19 * 1024, 2).encode(clearText);
+			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else {
 			throw new DomainException(passwordHashingAlgorithm + " not supported");
