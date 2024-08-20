@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<view title="admin.dataMaintenance.edit.title" name="edit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-	xmlns="http://www.skyve.org/xml/view" xmlns:c="http://www.skyve.org/xml/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view name="edit"
+		title="admin.dataMaintenance.edit.title"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:c="http://www.skyve.org/xml/common"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd">
 	<tabPane>
 		<tab title="admin.dataMaintenance.edit.importExport.tabTitle">
 			<!-- Bizport not implemented for PF -->
@@ -34,11 +38,25 @@
 				</row>
 			</form>
 			<vbox border="true" borderTitle="admin.dataMaintenance.edit.backups.borderTitle" widgetId="backups">
-				<listGrid model="BackupsModel" selectedIdBinding="selectedBackupName" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
-					showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false" postRefresh="backupsRefreshRequired">
+				<listGrid model="BackupsModel"
+							selectedIdBinding="selectedBackupName"
+							continueConversation="false"
+							showAdd="false"
+							showEdit="false"
+							showExport="false"
+							showFilter="false"
+							showRemove="false"
+							showSnap="false"
+							showSummary="false"
+							showTag="false"
+							showZoom="false"
+							postRefresh="backupsRefreshRequired">
 					<onSelectedHandlers>
 						<server action="BackupSelected" />
 					</onSelectedHandlers>
+					<properties>
+						<c:property key="componentBuilderClass">faces</c:property>
+					</properties>
 				</listGrid>
 				<form>
 					<column responsiveWidth="2" />
