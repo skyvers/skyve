@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.UUID;
 
@@ -26,7 +27,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -95,7 +95,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         }
     }
 
-    public Page emptyPage() {
+    private Page emptyPage() {
         Page p = new Page();
         p.setRows(new ArrayList<>());
         p.setSummary(createSummary(0));
@@ -248,16 +248,18 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     protected abstract String getDocument();
 
     /**
-     * Get the document config for the configured module+document from the application config (via
-     * <em>Util.getArchiveConfig()</em>). Can be overridden if needed.
+     * Get the (lucene) index directory from the document config for the configured module+document
+     * in the application config (via <em>Util.getArchiveConfig()</em>). Can be overridden if needed.
      * 
+     * @throws NoSuchElementException if the module+document combination is not present in the
+     *         application config.
      * @return
      */
-    protected ArchiveDocConfig getDocumentConfig() {
-
+    protected Path getIndexDirectory() {
         return Util.getArchiveConfig()
                    .findArchiveDocConfig(getModule(), getDocument())
-                   .get();
+                   .get()
+                   .getIndexDirectory();
     }
 
     /**
@@ -276,7 +278,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         public LuceneResultsIterable(int startRow, int endRow) throws IOException {
 
             // open the index
-            Path indexPath = getDocumentConfig().getIndexDirectory();
+            Path indexPath = getIndexDirectory();
             lriLogger.debug("Using index at {}", indexPath);
             directory = FSDirectory.open(indexPath);
             dirReader = DirectoryReader.open(directory);

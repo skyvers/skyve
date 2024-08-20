@@ -68,7 +68,7 @@ public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentList
         String dateStr = luceneDoc.get(Audit.timestampPropertyName);
         props.put(Audit.timestampPropertyName, new Timestamp(DocumentConverter.stringToDate(dateStr)));
 
-        return new DynamicBean("admin", "Audit", props);
+        return new DynamicBean(getModule(), getDocument(), props);
     }
 
     @Override
