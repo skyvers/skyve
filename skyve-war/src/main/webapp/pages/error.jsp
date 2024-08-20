@@ -13,7 +13,6 @@
 	
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
-	String referer = WebUtil.getRefererHeader(request);
 	Principal p = request.getUserPrincipal();
 	User user = null;
 	try {

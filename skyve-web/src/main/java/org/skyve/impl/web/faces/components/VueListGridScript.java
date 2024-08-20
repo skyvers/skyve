@@ -208,6 +208,12 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		for (MetaDataQueryColumn mdQueryColumn : columns) {
+			// Don't process non-projected columns
+			if ((mdQueryColumn instanceof MetaDataQueryProjectedColumn) && 
+					(! ((MetaDataQueryProjectedColumn) mdQueryColumn).isProjected())) {
+				continue;
+			}
+
 			SmartClientQueryColumnDefinition scColDefn = SmartClientViewRenderer.getQueryColumn(user,
 																									customer,
 																									module,
@@ -329,6 +335,10 @@ public class VueListGridScript extends UIOutput {
 
 		public Map<String, String> getValueMap() {
 			return scQueryColumnDefn.getValueMap();
+		}
+		
+		public boolean isHidden() {
+			return mdQueryColumn.isHidden();
 		}
 
 		@Override
@@ -526,6 +536,7 @@ public class VueListGridScript extends UIOutput {
 		private String header;
 		private boolean sortable = true;
 		private boolean filterable = true;
+		private boolean hidden = false;
 		private List<EnumValue> enumValues = new ArrayList<>(0);
 		private String type;
 		private String converter;
@@ -538,6 +549,7 @@ public class VueListGridScript extends UIOutput {
 			cd.type = metadata.getType();
 			cd.sortable = metadata.isSortable();
 			cd.filterable = metadata.isFilterable();
+			cd.hidden = metadata.isHidden();
 			cd.converter = metadata.getConverterName();
 
 			Optional.ofNullable(metadata.getValueMap()).ifPresent(map -> map.entrySet().stream()
@@ -562,6 +574,10 @@ public class VueListGridScript extends UIOutput {
 			return filterable;
 		}
 
+		public boolean isHidden() {
+			return hidden;
+		}
+
 		public String getType() {
 			return type;
 		}
@@ -577,8 +593,8 @@ public class VueListGridScript extends UIOutput {
 		@Override
 		public String toString() {
 			return MoreObjects.toStringHelper(this).omitNullValues().add("field", field).add("header", header)
-					.add("sortable", sortable).add("filterable", filterable).add("type", type)
-					.add("converter", converter).add("enumValues", enumValues).toString();
+					.add("sortable", sortable).add("filterable", filterable).add("hidden", hidden)
+					.add("type", type).add("converter", converter).add("enumValues", enumValues).toString();
 		}
 	}
 

@@ -3,17 +3,15 @@ package org.skyve.impl.web.faces;
 import java.util.Iterator;
 
 import jakarta.faces.FacesException;
-import jakarta.faces.application.ViewExpiredException;
 import jakarta.faces.context.ExceptionHandler;
 import jakarta.faces.context.ExceptionHandlerWrapper;
 import jakarta.faces.event.ExceptionQueuedEvent;
 import jakarta.faces.event.ExceptionQueuedEventContext;
 
 /**
- * Handles ViewExpiredException.
- * Other exceptions during faces processing are handled in FacesAction which
- * will still allow rendering to complete if an exception is thrown during 
- * render response phase.
+ * Handles unhandled Exceptions by throwing them to the SkyveFacesFilter to be handled.
+ * Most exceptions during faces processing are handled in FacesAction which
+ * will still allow rendering to complete if an exception is thrown during render response phase.
  * 
  * @author mike
  */
@@ -30,10 +28,11 @@ public class SkyveExceptionHandler extends ExceptionHandlerWrapper {
 			ExceptionQueuedEvent event = it.next();
 			ExceptionQueuedEventContext eqec = event.getContext();
 
-			if (eqec.getException() instanceof ViewExpiredException) {
-				it.remove();
-				throw (ViewExpiredException) eqec.getException();
+			Throwable e = eqec.getException();
+			if (e instanceof RuntimeException) {
+				throw (RuntimeException) e;
 			}
+			throw new FacesException(e);
 		}
 
 		wrapped.handle();
