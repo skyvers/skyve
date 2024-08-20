@@ -118,15 +118,15 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+		    <groupId>org.bouncycastle</groupId>
+		    <artifactId>bcprov-jdk18on</artifactId>
+		    <scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.pf4j</groupId>
 			<artifactId>pf4j</artifactId>
 		</dependency>
-		<dependency>
-		    <groupId>org.bouncycastle</groupId>
-		    <artifactId>bcprov-jdk18on</artifactId>
-		    <scope>compile</scope>
-		</dependency>
-		
+
 		<!-- html reports and html to pdf conversion -->
 		<dependency>
 			<groupId>org.freemarker</groupId>
