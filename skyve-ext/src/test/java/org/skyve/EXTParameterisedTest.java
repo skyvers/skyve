@@ -40,8 +40,10 @@ public class EXTParameterisedTest {
 				{ "bcrypt", longPassword },
 				{ "pbkdf2", shortPassword },
 				{ "pbkdf2", longPassword },
-//				{ "scrypt", shortPassword },
-//				{ "scrypt", longPassword },
+				{ "scrypt", shortPassword },
+				{ "scrypt", longPassword },
+				{ "argon2", shortPassword },
+				{ "argon2", longPassword },
 		});
 	}
 
@@ -62,7 +64,7 @@ public class EXTParameterisedTest {
 
 		// verify the result
 		// System.out.println(String.format("%s (%d): %s (%d)", algorithm, clearText.length(), result, result.length()));
-		assertThat("Encoded length should be less than 100 chars", result.length() <= 255, is(true));
+		assertThat("Encoded length should be less than 255 chars", result.length() <= 255, is(true));
 		assertThat(result, is(not(clearText)));
 	}
 }
