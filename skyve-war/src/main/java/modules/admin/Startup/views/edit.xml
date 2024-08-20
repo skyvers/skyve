@@ -172,7 +172,7 @@
 	        		<blurb>
 	        			<![CDATA[
 	        				<span style="font-size: 80%; color: #888;">
-	        					See instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix/#configuring-recaptcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
+	        					See detailed instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix-skyve-application-configuration/#configuring-captcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
 	       					</span>
 	        			]]>
 	        		</blurb>

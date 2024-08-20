@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.snapshot.SnapshotAdapter;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.DesktopView;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.OWASP;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.FacesContext;
@@ -58,8 +60,9 @@ public class DrekitekDesktopView extends DesktopView {
 		for (Object[] row : results) {
 			script.append("{").append(Bean.DOCUMENT_ID).append(":'").append(row[0]);
 			script.append("',ds:'").append(row[1]).append('_').append(row[2]);
-			script.append("',").append(Snapshot.namePropertyName).append(":'").append(row[3]);
-			script.append("',").append(Snapshot.snapshotPropertyName).append(':').append(row[4]).append("},");
+			script.append("',").append(Snapshot.namePropertyName).append(":'").append(OWASP.escapeJsString((String) row[3], false, false));
+			String snapshot = SnapshotAdapter.toSmartClient((String) row[4]);
+			script.append("',").append(Snapshot.snapshotPropertyName).append(':').append(snapshot).append("},");
 		}
 		if (! results.isEmpty()) {
 			script.setLength(script.length() - 1); // remove last comma

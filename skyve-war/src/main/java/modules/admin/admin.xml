@@ -240,8 +240,6 @@
 					<action name="DownloadResults"/>
 					<action name="DownloadSAIL" />
 					<action name="DownloadClientSAIL" />
-					<action name="ApplyStartupConfiguration" />
-					<action name="AddAPIKey"/>
 					<action name="GenerateTestData" />
 					<action name="DeleteTestData" />
 				</document>

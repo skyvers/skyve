@@ -19,7 +19,6 @@
 	Principal p = request.getUserPrincipal();
 	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName());
 	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
-	String referer = WebUtil.getRefererHeader(request);
 
 	// This is a postback, process it and move on
 	String customerValue = request.getParameter("customer");
@@ -74,19 +73,19 @@
 		    	
 		        <div class="ui large form">
 		            <div class="ui segment">
-		            	<% if(postback) { %>
-		            	<div class="ui header">
-		            		<%=Util.i18n("page.resendRegistrationEmail.banner", locale)%>
-		            	</div>
+		            	<% if (postback) { %>
+			            	<div class="ui header">
+			            		<%=Util.i18n("page.resendRegistrationEmail.banner", locale)%>
+			            	</div>
 						<% } else { %>
-						<div class="ui red message">
-		            		<div class="ui header">
-		            			<%=Util.i18n("page.error.banner", locale)%>
-		            		</div>
-		            		<div class="field">
-		            			<%=Util.i18n("page.error.explanation", locale)%>
-		            		</div>
-		            	</div>
+							<div class="ui red message">
+			            		<div class="ui header">
+			            			<%=Util.i18n("page.error.banner", locale)%>
+			            		</div>
+			            		<div class="field">
+			            			<%=Util.i18n("page.error.explanation", locale)%>
+			            		</div>
+			            	</div>
 		            	<% } %>
 	                	<% if (UtilImpl.CUSTOMER == null) { %>
 		            		<a href="<%=Util.getSkyveContextUrl()%><%=Util.getHomeUri()%><%=(user == null) ? "" : ("?customer=" + user.getCustomerName())%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>

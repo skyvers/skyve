@@ -1299,11 +1299,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					
 					Module referencedModule = repository.getModule(customer, referencedModuleName);
 
+					// Check that there are no relations in the embedded document
+					// Note that we cannot use referencedDocument.getAllAttributes(customer); as customer can be null so we need to use the repository
 					Module currentModule = referencedModule;
 					Document currentDocument = referencedDocument;
 					Extends currentExtends = null;
 					do {
-						// Check that there are no relations in the embedded document
 						List<? extends Attribute> attributes = currentDocument.getAttributes();
 						if (attributes.stream().anyMatch(a -> (a instanceof Relation))) {
 							throw new MetaDataException("Embedded association name " + associationName + 

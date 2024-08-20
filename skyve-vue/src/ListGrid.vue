@@ -36,6 +36,33 @@ function arraysEqual(a, b) {
     return a.every((val, index) => val == b[index])
 }
 
+/**
+ * Call the provided RemoteCommand function, converting the 
+ * supplied parameters object from `{ k: v }` to 
+ * `[{ name: k, value: v }]`.
+ * 
+ * Returns the result of the provided command (presumably a 
+ * Promise)
+ * 
+ * @param {String} commandName The name of the function (in 
+ * global scope) that will be called.
+ * @param {Object} paramsObj 
+ */
+async function callRemoteCommand(commandName, paramsObj) {
+
+    const commandFn = window[commandName];
+    if (!commandFn) {
+        throw `CommandName (${commandName}) not found`;
+    }
+
+    let paramsArray = [];
+    for (let key in paramsObj) {
+        paramsArray.push({ name: key, value: paramsObj[key] });
+    }
+
+    return commandFn(paramsArray);
+}
+
 export default {
     props: {
         module: String,
@@ -60,6 +87,14 @@ export default {
             type: String,
             default: null
         },
+        actions: {
+            type: Object,
+            default: {
+                selected: null,
+                edited: null,
+                deleted: null
+            }
+		},
         showAdd: {
             type: Boolean,
             default: true
@@ -88,6 +123,7 @@ export default {
             value: [],
             totalRecords: 0,
             filters: {},
+            smartClientCriteria: null,
             firstRow: 0,
             pageSize: 25,
             errorText: '',
@@ -261,7 +297,10 @@ export default {
                 fd.append('_sortBy', sortCol);
             }
 
-            if (this.skyveCriteria.length > 0) {
+            if (!! this.smartClientCriteria) {
+                fd.append('criteria', JSON.stringify(this.smartClientCriteria));
+            }
+            else if (this.skyveCriteria.length > 0) {
                 fd.append('_constructor', 'AdvancedCriteria');
                 fd.append('operator', this.selectedTopLevelOperator);
 
@@ -340,6 +379,8 @@ export default {
 
             return {
                 "filters": this.filters,
+                "smartClientCriteria": this.smartClientCriteria,
+				"operator": this.selectedTopLevelOperator,
                 "visibleColumns": visibleColNames,
                 "summarySelection": this.summarySelection,
                 "sortColumns": this.sortColumns,
@@ -466,6 +507,7 @@ export default {
             this.pageSize = event.rows ?? 25;
             this.sortColumn = event.sortField ?? '';
             this.filters = event.filters ?? {};
+            this.smartClientCriteria = event.smartClientCriteria;
         },
         /**
          * Initialise/clear the filter state, optionally setting some 
@@ -484,6 +526,7 @@ export default {
             }
 
             this.filters = Object.assign(defaultFilters, incomingFilters);
+            this.smartClientCriteria = null;
         },
         snapshotChanged(newSnapshot) {
 
@@ -491,11 +534,13 @@ export default {
             this.setStorageItem(SNAP_KEY_PREFIX, newSnapshot?.bizId);
 
             if (snapstate) {
-
                 // Filters
                 const incomingFilters = snapstate.filters ?? {};
                 this.initFilters(incomingFilters);
+                this.smartClientCriteria = snapstate.smartClientCriteria;
 
+				this.selectedTopLevelOperator = snapstate.operator ?? 'and';
+				
                 // Visible columns
                 const visibleCols = snapstate.visibleColumns ?? [];
                 this.selectedColumns = [];
@@ -545,7 +590,13 @@ export default {
             this.$refs.cm.show(event.originalEvent);
         },
         onRowClick(event) {
-            this.zoomInto(event.data.bizId);
+            if (this.actions.selected) {
+				// Don't use the ListGrid loading style here as the view loading indicator is invoked by <remoteCommand/>
+				callRemoteCommand(this.actions.selected, {bizId: event.data.bizId});
+            }
+			else if (this.showZoom) {
+			    this.zoomInto(event.data.bizId);
+			}
         },
         zoomInto(bizId) {
             openDocInSameWindow({
@@ -631,7 +682,8 @@ export default {
         @state-save="stateSave"
         contextMenu
         v-model:contextMenuSelection="selectedRow"
-        @rowContextmenu="onRowContextMenu"
+        v-model:selection="selectedRow"
+        @row-contextmenu="onRowContextMenu"
         @row-click="onRowClick"
         sortMode="multiple"
         v-model:multiSortMeta="multiSortMeta"
@@ -641,7 +693,6 @@ export default {
                 {{ title }}
             </div>
             <div class="flex flex-column md:flex-row gap-2">
-
                 <!-- Multi select for choosing visible columns -->
                 <MultiSelect
                     v-model="selectedColumns"
@@ -669,6 +720,11 @@ export default {
                     optionLabel="label"
                     optionValue="value"
                 />
+                <div v-if="!! smartClientCriteria" style="height: 50px; padding-top: 16px; text-align: center;">
+                    <span class="pi pi-exclamation-triangle" />
+                    &nbsp;
+                    <span>Snapshot cannot be displayed or updated</span>
+                </div>
             </div>
         </template>
         <template #empty> No data found.</template>

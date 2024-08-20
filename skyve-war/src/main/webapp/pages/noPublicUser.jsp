@@ -7,7 +7,6 @@
 <%
 	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
-	String referer = WebUtil.getRefererHeader(request);
 	Locale locale = request.getLocale();
 	if (locale == null) {
 		locale = Locale.ENGLISH;

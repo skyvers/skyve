@@ -8,12 +8,17 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
+import org.skyve.impl.web.faces.pipeline.component.DeviceResponsiveComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.PaginatedListGridBuilder;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
+import org.skyve.impl.web.faces.pipeline.component.VueListGridComponentBuilder;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -23,6 +28,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -48,38 +55,17 @@ public class ListGrid extends HtmlPanelGroup {
 			final String modelName = (String) attributes.get("model");
 			final String managedBeanName = (String) attributes.get("managedBean");
 			Object createRenderedAttribute = attributes.get("createRendered");
-			final Boolean createRendered = Boolean.valueOf((createRenderedAttribute == null) || 
-															String.valueOf(true).equals(createRenderedAttribute) || // literal "true"
-															Boolean.TRUE.equals(createRenderedAttribute)); // evaluated EL expression
+			final Boolean createRendered = getBooleanObjectAttribute(createRenderedAttribute);
 			Object createDisabledAttribute = attributes.get("createDisabled");
-			final boolean createDisabled = String.valueOf(true).equals(createDisabledAttribute) || // literal "true"
-											Boolean.TRUE.equals(createDisabledAttribute); // evaluated EL Expression
+			final boolean createDisabled = getBooleanAttribute(createDisabledAttribute);
 			Object zoomRenderedAttribute = attributes.get("zoomRendered");
-			final Boolean zoomRendered = Boolean.valueOf((zoomRenderedAttribute == null) ||
-															String.valueOf(true).equals(zoomRenderedAttribute) || // literal "true"
-															Boolean.TRUE.equals(zoomRenderedAttribute)); // evaluated EL expression
+			final Boolean zoomRendered = getBooleanObjectAttribute(zoomRenderedAttribute);
 			Object zoomDisabledAttribute = attributes.get("zoomDisabled");
-			final boolean zoomDisabled = String.valueOf(true).equals(zoomDisabledAttribute) || // literal "true"
-											Boolean.TRUE.equals(zoomDisabledAttribute); // evaluated EL expression
+			final boolean zoomDisabled = getBooleanAttribute(zoomDisabledAttribute);
 			Object filterRenderedAttribute = attributes.get("filterRendered");
-			final Boolean filterRendered = Boolean.valueOf((filterRenderedAttribute == null) ||
-															String.valueOf(true).equals(filterRenderedAttribute) || // literal "true"
-															Boolean.TRUE.equals(filterRenderedAttribute)); // evaluated EL expression
-			String classString = (String) attributes.get("componentBuilderClass");
-			ComponentBuilder tempComponentBuilder = null;
-			try {
-				if (classString == null) {
-					tempComponentBuilder = new SkyveComponentBuilderChain();
-				}
-				else {
-					Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(classString);
-					tempComponentBuilder = (ComponentBuilder) type.getDeclaredConstructor().newInstance();
-				}
-			}
-			catch (Exception e) {
-				throw new IOException("Cannot instantiate the component builder " + classString, e);
-			}
-			final ComponentBuilder componentBuilder = tempComponentBuilder;
+			final Boolean filterRendered = getBooleanObjectAttribute(filterRenderedAttribute);
+			final String componentBuilderClassString = (String) attributes.get("componentBuilderClass");
+			final ComponentBuilder componentBuilder = newComponentBuilder(componentBuilderClassString);
 
 			new FacesAction<Void>() {
 				@Override
@@ -112,17 +98,17 @@ public class ListGrid extends HtmlPanelGroup {
 		super.encodeBegin(context);
 	}
 
-	public static List<UIComponent> generate(String moduleName,
-												String documentName,
-												String queryName,
-												String modelName,
-												String uxui,
-												Boolean createRendered,
+	public static List<UIComponent> generate(@Nonnull String moduleName,
+												@Nonnull String documentName,
+												@Nullable String queryName,
+												@Nullable String modelName,
+												@Nonnull String uxui,
+												@Nullable Boolean createRendered,
 												boolean createDisabled,
-												Boolean zoomRendered,
+												@Nullable Boolean zoomRendered,
 												boolean zoomDisabled,
-												Boolean filterRendered,
-												ComponentBuilder componentBuilder) {
+												@Nullable Boolean filterRendered,
+												@Nonnull ComponentBuilder componentBuilder) {
 		ListModel<Bean> model = null;
 		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
 		String name = null;
@@ -171,5 +157,40 @@ public class ListGrid extends HtmlPanelGroup {
 			result.add(componentBuilder.listGridContextMenu(null, grid.getId(), listGrid));
 		}
 		return result;
+	}
+	
+	public static ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString) {
+		try {
+			ComponentBuilder result = null;
+			if (componentBuilderClassString == null) {
+				result = new SkyveComponentBuilderChain();
+			}
+			else if (componentBuilderClassString.equalsIgnoreCase("faces")) {
+				result = new ComponentBuilderChain(new DeviceResponsiveComponentBuilder(),
+																	new PaginatedListGridBuilder());
+			}
+			else if (componentBuilderClassString.equalsIgnoreCase("vue")) {
+				result = new VueListGridComponentBuilder();
+			}
+			else {
+				Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(componentBuilderClassString);
+				result = (ComponentBuilder) type.getDeclaredConstructor().newInstance();
+			}
+			return result;
+		}
+		catch (Exception e) {
+			throw new DomainException("Cannot instantiate the component builder " + componentBuilderClassString, e);
+		}
+	}
+	
+	public static Boolean getBooleanObjectAttribute(Object renderedAttributeValue) {
+		return Boolean.valueOf((renderedAttributeValue == null) || 
+														String.valueOf(true).equals(renderedAttributeValue) || // literal "true"
+														Boolean.TRUE.equals(renderedAttributeValue)); // evaluated EL expression
+	}
+
+	public static boolean getBooleanAttribute(Object disabledAttributeValue) {
+		return String.valueOf(true).equals(disabledAttributeValue) || // literal "true"
+				Boolean.TRUE.equals(disabledAttributeValue); // evaluated EL Expression
 	}
 }

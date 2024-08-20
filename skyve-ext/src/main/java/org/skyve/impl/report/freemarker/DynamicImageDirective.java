@@ -223,7 +223,7 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 	
 						s.append(" />");
 	
-						System.out.println("@dynamicImage output: " + s.toString());
+						//System.out.println("@dynamicImage output: " + s.toString());
 	
 						out.write(s.toString());
 					}

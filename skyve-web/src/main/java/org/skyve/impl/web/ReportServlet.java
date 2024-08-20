@@ -28,9 +28,9 @@ import org.skyve.impl.report.jasperreports.ReportDesignParameters.ColumnAlignmen
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportColumn;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportStyle;
 import org.skyve.impl.report.jasperreports.SkyveDataSource;
+import org.skyve.impl.snapshot.CompoundFilterOperator;
+import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
-import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientListServlet;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;

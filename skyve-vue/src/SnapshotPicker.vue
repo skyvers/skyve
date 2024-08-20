@@ -27,6 +27,7 @@ export default {
             snapshots: [],
             selectedSnapshot: null,
             showDialog: false,
+			loading: false,
             snapshotName: ''
         };
     },
@@ -49,7 +50,7 @@ export default {
                 {
                     label: 'New Snapshot',
                     icon: PrimeIcons.PLUS,
-                    command: this.cofirmCreate
+                    command: this.confirmCreate
                 },
                 {
                     label: 'No Snapshot',
@@ -70,6 +71,8 @@ export default {
                         optionalAction = {
                             label: 'Update Snapshot',
                             icon: PrimeIcons.PENCIL,
+                            // If smartClientCriteria is defined on the snapshot then update is disabled
+                            disabled: !! currSnap.snapshot?.smartClientCriteria,
                             command: () => this.updateSnapshot(currSnap)
                         };
                     } else {
@@ -77,7 +80,7 @@ export default {
                             label: 'Select Snapshot',
                             icon: PrimeIcons.CHECK,
                             command: () => this.chooseSnapshot(currSnap)
-                        }
+                        };
                     }
 
                     let result = {
@@ -104,15 +107,24 @@ export default {
         toggle(event) {
             this.$refs.menu.toggle(event);
         },
+        beforeShow(event) {
+			this.snapshots = [];
+			this.reload();
+        },
         async reload() {
-
-            const queryObj = { documentQuery: this.documentQuery };
-            this.snapshots = await SnapshotService.getSnapshots(queryObj);
+			this.loading = true;
+            try {
+                const queryObj = { documentQuery: this.documentQuery };
+                this.snapshots = await SnapshotService.getSnapshots(queryObj);
+            }
+			finally {
+				this.loading = false;
+			}
         },
         chooseSnapshot(snapshot) {
             this.selectedSnapshot = snapshot ?? null;
         },
-        cofirmCreate() {
+        confirmCreate() {
             this.showDialog = true;
         },
         async createSnapshot() {
@@ -173,17 +185,19 @@ export default {
     },
     emits: ['snapshotChanged'],
     mounted() {
-        this.reload()
-            .then(() => {
-
-                // If an initialSelection bizId was provided, try to find the 
-                // matching snapshot during this initial mounting of the picker
-                if (!!this.initialSelection) {
-                    const selection = this.snapshots
-                        .find(snap => snap.bizId == this.initialSelection);
-                    this.chooseSnapshot(selection);
-                }
-            });
+        if (!!this.initialSelection) {
+	        this.reload()
+	            .then(() => {
+	
+	                // If an initialSelection bizId was provided, try to find the 
+	                // matching snapshot during this initial mounting of the picker
+	                if (!!this.initialSelection) {
+	                    const selection = this.snapshots
+	                        .find(snap => snap.bizId == this.initialSelection);
+	                    this.chooseSnapshot(selection);
+	                }
+	            });
+		}
     },
 }
 </script>
@@ -192,6 +206,7 @@ export default {
     <Button
         type="button"
         :label="buttonLabel"
+        :loading="loading"
         @click="toggle"
         aria-haspopup="true"
         aria-controls="overlay_tmenu"
@@ -200,6 +215,7 @@ export default {
         ref="menu"
         id="overlay_tmenu"
         :model="items"
+        @before-show="beforeShow"
         popup
     >
     </TieredMenu>

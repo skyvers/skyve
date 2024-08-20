@@ -1,4 +1,4 @@
-The drekitek branch is a customisation of skyve wip/vue-list-grid branch to add client-side snapshot definitions.
+The drekitek branch is a customisation of skyve master branch to add client-side snapshot definitions.
 It should not be merged back into the master branch or any other branch.
 
 drekitek.xhtml
@@ -23,12 +23,9 @@ web.xml
 			<param-name>renderer</param-name>
 			<param-value>com.drekitek.DrekitekSmartClientViewRenderer</param-value>
 		</init-param>
-SkyveComponentBuilderChain.java
-	Adds the VueListGridComponentBuilder to the chain.
 Reorder.java
 	admin.Snapshots action
 	Added a push to execute refreshPageAfterSnapshotReorder function in browser
 edit.xml
 	admin.Snapshots view
 	Added confirm to let the user know about the impending browser page refresh.
-	

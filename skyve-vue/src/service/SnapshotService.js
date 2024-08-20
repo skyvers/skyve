@@ -1,6 +1,6 @@
 const SNAP_PATH = 'smartsnap';
 const FORM_URL_ENCODED = 'application/x-www-form-urlencoded;charset=UTF-8';
-const DEFAULT_TYPE = 'pf1';
+const DEFAULT_TYPE = 'vue';
 
 const params = {
     action: "a",
@@ -9,7 +9,7 @@ const params = {
     csrf: "_csrf",
     snapshot: "s",
     id: "i",
-    type: "type"
+    type: "t"
 };
 
 const actions = {
@@ -44,7 +44,6 @@ export const SnapshotService = {
             throw new Error('Error retrieving snapshots', { cause: err });
         }
 
-        console.debug(`getSnapshots: Got ${payload.length} results`);
         return payload;
     },
     async createSnapshot({ documentQuery, name, snapshot, type = DEFAULT_TYPE }) {
@@ -95,7 +94,7 @@ export const SnapshotService = {
             return false;
         }
     },
-    async updateSnapshot({ snapshot, id }) {
+    async updateSnapshot({ snapshot, id, type = DEFAULT_TYPE }) {
 
         const snapString = JSON.stringify(snapshot);
 
@@ -103,6 +102,7 @@ export const SnapshotService = {
         fd.append(params.action, actions.update);
         fd.append(params.snapshot, snapString);
         fd.append(params.id, id);
+        fd.append(params.type, type);
 
         const req = new Request(SNAP_PATH, {
             method: 'POST',

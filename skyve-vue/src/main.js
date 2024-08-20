@@ -29,8 +29,13 @@ window.SKYVE ??= {};
 
 // JS create method
 window.SKYVE.listgrid = function (gridConfig) {
-
-    const grid = createApp(ListGrid, gridConfig);
+	if (window[gridConfig.containerId]) {
+		if (window[gridConfig.containerId].unmount) {
+			window[gridConfig.containerId].unmount();
+		}
+	}
+	
+	const grid = createApp(ListGrid, gridConfig);
     grid.use(PrimeVue, { ripple: true });
     grid.component('Button', Button);
     grid.component('Column', Column);
@@ -48,5 +53,7 @@ window.SKYVE.listgrid = function (gridConfig) {
     grid.component('ContextMenu', ContextMenu);
     grid.component('Image', Image);
 
-    grid.mount(gridConfig.targetSelector);
+    grid.mount("[id$='" + gridConfig.containerId + "']");
+	
+	window[gridConfig.containerId] = grid;
 }  

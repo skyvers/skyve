@@ -498,31 +498,28 @@ public class SmartClientAttributeDefinition {
 		this.escape = escape;
 	}
 
-    public Map<String, String> getValueMap() {
-        return valueMap;
-    }
+	public Map<String, String> getValueMap() {
+		return valueMap;
+	}
 
-    /**
-     * Convert the valueMap to a string for use in the various toJavascript()
-     * methods in the sub-classes. Produces a JSON representation of the
-     * <code>valueMap</code> field (it the map contains any values), or an array
-     * containing one space (if the map is empty).
-     * 
-     * @return
-     */
-    protected String getValueMapAsString() {
-        if (valueMap.isEmpty()) {
-            // this valueMap will be replaced in client logic but this defn ensures that the
-            // select widget doesn't try to use the form's data source to get values when
-            // opened
-            return "[' ']";
-        } else {
-            return valueMap.entrySet()
-                           .stream()
-                           .map(entry -> "'" + entry.getKey() + "':'" + entry.getValue() + "'")
-                           .collect(joining(", ", "{", "}"));
-        }
-    }
+	/**
+	 * Convert the valueMap to a string for use in the various toJavascript() methods in the sub-classes. Produces a JSON representation of the
+	 * <code>valueMap</code> field (it the map contains any values), or an array containing one space (if the map is empty).
+	 * 
+	 * @return	The value map string
+	 */
+	protected String getValueMapAsString() {
+		if (valueMap.isEmpty()) {
+			// this valueMap will be replaced in client logic but this defn ensures that the
+			// select widget doesn't try to use the form's data source to get values when opened
+			return "[' ']";
+		}
+
+		return valueMap.entrySet()
+						.stream()
+						.map(entry -> "'" + entry.getKey() + "':'" + entry.getValue() + "'")
+						.collect(joining(", ", "{", "}"));
+	}
 
 	void setMask(String mask) {
 		this.mask = mask;

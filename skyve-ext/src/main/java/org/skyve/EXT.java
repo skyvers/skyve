@@ -71,6 +71,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
 import org.skyve.util.Util;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
@@ -359,15 +360,16 @@ public class EXT {
 		// Note Sessions are thread-safe
 		Set<String> userIds = message.getUserIds();
 		boolean broadcast = userIds.isEmpty();
+		String payload = JSON.marshall(message.getItems());
 		for (Session session : PushMessage.SESSIONS) {
 			if (session.isOpen()) {
 				if (broadcast) {
-					session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
+					session.getAsyncRemote().sendText(payload);
 				}
 				else {
 					Object userId = session.getUserProperties().get("user");
 					if ((userId == null) || userIds.contains(userId)) {
-						session.getAsyncRemote().sendText(JSON.marshall(message.getItems()));
+						session.getAsyncRemote().sendText(payload);
 					}
 				}
 			}
@@ -572,6 +574,9 @@ public class EXT {
 		}
 		else if ("scrypt".equals(passwordHashingAlgorithm)) {
 			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
+		}
+		else if ("argon2".equals(passwordHashingAlgorithm)) {
+			result = "{argon2}" + Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
 		}
 		else {
 			throw new DomainException(passwordHashingAlgorithm + " not supported");

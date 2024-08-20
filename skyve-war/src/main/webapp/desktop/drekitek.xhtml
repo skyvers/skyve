@@ -152,7 +152,7 @@
 											evalResult: true,
 											useSimpleHttp: true,
 											httpMethod: 'POST',
-											params: {a: 'N', n: value, d: me._dataSource.ID, s: s, _csrf: me._csrf},
+											params: {a: 'N', n: value, d: me._dataSource.ID, s: s, t: 'sc', _csrf: me._csrf},
 											actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 											callback: function(rpcResponse, data, rpcRequest) {
 												if (rpcResponse.status >= 0) { // success
@@ -198,7 +198,7 @@
 								evalResult: true,
 								useSimpleHttp: true,
 								httpMethod: 'POST',
-								params: {a: 'U', i: snapId, _csrf: me._csrf, s: s},
+								params: {a: 'U', i: snapId, _csrf: me._csrf, s: s, t: 'sc'},
 								actionURL: SKYVE.Util.CONTEXT_URL + 'smartsnap',
 								callback: function(rpcResponse, data, rpcRequest) {
 									if (rpcResponse.status >= 0) { // success

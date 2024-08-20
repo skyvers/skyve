@@ -168,7 +168,7 @@
 			return;
 		}
 		
-		// Set the extra criterium if user is defined
+		// Set the extra criterion if user is defined
 		if (user != null) {
 			criteria.setCustomerName(user.getCustomerName());
 			criteria.setDataGroupId(user.getDataGroupId());

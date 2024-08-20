@@ -488,7 +488,7 @@ isc.BizListGrid.addMethods({
 		    title: "No Snapshot",
 		    menu: me._snapMenu,
 		    click: function() {
-		    	var params = {a: 'L', d: me._dataSource.ID, _csrf: me._csrf};
+		    	var params = {a: 'L', d: me._dataSource.ID, t: 'sc', _csrf: me._csrf};
 		    	isc.RPCManager.sendRequest({
 					showPrompt: false,
 					evalResult: true,
@@ -560,7 +560,8 @@ isc.BizListGrid.addMethods({
 							httpMethod: 'POST',
 							params: {a: 'N', 
 										n: value, 
-										d: me._dataSource.ID, 
+										d: me._dataSource.ID,
+										t: 'sc',
 										_csrf: me._csrf,
 										s: {criteria: me._advancedFilter.toggleButton.selected ?
 														me._advancedFilter.getCriteria() :
@@ -628,6 +629,7 @@ isc.BizListGrid.addMethods({
 				httpMethod: 'POST',
 				params: {a: 'U', 
 							i: snapId,
+							t: 'sc',
 							_csrf: me._csrf,
 							s: {criteria: me._advancedFilter.toggleButton.selected ?
 											me._advancedFilter.getCriteria() :

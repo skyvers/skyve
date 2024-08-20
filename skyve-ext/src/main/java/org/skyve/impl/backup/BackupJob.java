@@ -33,9 +33,10 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
+import org.skyve.domain.app.admin.DataMaintenance;
+import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -518,8 +519,8 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 */
 	private static int getSensitivityLevel(Bean bean) {
-		if (bean != null) {
-			Object sensitivityInput = BindUtil.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
+		if (bean instanceof DataMaintenance dataMaintenance) {
+			DataSensitivity sensitivityInput = dataMaintenance.getDataSensitivity();
 			if (sensitivityInput != null) {
 				return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
 			}
@@ -534,8 +535,8 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 */
 	private static boolean getIncludeContent(Bean bean) {
-		if (bean != null) {
-			Boolean includeContent = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_CONTENT_ATTRIBUTE_NAME);
+		if (bean instanceof DataMaintenance dataMaintenance) {
+			Boolean includeContent = dataMaintenance.getIncludeContent();
 			return Boolean.TRUE.equals(includeContent);
 		}
 		
@@ -548,8 +549,8 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 */
 	private static boolean getIncludeAuditLog(Bean bean) {
-		if (bean != null) {
-			Boolean includeAudits = (Boolean) BindUtil.get(bean, AppConstants.INCLUDE_AUDITS_ATTRIBUTE_NAME);
+		if (bean instanceof DataMaintenance dataMaintenance) {
+			Boolean includeAudits = dataMaintenance.getIncludeAuditLog();
 			return Boolean.TRUE.equals(includeAudits);
 		}
 		

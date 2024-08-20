@@ -9,6 +9,8 @@ import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.metadata.MetaDataException;
@@ -39,11 +42,13 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
+import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -318,8 +323,10 @@ public class WebUtil {
 			if (! users.isEmpty()) {
 				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
+				org.skyve.domain.types.Timestamp now = new org.skyve.domain.types.Timestamp();
 				for (PersistentBean user: users) {
 					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME, passwordResetToken);
+					Binder.set(user, AppConstants.PASSWORD_RESET_TOKEN_CREATION_TIMESTAMP_ATTRIBUTE_NAME, now);
 					p.upsertBeanTuple(user);
 					if (firstUser == null) {
 						firstUser = user;
@@ -414,24 +421,60 @@ public class WebUtil {
 	throws Exception {
 		String customerName = null;
 		String userName = null;
+		Timestamp tokenCreated = null;
 		String errorMsg = null;
-		try (Connection c = EXT.getDataStoreConnection()) {
-			try (PreparedStatement s = c.prepareStatement(String.format("select %s, %s from ADM_SecurityUser where %s = ?",
-																			Bean.CUSTOMER_NAME,
-																			AppConstants.USER_NAME_ATTRIBUTE_NAME,
-																			AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME))) {
-				s.setString(1, passwordResetToken);
-				try (ResultSet rs = s.executeQuery()) {
-					if (!rs.isBeforeFirst() ) {
-						return "Reset link used is invalid";
-					}
-					while (rs.next()) {
-						customerName = rs.getString(1);
-						userName = rs.getString(2);
 
-						Repository r = CORE.getRepository();
-						org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
-						errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
+		try (Connection c = EXT.getDataStoreConnection()) {
+			// Get password reset token expiry minutes
+			try (PreparedStatement s2 = c.prepareStatement(String.format("select %s from ADM_Configuration",
+					AppConstants.PASSWORD_RESET_TOKEN_EXPIRY_MINUTES_ATTRIBUTE_NAME))) {
+				try (ResultSet rs2 = s2.executeQuery()) {
+					Integer expiryMinutes = null;
+					if (rs2.next()) {
+						int value = rs2.getInt(1);
+						if (!rs2.wasNull()) {
+							expiryMinutes = Integer.valueOf(value);
+						}
+					}
+
+					// Get user by token
+					try (PreparedStatement s = c
+							.prepareStatement(String.format("select %s, %s, %s from ADM_SecurityUser where %s = ?",
+									Bean.CUSTOMER_NAME,
+									AppConstants.USER_NAME_ATTRIBUTE_NAME,
+									AppConstants.PASSWORD_RESET_TOKEN_CREATION_TIMESTAMP_ATTRIBUTE_NAME,
+									AppConstants.PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME))) {
+						s.setString(1, passwordResetToken);
+
+						try (ResultSet rs = s.executeQuery()) {
+							if (!rs.isBeforeFirst()) {
+								return Util.i18n("exception.passwordResetLinkInvalid");
+							}
+							while (rs.next()) {
+								customerName = rs.getString(1);
+								userName = rs.getString(2);
+								tokenCreated = rs.getTimestamp(3);
+								
+								// Check for expiry of token
+								boolean expired = false;
+								if (expiryMinutes != null) {
+									Timestamp now = Timestamp.from(Instant.now());
+									if (tokenCreated != null) {
+										TimeUtil.addMinutes(tokenCreated, expiryMinutes.intValue());
+										if (now.after(tokenCreated)) {
+											expired = true;
+										}
+									}
+								}
+								if (!expired) {
+									Repository r = CORE.getRepository();
+									org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
+									errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
+								} else {
+									return Util.i18n("exception.passwordResetTokenExpired");
+								}
+							}
+						}
 					}
 				}
 			}
@@ -498,6 +541,9 @@ public class WebUtil {
 										" looks tampered with because it does not start with " + Util.getSkyveContextUrl() + 
 										". This looks like a doctored request because Referrer-Policy should be same-origin!");
 				result = null;
+			}
+			else {
+				result = OWASP.sanitise(Sanitisation.text, result); // protect reflected XSS in referer header
 			}
 		}
 		return result;

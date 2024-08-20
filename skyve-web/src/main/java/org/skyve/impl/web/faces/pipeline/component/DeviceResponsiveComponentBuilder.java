@@ -1,7 +1,9 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import org.primefaces.component.commandbutton.CommandButton;
+import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.view.Action;
 import org.skyve.web.UserAgentType;
 
 import jakarta.faces.component.UIComponent;
@@ -83,5 +85,63 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 									processOverride,
 									updateOverride,
 									canDelete);
+	}
+	
+	/**
+	 * Use a dialog instead of an overlay panel for phones.
+	 */
+	@Override
+	public UIComponent upload(UIComponent component, 
+								String label,
+								String iconStyleClass,
+								String toolTip,
+								String confirmationText,
+								Action action) {
+		if (component != null) {
+			return component;
+		}
+
+		return uploadButton(label,
+								iconStyleClass,
+								toolTip,
+								action.getName(),
+								null,
+								null,
+								action.getClientValidation(),
+								confirmationText,
+								action.getDisabledConditionName(),
+								null,
+								action.getInvisibleConditionName(),
+								UserAgentType.phone.equals(userAgentType));
+	}
+
+	/**
+	 * Use a dialog instead of an overlay panel for phones.
+	 */
+	@Override
+	public UIComponent uploadButton(UIComponent component,
+									String label, 
+									String iconStyleClass, 
+									String toolTip,
+									String confirmationText, 
+									Button button, 
+									String formDisabledConditionName, 
+									Action action) {
+		if (component != null) {
+			return component;
+		}
+
+		return uploadButton(label,
+								iconStyleClass,
+								toolTip,
+								action.getName(),
+								button.getPixelWidth(),
+								button.getPixelHeight(),
+								action.getClientValidation(),
+								confirmationText,
+								action.getDisabledConditionName(),
+								formDisabledConditionName,
+								action.getInvisibleConditionName(),
+								UserAgentType.phone.equals(userAgentType));
 	}
 }
