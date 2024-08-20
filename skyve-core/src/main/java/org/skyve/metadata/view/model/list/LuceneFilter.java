@@ -288,7 +288,7 @@ public class LuceneFilter implements Filter {
     public void addGreaterThan(String binding, Decimal value) {
         Query gt = DoubleField.newRangeQuery(binding, value.doubleValue(), Double.MAX_VALUE);
         clauses.add(new BooleanClause(gt, MUST));
-        
+
         Query ne = DoubleField.newExactQuery(binding, value.doubleValue());
         clauses.add(new BooleanClause(ne, MUST_NOT));
     }
@@ -446,7 +446,7 @@ public class LuceneFilter implements Filter {
         List<BytesRef> refs = new ArrayList<>(values.length);
 
         for (Object val : values) {
-            refs.add(new BytesRef(String.valueOf(val)));
+            refs.add(new BytesRef(lower(String.valueOf(val))));
         }
 
         clauses.add(new BooleanClause(new TermInSetQuery(binding, refs), MUST));
