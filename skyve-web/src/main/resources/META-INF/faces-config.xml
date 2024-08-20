@@ -7,11 +7,9 @@
 		<!-- This EL resolver is required to ensure that String properties of value "" (empty string) are successfully coerced to null -->
 		<el-resolver>org.skyve.impl.web.faces.EmptyStringResolver</el-resolver>
 	</application>
-
     <factory>
         <exception-handler-factory>org.skyve.impl.web.faces.SkyveExceptionHandlerFactory</exception-handler-factory>
     </factory>
-    	
 	<lifecycle>
 		<phase-listener>org.skyve.impl.web.faces.SkyveFacesPhaseListener</phase-listener>
 	</lifecycle>
