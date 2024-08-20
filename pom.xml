@@ -52,7 +52,7 @@
 		<owasp.json.sanitizer.version>[1.0,)</owasp.json.sanitizer.version>
 		<pdfbox.version>1.8.4</pdfbox.version>
 		<pf4j.version>3.10.0</pf4j.version>
-		<bouncycastle.version>1.76</bouncycastle.version>
+		<bouncycastle.version>1.78</bouncycastle.version>
 		<poi.version>5.2.3</poi.version>
 		<primefaces.version>13.0.5</primefaces.version>
 		<primefaces-extensions.version>13.0.5</primefaces-extensions.version>
