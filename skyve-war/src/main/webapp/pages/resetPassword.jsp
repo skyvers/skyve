@@ -4,6 +4,7 @@
 <%@ page import="java.util.Locale"%>
 
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
+<%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.AbstractWebContext"%>
@@ -21,16 +22,16 @@
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Locale locale = request.getLocale();
 	
-	//Captcha checking
+	// Captcha checking
 	boolean recaptchaSet = (UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null || UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
 	boolean googleRecaptchaUsed = false;
 	boolean cloudflareTurnstileUsed = false;
 	String siteKey = null;
-	if(recaptchaSet){
+	if(recaptchaSet) {
 		siteKey = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null ? UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY : UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
 		if(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null){
 			googleRecaptchaUsed = true;
-		}else{
+		} else {
 			cloudflareTurnstileUsed = true;
 		}
 	}
@@ -40,12 +41,29 @@
 	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
 	String passwordResetToken = OWASP.sanitise(Sanitisation.text, request.getParameter("t"));
 	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
-
-	if (passwordResetToken == null) {
+	
+	// Retrieve the session and check if the 'Password Breached' warning has been shown before
+    HttpSession session = request.getSession();
+    Boolean warningShown = (Boolean) session.getAttribute("warningShown");
+    if (warningShown == null) {
+        warningShown = Boolean.FALSE;
+        session.setAttribute("warningShown", warningShown);
+    }
+    
+ 	// Check if password is breached
+    if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
+        passwordChangeErrorMessage = Util.i18n("warning.breachedPassword.jsp", locale);
+        session.setAttribute("warningShown", Boolean.TRUE);
+    }
+	// Check if missing token
+    else if (passwordResetToken == null) {
 		passwordChangeErrorMessage = Util.i18n("page.resetPassword.link.error", locale);
 	}
 	// This is a postback, process it and move on
 	else if ((newPasswordValue != null) && (confirmPasswordValue != null) && (captcha != null)) {
+		// Remove warning flag after processing
+		session.removeAttribute("warningShown");
+
 		if (WebUtil.validateRecaptcha(captcha)) {
 			passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
 			if (passwordChangeErrorMessage == null) {
