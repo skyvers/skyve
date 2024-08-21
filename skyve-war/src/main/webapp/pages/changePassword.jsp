@@ -5,6 +5,7 @@
 <%@ page import="org.apache.commons.codec.binary.Base64"%>
 
 <%@ page import="modules.admin.domain.Configuration"%>
+<%@ page import="org.skyve.EXT"%>
 <%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
@@ -47,12 +48,16 @@
 	
 	Boolean warningShown = null;
 	if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
-		// Check if the 'Password Breached' warning has been shown before
-		warningShown = (Boolean) session.getAttribute("warningShown");
-	    if (warningShown == null) {
-	        warningShown = Boolean.FALSE;
-	        session.setAttribute("warningShown", warningShown);
-	    }
+		// Check if the 'Password Breached' warning has been shown before for this password
+		if (newPasswordValue != null) {			
+			warningShown = (Boolean) session.getAttribute("warningShown");
+			String warningHashedPassword = (String) session.getAttribute("warningHashedPassword");
+		    if (warningShown == null || warningHashedPassword == null || !EXT.checkPassword(newPasswordValue, warningHashedPassword)) {
+		        warningShown = Boolean.FALSE;
+		        session.setAttribute("warningShown", warningShown);
+		        session.setAttribute("warningHashedPassword", EXT.hashPassword(newPasswordValue));
+		    }
+		}
 	}
     
  	// Check if password is breached
@@ -64,6 +69,7 @@
 	else if ((oldPasswordValue != null) && (newPasswordValue != null) && (confirmPasswordValue != null)) {
 		// Remove warning flag after processing (if existing)
 		session.removeAttribute("warningShown");
+		session.removeAttribute("warningHashedPassword");
 		
 		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, oldPasswordValue, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {
