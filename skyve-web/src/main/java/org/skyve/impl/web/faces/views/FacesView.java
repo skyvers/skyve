@@ -18,6 +18,7 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.Visibility;
 import org.primefaces.model.charts.ChartModel;
+import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -954,7 +955,7 @@ public class FacesView extends HarnessView {
 				User user = getUser();
 				String bizModule = bean.getBizModule();
 				String bizDocument = bean.getBizDocument();
-				user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
+				EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 				// Check document access
 				Customer customer = user.getCustomer();
