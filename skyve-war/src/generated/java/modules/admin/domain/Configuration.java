@@ -66,9 +66,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String passwordRuleDescriptionPropertyName = "passwordRuleDescription";
 
 	/** @hidden */
-	public static final String checkForBreachedPasswordPropertyName = "checkForBreachedPassword";
-
-	/** @hidden */
 	public static final String fromEmailPropertyName = "fromEmail";
 
 	/** @hidden */
@@ -336,15 +333,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 				with the system password complexity settings. This is a calculated field, see ConfigurationExtension.
 	 **/
 	private String passwordRuleDescription;
-
-	/**
-	 * Check for breached password
-	 * <br/>
-	 * When users try to create or change a password, this checks whether the new password has been compromised in known data breaches (requires internet access).
-	 * <br/>
-	 * Determines whether or not HaveIBeenPwned API is used as part of password validation.
-	 **/
-	private Boolean checkForBreachedPassword = Boolean.valueOf(true);
 
 	/**
 	 * Sender/From Email Address
@@ -668,24 +656,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 	@XmlElement
 	public void setPasswordRuleDescription(String passwordRuleDescription) {
 		this.passwordRuleDescription = passwordRuleDescription;
-	}
-
-	/**
-	 * {@link #checkForBreachedPassword} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getCheckForBreachedPassword() {
-		return checkForBreachedPassword;
-	}
-
-	/**
-	 * {@link #checkForBreachedPassword} mutator.
-	 * @param checkForBreachedPassword	The new value.
-	 **/
-	@XmlElement
-	public void setCheckForBreachedPassword(Boolean checkForBreachedPassword) {
-		preset(checkForBreachedPasswordPropertyName, checkForBreachedPassword);
-		this.checkForBreachedPassword = checkForBreachedPassword;
 	}
 
 	/**
@@ -1201,25 +1171,6 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotBackupsConfigured() {
 		return (! isBackupsConfigured());
-	}
-
-	/**
-	 * True when checks for breached passwords is enabled
-	 *
-	 * @return The condition
-	 */
-	@XmlTransient
-	public boolean isCheckForBreachedPasswordsEnabled() {
-		return (Boolean.TRUE.equals(checkForBreachedPassword));
-	}
-
-	/**
-	 * {@link #isCheckForBreachedPasswordsEnabled} negation.
-	 *
-	 * @return The negated condition
-	 */
-	public boolean isNotCheckForBreachedPasswordsEnabled() {
-		return (! isCheckForBreachedPasswordsEnabled());
 	}
 
 	/**

@@ -4,9 +4,11 @@
 <%@ page import="java.util.Locale"%>
 <%@ page import="org.apache.commons.codec.binary.Base64"%>
 
+<%@ page import="modules.admin.domain.Configuration"%>
 <%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
+<%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.metadata.user.User"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebContext"%>
@@ -43,12 +45,15 @@
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
 	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
 	
-	// Check if the 'Password Breached' warning has been shown before
-    Boolean warningShown = (Boolean) session.getAttribute("warningShown");
-    if (warningShown == null) {
-        warningShown = Boolean.FALSE;
-        session.setAttribute("warningShown", warningShown);
-    }
+	Boolean warningShown = null;
+	if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
+		// Check if the 'Password Breached' warning has been shown before
+		warningShown = (Boolean) session.getAttribute("warningShown");
+	    if (warningShown == null) {
+	        warningShown = Boolean.FALSE;
+	        session.setAttribute("warningShown", warningShown);
+	    }
+	}
     
  	// Check if password is breached
     if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
@@ -57,7 +62,7 @@
     }
 	// This is a postback, process it and move on
 	else if ((oldPasswordValue != null) && (newPasswordValue != null) && (confirmPasswordValue != null)) {
-		// Remove warning flag after processing
+		// Remove warning flag after processing (if existing)
 		session.removeAttribute("warningShown");
 		
 		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, oldPasswordValue, newPasswordValue, confirmPasswordValue);

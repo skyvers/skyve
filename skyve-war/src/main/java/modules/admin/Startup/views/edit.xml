@@ -126,6 +126,11 @@
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
+				<item>
+					<checkBox binding="checkForBreachedPassword" triState="false" />
+				</item>
+			</row>
+	        <row>
 	        	<item >
 	        		<combo binding="captchaType">
 	        			<onChangedHandlers>

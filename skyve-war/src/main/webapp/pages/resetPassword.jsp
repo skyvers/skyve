@@ -3,6 +3,7 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
 
+<%@ page import="modules.admin.domain.Configuration"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
@@ -42,13 +43,16 @@
 	String passwordResetToken = OWASP.sanitise(Sanitisation.text, request.getParameter("t"));
 	String captcha = Util.processStringValue(request.getParameter("g-recaptcha-response"));
 	
-	// Retrieve the session and check if the 'Password Breached' warning has been shown before
     HttpSession session = request.getSession();
-    Boolean warningShown = (Boolean) session.getAttribute("warningShown");
-    if (warningShown == null) {
-        warningShown = Boolean.FALSE;
-        session.setAttribute("warningShown", warningShown);
-    }
+    Boolean warningShown = null;
+    if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
+    	// Check if the 'Password Breached' warning has been shown before
+    	warningShown = (Boolean) session.getAttribute("warningShown");
+        if (warningShown == null) {
+            warningShown = Boolean.FALSE;
+            session.setAttribute("warningShown", warningShown);
+        }
+    }	
     
  	// Check if password is breached
     if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
@@ -61,7 +65,7 @@
 	}
 	// This is a postback, process it and move on
 	else if ((newPasswordValue != null) && (confirmPasswordValue != null) && (captcha != null)) {
-		// Remove warning flag after processing
+		// Remove warning flag after processing (if existing)
 		session.removeAttribute("warningShown");
 
 		if (WebUtil.validateRecaptcha(captcha)) {

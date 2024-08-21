@@ -60,11 +60,6 @@
 				<textField binding="passwordAccountLockoutDuration" disabled="true" />
 			</item>
 		</row>
-		<row>
-			<item>
-				<checkBox binding="checkForBreachedPassword" triState="false" />
-			</item>
-		</row>
 	</form>
 	
 	<!-- test email has a different component for desktop and external -->

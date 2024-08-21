@@ -12,6 +12,7 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.security.HIBPPasswordValidator;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -98,8 +99,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		if (User.newPasswordPropertyName.equals(source)) {
 			String newPassword = bean.getNewPassword();
 			if (newPassword != null) {
-				Configuration c = Configuration.newInstance();
-				if (c.isCheckForBreachedPasswordsEnabled()) {
+				if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
 					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
 						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
 					}

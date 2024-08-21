@@ -5,6 +5,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.security.HIBPPasswordValidator;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
@@ -13,7 +14,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.User.UserExtension;
-import modules.admin.domain.Configuration;
 import modules.admin.domain.SelfRegistration;
 import modules.admin.domain.User;
 
@@ -87,8 +87,7 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 		if (userPassword.equals(source)) {
 			String newPassword = bean.getUser().getPassword();
 			if (newPassword != null) {
-				Configuration c = Configuration.newInstance();
-				if (c.isCheckForBreachedPasswordsEnabled()) {
+				if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
 					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
 						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
 					}
