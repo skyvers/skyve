@@ -3,10 +3,8 @@ import Column from 'primevue/column';
 import { FilterOperator } from 'primevue/api';
 import { MatchModes } from './support/MatchModes';
 import Dropdown from 'primevue/dropdown';
-import { openDocInNewWindow, openDocInSameWindow } from './support/Util';
+import { openDocInNewWindow, openDocInSameWindow, SNAP_KEY_PREFIX } from './support/Util';
 import { applyConverters } from './support/Converters';
-
-const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
 
 /**
  * Map from the skyve attribute type to
@@ -137,8 +135,6 @@ export default {
             summarySelection: '',
             summaryOpts: ['', 'Count', 'Avg', 'Sum', 'Min', 'Max'],
             summaryRow: {},
-
-            snapshotBizId: null,
 
             topLevelOperators: [
                 {
@@ -606,11 +602,8 @@ export default {
             });
         }
     },
-    mounted() {
-        this.snapshotBizId = this.getStorageItem(SNAP_KEY_PREFIX);
-    },
     beforeMount() {
-        // Calling init filters from mounted() was
+       // Calling init filters from mounted() was
         // triggering this issue: https://github.com/primefaces/primevue/issues/4291
         // Seems like the DataTable will reset its filters to whatever
         // was set when it was mounted so we need to set the defaults earlier
@@ -667,7 +660,7 @@ export default {
         selectionMode="single"
         :stateKey="dataSource"
         stateStorage="session"
-        :rowsPerPageOptions="[5, 25, 50, 75, 100]"
+        :rowsPerPageOptions="[5, 10, 25, 50, 75, 100]"
         :lazy="true"
         :value="value"
         :loading="loading"
@@ -710,7 +703,8 @@ export default {
                     :documentQuery="dataSource"
                     :snapshotState="snapshotState"
                     @snapshotChanged="snapshotChanged"
-                    :initialSelection="snapshotBizId"
+                    stateStorage="session"
+                    :stateKey="dataSource"
                 />
 
                 <!-- Match Any/All Operator -->
