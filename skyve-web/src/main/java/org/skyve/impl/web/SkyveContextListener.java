@@ -739,7 +739,7 @@ public class SkyveContextListener implements ServletContextListener {
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		try {
-			UtilImpl.CHECK_FOR_BREACHED_PASSWORD = getBoolean("api", "checkForBreachedPasswordKey", api);
+			UtilImpl.CHECK_FOR_BREACHED_PASSWORD = getBoolean("api", "checkForBreachedPassword", api);
 		} catch (@SuppressWarnings("unused") Exception e) {
 			// Ignore - optional property in JSON
 		}

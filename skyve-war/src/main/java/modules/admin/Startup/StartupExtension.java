@@ -35,7 +35,7 @@ public class StartupExtension extends Startup {
 	static final String ACCOUNT_ALLOW_SELF_REGISTRATION_KEY = "allowUserSelfRegistration";
 
 	static final String API_STANZA_KEY = "api";
-	static final String API_CHECK_BREACH_PASSWORD_KEY = "checkForBreachedPasswordKey";
+	static final String API_PASSWORD_BREACH_CHECK = "checkForBreachedPassword";
 	static final String API_GOOGLE_MAPS_V3_KEY = "googleMapsV3Key";
 	static final String API_GOOGLE_RECAPTCHA_SITE_KEY = "googleRecaptchaSiteKey";
 	static final String API_GOOGLE_RECAPTCHA_SECRET_KEY = "googleRecaptchaSecretKey";
@@ -238,7 +238,7 @@ public class StartupExtension extends Startup {
 		// add any values to the override configuration if they have changed
 		if (getCheckForBreachedPassword() != null
 				&& UtilImpl.CHECK_FOR_BREACHED_PASSWORD != getCheckForBreachedPassword().booleanValue()) {
-			api.put(API_CHECK_BREACH_PASSWORD_KEY, getCheckForBreachedPassword());
+			api.put(API_PASSWORD_BREACH_CHECK, getCheckForBreachedPassword());
 			UtilImpl.CHECK_FOR_BREACHED_PASSWORD = getCheckForBreachedPassword().booleanValue();
 		}
 		if (getApiGoogleMapsKey() != null
