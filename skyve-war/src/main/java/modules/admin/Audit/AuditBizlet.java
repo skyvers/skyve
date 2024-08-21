@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.archive.support.ArchiveRetriever;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
@@ -15,15 +16,12 @@ import org.skyve.metadata.view.model.list.LuceneFilter;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-import jakarta.inject.Inject;
-import modules.admin.Audit.job.support.ArchiveRetriever;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 
 public class AuditBizlet extends Bizlet<Audit> {
 
-    @Inject
-    private ArchiveRetriever retriever;
+    private ArchiveRetriever retriever = ArchiveRetriever.getInstance();
 
     @Override
     public Audit preExecute(ImplicitActionName actionName,

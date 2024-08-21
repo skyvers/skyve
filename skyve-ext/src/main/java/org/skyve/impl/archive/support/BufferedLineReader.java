@@ -1,6 +1,6 @@
-package modules.admin.Audit.job.support;
+package org.skyve.impl.archive.support;
 
-import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
+import static org.skyve.impl.archive.support.ArchiveUtils.ARCHIVE_CHARSET;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

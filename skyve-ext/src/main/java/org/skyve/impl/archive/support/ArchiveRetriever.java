@@ -1,8 +1,8 @@
-package modules.admin.Audit.job.support;
+package org.skyve.impl.archive.support;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
-import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
+import static org.skyve.impl.archive.support.ArchiveUtils.ARCHIVE_CHARSET;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -29,23 +29,32 @@ import org.skyve.EXT;
 import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.cache.Caching;
 import org.skyve.domain.Bean;
+import org.skyve.impl.archive.job.IndexArchivesJob;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.view.model.list.LuceneFilter;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
-import jakarta.inject.Singleton;
-import modules.admin.Audit.job.IndexArchivesJob;
-
 /**
  * Utility class for retrieving Beans archived to file.
  */
-@Singleton
 public class ArchiveRetriever {
 
     private final Logger logger = LogManager.getLogger();
 
     private static final String READ_ONLY = "r";
+
+    private static final class SingletonHolder {
+        private static final ArchiveRetriever INSTANCE = new ArchiveRetriever();
+    }
+
+    private ArchiveRetriever() {
+
+    }
+
+    public static ArchiveRetriever getInstance() {
+        return SingletonHolder.INSTANCE;
+    }
 
     /**
      * Retrieve 0 or 1 archived beans via that <em>Bean</em>'s bizId. If the bean has

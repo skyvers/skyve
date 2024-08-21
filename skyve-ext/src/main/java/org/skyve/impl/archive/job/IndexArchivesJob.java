@@ -1,9 +1,9 @@
-package modules.admin.Audit.job;
+package org.skyve.impl.archive.job;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_FILE_SUFFIX;
-import static modules.admin.Audit.job.support.ArchiveUtils.excerptLine;
+import static org.skyve.impl.archive.support.ArchiveUtils.ARCHIVE_FILE_SUFFIX;
+import static org.skyve.impl.archive.support.ArchiveUtils.excerptLine;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +41,11 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.skyve.CORE;
+import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
+import org.skyve.impl.archive.support.BufferedLineReader;
+import org.skyve.impl.archive.support.BufferedLineReader.Line;
+import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
@@ -51,16 +55,12 @@ import org.skyve.util.Util;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import modules.admin.Audit.job.support.BufferedLineReader;
-import modules.admin.Audit.job.support.BufferedLineReader.Line;
-import modules.admin.Audit.job.support.DocumentConverter;
-import modules.admin.Audit.job.support.FileLockRepo;
 
 public class IndexArchivesJob extends CancellableJob {
 
     private static final Logger logger = LogManager.getLogger();
 
-    // Fields added to each Audit document index entry
+    // Fields added to each archived document index entry
     public static String FILENAME_FIELD = "_filename";
     public static String OFFSET_FIELD = "_offset";
     public static String LENGTH_FIELD = "_length";
@@ -70,8 +70,7 @@ public class IndexArchivesJob extends CancellableJob {
     private static String PROGRESS_FILENAME_FIELD = "_progress_filename";
     private static String PROGRESS_OFFSET_FIELD = "_progress_offset";
 
-    @Inject
-    private FileLockRepo repo;
+    private FileLockRepo repo = FileLockRepo.getInstance();
 
     @Inject
     @Any

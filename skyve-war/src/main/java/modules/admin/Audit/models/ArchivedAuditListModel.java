@@ -15,6 +15,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.SortField.Type;
+import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
@@ -23,7 +24,6 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.view.model.list.ArchivedDocumentListModel;
 
-import modules.admin.Audit.job.support.DocumentConverter;
 import modules.admin.domain.Audit;
 
 public class ArchivedAuditListModel<U extends Bean> extends ArchivedDocumentListModel<U> {

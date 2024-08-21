@@ -8,6 +8,7 @@ import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.util.BytesRef;
+import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
 
 import modules.admin.domain.Audit;

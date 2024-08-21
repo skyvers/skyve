@@ -1,9 +1,9 @@
-package modules.admin.Audit.job;
+package org.skyve.impl.archive.job;
 
 import static java.time.Instant.now;
-import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_CHARSET;
-import static modules.admin.Audit.job.support.ArchiveUtils.ARCHIVE_FILE_SUFFIX;
 import static org.apache.commons.lang3.StringUtils.toRootLowerCase;
+import static org.skyve.impl.archive.support.ArchiveUtils.ARCHIVE_CHARSET;
+import static org.skyve.impl.archive.support.ArchiveUtils.ARCHIVE_FILE_SUFFIX;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
 import org.skyve.domain.DynamicBean;
+import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
@@ -34,7 +35,6 @@ import org.skyve.util.Util;
 import com.google.common.base.MoreObjects;
 
 import jakarta.inject.Inject;
-import modules.admin.Audit.job.support.FileLockRepo;
 
 public class ExportDocumentsToArchiveJob extends CancellableJob {
 
@@ -44,8 +44,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
     @Inject
     private transient Persistence persistence;
 
-    @Inject
-    private transient FileLockRepo repo;
+    private transient FileLockRepo repo = FileLockRepo.getInstance();
 
     private final Logger logger = LogManager.getLogger();
     private final Instant targetEndTime;
@@ -247,7 +246,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             } catch (IOException e) {
                 logger.atFatal()
                       .withThrowable(e)
-                      .log("Writing to audit archive '{}' failed", file);
+                      .log("Writing to archive '{}' failed", file);
                 throw e;
             }
 
@@ -257,10 +256,10 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             return documents.size();
         }
 
-        public void deleteDocument(DynamicBean currAudit) {
+        public void deleteDocument(DynamicBean currDocument) {
 
             persistence.newSQL(deleteStatement)
-                       .putParameter("id", currAudit.getBizId(), false)
+                       .putParameter("id", currDocument.getBizId(), false)
                        .execute();
         }
 
