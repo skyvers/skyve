@@ -719,7 +719,7 @@ public class UtilImpl {
                              .findFirst();
         }
 
-        public static record ArchiveDocConfig(String module, String document, String directory) {
+        public static record ArchiveDocConfig(String module, String document, String directory, int retainDeletedDocumentsDays) {
 
             /**
              * The directory we will store exported documents in <em>.archive</em> files

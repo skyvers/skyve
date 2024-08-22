@@ -14,7 +14,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -22,12 +24,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
+import org.skyve.archive.support.ArchiveableBean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Interface;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
@@ -40,6 +46,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
 
     private static final char LF = '\n';
     private static final int LOCK_FAILURE = -999;
+    private static final String REQD_BEAN_INTERFACE = ArchiveableBean.class.getName();
 
     @Inject
     private transient Persistence persistence;
@@ -86,11 +93,17 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             }
 
             Document doc = getDocument(archiveDocConfig.module(), archiveDocConfig.document());
+            validateExportedType(doc);
             JobSubstance js = new JobSubstance(doc, archiveDocConfig);
 
             logger.debug("Running {}", js);
             int archiveCount = js.execute();
             logger.debug("{} archived {} documents", js, archiveCount);
+            getLog().add(String.format("Archived %,d %s documents", archiveCount, doc.getName()));
+
+            int deleteCount = js.deleteExportedDocuments();
+            logger.debug("{} deleted {} documents", js, deleteCount);
+            getLog().add(String.format("Deleted %,d %s documents", deleteCount, doc.getName()));
 
             recordsArchived += archiveCount;
         }
@@ -102,6 +115,33 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         }
 
         getLog().add("Done; archived " + recordsArchived + " documents");
+    }
+
+    /**
+     * The bean about to be exported must implement the ArchiveableBean
+     * interface, so it can be marked soft deleted.
+     * 
+     * @param doc
+     */
+    protected void validateExportedType(Document doc) {
+        boolean hasInterface = doc.getInterfaces()
+                                  .stream()
+                                  .map(Interface::getInterfaceName)
+                                  .anyMatch(name -> name.equals(REQD_BEAN_INTERFACE));
+
+        if (!hasInterface) {
+
+            String msg = new StringJoiner("").add("Document type ")
+                                             .add(String.valueOf(doc))
+                                             .add(" does not implement interface ")
+                                             .add(REQD_BEAN_INTERFACE)
+                                             .add(" and cannot be archived")
+                                             .toString();
+
+            logger.warn(msg);
+            getLog().add(msg);
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     /**
@@ -125,12 +165,38 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
 
         private final Document document;
         private final ArchiveDocConfig config;
-        private final String deleteStatement;
+        private final String updateStatement;
 
         public JobSubstance(Document doc, ArchiveDocConfig config) {
             this.document = doc;
             this.config = config;
-            this.deleteStatement = createDeleteStatement();
+            this.updateStatement = createUpdateStatement();
+        }
+
+        public int deleteExportedDocuments() {
+
+            String table = document.getPersistent()
+                                   .getPersistentIdentifier();
+
+            Instant cutoff = now().minus(Duration.ofDays(config.retainDeletedDocumentsDays()));
+
+            String deleteSql = new StringJoiner(" ").add("delete from " + table)
+                                                    .add("where ")
+                                                    .add(ArchiveableBean.archiveTimestampPropertyName)
+                                                    .add(" < :cutoff")
+                                                    .toString();
+
+            logger.debug("Deleting {} documents archived prior to {}", document, cutoff);
+
+            persistence.begin();
+            int count = persistence.newSQL(deleteSql)
+                                   .putParameter("cutoff", new Timestamp(Date.from(cutoff)))
+                                   .execute();
+            persistence.commit(false);
+
+            logger.debug("Delete {} {} documents", count, document);
+
+            return count;
         }
 
         public int execute() throws IOException, InterruptedException {
@@ -227,6 +293,9 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
                 return 0;
             }
 
+            final String fileName = file.getName();
+            final Timestamp batchDeleteTime = new Timestamp();
+
             Customer c = CORE.getCustomer();
             persistence.begin();
 
@@ -241,7 +310,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
                     writer.write(entry);
                     writer.write(LF);
 
-                    deleteDocument(currDoc);
+                    softDeleteDocument(currDoc, batchDeleteTime, fileName);
                 }
             } catch (IOException e) {
                 logger.atFatal()
@@ -256,18 +325,26 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             return documents.size();
         }
 
-        public void deleteDocument(DynamicBean currDocument) {
+        public void softDeleteDocument(DynamicBean currDocument, Timestamp archiveTimestamp, String archiveFilename) {
 
-            persistence.newSQL(deleteStatement)
+            persistence.newSQL(updateStatement)
+                       .putParameter("time", archiveTimestamp)
+                       .putParameter("file", archiveFilename, false)
                        .putParameter("id", currDocument.getBizId(), false)
                        .execute();
         }
 
-        public String createDeleteStatement() {
+        public String createUpdateStatement() {
             String table = document.getPersistent()
                                    .getPersistentIdentifier();
-            String sql = "delete from " + table + " where bizId = :id";
-            logger.trace("Using delete stament {}", sql);
+
+            String sql = new StringJoiner("\n").add("update " + table)
+                                               .add("  set  archiveTimestamp = :time")
+                                               .add("      ,archiveFilename  = :file")
+                                               .add("where bizId = :id")
+                                               .toString();
+
+            logger.trace("Using update statement {}", sql);
             return sql;
         }
 
@@ -291,9 +368,13 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         }
 
         private List<DynamicBean> getDocumentsToExport(int howMany) {
-            return persistence.newDocumentQuery(document)
-                              .setMaxResults(howMany)
-                              .projectedResults();
+            DocumentQuery query = persistence.newDocumentQuery(document)
+                                             .setMaxResults(howMany);
+
+            query.getFilter()
+                 .addNull(ArchiveableBean.archiveTimestampPropertyName);
+
+            return query.projectedResults();
         }
 
         @Override

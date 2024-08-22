@@ -791,8 +791,9 @@ public class SkyveContextListener implements ServletContextListener {
             String module = docProp.get("module");
             String document = docProp.get("document");
             String directory = docProp.get("directory");
+            int retainDeletedDocumentsDays = 7; // FIXME update config
 
-            docConfigs.add(new ArchiveDocConfig(module, document, directory));
+            docConfigs.add(new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays));
         }
 
         // Setup the archive doc cache, with some defaults
