@@ -1,20 +1,18 @@
 package modules.admin.domain;
 
-import org.skyve.CORE;
-import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.domain.AbstractPersistentBean;
-
 import jakarta.annotation.Generated;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import modules.admin.UserProxy.UserProxyExtension;
+import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Snapshot
  * 
- * @depend - - - Type
  * @navhas n copyToUser 0..1 UserProxy
  * @stereotype "persistent"
  */

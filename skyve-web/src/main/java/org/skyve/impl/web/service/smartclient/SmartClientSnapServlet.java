@@ -121,13 +121,11 @@ public class SmartClientSnapServlet extends HttpServlet {
 							MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 							// not a query, must be a document
 							if (query == null) {
-								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName),
-										uxui.getName());
+								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 							}
 							else {
-								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName),
-										uxui.getName());
+								EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 							}
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);

@@ -2,13 +2,19 @@ package modules.admin.SelfRegistration;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.security.HIBPPasswordValidator;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.Binder;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 import modules.admin.User.UserExtension;
+import modules.admin.domain.SelfRegistration;
 import modules.admin.domain.User;
 
 public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
@@ -73,5 +79,22 @@ public class SelfRegistrationBizlet extends Bizlet<SelfRegistrationExtension> {
 										requestPasswordResetUrl)));
 			}
 		});
+	}
+
+	@Override
+	public void preRerender(String source, SelfRegistrationExtension bean, WebContext webContext) throws Exception {
+		String userPassword = Binder.createCompoundBinding(SelfRegistration.userPropertyName, User.passwordPropertyName);
+		if (userPassword.equals(source)) {
+			String newPassword = bean.getUser().getPassword();
+			if (newPassword != null) {
+				if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
+					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
+						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
+					}
+				}
+			}
+		}
+
+		super.preRerender(source, bean, webContext);
 	}
 }

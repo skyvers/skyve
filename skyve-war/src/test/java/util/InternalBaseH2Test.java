@@ -166,7 +166,6 @@ abstract class InternalBaseH2Test {
 	protected static AbstractWebContext mockWebContext() {
 		HttpServletRequest request = new MockHttpServletRequest();
 		request.getSession(true); // establish session
-		return new SmartClientWebContext(UUID.randomUUID()
-				.toString(), request);
+		return new SmartClientWebContext(UUID.randomUUID().toString(), request);
 	}
 }

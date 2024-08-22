@@ -4,8 +4,12 @@
 <%@ page import="java.util.Locale"%>
 <%@ page import="org.apache.commons.codec.binary.Base64"%>
 
+<%@ page import="modules.admin.domain.Configuration"%>
+<%@ page import="org.skyve.EXT"%>
+<%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
+<%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.metadata.user.User"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebContext"%>
@@ -21,26 +25,52 @@
 		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
 		return;
 	}
-	else {
-		// Get the user
-		HttpSession session = request.getSession(false);
-		if (session == null) {
-			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
-			return;
-		}
-		user = (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		if (user == null) { // if the user is not established yet (but we've logged in...)
-			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
-			return;
-		}
+	// Get the user
+	HttpSession session = request.getSession(false);
+	if (session == null) {
+		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+		return;
 	}
-
-	// This is a postback, process it and move on
+	user = (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+	if (user == null) { // if the user is not established yet (but we've logged in...)
+		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+		return;
+	}
+	
+	String basePath = Util.getSkyveContextUrl() + "/";
+	boolean mobile = UserAgent.getType(request).isMobile();
+	Locale locale = user.getLocale();
+	
 	String passwordChangeErrorMessage = null;
 	String oldPasswordValue = request.getParameter(oldPasswordFieldName);
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
 	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
-	if ((oldPasswordValue != null) && (newPasswordValue != null) && (confirmPasswordValue != null)) {
+	
+	Boolean warningShown = null;
+	if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
+		// Check if the 'Password Breached' warning has been shown before for this password
+		if (newPasswordValue != null) {			
+			warningShown = (Boolean) session.getAttribute("warningShown");
+			String warningHashedPassword = (String) session.getAttribute("warningHashedPassword");
+		    if (warningShown == null || warningHashedPassword == null || !EXT.checkPassword(newPasswordValue, warningHashedPassword)) {
+		        warningShown = Boolean.FALSE;
+		        session.setAttribute("warningShown", warningShown);
+		        session.setAttribute("warningHashedPassword", EXT.hashPassword(newPasswordValue));
+		    }
+		}
+	}
+    
+ 	// Check if password is breached
+    if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
+        passwordChangeErrorMessage = Util.i18n("warning.breachedPassword.jsp", locale);
+        session.setAttribute("warningShown", Boolean.TRUE);
+    }
+	// This is a postback, process it and move on
+	else if ((oldPasswordValue != null) && (newPasswordValue != null) && (confirmPasswordValue != null)) {
+		// Remove warning flag after processing (if existing)
+		session.removeAttribute("warningShown");
+		session.removeAttribute("warningHashedPassword");
+		
 		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, oldPasswordValue, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {
 			request.getSession().setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
@@ -48,10 +78,6 @@
 			return;
 		}
 	}
-	
-	String basePath = Util.getSkyveContextUrl() + "/";
-	boolean mobile = UserAgent.getType(request).isMobile();
-	Locale locale = user.getLocale();
 %>
 <!DOCTYPE html>
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">

@@ -7,8 +7,6 @@ import org.skyve.CORE;
 import org.skyve.addin.AddInManager;
 import org.skyve.cache.Caching;
 import org.skyve.domain.number.NumberGenerator;
-import org.skyve.impl.web.HttpServletRequestResponse;
-import org.skyve.impl.web.WebContainer;
 import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
@@ -71,10 +69,5 @@ public class SkyveCDIProducer implements Serializable {
 	@Produces
 	public static NumberGenerator getNumberGenerator() {
 		return new NumberGeneratorInjectable();
-	}
-
-	@Produces
-	public static HttpServletRequestResponse getHttpServletRequestResponse() {
-		return WebContainer.getHttpServletRequestResponse();
 	}
 }

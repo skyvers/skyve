@@ -198,14 +198,15 @@ public class BackupJob extends Job {
 		List<String> log = getLog();
 		final String regex = prefix + "\\d*" + ((suffix == null) ? "" : suffix) + "\\.zip";
 		File[] files = FileUtil.listFiles(backupDir, regex, SortDirection.descending);
-
-		for (int i = retain, l = files.length; i < l; i++) {
-			String trace = String.format("Cull backup %s - retention is set to %d",
-					files[i].getAbsolutePath(),
-					Integer.valueOf(retain));
-			log.add(trace);
-			Util.LOGGER.info(trace);
-			FileUtil.delete(files[i]);
+		if (files != null) {
+			for (int i = retain, l = files.length; i < l; i++) {
+				String trace = String.format("Cull backup %s - retention is set to %d",
+						files[i].getAbsolutePath(),
+						Integer.valueOf(retain));
+				log.add(trace);
+				Util.LOGGER.info(trace);
+				FileUtil.delete(files[i]);
+			}
 		}
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			try {

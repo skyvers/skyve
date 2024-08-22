@@ -95,8 +95,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 		List<String> result = Collections.emptyList();
 
 		if (complete == CompleteType.previous) {
-			EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi()
-					.getName());
+			EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName());
 	    	if (! user.canReadDocument(document)) {
 				throw new SecurityException("read this data", user.getName());
 			}

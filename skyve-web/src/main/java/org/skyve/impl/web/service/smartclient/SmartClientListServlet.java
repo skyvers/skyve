@@ -201,8 +201,7 @@ public class SmartClientListServlet extends HttpServlet {
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
-								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName),
-										uxui.getName());
+								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 							}
 							else {
@@ -977,7 +976,10 @@ public class SmartClientListServlet extends HttpServlet {
 								values.set(i, v);
 							}
 						}
-						filterOperator = SmartClientFilterOperator.inSet;
+						// If we got an array and there is no operator (multi-select in filter header), then set it to inSet
+						if (filterOperator == null) {
+							filterOperator = SmartClientFilterOperator.inSet;
+						}
 		    		}
 		    		else {
 		    			value = fromString(binding, "value", valueString, customer, converter, type);
@@ -1490,6 +1492,12 @@ public class SmartClientListServlet extends HttpServlet {
 	    			}
 	    			break;
 	    		case notInSet: // value is not in a set of values. Specify criterion.value as an Array
+	    			if (value instanceof Object[]) {
+	    				filter.addNotIn(binding, (Object[]) value);
+	    			}
+	    			else if (value instanceof List<?>) {
+	    				filter.addNotIn(binding, ((List<?>) value).toArray());
+	    			}
 	    			break;
 	    		case geoWithin:
 					if (value instanceof Geometry) {

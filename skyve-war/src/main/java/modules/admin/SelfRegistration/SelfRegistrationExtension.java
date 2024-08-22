@@ -77,22 +77,23 @@ public class SelfRegistrationExtension extends SelfRegistration {
 				Message message = new Message(Binder.createCompoundBinding(SelfRegistration.userPropertyName, User.passwordPropertyName), PASSWORD_REQUIRED);
 				ve.getMessages().add(message);
 			}
-			
+
 			if (StringUtils.isEmpty(getConfirmPassword())) {
 				Message message = new Message(SelfRegistration.confirmPasswordPropertyName, CONFIRM_PASSWORD_REQUIRED);
 				ve.getMessages().add(message);
 			}
-			
+
 			if (!ve.getMessages().isEmpty()) {
 				throw ve;
 			}
 			
 			// if both aren't null, check that they are the same
-			if (!getUser().getPassword().equals(getConfirmPassword())) {
+			if (!getUser().getPassword()
+					.equals(getConfirmPassword())) {
 				Message message = new Message(SelfRegistration.confirmPasswordPropertyName, PASSWORD_MISMATCH);
 				ve.getMessages().add(message);
 			}
-			
+
 			if (!ve.getMessages().isEmpty()) {
 				throw ve;
 			}

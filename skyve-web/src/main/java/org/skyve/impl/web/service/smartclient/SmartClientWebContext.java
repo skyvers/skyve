@@ -22,8 +22,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 	// lazily initialized list of messages to render
 	private transient List<Map<String, String>> messages;
 	
-	public SmartClientWebContext(String key, 
-			HttpServletRequest request) {
+	public SmartClientWebContext(String key, HttpServletRequest request) {
 		super(key, request);
 	}
 	

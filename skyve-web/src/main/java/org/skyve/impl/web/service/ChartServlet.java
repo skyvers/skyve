@@ -107,7 +107,7 @@ public class ChartServlet extends HttpServlet {
 
 					String dataSourceName = request.getParameter(DATA_SOURCE_NAME);
 					String result = (dataSourceName == null) ? 
-							processChartModel(request) :
+										processChartModel(request) :
 										processListModel(request);
 					if (result != null) {
 						pw.print(result);
