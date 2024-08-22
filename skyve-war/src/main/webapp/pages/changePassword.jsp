@@ -83,7 +83,10 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
-
+		
+		<!-- Password strength estimator -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
+		
 		<script type="text/javascript">
 			<!--
 			function testMandatoryFields(form) {
@@ -133,8 +136,93 @@
 			        }
 			    });
 			});
+			
+			var passwordStrength = {
+				    0: "Worst",
+				    1: "Bad",
+				    2: "Weak",
+				    3: "Good",
+				    4: "Strong"
+				}
+			
+			var progressBarPower = {
+				    0: "1%",
+				    1: "25%",
+				    2: "50%",
+				    3: "75%",
+				    4: "100%"
+				}
+			
+			var progressBarColour = {
+				    0: "#D73F40",
+				    1: "#DC6551",
+				    2: "#F2B84F",
+				    3: "#BDE952",
+				    4: "#3ba62f"
+				}
+
+			document.addEventListener('DOMContentLoaded', function() {
+				var password = document.getElementById('password');
+			    var progressBar = document.getElementById('progress-bar');
+			    var strength = document.getElementById('password-strength-text');
+			    var warning = document.getElementById('password-strength-warning');
+			    var suggestions = document.getElementById('password-strength-suggestions');
+
+			    password.addEventListener('input', function() {
+			        var val = password.value;
+			        var result = zxcvbn(val);
+			        
+					// Update progress bar styling
+			        progressBar.style.width = progressBarPower[result.score];
+			        progressBar.style.backgroundColor = progressBarColour[result.score];
+
+			        // Update the text indicators
+			        if (val !== "") {
+			            strength.innerHTML = "Strength: <strong>" + passwordStrength[result.score] + "</strong>";
+
+			            // Show/hide the warning and suggestions
+			            if (result.feedback.warning) {
+			                warning.innerHTML = result.feedback.warning;
+			            } else {
+			                warning.innerHTML = "";
+			            }
+
+			            if (result.feedback.suggestions.length > 0) {
+			                suggestions.innerHTML = result.feedback.suggestions.join(' ');
+			            } else {
+			                suggestions.innerHTML = "";
+			            }
+			        } else {
+			            strength.innerHTML = "";
+			            warning.innerHTML = "";
+			            suggestions.innerHTML = "";
+			        }
+			    });
+			});
 			-->
 		</script>
+		
+		<style>		
+			.feedback {
+				margin-top: 0.5em;
+			}
+			
+			.progress-bar-container {
+				background: none;
+			    background-color: rgba(0,0,0,0.1);
+			    width: 100%;
+			    height: .5em;
+			    border-radius: 0.25rem;
+			}
+			
+			.progress-bar-container #progress-bar {
+			    background-color: #D73F40;
+			    width: 1%;
+			    height: 100%;
+			    border-radius: 5px;
+			    transition: 0.5s;
+			}
+		</style>
 	</head>
 	<% if (passwordChangeErrorMessage != null) { %>
 	<body onload="document.forms['changeForm'].elements['<%=oldPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
@@ -161,11 +249,17 @@
 		                    </div>
 		                </div>
 		    			<div class="field">
-		                    <div class="ui left icon input">
-		                        <i class="lock icon"></i>
-		                        <input type="password" name="<%=newPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.newPassword.label", locale)%>">
-		                    </div>
-		                </div>
+						    <div class="ui left icon input">
+						        <i class="lock icon"></i>
+						        <input type="password" name="<%=newPasswordFieldName%>" id="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.newPassword.label", locale)%>">
+						    </div>
+						    <div class="progress-bar-container">
+					            <div id="progress-bar"></div>
+					        </div>
+							<div class="feedback" id="password-strength-text"></div>
+							<div class="feedback" id="password-strength-warning"></div>
+							<div class="feedback" id="password-strength-suggestions"></div>
+						</div>
 		                <div class="field">
 		                    <div class="ui left icon input">
 		                        <i class="lock icon"></i>
