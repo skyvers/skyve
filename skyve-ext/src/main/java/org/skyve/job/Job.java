@@ -1,6 +1,7 @@
 package org.skyve.job;
 
 import org.skyve.impl.job.AbstractSkyveJob;
+import org.skyve.impl.util.UtilImpl;
 
 /**
  * Extension point for Jobs.
@@ -44,6 +45,7 @@ public abstract class Job extends AbstractSkyveJob {
 	public final void execute(Job job) throws Exception {
 		job.setBean(getBean());
 		job.setLog(getLog());
+		UtilImpl.inject(job);
 		job.execute();
 	}
 }
