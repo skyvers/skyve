@@ -105,8 +105,6 @@ public class LuceneFilterTest {
                 createDoc("brown", 666),
                 createDoc("fox", 999));
 
-        LuceneFilter filterOuter = new LuceneFilter();
-
         LuceneFilter filterA = new LuceneFilter();
         filterA.addContains(TEXT_FIELD, "foo");
 
@@ -116,11 +114,10 @@ public class LuceneFilterTest {
         LuceneFilter filterC = new LuceneFilter();
         filterC.addContains(TEXT_FIELD, "baz");
 
-        filterOuter.addOr(filterA);
-        filterOuter.addOr(filterB);
-        filterOuter.addOr(filterC);
+        filterA.addOr(filterB);
+        filterA.addOr(filterC);
 
-        List<Document> results = newIndexAndQuery(docs, filterOuter);
+        List<Document> results = newIndexAndQuery(docs, filterA);
 
         // Expecting 3 results
         assertThat(results.size(), is(3));
@@ -146,18 +143,15 @@ public class LuceneFilterTest {
                 createDoc("brown", 666),
                 createDoc("fox", 999));
 
-        LuceneFilter filterOuter = new LuceneFilter();
-
         LuceneFilter filterA = new LuceneFilter();
         filterA.addContains(TEXT_FIELD, "test");
 
         LuceneFilter filterB = new LuceneFilter();
         filterB.addContains(TEXT_FIELD, "bar");
 
-        filterOuter.addAnd(filterA);
-        filterOuter.addAnd(filterB);
+        filterA.addAnd(filterB);
 
-        List<Document> results = newIndexAndQuery(docs, filterOuter);
+        List<Document> results = newIndexAndQuery(docs, filterA);
 
         // Expecting 3 results
         assertThat(results.size(), is(1));

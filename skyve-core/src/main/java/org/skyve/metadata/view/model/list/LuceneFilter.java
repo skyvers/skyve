@@ -89,16 +89,22 @@ public class LuceneFilter implements Filter {
     @Override
     public void addAnd(Filter filter) {
 
-        if (filter instanceof LuceneFilter lf) {
-            clauses.add(new BooleanClause(lf.toQuery(), MUST));
+        if (filter instanceof LuceneFilter otherFilter) {
+
+            clauses.add(new BooleanClause(otherFilter.toQuery(), MUST));
         }
     }
 
     @Override
     public void addOr(Filter filter) {
 
-        if (filter instanceof LuceneFilter lf) {
-            clauses.add(new BooleanClause(lf.toQuery(), SHOULD));
+        if (filter instanceof LuceneFilter otherFilter) {
+
+            Query copyThisQuery = toQuery();
+            clauses.clear();
+
+            clauses.add(new BooleanClause(copyThisQuery, SHOULD));
+            clauses.add(new BooleanClause(otherFilter.toQuery(), SHOULD));
         }
     }
 

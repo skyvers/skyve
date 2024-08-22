@@ -16,6 +16,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -62,7 +63,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 
     @Override
     public Filter newFilter() {
-        return filter = new LuceneFilter();
+        return new LuceneFilter();
     }
 
     @Override
@@ -286,8 +287,9 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             IndexSearcher isearcher = new IndexSearcher(dirReader);
 
             // execute query
-            lriLogger.debug("Executing filter {}", filter);
-            topDocs = isearcher.search(filter.toQuery(), endRow, getSort());
+            Query query = filter.toQuery();
+            lriLogger.debug("Executing filter {}; query '{}'", filter, query);
+            topDocs = isearcher.search(query, endRow, getSort());
 
             // set aside scoredocs
             ScoreDoc[] allScoreDocs = topDocs.scoreDocs;
