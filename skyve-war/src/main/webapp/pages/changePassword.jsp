@@ -86,6 +86,7 @@
 		
 		<!-- Password strength estimator -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
+		<link rel="stylesheet" type="text/css" href="pages/css/strengthIndicator.css">
 		
 		<script type="text/javascript">
 			<!--
@@ -137,6 +138,7 @@
 			    });
 			});
 			
+			// Strength indicator
 			var passwordStrength = {
 				    0: "Worst",
 				    1: "Bad",
@@ -144,7 +146,6 @@
 				    3: "Good",
 				    4: "Strong"
 				}
-			
 			var progressBarPower = {
 				    0: "1%",
 				    1: "25%",
@@ -152,7 +153,6 @@
 				    3: "75%",
 				    4: "100%"
 				}
-			
 			var progressBarColour = {
 				    0: "#D73F40",
 				    1: "#DC6551",
@@ -160,7 +160,6 @@
 				    3: "#BDE952",
 				    4: "#3ba62f"
 				}
-
 			document.addEventListener('DOMContentLoaded', function() {
 				var password = document.getElementById('password');
 			    var progressBar = document.getElementById('progress-bar');
@@ -202,27 +201,6 @@
 			-->
 		</script>
 		
-		<style>		
-			.feedback {
-				margin-top: 0.5em;
-			}
-			
-			.progress-bar-container {
-				background: none;
-			    background-color: rgba(0,0,0,0.1);
-			    width: 100%;
-			    height: .5em;
-			    border-radius: 0.25rem;
-			}
-			
-			.progress-bar-container #progress-bar {
-			    background-color: #D73F40;
-			    width: 1%;
-			    height: 100%;
-			    border-radius: 5px;
-			    transition: 0.5s;
-			}
-		</style>
 	</head>
 	<% if (passwordChangeErrorMessage != null) { %>
 	<body onload="document.forms['changeForm'].elements['<%=oldPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
