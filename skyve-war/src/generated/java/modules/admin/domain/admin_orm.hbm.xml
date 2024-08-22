@@ -33,6 +33,8 @@
 		<property name="millis" index="IDX_millis" />
 		<property name="userName" length="254" />
 		<property name="auditDetail" type="text" />
+		<property name="archiveTimestamp" type="Timestamp" />
+		<property name="archiveFilename" length="500" />
 		<filter name="adminAuditNoneFilter" condition="1=0"/>
 		<filter name="adminAuditCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminAuditDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
