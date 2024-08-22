@@ -83,7 +83,6 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.Session;
@@ -669,14 +668,33 @@ public class EXT {
 	}
 
 	/**
-	 * Get the {@link HttpServletRequest} & {@link HttpServletResponse} from the current transaction.
+	 * Get the {@link HttpServletRequest} for the current thread.
 	 * <br/>
-	 * Can return null if called from a job or other background task.
+	 * This method will throw IllegalStateException if there is no request (eg called from a job or other background task).
 	 * 
-	 * @return An object containing both the request & response
+	 * @return The HttpServletRequest
 	 */
-	public static @Nullable HttpServletRequestResponse getHttpServletRequestResponse() {
-		return WebContainer.getHttpServletRequestResponse();
+	public static @Nonnull HttpServletRequest getHttpServletRequest() {
+		HttpServletRequestResponse result = WebContainer.getHttpServletRequestResponse();
+		if (result == null) {
+			throw new IllegalStateException("No request is available");
+		}
+		return result.getRequest();
+	}
+
+	/**
+	 * Get the {@link HttpServletRequest} for the current thread.
+	 * <br/>
+	 * This method will throw IllegalStateException if there is no request (eg called from a job or other background task).
+	 * 
+	 * @return The HttpServletRequest
+	 */
+	public static @Nonnull HttpServletResponse getHttpServletRespsone() {
+		HttpServletRequestResponse result = WebContainer.getHttpServletRequestResponse();
+		if (result == null) {
+			throw new IllegalStateException("No response is available");
+		}
+		return result.getResponse();
 	}
 
 	/**

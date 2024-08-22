@@ -14,7 +14,6 @@ import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.report.jasperreports.JasperReportUtil;
-import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
@@ -58,15 +57,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 
 		final Map<String, Object> parameters = new HashMap<>();
 
-		HttpServletRequestResponse requestResponse = EXT.getHttpServletRequestResponse();
-		HttpServletRequest request = null;
-		if (requestResponse != null) {
-			request = requestResponse.getRequest();
-		}
-		if (request == null) {
-			throw new IllegalStateException("HttpServletRequest is null");
-		}
-
+		HttpServletRequest request = EXT.getHttpServletRequest();
 		final UxUi uxui = UserAgent.getUxUi(request);
 		if (DesignSpecification.DefinitionSource.list.equals(designSpecification.getDefinitionSource())) {
 			final String queryName = designSpecification.getQueryName();

@@ -71,8 +71,7 @@ public class EditAction extends FacesAction<Void> {
 				final String bizModule = current.getBizModule();
 				final String bizDocument = current.getBizDocument();
 
-				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi()
-						.getName());
+				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
 				
 				facesView.setBizModuleParameter(bizModule);
 				facesView.setBizDocumentParameter(bizDocument);
@@ -87,8 +86,7 @@ public class EditAction extends FacesAction<Void> {
 					throw new IllegalStateException("bizDocument is required");
 				}
 
-				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi()
-						.getName());
+				EXT.checkAccess(user, UserAccess.singular(bizModule, bizDocument), facesView.getUxUi().getName());
 
 				Module module = customer.getModule(bizModule);
 				Document document = module.getDocument(customer, bizDocument);

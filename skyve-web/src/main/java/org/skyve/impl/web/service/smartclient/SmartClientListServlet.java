@@ -201,8 +201,7 @@ public class SmartClientListServlet extends HttpServlet {
 							query = module.getMetaDataQuery(documentOrQueryName);
 							// not a query, must be a document
 							if (query == null) {
-								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName),
-										uxui.getName());
+								EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui.getName());
 								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 							}
 							else {

@@ -173,8 +173,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			        }
 			    	else {
 			            // Create and inject any dependencies
-						webContext = new SmartClientWebContext(UUID.randomUUID()
-								.toString(), request);
+						webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request);
 
 			    		UtilImpl.LOGGER.info("START NEW CONVERSATION!!!!");
 			            persistence = AbstractPersistence.get();

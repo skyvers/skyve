@@ -83,8 +83,7 @@ public class RequestLoggingAndStatisticsFilter implements Filter {
 				UtilImpl.LOGGER.info("RemoteUser=" + httpRequest.getRemoteUser());
 				UtilImpl.LOGGER.info("RequestedSessionId=" + httpRequest.getRequestedSessionId());
 				UtilImpl.LOGGER.info("RequestURI=" + httpRequest.getRequestURI());
-				UtilImpl.LOGGER.info("RequestURL=" + httpRequest.getRequestURL()
-						.toString());
+				UtilImpl.LOGGER.info("RequestURL=" + httpRequest.getRequestURL().toString());
 				UtilImpl.LOGGER.info("Scheme=" + request.getScheme());
 				UtilImpl.LOGGER.info("ServerName=" + request.getServerName());
 				UtilImpl.LOGGER.info("ServerPort=" + request.getServerPort());
@@ -96,21 +95,21 @@ public class RequestLoggingAndStatisticsFilter implements Filter {
 				while (parameterNames.hasMoreElements()) {
 					String parameterName = parameterNames.nextElement();
 					if (parameterName != null) {
-						if (parameterName.toLowerCase()
-								.contains("password")) {
+						if (parameterName.toLowerCase().contains("password")) {
 							UtilImpl.LOGGER.info(parameterName + "=***PASSWORD***");
-						} else {
+						}
+						else {
 							String[] parameterValues = request.getParameterValues(parameterName);
 							if (parameterValues != null) {
 								for (String parameterValue : parameterValues) {
 									int parameterValueLength = parameterValue.length();
 									if (parameterValueLength > 51200) { // 50K
-										UtilImpl.LOGGER
-												.info(parameterName + "=***LENGTH " + (parameterValueLength / 1024) + "K***");
-									} else if (parameterValue.toLowerCase()
-											.contains("password")) {
+										UtilImpl.LOGGER.info(parameterName + "=***LENGTH " + (parameterValueLength / 1024) + "K***");
+									}
+									else if (parameterValue.toLowerCase().contains("password")) {
 										UtilImpl.LOGGER.info(parameterName + "=***CONTAINS PASSWORD***");
-									} else {
+									}
+									else {
 										UtilImpl.LOGGER.info(String.format("%s=%s", parameterName, parameterValue));
 									}
 								}
@@ -139,9 +138,9 @@ public class RequestLoggingAndStatisticsFilter implements Filter {
 					String userAgentHeader = httpRequest.getHeader("User-Agent");
 					UserAgentType userAgentType = UserAgent.getType(httpRequest);
 					WebStatsUtil.recordHit(user, userAgentHeader, userAgentType);
-				} else {
-					if (UtilImpl.COMMAND_TRACE)
-						UtilImpl.LOGGER.info("DIDNT RECORD HIT AS WE ARE NOT LOGGED IN");
+				}
+				else {
+					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("DIDNT RECORD HIT AS WE ARE NOT LOGGED IN");
 				}
 			}
 			catch (Exception e) {

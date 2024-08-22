@@ -9,6 +9,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
+import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
@@ -82,7 +83,7 @@ public class SecurityUtil {
 				}
 
 				// Source IP
-				HttpServletRequestResponse requestResponse = EXT.getHttpServletRequestResponse();
+				HttpServletRequestResponse requestResponse = WebContainer.getHttpServletRequestResponse();
 				if (requestResponse == null) {
 					Util.LOGGER.severe("Failed to get HTTP request/response");
 				} else {
@@ -153,7 +154,7 @@ public class SecurityUtil {
 	 * @param sl The newly created security log
 	 * @author Simeon Solomou
 	 */
-	private static void email(SecurityLog sl) {
+	private static void email(@Nonnull SecurityLog sl) {
 		String supportEmail = UtilImpl.SUPPORT_EMAIL_ADDRESS;
 		if (supportEmail == null) {
 			Util.LOGGER.warning("Cannot send security log notification as no support email address is specified");
@@ -190,7 +191,7 @@ public class SecurityUtil {
 	 * @param request
 	 * @return source IP
 	 */
-	public static String getSourceIpAddress(HttpServletRequest request) {
+	public static @Nonnull String getSourceIpAddress(@Nonnull HttpServletRequest request) {
 		// Check "Forwarded" header
 	    String forwardedHeader = request.getHeader("Forwarded");
 	    if (forwardedHeader != null) {
@@ -221,7 +222,7 @@ public class SecurityUtil {
 	 * @param e
 	 * @return provenance
 	 */
-	public static @Nullable String getProvenance(Exception e) {
+	public static @Nullable String getProvenance(@Nonnull Exception e) {
 		StackTraceElement[] stackTrace = e.getStackTrace();
 		if (stackTrace.length > 0) {
 			StackTraceElement firstElement = stackTrace[0];

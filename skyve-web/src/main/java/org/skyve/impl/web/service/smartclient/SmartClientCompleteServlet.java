@@ -165,8 +165,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 					if (complete == CompleteType.previous) {
 						final String userName = user.getName();
 						final UxUi uxui = UserAgent.getUxUi(request);
-						EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding),
-								uxui.getName());
+						EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding), uxui.getName());
 
 						if (! user.canReadDocument(document)) {
 							throw new SecurityException("read this data", userName);

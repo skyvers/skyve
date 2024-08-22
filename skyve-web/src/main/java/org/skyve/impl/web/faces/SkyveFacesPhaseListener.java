@@ -109,7 +109,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	throws Exception {
 		// restore the context
 		AbstractWebContext webContext = StateUtil.getCachedConversation(view.getDehydratedWebId(),
-				(HttpServletRequest) ec.getRequest());
+																			(HttpServletRequest) ec.getRequest());
 		if (webContext != null) { // should always be the case
 			view.hydrate(webContext);
 	
@@ -122,8 +122,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	private static void restore(String webId, ExternalContext ec)
 	throws Exception {
 		// restore the context
-		AbstractWebContext webContext = StateUtil.getCachedConversation(webId,
-				(HttpServletRequest) ec.getRequest());
+		AbstractWebContext webContext = StateUtil.getCachedConversation(webId, (HttpServletRequest) ec.getRequest());
 		if (webContext != null) { // should always be the case
 			// place the conversation into the thread
 			AbstractPersistence persistence = webContext.getConversation();
