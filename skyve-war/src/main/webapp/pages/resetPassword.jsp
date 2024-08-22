@@ -126,8 +126,9 @@
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
 		
 		<!-- Password strength estimator -->
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
-		<link rel="stylesheet" type="text/css" href="pages/css/strengthIndicator.css">
+		<script type="text/javascript" src="strength-indicator/zxcvbn.js"></script>
+		<script type="text/javascript" src="strength-indicator/util.js"></script>
+		<link rel="stylesheet" type="text/css" href="pages/css/strength-indicator.css"></link>
 		
 		<%-- Add script based on captcha type set --%>
 		<% if (googleRecaptchaUsed) { %>
@@ -178,27 +179,6 @@
 			});
 			
 			// Strength indicator
-			var passwordStrength = {
-				    0: "Worst",
-				    1: "Bad",
-				    2: "Weak",
-				    3: "Good",
-				    4: "Strong"
-				}
-			var progressBarPower = {
-				    0: "1%",
-				    1: "25%",
-				    2: "50%",
-				    3: "75%",
-				    4: "100%"
-				}
-			var progressBarColour = {
-				    0: "#D73F40",
-				    1: "#DC6551",
-				    2: "#F2B84F",
-				    3: "#BDE952",
-				    4: "#3ba62f"
-				}
 			document.addEventListener('DOMContentLoaded', function() {
 				var password = document.getElementById('password');
 			    var progressBar = document.getElementById('progress-bar');

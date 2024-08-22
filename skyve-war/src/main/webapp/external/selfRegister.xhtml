@@ -26,8 +26,9 @@
 			<ui:param name="showLogout" value="false" />
 			<ui:define name="head">
 				<!-- Password strength estimator -->
-				<script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
-                <link rel="stylesheet" type="text/css" href="pages/css/strengthIndicator.css" />
+				<script type="text/javascript" src="strength-indicator/zxcvbn.js"></script>
+				<script type="text/javascript" src="strength-indicator/util.js"></script>
+				<link rel="stylesheet" type="text/css" href="pages/css/strength-indicator.css"></link>
 			</ui:define>
 			<ui:define name="body">
 				<s:conversation managedBean="skyvePublic" />
@@ -53,7 +54,7 @@
 						update="@form"
 						widgetId="postRegister" />
 								
-					<div id="outerPanelId" widgetVar="doRegister" style="border: none;">
+					<div id="outerPanelId" style="border: none;">
 						<!-- If you are an existing user, sign in -->
 						<s:view module="#{skyvePublic.bizModuleParameter}"
 							document="#{skyvePublic.bizDocumentParameter}"
@@ -126,28 +127,6 @@
                         password.addEventListener('input', function() {
                             var val = password.value;
                             var result = zxcvbn(val);
-
-                            var passwordStrength = {
-                                0: "Worst",
-                                1: "Bad",
-                                2: "Weak",
-                                3: "Good",
-                                4: "Strong"
-                            }
-                            var progressBarPower = {
-                                0: "1%",
-                                1: "25%",
-                                2: "50%",
-                                3: "75%",
-                                4: "100%"
-                            }
-                            var progressBarColour = {
-                                0: "#D73F40",
-                                1: "#DC6551",
-                                2: "#F2B84F",
-                                3: "#BDE952",
-                                4: "#3ba62f"
-                            }
 
                             // Update progress bar styling
                             progressBar.style.width = progressBarPower[result.score];
