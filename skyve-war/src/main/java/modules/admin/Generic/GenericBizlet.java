@@ -14,7 +14,7 @@ public class GenericBizlet extends Bizlet<Generic> {
 
 	@Override
 	public Generic resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
-		// used by Startup to populate the collection of selected countries as domain values
+		// Used by Startup to populate the collection of selected countries as domain values
 		if (conversationBean instanceof ConfigurationExtension || conversationBean instanceof StartupExtension) {
 			return createCountryFromCode(bizId);
 		}
