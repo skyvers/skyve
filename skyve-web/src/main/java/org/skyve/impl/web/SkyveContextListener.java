@@ -738,6 +738,11 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
+		try {
+			UtilImpl.CHECK_FOR_BREACHED_PASSWORD = getBoolean("api", "checkForBreachedPassword", api);
+		} catch (@SuppressWarnings("unused") Exception e) {
+			// Ignore - optional property in JSON
+		}
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString("api", "googleRecaptchaSiteKey", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString("api", "googleRecaptchaSecretKey", api, false);

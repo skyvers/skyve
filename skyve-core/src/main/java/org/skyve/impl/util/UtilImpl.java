@@ -290,6 +290,8 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
 	// How long to remember a login on a device (if checked)
 	public static int REMEMBER_ME_TOKEN_TIMEOUT_HOURS = 336; // 336hrs = 14 days
+	// Determines whether or not HaveIBeenPwned API is used as part of password validation
+	public static boolean CHECK_FOR_BREACHED_PASSWORD = true;
 	// Enables new users to register for an account when true, requires email
 	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
 	// google auth client id
