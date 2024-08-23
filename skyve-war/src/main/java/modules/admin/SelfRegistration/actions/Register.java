@@ -3,7 +3,6 @@ package modules.admin.SelfRegistration.actions;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.StringTokenizer;
 
 import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
@@ -18,6 +17,7 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.SecurityUtil;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +30,8 @@ import modules.admin.Startup.StartupExtension;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Startup;
-import modules.admin.domain.User;
 import modules.admin.domain.Startup.CountryListType;
+import modules.admin.domain.User;
 
 /**
  * Action to register a new user, giving them appropriate permissions and sending a
@@ -69,8 +69,8 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 			// check the country and if it is on the blacklist, fail
 			StartupExtension startup = Startup.newInstance();
 			if(startup.isHasIpInfoToken()) {
-				HttpServletRequest request = (HttpServletRequest) webContext.getHttpServletRequest();
-				String clientIpAddress = getClientIpAddress(request);
+				HttpServletRequest request = EXT.getHttpServletRequest();
+				String clientIpAddress = SecurityUtil.getSourceIpAddress(request);
 				LOGGER.info("Checking country for ip " + clientIpAddress);
 				Optional<String> countryCode = geoIpService.getCountryCodeForIp(clientIpAddress);
 				if (countryCode.isPresent()) {
@@ -167,18 +167,6 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 			}
 		}
 		return new ServerSideActionResult<>(bean);
-	}
-	
-	private static String getClientIpAddress(HttpServletRequest request) {
-		String xForwardedForHeader = request.getHeader("X-Forwarded-For");
-		if (xForwardedForHeader == null) {
-			return request.getRemoteAddr();
-		}
-
-		// As of https://en.wikipedia.org/wiki/X-Forwarded-For
-		// The general format of the field is: X-Forwarded-For: client, proxy1, proxy2 ...
-		// we only want the client
-		return new StringTokenizer(xForwardedForHeader, ",").nextToken().trim();
 	}
 	
 	private static void encodePassword(User user) throws Exception {
