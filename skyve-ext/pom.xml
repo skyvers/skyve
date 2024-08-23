@@ -167,6 +167,7 @@
 		<dependency>
 		    <groupId>net.minidev</groupId>
 		    <artifactId>json-smart</artifactId>
+		    <scope>compile</scope>
 		</dependency>
 
 		<!-- Test dependencies -->
