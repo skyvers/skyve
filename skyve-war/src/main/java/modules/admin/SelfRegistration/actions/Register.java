@@ -78,11 +78,11 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					LOGGER.info("Registration request from country " + country);
 					if(UtilImpl.COUNTRY_CODES != null) {
 						List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("\\|"));
-						// Is country on list
+						// is this country on the list
 						boolean found = countryList.stream()
 								.anyMatch(s -> s.equalsIgnoreCase(country));
 						if (found) {
-							// Check if the list is a blacklist and ban the country if it is
+							// Check if the list type is a blacklist and ignore the registration if this country is on the deny list
 							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(BLACK_LIST)) {
 								LOGGER.warn("Self-registration failed because country " + country
 										+ " is on the blacklist. Suspected bot submission for "
@@ -96,7 +96,8 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 								return new ServerSideActionResult<>(bean);
 							}
 						} else if (!found) {
-							// Check if the list is a white list and ban the country if the list is a white list
+							// Check if the list type is a white list and ignore the registration if this country is not on the
+							// allow list
 							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(WHITE_LIST)) {
 								LOGGER.warn("Self-registration failed because country " + country
 										+ " is not on the whitelist. Suspected bot submission for "
