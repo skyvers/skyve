@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="edit" 
+		title="{bizKey}" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+		xmlns="http://www.skyve.org/xml/view" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" borderTitle="Security Log Details" disabled="true">
+        <column responsiveWidth="3" />
+        <column responsiveWidth="6" />
+        <column />
+        <row>
+            <item showLabel="true" label="Timestamp">
+            	<blurb>{timestamp}</blurb>
+            </item>
+		</row>
+		<row>
+            <item showLabel="true" label="Thread ID">
+            	<blurb>{threadId}</blurb>
+            </item>
+		</row>
+        <row>
+            <item showLabel="true" label="Thread Name">
+            	<blurb>{threadName}</blurb>
+            </item>
+		</row>
+		<row>
+            <item showLabel="true" label="Source IP">
+            	<blurb>{sourceIP}</blurb>
+            </item>
+        </row>
+        <row>
+            <item showLabel="true" label="Username">
+            	<blurb>{username}</blurb>
+            </item>
+		</row>
+		<row>
+            <item showLabel="true" label="Logged in User ID">
+            	<blurb>{loggedInUserId}</blurb>
+            </item>
+        </row>
+        <row>
+            <item showLabel="true" label="Event Type">
+            	<blurb>{eventType}</blurb>
+            </item>
+        </row>
+         <row>
+            <item showLabel="true" label="Event Message">
+            	<blurb>{eventMessage}</blurb>
+            </item>
+        </row>
+         <row>
+            <item showLabel="true" label="Provenance">
+            	<blurb>{provenance}</blurb>
+            </item>
+        </row>
+    </form>
+	<actions>
+		<cancel />
+	</actions>
+</view>

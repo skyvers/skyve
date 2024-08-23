@@ -25,7 +25,6 @@ import jakarta.faces.event.PhaseEvent;
 import jakarta.faces.event.PhaseId;
 import jakarta.faces.event.PhaseListener;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 public class SkyveFacesPhaseListener implements PhaseListener {
 	private static final long serialVersionUID = 3757264858610371158L;
@@ -110,8 +109,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	throws Exception {
 		// restore the context
 		AbstractWebContext webContext = StateUtil.getCachedConversation(view.getDehydratedWebId(),
-																			(HttpServletRequest) ec.getRequest(),
-																			(HttpServletResponse) ec.getResponse());
+																			(HttpServletRequest) ec.getRequest());
 		if (webContext != null) { // should always be the case
 			view.hydrate(webContext);
 	
@@ -124,9 +122,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	private static void restore(String webId, ExternalContext ec)
 	throws Exception {
 		// restore the context
-		AbstractWebContext webContext = StateUtil.getCachedConversation(webId,
-																			(HttpServletRequest) ec.getRequest(),
-																			(HttpServletResponse) ec.getResponse());
+		AbstractWebContext webContext = StateUtil.getCachedConversation(webId, (HttpServletRequest) ec.getRequest());
 		if (webContext != null) { // should always be the case
 			// place the conversation into the thread
 			AbstractPersistence persistence = webContext.getConversation();

@@ -47,7 +47,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			throw new ValidationException(message);
 		}
 
-		if (! newPassword.equals(confirmPassword)) { // these 2 are mandatory in the document
+		if (!newPassword.equals(confirmPassword)) { // these 2 are mandatory in the document
 			Message message = new Message(ChangePassword.newPasswordPropertyName,
 					"You did not type the same password.  Please re-enter and confirm the password.");
 			message.addBinding(ChangePassword.confirmPasswordPropertyName);

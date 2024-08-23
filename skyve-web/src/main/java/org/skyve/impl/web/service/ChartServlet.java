@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
@@ -17,14 +18,14 @@ import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.model.chart.TextLengthBucketMetaData;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.snapshot.CompoundFilterOperator;
+import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.actions.ChartAction;
 import org.skyve.impl.web.faces.charts.config.ChartConfigRenderer;
-import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
-import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientListServlet;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -106,7 +107,7 @@ public class ChartServlet extends HttpServlet {
 
 					String dataSourceName = request.getParameter(DATA_SOURCE_NAME);
 					String result = (dataSourceName == null) ? 
-										processChartModel(request, response) :
+										processChartModel(request) :
 										processListModel(request);
 					if (result != null) {
 						pw.print(result);
@@ -138,10 +139,10 @@ public class ChartServlet extends HttpServlet {
 		doGet(request, response);
 	}
 	
-	private static String processChartModel(HttpServletRequest request, HttpServletResponse response)
+	private static String processChartModel(HttpServletRequest request)
 	throws Exception {
 		String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 		User user = CORE.getUser();
@@ -167,7 +168,7 @@ public class ChartServlet extends HttpServlet {
 		ChartBuilderMetaData builder = (ChartBuilderMetaData) view.getInlineModel(modelName);
 		if (builder == null) {
 			// Check access since we know this is not an inline model
-			user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxuiName);
+			EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxuiName);
 			ChartModel<Bean> model = document.getChartModel(customer, modelName, true);
 			model.setBean(bean);
 			data = model.getChartData();
@@ -204,12 +205,12 @@ public class ChartServlet extends HttpServlet {
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 		// not a query, must be a document
 		if (query == null) {
-			user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 		}
 		// a query
 		else {
-			user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 		}
 		if (query == null) {
 			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);

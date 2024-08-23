@@ -20,6 +20,8 @@ import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 
+import com.google.common.base.MoreObjects;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -275,4 +277,12 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	public void setAbstract(boolean abstractClass) {
 		this.abstractClass = abstractClass;
 	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .toString();
+    }
 }

@@ -10,7 +10,6 @@ import org.skyve.impl.web.ViewWebContext;
 import org.skyve.util.Util;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 public final class SmartClientWebContext extends ViewWebContext {
 	private static final long serialVersionUID = 7657798607012186366L;
@@ -23,10 +22,8 @@ public final class SmartClientWebContext extends ViewWebContext {
 	// lazily initialized list of messages to render
 	private transient List<Map<String, String>> messages;
 	
-	public SmartClientWebContext(String key, 
-									HttpServletRequest request, 
-									HttpServletResponse response) {
-		super(key, request, response);
+	public SmartClientWebContext(String key, HttpServletRequest request) {
+		super(key, request);
 	}
 	
 	@Override

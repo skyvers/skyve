@@ -91,6 +91,9 @@
 		<timestamp name="timestamp">
 			<displayName>Timestamp</displayName>
 		</timestamp>
+		<image name="image">
+			<displayName>Image</displayName>
+		</image>
 	</attributes>
 	<conditions>
 		<condition name="condition">

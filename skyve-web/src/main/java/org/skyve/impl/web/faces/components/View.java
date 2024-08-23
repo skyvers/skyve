@@ -54,7 +54,7 @@ public class View extends HtmlPanelGroup {
 	    	final String childStyleClass = (String) attributes.get("childStyleClass");
 	    	final String process = (String) attributes.get("process");
 	    	final String update = (String) attributes.get("update");
-	    	String classString = (String) attributes.get("componentBuilderClass");
+	    	String classString = (String) attributes.get(ComponentBuilder.COMPONENT_BUILDER_CLASS_KEY);
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
 	    		if (classString == null) {
@@ -68,7 +68,7 @@ public class View extends HtmlPanelGroup {
 	    	catch (Exception e) {
 	    		throw new IOException("Cannot instantiate the component builder " + classString, e);
 	    	}
-	    	classString = (String) attributes.get("layoutBuilderClass");
+	    	classString = (String) attributes.get(LayoutBuilder.LAYOUT_BUILDER_CLASS_KEY);
 	    	LayoutBuilder tempLayoutBuilder = null;
 	    	try {
 	    		if (classString == null) {

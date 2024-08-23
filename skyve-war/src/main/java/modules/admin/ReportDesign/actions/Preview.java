@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
@@ -56,7 +57,8 @@ public class Preview extends DownloadAction<ReportDesign> {
 
 		final Map<String, Object> parameters = new HashMap<>();
 
-		final UxUi uxui = UserAgent.getUxUi((HttpServletRequest) webContext.getHttpServletRequest());
+		HttpServletRequest request = EXT.getHttpServletRequest();
+		final UxUi uxui = UserAgent.getUxUi(request);
 		if (DesignSpecification.DefinitionSource.list.equals(designSpecification.getDefinitionSource())) {
 			final String queryName = designSpecification.getQueryName();
 			final String documentName = designSpecification.getDocumentName();
@@ -76,7 +78,7 @@ public class Preview extends DownloadAction<ReportDesign> {
 			final String documentName = document.getName();
 
 			// Check access
-			user.checkAccess(UserAccess.singular(moduleName, documentName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui.getName());
 
 			// Check create
 			if (! user.canCreateDocument(document)) {

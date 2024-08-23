@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
 
@@ -91,9 +92,9 @@ System.out.println(createSql());
 	private String createSql() throws NoSuchAlgorithmException {
 		StringBuilder result = new StringBuilder(1024);
 		
-		String contactId = UUID.randomUUID().toString();
-		String userId = UUID.randomUUID().toString();
-		String groupId = UUID.randomUUID().toString();
+		String contactId = UUIDv7.create().toString();
+		String userId = UUIDv7.create().toString();
+		String groupId = UUIDv7.create().toString();
 		String optimisticLock = new OptimisticLock(panel.getUser(), new Date()).toString();
 		
 		// Contact

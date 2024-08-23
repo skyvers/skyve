@@ -279,11 +279,11 @@ isc.BizUtil.addClassMethods({
 		if (criteria) {
 			if (criteria.criteria) { // advanced criteria
 				for (var i = 0, l = criteria.criteria.length; i < l; i++) {
-					var criterium = criteria.criteria[i];
-					isc.BizUtil.convertFilterCriteria(criterium);
+					var criterion = criteria.criteria[i];
+					isc.BizUtil.convertFilterCriteria(criterion);
 				}
 			}
-			else if (criteria.fieldName) { // advanced criterium
+			else if (criteria.fieldName) { // advanced criterion
 				var propertyName = criteria.fieldName;
 				if (propertyName.startsWith('_display_')) {
 					criteria.fieldName = propertyName.substring(9);

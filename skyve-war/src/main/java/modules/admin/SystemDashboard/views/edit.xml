@@ -18,7 +18,6 @@
 		<chart type="pie" modelName="ActivityContextModel"/>
 		<chart type="bar" modelName="ActivityModel"/>
 	</hbox>
-	<vbox border="true" borderTitle="System Jobs">
-		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
-	</vbox>
+	<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" title="System Jobs" />
+	<listGrid continueConversation="false" model="RecentSecurityLogModel" disabled="true" title="Recent Security Logs" />
 </view>

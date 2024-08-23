@@ -3,9 +3,9 @@ package org.skyve.impl.security;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.UUID;
 
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 import org.springframework.dao.DataAccessException;
@@ -43,7 +43,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 			throw new IllegalStateException("getJdbcTemplate() is null");
 		}
 		t.update(createNewTokenSql,
-					UUID.randomUUID().toString(),
+					UUIDv7.create().toString(),
 					Integer.valueOf(0),
 					new OptimisticLock(userName, new Date()).toString(),
 					customerAndUserName,

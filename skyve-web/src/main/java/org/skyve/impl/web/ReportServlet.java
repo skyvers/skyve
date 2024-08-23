@@ -28,9 +28,9 @@ import org.skyve.impl.report.jasperreports.ReportDesignParameters.ColumnAlignmen
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportColumn;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters.ReportStyle;
 import org.skyve.impl.report.jasperreports.SkyveDataSource;
+import org.skyve.impl.snapshot.CompoundFilterOperator;
+import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
-import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientListServlet;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -141,13 +141,13 @@ public class ReportServlet extends HttpServlet {
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
 			String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+			AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final JasperPrint jasperPrint;
 			if (reportName == null) { // need to generate the report
-				user.checkAccess(UserAccess.singular(moduleName, documentName), uxui.getName());
+				EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui.getName());
 				
 				reportName = moduleName + " - " + documentName;
 
@@ -169,7 +169,7 @@ public class ReportServlet extends HttpServlet {
 				jasperPrint = JasperReportUtil.runReport(reportRenderer.getReport(), user, document, parameters, bean, format, baos);
 			}
 			else {
-				user.checkAccess(UserAccess.report(moduleName, documentName, reportName), uxui.getName());
+				EXT.checkAccess(user, UserAccess.report(moduleName, documentName, reportName), uxui.getName());
 
 				final String isList = request.getParameter(AbstractWebContext.IS_LIST);
 				if (isList != null && Boolean.parseBoolean(isList)) {
@@ -345,7 +345,7 @@ public class ReportServlet extends HttpServlet {
 					String documentName = documentOrQueryOrModelName.substring(0, __Index);
 					String modelName = documentOrQueryOrModelName.substring(__Index + 2);
 
-					user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+					EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 
 					Document document = module.getDocument(customer, documentName);
 					model = document.getListModel(customer, modelName, true);
@@ -353,7 +353,7 @@ public class ReportServlet extends HttpServlet {
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
 					String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-					AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+					AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
 					drivingDocument = model.getDrivingDocument();
@@ -361,11 +361,11 @@ public class ReportServlet extends HttpServlet {
 				else {
 					MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 					if (query == null) {
-						user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+						EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 						query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 					}
 					else {
-						user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+						EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 					}
 					if (query == null) {
 						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);

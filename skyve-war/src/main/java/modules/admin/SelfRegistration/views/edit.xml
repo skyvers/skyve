@@ -85,12 +85,20 @@
 					</item>
 				</row>
 			</form>
-			<form>
+			<form widgetId="widNewPassword">
 				<column responsiveWidth="2" />
 				<column responsiveWidth="6" />
 				<row>
 					<item required="true" showHelp="false">
-						<password binding="user.password" />
+						<password binding="user.password" >
+							<onChangedHandlers>
+								<rerender clientValidation="false">
+									<properties>
+										<c:property key="update">widNewPassword</c:property>
+									</properties>
+								</rerender>
+							</onChangedHandlers>
+						</password>
 					</item>
 				</row>
 				<row>
@@ -98,6 +106,10 @@
 						<password binding="confirmPassword" />
 					</item>
 				</row>
+			</form>
+			<form>
+				<column responsiveWidth="2" />
+				<column responsiveWidth="6" />
 				<row>
 					<item>
 						<spacer />

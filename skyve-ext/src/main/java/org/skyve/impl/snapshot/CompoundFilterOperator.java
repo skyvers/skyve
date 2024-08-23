@@ -1,4 +1,4 @@
-package org.skyve.impl.web.service.smartclient;
+package org.skyve.impl.snapshot;
 
 public enum CompoundFilterOperator {
 	and, or, not

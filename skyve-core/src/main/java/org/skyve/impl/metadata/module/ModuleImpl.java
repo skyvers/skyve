@@ -40,6 +40,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
+import com.google.common.base.MoreObjects;
+
 public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	private static final long serialVersionUID = -5291187014833234045L;
 
@@ -383,4 +385,12 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
 	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .toString();
+    }
 }

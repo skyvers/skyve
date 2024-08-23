@@ -56,6 +56,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.WebContext;
 
+import com.google.common.base.MoreObjects;
+
 import jakarta.servlet.http.HttpSession;
 
 public class CustomerImpl implements Customer {
@@ -946,5 +948,13 @@ public class CustomerImpl implements Customer {
 	public Set<String> getSwitchModeRoles() {
 		return switchModeRoles;
 	}
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+                          .add("name", name)
+                          .toString();
+    }
 }
        

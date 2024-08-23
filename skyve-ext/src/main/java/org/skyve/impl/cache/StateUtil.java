@@ -31,7 +31,6 @@ import org.skyve.impl.web.AbstractWebContext;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class StateUtil {
@@ -52,8 +51,7 @@ public class StateUtil {
 	}
 	
 	public static @Nullable AbstractWebContext getCachedConversation(@Nullable String webId,
-																		@Nullable HttpServletRequest request,
-																		@Nullable HttpServletResponse response)
+																		@Nullable HttpServletRequest request)
 	throws Exception {
 		AbstractWebContext result = null;
 
@@ -86,8 +84,6 @@ public class StateUtil {
 				}
 			}
 			
-			result.setHttpServletRequest(request);
-	        result.setHttpServletResponse(response);
 	        result.setKey(conversationKey);
 	        result.setCurrentBean(result.getBean(currentBeanId));
 		}

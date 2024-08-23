@@ -140,6 +140,9 @@ public abstract class Startup extends AbstractTransientBean {
 	/** @hidden */
 	public static final String backupDirectoryNamePropertyName = "backupDirectoryName";
 
+	/** @hidden */
+	public static final String checkForBreachedPasswordPropertyName = "checkForBreachedPassword";
+
 	/**
 	 * Type
 	 * <br/>
@@ -637,6 +640,15 @@ public abstract class Startup extends AbstractTransientBean {
 					Must be from 3 to 63 characters long.
 	 **/
 	private String backupDirectoryName;
+
+	/**
+	 * Check for breached password
+	 * <br/>
+	 * When users try to create or change a password, this checks whether the new password has been compromised in known data breaches (requires internet access).
+	 * <br/>
+	 * Determines whether or not HaveIBeenPwned API is used as part of password validation.
+	 **/
+	private Boolean checkForBreachedPassword = Boolean.valueOf(true);
 
 	@Override
 	@XmlTransient
@@ -1255,6 +1267,24 @@ public abstract class Startup extends AbstractTransientBean {
 	public void setBackupDirectoryName(String backupDirectoryName) {
 		preset(backupDirectoryNamePropertyName, backupDirectoryName);
 		this.backupDirectoryName = backupDirectoryName;
+	}
+
+	/**
+	 * {@link #checkForBreachedPassword} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getCheckForBreachedPassword() {
+		return checkForBreachedPassword;
+	}
+
+	/**
+	 * {@link #checkForBreachedPassword} mutator.
+	 * @param checkForBreachedPassword	The new value.
+	 **/
+	@XmlElement
+	public void setCheckForBreachedPassword(Boolean checkForBreachedPassword) {
+		preset(checkForBreachedPasswordPropertyName, checkForBreachedPassword);
+		this.checkForBreachedPassword = checkForBreachedPassword;
 	}
 
 	/**

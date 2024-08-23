@@ -21,6 +21,7 @@ public final class AppConstants {
 	public static final String REPORT_DATASET_DOCUMENT_NAME = "ReportDataset";
 	public static final String REPORT_PARAMETER_DOCUMENT_NAME = "ReportParameter";
 	public static final String REPORT_TEMPLATE_DOCUMENT_NAME = "ReportTemplate";
+	public static final String SECURITY_LOG_DOCUMENT_NAME = "SecurityLog";
 	public static final String SELF_REGISTRATION_DOCUMENT_NAME = "SelfRegistration";
 	public static final String SNAPSHOT_DOCUMENT_NAME = "Snapshot";
 	public static final String SUBSCRIPTION_DOCUMENT_NAME = "Subscription";
@@ -63,6 +64,8 @@ public final class AppConstants {
 	public static final String PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME = "passwordResetEmailBody";
 	public static final String PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME = "passwordResetEmailSubject";
 	public static final String PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME = "passwordResetToken";
+	public static final String PASSWORD_RESET_TOKEN_EXPIRY_MINUTES_ATTRIBUTE_NAME = "passwordResetTokenExpiryMinutes";
+	public static final String PASSWORD_RESET_TOKEN_CREATION_TIMESTAMP_ATTRIBUTE_NAME = "passwordResetTokenCreationTimestamp";
 	public static final String PERCENTAGE_COMPLETE_ATTRIBUTE_NAME = "percentComplete";
 	public static final String QUERY_NAME_ATTRIBUTE_NAME = "queryName";
 	public static final String RECEIVER_IDENTIFIER_ATTRIBUTE_NAME = "receiverIdentifier";

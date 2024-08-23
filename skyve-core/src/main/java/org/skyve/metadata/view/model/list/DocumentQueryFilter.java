@@ -598,10 +598,19 @@ public class DocumentQueryFilter implements Filter {
 
 	@Override
 	public void addIn(String binding, Object... values) {
+		in(binding, false, values);
+	}
+
+	@Override
+	public void addNotIn(String binding, Object... values) {
+		in(binding, true, values);
+	}
+	
+	private void in(String binding, boolean not, Object... values) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) {
 			StringBuilder sb = new StringBuilder(20 + (7 * values.length));
-			sb.append(binding).append(" in  ");
+			sb.append(binding).append(not ? " not in " : " in  ");
 			for (Object value : values) {
 				sb.append(value).append(", ");
 			}
@@ -609,7 +618,12 @@ public class DocumentQueryFilter implements Filter {
 			UtilImpl.LOGGER.info(sb.toString());
 		}
 		if (values.length > 0) {
-			detailFilter.addIn(binding, values);
+			if (not) {
+				detailFilter.addNotIn(binding, values);
+			}
+			else {
+				detailFilter.addIn(binding, values);
+			}
 		}
 		else {
 			// select nothing
@@ -618,7 +632,12 @@ public class DocumentQueryFilter implements Filter {
 		}
 		if (summaryFilter != null) {
 			if (values.length > 0) {
-				summaryFilter.addIn(binding, values);
+				if (not) {
+					summaryFilter.addNotIn(binding, values);
+				}
+				else {
+					summaryFilter.addIn(binding, values);
+				}
 			}
 			else {
 				// select nothing

@@ -25,7 +25,6 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -167,6 +166,6 @@ abstract class InternalBaseH2Test {
 	protected static AbstractWebContext mockWebContext() {
 		HttpServletRequest request = new MockHttpServletRequest();
 		request.getSession(true); // establish session
-		return new SmartClientWebContext(UUID.randomUUID().toString(), request, new MockHttpServletResponse());
+		return new SmartClientWebContext(UUID.randomUUID().toString(), request);
 	}
 }

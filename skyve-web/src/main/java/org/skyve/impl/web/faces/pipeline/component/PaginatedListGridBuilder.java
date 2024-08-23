@@ -20,13 +20,13 @@ public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 									String title,
 									ListGrid listGrid,
 									boolean aggregateQuery) {
-		if (component != null) {
+		if (component instanceof UIPageableData) {
 			UIPageableData dt = (UIPageableData) component;
 			dt.setPaginator(true);
-	    	dt.setRowsPerPageTemplate("25,50,75,100");
-	    	dt.setPaginatorAlwaysVisible(false);
+			dt.setRowsPerPageTemplate("25,50,75,100");
+			dt.setPaginatorAlwaysVisible(false);
 		}
-		
+
 		return component;
 	}
 }

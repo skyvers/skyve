@@ -1,5 +1,8 @@
 package org.skyve.impl.web.faces.views;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,7 @@ import org.primefaces.event.SelectEvent;
 import org.primefaces.event.ToggleEvent;
 import org.primefaces.model.Visibility;
 import org.primefaces.model.charts.ChartModel;
+import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -83,7 +87,7 @@ import jakarta.inject.Named;
 @Named("skyve")
 public class FacesView extends HarnessView {
 	private static final long serialVersionUID = 3331890232012703780L;
-
+	
 	// NB whatever state is added here needs to be handled by hydrate/dehydrate
 
 	// This is set from a request attribute (the attribute is set in home.jsp)
@@ -492,7 +496,40 @@ public class FacesView extends HarnessView {
 			}
 		}
 	}
-	
+
+	/**
+	 * Fired from JS with, eg:
+	 * `selectGridRow([{name:'bizId', value:'abcd-0000'})`
+	 * 
+	 * Set the selected row bizId and fire an action or rerender.
+	 * 
+	 * if actionName is null - do nothing - just set the selected row.
+	 * else if actionName is "true" - rerender with validation.
+	 * else if actionName is "false" - rerender with no validation.
+	 * else run the action.
+	 */
+	public void selectGridRow(String bizId, String selectedIdBinding, String actionName, String source) {
+		if ((bizId != null) && (selectedIdBinding != null)) {
+			new FacesAction<Void>() {
+				@Override
+				public Void callback() throws Exception {
+					Bean bean = getCurrentBean().getBean();
+					BindUtil.set(bean, selectedIdBinding, bizId);
+					return null;
+				}
+			}.execute();
+		}
+
+		if (actionName != null) {
+			if (TRUE.toString().equals(actionName) || FALSE.toString().equals(actionName)) {
+				rerender(source, Boolean.parseBoolean(actionName));
+			}
+			else {
+				action(actionName, null, null);
+			}
+		}
+	}
+
 	/**
 	 * Used to ensure the DataTable renderer highlights the row correctly
 	 */
@@ -561,18 +598,18 @@ public class FacesView extends HarnessView {
 			if (filterCriteria != null) {
 				filterParameters = new ArrayList<>(filterCriteria.size());
 				parameters = new ArrayList<>(filterCriteria.size());
-				for (List<String> filterCriterium : filterCriteria) {
-					if (filterCriterium.size() == 3) {
+				for (List<String> filterCriterion : filterCriteria) {
+					if (filterCriterion.size() == 3) {
 						FilterParameterImpl param = new FilterParameterImpl();
-						param.setFilterBinding(filterCriterium.get(0));
-						param.setOperator(FilterOperator.valueOf(filterCriterium.get(1)));
-						param.setValue(filterCriterium.get(2));
+						param.setFilterBinding(filterCriterion.get(0));
+						param.setOperator(FilterOperator.valueOf(filterCriterion.get(1)));
+						param.setValue(filterCriterion.get(2));
 						filterParameters.add(param);
 					}
 					else {
 						ParameterImpl param = new ParameterImpl();
-						param.setName(filterCriterium.get(0));
-						param.setValue(filterCriterium.get(1));
+						param.setName(filterCriterion.get(0));
+						param.setValue(filterCriterion.get(1));
 						parameters.add(param);
 					}
 				}
@@ -918,7 +955,7 @@ public class FacesView extends HarnessView {
 				User user = getUser();
 				String bizModule = bean.getBizModule();
 				String bizDocument = bean.getBizDocument();
-				user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
+				EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 				// Check document access
 				Customer customer = user.getCustomer();

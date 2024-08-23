@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import org.skyve.domain.Bean;
@@ -36,6 +35,7 @@ import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
@@ -289,7 +289,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			final Map<String, Object> p = new TreeMap<>();
 			
 			// Bean
-			p.put(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
+			p.put(Bean.DOCUMENT_ID, UUIDv7.create().toString());
 			p.put(Bean.BIZ_KEY, null);
 			p.put(Bean.CUSTOMER_NAME, null);
 			p.put(Bean.DATA_GROUP_ID, null);

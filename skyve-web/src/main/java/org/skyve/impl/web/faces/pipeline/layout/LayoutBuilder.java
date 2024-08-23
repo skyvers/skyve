@@ -16,6 +16,8 @@ import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import jakarta.faces.component.UIComponent;
 
 public abstract class LayoutBuilder extends AbstractFacesBuilder {
+	public static final String LAYOUT_BUILDER_CLASS_KEY = "layoutBuilderClass";
+
 	/**
 	 * The view Layout for the view internally
 	 * @return	The layout component added
