@@ -11,15 +11,14 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.SecurityUtil;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
@@ -122,6 +121,10 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		userBean.setPasswordExpired(Boolean.FALSE);
 		userBean.setPasswordLastChanged(new DateTime());
 		userBean.setPasswordResetToken(null);
+		HttpServletRequest request = EXT.getHttpServletRequest();
+		if (request != null) {
+			userBean.setPasswordLastChangedIP(SecurityUtil.getSourceIpAddress(request));
+		}
 
 		userBean = persistence.save(userDocument, userBean);
 
@@ -134,18 +137,6 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		// Ensure the user doesn't need to change their password any more.
 		((UserImpl) user).setPasswordChangeRequired(false);
-		
-		if (Configuration.newInstance().isEmailConfigured()) {
-			// Send email notification
-			final JobMetaData changePasswordNotificationJobMetadata = module.getJob("jChangePasswordNotification");
-			EXT.getJobScheduler()
-					.runOneShotJob(changePasswordNotificationJobMetadata, userBean, user);
-		} else {
-			Util.LOGGER.warning("Cannot send change password notification as email is not configured");
-		}
-
-		// Record security event in security log
-		SecurityUtil.log("Password Change", CORE.getUser().getName() + " changed their password");
 
 		return new ServerSideActionResult<>(bean); // stay on the same form
 	}

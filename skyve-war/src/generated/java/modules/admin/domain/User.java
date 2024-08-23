@@ -87,6 +87,9 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String passwordLastChangedPropertyName = "passwordLastChanged";
 
 	/** @hidden */
+	public static final String passwordLastChangedIPPropertyName = "passwordLastChangedIP";
+
+	/** @hidden */
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
 
 	/** @hidden */
@@ -380,8 +383,19 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Last changed
 	 * <br/>
 	 * Date and Time the users password was last changed
+	 * <br/>
+	 * Referenced in password change notification email contents
 	 **/
 	private DateTime passwordLastChanged;
+
+	/**
+	 * Password Last Changed IP
+	 * <br/>
+	 * Source IP when password was last changed
+	 * <br/>
+	 * Referenced in password change notification email contents
+	 **/
+	private String passwordLastChangedIP;
 
 	/**
 	 * Password Reset Token
@@ -395,7 +409,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	/**
 	 * Password Reset Token Creation Timestamp
 	 * <br/>
-	 * When the password reset token was created.
+	 * When the password reset token was created
 	 * <br/>
 	 * Used in WebUtil.resetPassword to evaluate token expiry.
 	 **/
@@ -791,6 +805,24 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setPasswordLastChanged(DateTime passwordLastChanged) {
 		preset(passwordLastChangedPropertyName, passwordLastChanged);
 		this.passwordLastChanged = passwordLastChanged;
+	}
+
+	/**
+	 * {@link #passwordLastChangedIP} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedIP() {
+		return passwordLastChangedIP;
+	}
+
+	/**
+	 * {@link #passwordLastChangedIP} mutator.
+	 * @param passwordLastChangedIP	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedIP(String passwordLastChangedIP) {
+		preset(passwordLastChangedIPPropertyName, passwordLastChangedIP);
+		this.passwordLastChangedIP = passwordLastChangedIP;
 	}
 
 	/**

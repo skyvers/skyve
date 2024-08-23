@@ -15,13 +15,16 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.SecurityUtil;
 import org.skyve.web.WebContext;
 
+import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
@@ -219,6 +222,12 @@ public class UserBizlet extends Bizlet<UserExtension> {
 		
 		// user must be saved to be visible within the users own User-scope
 		bean.setBizUserId(bean.getBizId());
+
+		// if password has changed, set switch in stash (see postSave)
+		if (bean.isPersisted() && ((bean.originalValues().containsKey(User.newPasswordPropertyName) && bean.originalValues().containsKey(User.confirmPasswordPropertyName))
+				|| bean.originalValues().containsKey(User.passwordPropertyName))) {
+			CORE.getStash().put("passwordChanged", Boolean.TRUE);
+		}
 	}
 
 	/**
@@ -226,6 +235,23 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	 */
 	@Override
 	public void postSave(UserExtension bean) throws Exception {
+		// If password has changed, notify & log security event
+		if (Boolean.TRUE.equals(CORE.getStash().get("passwordChanged"))) {
+			// Send email notification
+			Persistence persistence = CORE.getPersistence();
+			org.skyve.metadata.user.User user = persistence.getUser();
+			Customer customer = user.getCustomer();
+			Module module = customer.getModule(ChangePassword.MODULE_NAME);
+			final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
+			EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
+
+			// Record security event in security log
+			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password");
+			
+			// Clear stash
+			CORE.getStash().remove("passwordChanged");
+		}
+		
 		bean.clearAssignedRoles();
 		bean.setNewGroup(null);
 		bean.setNewPassword(null);
@@ -311,6 +337,10 @@ public class UserBizlet extends Bizlet<UserExtension> {
 							user.setPasswordExpired(Boolean.FALSE);
 							user.setGeneratedPassword(null);
 							user.setPasswordLastChanged(new DateTime());
+							HttpServletRequest request = EXT.getHttpServletRequest();
+							if (request != null) {
+								user.setPasswordLastChangedIP(SecurityUtil.getSourceIpAddress(request));
+							}
 						}
 						// clear out the new password entry fields
 						user.setNewPassword(null);

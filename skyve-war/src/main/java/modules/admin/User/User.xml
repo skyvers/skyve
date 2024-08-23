@@ -64,9 +64,16 @@
 			<description>admin.user.passwordExpired.description</description>
 		</boolean >
 		<dateTime name="passwordLastChanged" sensitivity="secret">
+			<documentation>Referenced in password change notification email contents</documentation>
 			<displayName>admin.user.passwordLastChanged.displayName</displayName>
 			<description>admin.user.passwordLastChanged.description</description>
 		</dateTime>
+		<text name="passwordLastChangedIP" sensitivity="secret" usage="domain">
+			<documentation>Referenced in password change notification email contents</documentation>
+			<displayName>admin.user.passwordLastChangedIP.displayName</displayName>
+			<description>admin.user.passwordLastChangedIP.description</description>
+			<length>45</length>
+		</text>
 		<text name="passwordResetToken" sensitivity="secret">
 			<documentation>This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.</documentation>
 			<displayName>admin.user.passwordResetToken.displayName</displayName>
@@ -75,8 +82,8 @@
 		</text>
 		<timestamp name="passwordResetTokenCreationTimestamp" usage="domain">
 			<documentation>Used in WebUtil.resetPassword to evaluate token expiry.</documentation>
-			<displayName>Password Reset Token Creation Timestamp</displayName>
-			<description>When the password reset token was created.</description>
+			<displayName>admin.user.passwordResetTokenCreationTimestamp.displayName</displayName>
+			<description>admin.user.passwordResetTokenCreationTimestamp.description</description>
 		</timestamp>
 		<memo name="passwordHistory" audited="false" trackChanges="false" sensitivity="secret">
 			<documentation>
