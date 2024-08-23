@@ -74,27 +74,38 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				LOGGER.info("Checking country for ip " + clientIpAddress);
 				Optional<String> countryCode = geoIpService.getCountryCodeForIp(clientIpAddress);
 				if (countryCode.isPresent()) {
-					LOGGER.info("Registration request from country " + countryCode.get());
+					String country = countryCode.get();
+					LOGGER.info("Registration request from country " + country);
 					if(UtilImpl.COUNTRY_CODES != null) {
-						List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("//|"));
+						List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("\\|"));
 						// Is country on list
 						boolean found = countryList.stream()
-								.anyMatch(s -> s.equalsIgnoreCase(countryCode.get()));
+								.anyMatch(s -> s.equalsIgnoreCase(country));
 						if (found) {
 							// Check if the list is a blacklist and ban the country if it is
 							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(BLACK_LIST)) {
-								LOGGER.warn(
-										"Self-registration failed because country was on the blacklist. Suspect bot submission for "
-												+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
+								LOGGER.warn("Self-registration failed because country " + country
+										+ " is on the blacklist. Suspected bot submission for "
+										+ bean.getUser()
+												.getContact()
+												.getName()
+										+ " - " + bean.getUser()
+												.getContact()
+												.getEmail1());
 								bean.setPassSilently(Boolean.TRUE);
 								return new ServerSideActionResult<>(bean);
 							}
-						} else if(!found) {
+						} else if (!found) {
 							// Check if the list is a white list and ban the country if the list is a white list
 							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(WHITE_LIST)) {
-								LOGGER.warn(
-										"Self-registration failed because country was not on the whitelist. Suspect bot submission for "
-												+ bean.getUser().getContact().getName() + ", " + bean.getUser().getContact().getEmail1());
+								LOGGER.warn("Self-registration failed because country " + country
+										+ " is not on the whitelist. Suspected bot submission for "
+										+ bean.getUser()
+												.getContact()
+												.getName()
+										+ " - " + bean.getUser()
+												.getContact()
+												.getEmail1());
 								bean.setPassSilently(Boolean.TRUE);
 								return new ServerSideActionResult<>(bean);
 							}
