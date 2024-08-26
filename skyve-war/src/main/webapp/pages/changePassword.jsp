@@ -113,7 +113,7 @@
 		<!-- Password strength estimator -->
 		<script type="text/javascript" src="strength-indicator/zxcvbn.js"></script>
 		<script type="text/javascript" src="strength-indicator/util.js"></script>
-		<link rel="stylesheet" type="text/css" href="pages/css/strength-indicator.css"></link>
+		<link rel="stylesheet" type="text/css" href="strength-indicator/strength-indicator.css"></link>
 		
 		<script type="text/javascript">
 			<!--
