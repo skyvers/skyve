@@ -33,7 +33,7 @@ public class SecurityUtil {
 		String eventMessage = exception.getMessage();
 		String provenance = getProvenance(exception);
 
-		log(eventType, eventMessage, provenance);
+		log(eventType, eventMessage, provenance, null);
 	}
 
 	/**
@@ -43,7 +43,20 @@ public class SecurityUtil {
 	 * @param eventMessage What is this security event
 	 */
 	public static void log(@Nonnull String eventType, @Nonnull String eventMessage) {
-		log(eventType, eventMessage, null);
+		log(eventType, eventMessage, null, null);
+	}
+
+	/**
+	 * Creates a {@link SecurityLog} entry and emails its contents to the defined support user.
+	 * <br/>
+	 * Use this method when the user for the security event is not attainable by <code>CORE.getPersistence.getUser</code>.
+	 * 
+	 * @param eventType The type of security event
+	 * @param eventMessage What is this security event
+	 * @param user The user for this security event
+	 */
+	public static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nonnull User user) {
+		log(eventType, eventMessage, null, user);
 	}
 
 	/**
@@ -52,23 +65,27 @@ public class SecurityUtil {
 	 * @param eventType The type of security event
 	 * @param eventMessage What is this security event
 	 * @param provenance The first line of the stack trace
+	 * @param user The user for this security event (if not supplied, fetched from current persistence)
 	 * 
 	 * @author Simeon Solomou
 	 */
-	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance) {
+	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user) {
 		// Get current persistence
-		Persistence p = CORE.getPersistence();
-		User user = p.getUser();
+		User currentUser = user;
+		if (currentUser == null) {
+			Persistence p = CORE.getPersistence();
+			currentUser = p.getUser();
+		}
 
 		// Create a new, temporary persistence
 		AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) AbstractPersistence.newInstance();
 		try {
 			// Setting user and beginning transaction
-			tempP.setUser(user);
+			tempP.setUser(currentUser);
 			tempP.begin();
 
 			try {
-				SecurityLog sl = SecurityLog.newInstance();
+				SecurityLog sl = SecurityLog.newInstance(currentUser);
 
 				// Timestamp
 				sl.setTimestamp(new Timestamp());
@@ -96,10 +113,10 @@ public class SecurityUtil {
 				}
 
 				// Username
-				sl.setUsername(user.getName());
+				sl.setUsername(currentUser.getName());
 
 				// Logged in user (ID)
-				sl.setLoggedInUserId(user.getId());
+				sl.setLoggedInUserId(currentUser.getId());
 
 				// Event type
 				sl.setEventType(eventType);

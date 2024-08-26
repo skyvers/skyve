@@ -11,9 +11,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -27,6 +29,7 @@ import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.cdi.GeoIpService;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -49,6 +52,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.OWASP;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -321,6 +325,61 @@ public class WebUtil {
 			// set reset password token for all users with the same email address across all customers
 			List<PersistentBean> users = q.beanResults();
 			if (! users.isEmpty()) {
+				// if configured, check the country and if it is on the blacklist/whitelist
+				boolean geoIpBlocked = false;
+				String geoIpMessage = null;
+				if (UtilImpl.IP_INFO_TOKEN != null) {
+					HttpServletRequest request = EXT.getHttpServletRequest();
+					String clientIpAddress = SecurityUtil.getSourceIpAddress(request);
+					Util.LOGGER.info("Checking country for ip " + clientIpAddress);
+					Optional<String> countryCode = new GeoIpService().getCountryCodeForIp(clientIpAddress); // TODO
+					if (countryCode.isPresent()) {
+						String country = countryCode.get();
+						Util.LOGGER.info("Password reset request from country " + country);
+						if(UtilImpl.COUNTRY_CODES != null) {
+							List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("\\|"));
+							// is this country on the list?
+							boolean found = countryList.stream()
+									.anyMatch(i -> i.equalsIgnoreCase(country));
+							if (found) {
+								// check if the list type is a blacklist and ignore the reset if this country is on the deny list
+								if (UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(AppConstants.COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE)) {
+									geoIpMessage = "Password reset request failed because country " + country
+											+ " is on the blacklist. Suspected bot submission for user with email " + email;
+									Util.LOGGER.warning(geoIpMessage);
+
+									// Record GEO IP block (to be recorded in security log)
+									geoIpBlocked = true;
+								}
+							} else {
+								// check if the list type is a white list and ignore the reset if this country is not on the allow list
+								if (UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(AppConstants.COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE)) {
+									geoIpMessage = "Password reset request failed because country " + country
+											+ " is not on the whitelist. Suspected bot submission for user with email " + email;
+									Util.LOGGER.warning(geoIpMessage);
+
+									// Record GEO IP block (to be recorded in security log)
+									geoIpBlocked = true;
+								}
+							}
+						}
+					}
+				}
+				// if blocked - create security log entries for users & return
+				if (geoIpBlocked) {
+					for (PersistentBean user: users) {
+						// Record security event for this user
+						String userName = (String) Binder.get(user, AppConstants.USER_NAME_ATTRIBUTE_NAME);
+						User metaUser = CORE.getRepository().retrieveUser(userName);
+						if (metaUser == null) {
+							Util.LOGGER.warning("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
+						} else {
+							SecurityUtil.log("GEO IP Block", geoIpMessage, metaUser);
+						}
+					}
+					return; // pass silently
+				}
+				
 				PersistentBean firstUser = null;
 				String passwordResetToken = generatePasswordResetToken();
 				org.skyve.domain.types.Timestamp now = new org.skyve.domain.types.Timestamp();

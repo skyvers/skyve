@@ -26,10 +26,8 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Group.GroupExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
-import modules.admin.Startup.StartupExtension;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
-import modules.admin.domain.Startup;
 import modules.admin.domain.Startup.CountryListType;
 import modules.admin.domain.User;
 
@@ -38,10 +36,6 @@ import modules.admin.domain.User;
  * registration email to confirm their user account.
  */
 public class Register implements ServerSideAction<SelfRegistrationExtension> {
-
-	private static final String WHITE_LIST = CountryListType.whitelist.name();
-
-	private static final String BLACK_LIST = CountryListType.blacklist.name();
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
@@ -66,9 +60,8 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					throw new ValidationException("Captcha is not valid");
 				}
 			}
-			// check the country and if it is on the blacklist, fail
-			StartupExtension startup = Startup.newInstance();
-			if(startup.isHasIpInfoToken()) {
+			// If configured, check the country and if it is on the blacklist/whitelist
+			if (UtilImpl.IP_INFO_TOKEN != null) {
 				HttpServletRequest request = EXT.getHttpServletRequest();
 				String clientIpAddress = SecurityUtil.getSourceIpAddress(request);
 				LOGGER.info("Checking country for ip " + clientIpAddress);
@@ -76,37 +69,36 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				if (countryCode.isPresent()) {
 					String country = countryCode.get();
 					LOGGER.info("Registration request from country " + country);
-					if(UtilImpl.COUNTRY_CODES != null) {
+					if (UtilImpl.COUNTRY_CODES != null) {
 						List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("\\|"));
-						// is this country on the list
+						// Is this country on the list?
 						boolean found = countryList.stream()
 								.anyMatch(s -> s.equalsIgnoreCase(country));
 						if (found) {
 							// Check if the list type is a blacklist and ignore the registration if this country is on the deny list
-							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(BLACK_LIST)) {
-								LOGGER.warn("Self-registration failed because country " + country
+							if (UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(CountryListType.blacklist.name())) {
+								String message = "Self-registration failed because country " + country
 										+ " is on the blacklist. Suspected bot submission for "
-										+ bean.getUser()
-												.getContact()
-												.getName()
-										+ " - " + bean.getUser()
-												.getContact()
-												.getEmail1());
+										+ bean.getUser().getContact().getName() + " - " + bean.getUser().getContact().getEmail1();
+								LOGGER.warn(message);
+								
+								// Record security event
+								SecurityUtil.log("GEO IP Block", message);
+								
 								bean.setPassSilently(Boolean.TRUE);
 								return new ServerSideActionResult<>(bean);
 							}
-						} else if (!found) {
-							// Check if the list type is a white list and ignore the registration if this country is not on the
-							// allow list
-							if(UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(WHITE_LIST)) {
-								LOGGER.warn("Self-registration failed because country " + country
+						} else {
+							// Check if the list type is a white list and ignore the registration if this country is not on the allow list
+							if (UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(CountryListType.whitelist.name())) {
+								String message = "Self-registration failed because country " + country
 										+ " is not on the whitelist. Suspected bot submission for "
-										+ bean.getUser()
-												.getContact()
-												.getName()
-										+ " - " + bean.getUser()
-												.getContact()
-												.getEmail1());
+										+ bean.getUser().getContact().getName() + " - " + bean.getUser().getContact().getEmail1();
+								LOGGER.warn(message);
+								
+								// Record security event
+								SecurityUtil.log("GEO IP Block", message);
+								
 								bean.setPassSilently(Boolean.TRUE);
 								return new ServerSideActionResult<>(bean);
 							}
