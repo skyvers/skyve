@@ -217,6 +217,8 @@ public class ArchiveRetriever {
         // If this throws an ArithmeticException this record is longer than Integer.MAX_VALUE (2GB)
         // and can't be handled with a plain old byte array. The data on disk and in the index is
         // fine, but this method isn't written to handle that much data and will need to be updated
+        // This is unlikely to ever be an issue, as a string is capped at Integer.MAX_VALUE bytes
+        // anyway
         int lengthAsInt = Math.toIntExact(length);
 
         try (RandomAccessFile raf = new RandomAccessFile(filePath.toFile(), READ_ONLY)) {

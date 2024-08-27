@@ -120,7 +120,7 @@ public class IndexArchivesJob extends CancellableJob {
      * Find (via CDI) a DocumentConverter instance that can handle the requested module+document (as determined
      * by calling <em>DocumentConverter.handles(String, String)</em> on available instances.
      * <p>
-     * If more than one DocumentConverter instance can handle the document type the particular instance 
+     * If more than one DocumentConverter instance can handle the document type the particular instance
      * which is returned is undefined.
      * 
      * @return An optional containing a suitable DocumentConverter, or an empty option if no suitable converter is found.
@@ -278,10 +278,16 @@ public class IndexArchivesJob extends CancellableJob {
             doc.add(new StoredField(OFFSET_FIELD, offset));
             doc.add(new StoredField(LENGTH_FIELD, lineRecord.length()));
             doc.add(new StringField(DOC_TYPE_FIELD, docType, Store.YES));
-            iwriter.addDocument(doc);
+
+            // Using 'Update' incase this doc/bizId has been exported twice
+            iwriter.updateDocument(bizIdTerm(entryBean), doc);
 
             // Record progress through the file
             updateProgress(fileName, lineRecord.end(), iwriter);
+        }
+
+        private Term bizIdTerm(Bean bean) {
+            return new Term(Bean.DOCUMENT_ID, bean.getBizId());
         }
 
         /**
