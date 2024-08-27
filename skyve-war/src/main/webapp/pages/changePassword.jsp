@@ -62,7 +62,7 @@
     
  	// Check if password is breached
     if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
-        passwordChangeErrorMessage = Util.i18n("warning.breachedPassword.jsp", locale);
+        passwordChangeErrorMessage = Util.i18n("warning.breachedPasswordConfirm", locale);
         session.setAttribute("warningShown", Boolean.TRUE);
     }
 	// This is a postback, process it and move on
@@ -109,11 +109,11 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+		<script type="text/javascript" src="skyve/prime/skyve-min.js"></script>
 		
 		<!-- Password strength estimator -->
-		<script type="text/javascript" src="strength-indicator/zxcvbn.js"></script>
-		<script type="text/javascript" src="strength-indicator/util.js"></script>
-		<link rel="stylesheet" type="text/css" href="strength-indicator/strength-indicator.css"></link>
+		<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>
+		<link type="text/css" rel="stylesheet" href="zxcvbn/strength-bar-min.css"/>
 		
 		<script type="text/javascript">
 			<!--
@@ -178,12 +178,12 @@
 			        var result = zxcvbn(val);
 			        
 					// Update progress bar styling
-			        progressBar.style.width = progressBarPower[result.score];
-			        progressBar.style.backgroundColor = progressBarColour[result.score];
+			        progressBar.style.width = SKYVE.Util.progressBarPower[result.score];
+			        progressBar.style.backgroundColor = SKYVE.Util.progressBarColour[result.score];
 
 			        // Update the text indicators
 			        if (val !== "") {
-			            strength.innerHTML = "Strength: <strong>" + passwordStrength[result.score] + "</strong>";
+			            strength.innerHTML = "Strength: <strong>" + SKYVE.Util.passwordStrength[result.score] + "</strong>";
 
 			            // Show/hide the warning and suggestions
 			            if (result.feedback.warning) {
