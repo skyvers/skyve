@@ -58,6 +58,7 @@ import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -332,7 +333,8 @@ public class WebUtil {
 					HttpServletRequest request = EXT.getHttpServletRequest();
 					String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
 					Util.LOGGER.info("Checking country for IP " + clientIPAddress);
-					Optional<String> countryCode = new GeoIPService().getCountryCodeForIP(clientIPAddress);
+			        GeoIPService geoIPService = CDI.current().select(GeoIPService.class).get();
+					Optional<String> countryCode = geoIPService.getCountryCodeForIP(clientIPAddress);
 					if (countryCode.isPresent()) {
 						String country = countryCode.get();
 						Util.LOGGER.info("Password reset request from country " + country);
