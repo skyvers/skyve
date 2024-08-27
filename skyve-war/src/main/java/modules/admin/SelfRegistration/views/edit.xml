@@ -21,7 +21,7 @@
 				]]>
 			</blurb>
 		</vbox>
-		<vbox border="true" borderTitle="admin.selfRegistration.edit.userDetails.borderTitle">
+		<vbox widgetId="userDetailsFirstPart">
 			<form>
 				<column responsiveWidth="2" />
 				<column responsiveWidth="6" />
@@ -85,85 +85,71 @@
 					</item>
 				</row>
 			</form>
-			<form widgetId="widNewPassword">
-				<column responsiveWidth="2" />
-				<column responsiveWidth="6" />
-				<row>
-					<item required="true" showHelp="false">
-						<password binding="user.password" >
-							<onChangedHandlers>
-								<rerender clientValidation="false">
-									<properties>
-										<c:property key="update">widNewPassword</c:property>
-									</properties>
-								</rerender>
-							</onChangedHandlers>
-						</password>
-					</item>
-				</row>
-				<row>
-					<item required="true" showHelp="false">
-						<password binding="confirmPassword" />
-					</item>
-				</row>
-			</form>
-			<form>
-				<column responsiveWidth="2" />
-				<column responsiveWidth="6" />
-				<row>
-					<item>
-						<spacer />
-					</item>
-					<item>
-						<blurb escape="false" sanitise="none" visible="showGoogleRecaptcha">
-							<![CDATA[
-								<script src='https://www.google.com/recaptcha/api.js'></script>
-								<table>
-									<tr>
-										<td style="width:50%" />
-										<td>
-											<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
-										</td>
-										<td style="width:50%" />
-									</tr>
-								</table>
-							]]>
-						</blurb>
-					</item>
-				</row>
-				<row>
-					<item>
-						<spacer />
-					</item>
-					<item>
-						<blurb escape="false" sanitise="none" visible="showCloudflareTurnstile">
-							<![CDATA[
-								<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
-								<table>
-									<tr>
-										<td style="width:50%" />
-										<td>
-											<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
-										</td>
-										<td style="width:50%" />
-									</tr>
-								</table>
-							]]>
-						</blurb>
-					</item>
-				</row>
-				<row>
-					<item>
-						<spacer />
-					</item>
-					<item>
-						<button action="Register" />
-					</item>
-				</row>
-			</form>
 		</vbox>
+		
+		<!-- see selfRegister.xhtml for newPassword -->
+		
+		<form widgetId="userDetailsLastPart">
+			<column responsiveWidth="2" />
+			<column responsiveWidth="6" />
+			<row>
+				<item required="true" showHelp="false">
+					<password binding="confirmPassword" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item>
+					<blurb escape="false" sanitise="none" visible="showGoogleRecaptcha">
+						<![CDATA[
+							<script src='https://www.google.com/recaptcha/api.js'></script>
+							<table>
+								<tr>
+									<td style="width:50%" />
+									<td>
+										<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
+									</td>
+									<td style="width:50%" />
+								</tr>
+							</table>
+						]]>
+					</blurb>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item>
+					<blurb escape="false" sanitise="none" visible="showCloudflareTurnstile">
+						<![CDATA[
+							<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+							<table>
+								<tr>
+									<td style="width:50%" />
+									<td>
+										<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
+									</td>
+									<td style="width:50%" />
+								</tr>
+							</table>
+						]]>
+					</blurb>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item>
+					<button action="Register" />
+				</item>
+			</row>
+		</form>
 	</vbox>
-	<actions>
+	<actions widgetId="actions">
 		<action className="Register" name="Register" displayName="admin.selfRegistration.actions.register.displayName"
 			inActionPanel="false" />
 	</actions>

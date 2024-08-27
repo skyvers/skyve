@@ -3,7 +3,6 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
 
-<%@ page import="modules.admin.domain.Configuration"%>
 <%@ page import="org.skyve.EXT"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
@@ -46,24 +45,25 @@
 	
     HttpSession session = request.getSession();
     
-    Boolean warningShown = null;
+    Boolean breachedPasswordWarningShown = null;
     if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
     	// Check if the 'Password Breached' warning has been shown before for this password
     	if (newPasswordValue != null) {
-    		warningShown = (Boolean) session.getAttribute("warningShown");
-			String warningHashedPassword = (String) session.getAttribute("warningHashedPassword");
-			if (warningShown == null || warningHashedPassword == null || !EXT.checkPassword(newPasswordValue, warningHashedPassword)) {
-		        warningShown = Boolean.FALSE;
-		        session.setAttribute("warningShown", warningShown);
-		        session.setAttribute("warningHashedPassword", EXT.hashPassword(newPasswordValue));
+    		breachedPasswordWarningShown = (Boolean) session.getAttribute("breachedPasswordWarningShown");
+			String hashedPreviousPasswordPrefix = (String) session.getAttribute("hashedPreviousPasswordPrefix");
+			String hashedNewPasswordPrefix = HIBPPasswordValidator.hashPassword(newPasswordValue).substring(0, 5);
+			if (breachedPasswordWarningShown == null || hashedPreviousPasswordPrefix == null || !hashedNewPasswordPrefix.equals(hashedPreviousPasswordPrefix)) {
+		        breachedPasswordWarningShown = Boolean.FALSE;
+		        session.setAttribute("breachedPasswordWarningShown", breachedPasswordWarningShown);
+		        session.setAttribute("hashedPreviousPasswordPrefix", hashedNewPasswordPrefix);
 		    }
     	}
     }	
     
  	// Check if password is breached
-    if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
-        passwordChangeErrorMessage = Util.i18n("warning.breachedPassword.jsp", locale);
-        session.setAttribute("warningShown", Boolean.TRUE);
+    if (Boolean.FALSE.equals(breachedPasswordWarningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
+        passwordChangeErrorMessage = Util.i18n("warning.breachedPasswordConfirm", locale);
+        session.setAttribute("breachedPasswordWarningShown", Boolean.TRUE);
     }
 	// Check if missing token
     else if (passwordResetToken == null) {
@@ -72,8 +72,8 @@
 	// This is a postback, process it and move on
 	else if ((newPasswordValue != null) && (confirmPasswordValue != null) && (captcha != null)) {
 		// Remove warning flag after processing (if existing)
-		session.removeAttribute("warningShown");
-		session.removeAttribute("warningHashedPassword");
+		session.removeAttribute("breachedPasswordWarningShown");
+		session.removeAttribute("hashedPreviousPasswordPrefix");
 
 		if (WebUtil.validateRecaptcha(captcha)) {
 			passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
@@ -124,6 +124,11 @@
 		<script type="text/javascript" src="semantic24/jquery.slim.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/form.min.js"></script>
 		<script type="text/javascript" src="semantic24/components/transition.min.js"></script>
+		<script type="text/javascript" src="skyve/prime/skyve-min.js"></script>
+		
+		<!-- Password strength estimator -->
+		<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>
+		<link type="text/css" rel="stylesheet" href="zxcvbn/strength-bar-min.css"/>
 		
 		<%-- Add script based on captcha type set --%>
 		<% if (googleRecaptchaUsed) { %>
@@ -172,6 +177,46 @@
 			        }
 			    });
 			});
+			
+			// Strength indicator
+			document.addEventListener('DOMContentLoaded', function() {
+				var password = document.getElementById('password');
+			    var progressBar = document.getElementById('progress-bar');
+			    var strength = document.getElementById('password-strength-text');
+			    var warning = document.getElementById('password-strength-warning');
+			    var suggestions = document.getElementById('password-strength-suggestions');
+
+			    password.addEventListener('input', function() {
+			        var val = password.value;
+			        var result = zxcvbn(val);
+			        
+					// Update progress bar styling
+			        progressBar.style.width = SKYVE.Util.progressBarPower[result.score];
+			        progressBar.style.backgroundColor = SKYVE.Util.progressBarColour[result.score];
+
+			        // Update the text indicators
+			        if (val !== "") {
+			            strength.innerHTML = "Strength: <strong>" + SKYVE.Util.passwordStrength[result.score] + "</strong>";
+
+			            // Show/hide the warning and suggestions
+			            if (result.feedback.warning) {
+			                warning.innerHTML = result.feedback.warning;
+			            } else {
+			                warning.innerHTML = "";
+			            }
+
+			            if (result.feedback.suggestions.length > 0) {
+			                suggestions.innerHTML = result.feedback.suggestions.join(' ');
+			            } else {
+			                suggestions.innerHTML = "";
+			            }
+			        } else {
+			            strength.innerHTML = "";
+			            warning.innerHTML = "";
+			            suggestions.innerHTML = "";
+			        }
+			    });
+			});
 			-->
 		</script>
 	</head>
@@ -197,8 +242,14 @@
 		    			<div class="field">
 		                    <div class="ui left icon input">
 		                        <i class="lock icon"></i>
-		                        <input type="password" name="<%=newPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.newPassword.label", locale)%>" />
+		                        <input type="password" name="<%=newPasswordFieldName%>" id="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.newPassword.label", locale)%>" />
 		                    </div>
+		                    <div class="progress-bar-container">
+					            <div id="progress-bar"></div>
+					        </div>
+							<div class="feedback" id="password-strength-text"></div>
+							<div class="feedback" id="password-strength-warning"></div>
+							<div class="feedback" id="password-strength-suggestions"></div>
 		                </div>
 		                <div class="field">
 		                    <div class="ui left icon input">

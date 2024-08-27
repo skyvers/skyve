@@ -46,6 +46,15 @@
             <displayName>admin.selfRegistration.association.user.displayName</displayName>
             <documentName>User</documentName>
         </association>
+        <text name="previouslyAttemptedPassword" persistent="false" audited="false" trackChanges="false" sensitivity="secret">
+			<documentation><![CDATA[
+				If checks for breached passwords are enabled, this field is used to track whether a warning has been displayed for this password.
+				A user may use a 'breached' password once they confirm by re-submitting.
+				Implementation is similar to that in changePassword.jsp & resetPassword.jsp.
+			]]></documentation>
+			<displayName>Previously Attempted Password</displayName>
+			<length>255</length>
+		</text>
     </attributes>
     <conditions>
     	<condition name="confirmEmailInvalid" usage="view">

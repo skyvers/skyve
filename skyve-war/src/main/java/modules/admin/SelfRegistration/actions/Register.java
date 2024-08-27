@@ -11,6 +11,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.cdi.GeoIpService;
+import org.skyve.impl.security.HIBPPasswordValidator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -18,6 +19,7 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.SecurityUtil;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +120,20 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				bean.getUser().getContact().setContactType(Contact.ContactType.person);
 
 				String unencodedPassword = bean.getUser().getPassword();
+
+				// If enabled, evaluate if password is breached
+				if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
+					if (HIBPPasswordValidator.isPasswordPwned(unencodedPassword)) {
+						// If user hasn't been already warned about this password
+						if (bean.getPreviouslyAttemptedPassword() == null
+								|| !EXT.checkPassword(unencodedPassword, bean.getPreviouslyAttemptedPassword())) {
+							// Warn user
+							bean.setPreviouslyAttemptedPassword(EXT.hashPassword(unencodedPassword));
+							webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPasswordConfirm"));
+							return new ServerSideActionResult<>(bean);
+						}
+					}
+				}
 				try {
 					// validate the password and confirm password match
 					bean.validateConfirmPassword();
