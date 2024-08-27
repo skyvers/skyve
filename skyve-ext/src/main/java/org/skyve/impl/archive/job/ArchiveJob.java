@@ -18,12 +18,14 @@ public class ArchiveJob extends CancellableJob {
 
         for (CancellableJob currentJob : subJobs) {
 
+            runningJob = Optional.of(currentJob);
+
             if (isCancelled()) {
                 break;
             }
 
-            runningJob = Optional.of(currentJob);
             execute(currentJob);
+
             runningJob = Optional.empty();
         }
     }
@@ -31,8 +33,15 @@ public class ArchiveJob extends CancellableJob {
     @Override
     public String cancel() {
 
-        return runningJob.map(CancellableJob::cancel)
-                         .orElse("Unable to cancel");
+        super.cancel();
+
+        if (runningJob.isPresent()) {
+            return runningJob.map(CancellableJob::cancel)
+                             .orElse(null);
+        }
+
+        // No sub job is running, cancel self only
+        return null;
     }
 
 }
