@@ -2,9 +2,7 @@
 
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
-<%@ page import="org.apache.commons.codec.binary.Base64"%>
 
-<%@ page import="modules.admin.domain.Configuration"%>
 <%@ page import="org.skyve.EXT"%>
 <%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
 <%@ page import="org.skyve.impl.web.UserAgent"%>
@@ -46,30 +44,31 @@
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
 	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
 	
-	Boolean warningShown = null;
-	if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
-		// Check if the 'Password Breached' warning has been shown before for this password
-		if (newPasswordValue != null) {			
-			warningShown = (Boolean) session.getAttribute("warningShown");
-			String warningHashedPassword = (String) session.getAttribute("warningHashedPassword");
-		    if (warningShown == null || warningHashedPassword == null || !EXT.checkPassword(newPasswordValue, warningHashedPassword)) {
-		        warningShown = Boolean.FALSE;
-		        session.setAttribute("warningShown", warningShown);
-		        session.setAttribute("warningHashedPassword", EXT.hashPassword(newPasswordValue));
+	Boolean breachedPasswordWarningShown = null;
+    if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
+    	// Check if the 'Password Breached' warning has been shown before for this password
+    	if (newPasswordValue != null) {
+    		breachedPasswordWarningShown = (Boolean) session.getAttribute("breachedPasswordWarningShown");
+			String hashedPreviousPasswordPrefix = (String) session.getAttribute("hashedPreviousPasswordPrefix");
+			String hashedNewPasswordPrefix = HIBPPasswordValidator.hashPassword(newPasswordValue).substring(0, 5);
+			if (breachedPasswordWarningShown == null || hashedPreviousPasswordPrefix == null || !hashedNewPasswordPrefix.equals(hashedPreviousPasswordPrefix)) {
+				breachedPasswordWarningShown = Boolean.FALSE;
+		        session.setAttribute("breachedPasswordWarningShown", breachedPasswordWarningShown);
+		        session.setAttribute("hashedPreviousPasswordPrefix", hashedNewPasswordPrefix);
 		    }
-		}
-	}
+    	}
+    }
     
  	// Check if password is breached
-    if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
+    if (Boolean.FALSE.equals(breachedPasswordWarningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
         passwordChangeErrorMessage = Util.i18n("warning.breachedPasswordConfirm", locale);
-        session.setAttribute("warningShown", Boolean.TRUE);
+        session.setAttribute("breachedPasswordWarningShown", Boolean.TRUE);
     }
 	// This is a postback, process it and move on
 	else if ((oldPasswordValue != null) && (newPasswordValue != null) && (confirmPasswordValue != null)) {
 		// Remove warning flag after processing (if existing)
-		session.removeAttribute("warningShown");
-		session.removeAttribute("warningHashedPassword");
+		session.removeAttribute("breachedPasswordWarningShown");
+		session.removeAttribute("hashedPreviousPasswordPrefix");
 		
 		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, oldPasswordValue, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {

@@ -3,7 +3,6 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
 
-<%@ page import="modules.admin.domain.Configuration"%>
 <%@ page import="org.skyve.EXT"%>
 <%@ page import="org.skyve.impl.util.UtilImpl"%>
 <%@ page import="org.skyve.impl.security.HIBPPasswordValidator"%>
@@ -46,24 +45,25 @@
 	
     HttpSession session = request.getSession();
     
-    Boolean warningShown = null;
+    Boolean breachedPasswordWarningShown = null;
     if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
     	// Check if the 'Password Breached' warning has been shown before for this password
     	if (newPasswordValue != null) {
-    		warningShown = (Boolean) session.getAttribute("warningShown");
-			String warningHashedPassword = (String) session.getAttribute("warningHashedPassword");
-			if (warningShown == null || warningHashedPassword == null || !EXT.checkPassword(newPasswordValue, warningHashedPassword)) {
-		        warningShown = Boolean.FALSE;
-		        session.setAttribute("warningShown", warningShown);
-		        session.setAttribute("warningHashedPassword", EXT.hashPassword(newPasswordValue));
+    		breachedPasswordWarningShown = (Boolean) session.getAttribute("breachedPasswordWarningShown");
+			String hashedPreviousPasswordPrefix = (String) session.getAttribute("hashedPreviousPasswordPrefix");
+			String hashedNewPasswordPrefix = HIBPPasswordValidator.hashPassword(newPasswordValue).substring(0, 5);
+			if (breachedPasswordWarningShown == null || hashedPreviousPasswordPrefix == null || !hashedNewPasswordPrefix.equals(hashedPreviousPasswordPrefix)) {
+		        breachedPasswordWarningShown = Boolean.FALSE;
+		        session.setAttribute("breachedPasswordWarningShown", breachedPasswordWarningShown);
+		        session.setAttribute("hashedPreviousPasswordPrefix", hashedNewPasswordPrefix);
 		    }
     	}
     }	
     
  	// Check if password is breached
-    if (Boolean.FALSE.equals(warningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
+    if (Boolean.FALSE.equals(breachedPasswordWarningShown) && newPasswordValue != null && HIBPPasswordValidator.isPasswordPwned(newPasswordValue)) {
         passwordChangeErrorMessage = Util.i18n("warning.breachedPasswordConfirm", locale);
-        session.setAttribute("warningShown", Boolean.TRUE);
+        session.setAttribute("breachedPasswordWarningShown", Boolean.TRUE);
     }
 	// Check if missing token
     else if (passwordResetToken == null) {
@@ -72,8 +72,8 @@
 	// This is a postback, process it and move on
 	else if ((newPasswordValue != null) && (confirmPasswordValue != null) && (captcha != null)) {
 		// Remove warning flag after processing (if existing)
-		session.removeAttribute("warningShown");
-		session.removeAttribute("warningHashedPassword");
+		session.removeAttribute("breachedPasswordWarningShown");
+		session.removeAttribute("hashedPreviousPasswordPrefix");
 
 		if (WebUtil.validateRecaptcha(captcha)) {
 			passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
