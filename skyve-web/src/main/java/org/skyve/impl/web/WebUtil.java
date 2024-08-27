@@ -29,7 +29,7 @@ import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.cdi.GeoIpService;
+import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -325,59 +325,67 @@ public class WebUtil {
 			// set reset password token for all users with the same email address across all customers
 			List<PersistentBean> users = q.beanResults();
 			if (! users.isEmpty()) {
-				// if configured, check the country and if it is on the blacklist/whitelist
-				boolean geoIpBlocked = false;
-				String geoIpMessage = null;
+				// If configured, check the country and if it is on the blacklist/whitelist
+				boolean geoIPBlocked = false;
+				String geoIPMessage = null;
 				if (UtilImpl.IP_INFO_TOKEN != null) {
 					HttpServletRequest request = EXT.getHttpServletRequest();
-					String clientIpAddress = SecurityUtil.getSourceIpAddress(request);
-					Util.LOGGER.info("Checking country for ip " + clientIpAddress);
-					Optional<String> countryCode = new GeoIpService().getCountryCodeForIp(clientIpAddress); // TODO
+					String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
+					Util.LOGGER.info("Checking country for IP " + clientIPAddress);
+					Optional<String> countryCode = new GeoIPService().getCountryCodeForIP(clientIPAddress);
 					if (countryCode.isPresent()) {
 						String country = countryCode.get();
 						Util.LOGGER.info("Password reset request from country " + country);
-						if(UtilImpl.COUNTRY_CODES != null) {
+						if (UtilImpl.COUNTRY_CODES != null) {
 							List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("\\|"));
-							// is this country on the list?
-							boolean found = countryList.stream()
-									.anyMatch(i -> i.equalsIgnoreCase(country));
-							if (found) {
-								// check if the list type is a blacklist and ignore the reset if this country is on the deny list
-								if (UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(AppConstants.COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE)) {
-									geoIpMessage = "Password reset request failed because country " + country
-											+ " is on the blacklist. Suspected bot submission for user with email " + email;
-									Util.LOGGER.warning(geoIpMessage);
+							// Is this a blacklist or a whitelist?
+							switch (UtilImpl.COUNTRY_LIST_TYPE) {
+								// Blacklist
+								case AppConstants.COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE:
+									// If country is on the list
+									if (countryList.stream()
+											.anyMatch(s -> s.equalsIgnoreCase(country))) {
+										geoIPMessage = "Password reset request failed because country " + country
+												+ " is on the blacklist. Suspected bot submission for user with email " + email;
+										Util.LOGGER.warning(geoIPMessage);
 
-									// Record GEO IP block (to be recorded in security log)
-									geoIpBlocked = true;
-								}
-							} else {
-								// check if the list type is a white list and ignore the reset if this country is not on the allow list
-								if (UtilImpl.COUNTRY_LIST_TYPE.equalsIgnoreCase(AppConstants.COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE)) {
-									geoIpMessage = "Password reset request failed because country " + country
-											+ " is not on the whitelist. Suspected bot submission for user with email " + email;
-									Util.LOGGER.warning(geoIpMessage);
+										// Record GEO IP block (to be recorded in security log)
+										geoIPBlocked = true;
+									}
+									break;
+								// Whitelist
+								case AppConstants.COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE:
+									// If country is not on the list
+									if (!countryList.stream()
+											.anyMatch(s -> s.equalsIgnoreCase(country))) {
+										geoIPMessage = "Password reset request failed because country " + country
+												+ " is not on the whitelist. Suspected bot submission for user with email " + email;
+										Util.LOGGER.warning(geoIPMessage);
 
-									// Record GEO IP block (to be recorded in security log)
-									geoIpBlocked = true;
-								}
+										// Record GEO IP block (to be recorded in security log)
+										geoIPBlocked = true;
+									}
+									break;
+								// Invalid
+								default:
+									Util.LOGGER.warning("GeoIP country list type is invalid - bypassing check");
 							}
 						}
 					}
 				}
-				// if blocked - create security log entries for users & return
-				if (geoIpBlocked) {
-					for (PersistentBean user: users) {
+				// If region is blocked - create security log entries for users & pass silently
+				if (geoIPBlocked) {
+					for (PersistentBean user : users) {
 						// Record security event for this user
 						String userName = (String) Binder.get(user, AppConstants.USER_NAME_ATTRIBUTE_NAME);
 						User metaUser = CORE.getRepository().retrieveUser(userName);
 						if (metaUser == null) {
 							Util.LOGGER.warning("Failed to retrieve user with username " + userName + ", and therefore cannot create security log entry.");
 						} else {
-							SecurityUtil.log("GEO IP Block", geoIpMessage, metaUser);
+							SecurityUtil.log("GEO IP Block", geoIPMessage, metaUser);
 						}
 					}
-					return; // pass silently
+					return; // Pass silently
 				}
 				
 				PersistentBean firstUser = null;

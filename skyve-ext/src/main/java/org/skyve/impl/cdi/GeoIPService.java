@@ -17,7 +17,7 @@ import net.minidev.json.parser.JSONParser;
  * country for a visiting IP.
  */
 @ApplicationScoped
-public class GeoIpService {
+public class GeoIPService {
 
 	private static final String IPINFO_API_URL = "https://ipinfo.io/%s/json?token=%s";
 
@@ -28,7 +28,7 @@ public class GeoIpService {
 	 * @return The 2-letter country-code, or an empty optional if one could not be returned
 	 */
 	@SuppressWarnings("static-method")
-	public Optional<String> getCountryCodeForIp(final String ipAddress) {
+	public Optional<String> getCountryCodeForIP(final String ipAddress) {
 		HttpClient client = HttpClient.newHttpClient();
 		String token = UtilImpl.IP_INFO_TOKEN;
 		String requestUrl = String.format(IPINFO_API_URL, ipAddress, token);
