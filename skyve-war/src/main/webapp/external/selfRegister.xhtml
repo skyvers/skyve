@@ -25,7 +25,6 @@
 			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
 			<ui:param name="showLogout" value="false" />
 			<ui:define name="head">
-			<script type="text/javascript" src="skyve/prime/skyve-min.js"></script>
 			</ui:define>
 			<ui:define name="body">
 				<s:conversation managedBean="skyvePublic" />
@@ -51,7 +50,7 @@
 						update="@form"
 						widgetId="postRegister" />
 								
-					<p:panel id="outerPanelId" style="border: none;" rendered="#{!skyvePublic.currentBean['registrationComplete']}">
+					<h:panelGroup id="outerPanelId" style="border: none;" rendered="#{!skyvePublic.currentBean['registrationComplete']}">
 						<!-- If you are an existing user, sign in -->
 						<s:view module="#{skyvePublic.bizModuleParameter}"
 							document="#{skyvePublic.bizDocumentParameter}"
@@ -71,10 +70,6 @@
 									widgetId="userDetailsFirstPart"
 									childStyle="padding: 0px;"
 									childStyleClass="ui-g-12" />
-									
-								<!-- Password strength estimator -->
-								<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>
-								<link type="text/css" rel="stylesheet" href="zxcvbn/strength-bar-min.css"/>
 									
 								<!-- New password -->
 								<h:panelGroup childStyleClass="ui-g-12" widgetId="newPassword" childStyle="padding: 0px;" update="@form">
@@ -114,9 +109,13 @@
 									childStyleClass="ui-g-12" />
 							</div>
 						</p:panel>
-					</p:panel>
+					</h:panelGroup>
 				</s:csrfForm>
 				
+				<!-- Password strength estimator -->
+				<link type="text/css" rel="stylesheet" href="zxcvbn/strength-bar-min.css"/>
+				<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>
+				<script type="text/javascript" src="skyve/prime/skyve-min.js"></script>
 				<script type="text/javascript">
                     document.addEventListener('DOMContentLoaded', function() {
                         var password = document.getElementById('newPassword');
