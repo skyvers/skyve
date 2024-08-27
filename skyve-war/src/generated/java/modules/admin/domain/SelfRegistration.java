@@ -58,6 +58,9 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	/** @hidden */
 	public static final String userPropertyName = "user";
 
+	/** @hidden */
+	public static final String previouslyAttemptedPasswordPropertyName = "previouslyAttemptedPassword";
+
 	/**
 	 * Activation Url
 	 **/
@@ -101,6 +104,15 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 * The new user to create for this registration
 	 **/
 	private UserExtension user = null;
+
+	/**
+	 * Previously Attempted Password
+	 * <br/>
+	 * If checks for breached passwords are enabled, this field is used to track whether a warning has been displayed for this password.
+				A user may use a 'breached' password once they confirm by re-submitting.
+				Implementation is similar to that in changePassword.jsp & resetPassword.jsp.
+	 **/
+	private String previouslyAttemptedPassword;
 
 	@Override
 	@XmlTransient
@@ -268,6 +280,23 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 			preset(userPropertyName, user);
 			this.user = user;
 		}
+	}
+
+	/**
+	 * {@link #previouslyAttemptedPassword} accessor.
+	 * @return	The value.
+	 **/
+	public String getPreviouslyAttemptedPassword() {
+		return previouslyAttemptedPassword;
+	}
+
+	/**
+	 * {@link #previouslyAttemptedPassword} mutator.
+	 * @param previouslyAttemptedPassword	The new value.
+	 **/
+	@XmlElement
+	public void setPreviouslyAttemptedPassword(String previouslyAttemptedPassword) {
+		this.previouslyAttemptedPassword = previouslyAttemptedPassword;
 	}
 
 	/**
