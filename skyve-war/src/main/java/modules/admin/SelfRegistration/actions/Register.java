@@ -1,11 +1,17 @@
 package modules.admin.SelfRegistration.actions;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.security.HIBPPasswordValidator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
@@ -13,11 +19,13 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Group.GroupExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
@@ -33,6 +41,9 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
+	@Inject
+	private transient GeoIPService geoIPService;
+	
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -51,7 +62,63 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 					throw new ValidationException("Captcha is not valid");
 				}
 			}
+			// If configured, check the country and if it is on the blacklist/whitelist
+			if (UtilImpl.IP_INFO_TOKEN != null) {
+				HttpServletRequest request = EXT.getHttpServletRequest();
+				String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
+				LOGGER.info("Checking country for IP " + clientIPAddress);
+				Optional<String> countryCode = geoIPService.getCountryCodeForIP(clientIPAddress);
+				if (countryCode.isPresent()) {
+					String country = countryCode.get();
+					LOGGER.info("Registration request from country " + country);
+					if (UtilImpl.COUNTRY_CODES != null) {
+						List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("\\|"));
+						// Is this a blacklist or a whitelist?
+						switch (UtilImpl.COUNTRY_LIST_TYPE) {
+							// Blacklist
+							case AppConstants.COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE:
+								// If country is on the list
+								if (countryList.stream()
+										.anyMatch(s -> s.equalsIgnoreCase(country))) {
+									String message = "Self-registration failed because country " + country
+											+ " is on the blacklist. Suspected bot submission for "
+											+ bean.getUser().getContact().getName() + " - " + bean.getUser().getContact().getEmail1();
+									LOGGER.warn(message);
 
+									// Record security event
+									SecurityUtil.log("GEO IP Block", message);
+
+									// Silently pass
+									bean.setPassSilently(Boolean.TRUE);
+									return new ServerSideActionResult<>(bean);
+								}
+								break;
+							// Whitelist
+							case AppConstants.COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE:
+								// If country is not on the list
+								if (!countryList.stream()
+										.anyMatch(s -> s.equalsIgnoreCase(country))) {
+									String message = "Self-registration failed because country " + country
+											+ " is not on the whitelist. Suspected bot submission for "
+											+ bean.getUser().getContact().getName() + " - " + bean.getUser().getContact().getEmail1();
+									LOGGER.warn(message);
+
+									// Record security event
+									SecurityUtil.log("GEO IP Block", message);
+
+									// Silently pass
+									bean.setPassSilently(Boolean.TRUE);
+									return new ServerSideActionResult<>(bean);
+								}
+								break;
+							// Invalid
+							default:
+								Util.LOGGER.warning("GeoIP country list type is invalid - bypassing check");
+						}
+					}
+				}
+			}
+			
 			// validate the email and confirm email match
 			bean.validateConfirmEmail();
 
@@ -131,7 +198,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 		}
 		return new ServerSideActionResult<>(bean);
 	}
-
+	
 	private static void encodePassword(User user) throws Exception {
 		user.setPassword(EXT.hashPassword(user.getPassword()));
 	}

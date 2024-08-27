@@ -7,6 +7,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,7 +29,9 @@ import org.skyve.util.Util;
  * 
  * @depend - - - MapType
  * @depend - - - CaptchaType
+ * @depend - - - CountryListType
  * @depend - - - BackupType
+ * @navhas n countryCodes 0..n Generic
  * @stereotype "transient"
  */
 @XmlType
@@ -106,6 +109,15 @@ public abstract class Startup extends AbstractTransientBean {
 
 	/** @hidden */
 	public static final String apiCloudflareTurnstileSecretKeyPropertyName = "apiCloudflareTurnstileSecretKey";
+
+	/** @hidden */
+	public static final String apiIpInfoTokenPropertyName = "apiIpInfoToken";
+
+	/** @hidden */
+	public static final String countryListTypePropertyName = "countryListType";
+
+	/** @hidden */
+	public static final String countryCodesPropertyName = "countryCodes";
 
 	/** @hidden */
 	public static final String accountAllowUserSelfRegistrationPropertyName = "accountAllowUserSelfRegistration";
@@ -261,6 +273,78 @@ public abstract class Startup extends AbstractTransientBean {
 			CaptchaType result = null;
 
 			for (CaptchaType value : values()) {
+				if (value.toLocalisedDescription().equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Country List Type
+	 * <br/>
+	 * This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.
+	 **/
+	@XmlEnum
+	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+	public static enum CountryListType implements Enumeration {
+		blacklist("blacklist", "Blacklist"),
+		whitelist("whitelist", "Whitelist");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues = Stream.of(values()).map(CountryListType::toDomainValue).collect(Collectors.toUnmodifiableList());
+
+		private CountryListType(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toLocalisedDescription() {
+			return Util.i18n(description);
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static CountryListType fromCode(String code) {
+			CountryListType result = null;
+
+			for (CountryListType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static CountryListType fromLocalisedDescription(String description) {
+			CountryListType result = null;
+
+			for (CountryListType value : values()) {
 				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
@@ -489,6 +573,25 @@ public abstract class Startup extends AbstractTransientBean {
 	 * Cloudflare Turnstile secret key can be specified here to enable server-side validation for stronger security.
 	 **/
 	private String apiCloudflareTurnstileSecretKey;
+
+	/**
+	 * IPInfo Token
+	 * <br/>
+	 * By supplying an IPinfo API token, you can allow/disallow countries for registration and password reset.
+	 **/
+	private String apiIpInfoToken;
+
+	/**
+	 * Country List Type
+	 * <br/>
+	 * This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.
+	 **/
+	private CountryListType countryListType;
+
+	/**
+	 * Country Codes
+	 **/
+	private List<Generic> countryCodes = new ArrayList<>();
 
 	/**
 	 * Allow User Self Registration
@@ -946,6 +1049,101 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #apiIpInfoToken} accessor.
+	 * @return	The value.
+	 **/
+	public String getApiIpInfoToken() {
+		return apiIpInfoToken;
+	}
+
+	/**
+	 * {@link #apiIpInfoToken} mutator.
+	 * @param apiIpInfoToken	The new value.
+	 **/
+	@XmlElement
+	public void setApiIpInfoToken(String apiIpInfoToken) {
+		preset(apiIpInfoTokenPropertyName, apiIpInfoToken);
+		this.apiIpInfoToken = apiIpInfoToken;
+	}
+
+	/**
+	 * {@link #countryListType} accessor.
+	 * @return	The value.
+	 **/
+	public CountryListType getCountryListType() {
+		return countryListType;
+	}
+
+	/**
+	 * {@link #countryListType} mutator.
+	 * @param countryListType	The new value.
+	 **/
+	@XmlElement
+	public void setCountryListType(CountryListType countryListType) {
+		this.countryListType = countryListType;
+	}
+
+	/**
+	 * {@link #countryCodes} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<Generic> getCountryCodes() {
+		return countryCodes;
+	}
+
+	/**
+	 * {@link #countryCodes} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public Generic getCountryCodesElementById(String bizId) {
+		return getElementById(countryCodes, bizId);
+	}
+
+	/**
+	 * {@link #countryCodes} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setCountryCodesElementById(String bizId, Generic element) {
+		setElementById(countryCodes, element);
+	}
+
+	/**
+	 * {@link #countryCodes} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addCountryCodesElement(Generic element) {
+		return countryCodes.add(element);
+	}
+
+	/**
+	 * {@link #countryCodes} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addCountryCodesElement(int index, Generic element) {
+		countryCodes.add(index, element);
+	}
+
+	/**
+	 * {@link #countryCodes} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeCountryCodesElement(Generic element) {
+		return countryCodes.remove(element);
+	}
+
+	/**
+	 * {@link #countryCodes} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public Generic removeCountryCodesElement(int index) {
+		return countryCodes.remove(index);
+	}
+
+	/**
 	 * {@link #accountAllowUserSelfRegistration} accessor.
 	 * @return	The value.
 	 **/
@@ -1144,6 +1342,25 @@ public abstract class Startup extends AbstractTransientBean {
 	 */
 	public boolean isNotGoogleRecaptcha() {
 		return (! isGoogleRecaptcha());
+	}
+
+	/**
+	 * True when an IPinfo token has been set
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasIpInfoToken() {
+		return (getApiIpInfoToken() != null);
+	}
+
+	/**
+	 * {@link #isHasIpInfoToken} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasIpInfoToken() {
+		return (! isHasIpInfoToken());
 	}
 
 	/**

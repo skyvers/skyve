@@ -35,6 +35,12 @@
             <documentation>The date and time that this self registration was completed.</documentation>
             <displayName>admin.selfRegistration.registrationDate.displayName</displayName>
         </dateTime>
+        <boolean name="passSilently" persistent="false" audited="false" trackChanges="false" usage="view">
+			<documentation>Flag used when registration should pass but not actually create a user. 
+				Used for suspected bot registrations.</documentation>
+			<displayName>Silent Pass</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
         <association name="user" type="aggregation" required="true">
         	<documentation>The new user to create for this registration</documentation>
             <displayName>admin.selfRegistration.association.user.displayName</displayName>
@@ -61,7 +67,7 @@
     	</condition>	
         <condition name="registrationComplete">
             <description>Whether or not the registration process has finished.</description>
-            <expression><![CDATA[getUser() != null && getUser().isPersisted()]]></expression>
+            <expression><![CDATA[getUser() != null && getUser().isPersisted() || Boolean.TRUE.equals(passSilently)]]></expression>
         </condition>
         <condition name="selfRegistrationAllowed">
             <description>Whether or not self registration is allowed.</description>

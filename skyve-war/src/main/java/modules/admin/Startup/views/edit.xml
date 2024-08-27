@@ -120,8 +120,8 @@
 		</form>
 	</vbox>
 
-	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title">
-		<form responsiveWidth="12" widgetId="formSecurity">
+	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title" widgetId="formSecurity">
+		<form responsiveWidth="12">
 	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
@@ -183,7 +183,40 @@
 	        		</blurb>
 	        	</item>
 	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiIpInfoToken">
+	                	<onBlurHandlers>
+	                		<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity</c:property>
+	        					</properties>
+	        				</rerender>
+	                	</onBlurHandlers>
+	                	<onChangedHandlers>
+	                		<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity</c:property>
+	        					</properties>
+	        				</rerender>
+	                	</onChangedHandlers>
+	                </textField>
+	            </item>
+	        </row>
 	    </form>
+	    <vbox visible="hasIpInfoToken">
+		    <form responsiveWidth="12">
+		        <column responsiveWidth="3"/>
+		        <column/>
+		        <column responsiveWidth="2"/>
+		        <row>
+					<item>
+						<combo binding="countryListType"/>
+					</item>
+				</row>
+	        </form>
+	        <listMembership binding="countryCodes" candidatesHeading="Available Country Codes" membersHeading="Selected Country Codes" />
+        </vbox>
     </vbox>
 
     <vbox border="true" borderTitle="admin.startup.accountSettings.frameset.title">
