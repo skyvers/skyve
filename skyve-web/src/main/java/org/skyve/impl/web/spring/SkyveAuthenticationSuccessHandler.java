@@ -1,7 +1,9 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
+import java.util.Optional;
 
+import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.SecurityUtil;
@@ -13,7 +15,9 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
+import org.springframework.stereotype.Component;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,10 +41,24 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 										HttpServletResponse response,
 										Authentication authentication)
 	throws ServletException, IOException {
-		// Log the ip address of the user that has logged in
+		// Log the ip address and country of the user that has logged in
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(authentication.getPrincipal());
 		String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
-		UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress);
+		String ipInfoToken = UtilImpl.IP_INFO_TOKEN;
+		
+		// Check if the IpInfo token has been set so as to get the country code
+		if(ipInfoToken != null) {
+			final GeoIPService geoIPService = new GeoIPService();
+			Optional<String> countryCode = geoIPService.getCountryCodeForIP(clientIPAddress);
+			if (countryCode.isPresent()) {
+				String country = countryCode.get();
+				UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress + " in country: " + country);
+			} else {
+				UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress);
+			}
+		} else {
+			UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress);
+		}
 		
 		String redirectUrl = null;
 		RequestCache requestCache = new HttpSessionRequestCache();
