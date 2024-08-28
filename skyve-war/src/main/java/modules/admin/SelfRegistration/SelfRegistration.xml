@@ -35,11 +35,26 @@
             <documentation>The date and time that this self registration was completed.</documentation>
             <displayName>admin.selfRegistration.registrationDate.displayName</displayName>
         </dateTime>
+        <boolean name="passSilently" persistent="false" audited="false" trackChanges="false" usage="view">
+			<documentation>Flag used when registration should pass but not actually create a user. 
+				Used for suspected bot registrations.</documentation>
+			<displayName>Silent Pass</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
         <association name="user" type="aggregation" required="true">
         	<documentation>The new user to create for this registration</documentation>
             <displayName>admin.selfRegistration.association.user.displayName</displayName>
             <documentName>User</documentName>
         </association>
+        <text name="previouslyAttemptedPassword" persistent="false" audited="false" trackChanges="false" sensitivity="secret">
+			<documentation><![CDATA[
+				If checks for breached passwords are enabled, this field is used to track whether a warning has been displayed for this password.
+				A user may use a 'breached' password once they confirm by re-submitting.
+				Implementation is similar to that in changePassword.jsp & resetPassword.jsp.
+			]]></documentation>
+			<displayName>Previously Attempted Password</displayName>
+			<length>255</length>
+		</text>
     </attributes>
     <conditions>
     	<condition name="confirmEmailInvalid" usage="view">
@@ -52,7 +67,7 @@
     	</condition>	
         <condition name="registrationComplete">
             <description>Whether or not the registration process has finished.</description>
-            <expression><![CDATA[getUser() != null && getUser().isPersisted()]]></expression>
+            <expression><![CDATA[getUser() != null && getUser().isPersisted() || Boolean.TRUE.equals(passSilently)]]></expression>
         </condition>
         <condition name="selfRegistrationAllowed">
             <description>Whether or not self registration is allowed.</description>

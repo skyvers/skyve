@@ -85,6 +85,10 @@ public final class AppConstants {
 	public static final String USER_ATTRIBUTE_NAME = "user";
 	public static final String USER_NAME_ATTRIBUTE_NAME = "userName";
 	
+	// Enumerations
+	public static final String COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE = "blacklist";
+	public static final String COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE = "whitelist";
+
 	// Actions
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
 	public static final String RESEND_ACTIVATION_ACTION_NAME = "ResendActivation";

@@ -161,6 +161,29 @@
 			</description>
 			<length>200</length>
 		</text>
+		<text name="apiIpInfoToken" audited="false" sensitivity="secret">
+			<displayName>IPInfo Token</displayName>
+			<description>
+				<![CDATA[
+					By supplying an IPinfo API token, you can allow/disallow countries for registration and password reset.
+				]]>
+			</description>
+			<length>15</length>
+		</text>
+		<enum name="countryListType" audited="false" trackChanges="false">
+			<displayName>Country List Type</displayName>
+			<description>This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.</description>
+			<values>
+				<value code="blacklist" description="Blacklist" />
+				<value code="whitelist" description="Whitelist" />
+			</values>
+		</enum>
+		<collection type="aggregation" name="countryCodes" persistent="false" audited="false" trackChanges="false">
+			<displayName>Country Codes</displayName>
+			<domain>dynamic</domain>
+			<documentName>Generic</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 
 		<!-- account settings -->
 		<boolean name="accountAllowUserSelfRegistration" persistent="false">
@@ -237,6 +260,12 @@
 			<description>True when the captcha type is Google Recaptcha</description>
 			<expression>
 				<![CDATA[getCaptchaType() != null && CaptchaType.googleRecaptcha == getCaptchaType()]]>
+			</expression>
+		</condition>
+		<condition name="hasIpInfoToken" usage="view">
+			<description>True when an IPinfo token has been set</description>
+			<expression>
+				<![CDATA[getApiIpInfoToken() != null]]>
 			</expression>
 		</condition>
 		<condition name="cloudflareTurnstile" usage="both">

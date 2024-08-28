@@ -4,10 +4,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.locationtech.jts.geom.Coordinate;
@@ -22,6 +25,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import jakarta.inject.Inject;
+import modules.admin.domain.Generic;
 import modules.admin.domain.Startup;
 
 public class StartupExtension extends Startup {
@@ -41,6 +45,9 @@ public class StartupExtension extends Startup {
 	static final String API_GOOGLE_RECAPTCHA_SECRET_KEY = "googleRecaptchaSecretKey";
 	static final String API_CLOUDFLARE_TURNSTILE_SITE_KEY = "cloudflareTurnstileSiteKey";
 	static final String API_CLOUDFLARE_TURNSTILE_SECRET_KEY = "cloudflareTurnstileSecretKey";
+	static final String API_IP_INFO_TOKEN = "ipInfoToken";
+	static final String API_COUNTRY_LIST_TYPE = "countryListType";
+	static final String API_COUNTRY_CODES = "countryCodes";
 
 	static final String BACKUP_STANZA_KEY = "backup";
 	static final String BACKUP_EXTERNAL_BACKUP_CLASS_KEY = "externalBackupClass";
@@ -82,11 +89,11 @@ public class StartupExtension extends Startup {
 		boolean googleRecaptchaValuesSet = UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null;
 		boolean cloudflareTurnstileValuesSet = UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null;
 		
-		if(googleRecaptchaValuesSet) {
+		if (googleRecaptchaValuesSet) {
 			setCaptchaType(CaptchaType.googleRecaptcha);
-		}else if(cloudflareTurnstileValuesSet){
+		} else if (cloudflareTurnstileValuesSet) {
 			setCaptchaType(CaptchaType.cloudflareTurnstile);
-		}else {
+		} else {
 			setCaptchaType(null);
 		}
 
@@ -111,6 +118,7 @@ public class StartupExtension extends Startup {
 				setMapCentre(new GeometryFactory().createPoint(new Coordinate(0, 0)));
 			}
 		}
+
 		setMapLayer(UtilImpl.MAP_LAYERS);
 		setMapType(MapType.fromCode(UtilImpl.MAP_TYPE.name()));
 		setMapZoom(Integer.valueOf(UtilImpl.MAP_ZOOM));
@@ -133,6 +141,29 @@ public class StartupExtension extends Startup {
 				setBackupDirectoryName(property.toString());
 			}
 		}
+
+		// load country list type
+		if (UtilImpl.COUNTRY_LIST_TYPE != null) {
+			setCountryListType(CountryListType.fromCode(UtilImpl.COUNTRY_LIST_TYPE));
+		}
+
+		// convert country codes from csv to list
+		String countryCodes = UtilImpl.COUNTRY_CODES;
+		if (StringUtils.isNotBlank(countryCodes)) {
+			Arrays.asList(countryCodes.split("\\|"))
+					.stream()
+					.forEach(cc -> {
+						Generic gCountry = Generic.newInstance();
+						gCountry.setBizId(cc);
+						gCountry.setText5001(cc);
+						// populate country name for this code
+						Locale locale = new Locale("", cc);
+						String countryName = locale.getDisplayCountry();
+						gCountry.setText5002(countryName);
+						getCountryCodes().add(gCountry);
+					});
+		}
+		setApiIpInfoToken(UtilImpl.IP_INFO_TOKEN);
 	}
 
 	/**
@@ -247,79 +278,111 @@ public class StartupExtension extends Startup {
 			UtilImpl.GOOGLE_MAPS_V3_API_KEY = getApiGoogleMapsKey();
 		}
 		
-		if(getCaptchaType() == null) {
+		if (getCaptchaType() == null) {
 			// Clear cloudflare turnstile site key and secret key
 			api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
 			UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
 			api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
 			UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
-			
+
 			// Clear google recaptcha site key and secret key
 			api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
 			UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
 			api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
 			UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
-			return api;
-		}
-		switch(getCaptchaType()) {
-			case googleRecaptcha:
-				// Set google recaptcha keys
-				String googleSiteKey = getApiGoogleRecaptchaSiteKey();
-				if (googleSiteKey != null
-						&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey)) {
-					api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey);
-					UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = googleSiteKey;
-				}
+		} else {
+			switch (getCaptchaType()) {
+				case googleRecaptcha:
+					// Set google recaptcha keys
+					String googleSiteKey = getApiGoogleRecaptchaSiteKey();
+					if (googleSiteKey != null
+							&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey)) {
+						api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, googleSiteKey);
+						UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = googleSiteKey;
+					}
 
-				String googleSecretKey = getApiGoogleRecaptchaSecretKey();
-				if (googleSecretKey != null
-						&& ! StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey)) {
-					api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey);
-					UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = googleSecretKey;
-				}
-				
-				// Clear cloudflare turnstile site key and secret key
-				api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
-				UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
-				api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
-				UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
-				
-				break;
-			case cloudflareTurnstile:
-				// Set turnstile keys
-				String turnstileSiteKey = getApiCloudflareTurnstileSiteKey();
-				if (turnstileSiteKey != null
-						&& !StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey)) {
-					api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey);
-					UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = turnstileSiteKey;
-				}
-				
-				String turnstileSecretKey = getApiCloudflareTurnstileSecretKey();
-				if (turnstileSecretKey != null
-						&& ! StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey)) {
-					api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey);
-					UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = turnstileSecretKey;
-				}
-				
-				// Clear google recaptcha site key and secret key
-				api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
-				UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
-				api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
-				UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
-				
-				break;
-			default:
-				// Clear cloudflare turnstile site key and secret key
-				api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
-				UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
-				api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
-				UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
-				
-				// Clear google recaptcha site key and secret key
-				api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
-				UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
-				api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
-				UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+					String googleSecretKey = getApiGoogleRecaptchaSecretKey();
+					if (googleSecretKey != null
+							&& !StringUtils.equals(UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey)) {
+						api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, googleSecretKey);
+						UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = googleSecretKey;
+					}
+
+					// Clear cloudflare turnstile site key and secret key
+					api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+					api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+
+					break;
+				case cloudflareTurnstile:
+					// Set turnstile keys
+					String turnstileSiteKey = getApiCloudflareTurnstileSiteKey();
+					if (turnstileSiteKey != null
+							&& !StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey)) {
+						api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, turnstileSiteKey);
+						UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = turnstileSiteKey;
+					}
+
+					String turnstileSecretKey = getApiCloudflareTurnstileSecretKey();
+					if (turnstileSecretKey != null
+							&& !StringUtils.equals(UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey)) {
+						api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, turnstileSecretKey);
+						UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = turnstileSecretKey;
+					}
+
+					// Clear google recaptcha site key and secret key
+					api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+					UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+					api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+					UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+
+					break;
+				default:
+					// Clear cloudflare turnstile site key and secret key
+					api.put(API_CLOUDFLARE_TURNSTILE_SITE_KEY, null);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+					api.put(API_CLOUDFLARE_TURNSTILE_SECRET_KEY, null);
+					UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
+
+					// Clear google recaptcha site key and secret key
+					api.put(API_GOOGLE_RECAPTCHA_SITE_KEY, null);
+					UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
+					api.put(API_GOOGLE_RECAPTCHA_SECRET_KEY, null);
+					UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
+			}
+		}
+
+		if (getApiIpInfoToken() != null) {
+			api.put(API_IP_INFO_TOKEN, getApiIpInfoToken());
+			UtilImpl.IP_INFO_TOKEN = getApiIpInfoToken();
+		} else {
+			api.put(API_IP_INFO_TOKEN, null);
+			UtilImpl.IP_INFO_TOKEN = null;
+		}
+
+		if (getCountryCodes() != null && getCountryCodes().size() > 0) {
+			// convert the selected countries into a | separated string of the 2-letter country codes
+			String selectedCodes = this.getCountryCodes()
+					.stream()
+					.map(Generic::getText5001)
+					.collect(Collectors.joining("|"));
+			api.put(API_COUNTRY_CODES, selectedCodes);
+			UtilImpl.COUNTRY_CODES = selectedCodes;
+		} else {
+			// clear the codes if the list has been emptied
+			api.put(API_COUNTRY_CODES, null);
+			UtilImpl.COUNTRY_CODES = null;
+		}
+		
+		if (getCountryListType() != null) {
+			// set country list type in json
+			api.put(API_COUNTRY_LIST_TYPE, getCountryListType().toCode());
+			UtilImpl.COUNTRY_LIST_TYPE = getCountryListType().toCode();
+		} else {
+			// clear the country list type
+			api.put(API_COUNTRY_LIST_TYPE, null);
+			UtilImpl.COUNTRY_LIST_TYPE = null;
 		}
 
 		return api;
