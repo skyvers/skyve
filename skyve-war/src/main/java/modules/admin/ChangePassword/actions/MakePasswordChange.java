@@ -4,7 +4,6 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.types.DateTime;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -15,15 +14,14 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.SecurityUtil;
 import org.skyve.web.WebContext;
 
-import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
+	
 	@Override
 	public ServerSideActionResult<ChangePassword> execute(ChangePassword bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -119,12 +117,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		// clear reset password details
 		userBean.setPasswordExpired(Boolean.FALSE);
-		userBean.setPasswordLastChanged(new DateTime());
 		userBean.setPasswordResetToken(null);
-		HttpServletRequest request = EXT.getHttpServletRequest();
-		if (request != null) {
-			userBean.setPasswordLastChangedIP(SecurityUtil.getSourceIpAddress(request));
-		}
 
 		userBean = persistence.save(userDocument, userBean);
 

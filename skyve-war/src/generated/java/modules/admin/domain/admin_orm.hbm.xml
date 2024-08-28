@@ -670,6 +670,7 @@
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
 		<property name="passwordLastChangedIP" length="45" />
+		<property name="passwordLastChangedRegion" length="2" />
 		<property name="passwordResetToken" length="56" />
 		<property name="passwordResetTokenCreationTimestamp" type="Timestamp" />
 		<property name="passwordHistory" type="text" />
