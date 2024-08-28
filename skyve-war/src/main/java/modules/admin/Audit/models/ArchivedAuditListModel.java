@@ -20,9 +20,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.archive.list.ArchivedDocumentListModel;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
-import org.skyve.metadata.view.model.list.ArchivedDocumentListModel;
 
 import modules.admin.domain.Audit;
 

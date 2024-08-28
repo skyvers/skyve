@@ -1,4 +1,4 @@
-package org.skyve.metadata.view.model.list;
+package org.skyve.impl.archive.list;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;

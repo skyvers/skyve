@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.archive.list.LuceneFilter;
 import org.skyve.impl.archive.support.ArchiveRetriever;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.view.model.list.LuceneFilter;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 

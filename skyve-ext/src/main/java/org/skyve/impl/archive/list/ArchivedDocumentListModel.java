@@ -1,4 +1,4 @@
-package org.skyve.metadata.view.model.list;
+package org.skyve.impl.archive.list;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -31,6 +31,9 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.view.model.list.Filter;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Util;
