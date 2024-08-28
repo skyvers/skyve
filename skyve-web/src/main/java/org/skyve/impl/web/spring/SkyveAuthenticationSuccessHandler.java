@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -36,6 +37,11 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 										HttpServletResponse response,
 										Authentication authentication)
 	throws ServletException, IOException {
+		// Log the ip address of the user that has logged in
+		String userName = SkyveSpringSecurity.userNameFromPrincipal(authentication.getPrincipal());
+		String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
+		UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress);
+		
 		String redirectUrl = null;
 		RequestCache requestCache = new HttpSessionRequestCache();
 		SavedRequest savedRequest = requestCache.getRequest(request, response);
