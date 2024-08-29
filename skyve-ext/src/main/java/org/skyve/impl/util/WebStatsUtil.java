@@ -66,7 +66,8 @@ public class WebStatsUtil {
 	}
 	
 	/**
-	 * This method is used to populate the UserLoginRecord table with details of a new log in to the system
+	 * This method is used to populate the UserLoginRecord table with details of a new login to the system. It also checks the
+	 * previous record and sends alerts if there's a change in Ip Address and/or country
 	 * 
 	 * @param user
 	 * @param userIPAddress
