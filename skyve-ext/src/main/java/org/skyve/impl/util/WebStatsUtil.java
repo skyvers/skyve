@@ -2,9 +2,11 @@ package org.skyve.impl.util;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
@@ -17,10 +19,12 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
+import org.skyve.util.Mail;
 import org.skyve.util.SecurityUtil;
 import org.skyve.web.UserAgentType;
 
@@ -48,11 +52,11 @@ public class WebStatsUtil {
 		BindUtil.set(loginRecord, "loginDateTime", new DateTime(System.currentTimeMillis()));
 		BindUtil.set(loginRecord, "failed", Boolean.FALSE);
 		BindUtil.set(loginRecord, "ipAddress", userIPAddress);
-		
+
 		// Check if the IpInfo token has been set so as to get the country code
 		String ipInfoToken = UtilImpl.IP_INFO_TOKEN;
 		String countryCode = null;
-		if(ipInfoToken != null) {
+		if (ipInfoToken != null) {
 			final GeoIPService geoIPService = new GeoIPService();
 			Optional<String> countryCodeOptional = geoIPService.getCountryCodeForIP(userIPAddress);
 			if (countryCodeOptional.isPresent()) {
@@ -60,28 +64,73 @@ public class WebStatsUtil {
 				BindUtil.set(loginRecord, "country", countryCode);
 			}
 		}
-		AbstractPersistence.get().save(loginRecordDocument, loginRecord);
-		
-		//Get the last login record of the current user
-		DocumentQuery q = CORE.getPersistence().newDocumentQuery(loginRecordDocument);
-		q.getFilter().addEquals("userName", user.getName());
-		q.addBoundOrdering("loginDateTime",SortDirection.descending);
-		Bean record = q.beanResult();
-		
+		AbstractPersistence.get()
+				.save(loginRecordDocument, loginRecord);
+
+		// Get the last login record of the current user
+		DocumentQuery q = CORE.getPersistence()
+				.newDocumentQuery(loginRecordDocument);
+		q.getFilter()
+				.addEquals("userName", user.getName());
+		q.addBoundOrdering("loginDateTime", SortDirection.descending);
+		AbstractPersistentBean previousLoginRecord = q.beanResult();
+
+		// Get email and name from the metadata user
+		Document userDocument = module.getDocument(customer, "User");
+		AbstractPersistentBean adminUserBean = CORE.getPersistence()
+				.retrieve(userDocument, user.getId());
+		String contactEmailBinding = BindUtil.createCompoundBinding("contact", "email1");
+		String contactNameBinding = BindUtil.createCompoundBinding("contact", "name");
+		String userEmail = (String) BindUtil.get(adminUserBean, contactEmailBinding);
+		String userName = (String) BindUtil.get(adminUserBean, contactNameBinding);
+
 		// Check if the ip address changed since last login and if so log the event
-		String lastIpAddress = (String) BindUtil.get(record, "ipAddress");
+		String lastIpAddress = (String) BindUtil.get(previousLoginRecord, "ipAddress");
 		if (userIPAddress != lastIpAddress) {
-			SecurityUtil.log("Change of IP Address from last login",
-					"The user " + user.getName() + " has changed their IP address from " + lastIpAddress + " to " + userIPAddress);
+			SecurityUtil.log("Change of IP Address from Last Login",
+					"The user " + userName + " has logged in from a new IP address. "
+							+ "The IP address has changed from " + lastIpAddress + " to " + userIPAddress + ". "
+							+ "If this change is unexpected, it may indicate unauthorized access to the account. "
+							+ "Please review the login activity and consider updating the user's security settings if necessary.");
+
 		}
-		
+
 		// Check if the country has changed since the last login and if so send the user a warning message
-		String lastCountryCode = (String) BindUtil.get(record, "countryCode");
-		if (countryCode != null && countryCode != lastCountryCode) {
-			SecurityUtil.log("Change of Country by user",
-					"The user " + user.getName() + " has changed their country code from " + lastCountryCode + " to " + countryCode);
-		}
+		String previousCountryCode = (String) BindUtil.get(previousLoginRecord, "countryCode");
 		
+		if (countryCode != null && countryCode != previousCountryCode) {
+			// Get actual country name
+			Locale locale = new Locale("", countryCode);
+			String country = locale.getDisplayCountry();
+
+			Locale previousLocale = new Locale("", previousCountryCode);
+			String previousCountry = previousLocale.getDisplayCountry();
+
+			SecurityUtil.log("User Logged in from Different Country",
+					"The user " + userName + " has logged in from a different country. "
+							+ "Their location has changed from " + previousCountry + " to " + country + ". "
+							+ "If this change is unexpected, it might indicate unauthorized access. Please review the user's recent activity for any discrepancies.");
+
+			// Send email to user advising password reset
+			try {
+				EXT.sendMail(new Mail().from(UtilImpl.SMTP_SENDER)
+						.addTo(userEmail)
+						.subject("Security Alert: Unusual Login Activity Detected")
+						.body("Dear " + userName + ",\n\n"
+								+ "We have detected a login attempt to your account from a new location: " + country + ". "
+								+ "If this was you, there's no need to take further action.\n\n"
+								+ "However, if you do not recognize this activity, we strongly recommend that you change your password immediately to secure your account. "
+								+ "You can do this by logging into your account and navigating to <strong>Admin -> Password</strong>.\n\n"
+								+ "For your safety, please do not share your password with anyone.\n\n"
+								+ "If you have any questions or need assistance, please contact our support team at "
+								+ UtilImpl.SUPPORT_EMAIL_ADDRESS + ".\n\n"
+								+ "Best regards,\n"
+								+ "The Security Team"));
+			} catch (Exception e) {
+				UtilImpl.LOGGER.severe("Failed to send email warning user of country change");
+			}
+		}
+
 // NO COMMIT
 	}
 	
