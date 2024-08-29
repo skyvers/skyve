@@ -44,6 +44,12 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String failedPropertyName = "failed";
 
+	/** @hidden */
+	public static final String ipAddressPropertyName = "ipAddress";
+
+	/** @hidden */
+	public static final String countryCodePropertyName = "countryCode";
+
 	/**
 	 * User Name
 	 **/
@@ -58,6 +64,16 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	 * Failed
 	 **/
 	private Boolean failed;
+
+	/**
+	 * IP Address
+	 **/
+	private String ipAddress;
+
+	/**
+	 * Country Code
+	 **/
+	private String countryCode;
 
 	@Override
 	@XmlTransient
@@ -154,5 +170,41 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	public void setFailed(Boolean failed) {
 		preset(failedPropertyName, failed);
 		this.failed = failed;
+	}
+
+	/**
+	 * {@link #ipAddress} accessor.
+	 * @return	The value.
+	 **/
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	/**
+	 * {@link #ipAddress} mutator.
+	 * @param ipAddress	The new value.
+	 **/
+	@XmlElement
+	public void setIpAddress(String ipAddress) {
+		preset(ipAddressPropertyName, ipAddress);
+		this.ipAddress = ipAddress;
+	}
+
+	/**
+	 * {@link #countryCode} accessor.
+	 * @return	The value.
+	 **/
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	/**
+	 * {@link #countryCode} mutator.
+	 * @param countryCode	The new value.
+	 **/
+	@XmlElement
+	public void setCountryCode(String countryCode) {
+		preset(countryCodePropertyName, countryCode);
+		this.countryCode = countryCode;
 	}
 }

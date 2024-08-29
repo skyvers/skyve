@@ -2,6 +2,7 @@ package org.skyve.impl.util;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -10,6 +11,7 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -19,6 +21,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 import org.skyve.web.UserAgentType;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public class WebStatsUtil {
 	private static final String YEAR_FORMAT = "yyyy";
 	private static final String MONTH_FORMAT = "M";
@@ -27,7 +31,13 @@ public class WebStatsUtil {
 		// do nothing
 	}
 	
-	public static void recordLogin(User user)
+	/**
+	 * This method is used to populate the UserLoginRecord table with details of a new log in to the system
+	 * @param user
+	 * @param userIPAddress
+	 * @throws Exception
+	 */
+	public static void recordLogin(User user, String userIPAddress)
 	throws Exception {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
@@ -36,6 +46,18 @@ public class WebStatsUtil {
 		BindUtil.set(loginRecord, "userName", user.getName());
 		BindUtil.set(loginRecord, "loginDateTime", new DateTime(System.currentTimeMillis()));
 		BindUtil.set(loginRecord, "failed", Boolean.FALSE);
+		BindUtil.set(loginRecord, "ipAddress", userIPAddress);
+		
+		// Check if the IpInfo token has been set so as to get the country code
+		String ipInfoToken = UtilImpl.IP_INFO_TOKEN;
+		if(ipInfoToken != null) {
+			final GeoIPService geoIPService = new GeoIPService();
+			Optional<String> countryCodeOptional = geoIPService.getCountryCodeForIP(userIPAddress);
+			if (countryCodeOptional.isPresent()) {
+				String countryCode = countryCodeOptional.get();
+				BindUtil.set(loginRecord, "country", countryCode);
+			}
+		}
 
 		AbstractPersistence.get().save(loginRecordDocument, loginRecord);
 // NO COMMIT

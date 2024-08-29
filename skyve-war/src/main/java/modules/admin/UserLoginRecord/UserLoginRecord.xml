@@ -20,5 +20,13 @@
 		<boolean name="failed" required="true" usage="domain">
 			<displayName>admin.userLoginRecord.failed.displayName</displayName>
 		</boolean>
+		<text name="ipAddress" required="true" usage="domain" sensitivity="personal">
+			<displayName>admin.userLoginRecord.ipAddress.displayName</displayName>
+			<length>254</length>
+		</text>
+		<text name="countryCode" usage="domain">
+			<displayName>admin.userLoginRecord.countryCode.displayName</displayName>
+			<length>2</length>
+		</text>
 	</attributes>
 </document>
