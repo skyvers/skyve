@@ -52,26 +52,36 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 
 	/**
 	 * User Name
+	 * <br/>
+	 * admin.userLoginRecord.userName.documentation
 	 **/
 	private String userName;
 
 	/**
 	 * Sign In Date/Time
+	 * <br/>
+	 * admin.userLoginRecord.loginDateTime.documentation
 	 **/
 	private DateTime loginDateTime;
 
 	/**
 	 * Failed
+	 * <br/>
+	 * admin.userLoginRecord.failed.documentation
 	 **/
 	private Boolean failed;
 
 	/**
 	 * IP Address
+	 * <br/>
+	 * admin.userLoginRecord.ipAddress.documentation
 	 **/
 	private String ipAddress;
 
 	/**
 	 * Country Code
+	 * <br/>
+	 * admin.userLoginRecord.countryCode.documentation
 	 **/
 	private String countryCode;
 

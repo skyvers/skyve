@@ -11,20 +11,25 @@
 	<bizKey expression="{userName} @ {loginDateTime}" sensitivity="personal" />
 	<attributes>
 		<text name="userName" required="true" usage="domain" sensitivity="personal">
+			<documentation>admin.userLoginRecord.userName.documentation</documentation>
 			<displayName>admin.userLoginRecord.userName.displayName</displayName>
 			<length>254</length>
 		</text>
 		<dateTime name="loginDateTime" required="true" usage="domain">
+			<documentation>admin.userLoginRecord.loginDateTime.documentation</documentation>
 			<displayName>admin.userLoginRecord.loginDateTime.displayName</displayName>
 		</dateTime>
 		<boolean name="failed" required="true" usage="domain">
+			<documentation>admin.userLoginRecord.failed.documentation</documentation>
 			<displayName>admin.userLoginRecord.failed.displayName</displayName>
 		</boolean>
 		<text name="ipAddress" required="true" usage="domain" sensitivity="personal">
+			<documentation>admin.userLoginRecord.ipAddress.documentation</documentation>
 			<displayName>admin.userLoginRecord.ipAddress.displayName</displayName>
 			<length>254</length>
 		</text>
 		<text name="countryCode" usage="domain">
+			<documentation>admin.userLoginRecord.countryCode.documentation</documentation>
 			<displayName>admin.userLoginRecord.countryCode.displayName</displayName>
 			<length>2</length>
 		</text>
