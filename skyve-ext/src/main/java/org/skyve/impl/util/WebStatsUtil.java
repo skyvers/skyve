@@ -14,14 +14,15 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
+import org.skyve.util.SecurityUtil;
 import org.skyve.web.UserAgentType;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 public class WebStatsUtil {
 	private static final String YEAR_FORMAT = "yyyy";
@@ -50,16 +51,37 @@ public class WebStatsUtil {
 		
 		// Check if the IpInfo token has been set so as to get the country code
 		String ipInfoToken = UtilImpl.IP_INFO_TOKEN;
+		String countryCode = null;
 		if(ipInfoToken != null) {
 			final GeoIPService geoIPService = new GeoIPService();
 			Optional<String> countryCodeOptional = geoIPService.getCountryCodeForIP(userIPAddress);
 			if (countryCodeOptional.isPresent()) {
-				String countryCode = countryCodeOptional.get();
+				countryCode = countryCodeOptional.get();
 				BindUtil.set(loginRecord, "country", countryCode);
 			}
 		}
-
 		AbstractPersistence.get().save(loginRecordDocument, loginRecord);
+		
+		//Get the last login record of the current user
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(loginRecordDocument);
+		q.getFilter().addEquals("userName", user.getName());
+		q.addBoundOrdering("loginDateTime",SortDirection.descending);
+		Bean record = q.beanResult();
+		
+		// Check if the ip address changed since last login and if so log the event
+		String lastIpAddress = (String) BindUtil.get(record, "ipAddress");
+		if (userIPAddress != lastIpAddress) {
+			SecurityUtil.log("Change of IP Address from last login",
+					"The user " + user.getName() + " has changed their IP address from " + lastIpAddress + " to " + userIPAddress);
+		}
+		
+		// Check if the country has changed since the last login and if so send the user a warning message
+		String lastCountryCode = (String) BindUtil.get(record, "countryCode");
+		if (countryCode != null && countryCode != lastCountryCode) {
+			SecurityUtil.log("Change of Country by user",
+					"The user " + user.getName() + " has changed their country code from " + lastCountryCode + " to " + countryCode);
+		}
+		
 // NO COMMIT
 	}
 	
