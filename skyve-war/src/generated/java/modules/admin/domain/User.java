@@ -87,6 +87,12 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String passwordLastChangedPropertyName = "passwordLastChanged";
 
 	/** @hidden */
+	public static final String passwordLastChangedIPPropertyName = "passwordLastChangedIP";
+
+	/** @hidden */
+	public static final String passwordLastChangedRegionPropertyName = "passwordLastChangedRegion";
+
+	/** @hidden */
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
 
 	/** @hidden */
@@ -380,8 +386,28 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Last changed
 	 * <br/>
 	 * Date and Time the users password was last changed
+	 * <br/>
+	 * When password was last changed. Referenced in password change notification email contents.
 	 **/
 	private DateTime passwordLastChanged;
+
+	/**
+	 * Password Last Changed IP
+	 * <br/>
+	 * Source IP when password was last changed
+	 * <br/>
+	 * IP when password was last changed. Referenced in password change notification email contents.
+	 **/
+	private String passwordLastChangedIP;
+
+	/**
+	 * Password Last Changed Region
+	 * <br/>
+	 * Region when password was last changed
+	 * <br/>
+	 * 2-letter country-code where password was last changed. Referenced in password change notification email contents.
+	 **/
+	private String passwordLastChangedRegion;
 
 	/**
 	 * Password Reset Token
@@ -395,7 +421,7 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	/**
 	 * Password Reset Token Creation Timestamp
 	 * <br/>
-	 * When the password reset token was created.
+	 * When the password reset token was created
 	 * <br/>
 	 * Used in WebUtil.resetPassword to evaluate token expiry.
 	 **/
@@ -791,6 +817,42 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setPasswordLastChanged(DateTime passwordLastChanged) {
 		preset(passwordLastChangedPropertyName, passwordLastChanged);
 		this.passwordLastChanged = passwordLastChanged;
+	}
+
+	/**
+	 * {@link #passwordLastChangedIP} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedIP() {
+		return passwordLastChangedIP;
+	}
+
+	/**
+	 * {@link #passwordLastChangedIP} mutator.
+	 * @param passwordLastChangedIP	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedIP(String passwordLastChangedIP) {
+		preset(passwordLastChangedIPPropertyName, passwordLastChangedIP);
+		this.passwordLastChangedIP = passwordLastChangedIP;
+	}
+
+	/**
+	 * {@link #passwordLastChangedRegion} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedRegion() {
+		return passwordLastChangedRegion;
+	}
+
+	/**
+	 * {@link #passwordLastChangedRegion} mutator.
+	 * @param passwordLastChangedRegion	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedRegion(String passwordLastChangedRegion) {
+		preset(passwordLastChangedRegionPropertyName, passwordLastChangedRegion);
+		this.passwordLastChangedRegion = passwordLastChangedRegion;
 	}
 
 	/**
