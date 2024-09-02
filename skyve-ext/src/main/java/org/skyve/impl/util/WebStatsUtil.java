@@ -2,8 +2,6 @@ package org.skyve.impl.util;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.skyve.CORE;
@@ -16,52 +14,21 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
-import org.skyve.util.CommunicationUtil;
-import org.skyve.util.SecurityUtil;
 import org.skyve.web.UserAgentType;
 
 public class WebStatsUtil {
 	
-	private static final String COUNTRY_CODE = "countryCode";
-	private static final String UNUSUAL_LOGIN_ACTIVITY_EMAIL_DEFAULT_SUBJECT = "Security Alert: Unusual Login Activity Detected";
 	private static final String FAILED = "failed";
 	private static final String LOGIN_DATE_TIME = "loginDateTime";
 	private static final String IP_ADDRESS = "ipAddress";
 	private static final String COUNTRY = "country";
 	private static final String YEAR_FORMAT = "yyyy";
 	private static final String MONTH_FORMAT = "M";
-	
-	private static final String IP_CHANGE_LOG_MESSAGE = 
-			"The user %s has logged in from a new IP address. "
-			+ "The IP address has changed from %s to %s. "
-			+ "If this change is unexpected, it may indicate unauthorized access to the account. "
-			+ "Please review the login activity and consider updating the user's security settings if necessary.";
-	
-	private static final String COUNTRY_CHANGE_LOG_MESSAGE = 
-		    "The user %s has logged in from a different country. "
-		    + "Their location has changed from %s (IP: %s) to %s (IP: %s). "
-		    + "If this change is unexpected, it might indicate unauthorized access. Please review the user's recent activity for any discrepancies.";
-
-	private static final String UNUSUAL_LOGIN_EMAIL_BODY = 
-			"Dear %s,\n\n"
-			+ "We have detected a login attempt to your account from a new location: %s with IP address: %s. "
-			+ "If this was you, there's no need to take further action.\n\n"
-			+ "However, if you do not recognize this activity, we strongly recommend that you change your password immediately to secure your account. "
-			+ "You can do this by logging into your account and navigating to <strong>Admin -> Password</strong>.\n\n"
-			+ "For your safety, please do not share your password with anyone.\n\n"
-			+ "If you have any questions or need assistance, please contact our support team at %s.\n\n"
-			+ "Best regards,\n"
-			+ "The Security Team";
-	
-	private static final String UNUSUAL_LOGIN_EMAIL_FAILURE_LOG_MESSAGE = 
-			"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s";
 	
 	public static final String COMMUNICATION_DESCRIPTION = "Email warning a user of a new login from a different country";
 
@@ -100,74 +67,9 @@ public class WebStatsUtil {
 			}
 		}
 
-		// Get the last login record of the current user
-		DocumentQuery q = CORE.getPersistence()
-				.newDocumentQuery(loginRecordDocument);
-		q.getFilter()
-				.addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, user.getName());
-		q.addBoundOrdering(LOGIN_DATE_TIME, SortDirection.descending);
-		AbstractPersistentBean previousLoginRecord = q.beanResult();
-
-		// Save the new record after retrieving the last record
+		// Save the new record. Country code is added in the preSave method of 
 		AbstractPersistence.get()
 				.save(loginRecordDocument, loginRecord);
-
-		// If there is no previous record then this is probably their first login to the system
-		if (previousLoginRecord != null) {
-			// Get email and name from the metadata user
-			Document userDocument = module.getDocument(customer, AppConstants.USER_DOCUMENT_NAME);
-			AbstractPersistentBean adminUserBean = CORE.getPersistence()
-					.retrieve(userDocument, user.getId());
-			AbstractPersistentBean contact = (AbstractPersistentBean) BindUtil.get(adminUserBean,
-					AppConstants.CONTACT_ATTRIBUTE_NAME);
-			String contactEmailBinding = BindUtil.createCompoundBinding(AppConstants.CONTACT_ATTRIBUTE_NAME,
-					AppConstants.EMAIL1_ATTRIBUTE_NAME);
-			String contactNameBinding = BindUtil.createCompoundBinding(AppConstants.CONTACT_ATTRIBUTE_NAME,
-					AppConstants.NAME_ATTRIBUTE_NAME);
-			String userEmail = (String) BindUtil.get(adminUserBean, contactEmailBinding);
-			String userName = (String) BindUtil.get(adminUserBean, contactNameBinding);
-
-			// Check if the ip address changed since last login and if so log the event
-			String lastIpAddress = (String) BindUtil.get(previousLoginRecord, IP_ADDRESS);
-			if (lastIpAddress != null && !Objects.equals(userIPAddress, lastIpAddress)) {
-
-				// Check if the country has changed since the last login and if so send the user a warning message
-				String previousCountryCode = (String) BindUtil.get(previousLoginRecord, COUNTRY_CODE);
-				if (countryCode != null && previousCountryCode != null && !Objects.equals(countryCode, previousCountryCode)) {
-					// Get actual country name
-					Locale locale = new Locale("", countryCode);
-					String country = locale.getDisplayCountry();
-
-					Locale previousLocale = new Locale("", previousCountryCode);
-					String previousCountry = previousLocale.getDisplayCountry();
-
-					SecurityUtil.log("User Logged in from Different Country",
-							String.format(COUNTRY_CHANGE_LOG_MESSAGE, userName, previousCountry, lastIpAddress, country,
-									userIPAddress));
-
-					try {
-						CommunicationUtil.sendFailSafeSystemCommunication(COMMUNICATION_DESCRIPTION,
-								UNUSUAL_LOGIN_ACTIVITY_EMAIL_DEFAULT_SUBJECT,
-								String.format(UNUSUAL_LOGIN_EMAIL_BODY, userName, country, userIPAddress,
-										UtilImpl.SUPPORT_EMAIL_ADDRESS),
-								CommunicationUtil.ResponseMode.EXPLICIT,
-								null,
-								contact);
-						UtilImpl.LOGGER
-								.info(String.format("Successfully sent email warning of unusual login activity to %s", userEmail));
-					} catch (Exception e) {
-						UtilImpl.LOGGER
-								.severe(String.format(UNUSUAL_LOGIN_EMAIL_FAILURE_LOG_MESSAGE, userName, userEmail,
-										e.getMessage()));
-						throw new RuntimeException(String.format("Failed to send email warning of unusual login activity to %s", userEmail));
-					}
-				} else {
-					// If the country has not changed then the security log shall only have details of an IP change
-					SecurityUtil.log("Change of IP Address from Last Login",
-							String.format(IP_CHANGE_LOG_MESSAGE, userName, lastIpAddress, userIPAddress));
-				}
-			}
-		}
 
 		// NO COMMIT
 	}
