@@ -68,6 +68,12 @@
 			<displayName>admin.configuration.selfRegistrationActivationExpiryHours.displayName</displayName>
 			<description>admin.configuration.selfRegistrationActivationExpiryHours.description</description>
 		</integer>
+		<integer name="passwordResetTokenExpiryMinutes">
+			<displayName>Password Reset Token Expiry (minutes)</displayName>
+			<description>Clear this setting to have tokens that never expire.</description>
+			<defaultValue>15</defaultValue>
+			<validator min="1" />
+		</integer>
 		
 		<boolean name="allowUserSelfRegistration" required="false" deprecated="true">
 			<displayName>This option is now a startup property found in the project JSON file.</displayName>
@@ -243,6 +249,30 @@
 				<![CDATA[
 					TwoFactorType.email == getTwoFactorType()
 				]]>
+			</expression>
+		</condition>
+		<condition name="googleRecaptcha" usage="both">
+			<description>True when the captcha type of startup is Google Recaptcha</description>
+			<expression>
+				<![CDATA[getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.googleRecaptcha == getStartup().getCaptchaType()]]>
+			</expression>
+		</condition>
+		<condition name="hasIpInfoToken" usage="view">
+			<description>True when an IPinfo token has been set</description>
+			<expression>
+				<![CDATA[getStartup().getApiIpInfoToken() != null]]>
+			</expression>
+		</condition>
+		<condition name="cloudflareTurnstile" usage="both">
+			<description>True when the captcha type of startup is Cloudflare Turnstile</description>
+			<expression>
+				<![CDATA[getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.cloudflareTurnstile == getStartup().getCaptchaType()]]>
+			</expression>
+		</condition>
+		<condition name="noCaptcha" usage="both">
+			<description>True when no captcha type is selected in startup</description>
+			<expression>
+				<![CDATA[getStartup().getCaptchaType() == null]]>
 			</expression>
 		</condition>
 	</conditions>

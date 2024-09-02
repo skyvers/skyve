@@ -220,7 +220,7 @@ public class JSONReader {
 							BindUtil.set(result, propertyName, value);
 						}
 						catch (@SuppressWarnings("unused") Exception e) {
-							// do nothing - ie leave the generate UUID in place
+							// do nothing - ie leave the generated UUID in place
 						}
 					}
 					else if (value instanceof List) {

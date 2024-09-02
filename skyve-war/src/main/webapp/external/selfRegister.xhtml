@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pt="http://www.primefaces.org/ui"
+		xmlns:s="http://skyve.org/xml/ui"
+		dir="#{skyvePublic.dir}">
+	<f:view contentType="text/html" encoding="UTF-8">
+		<f:metadata>
+			<f:viewParam name="a" value="#{skyvePublic.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyvePublic.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyvePublic.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyvePublic.queryNameParameter}" />
+			<f:viewParam name="i" value="#{skyvePublic.bizIdParameter}" />
+			<f:viewParam name="c" value="#{skyvePublic.bizCustomerParameter}" />
+			<f:event type="preRenderView" listener="#{skyvePublic.preRender}"/>
+		</f:metadata>
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<ui:composition template="#{'/WEB-INF/pages/templates/'.concat(skyvePublic.templateName).concat('/view.xhtml')}">
+			<ui:param name="bean" value="#{skyvePublic}" />
+			<ui:param name="showMenu" value="false" />
+			<ui:param name="resetMenu" value="false" />
+			<ui:param name="showSwitchMode" value="#{'phone' ne skyve.userAgentType and skyve.canSwitchMode}" />
+			<ui:param name="showLogout" value="false" />
+			<ui:define name="head">
+			</ui:define>
+			<ui:define name="body">
+				<s:conversation managedBean="skyvePublic" />
+				<h:panelGroup layout="block" class="ui warning message" rendered="#{empty skyvePublic.user}">
+					<h1 style="text-align: center"><h:outputText escape="false" value="#{skyvePublic.i18n['page.public.noPublicUser']}" /></h1>
+				</h:panelGroup>
+				<s:csrfForm managedBean="skyvePublic" rendered="#{not empty skyvePublic.user}">
+					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
+						<ui:param name="bean" value="#{skyvePublic}" />
+					</ui:include>
+					
+					<!-- Action bar -->
+					<s:view module="#{skyvePublic.bizModuleParameter}"
+						document="#{skyvePublic.bizDocumentParameter}" 
+						managedBean="skyvePublic"
+						update="@form" 
+						widgetId="actions" />
+					
+					<!-- Registration complete -->
+					<s:view module="#{skyvePublic.bizModuleParameter}"
+						document="#{skyvePublic.bizDocumentParameter}"
+						managedBean="skyvePublic"
+						update="@form"
+						widgetId="postRegister" />
+								
+					<h:panelGroup id="outerPanelId" style="border: none;" rendered="#{!skyvePublic.currentBean['registrationComplete']}">
+						<!-- If you are an existing user, sign in -->
+						<s:view module="#{skyvePublic.bizModuleParameter}"
+							document="#{skyvePublic.bizDocumentParameter}"
+							managedBean="skyvePublic"
+							update="@form"
+							widgetId="existingUserBanner" />
+							
+						<!-- User Details -->
+						<p:panel header="#{skyvePublic.i18n['admin.selfRegistration.edit.userDetails.borderTitle']}"
+								 style="padding-top: 1rem;">
+							<div class="ui-g">
+								<!-- Beginning of form -->
+								<s:view module="#{skyvePublic.bizModuleParameter}"
+									document="#{skyvePublic.bizDocumentParameter}"
+									managedBean="skyvePublic"
+									update="@form"
+									widgetId="userDetailsFirstPart"
+									childStyle="padding: 0px;"
+									childStyleClass="ui-g-12" />
+									
+								<!-- New password -->
+								<h:panelGroup childStyleClass="ui-g-12" widgetId="newPassword" childStyle="padding: 0px;" update="@form">
+								    <h:panelGroup layout="block" style="padding: 0px;" styleClass="ui-g-12" rendered="#{(skyvePublic.currentBean ne null) and (skyvePublic.currentBean.getBean() ne null) and (not skyvePublic.currentBean['notCreated'])}">
+								        <h:panelGroup id="newPasswordOuter" layout="block" styleClass="ui-g ui-g-nopad ui-fluid">
+								            <h:panelGroup layout="block" styleClass="ui-g-12 ui-g-nopad">
+								                <h:panelGroup layout="block" styleClass="ui-g">
+								                    <h:panelGroup layout="block" styleClass="ui-g-12 ui-md-2 ui-lg-2 ui-xl-2 rightForm">
+								                        <p:outputLabel for="newPassword" value="Password&#160;*:" />
+								                    </h:panelGroup>
+								                    <h:panelGroup layout="block" styleClass="ui-g-12 ui-md-6 ui-lg-6 ui-xl-6 leftForm">
+								                        <p:message for="newPassword" showDetail="true" showSummary="false" display="icon" styleClass="formMessageStyle" />
+								                        <h:panelGroup layout="block" styleClass="ui-g-12" style="padding: 0;">
+								                            <p:password id="newPassword" style="text-align:left" value="#{skyvePublic.currentBean['user.password']}" title="Password *" requiredMessage="Password is required." pt:autocorrect="none" pt:spellcheck="false" pt:autocapitalize="none" />
+								                            <!-- Progress bar container -->
+								                            <div class="progress-bar-container">
+								                                <div id="progress-bar"></div>
+								                            </div>
+								                            <div class="feedback" id="password-strength-text"></div>
+								                            <div class="feedback" id="password-strength-warning"></div>
+								                            <div class="feedback" id="password-strength-suggestions"></div>
+								                        </h:panelGroup>
+								                    </h:panelGroup>
+								                </h:panelGroup>
+								            </h:panelGroup>
+								        </h:panelGroup>
+								    </h:panelGroup>
+								</h:panelGroup>
+								
+								<!-- Remainder of form -->
+								<s:view module="#{skyvePublic.bizModuleParameter}"
+									document="#{skyvePublic.bizDocumentParameter}"
+									managedBean="skyvePublic"
+									update="@form"
+									widgetId="userDetailsLastPart"
+									childStyle="padding: 0px;"
+									childStyleClass="ui-g-12" />
+							</div>
+						</p:panel>
+					</h:panelGroup>
+				</s:csrfForm>
+				
+				<!-- Password strength estimator -->
+				<link type="text/css" rel="stylesheet" href="zxcvbn/strength-bar-min.css"/>
+				<script type="text/javascript" src="zxcvbn/zxcvbn-4.4.2-min.js"></script>
+				<script type="text/javascript" src="skyve/prime/skyve-min.js"></script>
+				<script type="text/javascript">
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var password = document.getElementById('newPassword');
+                        var progressBar = document.getElementById('progress-bar');
+                        var strength = document.getElementById('password-strength-text');
+                        var warning = document.getElementById('password-strength-warning');
+                        var suggestions = document.getElementById('password-strength-suggestions');
+
+                        password.addEventListener('input', function() {
+                            var val = password.value;
+                            var result = zxcvbn(val);
+
+                            // Update progress bar styling
+                            progressBar.style.width = SKYVE.Util.progressBarPower[result.score];
+                            progressBar.style.backgroundColor = SKYVE.Util.progressBarColour[result.score];
+
+                            // Update the text indicators
+                            if (val !== "") {
+                                strength.innerHTML = "Strength: <strong>" + SKYVE.Util.passwordStrength[result.score] + "</strong>";
+
+                                // Show/hide the warning and suggestions
+                                if (result.feedback.warning) {
+                                    warning.innerHTML = result.feedback.warning;
+                                } else {
+                                    warning.innerHTML = "";
+                                }
+
+                                if (result.feedback.suggestions.length > 0) {
+                                    suggestions.innerHTML = result.feedback.suggestions.join(' ');
+                                } else {
+                                    suggestions.innerHTML = "";
+                                }
+                            } else {
+                                strength.innerHTML = "";
+                                warning.innerHTML = "";
+                                suggestions.innerHTML = "";
+                            }
+                        });
+                    });
+                </script>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

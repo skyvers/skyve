@@ -81,6 +81,9 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public static final String selfRegistrationActivationExpiryHoursPropertyName = "selfRegistrationActivationExpiryHours";
 
 	/** @hidden */
+	public static final String passwordResetTokenExpiryMinutesPropertyName = "passwordResetTokenExpiryMinutes";
+
+	/** @hidden */
 	@Deprecated
 	public static final String allowUserSelfRegistrationPropertyName = "allowUserSelfRegistration";
 
@@ -365,6 +368,13 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 * Clear this setting to have codes that never expire.
 	 **/
 	private Integer selfRegistrationActivationExpiryHours;
+
+	/**
+	 * Password Reset Token Expiry (minutes)
+	 * <br/>
+	 * Clear this setting to have tokens that never expire.
+	 **/
+	private Integer passwordResetTokenExpiryMinutes = Integer.valueOf(15);
 
 	/**
 	 * This option is now a startup property found in the project JSON file.
@@ -738,6 +748,24 @@ public abstract class Configuration extends AbstractPersistentBean {
 	public void setSelfRegistrationActivationExpiryHours(Integer selfRegistrationActivationExpiryHours) {
 		preset(selfRegistrationActivationExpiryHoursPropertyName, selfRegistrationActivationExpiryHours);
 		this.selfRegistrationActivationExpiryHours = selfRegistrationActivationExpiryHours;
+	}
+
+	/**
+	 * {@link #passwordResetTokenExpiryMinutes} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getPasswordResetTokenExpiryMinutes() {
+		return passwordResetTokenExpiryMinutes;
+	}
+
+	/**
+	 * {@link #passwordResetTokenExpiryMinutes} mutator.
+	 * @param passwordResetTokenExpiryMinutes	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordResetTokenExpiryMinutes(Integer passwordResetTokenExpiryMinutes) {
+		preset(passwordResetTokenExpiryMinutesPropertyName, passwordResetTokenExpiryMinutes);
+		this.passwordResetTokenExpiryMinutes = passwordResetTokenExpiryMinutes;
 	}
 
 	/**
@@ -1146,6 +1174,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the captcha type of startup is Cloudflare Turnstile
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isCloudflareTurnstile() {
+		return (getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.cloudflareTurnstile == getStartup().getCaptchaType());
+	}
+
+	/**
+	 * {@link #isCloudflareTurnstile} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotCloudflareTurnstile() {
+		return (! isCloudflareTurnstile());
+	}
+
+	/**
 	 * emailConfigured
 	 *
 	 * @return The condition
@@ -1165,6 +1212,44 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * True when the captcha type of startup is Google Recaptcha
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isGoogleRecaptcha() {
+		return (getStartup().getCaptchaType() != null && modules.admin.domain.Startup.CaptchaType.googleRecaptcha == getStartup().getCaptchaType());
+	}
+
+	/**
+	 * {@link #isGoogleRecaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotGoogleRecaptcha() {
+		return (! isGoogleRecaptcha());
+	}
+
+	/**
+	 * True when an IPinfo token has been set
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasIpInfoToken() {
+		return (getStartup().getApiIpInfoToken() != null);
+	}
+
+	/**
+	 * {@link #isHasIpInfoToken} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasIpInfoToken() {
+		return (! isHasIpInfoToken());
+	}
+
+	/**
 	 * True when the selected startup map type is Google Maps
 	 *
 	 * @return The condition
@@ -1181,6 +1266,25 @@ public abstract class Configuration extends AbstractPersistentBean {
 	 */
 	public boolean isNotMapTypeGmap() {
 		return (! isMapTypeGmap());
+	}
+
+	/**
+	 * True when no captcha type is selected in startup
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isNoCaptcha() {
+		return (getStartup().getCaptchaType() == null);
+	}
+
+	/**
+	 * {@link #isNoCaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotNoCaptcha() {
+		return (! isNoCaptcha());
 	}
 
 	/**

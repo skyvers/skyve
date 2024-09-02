@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.skyve.CORE;
@@ -16,6 +15,7 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -153,7 +153,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 		
 		Map<String, Object> properties = new TreeMap<>();
 		// concat a random ID to handle cyclic object graphs
-		properties.put(Bean.DOCUMENT_ID, bean.getBizId() + UUID.randomUUID().toString());
+		properties.put(Bean.DOCUMENT_ID, bean.getBizId() + UUIDv7.create().toString());
 		properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(u.getName(), new Date()));
 		properties.put(PersistentBean.TAGGED_NAME, null);
 		properties.put(PersistentBean.FLAG_COMMENT_NAME, null);

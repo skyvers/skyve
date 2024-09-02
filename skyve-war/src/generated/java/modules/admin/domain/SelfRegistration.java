@@ -56,7 +56,13 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	public static final String registrationDatePropertyName = "registrationDate";
 
 	/** @hidden */
+	public static final String passSilentlyPropertyName = "passSilently";
+
+	/** @hidden */
 	public static final String userPropertyName = "user";
+
+	/** @hidden */
+	public static final String previouslyAttemptedPasswordPropertyName = "previouslyAttemptedPassword";
 
 	/**
 	 * Activation Url
@@ -96,11 +102,28 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	private DateTime registrationDate;
 
 	/**
+	 * Silent Pass
+	 * <br/>
+	 * Flag used when registration should pass but not actually create a user. 
+				Used for suspected bot registrations.
+	 **/
+	private Boolean passSilently = Boolean.valueOf(false);
+
+	/**
 	 * User
 	 * <br/>
 	 * The new user to create for this registration
 	 **/
 	private UserExtension user = null;
+
+	/**
+	 * Previously Attempted Password
+	 * <br/>
+	 * If checks for breached passwords are enabled, this field is used to track whether a warning has been displayed for this password.
+				A user may use a 'breached' password once they confirm by re-submitting.
+				Implementation is similar to that in changePassword.jsp & resetPassword.jsp.
+	 **/
+	private String previouslyAttemptedPassword;
 
 	@Override
 	@XmlTransient
@@ -251,6 +274,23 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	}
 
 	/**
+	 * {@link #passSilently} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getPassSilently() {
+		return passSilently;
+	}
+
+	/**
+	 * {@link #passSilently} mutator.
+	 * @param passSilently	The new value.
+	 **/
+	@XmlElement
+	public void setPassSilently(Boolean passSilently) {
+		this.passSilently = passSilently;
+	}
+
+	/**
 	 * {@link #user} accessor.
 	 * @return	The value.
 	 **/
@@ -268,6 +308,23 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 			preset(userPropertyName, user);
 			this.user = user;
 		}
+	}
+
+	/**
+	 * {@link #previouslyAttemptedPassword} accessor.
+	 * @return	The value.
+	 **/
+	public String getPreviouslyAttemptedPassword() {
+		return previouslyAttemptedPassword;
+	}
+
+	/**
+	 * {@link #previouslyAttemptedPassword} mutator.
+	 * @param previouslyAttemptedPassword	The new value.
+	 **/
+	@XmlElement
+	public void setPreviouslyAttemptedPassword(String previouslyAttemptedPassword) {
+		this.previouslyAttemptedPassword = previouslyAttemptedPassword;
 	}
 
 	/**
@@ -315,7 +372,7 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 */
 	@XmlTransient
 	public boolean isRegistrationComplete() {
-		return (getUser() != null && getUser().isPersisted());
+		return (getUser() != null && getUser().isPersisted() || Boolean.TRUE.equals(passSilently));
 	}
 
 	/**
@@ -344,5 +401,43 @@ public abstract class SelfRegistration extends AbstractTransientBean {
 	 */
 	public boolean isNotSelfRegistrationAllowed() {
 		return (! isSelfRegistrationAllowed());
+	}
+
+	/**
+	 * Whether to show cloudflare turnstile.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowCloudflareTurnstile() {
+		return (org.skyve.impl.util.UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null);
+	}
+
+	/**
+	 * {@link #isShowCloudflareTurnstile} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowCloudflareTurnstile() {
+		return (! isShowCloudflareTurnstile());
+	}
+
+	/**
+	 * Whether to show google recaptcha.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isShowGoogleRecaptcha() {
+		return (org.skyve.impl.util.UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null);
+	}
+
+	/**
+	 * {@link #isShowGoogleRecaptcha} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotShowGoogleRecaptcha() {
+		return (! isShowGoogleRecaptcha());
 	}
 }

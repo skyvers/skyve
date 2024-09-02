@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.hibernate.internal.util.SerializationHelper;
@@ -77,8 +76,8 @@ public class UtilImpl {
 	public static Map<String, Object> OVERRIDE_CONFIGURATION;
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "53";
-	public static final String SKYVE_VERSION = "9.1.0-SNAPSHOT";
+	public static final String WEB_RESOURCE_FILE_VERSION = "56";
+	public static final String SKYVE_VERSION = "9.2.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -274,7 +273,12 @@ public class UtilImpl {
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;
 	public static String GOOGLE_RECAPTCHA_SECRET_KEY = null;
+	public static String CLOUDFLARE_TURNSTILE_SITE_KEY = null;
+	public static String CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
 	public static String CKEDITOR_CONFIG_FILE_URL = "";
+	public static String COUNTRY_CODES = null;
+	public static String COUNTRY_LIST_TYPE = null;
+	public static String IP_INFO_TOKEN = null;
 
 	// null = prod, could be dev, test, uat or another arbitrary environment
 	public static String ENVIRONMENT_IDENTIFIER = null;
@@ -297,6 +301,8 @@ public class UtilImpl {
 	public static int ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
 	// How long to remember a login on a device (if checked)
 	public static int REMEMBER_ME_TOKEN_TIMEOUT_HOURS = 336; // 336hrs = 14 days
+	// Determines whether or not HaveIBeenPwned API is used as part of password validation
+	public static boolean CHECK_FOR_BREACHED_PASSWORD = true;
 	// Enables new users to register for an account when true, requires email
 	public static boolean ACCOUNT_ALLOW_SELF_REGISTRATION = false;
 	// google auth client id
@@ -569,7 +575,7 @@ public class UtilImpl {
 		}
 		else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
-			bean.setBizId(UUID.randomUUID().toString());
+			bean.setBizId(UUIDv7.create().toString());
 			bean.setBizLock(null);
 			bean.setBizVersion(null);
 

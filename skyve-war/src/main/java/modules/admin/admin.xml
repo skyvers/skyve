@@ -18,6 +18,7 @@
 		<job name="jBulkUserCreation" displayName="Create Users" className="modules.admin.UserList.BulkUserCreationJob"/>
 		<job name="jGenerateTestData" displayName="Generate Test Data" className="modules.admin.ControlPanel.GenerateTestDataJob"/>
 		<job name="jAvailableDiskSpaceAlarm" displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob"/>
+		<job name="jPasswordChangeNotification" displayName="Password change notification" className="modules.admin.ChangePassword.SendPasswordChangeNotificationJob"/>
 		<job name="ArchiveJob" displayName="Archive Job" className="org.skyve.impl.archive.job.ArchiveJob" />
 	</jobs>
 	<documents>
@@ -51,6 +52,7 @@
 		<document ref="ReportParameter" />
 		<document ref="ReportManager" />
 		<document ref="ReportTemplate" defaultQueryName="qReportTemplates" />
+		<document ref="SecurityLog" defaultQueryName="qSecurityLogs"/>
 		<document ref="SelfRegistration" />
 		<document ref="SelfRegistrationActivation" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
@@ -247,8 +249,6 @@
 					<action name="DownloadResults"/>
 					<action name="DownloadSAIL" />
 					<action name="DownloadClientSAIL" />
-					<action name="ApplyStartupConfiguration" />
-					<action name="AddAPIKey"/>
 					<action name="GenerateTestData" />
 					<action name="DeleteTestData" />
 				</document>
@@ -387,6 +387,7 @@
 					<action name="DownloadJasperReport" />
 					<action name="DownloadReport" />
 				</document>
+				<document name="SecurityLog" permission="_R_DC"/>
 				<document name="SelfRegistration" permission="_RUDC">
 					<action name="Register"/>
 				</document>
@@ -558,6 +559,12 @@
 			<role name="SecurityAdministrator" />
 			<role name="AuditManager" />
 		</list>
+		<list document="SecurityLog" name="Security Log">
+            <uxui name="desktop"/>
+            <uxui name="external"/>
+            <uxui name="tablet"/>
+            <role name="SecurityAdministrator"/>
+        </list>
 		<edit document="SystemDashboard" name="admin.adminMenu.systemDashboard.document.displayName">
 			<uxui name="desktop" />
 			<uxui name="external" />
@@ -903,5 +910,14 @@
 				<column binding="template" hidden="true" />
 			</columns>
 		</query>
+		<query documentName="SecurityLog" name="qSecurityLogs">
+            <description><![CDATA[All Security Logs]]></description>
+            <columns>
+                <column binding="timestamp" sortOrder="descending"/>
+                <column binding="username"/>
+                <column binding="eventType"/>
+                <column binding="eventMessage"/>
+            </columns>
+        </query>
 	</queries>
 </module>

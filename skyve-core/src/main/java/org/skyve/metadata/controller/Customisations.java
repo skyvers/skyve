@@ -16,13 +16,13 @@ public interface Customisations {
 	/**
 	 * Determine the default text alignment to use in columns and within textual widgets given an attribute type.
 	 */
-	@Nonnull HorizontalAlignment determineDefaultTextAlignment(String uxui, AttributeType attributeType);
+	@Nonnull HorizontalAlignment determineDefaultTextAlignment(@Nonnull String uxui, @Nullable AttributeType attributeType);
 
 	/**
 	 * Determine the default column width in pixels given an attribute type.
 	 * <code>null</code> may be returned if there is no default.
 	 */
-	@Nullable Integer determineDefaultColumnWidth(String uxui, AttributeType attributeType);
+	@Nullable Integer determineDefaultColumnWidth(@Nonnull String uxui, @Nullable AttributeType attributeType);
 
 	/**
 	 * Register custom ExpressionEvaluators for use in this Skyve deployment using ExpressionEvaluator.register().

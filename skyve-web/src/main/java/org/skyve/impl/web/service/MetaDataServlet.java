@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Format.TextCase;
@@ -239,7 +240,7 @@ public class MetaDataServlet extends HttpServlet {
 					String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 					documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
 					if (documentName != null) {
-						user.checkAccess(UserAccess.singular(moduleName, documentName), uxui);
+						EXT.checkAccess(user, UserAccess.singular(moduleName, documentName), uxui);
 
 						String top = Util.processStringValue(request.getParameter(AbstractWebContext.TOP_FORM_LABELS_NAME));
 						pw.append(view(user, uxui, moduleName, documentName, Boolean.TRUE.toString().equals(top)));

@@ -13,6 +13,8 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.snapshot.CompoundFilterOperator;
+import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
@@ -107,7 +109,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+						AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						UxUi uxui = UserAgent.getUxUi(request);
@@ -126,7 +128,7 @@ public class SmartClientTagServlet extends HttpServlet {
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
-			        	AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request, response);
+						AbstractWebContext webContext = StateUtil.getCachedConversation(contextKey, request);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 						UxUi uxui = UserAgent.getUxUi(request);
@@ -268,7 +270,7 @@ public class SmartClientTagServlet extends HttpServlet {
 			String documentName = documentOrQueryOrModelName.substring(0, __Index);
 			Document document = module.getDocument(customer, documentName);
 			String modelName = documentOrQueryOrModelName.substring(__Index + 2);
-			user.checkAccess(UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
+			EXT.checkAccess(user, UserAccess.modelAggregate(moduleName, documentName, modelName), uxui.getName());
 
 			model = document.getListModel(customer, modelName, true);
 			model.setBean(bean);
@@ -279,11 +281,11 @@ public class SmartClientTagServlet extends HttpServlet {
 			MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
 			// not a query, must be a document
 			if (query == null) {
-				user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+				EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 				query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
 			}
 			else {
-				user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
+				EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryOrModelName), uxui.getName());
 			}
 			if (query == null) {
 				throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);

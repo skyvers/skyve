@@ -39,7 +39,6 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
@@ -202,9 +201,8 @@ public class ImageMarkupView extends LocalisableView {
 
 		ExternalContext ec = fc.getExternalContext();
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
-		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 
-		AbstractWebContext webContext = StateUtil.getCachedConversation(contextParameter, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(contextParameter, request);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -234,8 +232,7 @@ public class ImageMarkupView extends LocalisableView {
 			// This was it will default to what is in the web.xml theme expression
 			request.removeAttribute(AbstractWebContext.UXUI);
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBindingParameter);
-			user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
-
+			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 			
 			// Check document access
 			Customer customer = user.getCustomer();
@@ -247,7 +244,7 @@ public class ImageMarkupView extends LocalisableView {
 			try (ContentManager cm = EXT.newContentManager()) {
 				AttachmentContent content = cm.getAttachment(contentIdParameter);
 				if (content != null) {
-					moduleDocument = content.getBizModule() + '.' + content.getBizDocument();
+					moduleDocument = bizModule + '.' + bizDocument;
 					// Set the SVG if we are rendering, but if we are applying we want the SVG sent in the request
 					if (! apply) {
 						svg = content.getMarkup();

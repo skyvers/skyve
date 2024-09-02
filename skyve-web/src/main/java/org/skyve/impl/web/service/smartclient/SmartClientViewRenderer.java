@@ -97,6 +97,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.MetaDataException;
@@ -1821,7 +1822,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		Integer numberOfDiscreteValues = slider.getNumberOfDiscreteValues();
 		if (numberOfDiscreteValues != null) {
-			code.append("numValues:").append(numberOfDiscreteValues).append(',');
+			code.append("numValues:").append(numberOfDiscreteValues.intValue() + 1).append(',');
 		}
 		Integer roundingPrecision = slider.getRoundingPrecision();
 		if ((roundingPrecision != null) && (roundingPrecision.intValue() != 0)) {

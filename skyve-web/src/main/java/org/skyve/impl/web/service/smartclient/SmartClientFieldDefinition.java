@@ -80,7 +80,7 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
             result.append('\'');
         }
         if (valueMap != null) {
-            result.append(",valueMap:").append(valueMap);
+            result.append(",valueMap:").append(getValueMapAsString());
         }
         if (required) {
         	result.append(",bizRequired:true,requiredMessage:'");

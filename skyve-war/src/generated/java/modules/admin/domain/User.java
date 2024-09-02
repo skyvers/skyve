@@ -87,7 +87,16 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String passwordLastChangedPropertyName = "passwordLastChanged";
 
 	/** @hidden */
+	public static final String passwordLastChangedIPPropertyName = "passwordLastChangedIP";
+
+	/** @hidden */
+	public static final String passwordLastChangedRegionPropertyName = "passwordLastChangedRegion";
+
+	/** @hidden */
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
+
+	/** @hidden */
+	public static final String passwordResetTokenCreationTimestampPropertyName = "passwordResetTokenCreationTimestamp";
 
 	/** @hidden */
 	public static final String passwordHistoryPropertyName = "passwordHistory";
@@ -377,8 +386,28 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * Last changed
 	 * <br/>
 	 * Date and Time the users password was last changed
+	 * <br/>
+	 * When password was last changed. Referenced in password change notification email contents.
 	 **/
 	private DateTime passwordLastChanged;
+
+	/**
+	 * Password Last Changed IP
+	 * <br/>
+	 * Source IP when password was last changed
+	 * <br/>
+	 * IP when password was last changed. Referenced in password change notification email contents.
+	 **/
+	private String passwordLastChangedIP;
+
+	/**
+	 * Password Last Changed Region
+	 * <br/>
+	 * Region when password was last changed
+	 * <br/>
+	 * 2-letter country-code where password was last changed. Referenced in password change notification email contents.
+	 **/
+	private String passwordLastChangedRegion;
 
 	/**
 	 * Password Reset Token
@@ -388,6 +417,15 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	 * This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.
 	 **/
 	private String passwordResetToken;
+
+	/**
+	 * Password Reset Token Creation Timestamp
+	 * <br/>
+	 * When the password reset token was created
+	 * <br/>
+	 * Used in WebUtil.resetPassword to evaluate token expiry.
+	 **/
+	private Timestamp passwordResetTokenCreationTimestamp;
 
 	/**
 	 * Password History
@@ -782,6 +820,42 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
+	 * {@link #passwordLastChangedIP} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedIP() {
+		return passwordLastChangedIP;
+	}
+
+	/**
+	 * {@link #passwordLastChangedIP} mutator.
+	 * @param passwordLastChangedIP	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedIP(String passwordLastChangedIP) {
+		preset(passwordLastChangedIPPropertyName, passwordLastChangedIP);
+		this.passwordLastChangedIP = passwordLastChangedIP;
+	}
+
+	/**
+	 * {@link #passwordLastChangedRegion} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedRegion() {
+		return passwordLastChangedRegion;
+	}
+
+	/**
+	 * {@link #passwordLastChangedRegion} mutator.
+	 * @param passwordLastChangedRegion	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedRegion(String passwordLastChangedRegion) {
+		preset(passwordLastChangedRegionPropertyName, passwordLastChangedRegion);
+		this.passwordLastChangedRegion = passwordLastChangedRegion;
+	}
+
+	/**
 	 * {@link #passwordResetToken} accessor.
 	 * @return	The value.
 	 **/
@@ -797,6 +871,26 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setPasswordResetToken(String passwordResetToken) {
 		preset(passwordResetTokenPropertyName, passwordResetToken);
 		this.passwordResetToken = passwordResetToken;
+	}
+
+	/**
+	 * {@link #passwordResetTokenCreationTimestamp} accessor.
+	 * @return	The value.
+	 **/
+	public Timestamp getPasswordResetTokenCreationTimestamp() {
+		return passwordResetTokenCreationTimestamp;
+	}
+
+	/**
+	 * {@link #passwordResetTokenCreationTimestamp} mutator.
+	 * @param passwordResetTokenCreationTimestamp	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	public void setPasswordResetTokenCreationTimestamp(Timestamp passwordResetTokenCreationTimestamp) {
+		preset(passwordResetTokenCreationTimestampPropertyName, passwordResetTokenCreationTimestamp);
+		this.passwordResetTokenCreationTimestamp = passwordResetTokenCreationTimestamp;
 	}
 
 	/**

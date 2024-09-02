@@ -54,9 +54,14 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	 * This is called from a Skyve EL expression within the recaptcha blurb in the edit view.
 	 * @return	The site key.
 	 */
-	@SuppressWarnings("static-method")
 	public String getSiteKey() {
-		return UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
+		if(isShowGoogleRecaptcha()) {
+			return UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY;
+		}else if(isShowCloudflareTurnstile()) {
+			return UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY;
+		}else {
+			return null;
+		}
 	}
 
 	/**
@@ -72,22 +77,23 @@ public class SelfRegistrationExtension extends SelfRegistration {
 				Message message = new Message(Binder.createCompoundBinding(SelfRegistration.userPropertyName, User.passwordPropertyName), PASSWORD_REQUIRED);
 				ve.getMessages().add(message);
 			}
-			
+
 			if (StringUtils.isEmpty(getConfirmPassword())) {
 				Message message = new Message(SelfRegistration.confirmPasswordPropertyName, CONFIRM_PASSWORD_REQUIRED);
 				ve.getMessages().add(message);
 			}
-			
+
 			if (!ve.getMessages().isEmpty()) {
 				throw ve;
 			}
 			
 			// if both aren't null, check that they are the same
-			if (!getUser().getPassword().equals(getConfirmPassword())) {
+			if (!getUser().getPassword()
+					.equals(getConfirmPassword())) {
 				Message message = new Message(SelfRegistration.confirmPasswordPropertyName, PASSWORD_MISMATCH);
 				ve.getMessages().add(message);
 			}
-			
+
 			if (!ve.getMessages().isEmpty()) {
 				throw ve;
 			}

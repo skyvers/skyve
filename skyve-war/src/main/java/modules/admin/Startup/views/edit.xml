@@ -120,19 +120,52 @@
 		</form>
 	</vbox>
 
-	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title">
-		<form responsiveWidth="12" widgetId="formSecurity">
+	<vbox border="true" borderTitle="admin.startup.securitySettings.frameset.title" widgetId="formSecurity">
+		<form responsiveWidth="12">
 	        <column responsiveWidth="3"/>
 	        <column/>
 	        <column responsiveWidth="2"/>
 	        <row>
+				<item>
+					<checkBox binding="checkForBreachedPassword" triState="false" />
+				</item>
+			</row>
+	        <row>
+	        	<item >
+	        		<combo binding="captchaType">
+	        			<onChangedHandlers>
+	        				<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity</c:property>
+	        					</properties>
+	        				</rerender>
+	        			</onChangedHandlers>
+	        		</combo>
+	        	</item>
+	        	<item>
+	        		<spacer/>
+	        	</item>
+	        </row>
+	        <!-- Google Recaptcha keys -->
+	        <row>
 	            <item>
-	                <default binding="apiGoogleRecaptchaSiteKey"/>
+	                <textField binding="apiGoogleRecaptchaSiteKey" visible="googleRecaptcha"/>
 	            </item>
 	        </row>
 	        <row>
 	            <item>
-	                <default binding="apiGoogleRecaptchaSecretKey"/>
+	                <textField binding="apiGoogleRecaptchaSecretKey" visible="googleRecaptcha"/>
+	            </item>
+	        </row>
+	        <!-- Cloudflare Turnstile keys -->
+	        <row>
+	            <item>
+	                <textField binding="apiCloudflareTurnstileSiteKey" visible="cloudflareTurnstile"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiCloudflareTurnstileSecretKey" visible="cloudflareTurnstile"/>
 	            </item>
 	        </row>
 	        <row>
@@ -144,13 +177,46 @@
 	        		<blurb>
 	        			<![CDATA[
 	        				<span style="font-size: 80%; color: #888;">
-	        					See instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix/#configuring-recaptcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
+	        					See detailed instructions in the <a href='https://skyvers.github.io/skyve-dev-guide/appendix-skyve-application-configuration/#configuring-captcha-for-the-sign-in-page' target='_blank'>Skyve Dev Guide</a>
 	       					</span>
 	        			]]>
 	        		</blurb>
 	        	</item>
 	        </row>
+	        <row>
+	            <item>
+	                <textField binding="apiIpInfoToken">
+	                	<onBlurHandlers>
+	                		<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity</c:property>
+	        					</properties>
+	        				</rerender>
+	                	</onBlurHandlers>
+	                	<onChangedHandlers>
+	                		<rerender>
+	        					<properties>
+	        						<c:property key="update">formSecurity</c:property>
+	        					</properties>
+	        				</rerender>
+	                	</onChangedHandlers>
+	                </textField>
+	            </item>
+	        </row>
 	    </form>
+	    <vbox visible="hasIpInfoToken">
+		    <form responsiveWidth="12">
+		        <column responsiveWidth="3"/>
+		        <column/>
+		        <column responsiveWidth="2"/>
+		        <row>
+					<item required="true">
+						<combo binding="countryListType"/>
+					</item>
+				</row>
+	        </form>
+	        <listMembership binding="countryCodes" candidatesHeading="Available Country Codes" membersHeading="Selected Country Codes" />
+        </vbox>
     </vbox>
 
     <vbox border="true" borderTitle="admin.startup.accountSettings.frameset.title">

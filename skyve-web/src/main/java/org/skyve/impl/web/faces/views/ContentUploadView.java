@@ -5,6 +5,7 @@ import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
@@ -32,7 +33,6 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @RequestScoped
 @Named("_skyveContent")
@@ -137,9 +137,8 @@ public class ContentUploadView extends AbstractUploadView {
 
 		ExternalContext ec = fc.getExternalContext();
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
-		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 
-		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request, response);
+		AbstractWebContext webContext = StateUtil.getCachedConversation(context, request);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
@@ -167,7 +166,7 @@ public class ContentUploadView extends AbstractUploadView {
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getUxUi(request);
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBinding);
-			user.checkAccess(UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
+			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 			// Check document access
 			Customer customer = user.getCustomer();

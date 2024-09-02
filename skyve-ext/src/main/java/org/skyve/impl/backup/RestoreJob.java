@@ -111,8 +111,10 @@ public class RestoreJob extends CancellableJob {
 			Util.LOGGER.info(trace);
 			setPercentComplete(50);
 
+			File validatedBackup = BackupUtil.validateSkyveBackup(extractDirName);
+
 			PreProcess restorePreProcess = options.getPreProcess();
-			ContentOption contrentRestoreOption = options.getContentOption();
+			ContentOption contentRestoreOption = options.getContentOption();
 
 			boolean truncateDatabase = PreProcess.deleteData.equals(restorePreProcess);
 			if (truncateDatabase) {
@@ -160,7 +162,7 @@ public class RestoreJob extends CancellableJob {
 			log.add(trace);
 			Util.LOGGER.info(trace);
 			IndexingOption indexingOption = options.getIndexingOption();
-			restore(extractDirName, createUsingBackup, contrentRestoreOption, indexingOption);
+			restore(validatedBackup, createUsingBackup, contentRestoreOption, indexingOption);
 			if (ddlSync) {
 				trace = "DDL Sync";
 				log.add(trace);
@@ -199,21 +201,11 @@ public class RestoreJob extends CancellableJob {
 		}
 	}
 
-	private void restore(String extractDirName,
+	private void restore(File backupDirectory,
 							boolean createUsingBackup,
 							ContentOption contentRestoreOption,
 							IndexingOption indexingOption)
 	throws Exception {
-		String customerName = CORE.getUser().getCustomerName();
-
-		String backupDirectoryPath = Util.getBackupDirectory() +
-										"backup_" + customerName +
-										File.separator + extractDirName;
-		File backupDirectory = new File(backupDirectoryPath);
-		if ((! backupDirectory.exists()) || (! backupDirectory.isDirectory())) {
-			throw new IllegalArgumentException(backupDirectoryPath + " is not a directory");
-		}
-
 		Collection<Table> tables = createUsingBackup ?
 									BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
 									BackupUtil.getTables();

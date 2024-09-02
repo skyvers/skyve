@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SecurityException;
@@ -55,7 +56,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 		Document document = null;
 		Attribute attribute = null;
 		String attributeName = binding;
-		
+
     	// if binding is compound, get the parent bean and adjust the attributeName
     	// prefer the module and document name determination polymorphically from the bean, otherwise use the metadata
     	int lastDotIndex = binding.lastIndexOf('.');
@@ -94,7 +95,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 		List<String> result = Collections.emptyList();
 
 		if (complete == CompleteType.previous) {
-			user.checkAccess(UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName());
+			EXT.checkAccess(user, UserAccess.previousComplete(formModuleName, formDocumentName, binding), facesView.getUxUi().getName());
 	    	if (! user.canReadDocument(document)) {
 				throw new SecurityException("read this data", user.getName());
 			}

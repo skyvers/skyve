@@ -244,6 +244,12 @@ th.hiddenFilter input.ui-column-filter, th.hiddenFilter div.ui-column-customfilt
 	align-items: center;
 }
 
+/* Ensure PrimeVue datepicker has no drop shadow */
+.p-datepicker {
+	box-shadow: 0 0 !important;
+	padding: 0px !important;
+}
+
 /* Used to put the sidebar on the RHS */
 #sidebarWrapper {
 	display: flex;

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import org.skyve.domain.Bean;
@@ -23,6 +22,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.metadata.customer.Customer;
@@ -245,7 +245,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 					@SuppressWarnings("unchecked")
 					List<Bean> relatedBeans = (List<Bean>) value;
 					for (Bean relatedBean : relatedBeans) {
-						sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
+						sql.putParameter(Bean.DOCUMENT_ID, UUIDv7.create().toString(), false);
 						String relatedId = relatedBean.getBizId();
 //System.out.println("insert collection element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
 						sql.putParameter(Bean.BIZ_KEY, parentId + "->" + relatedId, false);
@@ -263,7 +263,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 				}
 				else {
 					Bean relatedBean = (Bean) value;
-					sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
+					sql.putParameter(Bean.DOCUMENT_ID, UUIDv7.create().toString(), false);
 					String relatedId = relatedBean.getBizId();
 //System.out.println("insert association element for " + bean.getBizDocument() + " with bizId " + bean.getBizId() + " for attribute " + name + " = " + relatedId);
 					sql.putParameter(Bean.BIZ_KEY, parentId + "->" + relatedId, false);

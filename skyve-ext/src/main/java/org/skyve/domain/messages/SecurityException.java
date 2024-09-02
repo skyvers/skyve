@@ -1,5 +1,7 @@
 package org.skyve.domain.messages;
 
+import org.skyve.util.SecurityUtil;
+
 /**
  * Thrown when the current user does not have privileges to 
  * a perform an operation on a data entity or web resource.
@@ -9,5 +11,6 @@ public class SecurityException extends DomainException {
 
 	public SecurityException(String resource, String userName) {
 		super(userName + " does not have access to " + resource);
+		SecurityUtil.log(this);
 	}
 }

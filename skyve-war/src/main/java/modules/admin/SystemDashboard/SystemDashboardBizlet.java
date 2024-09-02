@@ -104,7 +104,7 @@ public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 		// Password self-reset configured
 		Generic passwordSelfResetConfigured = Generic.newInstance();
 		passwordSelfResetConfigured.setMemo1(formatLabelHTML(Util.i18n("admin.systemDashboard.status.itemLabel.passwordSelfResetConfigured")));
-		passwordSelfResetConfigured.setText5001(formatBooleanHTML(UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null, valTrue, valFalse,
+		passwordSelfResetConfigured.setText5001(formatBooleanHTML((UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY != null || UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY != null) && ConfigurationExtension.validSMTPHost(), valTrue, valFalse,
 				Util.i18n("admin.systemDashboard.status.itemLabel.passwordSelfResetConfigured.suggestion")));
 		bean.getStatus().add(passwordSelfResetConfigured);
 

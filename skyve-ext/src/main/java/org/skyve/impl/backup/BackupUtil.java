@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
@@ -32,6 +33,7 @@ import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
@@ -628,5 +630,42 @@ final class BackupUtil {
 		
 		// Should never reach - other geometry types are deprecated
 		return data;
+	}
+
+	/**
+	 * Creates and returns the {@link File} for the extracted directory,
+	 * only after validating that it is a valid Skyve backup.
+	 * 
+	 * @param extractDirName
+	 * @return Validated backup
+	 * @throws {@link IllegalArgumentException}
+	 * 
+	 * @author Simeon Solomou
+	 */
+	public static File validateSkyveBackup(String extractDirName) {
+		String customerName = CORE.getUser().getCustomerName();
+		String backupDirectoryPath = Util.getBackupDirectory() +
+										"backup_" + customerName +
+										File.separator + extractDirName;
+
+		File backupDirectory = new File(backupDirectoryPath);
+		if ((! backupDirectory.exists()) || (! backupDirectory.isDirectory())) {
+			throw new DomainException(backupDirectoryPath + " is not a directory");
+		}
+
+		// Validate that there is at least one CSV file in root
+		boolean hasCsvFile = backupDirectory.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.toLowerCase().endsWith(".csv");
+			}
+		}).length > 0;
+		if (! hasCsvFile) {
+			throw new DomainException(
+					"No valid Skyve CSV files were found in the expected location (the root of the ZIP)."
+							+ " If you have modified this ZIP, please ensure that it has been correctly recompressed");
+		}
+
+		return backupDirectory;
 	}
 }

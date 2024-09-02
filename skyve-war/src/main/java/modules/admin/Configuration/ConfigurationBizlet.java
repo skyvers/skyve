@@ -1,6 +1,7 @@
 package modules.admin.Configuration;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.SingletonCachedBizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
+import org.skyve.util.BeanValidator;
 import org.skyve.util.Binder;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.web.WebContext;
@@ -31,6 +33,9 @@ import modules.admin.domain.Startup;
 import modules.admin.domain.User;
 
 public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExtension> {
+
+	private static final String TFA_CODE_EXPRESSION = "{tfaCode}";
+	private static final String RESET_PASSWORD_URL_EXPRESSION = "{#resetPasswordUrl}";
 
 	@Override
 	public ConfigurationExtension newInstance(ConfigurationExtension bean) throws Exception {
@@ -70,9 +75,6 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 		
 		return result;
 	}
-
-	private static final String TFA_CODE_EXPRESSION = "{tfaCode}";
-	private static final String RESET_PASSWORD_URL_EXPRESSION = "{#resetPasswordUrl}";
 	
 	@Override
 	public List<String> complete(String attributeName, String value, ConfigurationExtension bean) throws Exception {
@@ -107,32 +109,6 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 	}
 	
 	@Override
-	public void validate(ConfigurationExtension bean, ValidationException e) throws Exception {
-		String expression = bean.getPasswordResetEmailSubject();
-		if (expression != null) {
-			String error = Binder.validateMessage(expression, User.MODULE_NAME, User.DOCUMENT_NAME);
-			if (error != null) {
-				e.getMessages().add(new Message(Configuration.passwordResetEmailSubjectPropertyName, error));
-			}
-		}
-		
-		expression = bean.getPasswordResetEmailBody();
-		if (expression != null) {
-			String error = Binder.validateMessage(expression.replace(RESET_PASSWORD_URL_EXPRESSION, ""), User.MODULE_NAME, User.DOCUMENT_NAME);
-			if (error != null) {
-				e.getMessages().add(new Message(Configuration.passwordResetEmailBodyPropertyName, error));
-			}
-		}
-		
-		expression = bean.getTwoFactorEmailBody();
-		if (expression != null) {
-			if (BindUtil.containsSkyveExpressions(expression.replace(TFA_CODE_EXPRESSION, ""))) {
-				e.getMessages().add(new Message(Configuration.twoFactorEmailBodyPropertyName, "The only expression allowed here is " + TFA_CODE_EXPRESSION));
-			}
-		}
-	}
-	
-	@Override
 	public ConfigurationExtension preExecute(ImplicitActionName actionName, ConfigurationExtension bean, Bean parentBean,
 			WebContext webContext) throws Exception {
 
@@ -158,6 +134,9 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 				bean.setTwoFactorType(TwoFactorType.off);
 			}
 		} else if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
+			// validate the startup values
+			BeanValidator.validateBeanAgainstBizlet(bean.getStartup());
+			// save any modified values to the override json
 			bean.getStartup().saveConfiguration();
 		}
 
@@ -212,6 +191,21 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 				// default to 5 minutes
 				bean.setTwofactorPushCodeTimeOutSeconds(Integer.valueOf(5 * 60));
 			}
+		} else if (Binder.createCompoundBinding(Configuration.startupPropertyName, Startup.captchaTypePropertyName)
+				.equals(source)) {
+			// Use key values found in the json file so that the user can easily switch between different captcha types
+			StartupExtension startup = bean.getStartup();
+			Map<String, Object> properties = new HashMap<>(UtilImpl.OVERRIDE_CONFIGURATION);
+			startup.clearApi(properties);
+			Map<String, Object> configuration = UtilImpl.CONFIGURATION;
+			@SuppressWarnings("unchecked")
+			Map<String, Object> api = (Map<String, Object>) configuration.get("api");
+			if(api != null) {
+				startup.setApiGoogleRecaptchaSiteKey((String) api.get("googleRecaptchaSiteKey"));
+				startup.setApiGoogleRecaptchaSecretKey((String) api.get("googleRecaptchaSecretKey"));
+				startup.setApiCloudflareTurnstileSiteKey((String) api.get("cloudflareTurnstileSiteKey"));
+				startup.setApiCloudflareTurnstileSecretKey((String) api.get("cloudflareTurnstileSecretKey"));
+			}
 		}
 
 		super.preRerender(source, bean, webContext);
@@ -238,6 +232,35 @@ public class ConfigurationBizlet extends SingletonCachedBizlet<ConfigurationExte
 					TwoFactorAuthCustomerConfiguration tfaConfig = new TwoFactorAuthCustomerConfiguration(type.toCode(), timeout.intValue(), subject, body);
 					TwoFactorAuthConfigurationSingleton.getInstance().add(tfaConfig);
 				}
+			}
+		}
+	}
+
+	@Override
+	public void validate(ConfigurationExtension bean, ValidationException e) throws Exception {
+		String expression = bean.getPasswordResetEmailSubject();
+		if (expression != null) {
+			String error = Binder.validateMessage(expression, User.MODULE_NAME, User.DOCUMENT_NAME);
+			if (error != null) {
+				e.getMessages().add(new Message(Configuration.passwordResetEmailSubjectPropertyName, error));
+			}
+		}
+
+		expression = bean.getPasswordResetEmailBody();
+		if (expression != null) {
+			String error = Binder.validateMessage(expression.replace(RESET_PASSWORD_URL_EXPRESSION, ""), User.MODULE_NAME,
+					User.DOCUMENT_NAME);
+			if (error != null) {
+				e.getMessages().add(new Message(Configuration.passwordResetEmailBodyPropertyName, error));
+			}
+		}
+
+		expression = bean.getTwoFactorEmailBody();
+		if (expression != null) {
+			if (BindUtil.containsSkyveExpressions(expression.replace(TFA_CODE_EXPRESSION, ""))) {
+				e.getMessages()
+						.add(new Message(Configuration.twoFactorEmailBodyPropertyName,
+								"The only expression allowed here is " + TFA_CODE_EXPRESSION));
 			}
 		}
 	}

@@ -21,6 +21,7 @@ public final class AppConstants {
 	public static final String REPORT_DATASET_DOCUMENT_NAME = "ReportDataset";
 	public static final String REPORT_PARAMETER_DOCUMENT_NAME = "ReportParameter";
 	public static final String REPORT_TEMPLATE_DOCUMENT_NAME = "ReportTemplate";
+	public static final String SECURITY_LOG_DOCUMENT_NAME = "SecurityLog";
 	public static final String SELF_REGISTRATION_DOCUMENT_NAME = "SelfRegistration";
 	public static final String SNAPSHOT_DOCUMENT_NAME = "Snapshot";
 	public static final String SUBSCRIPTION_DOCUMENT_NAME = "Subscription";
@@ -63,6 +64,8 @@ public final class AppConstants {
 	public static final String PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME = "passwordResetEmailBody";
 	public static final String PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME = "passwordResetEmailSubject";
 	public static final String PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME = "passwordResetToken";
+	public static final String PASSWORD_RESET_TOKEN_EXPIRY_MINUTES_ATTRIBUTE_NAME = "passwordResetTokenExpiryMinutes";
+	public static final String PASSWORD_RESET_TOKEN_CREATION_TIMESTAMP_ATTRIBUTE_NAME = "passwordResetTokenCreationTimestamp";
 	public static final String PERCENTAGE_COMPLETE_ATTRIBUTE_NAME = "percentComplete";
 	public static final String QUERY_NAME_ATTRIBUTE_NAME = "queryName";
 	public static final String RECEIVER_IDENTIFIER_ATTRIBUTE_NAME = "receiverIdentifier";
@@ -82,6 +85,10 @@ public final class AppConstants {
 	public static final String USER_ATTRIBUTE_NAME = "user";
 	public static final String USER_NAME_ATTRIBUTE_NAME = "userName";
 	
+	// Enumerations
+	public static final String COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE = "blacklist";
+	public static final String COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE = "whitelist";
+
 	// Actions
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
 	public static final String RESEND_ACTIVATION_ACTION_NAME = "ResendActivation";

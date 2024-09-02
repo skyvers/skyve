@@ -746,12 +746,20 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
+		UtilImpl.CHECK_FOR_BREACHED_PASSWORD = Boolean.TRUE.equals(get("api", "checkForBreachedPassword", api, false));
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString("api", "googleRecaptchaSiteKey", api, false);
 		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString("api", "googleRecaptchaSecretKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getString("api", "cloudflareTurnstileSiteKey", api, false);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getString("api", "cloudflareTurnstileSecretKey", api, false);
 		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
+		}
+		if (api != null) {
+			UtilImpl.COUNTRY_CODES = getString("api", "countryCodes", api, false);
+			UtilImpl.COUNTRY_LIST_TYPE = getString("api", "countryListType", api, false);
+			UtilImpl.IP_INFO_TOKEN = getString("api", "ipInfoToken", api, false);
 		}
 		
 		Map<String, Object> bootstrap = getObject(null, "bootstrap", properties, false);

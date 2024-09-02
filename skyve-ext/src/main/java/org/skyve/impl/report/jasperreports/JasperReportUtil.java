@@ -398,11 +398,11 @@ public final class JasperReportUtil {
 		final Customer customer = user.getCustomer();
 		MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryName);
 		if (query == null) {
-			user.checkAccess(UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui);
+			EXT.checkAccess(user, UserAccess.documentAggregate(moduleName, documentOrQueryName), uxui);
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 		}
 		else {
-			user.checkAccess(UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui);
+			EXT.checkAccess(user, UserAccess.queryAggregate(moduleName, documentOrQueryName), uxui);
 		}
 		if (query == null) {
 			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryName);

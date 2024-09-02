@@ -42,6 +42,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
@@ -70,6 +71,7 @@ import jakarta.faces.component.html.HtmlOutputLink;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public static final String COLLECTION_BINDING_ATTRIBUTE_KEY = "collectionBinding";
+	public static final String COMPONENT_BUILDER_CLASS_KEY = "componentBuilderClass";
 
 	public static class EventSourceComponent {
 		private UIComponent component;
@@ -397,6 +399,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 													HorizontalAlignment textAlignment,
 													jakarta.faces.convert.Converter<?> facesConverter);
 	
+	public abstract EventSourceComponent slider(EventSourceComponent component, 
+													String dataWidgetVar,
+													Slider slider,
+													String formDisabledConditionName,
+													String title,
+													boolean required,
+													jakarta.faces.convert.Converter<?> facesConverter);
+
 	public abstract EventSourceComponent text(EventSourceComponent component, 
 												String dataWidgetVar, 
 												TextField text, 
