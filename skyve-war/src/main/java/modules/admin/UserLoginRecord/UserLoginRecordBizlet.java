@@ -44,6 +44,11 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 
 	public static final String COMMUNICATION_DESCRIPTION = "Email warning a user of a new login from a different country";
 
+	/**
+	 * The preSave is overridden so as to add the country code of the user based on the ip addrress and if IpInfo token is set. The
+	 * method also adds security logs if the ip address and/or the country code of the user changed from the previous login. It also
+	 * kicks off a job sending the user an email if the country changed from the previous login.
+	 */
 	@Override
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 
@@ -82,7 +87,8 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				final org.skyve.metadata.user.User user = persistence.getUser();
 				final Customer customer = user.getCustomer();
 				final Module module = customer.getModule(User.MODULE_NAME);
-				final JobMetaData countryChangeNotificationJobMetaData = module.getJob(DifferentCountryLoginNotificationJob.JOB_NAME);
+				final JobMetaData countryChangeNotificationJobMetaData = module
+						.getJob(DifferentCountryLoginNotificationJob.JOB_NAME);
 				// Get username
 				String userName = adminUser.getContact()
 						.getName();
