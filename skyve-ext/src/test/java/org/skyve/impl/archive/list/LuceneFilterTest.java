@@ -67,7 +67,7 @@ public class LuceneFilterTest {
     private static final String BOOLEAN_FIELD = "our_bool";
     private static final String ENUM_FIELD = "our_enum";
 
-    private final int MAX_RESULTS = 10;
+    private final int MAX_RESULTS = 25;
 
     private static final boolean debugPrint = false;
 
@@ -748,6 +748,24 @@ public class LuceneFilterTest {
 
             assertThat(colours, is(Set.of("Black")));
         }
+
+        // Not In
+        {
+            LuceneFilter filter = new LuceneFilter();
+            filter.addNotNull(TEXT_FIELD);
+            filter.addNotIn(TEXT_FIELD, "Black", "foo", "bar", "baz");
+
+            List<Document> results = newIndexAndQuery(docs, filter);
+
+            Set<String> colours = results.stream()
+                                         .map(d -> d.get(TEXT_FIELD))
+                                         .collect(toSet());
+
+            // Every color except 'black' from the list above
+            assertThat(colours, is(Set.of("Aqua", "Blue", "Fuchsia", "Gray",
+                    "Green", "Lime", "Maroon", "Navy", "Olive", "Purple",
+                    "Red", "Silver", "Teal", "White", "Yellow")));
+        }
     }
 
     @Test
@@ -771,7 +789,7 @@ public class LuceneFilterTest {
             assertThat(results.size(), is(2));
         }
 
-        // Greater than
+        // Greater than or equal to
         {
             LuceneFilter filter = new LuceneFilter();
             filter.addGreaterThanOrEqualTo(DATE_FIELD, queryDate);

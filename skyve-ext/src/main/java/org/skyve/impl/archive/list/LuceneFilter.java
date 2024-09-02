@@ -458,6 +458,18 @@ public class LuceneFilter implements Filter {
 
         clauses.add(new BooleanClause(new TermInSetQuery(binding, refs), MUST));
     }
+    
+    @Override
+    public void addNotIn(String binding, Object... values) {
+
+        List<BytesRef> refs = new ArrayList<>(values.length);
+
+        for (Object val : values) {
+            refs.add(new BytesRef(lower(String.valueOf(val))));
+        }
+
+        clauses.add(new BooleanClause(new TermInSetQuery(binding, refs), MUST_NOT));
+    }
 
     @Override
     public boolean isEmpty() {
