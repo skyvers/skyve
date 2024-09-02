@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document
+	xmlns="http://www.skyve.org/xml/document"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	name="CorruptArchiveError"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+>
+	<documentation>
+		Used as part of the recovery process for corrupt archives; 
+		see org.skyve.impl.archive.job.ArchiveJob and its component jobs.
+	</documentation>
+	<persistent name="ADM_CorruptArchiveError" />
+	<singularAlias>CorruptArchiveError</singularAlias>
+	<pluralAlias>corruptarchiveerrors</pluralAlias>
+	<audited>false</audited>
+	<bizKey expression="Error {archiveTypeModule}.{archiveTypeDocument} - {filename}" />
+	<implements>
+		<interface>org.skyve.archive.support.CorruptArchiveError</interface>
+	</implements>
+	<attributes>
+		<text
+			name="filename"
+			required="true"
+		>
+			<displayName>Archive Filename</displayName>
+			<length>500</length>
+		</text>
+		<text
+			name="archiveTypeModule"
+			required="true"
+		>
+			<displayName>Archive Type Module</displayName>
+			<length>500</length>
+		</text>
+		<text
+			name="archiveTypeDocument"
+			required="true"
+		>
+			<displayName>Archive Type Document</displayName>
+			<length>500</length>
+		</text>
+		<timestamp
+			name="timestamp"
+			required="true"
+		>
+			<displayName>Timestamp</displayName>
+		</timestamp>
+		<enum
+			name="resolution"
+			required="true"
+			implementingEnumClassName="org.skyve.archive.support.CorruptArchiveError$Resolution"
+		>
+			<displayName>Resolution</displayName>
+		</enum>
+	</attributes>
+</document>

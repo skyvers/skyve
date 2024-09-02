@@ -6,6 +6,7 @@ import org.skyve.domain.types.Timestamp;
 public interface ArchiveableBean extends Bean {
 
     public static final String archiveTimestampPropertyName = "archiveTimestamp";
+    public static final String archiveFilenamePropertyName = "archiveFilename";
 
     public Timestamp getArchiveTimestamp();
 

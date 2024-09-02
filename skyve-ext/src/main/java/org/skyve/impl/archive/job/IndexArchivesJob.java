@@ -41,14 +41,19 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.skyve.CORE;
+import org.skyve.archive.support.CorruptArchiveError;
+import org.skyve.archive.support.CorruptArchiveError.Resolution;
 import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.archive.support.BufferedLineReader;
 import org.skyve.impl.archive.support.BufferedLineReader.Line;
 import org.skyve.impl.archive.support.FileLockRepo;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.job.CancellableJob;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
@@ -67,14 +72,17 @@ public class IndexArchivesJob extends CancellableJob {
     public static String DOC_TYPE_FIELD = "_doctype";
 
     // Fields used to record indexing progress of each file
-    private static String PROGRESS_FILENAME_FIELD = "_progress_filename";
-    private static String PROGRESS_OFFSET_FIELD = "_progress_offset";
+    protected static String PROGRESS_FILENAME_FIELD = "_progress_filename";
+    protected static String PROGRESS_OFFSET_FIELD = "_progress_offset";
 
     private FileLockRepo repo = FileLockRepo.getInstance();
 
     @Inject
     @Any
     private Instance<DocumentConverter> documentConverters;
+
+    @Inject
+    private Persistence persistence;
 
     @Override
     public void execute() throws Exception {
@@ -105,15 +113,45 @@ public class IndexArchivesJob extends CancellableJob {
                 continue;
             }
 
-            IndexDocumentsProcess process = new IndexDocumentsProcess(archiveDir, indexDir, converter.get());
-            process.execute();
+            IndexDocumentsProcess process = new IndexDocumentsProcess(archiveDir, indexDir, converter.get(), docConfig);
+            try {
+                process.execute();
+            } catch (IndexingException ie) {
+                logger.atWarn()
+                      .withThrowable(ie)
+                      .log("Indexing processing terminating due to exception");
+                getLog().add("Stopping indexing process due to error.");
+                recordIndexingError(ie);
+
+                throw ie;
+            }
         }
 
         if (isCancelled()) {
-            getLog().add("Job cancelled");
+            getLog().add("Index process cancelled");
         } else {
-            getLog().add("Job done");
+            getLog().add("Index process done");
         }
+    }
+
+    private void recordIndexingError(IndexingException ie) throws Exception {
+
+        Customer customer = CORE.getUser()
+                                .getCustomer();
+        CorruptArchiveError error = customer.getModule(CorruptArchiveError.MODULE_NAME)
+                                            .getDocument(customer, CorruptArchiveError.DOCUMENT_NAME)
+                                            .newInstance(CORE.getUser());
+
+        ArchiveDocConfig documentConfig = ie.getDocumentType();
+
+        error.setFilename(ie.getFilename());
+        error.setArchiveTypeModule(documentConfig.module());
+        error.setArchiveTypeDocument(documentConfig.document());
+        error.setTimestamp(new Timestamp());
+        error.setResolution(Resolution.unresolved);
+
+        persistence.save(error);
+        persistence.commit(false);
     }
 
     /**
@@ -160,13 +198,16 @@ public class IndexArchivesJob extends CancellableJob {
          */
         private final DocumentConverter converter;
 
-        public IndexDocumentsProcess(Path archiveDir, Path indexDir, DocumentConverter converter) {
+        private final ArchiveDocConfig docConfig;
+
+        public IndexDocumentsProcess(Path archiveDir, Path indexDir, DocumentConverter converter, ArchiveDocConfig docConfig) {
             this.archiveDir = archiveDir;
             this.indexDir = indexDir;
             this.converter = converter;
+            this.docConfig = docConfig;
         }
 
-        public void execute() throws IOException, ParseException, InterruptedException {
+        public void execute() throws IOException, ParseException, InterruptedException, IndexingException {
 
             logger.debug("Indexing files in {}", archiveDir);
             logger.debug("Using lucene index {}", indexDir);
@@ -201,7 +242,7 @@ public class IndexArchivesJob extends CancellableJob {
 
         }
 
-        private void processFile(IndexableFile indexableFile) throws IOException {
+        private void processFile(IndexableFile indexableFile) throws IOException, IndexingException {
 
             File file = indexableFile.file();
             long startOffset = indexableFile.startOffset();
@@ -229,9 +270,8 @@ public class IndexArchivesJob extends CancellableJob {
                                       .withThrowable(e)
                                       .log(errMsg);
                                 getLog().add(errMsg);
-                                // Give up indexing this file, but we will attempt to continue
-                                // indexing any others
-                                break;
+
+                                throw new IndexingException(errMsg, e, file.getName(), docConfig);
                             }
 
                         }
@@ -267,19 +307,15 @@ public class IndexArchivesJob extends CancellableJob {
 
             Bean entryBean = unmarshallBean(line);
 
-            // Doctype may not be necessary...
-            String docType = entryBean.getBizModule() + "." + entryBean.getBizDocument();
-
             // Convert the document and add to index
             Document doc = converter.convert(entryBean);
 
             // Standard entry metadata for all documents
-            doc.add(new StoredField(FILENAME_FIELD, fileName));
+            doc.add(new StringField(FILENAME_FIELD, fileName, Store.YES));
             doc.add(new StoredField(OFFSET_FIELD, offset));
             doc.add(new StoredField(LENGTH_FIELD, lineRecord.length()));
-            doc.add(new StringField(DOC_TYPE_FIELD, docType, Store.YES));
 
-            // Using 'Update' incase this doc/bizId has been exported twice
+            // Using 'Update' in case this doc/bizId has been exported twice
             iwriter.updateDocument(bizIdTerm(entryBean), doc);
 
             // Record progress through the file
@@ -411,6 +447,26 @@ public class IndexArchivesJob extends CancellableJob {
      * Tuple record for tracking where to start indexing .archive files
      */
     private static record IndexableFile(File file, long startOffset) {
+    }
+
+    private static class IndexingException extends Exception {
+
+        private final String filename;
+        private final ArchiveDocConfig documentType;
+
+        public IndexingException(String message, Throwable cause, String filename, ArchiveDocConfig documentType) {
+            super(message, cause);
+            this.filename = filename;
+            this.documentType = documentType;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        public ArchiveDocConfig getDocumentType() {
+            return documentType;
+        }
     }
 
 }

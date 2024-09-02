@@ -29,6 +29,7 @@
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="Content" />
 		<document ref="ControlPanel" />
+		<document ref="CorruptArchiveError"/>
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="DocumentCreator" />
@@ -230,7 +231,9 @@
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
-				</document>			
+				</document>
+				<document name="CorruptArchiveError" permission="CRUDC">
+				</document>
 				<document name="ControlPanel" permission="_____">
 					<action name="CacheStats" />
 					<action name="EvictFromCache" />

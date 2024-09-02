@@ -75,7 +75,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
 
         String targetTimeStr = DateTimeFormatter.ISO_LOCAL_TIME.withZone(ZoneId.systemDefault())
                                                                .format(targetEndTime);
-        getLog().add("Job started; target end time: " + targetTimeStr);
+        getLog().add("Export process started; target end time: " + targetTimeStr);
         getLog().add("Using batch size: " + batchSize);
 
         int recordsArchived = 0;
@@ -109,7 +109,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         }
 
         if (isCancelled()) {
-            getLog().add("Job cancelled");
+            getLog().add("Export process cancelled");
         } else if (timesUp()) {
             getLog().add("Time's up");
         }

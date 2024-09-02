@@ -119,10 +119,10 @@ public class ArchiveRetriever {
      */
     private List<ArchiveEntry> searchIndex(ArchiveDocConfig docConfig, LuceneFilter filter, int maxResults) throws IOException {
 
-        Path auditArchiveIndexPath = docConfig.getIndexDirectory();
-        logger.debug("Searching for {}; using index at {}", filter, auditArchiveIndexPath);
+        Path indexPath = docConfig.getIndexDirectory();
+        logger.debug("Searching for {}; using index at {}", filter, indexPath);
 
-        try (Directory directory = FSDirectory.open(auditArchiveIndexPath);
+        try (Directory directory = FSDirectory.open(indexPath);
                 DirectoryReader ireader = DirectoryReader.open(directory)) {
 
             IndexSearcher isearcher = new IndexSearcher(ireader);
