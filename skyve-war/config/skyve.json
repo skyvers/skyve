@@ -63,7 +63,9 @@
 				"module": "admin",
 				"document": "Audit",
 				// Directory within ${content.directory}/archive/ to store archived documents
-				"directory": "audit-archive"
+				"directory": "audit-archive",
+				// How long to retain exported (soft-deleted) documents
+				"retainDeletedDocumentsDays": 7
 			}
 		]
 	},

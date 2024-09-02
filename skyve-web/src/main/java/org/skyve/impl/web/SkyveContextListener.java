@@ -791,15 +791,15 @@ public class SkyveContextListener implements ServletContextListener {
         Integer batchSize = getNumber(archKey, "exportBatchSize", archiveProps, false).intValue();
 
         @SuppressWarnings("unchecked")
-        List<Map<String, String>> docProps = (List<Map<String, String>>) get(archKey, "documents", archiveProps, true);
+        List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
 
         List<ArchiveConfig.ArchiveDocConfig> docConfigs = new ArrayList<>();
-        for (Map<String, String> docProp : docProps) {
+        for (Map<String, Object> docProp : docProps) {
 
-            String module = docProp.get("module");
-            String document = docProp.get("document");
-            String directory = docProp.get("directory");
-            int retainDeletedDocumentsDays = 7; // FIXME update config
+            String module = getString(null, "module", docProp, true);
+            String document = getString(null, "document", docProp, true);
+            String directory = getString(null, "directory", docProp, true);
+            int retainDeletedDocumentsDays = getInt(null, "retainDeletedDocumentsDays", docProp);
 
             docConfigs.add(new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays));
         }
