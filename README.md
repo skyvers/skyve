@@ -348,7 +348,8 @@ mvn skyve:newAction
 This will prompt you for a module name, document name and action name and create an empty action ready to add business logic to. Note: the action will need to be manually added to any edit views and privileges within your module as required.
 
 ## Updating Skyve version
-To update your project with a specific Skyve version, you'll need to pull/check-out the Skyve project (from https://github.com/skyvers/skyve.git) prior to the following steps, ensuring you pull the specific Skyve version you're after. If in doubt, pull Skyve and check which version is retrieved. Releases are tagged, so it is typically safest to checkout the last tagged commit.
+
+To update your project with a specific Skyve version, you will need to pull/check-out the Skyve project (from https://github.com/skyvers/skyve.git) prior to the following steps, ensuring you pull the specific Skyve version you're after. If in doubt, pull Skyve and check which version is retrieved. All Skyve releases are tagged, so it is typically safest to checkout the last tagged commit.
 
 ⚠️ **Warning:** before continuing, make sure your project is under source control, and all files are committed locally. Upgrading a project can change lots of files, and will update your admin module and web resources. Any local changes you have made will be overwritten and need to be merged back in manually.
 
@@ -357,6 +358,7 @@ These instructions apply to projects created using the [Creating a new Skyve Pro
 
 - If using Eclipse, create a new Run Configuration target, setting the base directory to your project's workspace, and setting the goal to `skyve:assemble`. Once setup in your pom this can also be run from the command line with `mvn skyve:assemble`.
 - In your project's `pom.xml`, update the `skyve.version` property to match the version of Skyve you pulled/checked out
+    - **Note:** confirm that your Skyve checkout matches the version you are upgrading to, this is typically the last tagged commit, not the latest changes on the master branch
     - Find the Skyve plugin (search for artifactId `skyve-maven-plugin`) and configure the `<skyveDir></skyveDir>` setting with a relative or absolute path to the Skyve project local drive location (where you pulled to)
     - Set your `<customer></customer>` to match the customer in your project
     - Save your `pom.xml`
