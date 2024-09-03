@@ -1,35 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <document name="UserLoginRecord"
-			xmlns="http://www.skyve.org/xml/document" 
-			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<persistent name="ADM_UserLoginRecord" />
 	<singularAlias>User Login Record</singularAlias>
 	<pluralAlias>User Login Records</pluralAlias>
 	<audited>false</audited>
 	<iconStyleClass>fa-solid fa-history</iconStyleClass>
-	<bizKey expression="{userName} @ {loginDateTime}" sensitivity="personal" />
+	<bizKey expression="{userName} @ {loginDateTime}"
+		sensitivity="personal" />
 	<attributes>
-		<text name="userName" required="true" usage="domain" sensitivity="personal">
-			<documentation>admin.userLoginRecord.userName.documentation</documentation>
+		<text name="userName" required="true" usage="domain"
+			sensitivity="personal">
+			<documentation>The user name of the user that attempted to log in.</documentation>
 			<displayName>admin.userLoginRecord.userName.displayName</displayName>
 			<length>254</length>
 		</text>
 		<dateTime name="loginDateTime" required="true" usage="domain">
-			<documentation>admin.userLoginRecord.loginDateTime.documentation</documentation>
+			<documentation>The date/time that the user attempted to login.</documentation>
 			<displayName>admin.userLoginRecord.loginDateTime.displayName</displayName>
 		</dateTime>
 		<boolean name="failed" required="true" usage="domain">
-			<documentation>admin.userLoginRecord.failed.documentation</documentation>
+			<documentation>A boolean indicating whether the login attempt of the user failed.</documentation>
 			<displayName>admin.userLoginRecord.failed.displayName</displayName>
 		</boolean>
-		<text name="ipAddress" required="true" usage="domain" sensitivity="personal">
-			<documentation>admin.userLoginRecord.ipAddress.documentation</documentation>
+		<text name="ipAddress" required="true" usage="domain"
+			sensitivity="personal">
+			<documentation>The IP Address of the user that has logged in. This shall be compared with next login for security purposes by checking if there was a change in the IP Address.</documentation>
 			<displayName>admin.userLoginRecord.ipAddress.displayName</displayName>
 			<length>254</length>
 		</text>
 		<text name="countryCode" usage="domain">
-			<documentation>admin.userLoginRecord.countryCode.documentation</documentation>
+			<documentation>This is an ISO 3166 alpha-2 country code that is derived from the IP Address that is recorded. It is used to determine the country a user logged in from and an alert is sent to the user if the country changes. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.</documentation>
 			<displayName>admin.userLoginRecord.countryCode.displayName</displayName>
 			<length>2</length>
 		</text>

@@ -53,35 +53,35 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	/**
 	 * User Name
 	 * <br/>
-	 * admin.userLoginRecord.userName.documentation
+	 * The user name of the user that attempted to log in.
 	 **/
 	private String userName;
 
 	/**
 	 * Sign In Date/Time
 	 * <br/>
-	 * admin.userLoginRecord.loginDateTime.documentation
+	 * The date/time that the user attempted to login.
 	 **/
 	private DateTime loginDateTime;
 
 	/**
 	 * Failed
 	 * <br/>
-	 * admin.userLoginRecord.failed.documentation
+	 * A boolean indicating whether the login attempt of the user failed.
 	 **/
 	private Boolean failed;
 
 	/**
 	 * IP Address
 	 * <br/>
-	 * admin.userLoginRecord.ipAddress.documentation
+	 * The IP Address of the user that has logged in. This shall be compared with next login for security purposes by checking if there was a change in the IP Address.
 	 **/
 	private String ipAddress;
 
 	/**
 	 * Country Code
 	 * <br/>
-	 * admin.userLoginRecord.countryCode.documentation
+	 * This is an ISO 3166 alpha-2 country code that is derived from the IP Address that is recorded. It is used to determine the country a user logged in from and an alert is sent to the user if the country changes. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.
 	 **/
 	private String countryCode;
 
