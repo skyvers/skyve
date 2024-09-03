@@ -8,16 +8,11 @@ public class ArchivedDocumentCacheConfig extends EHCacheConfig<Serializable, Bea
 
     public static final String CACHE_NAME = "archivedDocuments";
 
-    public static final ArchivedDocumentCacheConfig DEFAULT = new ArchivedDocumentCacheConfig(
-            100l, 0l, CacheExpiryPolicy.timeToIdle, 10l);
+    public static final ArchivedDocumentCacheConfig DEFAULT = new ArchivedDocumentCacheConfig(100l, 10l);
 
-    public ArchivedDocumentCacheConfig(
-            long heapSizeEntries,
-            long offHeapSizeInMB,
-            CacheExpiryPolicy expiryPolicy,
-            long expiryInMinutes) {
+    public ArchivedDocumentCacheConfig(long heapSizeEntries, long expiryInMinutes) {
 
-        super(CACHE_NAME, heapSizeEntries, offHeapSizeInMB, expiryPolicy, expiryInMinutes, Serializable.class, Bean.class);
+        super(CACHE_NAME, heapSizeEntries, 0l, CacheExpiryPolicy.timeToIdle, expiryInMinutes, Serializable.class, Bean.class);
     }
 
 }

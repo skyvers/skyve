@@ -52,8 +52,6 @@
 		// Cache settings used when retrieving documents from the archive
 		"cache": {
 			"heapSizeEntries": 120,
-			"offHeapSizeMB": 0,
-			"expiryPolicy": "timeToLive",
 			"expiryTimeMinutes": 15
 		},
 		// Here you define the document(s) to export out of the RDBMS

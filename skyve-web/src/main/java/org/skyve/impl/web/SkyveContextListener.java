@@ -815,18 +815,11 @@ public class SkyveContextListener implements ServletContextListener {
             long heapSizeEntries = Optional.ofNullable(getNumber(cacheKey, "heapSizeEntries", cacheProps, false))
                                            .map(Number::longValue)
                                            .orElse(100l);
-            long offHeapSizeMB = Optional.ofNullable(getNumber(cacheKey, "offHeapSizeMB", cacheProps, false))
-                                         .map(Number::longValue)
-                                         .orElse(10l);
             long expiryInMinutes = Optional.ofNullable(getNumber(cacheKey, "expiryTimeMinutes", cacheProps, false))
                                            .map(Number::longValue)
                                            .orElse(10l);
 
-            CacheExpiryPolicy expiryPolicy = Optional.ofNullable(getString(cacheKey, "expiryPolicy", cacheProps, false))
-                                                     .map(CacheExpiryPolicy::valueOf)
-                                                     .orElse(CacheExpiryPolicy.timeToIdle);
-
-            cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, offHeapSizeMB, expiryPolicy, expiryInMinutes);
+            cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, expiryInMinutes);
         }
 
         UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs), cacheConfig);
