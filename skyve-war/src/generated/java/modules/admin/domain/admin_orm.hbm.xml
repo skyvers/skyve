@@ -712,7 +712,7 @@
 		<property name="loginDateTime" type="DateTime" />
 		<property name="failed" />
 		<property name="ipAddress" length="254" />
-		<property name="countryCode" length="2" />
+		<property name="country" length="100" />
 		<filter name="adminUserLoginRecordNoneFilter" condition="1=0"/>
 		<filter name="adminUserLoginRecordCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserLoginRecordDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

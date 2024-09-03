@@ -48,7 +48,7 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	public static final String ipAddressPropertyName = "ipAddress";
 
 	/** @hidden */
-	public static final String countryCodePropertyName = "countryCode";
+	public static final String countryPropertyName = "country";
 
 	/**
 	 * User Name
@@ -79,11 +79,11 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	private String ipAddress;
 
 	/**
-	 * Country Code
+	 * Country
 	 * <br/>
-	 * This is an ISO 3166 alpha-2 country code that is derived from the IP Address that is recorded. It is used to determine the country a user logged in from and an alert is sent to the user if the country changes. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.
+	 * This is the country name that is derived from the IP Address that is recorded. If it changes from the previous login record an alert is sent to the user. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.
 	 **/
-	private String countryCode;
+	private String country;
 
 	@Override
 	@XmlTransient
@@ -201,20 +201,20 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #countryCode} accessor.
+	 * {@link #country} accessor.
 	 * @return	The value.
 	 **/
-	public String getCountryCode() {
-		return countryCode;
+	public String getCountry() {
+		return country;
 	}
 
 	/**
-	 * {@link #countryCode} mutator.
-	 * @param countryCode	The new value.
+	 * {@link #country} mutator.
+	 * @param country	The new value.
 	 **/
 	@XmlElement
-	public void setCountryCode(String countryCode) {
-		preset(countryCodePropertyName, countryCode);
-		this.countryCode = countryCode;
+	public void setCountry(String country) {
+		preset(countryPropertyName, country);
+		this.country = country;
 	}
 }

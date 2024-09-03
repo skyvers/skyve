@@ -1,7 +1,6 @@
 package modules.admin.UserLoginRecord.jobs;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
@@ -24,15 +23,15 @@ public class DifferentCountryLoginNotificationJob extends Job {
 
 	private static final String UNUSUAL_LOGIN_ACTIVITY_EMAIL_DEFAULT_SUBJECT = "Security Alert: Unusual Login Activity Detected";
 
-	private static final String UNUSUAL_LOGIN_EMAIL_BODY = "Dear %s,\n\n"
-			+ "We have detected a login attempt to your account from a new location: %s with IP address: %s. "
+	private static final String UNUSUAL_LOGIN_EMAIL_BODY = String.format("Dear {name},\n\n"
+			+ "We have detected a login attempt to your account from a new location: {country} with IP address: {ipAddress}. "
 			+ "If this was you, there's no need to take further action.\n\n"
 			+ "However, if you do not recognize this activity, we strongly recommend that you change your password immediately to secure your account. "
 			+ "You can do this by logging into your account and navigating to <strong>Admin -> Password</strong>.\n\n"
 			+ "For your safety, please do not share your password with anyone.\n\n"
-			+ "If you have any questions or need assistance, please contact our support team at %s.\n\n"
+			+ "If you have any questions or need assistance, please contact our support team at " +  UtilImpl.SUPPORT_EMAIL_ADDRESS + ".\n\n"
 			+ "Best regards,\n"
-			+ "The Security Team";
+			+ "The Security Team", Contact.namePropertyName,UserLoginRecord.countryPropertyName, UserLoginRecord.ipAddressPropertyName);
 
 	private static final String UNUSUAL_LOGIN_EMAIL_FAILURE_LOG_MESSAGE = "Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s";
 
@@ -44,22 +43,18 @@ public class DifferentCountryLoginNotificationJob extends Job {
 		setPercentComplete(0);
 
 		UserLoginRecord loginRecord = (UserLoginRecord) this.getBean();
-		String userIPAddress = loginRecord.getIpAddress();
-		String countryCode = loginRecord.getCountryCode();
+		String country = loginRecord.getCountry();
 
-		if (countryCode != null) {
-			// Get actual country name
-			Locale locale = new Locale("", countryCode);
-			String country = locale.getDisplayCountry();
-
+		if (country != null) {
 			Contact contact = ModulesUtil.getCurrentUserContact();
 			String userEmail = contact.getEmail1();
 			String userName = contact.getName();
 			try {
 				CommunicationUtil.sendFailSafeSystemCommunication(COMMUNICATION_DESCRIPTION,
 						UNUSUAL_LOGIN_ACTIVITY_EMAIL_DEFAULT_SUBJECT,
-						String.format(UNUSUAL_LOGIN_EMAIL_BODY, userName, country, userIPAddress, UtilImpl.SUPPORT_EMAIL_ADDRESS),
-						CommunicationUtil.ResponseMode.EXPLICIT, null, contact);
+						UNUSUAL_LOGIN_EMAIL_BODY,
+						CommunicationUtil.ResponseMode.EXPLICIT, null, contact,loginRecord);
+				
 				log.add(String.format(SUCCESS_MESSAGE, userEmail));
 				UtilImpl.LOGGER.info(String.format(SUCCESS_MESSAGE, userEmail));
 			} catch (Exception e) {

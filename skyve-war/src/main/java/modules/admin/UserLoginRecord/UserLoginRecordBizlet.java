@@ -30,7 +30,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	@Inject
 	private transient GeoIPService geoIPService;
 
-	private static final String COUNTRY_CODE = "countryCode";
+	private static final String COUNTRY = "country";
 	private static final String IP_ADDRESS = "ipAddress";
 
 	private static final String IP_CHANGE_LOG_MESSAGE = "The user %s has logged in from a new IP address. "
@@ -45,21 +45,23 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	public static final String COMMUNICATION_DESCRIPTION = "Email warning a user of a new login from a different country";
 
 	/**
-	 * The preSave is overridden so as to add the country code of the user based on the ip addrress and if IpInfo token is set. The
+	 * The preSave is overridden so as to add the country of the user based on the ip addrress and if IpInfo token is set. The
 	 * method also adds security logs if the ip address and/or the country code of the user changed from the previous login. It also
 	 * kicks off a job sending the user an email if the country changed from the previous login.
 	 */
 	@Override
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 
-		// Check if the IpInfo token has been set so as to get the country code
-		String countryCode = bean.getCountryCode();
+		String country = bean.getCountry();
+		// Check if the IpInfo token has been set so as to get the country code and country
 		if (UtilImpl.IP_INFO_TOKEN != null) {
 
 			Optional<String> countryCodeOptional = geoIPService.getCountryCodeForIP(bean.getIpAddress());
 			if (countryCodeOptional.isPresent()) {
-				countryCode = countryCodeOptional.get();
-				bean.setCountryCode(countryCode);
+				String countryCode = countryCodeOptional.get();
+				Locale locale = new Locale("", countryCode);
+				country = locale.getDisplayCountry();
+				bean.setCountry(country);
 			}
 		}
 
@@ -98,15 +100,11 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				if (lastIpAddress != null && !Objects.equals(userIPAddress, lastIpAddress)) {
 
 					// Check if the country has changed since the last login and if so send the user a warning message
-					String previousCountryCode = (String) BindUtil.get(previousLoginRecord, COUNTRY_CODE);
+					String previousCountry = (String) BindUtil.get(previousLoginRecord, COUNTRY);
 
-					if (countryCode != null && previousCountryCode != null && !Objects.equals(countryCode, previousCountryCode)) {
+					if (country != null && previousCountry != null && !Objects.equals(country, previousCountry)) {
 						// Get actual country name
-						Locale locale = new Locale("", countryCode);
-						String country = locale.getDisplayCountry();
-
-						Locale previousLocale = new Locale("", previousCountryCode);
-						String previousCountry = previousLocale.getDisplayCountry();
+						bean.setCountry("Kenya");
 
 						SecurityUtil.log("User Logged in from Different Country",
 								String.format(COUNTRY_CHANGE_LOG_MESSAGE, userName, previousCountry, lastIpAddress, country,
@@ -125,7 +123,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 			}
 		}
 
-		super.postSave(bean);
+		super.preSave(bean);
 	}
 
 }

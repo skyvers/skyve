@@ -31,10 +31,10 @@
 			<displayName>admin.userLoginRecord.ipAddress.displayName</displayName>
 			<length>254</length>
 		</text>
-		<text name="countryCode" usage="domain">
-			<documentation>This is an ISO 3166 alpha-2 country code that is derived from the IP Address that is recorded. It is used to determine the country a user logged in from and an alert is sent to the user if the country changes. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.</documentation>
-			<displayName>admin.userLoginRecord.countryCode.displayName</displayName>
-			<length>2</length>
+		<text name="country" usage="domain">
+			<documentation>This is the country name that is derived from the IP Address that is recorded. If it changes from the previous login record an alert is sent to the user. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.</documentation>
+			<displayName>admin.userLoginRecord.country.displayName</displayName>
+			<length>100</length>
 		</text>
 	</attributes>
 </document>

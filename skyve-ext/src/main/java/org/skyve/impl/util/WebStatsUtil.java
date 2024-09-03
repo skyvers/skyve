@@ -2,7 +2,6 @@ package org.skyve.impl.util;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -11,7 +10,6 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -26,7 +24,6 @@ public class WebStatsUtil {
 	private static final String FAILED = "failed";
 	private static final String LOGIN_DATE_TIME = "loginDateTime";
 	private static final String IP_ADDRESS = "ipAddress";
-	private static final String COUNTRY = "country";
 	private static final String YEAR_FORMAT = "yyyy";
 	private static final String MONTH_FORMAT = "M";
 	
@@ -56,18 +53,7 @@ public class WebStatsUtil {
 		BindUtil.set(loginRecord, FAILED, Boolean.FALSE);
 		BindUtil.set(loginRecord, IP_ADDRESS, userIPAddress);
 
-		// Check if the IpInfo token has been set so as to get the country code
-		String countryCode = null;
-		if (UtilImpl.IP_INFO_TOKEN != null) {
-			final GeoIPService geoIPService = new GeoIPService();
-			Optional<String> countryCodeOptional = geoIPService.getCountryCodeForIP(userIPAddress);
-			if (countryCodeOptional.isPresent()) {
-				countryCode = countryCodeOptional.get();
-				BindUtil.set(loginRecord, COUNTRY, countryCode);
-			}
-		}
-
-		// Save the new record. Country code is added in the preSave method of 
+		// Save the new record. Country code is added in the preSave method of UserLoginRecordBizlet
 		AbstractPersistence.get()
 				.save(loginRecordDocument, loginRecord);
 
