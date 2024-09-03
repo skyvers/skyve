@@ -43,7 +43,7 @@
 			name="timestamp"
 			required="true"
 		>
-			<displayName>Timestamp</displayName>
+			<displayName>Created Timestamp</displayName>
 		</timestamp>
 		<enum
 			name="resolution"

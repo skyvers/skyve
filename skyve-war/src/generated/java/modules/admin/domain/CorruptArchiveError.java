@@ -69,7 +69,7 @@ public class CorruptArchiveError extends AbstractPersistentBean implements org.s
 	private String archiveTypeDocument;
 
 	/**
-	 * Timestamp
+	 * Created Timestamp
 	 **/
 	private Timestamp timestamp;
 
