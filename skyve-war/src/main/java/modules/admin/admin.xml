@@ -545,14 +545,7 @@
 			<uxui name="desktop" />
 			<role name="BasicUser" />
 		</list>
-<!-- 		<list document="Audit" name="admin.adminMenu.audits.list.displayName"> -->
-<!-- 			<uxui name="desktop" /> -->
-<!-- 			<uxui name="external" /> -->
-<!-- 			<uxui name="tablet" /> -->
-<!-- 			<role name="SecurityAdministrator" /> -->
-<!-- 			<role name="AuditManager" /> -->
-<!-- 		</list> -->
-		<list document="Audit" name="Audit" model="ArchivedAuditListModel">
+		<list document="Audit" name="admin.adminMenu.audits.list.displayName" model="ArchivedAuditListModel">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />
