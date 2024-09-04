@@ -44,13 +44,12 @@ public class WebStatsUtil {
 		Document loginRecordDocument = module.getDocument(customer, AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME);
 		AbstractPersistentBean loginRecord = loginRecordDocument.newInstance(user);
 		BindUtil.set(loginRecord, AppConstants.USER_NAME_ATTRIBUTE_NAME, user.getName());
-		BindUtil.set(loginRecord, AppConstants.LOGIN_DATE_TIME, new DateTime(System.currentTimeMillis()));
-		BindUtil.set(loginRecord, AppConstants.FAILED, Boolean.FALSE);
-		BindUtil.set(loginRecord, AppConstants.IP_ADDRESS, userIPAddress);
+		BindUtil.set(loginRecord, AppConstants.LOGIN_DATE_TIME_ATTRIBUTE_NAME, new DateTime(System.currentTimeMillis()));
+		BindUtil.set(loginRecord, AppConstants.FAILED_ATTRIBUTE_NAME, Boolean.FALSE);
+		BindUtil.set(loginRecord, AppConstants.IP_ADDRESS_ATTRIBUTE_NAME, userIPAddress);
 
 		// Save the new record. Country code is added in the preSave method of UserLoginRecordBizlet
-		AbstractPersistence.get()
-				.save(loginRecordDocument, loginRecord);
+		AbstractPersistence.get().save(loginRecordDocument, loginRecord);
 
 		// NO COMMIT
 	}

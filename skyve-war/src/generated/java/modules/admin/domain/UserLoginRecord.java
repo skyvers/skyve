@@ -74,14 +74,17 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	/**
 	 * IP Address
 	 * <br/>
-	 * The IP Address of the user that has logged in. This shall be compared with next login for security purposes by checking if there was a change in the IP Address.
+	 * The IP Address of the user that has logged in. This shall be compared with next login for 
+				security purposes by checking if there was a change in the IP Address.
 	 **/
 	private String ipAddress;
 
 	/**
 	 * Country
 	 * <br/>
-	 * This is the country name that is derived from the IP Address that is recorded. If it changes from the previous login record an alert is sent to the user. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.
+	 * This is the country name that is derived from the IP Address that is recorded. If it changes 
+				from the previous login record an alert is sent to the user. It is only used when the 
+				GeoipService is in use i.e if the user has provided an IpInfo token.
 	 **/
 	private String country;
 

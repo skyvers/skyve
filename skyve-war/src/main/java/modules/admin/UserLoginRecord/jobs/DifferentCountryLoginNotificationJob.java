@@ -19,13 +19,11 @@ import modules.admin.domain.UserLoginRecord;
  */
 public class DifferentCountryLoginNotificationJob extends Job {
 
-	private static final String SUCCESS_MESSAGE = "Successfully sent email warning of unusual login activity to %s";
-
 	public static final String JOB_NAME = "jDifferentCountryLoginNotification";
 
-	private static final String UNUSUAL_LOGIN_ACTIVITY_EMAIL_DEFAULT_SUBJECT = "Security Alert: Unusual Login Activity Detected";
-
-	private static final String UNUSUAL_LOGIN_EMAIL_BODY = "Dear {"
+	private static final String EMAIL_DESCRIPTION = "SYSTEM Different Country Login Notification";
+	private static final String EMAIL_SUBJECT = "Security Alert: Unusual Login Activity Detected";
+	private static final String EMAIL_BODY = "Dear {"
 			+ Contact.namePropertyName
 			+ "},<br/><br/>"
 			+ "We have detected a login attempt to your account from a new location: {"
@@ -33,18 +31,15 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			+ "} with IP address: {"
 			+ UserLoginRecord.ipAddressPropertyName
 			+ "}. If this was you, there's no need to take further action.<br/><br/>"
-			+ "However, if you do not recognize this activity, we strongly recommend that you change your password immediately to secure your account."
+			+ "However, if you do not recognize this activity, we strongly recommend that you change your password immediately to secure your account. "
 			+ "You can do this by logging into your account and navigating to <strong>Admin -> Password</strong>.<br/><br/>"
 			+ "For your safety, please do not share your password with anyone.<br/><br/>"
-			+ "If you have any questions or need assistance, please contact our support team at {"
+			+ "If you have any questions or need assistance, please contact our support team <a href=\"mailto: {"
 			+ Startup.environmentSupportEmailPropertyName
-			+ "}<br/><br/>"
+			+ "}\">here</a>.<br/><br/>"
 			+ "Best regards,<br/>"
 			+ "The Security Team";
 
-	private static final String UNUSUAL_LOGIN_EMAIL_FAILURE_LOG_MESSAGE = "Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s";
-
-	public static final String COMMUNICATION_DESCRIPTION = "SYSTEM Different Country Login Notification (GeoIP enabled)";
 
 	@Override
 	public void execute() throws Exception {
@@ -66,24 +61,24 @@ public class DifferentCountryLoginNotificationJob extends Job {
 					String warningMessage = "There is no environment support email specified. Failed to send different country login notification.";
 					log.add(warningMessage);
 					Util.LOGGER.warning(warningMessage);
-					throw new Exception(warningMessage);
+					return;
 				}
-				CommunicationUtil.sendFailSafeSystemCommunication(COMMUNICATION_DESCRIPTION,
-						UNUSUAL_LOGIN_ACTIVITY_EMAIL_DEFAULT_SUBJECT,
-						UNUSUAL_LOGIN_EMAIL_BODY,
-						CommunicationUtil.ResponseMode.EXPLICIT, null, contact, loginRecord, startup);
 
-				log.add(String.format(SUCCESS_MESSAGE, userEmail));
-				UtilImpl.LOGGER.info(String.format(SUCCESS_MESSAGE, userEmail));
+				// Send
+				CommunicationUtil.sendFailSafeSystemCommunication(EMAIL_DESCRIPTION,
+						EMAIL_SUBJECT, EMAIL_BODY, CommunicationUtil.ResponseMode.EXPLICIT, null, contact, loginRecord, startup);
+
+				String successMessage = String.format("Successfully sent email warning of unusual login activity to %s", userEmail);
+				log.add(successMessage);
+				UtilImpl.LOGGER.info(successMessage);
 			} catch (Exception e) {
-
-				log.add(String.format(UNUSUAL_LOGIN_EMAIL_FAILURE_LOG_MESSAGE, userName, userEmail, e.getMessage()));
-				UtilImpl.LOGGER.severe(String.format(UNUSUAL_LOGIN_EMAIL_FAILURE_LOG_MESSAGE, userName, userEmail, e.getMessage()));
+				String errorMessage = String.format(
+						"Failed to send security alert email to %s at %s regarding a login from a different country. Exception: %s", userName, userEmail, e.getMessage());
+				log.add(errorMessage);
+				UtilImpl.LOGGER.warning(errorMessage);
 				e.printStackTrace();
 			}
 		}
 		setPercentComplete(100);
-
 	}
-
 }

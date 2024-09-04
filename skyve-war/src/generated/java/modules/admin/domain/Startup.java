@@ -595,7 +595,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 * <br/>
 	 * This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.
 	 **/
-	private CountryListType countryListType = CountryListType.blacklist;
+	private CountryListType countryListType;
 
 	/**
 	 * Country Codes

@@ -8,8 +8,7 @@
 	<pluralAlias>User Login Records</pluralAlias>
 	<audited>false</audited>
 	<iconStyleClass>fa-solid fa-history</iconStyleClass>
-	<bizKey expression="{userName} @ {loginDateTime}"
-		sensitivity="personal" />
+	<bizKey expression="{userName} @ {loginDateTime}" sensitivity="personal" />
 	<attributes>
 		<text name="userName" required="true" usage="domain"
 			sensitivity="personal">
@@ -25,14 +24,20 @@
 			<documentation>A boolean indicating whether the login attempt of the user failed.</documentation>
 			<displayName>admin.userLoginRecord.failed.displayName</displayName>
 		</boolean>
-		<text name="ipAddress" required="true" usage="domain"
-			sensitivity="personal">
-			<documentation>The IP Address of the user that has logged in. This shall be compared with next login for security purposes by checking if there was a change in the IP Address.</documentation>
+		<text name="ipAddress" required="true" usage="domain" sensitivity="personal">
+			<documentation>
+				The IP Address of the user that has logged in. This shall be compared with next login for 
+				security purposes by checking if there was a change in the IP Address.
+			</documentation>
 			<displayName>admin.userLoginRecord.ipAddress.displayName</displayName>
 			<length>254</length>
 		</text>
-		<text name="country" usage="domain">
-			<documentation>This is the country name that is derived from the IP Address that is recorded. If it changes from the previous login record an alert is sent to the user. It is only used when the GeoipService is in use i.e if the user has provided an IpInfo token.</documentation>
+		<text name="country" usage="domain" sensitivity="personal">
+			<documentation>
+				This is the country name that is derived from the IP Address that is recorded. If it changes 
+				from the previous login record an alert is sent to the user. It is only used when the 
+				GeoipService is in use i.e if the user has provided an IpInfo token.
+			</documentation>
 			<displayName>admin.userLoginRecord.country.displayName</displayName>
 			<length>100</length>
 		</text>

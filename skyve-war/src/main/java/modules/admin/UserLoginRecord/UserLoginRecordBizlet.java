@@ -45,7 +45,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	@Override
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 
-		String country = bean.getCountry();
+		String country = null;
 		// Check if the IpInfo token has been set so as to get the country code and country
 		if (UtilImpl.IP_INFO_TOKEN != null) {
 
