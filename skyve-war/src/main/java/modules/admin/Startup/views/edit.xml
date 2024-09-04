@@ -210,7 +210,7 @@
 		        <column/>
 		        <column responsiveWidth="2"/>
 		        <row>
-					<item required="true">
+					<item>
 						<combo binding="countryListType"/>
 					</item>
 				</row>

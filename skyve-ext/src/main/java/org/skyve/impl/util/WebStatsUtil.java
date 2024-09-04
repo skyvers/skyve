@@ -21,15 +21,10 @@ import org.skyve.web.UserAgentType;
 
 public class WebStatsUtil {
 	
-	private static final String FAILED = "failed";
-	private static final String LOGIN_DATE_TIME = "loginDateTime";
-	private static final String IP_ADDRESS = "ipAddress";
+	
 	private static final String YEAR_FORMAT = "yyyy";
 	private static final String MONTH_FORMAT = "M";
 	
-	public static final String COMMUNICATION_DESCRIPTION = "Email warning a user of a new login from a different country";
-
-
 	private WebStatsUtil() {
 		// do nothing
 	}
@@ -49,9 +44,9 @@ public class WebStatsUtil {
 		Document loginRecordDocument = module.getDocument(customer, AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME);
 		AbstractPersistentBean loginRecord = loginRecordDocument.newInstance(user);
 		BindUtil.set(loginRecord, AppConstants.USER_NAME_ATTRIBUTE_NAME, user.getName());
-		BindUtil.set(loginRecord, LOGIN_DATE_TIME, new DateTime(System.currentTimeMillis()));
-		BindUtil.set(loginRecord, FAILED, Boolean.FALSE);
-		BindUtil.set(loginRecord, IP_ADDRESS, userIPAddress);
+		BindUtil.set(loginRecord, AppConstants.LOGIN_DATE_TIME, new DateTime(System.currentTimeMillis()));
+		BindUtil.set(loginRecord, AppConstants.FAILED, Boolean.FALSE);
+		BindUtil.set(loginRecord, AppConstants.IP_ADDRESS, userIPAddress);
 
 		// Save the new record. Country code is added in the preSave method of UserLoginRecordBizlet
 		AbstractPersistence.get()
