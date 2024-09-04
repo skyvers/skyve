@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.SortedDocValuesField;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.util.BytesRef;
 import org.skyve.archive.support.DocumentConverter;
@@ -32,17 +31,17 @@ public class AuditDocumentConverter implements DocumentConverter {
 
         // timestamp
         String timestampStr = DocumentConverter.dateToString(audit.getTimestamp());
-        doc.add(new StringField(Audit.timestampPropertyName, timestampStr, Store.YES));
+        doc.add(new TextField(Audit.timestampPropertyName, timestampStr, Store.YES));
         doc.add(sortField(Audit.timestampPropertyName, timestampStr));
 
         // user
         doc.add(new TextField(Audit.userNamePropertyName, audit.getUserName(), Store.YES));
         doc.add(sortField(Audit.userNamePropertyName, audit.getUserName()));
 
-        doc.add(new StringField(Bean.USER_ID, audit.getBizUserId(), Store.YES));
+        doc.add(new TextField(Bean.USER_ID, audit.getBizUserId(), Store.YES));
 
         // the audit record's bizId
-        doc.add(new StringField(Bean.DOCUMENT_ID, audit.getBizId(), Store.YES));
+        doc.add(new TextField(Bean.DOCUMENT_ID, audit.getBizId(), Store.YES));
 
         // operation
         String opName = audit.getOperation()
@@ -65,7 +64,7 @@ public class AuditDocumentConverter implements DocumentConverter {
                 });
 
         // bizId of the document being audited
-        doc.add(new StringField(Audit.auditBizIdPropertyName, audit.getAuditBizId(), Store.YES));
+        doc.add(new TextField(Audit.auditBizIdPropertyName, audit.getAuditBizId(), Store.YES));
         doc.add(sortField(Audit.auditBizIdPropertyName, audit.getAuditBizId()));
 
         return doc;
