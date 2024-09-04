@@ -15,9 +15,7 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
-import org.springframework.stereotype.Component;
 
-import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,12 +50,12 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 			Optional<String> countryCode = geoIPService.getCountryCodeForIP(clientIPAddress);
 			if (countryCode.isPresent()) {
 				String country = countryCode.get();
-				UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress + " in country: " + country);
+				UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress + " in country: " + country);
 			} else {
-				UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress);
+				UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress);
 			}
 		} else {
-			UtilImpl.LOGGER.info(userName + " has logged in from Ip Address " + clientIPAddress);
+			UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress);
 		}
 		
 		String redirectUrl = null;
