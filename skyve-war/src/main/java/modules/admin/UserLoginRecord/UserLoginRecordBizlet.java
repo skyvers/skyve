@@ -10,12 +10,10 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 import org.skyve.util.SecurityUtil;
 
 import jakarta.inject.Inject;
@@ -86,14 +84,12 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 									userIPAddress));
 					
 					// Run job to email user on country change
-					final Persistence persistence = CORE.getPersistence();
-					final org.skyve.metadata.user.User user = persistence.getUser();
-					final Customer customer = user.getCustomer();
-					final Module module = customer.getModule(User.MODULE_NAME);
+					final Module module = CORE.getCustomer()
+							.getModule(User.MODULE_NAME);
 					final JobMetaData countryChangeNotificationJobMetaData = module
 							.getJob(DifferentCountryLoginNotificationJob.JOB_NAME);
 					EXT.getJobScheduler()
-							.runOneShotJob(countryChangeNotificationJobMetaData, bean, user);
+							.runOneShotJob(countryChangeNotificationJobMetaData, bean, CORE.getUser());
 
 				} else {
 					// If the country has not changed then the security log shall only have details of an IP change
