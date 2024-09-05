@@ -103,7 +103,10 @@ public class WebUtil {
 				setSessionId(user, request);
 				session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 				AbstractPersistence.get().setUser(user);
-				WebStatsUtil.recordLogin(user);
+				
+//				Get Ip address of user to record in UserLoginRecord
+				String userIPAddress = SecurityUtil.getSourceIpAddress(request);
+				WebStatsUtil.recordLogin(user, userIPAddress);
 				Customer customer = user.getCustomer();
 				if (customer instanceof CustomerImpl) {
 					((CustomerImpl) customer).notifyLogin(user, session);
