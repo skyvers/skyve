@@ -447,7 +447,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				                dataWidgetVar,
 				                button.getPixelWidth(),
 				                button.getPixelHeight(),
-				                action.getClientValidation(),
 				                confirmationText,
 				                action.getDisabledConditionName(),
 				                formDisabledConditionName,
@@ -3150,7 +3149,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								null,
 								null,
-								action.getClientValidation(),
 								confirmationText,
 								action.getDisabledConditionName(),
 								null,
@@ -3185,7 +3183,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								dataWidgetVar,
 								null,
 								null,
-								action.getClientValidation(),
 								confirmationText,
 								action.getDisabledConditionName(),
 								null,
@@ -3699,7 +3696,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											String dataWidgetVar,
 											Integer pixelWidth,
 											Integer pixelHeight,
-											Boolean clientValidation,
 											String confirmationText,
 											String disabled,
 											String formDisabled,
@@ -3722,51 +3718,21 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// set a default icon if not already set and client Validation (immediate)
 		if (implicitActionName != null) {
 			switch (implicitActionName) {
-				case OK:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
-					break;
-				case Save:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
-					break;
 				case Delete:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					// Add the standard confirmation text if none exists
 					if (confirmationText == null) {
 						setConfirmation(result, "Do you want to delete this data?");
 					}
-					break;
-				case Add:
-				case New:
-					break;
-				case ZoomOut:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Cancel:
 					result.setType("button"); // stop the post
 					result.setOnclick("SKYVE.PF.popHistory(true)");
 					break;
 				case Remove:
-					result.setImmediate(true);
 					// Add the standard confirmation text if none exists
 					if (confirmationText == null) {
 						setConfirmation(result, "Do you want to remove this data?");
 					}
-					break;
-				case Edit:
-					break;
-				case Report:
-					break;
-				case BizImport:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
-					break;
-				case BizExport:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
-					break;
-				case Download:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
-					break;
-				case Upload:
-					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				default:
 					break;
