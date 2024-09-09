@@ -28,6 +28,7 @@ public final class AppConstants {
 	public static final String TAG_DOCUMENT_NAME = "Tag";
 	public static final String TAGGED_DOCUMENT_NAME = "Tagged";
 	public static final String USER_DOCUMENT_NAME = "User";
+	public static final String USER_LOGIN_RECORD_DOCUMENT_NAME = "UserLoginRecord";
 	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
 
 	// Attributes
@@ -47,12 +48,15 @@ public final class AppConstants {
 	public static final String EMAIL1_ATTRIBUTE_NAME = "email1";
 	public static final String ENABLED_ATTRIBUTE_NAME = "enabled";
 	public static final String END_TIME_ATTRIBUTE_NAME = "endTime";
+	public static final String FAILED_ATTRIBUTE_NAME = "failed";
 	public static final String FROM_EMAIL_ATTRIBUTE_NAME = "fromEmail";
 	public static final String FIELDS_ATTRIBUTE_NAME = "fields";
 	public static final String GROUPS_ATTRIBUTE_NAME = "groups";
 	public static final String INCLUDE_CONTENT_ATTRIBUTE_NAME = "includeContent";
 	public static final String INCLUDE_AUDITS_ATTRIBUTE_NAME = "includeAuditLog";
+	public static final String IP_ADDRESS_ATTRIBUTE_NAME = "ipAddress";
 	public static final String LOG_ATTRIBUTE_NAME = "log";
+	public static final String LOGIN_DATE_TIME_ATTRIBUTE_NAME = "loginDateTime";
 	public static final String MEMO_1_ATTRIBUTE_NAME = "memo1";
 	public static final String MODULE_NAME_ATTRIBUTE_NAME = "moduleName";
 	public static final String NAME_ATTRIBUTE_NAME = "name";

@@ -268,15 +268,20 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	 */
 	@Override
 	public void postSave(UserExtension bean) throws Exception {
-		// If password has changed, notify & log security event
+		// If password has changed...
 		if (Boolean.TRUE.equals(CORE.getStash().get("passwordChanged"))) {
 			// Send email notification
-			Persistence persistence = CORE.getPersistence();
-			org.skyve.metadata.user.User user = persistence.getUser();
-			Customer customer = user.getCustomer();
-			Module module = customer.getModule(ChangePassword.MODULE_NAME);
-			final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
-			EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
+			try {
+				Persistence persistence = CORE.getPersistence();
+				org.skyve.metadata.user.User user = persistence.getUser();
+				Customer customer = user.getCustomer();
+				Module module = customer.getModule(ChangePassword.MODULE_NAME);
+				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
+				EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
+			} catch (Exception e) {
+				Util.LOGGER.warning("Failed to kick off password change notification job");
+				e.printStackTrace();
+			}
 
 			// Record security event in security log
 			SecurityUtil.log("Password Change", bean.getUserName() + " changed their password");

@@ -58,6 +58,10 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 
 			String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
 			result.add(new DomainValue(cacheName, "Conversations"));
+			cacheName = UtilImpl.CSRF_TOKEN_CACHE.getName();
+			result.add(new DomainValue(cacheName, "CSRF Tokens"));
+			cacheName = UtilImpl.SESSION_CACHE.getName();
+			result.add(new DomainValue(cacheName, "Sessions"));
 			for (HibernateCacheConfig c : UtilImpl.HIBERNATE_CACHES) {
 				cacheName = c.getName();
 				result.add(new DomainValue(cacheName, cacheName + " (Hibernate)"));

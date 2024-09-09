@@ -1,25 +1,42 @@
 package modules.admin.ChangePassword.actions;
 
+import static org.mockito.Mockito.mock;
+
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebContainer;
 
+import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.domain.ChangePassword;
-import util.AbstractH2TestForJUnit4;
+import util.AbstractH2Test;
 
-public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
-	@Test(expected = ValidationException.class)
+public class MakePasswordChangeTest extends AbstractH2Test {
+
+	@BeforeEach
+	@SuppressWarnings("static-method")
+	public void beforeEach() {
+		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		WebContainer.setHttpServletRequestResponse(httpServletRequest, null);
+	}
+
+	@Test
 	@SuppressWarnings("static-method")
 	public void testNewAndConfirmPasswordNotTheSame() throws Exception {
-		changePassword("Password0!", "Password0@");
+		Assert.assertThrows(ValidationException.class, () -> {
+			changePassword("Password0!", "Password0@");
+		});
 	}
 	
-	@Test(expected = ValidationException.class)
+	@Test
 	@SuppressWarnings("static-method")
 	public void testOldPasswordMatchesNewPassword() throws Exception {
-		changePassword(PASSWORD);
+		Assert.assertThrows(ValidationException.class, () -> {
+			changePassword(PASSWORD);
+		});
 	}
 	
 	@Test
@@ -54,23 +71,25 @@ public class MakePasswordChangeTest extends AbstractH2TestForJUnit4 {
 		Assert.assertEquals(1, getPasswordHistory(false).length);
 	}
 
-	@Test(expected = ValidationException.class)
+	@Test
 	@SuppressWarnings("static-method")
 	public void checkPasswordHistoryOfTwoThrows() throws Exception {
-		UtilImpl.PASSWORD_HISTORY_RETENTION = 2;
+		Assert.assertThrows(ValidationException.class, () -> {
+			UtilImpl.PASSWORD_HISTORY_RETENTION = 2;
 
-		// change password
-		changePassword("Password0!0!"); // sets the password history
+			// change password
+			changePassword("Password0!0!"); // sets the password history
 
-		Assert.assertEquals(1, getPasswordHistory(false).length);
-		
-		// change password back
-		changePassword(PASSWORD);
+			Assert.assertEquals(1, getPasswordHistory(false).length);
 
-		Assert.assertEquals(2, getPasswordHistory(false).length);
+			// change password back
+			changePassword(PASSWORD);
 
-		// change password
-		changePassword("Password0!0!");
+			Assert.assertEquals(2, getPasswordHistory(false).length);
+
+			// change password
+			changePassword("Password0!0!");
+		});
 	}
 
 	@Test

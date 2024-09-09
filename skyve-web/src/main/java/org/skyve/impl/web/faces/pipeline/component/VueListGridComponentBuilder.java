@@ -1,5 +1,8 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -51,22 +54,21 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 		String queryName = grid.getQueryName();
 		String finalModelName = null;
 		String contextId = null;
-		boolean showAdd = canCreateDocument && (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
-		boolean showZoom = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowZoom()));
-		boolean showFilter = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowFilter()));
-		boolean showSummary = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowSummary()));
-		boolean showSnap = (! Boolean.FALSE.equals(grid.getShowSnap()));
+		boolean showAdd = canCreateDocument && (! aggregateQuery) && (! FALSE.equals(grid.getShowAdd()));
+		boolean showZoom = (! aggregateQuery) && (! FALSE.equals(grid.getShowZoom()));
+		boolean showFilter = (! aggregateQuery) && (! FALSE.equals(grid.getShowFilter()));
+		boolean showSummary = (! aggregateQuery) && (! FALSE.equals(grid.getShowSummary()));
+		boolean showSnap = (! FALSE.equals(grid.getShowSnap()));
 		String selectedRemoteCommand = null;
 
 		final Document docToUse;
 
 		// Only set one of "query" or "model", preferring query
 		if (queryName != null) {
-			docToUse = model.getDrivingDocument();
-		}
-		else {
+			docToUse = drivingDocument;
+		} else {
 			finalModelName = modelName;
-			docToUse = owningDocument;
+			docToUse = drivingDocument;
 		}
 
 		finalModuleName = docToUse.getOwningModuleName();
@@ -140,7 +142,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	private MethodExpression createSelectedExpression(String selectedIdBinding, String actionName, String modelName) {
 		// Note source should only be defined when this is a rerender
 		String source = null;
-		if (Boolean.TRUE.toString().equals(actionName) || Boolean.FALSE.toString().equals(actionName)) {
+		if (TRUE.toString().equals(actionName) || FALSE.toString().equals(actionName)) {
 			source = modelName;
 		}
 

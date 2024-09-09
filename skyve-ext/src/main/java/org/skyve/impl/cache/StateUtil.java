@@ -38,7 +38,7 @@ public class StateUtil {
 		// Disallow instantiation.
 	}
 
-	private static Cache<String, byte[]> getConversations() {
+	private static @Nonnull Cache<String, byte[]> getConversations() {
 		return EXT.getCaching().getEHCache(UtilImpl.CONVERSATION_CACHE.getName(), String.class, byte[].class);
 	}
 
@@ -109,16 +109,63 @@ public class StateUtil {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static Cache<String, TreeSet> getTokens() {
+	private static @Nonnull Cache<String, TreeSet> getSessions() {
+		return EXT.getCaching().getEHCache(UtilImpl.SESSION_CACHE.getName(), String.class, TreeSet.class);
+	}
+	
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	public static void addSession(@Nonnull String userId, @Nonnull HttpSession session) {
+		Cache<String, TreeSet> sessions = getSessions();
+		TreeSet sessionIds = sessions.get(userId);
+		if (sessionIds == null) {
+			sessionIds = new TreeSet<>();
+		}
+		sessionIds.add(session.getId());
+		// Note that EHCache puts are thread-safe
+		sessions.put(userId, sessionIds);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static void removeSession(@Nonnull String userId, @Nonnull HttpSession session) {
+		Cache<String, TreeSet> sessions = getSessions();
+		TreeSet sessionIds = sessions.get(userId);
+		if (sessionIds != null) {
+			sessionIds.remove(session.getId());
+			if (sessionIds.isEmpty()) {
+				sessions.remove(userId);
+			}
+			else {
+				// Note that EHCache puts are thread-safe
+				sessions.put(userId, sessionIds);
+			}
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static boolean checkSession(@Nonnull String userId, @Nonnull HttpSession session) {
+		Cache<String, TreeSet> sessions = getSessions();
+		TreeSet sessionIds = sessions.get(userId);
+		if (sessionIds != null) {
+			return sessionIds.contains(session.getId());
+		}
+		return false;
+	}
+	
+	public static void removeSessions(@Nonnull String userId) {
+		getSessions().remove(userId);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static @Nonnull Cache<String, TreeSet> getTokens() {
 		return EXT.getCaching().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
-	public static void clearTokens(HttpSession session) {
+	public static void clearTokens(@Nonnull HttpSession session) {
 		clearTokens(session.getId());
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static void clearTokens(String sessionId) {
+	public static void clearTokens(@Nonnull String sessionId) {
 		Cache<String, TreeSet> tokens = getTokens();
 		TreeSet values = tokens.get(sessionId);
 		if (values != null) {
@@ -128,12 +175,12 @@ public class StateUtil {
 		}
 	}
 	
-	public static boolean checkToken(HttpSession session, Integer token) {
+	public static boolean checkToken(@Nonnull HttpSession session, @Nullable Integer token) {
 		return checkToken(session.getId(), token);
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static boolean checkToken(String sessionId, Integer token) {
+	public static boolean checkToken(@Nonnull String sessionId, @Nullable Integer token) {
 		if (token == null) {
 			return false;
 		}
@@ -142,12 +189,16 @@ public class StateUtil {
 		return (values != null) && values.contains(token);
 	}
 
-	public static void replaceToken(HttpSession session, Integer oldToken, Integer newToken) {
+	public static void replaceToken(@Nonnull HttpSession session,
+										@Nullable Integer oldToken,
+										@Nonnull Integer newToken) {
 		replaceToken(session.getId(), oldToken, newToken);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public static void replaceToken(String sessionId, Integer oldToken, Integer newToken) {
+	public static void replaceToken(@Nonnull String sessionId,
+										@Nullable Integer oldToken,
+										@Nonnull Integer newToken) {
 //System.out.println("replace token o=" + oldToken + ":n=" + newToken);
 		if (newToken.equals(oldToken)) {
 			return;
@@ -177,18 +228,19 @@ public class StateUtil {
 	    RANDOM.nextBytes(randomBytes);
 	}
 	
-	public static Integer createToken() {
+	public static @Nonnull Integer createToken() {
 		return Integer.valueOf(RANDOM.nextInt());
 	}
 	
 	public static void logStateStats() {
 		logCacheStats(UtilImpl.CONVERSATION_CACHE.getName(), "Conversation");
-		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Session");
+		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Token");
+		logCacheStats(UtilImpl.SESSION_CACHE.getName(), "User Session");
 		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
 		UtilImpl.LOGGER.info("********************************************************************************");
 	}
 	
-	private static void logCacheStats(String cacheName, String cacheDescription) {
+	private static void logCacheStats(@Nonnull String cacheName, @Nonnull String cacheDescription) {
 		Caching caching = EXT.getCaching();
 		CacheStatistics statistics = caching.getEHCacheStatistics(cacheName);
 		if (statistics != null) {
@@ -244,7 +296,7 @@ public class StateUtil {
 	
 	private static final String ZIP_CHARSET = "ISO-8859-1";
 
-	public static String encode64(Serializable obj) 
+	public static @Nonnull String encode64(@Nonnull Serializable obj) 
 	throws IOException {
 		byte[] result = null;
 		
@@ -264,7 +316,7 @@ public class StateUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Serializable> T decode64(String encoding)
+	public static @Nonnull <T extends Serializable> T decode64(@Nonnull String encoding)
 	throws IOException {
 		T result = null;
 
