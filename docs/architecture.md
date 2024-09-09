@@ -109,6 +109,11 @@
     - Test data generation
     - Data store test data seeding.
 - Background UI task
+    - A ViewBackgroundTask is a short-running asynchronous process that can be kicked off via WebContext (no percent complete or interrupt method)
+    - It is applicable to the UI and has access to and the ability to control the conversation caching in its execution via cacheConversation().
+    - It continues to use the Persistence instance from the conversation with all the state as if it was another user gesture - same level 1 cache, same local UI mutations.
+    - It’s execute method takes the current contextual bean and is never null - ie it has UI context.
+    - The persistence is set as async for the thread so that aysnc timeouts are used during its execution similar to Jobs though.
 - Push tech
 - User Agent Sniffing in router
 - JS API and inject
@@ -118,6 +123,10 @@
     - Programmatic charting
     - JS and server-side
 - Jobs
+    - A Job represents an asynchronous process that can be scheduled or run ad-hoc.
+    - It is registered against a module and available to be scheduled through the UI.
+    - Although job logging can be turned off for a Job, each run is generally logged.
+    - The persistence is set as async for the thread so that aysnc timeouts are used during its execution.
 - Skyve Script
 - Security Integration
     - Database
