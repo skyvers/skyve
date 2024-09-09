@@ -184,7 +184,7 @@ public class SecurityUtil {
 
 		// Format email content
 		StringBuilder body = new StringBuilder();
-		body.append("A security exception has been logged:<br/><br/>");
+		body.append("A new security event has been logged:<br/><br/>");
 		body.append("Timestamp: ").append(sl.getTimestamp()).append("<br/>");
 		body.append("Thread ID: ").append(sl.getThreadId()).append("<br/>");
 		body.append("Thread Name: ").append(sl.getThreadName()).append("<br/>");
