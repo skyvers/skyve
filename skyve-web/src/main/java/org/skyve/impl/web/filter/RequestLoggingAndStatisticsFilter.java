@@ -11,13 +11,10 @@ import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.util.Monitoring;
-import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
-import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -25,42 +22,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-public class RequestLoggingAndStatisticsFilter implements Filter {
-    // A list of all excluded URL prefixes
-    private String[] excludedURLPrefixes;
-
-	@Override
-	public void init(FilterConfig config) throws ServletException {
-		String urls = Util.processStringValue(config.getInitParameter("excluded"));
-		if (urls != null) {
-			excludedURLPrefixes = urls.split("\n");
-			for (int i = 0, l = excludedURLPrefixes.length; i < l; i++) {
-				excludedURLPrefixes[i] = Util.processStringValue(excludedURLPrefixes[i]);
-			}
-		}
-	}
-
-	@Override
-	public void destroy() {
-		excludedURLPrefixes = null;
-	}
-
+/**
+ * Log and collect stats on requests, if this is not a static resource.
+ */
+public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
     @Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		String servletPath = httpRequest.getServletPath();
-
-        // Test if this URL is unsecured in the web.xml, and bug out if so
-        // NB can't use queryString here as there could be AJAX posts etc in faces so not good practice
-        if (excludedURLPrefixes != null) {
-	        for (String excludedURLPrefix : excludedURLPrefixes) {
-	        	if ((excludedURLPrefix != null) && servletPath.startsWith(excludedURLPrefix)) {
-        			chain.doFilter(request, response);
-	        		return;
-	        	}
-	        }
-        }
+    	if (staticURLPrefix(httpRequest)) {
+    		chain.doFilter(request, response);
+    		return;
+    	}
 
 		try {
 			// Set the request and response in WebContainer
@@ -87,7 +60,7 @@ public class RequestLoggingAndStatisticsFilter implements Filter {
 				UtilImpl.LOGGER.info("Scheme=" + request.getScheme());
 				UtilImpl.LOGGER.info("ServerName=" + request.getServerName());
 				UtilImpl.LOGGER.info("ServerPort=" + request.getServerPort());
-				UtilImpl.LOGGER.info("ServletPath=" + servletPath);
+				UtilImpl.LOGGER.info("ServletPath=" + httpRequest.getServletPath());
 				Principal principal = httpRequest.getUserPrincipal();
 				UtilImpl.LOGGER.info("UserPrincipal=" + ((principal == null) ? "<null>" : principal.getName()));
 				UtilImpl.LOGGER.info("********************************** PARAMETERS **********************************");

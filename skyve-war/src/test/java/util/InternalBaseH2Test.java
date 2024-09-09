@@ -7,6 +7,9 @@ import java.util.UUID;
 
 import org.jboss.weld.environment.se.Weld;
 import org.skyve.EXT;
+import org.skyve.cache.CSRFTokenCacheConfig;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.SessionCacheConfig;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -69,6 +72,9 @@ abstract class InternalBaseH2Test {
 		// init the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY + UUID.randomUUID().toString() + "/";
 
+		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(10, 0, 0, 60);
+		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(10, 0, 0, 60);
+		UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
 		EXT.getCaching().startup();
 
 		// init injection

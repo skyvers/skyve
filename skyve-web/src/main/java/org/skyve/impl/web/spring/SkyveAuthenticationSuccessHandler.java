@@ -31,6 +31,9 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		this.userDetailsManager = userDetailsManager;
 	}
 	
+	/**
+	 * Process the redirect after login
+	 */
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request,
 										HttpServletResponse response,

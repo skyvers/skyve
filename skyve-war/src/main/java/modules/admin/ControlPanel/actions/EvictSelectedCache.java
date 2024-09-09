@@ -31,6 +31,16 @@ public class EvictSelectedCache implements ServerSideAction<ControlPanelExtensio
 				cache.clear();
 				webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
 			}
+			else if (UtilImpl.CSRF_TOKEN_CACHE.getName().equals(cacheName)) {
+				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.CSRF_TOKEN_CACHE.getKeyClass(), UtilImpl.CSRF_TOKEN_CACHE.getValueClass());
+				cache.clear();
+				webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+			}
+			else if (UtilImpl.SESSION_CACHE.getName().equals(cacheName)) {
+				Cache<? extends Serializable, ? extends Serializable> cache = caching.getEHCache(cacheName, UtilImpl.SESSION_CACHE.getKeyClass(), UtilImpl.SESSION_CACHE.getValueClass());
+				cache.clear();
+				webContext.growl(MessageSeverity.info, "Cache " + cacheName + " has been cleared");
+			}
 			else {
 				boolean found = false;
 				for (HibernateCacheConfig c : UtilImpl.HIBERNATE_CACHES) {

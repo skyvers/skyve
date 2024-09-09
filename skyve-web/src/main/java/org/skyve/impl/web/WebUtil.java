@@ -27,8 +27,10 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -74,7 +76,17 @@ public class WebUtil {
 														@Nullable String userPrincipal)
 	throws Exception {
 		HttpSession session = request.getSession(false);
-		UserImpl user = (session == null) ? null : (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		UserImpl user = null;
+		if (session != null) {
+			user = (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+			// Check the user knows about the session
+			if ((user != null) && (! StateUtil.checkSession(user.getId(), session))) {
+				// If not invalidate, and throw to forward to /pages/expired.jsp
+				session.invalidate();
+				// throw SessionEndedException here to bug out of everything either to expired.jsp
+				throw new SessionEndedException(request.getLocale());
+			}
+		}
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
@@ -102,6 +114,7 @@ public class WebUtil {
 				}
 				setSessionId(user, request);
 				session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+				StateUtil.addSession(user.getId(), session);
 				AbstractPersistence.get().setUser(user);
 				WebStatsUtil.recordLogin(user);
 				Customer customer = user.getCustomer();

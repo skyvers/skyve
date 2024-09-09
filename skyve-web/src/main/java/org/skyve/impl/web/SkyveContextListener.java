@@ -24,6 +24,7 @@ import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
+import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
@@ -410,6 +411,11 @@ public class SkyveContextListener implements ServletContextListener {
 																	getInt("state.csrfTokens", "offHeapSizeMB", tokens),
 																	getInt("state.csrfTokens", "diskSizeGB", tokens) * 1024,
 																	getInt("state.csrfTokens", "expiryTimeMinutes", tokens));
+		Map<String, Object> sessions = getObject("state", "sessions", state, true);
+		UtilImpl.SESSION_CACHE = new SessionCacheConfig(getInt("state.sessions", "heapSizeEntries", sessions),
+																	getInt("state.sessions", "offHeapSizeMB", sessions),
+																	getInt("state.sessions", "diskSizeGB", sessions) * 1024,
+																	getInt("state.sessions", "expiryTimeMinutes", sessions));
 		UtilImpl.STATE_EVICT_CRON = getString("state", "evictCron", state, false);
 
 		Map<String, Object> caches = getObject(null, "caches", properties, false);
