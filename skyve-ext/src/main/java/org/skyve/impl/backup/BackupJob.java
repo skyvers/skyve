@@ -519,15 +519,11 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 */
 	private static int getSensitivityLevel(Bean bean) {
-		DataSensitivity sensitivityInput = null;
-		try {
-			sensitivityInput = (DataSensitivity) Binder.get(bean, AppConstants.DATA_SENSITIVITY_ATTRIBUTE_NAME);
-		} catch (Exception e) {
-			Util.LOGGER.warning("Failed to get sensitivity input");
-			e.printStackTrace();
-		}
-		if (sensitivityInput != null) {
-			return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
+		if (bean instanceof DataMaintenance dataMaintenance) {
+			DataSensitivity sensitivityInput = dataMaintenance.getDataSensitivity();
+			if (sensitivityInput != null) {
+				return Sensitivity.valueOf(sensitivityInput.toString()).ordinal();
+			}
 		}
 		
 		return 0;
