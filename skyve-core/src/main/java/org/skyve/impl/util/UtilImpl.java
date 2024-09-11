@@ -398,7 +398,7 @@ public class UtilImpl {
 		// minify the file to remove any comments
 		json = Minifier.minify(json);
 
-		return (Map<String, Object>) JSON.unmarshall(null, json);
+		return (Map<String, Object>) JSON.unmarshall(json);
 	}
 
 	@SuppressWarnings("unchecked")

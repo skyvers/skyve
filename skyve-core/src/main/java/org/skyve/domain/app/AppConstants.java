@@ -29,6 +29,7 @@ public final class AppConstants {
 	public static final String TAGGED_DOCUMENT_NAME = "Tagged";
 	public static final String USER_DOCUMENT_NAME = "User";
 	public static final String USER_LOGIN_RECORD_DOCUMENT_NAME = "UserLoginRecord";
+	public static final String USER_MONTHLY_HITS_DOCUMENT_NAME = "UserMonthlyHits";
 	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
 
 	// Attributes

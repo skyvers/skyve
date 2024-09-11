@@ -25,6 +25,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class JSONReader {
 	public enum JSONMode {
 		dynamic, // make collections and maps
@@ -58,12 +61,12 @@ public class JSONReader {
 	private Object token;
 	private StringBuilder sb = new StringBuilder();
 
-	public JSONReader(User user) {
+	public JSONReader(@Nullable User user) {
 		this.user = user;
 		this.customer = (user == null) ? null : user.getCustomer();
 	}
 
-	public Object read(String string) throws Exception {
+	public Object read(@Nonnull String string) throws Exception {
 		stringLength = string.length();
 		it = new StringCharacterIterator(string);
 		c = it.first();
@@ -81,7 +84,7 @@ public class JSONReader {
 		}
 	}
 
-	private Object read() throws Exception {
+	private @Nullable Object read() throws Exception {
 		skipWhiteSpace();
 		char ch = c;
 		next();
@@ -173,7 +176,7 @@ public class JSONReader {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object object() throws Exception {
+	private @Nullable Object object() throws Exception {
 		Object key = read();
 		if (Bean.MODULE_KEY.equals(key)) {
 			mode = JSONMode.bean;
@@ -365,7 +368,7 @@ public class JSONReader {
 		return null;
 	}
 
-	private Object array() throws Exception {
+	private @Nonnull Object array() throws Exception {
 		List<Object> result = new ArrayList<>();
 		Object value = read();
 		int i = 0;
@@ -383,7 +386,7 @@ public class JSONReader {
 		return result;
 	}
 
-	private Object number() {
+	private @Nonnull Object number() {
 		boolean isFloatingPoint = false;
 		sb.setLength(0);
 
@@ -419,7 +422,7 @@ public class JSONReader {
 		return result;
 	}
 
-	private Object string(char delimiter) {
+	private @Nonnull Object string(char delimiter) {
 		sb.setLength(0);
 		int i = 0;
 		while (((delimiter == '\0') && (c != ':')) || 

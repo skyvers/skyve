@@ -67,7 +67,8 @@ public class WebStatsUtil {
 		try {
 			Customer customer = user.getCustomer();
 			Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
-			String ADM_UserMonthlyHits = admin.getDocument(customer, "UserMonthlyHits").getPersistent().getPersistentIdentifier();
+			@SuppressWarnings("null")
+			String ADM_UserMonthlyHits = admin.getDocument(customer, AppConstants.USER_MONTHLY_HITS_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 
 			Date now = new Date();
 			Integer hitMonth = Integer.valueOf(CORE.getDateFormat(MONTH_FORMAT).format(now));
