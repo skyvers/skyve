@@ -25,3 +25,24 @@ If you have been assigned a Trello card for this feature/issue, you can link the
 ## Skyve Development Setup
 
 This Skyve repository is intended for developers with existing experience with Java projects and development environments. If you are trying to start a new Skyve project, please see our [Getting Started](https://skyve.org/getting-started) page instead.
+
+## Coding Guidelines
+
+Keep dependencies to a minimum
+Keep performance in front of mind
+Keep thread-safety in front of mind
+Ensure startup time is low - aim for 200 millis for serverless cold starts.
+Do not hard code javaee/spring resources with annotations, use web.xml to remain configurable.
+Use json configuration as a single configuration point if possible.
+Aim for null-safety over Optional.
+Remain agnostic of DI - no DI in Skyve (except faces)
+Usually 1 exit from a function called result
+Watch boxing and unboxing - be explicit
+Use functional coding to simplify (dont overuse) - stream processing.
+Functional coding introduces more run overhead, invokedynamic jvm instruction, and work at the call site / capture point and class engineering at first run.
+Functional is good for parallelism and scale-out.
+Call getters once
+Don't use String.format() unless you are using the formatting features - 50 times slower than StringBuilder.
+skyve-core - enough to power metadata reading and interpretation and domain generation
+skyve-ext - Bring in other dependencies, caching, reporting, addins etc.
+skyve-web - The web container and faces code.
