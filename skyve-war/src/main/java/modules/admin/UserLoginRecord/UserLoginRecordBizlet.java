@@ -2,18 +2,16 @@ package modules.admin.UserLoginRecord;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.app.AppConstants;
-import org.skyve.impl.cdi.GeoIPService;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.GeoIPService;
 import org.skyve.util.SecurityUtil;
 
 import jakarta.inject.Inject;
@@ -24,7 +22,7 @@ import modules.admin.domain.UserLoginRecord;
 public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 
 	@Inject
-	private transient GeoIPService geoIPService;
+	private GeoIPService geoIPService;
 
 	private static final String IP_CHANGE_LOG_MESSAGE = "The user %s has logged in from a new IP address. "
 			+ "The IP address has changed from %s to %s. "
@@ -44,23 +42,21 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 
 		String country = null;
-		// Check if the IpInfo token has been set so as to get the country code and country
-		if (UtilImpl.IP_INFO_TOKEN != null) {
 
-			Optional<String> countryCodeOptional = geoIPService.getCountryCodeForIP(bean.getIpAddress());
-			if (countryCodeOptional.isPresent()) {
-				String countryCode = countryCodeOptional.get();
+		// Geolocate the IP so as to get the country code and country
+		String ipAddress = bean.getIpAddress();
+		if (ipAddress != null) {
+			String countryCode = geoIPService.geolocate(ipAddress).countryCode();
+			if (countryCode != null) {
 				Locale locale = new Locale("", countryCode);
 				country = locale.getDisplayCountry();
-				bean.setCountry(country);
 			}
+			bean.setCountry(country);
 		}
 
 		// Get the previous login record of the current user
-		DocumentQuery q = CORE.getPersistence()
-				.newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
-		q.getFilter()
-				.addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, bean.getUserName());
+		DocumentQuery q = CORE.getPersistence().newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
+		q.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, bean.getUserName());
 		q.addBoundOrdering(UserLoginRecord.loginDateTimePropertyName, SortDirection.descending);
 		UserLoginRecordExtension previousLoginRecord = q.beanResult();
 
@@ -84,13 +80,9 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 									userIPAddress));
 					
 					// Run job to email user on country change
-					final Module module = CORE.getCustomer()
-							.getModule(User.MODULE_NAME);
-					final JobMetaData countryChangeNotificationJobMetaData = module
-							.getJob(DifferentCountryLoginNotificationJob.JOB_NAME);
-					EXT.getJobScheduler()
-							.runOneShotJob(countryChangeNotificationJobMetaData, bean, CORE.getUser());
-
+					final Module module = CORE.getCustomer().getModule(User.MODULE_NAME);
+					final JobMetaData countryChangeNotificationJobMetaData = module.getJob(DifferentCountryLoginNotificationJob.JOB_NAME);
+					EXT.getJobScheduler().runOneShotJob(countryChangeNotificationJobMetaData, bean, CORE.getUser());
 				} else {
 					// If the country has not changed then the security log shall only have details of an IP change
 					SecurityUtil.log("Change of IP Address from Last Login",

@@ -2,7 +2,6 @@ package modules.admin.User;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.skyve.CORE;
@@ -12,7 +11,6 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
-import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.security.HIBPPasswordValidator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
@@ -30,7 +28,6 @@ import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Configuration.ConfigurationExtension;
 import modules.admin.domain.ChangePassword;
@@ -250,11 +247,10 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			if (request != null) {
 				String ipAddress = SecurityUtil.getSourceIpAddress(request);
 				bean.setPasswordLastChangedIP(ipAddress);
-				if (ipAddress != null && UtilImpl.IP_INFO_TOKEN != null) {
-					GeoIPService geoIPService = CDI.current().select(GeoIPService.class).get();
-					Optional<String> countryCode = geoIPService.getCountryCodeForIP(ipAddress);
-					if (countryCode.isPresent()) {
-						bean.setPasswordLastChangedRegion(countryCode.get());
+				if (ipAddress != null) {
+					String countryCode = EXT.getGeoIPService().geolocate(ipAddress).countryCode();
+					if (countryCode != null) {
+						bean.setPasswordLastChangedRegion(countryCode);
 					}
 				}
 			}

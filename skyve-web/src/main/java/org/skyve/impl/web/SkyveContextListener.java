@@ -3,6 +3,7 @@ package org.skyve.impl.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -28,6 +30,7 @@ import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
+import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.DefaultRepository;
@@ -48,6 +51,7 @@ import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
+import org.skyve.util.GeoIPService;
 import org.skyve.util.Util;
 
 import jakarta.faces.FacesException;
@@ -594,7 +598,10 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
 
 		UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS = getString("factories", "numberGeneratorClass", factories, false);
-		if (UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS != null) {
+		if (UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS == null) {
+			NumberGeneratorStaticSingleton.setDefault();
+		}
+		else {
 			try {
 				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS);
 				NumberGenerator numberGenerator = (NumberGenerator) loadedClass.getDeclaredConstructor().newInstance();
@@ -606,7 +613,10 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 
 		UtilImpl.SKYVE_CUSTOMISATIONS_CLASS = getString("factories", "customisationsClass", factories, false);
-		if (UtilImpl.SKYVE_CUSTOMISATIONS_CLASS != null) {
+		if (UtilImpl.SKYVE_CUSTOMISATIONS_CLASS == null) {
+			CustomisationsStaticSingleton.setDefault();
+		}
+		else {
 			try {
 				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_CUSTOMISATIONS_CLASS);
 				Customisations customisations = (Customisations) loadedClass.getDeclaredConstructor().newInstance();
@@ -619,6 +629,21 @@ public class SkyveContextListener implements ServletContextListener {
 		Customisations customisations = CustomisationsStaticSingleton.get();
 		customisations.registerCustomExpressions();
 		customisations.registerCustomFormatters();
+
+		UtilImpl.SKYVE_GEOIP_SERVICE_CLASS = getString("factories", "geoIPServiceClass", factories, false);
+		if (UtilImpl.SKYVE_GEOIP_SERVICE_CLASS == null) {
+			GeoIPServiceStaticSingleton.setDefault();
+		}
+		else {
+			try {
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_GEOIP_SERVICE_CLASS);
+				GeoIPService geoip = (GeoIPService) loadedClass.getDeclaredConstructor().newInstance();
+				GeoIPServiceStaticSingleton.set(geoip);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create factories.geoIPServiceClass " + UtilImpl.SKYVE_GEOIP_SERVICE_CLASS, e);
+			}
+		}
 
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
@@ -750,16 +775,22 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString("api", "googleRecaptchaSecretKey", api, false);
 		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getString("api", "cloudflareTurnstileSiteKey", api, false);
 		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getString("api", "cloudflareTurnstileSecretKey", api, false);
+		UtilImpl.GEO_IP_KEY = getString("api", "geoIPKey", api, false);
+		String geoIPCountryCodes = getString("api", "geoIPCountryCodes", api, false);
+		if (geoIPCountryCodes != null) {
+			String[] codes = geoIPCountryCodes.split("\\|");
+			UtilImpl.GEO_IP_COUNTRY_CODES = new CopyOnWriteArraySet<>(Arrays.asList(codes)); // set in 1 fell swoop
+		}
+		// geoIPWhitelist is optional, but defaults to true.
+		Boolean geoIPWhitelist = (Boolean) get("api", "geoIPWhitelist", api, false);
+		if (geoIPWhitelist != null) {
+			UtilImpl.GEO_IP_WHITELIST = geoIPWhitelist.booleanValue();
+		}
 		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
 		}
-		if (api != null) {
-			UtilImpl.COUNTRY_CODES = getString("api", "countryCodes", api, false);
-			UtilImpl.COUNTRY_LIST_TYPE = getString("api", "countryListType", api, false);
-			UtilImpl.IP_INFO_TOKEN = getString("api", "ipInfoToken", api, false);
-		}
-		
+
 		Map<String, Object> bootstrap = getObject(null, "bootstrap", properties, false);
 		if (bootstrap != null) {
 			UtilImpl.BOOTSTRAP_CUSTOMER = getString("bootstrap", "customer", bootstrap, true);

@@ -163,12 +163,6 @@
 			<!-- This is an optional dependency and will need to be included in the pom of any project that wishes to use it. -->
 			<optional>true</optional>
 		</dependency>
-		<!-- For JSON parsing -->
-		<dependency>
-		    <groupId>net.minidev</groupId>
-		    <artifactId>json-smart</artifactId>
-		    <scope>compile</scope>
-		</dependency>
 
 		<!-- Test dependencies -->
 		<dependency>

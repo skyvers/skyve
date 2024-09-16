@@ -228,7 +228,9 @@
 		// Skyve number generator class
 		"numberGeneratorClass": null,
 		// Skyve customisations class
-		"customisationsClass": null
+		"customisationsClass": null,
+		// Skyve geo-ip service class
+		"geoIPServiceClass": null
 	},
 	// SMTP Settings
 	"smtp": {
@@ -271,6 +273,9 @@
 		"googleRecaptchaSecretKey": null,
 		"cloudflareTurnstileSiteKey": null,
 		"cloudflareTurnstileSecretKey": null,
+		"geoIPKey": null,
+		"geoIPCountryCodes": null,
+		"geoIPWhitelist": null,
 		"ckEditorConfigFileUrl": null
 	},
 	// Account settings

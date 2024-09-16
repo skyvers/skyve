@@ -161,16 +161,16 @@
 			</description>
 			<length>200</length>
 		</text>
-		<text name="apiIpInfoToken" audited="false" sensitivity="secret">
-			<displayName>IPInfo Token</displayName>
+		<text name="geoIPKey" audited="false" sensitivity="secret">
+			<displayName>Geo IP Key/Token</displayName>
 			<description>
 				<![CDATA[
-					By supplying an IPinfo API token, you can allow/disallow countries for registration and password reset.
+					By supplying a Geo IP API token (default is ipinfo.io), you can allow/disallow countries for registration and password reset.
 				]]>
 			</description>
 			<length>15</length>
 		</text>
-		<enum name="countryListType" audited="false" trackChanges="false">
+		<enum name="geoIPCountryListType" audited="false" trackChanges="false">
 			<displayName>Country List Type</displayName>
 			<description>This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.</description>
 			<values>
@@ -178,7 +178,7 @@
 				<value code="whitelist" description="Whitelist" />
 			</values>
 		</enum>
-		<collection type="aggregation" name="countryCodes" persistent="false" audited="false" trackChanges="false">
+		<collection type="aggregation" name="geoIPCountryCodes" persistent="false" audited="false" trackChanges="false">
 			<displayName>Country Codes</displayName>
 			<domain>dynamic</domain>
 			<documentName>Generic</documentName>
@@ -262,10 +262,10 @@
 				<![CDATA[getCaptchaType() != null && CaptchaType.googleRecaptcha == getCaptchaType()]]>
 			</expression>
 		</condition>
-		<condition name="hasIpInfoToken" usage="view">
-			<description>True when an IPinfo token has been set</description>
+		<condition name="hasGeoIPKey" usage="view">
+			<description>True when a Geo IP key/token has been set</description>
 			<expression>
-				<![CDATA[getApiIpInfoToken() != null]]>
+				<![CDATA[geoIPKey != null]]>
 			</expression>
 		</condition>
 		<condition name="cloudflareTurnstile" usage="both">

@@ -1,9 +1,8 @@
 package org.skyve.impl.web.spring;
 
 import java.io.IOException;
-import java.util.Optional;
 
-import org.skyve.impl.cdi.GeoIPService;
+import org.skyve.EXT;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.SecurityUtil;
@@ -45,21 +44,10 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		// Log the ip address and country of the user that has logged in
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(authentication.getPrincipal());
 		String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
-		String ipInfoToken = UtilImpl.IP_INFO_TOKEN;
 		
-		// Check if the IpInfo token has been set so as to get the country code
-		if(ipInfoToken != null) {
-			final GeoIPService geoIPService = new GeoIPService();
-			Optional<String> countryCode = geoIPService.getCountryCodeForIP(clientIPAddress);
-			if (countryCode.isPresent()) {
-				String country = countryCode.get();
-				UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress + " in country: " + country);
-			} else {
-				UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress);
-			}
-		} else {
-			UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress);
-		}
+		// Get the country code, if applicable
+		String countryCode = EXT.getGeoIPService().geolocate(clientIPAddress).countryCode();
+		UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress + " in country: " + ((countryCode == null) ? "??" : countryCode));
 		
 		String redirectUrl = null;
 		RequestCache requestCache = new HttpSessionRequestCache();
