@@ -123,6 +123,17 @@
 			// Number of minutes to wait until expiring session tokens from the cache
 			"expiryTimeMinutes": 60
 		},
+		// Geo IP cache settings
+		"geoIPs": {
+			// Max session tokens allowed in heap memory before being moved off-heap or to disk
+			"heapSizeEntries": 1000,
+			// Max off-heap memory size - 0 indicates no usage
+			"offHeapSizeMB": 0,
+			// Max disk size - 0 indicates no usage
+			"diskSizeGB": 10,
+			// Number of minutes to wait until expiring session tokens from the cache
+			"expiryTimeMinutes": 1440
+		},
 		// Session cache settings
 		"sessions": {
 			// Max sessions allowed in heap memory before being moved off-heap or to disk

@@ -49,7 +49,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.GeoIPService;
-import org.skyve.util.GeoIPService.IPGeolocation;
+import org.skyve.util.IPGeolocation;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.OWASP;
@@ -115,7 +115,7 @@ public class WebUtil {
 				StateUtil.addSession(user.getId(), session);
 				AbstractPersistence.get().setUser(user);
 				
-//				Get Ip address of user to record in UserLoginRecord
+				// Get IP address of user to record in UserLoginRecord
 				String userIPAddress = SecurityUtil.getSourceIpAddress(request);
 				WebStatsUtil.recordLogin(user, userIPAddress);
 				Customer customer = user.getCustomer();

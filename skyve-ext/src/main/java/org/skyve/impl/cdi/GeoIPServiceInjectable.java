@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.skyve.EXT;
 import org.skyve.util.GeoIPService;
+import org.skyve.util.IPGeolocation;
 
 import jakarta.enterprise.inject.Alternative;
 
@@ -14,7 +15,7 @@ import jakarta.enterprise.inject.Alternative;
  */
 @Alternative
 public class GeoIPServiceInjectable implements GeoIPService, Serializable {
-	private static final long serialVersionUID = -5169979825841065030L;
+	private static final long serialVersionUID = 2567279857426720449L;
 
 	@Override
 	public IPGeolocation geolocate(String ipAddress) {

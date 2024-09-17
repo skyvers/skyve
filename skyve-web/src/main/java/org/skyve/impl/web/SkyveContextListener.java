@@ -24,6 +24,7 @@ import org.skyve.cache.CacheExpiryPolicy;
 import org.skyve.cache.Caching;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.EHCacheConfig;
+import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
@@ -412,14 +413,19 @@ public class SkyveContextListener implements ServletContextListener {
 																	getInt("state.conversations", "expiryTimeMinutes", conversations));
 		Map<String, Object> tokens = getObject("state", "csrfTokens", state, true);
 		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(getInt("state.csrfTokens", "heapSizeEntries", tokens),
-																	getInt("state.csrfTokens", "offHeapSizeMB", tokens),
-																	getInt("state.csrfTokens", "diskSizeGB", tokens) * 1024,
-																	getInt("state.csrfTokens", "expiryTimeMinutes", tokens));
+																getInt("state.csrfTokens", "offHeapSizeMB", tokens),
+																getInt("state.csrfTokens", "diskSizeGB", tokens) * 1024,
+																getInt("state.csrfTokens", "expiryTimeMinutes", tokens));
 		Map<String, Object> sessions = getObject("state", "sessions", state, true);
 		UtilImpl.SESSION_CACHE = new SessionCacheConfig(getInt("state.sessions", "heapSizeEntries", sessions),
-																	getInt("state.sessions", "offHeapSizeMB", sessions),
-																	getInt("state.sessions", "diskSizeGB", sessions) * 1024,
-																	getInt("state.sessions", "expiryTimeMinutes", sessions));
+															getInt("state.sessions", "offHeapSizeMB", sessions),
+															getInt("state.sessions", "diskSizeGB", sessions) * 1024,
+															getInt("state.sessions", "expiryTimeMinutes", sessions));
+		Map<String, Object> geoips = getObject("state", "geoIPs", state, true);
+		UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(getInt("state.geoIPs", "heapSizeEntries", geoips),
+														getInt("state.geoIPs", "offHeapSizeMB", geoips),
+														getInt("state.geoIPs", "diskSizeGB", geoips) * 1024,
+														getInt("state.geoIPs", "expiryTimeMinutes", geoips));
 		UtilImpl.STATE_EVICT_CRON = getString("state", "evictCron", state, false);
 
 		Map<String, Object> caches = getObject(null, "caches", properties, false);

@@ -21,6 +21,7 @@ import org.skyve.CORE;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.Bean;
@@ -227,6 +228,7 @@ public class UtilImpl {
 	public static ConversationCacheConfig CONVERSATION_CACHE = null;
 	public static CSRFTokenCacheConfig CSRF_TOKEN_CACHE = null;
 	public static SessionCacheConfig SESSION_CACHE = null;
+	public static GeoIPCacheConfig GEO_IP_CACHE = null;
 	public static List<HibernateCacheConfig> HIBERNATE_CACHES = new ArrayList<>();
 	public static boolean HIBERNATE_FAIL_ON_MISSING_CACHE = false;
 	public static List<CacheConfig<? extends Serializable, ? extends Serializable>> APP_CACHES = new ArrayList<>();
