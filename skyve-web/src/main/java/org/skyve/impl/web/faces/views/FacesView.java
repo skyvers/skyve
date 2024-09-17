@@ -23,6 +23,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
@@ -953,6 +954,9 @@ public class FacesView extends HarnessView {
 
 				// Check content access
 				User user = getUser();
+				if (user == null) {
+					throw new SessionEndedException(FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				}
 				String bizModule = bean.getBizModule();
 				String bizDocument = bean.getBizDocument();
 				EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());

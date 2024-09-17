@@ -1,17 +1,11 @@
 package modules.admin.SelfRegistration.actions;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import org.primefaces.PrimeFaces;
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.impl.cdi.GeoIPService;
 import org.skyve.impl.security.HIBPPasswordValidator;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
@@ -19,6 +13,8 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.GeoIPService;
+import org.skyve.util.GeoIPService.IPGeolocation;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -42,7 +38,7 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Register.class);
 
 	@Inject
-	private transient GeoIPService geoIPService;
+	private GeoIPService geoIPService;
 	
 	@Override
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext) throws Exception {
@@ -50,10 +46,10 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 
 		if (bean.getUser() != null && bean.getUser().getContact() != null) {
 			// Get and validate the recaptcha response from the request parameters if captcha is set
-			if(bean.isShowGoogleRecaptcha() || bean.isShowCloudflareTurnstile()) {
+			if (bean.isShowGoogleRecaptcha() || bean.isShowCloudflareTurnstile()) {
 				HttpServletRequest request = EXT.getHttpServletRequest();
 				String captchaResponse = null;
-				if(bean.isShowGoogleRecaptcha()) {
+				if (bean.isShowGoogleRecaptcha()) {
 					captchaResponse = request.getParameter("g-recaptcha-response");
 				} else if(bean.isShowCloudflareTurnstile()) {
 					captchaResponse = request.getParameter("cf-turnstile-response");
@@ -63,59 +59,24 @@ public class Register implements ServerSideAction<SelfRegistrationExtension> {
 				}
 			}
 			// If configured, check the country and if it is on the blacklist/whitelist
-			if (UtilImpl.IP_INFO_TOKEN != null) {
+			if (geoIPService.isBlocking()) {
 				HttpServletRequest request = EXT.getHttpServletRequest();
 				String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
 				LOGGER.info("Checking country for IP " + clientIPAddress);
-				Optional<String> countryCode = geoIPService.getCountryCodeForIP(clientIPAddress);
-				if (countryCode.isPresent()) {
-					String country = countryCode.get();
-					LOGGER.info("Registration request from country " + country);
-					if (UtilImpl.COUNTRY_CODES != null) {
-						List<String> countryList = Arrays.asList(UtilImpl.COUNTRY_CODES.split("\\|"));
-						// Is this a blacklist or a whitelist?
-						switch (UtilImpl.COUNTRY_LIST_TYPE) {
-							// Blacklist
-							case AppConstants.COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE:
-								// If country is on the list
-								if (countryList.stream()
-										.anyMatch(s -> s.equalsIgnoreCase(country))) {
-									String message = "Self-registration failed because country " + country
-											+ " is on the blacklist. Suspected bot submission for "
-											+ bean.getUser().getContact().getName() + " - " + bean.getUser().getContact().getEmail1();
-									LOGGER.warn(message);
+				IPGeolocation geolocation = geoIPService.geolocate(clientIPAddress);
+				if (geolocation.isBlocked()) {
+					Contact contact = bean.getUser().getContact();
+					String message = "Self-registration failed because country " + geolocation.countryCode() +
+										(geoIPService.isWhitelist() ? " is not on the whitelist" : " is on the blacklist") + 
+										". Suspected bot submission for " + contact.getName() + " - " + contact.getEmail1();
+					LOGGER.warn(message);
 
-									// Record security event
-									SecurityUtil.log("GEO IP Block", message);
+					// Record security event
+					SecurityUtil.log("GEO IP Block", message);
 
-									// Silently pass
-									bean.setPassSilently(Boolean.TRUE);
-									return new ServerSideActionResult<>(bean);
-								}
-								break;
-							// Whitelist
-							case AppConstants.COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE:
-								// If country is not on the list
-								if (!countryList.stream()
-										.anyMatch(s -> s.equalsIgnoreCase(country))) {
-									String message = "Self-registration failed because country " + country
-											+ " is not on the whitelist. Suspected bot submission for "
-											+ bean.getUser().getContact().getName() + " - " + bean.getUser().getContact().getEmail1();
-									LOGGER.warn(message);
-
-									// Record security event
-									SecurityUtil.log("GEO IP Block", message);
-
-									// Silently pass
-									bean.setPassSilently(Boolean.TRUE);
-									return new ServerSideActionResult<>(bean);
-								}
-								break;
-							// Invalid
-							default:
-								Util.LOGGER.warning("GeoIP country list type is invalid - bypassing check");
-						}
-					}
+					// Silently pass
+					bean.setPassSilently(Boolean.TRUE);
+					return new ServerSideActionResult<>(bean);
 				}
 			}
 			

@@ -209,7 +209,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			return null;
 		}
 		@SuppressWarnings("unchecked")
-		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(null, FileUtil.string(metaFile));
+		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(FileUtil.string(metaFile));
 
 		File file = new File(dir, CONTENT);
 		if (! file.exists()) {

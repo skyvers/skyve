@@ -126,7 +126,7 @@ public class Snapshot {
 	 */
 	public static Snapshot fromJSON(String json) throws Exception {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(null, json);
+		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(json);
 		if (values == null) {
 			return null;
 		}

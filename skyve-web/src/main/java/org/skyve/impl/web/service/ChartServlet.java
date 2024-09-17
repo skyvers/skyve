@@ -231,7 +231,7 @@ public class ChartServlet extends HttpServlet {
 		// add filter criteria
 		String criteriaString = request.getParameter("criteria");
 		@SuppressWarnings("unchecked")
-		Map<String, Object> criteria = (Map<String, Object>) JSON.unmarshall(null, criteriaString);
+		Map<String, Object> criteria = (Map<String, Object>) JSON.unmarshall(criteriaString);
 		if (criteria != null) {
 			String operator = (String) criteria.get("operator");
 			if (operator != null) { // advanced criteria

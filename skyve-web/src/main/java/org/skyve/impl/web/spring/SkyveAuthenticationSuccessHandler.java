@@ -2,8 +2,10 @@ package org.skyve.impl.web.spring;
 
 import java.io.IOException;
 
+import org.skyve.EXT;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -31,11 +33,22 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		this.userDetailsManager = userDetailsManager;
 	}
 	
+	/**
+	 * Process the redirect after login
+	 */
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request,
 										HttpServletResponse response,
 										Authentication authentication)
 	throws ServletException, IOException {
+		// Log the ip address and country of the user that has logged in
+		String userName = SkyveSpringSecurity.userNameFromPrincipal(authentication.getPrincipal());
+		String clientIPAddress = SecurityUtil.getSourceIpAddress(request);
+		
+		// Get the country code, if applicable
+		String countryCode = EXT.getGeoIPService().geolocate(clientIPAddress).countryCode();
+		UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + clientIPAddress + " in country: " + ((countryCode == null) ? "??" : countryCode));
+		
 		String redirectUrl = null;
 		RequestCache requestCache = new HttpSessionRequestCache();
 		SavedRequest savedRequest = requestCache.getRequest(request, response);

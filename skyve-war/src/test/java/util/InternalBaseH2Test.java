@@ -7,9 +7,15 @@ import java.util.UUID;
 
 import org.jboss.weld.environment.se.Weld;
 import org.skyve.EXT;
+import org.skyve.cache.CSRFTokenCacheConfig;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.SessionCacheConfig;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
+import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
+import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -69,6 +75,9 @@ abstract class InternalBaseH2Test {
 		// init the cache once
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY + UUID.randomUUID().toString() + "/";
 
+		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(10, 0, 0, 60);
+		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(10, 0, 0, 60);
+		UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
 		EXT.getCaching().startup();
 
 		// init injection
@@ -103,6 +112,9 @@ abstract class InternalBaseH2Test {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		NumberGeneratorStaticSingleton.setDefault();
+		GeoIPServiceStaticSingleton.setDefault();
+		CustomisationsStaticSingleton.setDefault();
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
 		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
 		UtilImpl.DDL_SYNC = true;

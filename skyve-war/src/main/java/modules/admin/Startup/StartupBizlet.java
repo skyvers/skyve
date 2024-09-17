@@ -20,7 +20,7 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, StartupExtension bean) throws Exception {
-		if (Startup.countryCodesPropertyName.equals(attributeName)) {
+		if (Startup.geoIPCountryCodesPropertyName.equals(attributeName)) {
 			// return a domain value for each country
 			return Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2)
 					.stream()

@@ -1231,22 +1231,22 @@ public abstract class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
-	 * True when an IPinfo token has been set
+	 * True when an Geo IP key/token has been set
 	 *
 	 * @return The condition
 	 */
 	@XmlTransient
-	public boolean isHasIpInfoToken() {
-		return (getStartup().getApiIpInfoToken() != null);
+	public boolean isHasGeoIPKey() {
+		return (getStartup().getGeoIPKey() != null);
 	}
 
 	/**
-	 * {@link #isHasIpInfoToken} negation.
+	 * {@link #isHasGeoIPKey} negation.
 	 *
 	 * @return The negated condition
 	 */
-	public boolean isNotHasIpInfoToken() {
-		return (! isHasIpInfoToken());
+	public boolean isNotHasGeoIPKey() {
+		return (! isHasGeoIPKey());
 	}
 
 	/**

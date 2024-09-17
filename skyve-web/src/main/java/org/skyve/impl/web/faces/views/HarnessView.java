@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -24,10 +25,12 @@ import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.FacesException;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public abstract class HarnessView extends LocalisableView {
 	private static final long serialVersionUID = 2805839690076647L;
@@ -246,7 +249,7 @@ public abstract class HarnessView extends LocalisableView {
 	}
 	
 	@SuppressWarnings("static-method")
-	public User getUser() {
+	public @Nullable User getUser() {
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		return (User) ec.getSessionMap().get(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 	}
@@ -256,27 +259,34 @@ public abstract class HarnessView extends LocalisableView {
 		UserImpl user = null;
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+		String userPrincipal = null;
 		if (ec.getUserPrincipal() == null) { // not logged in
-			user = repository.retrieveUser(new StringBuilder(64).append(customerName).append('/').append(userName).toString());
+			userPrincipal = new StringBuilder(64).append(customerName).append('/').append(userName).toString();
 		}
 		else {
-			user = repository.retrieveUser(ec.getUserPrincipal().toString());
+			userPrincipal = ec.getUserPrincipal().toString();
 		}
+		user = repository.retrieveUser(userPrincipal);
+		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
+		HttpSession session = request.getSession(true);
 		if (user != null) {
-			WebUtil.setSessionId(user, (HttpServletRequest) ec.getRequest());
+			WebUtil.setSessionId(user, request);
+			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+			StateUtil.addSession(user.getId(), session);
 		}
-		ec.getSessionMap().put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
 	}
 	
 	public boolean isCanTextSearch() {
-		return getUser().canTextSearch();
+		User u = getUser();
+		return ((u != null) && (u.canTextSearch()));
 	}
 	
 	public boolean isCanSwitchMode() {
-		return getUser().canSwitchMode();
+		User u = getUser();
+		return ((u != null) && (u.canSwitchMode()));
 	}
 	
 	/**
@@ -285,7 +295,8 @@ public abstract class HarnessView extends LocalisableView {
 	 */
 	public void setUxUi(String uxui) {
 		if (! isCanSwitchMode()) {
-			throw new SecurityException("switch modes", getUser().getName());
+			User u = getUser();
+			throw new SecurityException("switch modes", (u == null) ? "anonymous" : u.getName());
 		}
 		
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();

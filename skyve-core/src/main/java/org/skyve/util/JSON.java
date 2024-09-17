@@ -7,6 +7,9 @@ import org.skyve.impl.util.json.JSONWriter;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class JSON {
 	/**
 	 * Create JSON.
@@ -16,7 +19,9 @@ public class JSON {
 	 * @param propertyNames Needed for marshalling the result of executing a Query.
 	 * @return The JSON.
 	 */
-	public static final String marshall(Customer customer, Object beanOrBeans, Set<String> propertyNames) {
+	public static final @Nonnull String marshall(@Nonnull Customer customer,
+													@Nullable Object beanOrBeans,
+													@Nonnull Set<String> propertyNames) {
 		JSONWriter writer = new JSONWriter(customer);
 		return writer.write(beanOrBeans, propertyNames);
 	}
@@ -28,7 +33,8 @@ public class JSON {
 	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
 	 * @return The JSON.
 	 */
-	public static final String marshall(Customer customer, Object beanOrBeans) {
+	public static final @Nonnull String marshall(@Nonnull Customer customer,
+													@Nullable Object beanOrBeans) {
 		return marshall(customer, beanOrBeans, null);
 	}
 
@@ -38,7 +44,7 @@ public class JSON {
 	 * @param beanOrBeans Either a Bean or List<Bean> or a Java Bean
 	 * @return The JSON.
 	 */
-	public static final String marshall(Object beanOrBeans) {
+	public static final @Nonnull String marshall(@Nullable Object beanOrBeans) {
 		return marshall(null, beanOrBeans, null);
 	}
 
@@ -49,9 +55,20 @@ public class JSON {
 	 * @param json
 	 * @return a Bean or List<Bean> or a Map or a Java bean.
 	 */
-	public static final Object unmarshall(User user, String json) 
+	public static final @Nonnull Object unmarshall(@Nonnull User user, @Nonnull String json) 
 	throws Exception {
 		JSONReader reader = new JSONReader(user);
 		return reader.read(json);
+	}
+	
+	/**
+	 * Consume JSON.
+	 * 
+	 * @param json
+	 * @return a Bean or List<Bean> or a Map or a Java bean.
+	 */
+	public static final Object unmarshall(@Nonnull String json) 
+	throws Exception {
+		return unmarshall(null, json);
 	}
 }
