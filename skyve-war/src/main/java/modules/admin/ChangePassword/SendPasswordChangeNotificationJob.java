@@ -34,7 +34,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 			+ "You recently changed your password. To help keep you safe, here are some details:<br/>"
 			+ "Date/Time: {" + User.passwordLastChangedPropertyName + "}<br/>"
 			+ "IP Address: {" + User.passwordLastChangedIPPropertyName + "}<br/>"
-			+ "Region: {" + User.passwordLastChangedRegionPropertyName + "}<br/>"
+			+ "Country: {" + User.passwordLastChangedCountryCodePropertyName + "} - {" + User.passwordLastChangedCountryNamePropertyName + "}<br/>"
 			+ "<br/>"
 			+ "If this was you, then you can safely ignore this email.<br/>"
 			+ "If you are not sure if this was you, please contact us <a href=\"mailto: {"

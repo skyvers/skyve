@@ -13,7 +13,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.repository.ConvertableMetaData;
+import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.XMLMetaData;
@@ -52,7 +52,7 @@ import jakarta.xml.bind.annotation.XmlType;
 							"observers",
 							"JFreeChartPostProcessorClassName",
 							"primeFacesChartPostProcessorClassName"})
-public class CustomerMetaData extends NamedMetaData implements ConvertableMetaData<Customer> {
+public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaData<Customer> {
 	private static final long serialVersionUID = 4281621343439667457L;
 
 	private String language;

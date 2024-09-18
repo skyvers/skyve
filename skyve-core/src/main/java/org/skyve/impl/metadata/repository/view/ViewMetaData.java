@@ -7,7 +7,7 @@ import java.util.TreeMap;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.repository.ConvertableMetaData;
+import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessesMetaData;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
@@ -48,7 +48,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"parameters",
 							"accesses",
 							"properties"})
-public class ViewMetaData extends Container implements NamedMetaData, ConvertableMetaData<ViewImpl>, DecoratedMetaData {
+public class ViewMetaData extends Container implements NamedMetaData, ConvertibleMetaData<ViewImpl>, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
 
 	private String name;

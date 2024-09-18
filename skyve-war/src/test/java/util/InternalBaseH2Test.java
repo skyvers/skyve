@@ -9,6 +9,7 @@ import org.jboss.weld.environment.se.Weld;
 import org.skyve.EXT;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
@@ -78,6 +79,7 @@ abstract class InternalBaseH2Test {
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(10, 0, 0, 60);
 		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(10, 0, 0, 60);
 		UtilImpl.SESSION_CACHE = new SessionCacheConfig(10, 0, 0, 60);
+		UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(10, 0, 0, 60);
 		EXT.getCaching().startup();
 
 		// init injection

@@ -48,7 +48,10 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	public static final String ipAddressPropertyName = "ipAddress";
 
 	/** @hidden */
-	public static final String countryPropertyName = "country";
+	public static final String countryCodePropertyName = "countryCode";
+
+	/** @hidden */
+	public static final String countryNamePropertyName = "countryName";
 
 	/**
 	 * User Name
@@ -82,11 +85,19 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	/**
 	 * Country
 	 * <br/>
-	 * This is the country name that is derived from the IP Address that is recorded. If it changes 
+	 * This is the country code that is derived from the IP Address that is recorded. If it changes 
 				from the previous login record an alert is sent to the user. It is only used when the 
-				GeoipService is in use i.e if the user has provided an IpInfo token.
+				GeoipService is in use i.e if the user has provided a geo-ip key/token.
 	 **/
-	private String country;
+	private String countryCode;
+
+	/**
+	 * Country Name
+	 * <br/>
+	 * This is the country name (in the user's locale) derived from the country code.
+				The getter is overridden in the extension class.
+	 **/
+	private String countryName;
 
 	@Override
 	@XmlTransient
@@ -204,20 +215,37 @@ public abstract class UserLoginRecord extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #country} accessor.
+	 * {@link #countryCode} accessor.
 	 * @return	The value.
 	 **/
-	public String getCountry() {
-		return country;
+	public String getCountryCode() {
+		return countryCode;
 	}
 
 	/**
-	 * {@link #country} mutator.
-	 * @param country	The new value.
+	 * {@link #countryCode} mutator.
+	 * @param countryCode	The new value.
 	 **/
 	@XmlElement
-	public void setCountry(String country) {
-		preset(countryPropertyName, country);
-		this.country = country;
+	public void setCountryCode(String countryCode) {
+		preset(countryCodePropertyName, countryCode);
+		this.countryCode = countryCode;
+	}
+
+	/**
+	 * {@link #countryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getCountryName() {
+		return countryName;
+	}
+
+	/**
+	 * {@link #countryName} mutator.
+	 * @param countryName	The new value.
+	 **/
+	@XmlElement
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
 	}
 }

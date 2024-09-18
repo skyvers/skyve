@@ -1,5 +1,7 @@
 package modules.admin.UserLoginRecord;
 
+import org.skyve.util.Util;
+
 import modules.admin.domain.UserLoginRecord;
 
 public class UserLoginRecordExtension extends UserLoginRecord {
@@ -12,5 +14,14 @@ public class UserLoginRecordExtension extends UserLoginRecord {
 		}
 
 		return super.getBizKey();
+	}
+	
+	/**
+	 * Get the country name (for the current user's locale) for the country code.
+	 */
+	@Override
+	public String getCountryName() {
+		String countryCode = getCountryCode();
+		return (countryCode == null) ? null : Util.countryNameFromCode(countryCode);
 	}
 }

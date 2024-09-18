@@ -10,7 +10,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public class ConvertableField extends ConstrainableField {
+public class ConvertibleField extends ConstrainableField {
 	private static final long serialVersionUID = 7758386077394530922L;
 
 	private ConverterName converterName;

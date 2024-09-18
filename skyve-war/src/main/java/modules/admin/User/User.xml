@@ -74,11 +74,23 @@
 			<description>admin.user.passwordLastChangedIP.description</description>
 			<length>45</length>
 		</text>
-		<text name="passwordLastChangedRegion" sensitivity="secret" usage="domain">
+		<text name="passwordLastChangedCountryCode" sensitivity="secret" usage="domain">
 			<documentation>2-letter country-code where password was last changed. Referenced in password change notification email contents.</documentation>
-			<displayName>admin.user.passwordLastChangedRegion.displayName</displayName>
-			<description>admin.user.passwordLastChangedRegion.description</description>
+			<displayName>admin.user.passwordLastChangedCountryCode.displayName</displayName>
+			<description>admin.user.passwordLastChangedCountryCode.description</description>
 			<length>2</length>
+		</text>
+		<text name="passwordLastChangedCountryName" audited="false" persistent="false" trackChanges="false" sensitivity="secret" usage="view">
+			<documentation>
+				<![CDATA[
+					User Locale Country Name where password was last changed.
+					Referenced in password change notification email contents.
+					The getter is overridden in the extension class.
+				]]>
+			</documentation>
+			<displayName>admin.user.passwordLastChangedCountryName.displayName</displayName>
+			<description>admin.user.passwordLastChangedCountryName.description</description>
+			<length>100</length>
 		</text>
 		<text name="passwordResetToken" sensitivity="secret">
 			<documentation>This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.</documentation>

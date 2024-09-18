@@ -10,17 +10,17 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.GeoIPService;
+import org.skyve.util.IPGeolocation;
 import org.skyve.util.JSON;
 
 /**
  * Client for the ipinfo.io geoip service.
  */
-public class IPInfoIo implements GeoIPService {
+public class IPInfoIo extends AbstractCachingGeoIPService {
 	private static final String IPINFO_DOMAIN = "https://ipinfo.io/";
 
 	@Override
-	public IPGeolocation geolocate(String ipAddress) {
+	protected IPGeolocation doGeolocation(String ipAddress) {
 		IPGeolocation result = IPGeolocation.EMPTY;
 		
 		HttpClient client = HttpClient.newHttpClient();

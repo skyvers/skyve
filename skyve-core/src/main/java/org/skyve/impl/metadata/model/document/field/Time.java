@@ -9,7 +9,7 @@ import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public class Time extends ConvertableField {
+public class Time extends ConvertibleField {
 	private static final long serialVersionUID = 5704150703623236506L;
 
 	private DateValidator validator;

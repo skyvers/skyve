@@ -10,7 +10,7 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
@@ -1646,8 +1646,8 @@ public class ClientViewRenderer extends ViewRenderer {
 			length = Integer.valueOf(((LengthField) attribute).getLength());
 		}
 		Converter<?> converter = null;
-        if (attribute instanceof ConvertableField) {
-            converter = ((ConvertableField) attribute).getConverter();
+        if (attribute instanceof ConvertibleField) {
+            converter = ((ConvertibleField) attribute).getConverter();
         }
         if (AttributeType.date.equals(type)) {
         	if (converter == null) {

@@ -90,7 +90,10 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	public static final String passwordLastChangedIPPropertyName = "passwordLastChangedIP";
 
 	/** @hidden */
-	public static final String passwordLastChangedRegionPropertyName = "passwordLastChangedRegion";
+	public static final String passwordLastChangedCountryCodePropertyName = "passwordLastChangedCountryCode";
+
+	/** @hidden */
+	public static final String passwordLastChangedCountryNamePropertyName = "passwordLastChangedCountryName";
 
 	/** @hidden */
 	public static final String passwordResetTokenPropertyName = "passwordResetToken";
@@ -401,13 +404,24 @@ public abstract class User extends AbstractPersistentBean implements org.skyve.d
 	private String passwordLastChangedIP;
 
 	/**
-	 * Password Last Changed Region
+	 * Password Last Changed Country Code
 	 * <br/>
-	 * Region when password was last changed
+	 * Country Code where password was last changed
 	 * <br/>
 	 * 2-letter country-code where password was last changed. Referenced in password change notification email contents.
 	 **/
-	private String passwordLastChangedRegion;
+	private String passwordLastChangedCountryCode;
+
+	/**
+	 * Password Last Changed Country
+	 * <br/>
+	 * Country where password was last changed
+	 * <br/>
+	 * User Locale Country Name where password was last changed.
+					Referenced in password change notification email contents.
+					The getter is overridden in the extension class.
+	 **/
+	private String passwordLastChangedCountryName;
 
 	/**
 	 * Password Reset Token
@@ -838,21 +852,38 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * {@link #passwordLastChangedRegion} accessor.
+	 * {@link #passwordLastChangedCountryCode} accessor.
 	 * @return	The value.
 	 **/
-	public String getPasswordLastChangedRegion() {
-		return passwordLastChangedRegion;
+	public String getPasswordLastChangedCountryCode() {
+		return passwordLastChangedCountryCode;
 	}
 
 	/**
-	 * {@link #passwordLastChangedRegion} mutator.
-	 * @param passwordLastChangedRegion	The new value.
+	 * {@link #passwordLastChangedCountryCode} mutator.
+	 * @param passwordLastChangedCountryCode	The new value.
 	 **/
 	@XmlElement
-	public void setPasswordLastChangedRegion(String passwordLastChangedRegion) {
-		preset(passwordLastChangedRegionPropertyName, passwordLastChangedRegion);
-		this.passwordLastChangedRegion = passwordLastChangedRegion;
+	public void setPasswordLastChangedCountryCode(String passwordLastChangedCountryCode) {
+		preset(passwordLastChangedCountryCodePropertyName, passwordLastChangedCountryCode);
+		this.passwordLastChangedCountryCode = passwordLastChangedCountryCode;
+	}
+
+	/**
+	 * {@link #passwordLastChangedCountryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getPasswordLastChangedCountryName() {
+		return passwordLastChangedCountryName;
+	}
+
+	/**
+	 * {@link #passwordLastChangedCountryName} mutator.
+	 * @param passwordLastChangedCountryName	The new value.
+	 **/
+	@XmlElement
+	public void setPasswordLastChangedCountryName(String passwordLastChangedCountryName) {
+		this.passwordLastChangedCountryName = passwordLastChangedCountryName;
 	}
 
 	/**

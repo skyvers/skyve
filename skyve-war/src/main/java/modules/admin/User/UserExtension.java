@@ -140,6 +140,15 @@ public class UserExtension extends User {
 				.append(this.getActivationCode());
 		return urlBuilder.toString();
 	}
+	
+	/**
+	 * Get the password last changed country name (for the current user's locale) for the country code.
+	 */
+	@Override
+	public String getPasswordLastChangedCountryName() {
+		String countryCode = getPasswordLastChangedCountryCode();
+		return (countryCode == null) ? null : Util.countryNameFromCode(countryCode);
+	}
 
 	/**
 	 * Sends the activation email to the user who registered.

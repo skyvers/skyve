@@ -3,7 +3,7 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Integer;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 
-public class FluentInteger extends FluentConvertableField<FluentInteger> {
+public class FluentInteger extends FluentConvertibleField<FluentInteger> {
 	private Integer integer = null;
 	
 	public FluentInteger() {

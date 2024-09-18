@@ -14,7 +14,7 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.GeoIPService;
-import org.skyve.util.GeoIPService.IPGeolocation;
+import org.skyve.util.IPGeolocation;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;

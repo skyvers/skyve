@@ -1,9 +1,8 @@
 package modules.admin.Generic;
 
-import java.util.Locale;
-
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.Configuration.ConfigurationExtension;
@@ -29,8 +28,7 @@ public class GenericBizlet extends Bizlet<Generic> {
 	 */
 	private static Generic createCountryFromCode(String countryCode) {
 		Generic generic = Generic.newInstance();
-		Locale locale = new Locale("", countryCode);
-		String countryName = locale.getDisplayCountry();
+		String countryName = Util.countryNameFromCode(countryCode);
 		generic.setBizId(countryCode);
 		generic.setText5001(countryCode);
 		generic.setText5002(countryName);

@@ -22,6 +22,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.test.TestUtil;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  *
  */
@@ -181,6 +184,20 @@ public class Util {
 		return (locale != null) && (! ComponentOrientation.getOrientation(locale).isLeftToRight());
 	}
 
+	/**
+	 * Get the Country Name for a 2 letter country code in the current user's locale.
+	 * @param twoLetterCountryCode	To convert.
+	 * @return	The country name in the current user's locale, or if no user, the default system locale, or null if unknown. 
+	 */
+	public static @Nullable String countryNameFromCode(@Nonnull String twoLetterCountryCode) {
+		User user = CORE.getUser();
+		Locale userLocale = (user == null) ? null : user.getLocale();
+		Locale countryLocale = new Locale("", twoLetterCountryCode);
+		return UtilImpl.processStringValue((userLocale == null) ?
+												countryLocale.getDisplayCountry() :
+												countryLocale.getDisplayCountry(userLocale));
+	}
+	
 	public static int UTF8Length(CharSequence sequence) {
 		int count = 0;
 		for (int i = 0, len = sequence.length(); i < len; i++) {

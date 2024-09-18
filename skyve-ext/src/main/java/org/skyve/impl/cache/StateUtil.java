@@ -27,6 +27,7 @@ import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.util.IPGeolocation;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -155,6 +156,10 @@ public class StateUtil {
 		getSessions().remove(userId);
 	}
 
+	public static @Nonnull Cache<String, IPGeolocation> getGeoIPs() {
+		return EXT.getCaching().getEHCache(UtilImpl.GEO_IP_CACHE.getName(), String.class, IPGeolocation.class);
+	}
+	
 	@SuppressWarnings("rawtypes")
 	private static @Nonnull Cache<String, TreeSet> getTokens() {
 		return EXT.getCaching().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
@@ -235,6 +240,7 @@ public class StateUtil {
 	public static void logStateStats() {
 		logCacheStats(UtilImpl.CONVERSATION_CACHE.getName(), "Conversation");
 		logCacheStats(UtilImpl.CSRF_TOKEN_CACHE.getName(), "CSRF Token");
+		logCacheStats(UtilImpl.GEO_IP_CACHE.getName(), "Geo IP");
 		logCacheStats(UtilImpl.SESSION_CACHE.getName(), "User Session");
 		UtilImpl.LOGGER.info("Session count = " + SESSION_COUNT.get());
 		UtilImpl.LOGGER.info("********************************************************************************");

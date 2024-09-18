@@ -21,7 +21,7 @@ import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -269,8 +269,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 						}
 						else if (value instanceof String) {
 							Converter<?> converter = null;
-							if (attribute instanceof ConvertableField) {
-								converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+							if (attribute instanceof ConvertibleField) {
+								converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
 							}
 							Class<?> implementingType = type.getImplementingType();
 							if (! String.class.equals(implementingType)) {

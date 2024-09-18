@@ -250,7 +250,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 				if (ipAddress != null) {
 					String countryCode = EXT.getGeoIPService().geolocate(ipAddress).countryCode();
 					if (countryCode != null) {
-						bean.setPasswordLastChangedRegion(countryCode);
+						bean.setPasswordLastChangedCountryCode(countryCode);
 					}
 				}
 			}

@@ -16,7 +16,7 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Date;
 import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
@@ -106,8 +106,8 @@ public class ValidationUtil {
 		}
 
 		String localisedDisplayName = attribute.getLocalisedDisplayName();
-		Converter<?> converter = (attribute instanceof ConvertableField) ? 
-									((ConvertableField) attribute).getConverterForCustomer(user.getCustomer()) : 
+		Converter<?> converter = (attribute instanceof ConvertibleField) ? 
+									((ConvertibleField) attribute).getConverterForCustomer(user.getCustomer()) : 
 									null;
 		Object attributeValue = getAttributeValue(bean, binding);
 		if (attribute.isRequired()) {

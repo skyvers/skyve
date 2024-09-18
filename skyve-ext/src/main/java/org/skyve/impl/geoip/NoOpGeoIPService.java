@@ -1,6 +1,7 @@
 package org.skyve.impl.geoip;
 
 import org.skyve.util.GeoIPService;
+import org.skyve.util.IPGeolocation;
 
 /**
  * No GeoIP services.
