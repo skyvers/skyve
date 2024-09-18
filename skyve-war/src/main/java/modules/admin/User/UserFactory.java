@@ -13,7 +13,8 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 
-@SkyveFactory(excludedActions = { Check.class, GeneratePassword.class, Next.class, ResendActivation.class })
+@SkyveFactory(excludedActions = { Check.class, GeneratePassword.class, Next.class, ResendActivation.class },
+				excludedUpdateAttributes = { User.passwordLastChangedCountryCodePropertyName, User.passwordLastChangedCountryNamePropertyName })
 public class UserFactory {
 
 	@SkyveFixture(types = FixtureType.crud)

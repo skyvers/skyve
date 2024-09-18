@@ -685,6 +685,9 @@
 				<column binding="userName" />
 				<column binding="loginDateTime" sortOrder="descending" />
 				<column binding="failed" />
+				<column binding="ipAddress" />
+				<column binding="countryCode" />
+				<column binding="countryName" editable="false" filterable="false" sortable="false" />
 			</columns>
 		</query>
 		

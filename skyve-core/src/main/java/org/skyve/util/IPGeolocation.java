@@ -36,4 +36,16 @@ public record IPGeolocation (@Nullable String city,
 		
 		return result;
 	}
+	
+	/**
+	 * Get the country name of the Geolocated IP in the current user's locale.
+	 * @return	The country name in the current user's locale, or if no user, the default system locale, or null if unknown. 
+	 */
+	public @Nullable String getCountry() {
+		String result = null;
+		if (countryCode != null) {
+			result = Util.countryNameFromCode(countryCode);
+		}
+		return result;
+	}
 }

@@ -670,7 +670,7 @@
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
 		<property name="passwordLastChangedIP" length="45" />
-		<property name="passwordLastChangedRegion" length="2" />
+		<property name="passwordLastChangedCountryCode" length="2" />
 		<property name="passwordResetToken" length="56" />
 		<property name="passwordResetTokenCreationTimestamp" type="Timestamp" />
 		<property name="passwordHistory" type="text" />
@@ -712,7 +712,7 @@
 		<property name="loginDateTime" type="DateTime" />
 		<property name="failed" />
 		<property name="ipAddress" length="254" />
-		<property name="country" length="100" />
+		<property name="countryCode" length="2" />
 		<filter name="adminUserLoginRecordNoneFilter" condition="1=0"/>
 		<filter name="adminUserLoginRecordCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserLoginRecordDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

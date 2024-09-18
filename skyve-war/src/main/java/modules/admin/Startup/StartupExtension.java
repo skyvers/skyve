@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -156,9 +155,7 @@ public class StartupExtension extends Startup {
 				gCountry.setBizId(cc);
 				gCountry.setText5001(cc);
 				// populate country name for this code
-				Locale locale = new Locale("", cc);
-				String countryName = locale.getDisplayCountry();
-				gCountry.setText5002(countryName);
+				gCountry.setText5002(Util.countryNameFromCode(cc));
 				countryCodes.add(gCountry);
 			});
 		}

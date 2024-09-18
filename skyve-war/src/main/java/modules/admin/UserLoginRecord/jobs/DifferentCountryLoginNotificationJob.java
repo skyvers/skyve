@@ -27,7 +27,9 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			+ Contact.namePropertyName
 			+ "},<br/><br/>"
 			+ "We have detected a login attempt to your account from a new location: {"
-			+ UserLoginRecord.countryPropertyName
+			+ UserLoginRecord.countryCodePropertyName
+			+ "} - {"
+			+ UserLoginRecord.countryNamePropertyName
 			+ "} with IP address: {"
 			+ UserLoginRecord.ipAddressPropertyName
 			+ "}. If this was you, there's no need to take further action.<br/><br/>"
@@ -40,14 +42,13 @@ public class DifferentCountryLoginNotificationJob extends Job {
 			+ "Best regards,<br/>"
 			+ "The Security Team";
 
-
 	@Override
 	public void execute() throws Exception {
 		List<String> log = getLog();
 		setPercentComplete(0);
 
 		UserLoginRecord loginRecord = (UserLoginRecord) this.getBean();
-		String country = loginRecord.getCountry();
+		String country = loginRecord.getCountryName();
 
 		if (country != null) {
 			Contact contact = ModulesUtil.getCurrentUserContact();

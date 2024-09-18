@@ -9,6 +9,7 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import modules.admin.domain.Startup;
@@ -25,8 +26,7 @@ public class StartupBizlet extends Bizlet<StartupExtension> {
 			return Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2)
 					.stream()
 					.map(code -> {
-						Locale locale = new Locale("", code);
-						return new DomainValue(code, locale.getDisplayCountry());
+						return new DomainValue(code, Util.countryNameFromCode(code));
 					})
 					.sorted(Comparator.comparing(DomainValue::getLocalisedDescription))
 					.collect(Collectors.toList());

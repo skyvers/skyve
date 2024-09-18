@@ -1,6 +1,5 @@
 package modules.admin.UserLoginRecord;
 
-import java.util.Locale;
 import java.util.Objects;
 
 import org.skyve.CORE;
@@ -31,7 +30,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 			+ "Please review the login activity and consider updating the user's security settings if necessary.";
 
 	private static final String COUNTRY_CHANGE_LOG_MESSAGE = "The user %s has logged in from a different country. "
-			+ "Their location has changed from %s (IP: %s) to %s (IP: %s). "
+			+ "Their location has changed from %s - %s (IP: %s) to %s - %s (IP: %s). "
 			+ "If this change is unexpected, it might indicate unauthorized access. Please review the user's recent activity for any discrepancies.";
 
 	/**
@@ -43,21 +42,14 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 	public void preSave(UserLoginRecordExtension bean) throws Exception {
 		if (bean.isNotPersisted()) {
 			String userName = bean.getUserName();
-			String country = null;
-	
+
 			// Geolocate the IP so as to get the country code and country
+			String countryCode = null;
 			String ipAddress = bean.getIpAddress();
 			if (ipAddress != null) {
-				String countryCode = geoIPService.geolocate(ipAddress).countryCode();
-				if (countryCode == null) {
-					UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in an unknown country");
-				}
-				else {
-					UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in country: " + countryCode);
-					Locale locale = new Locale("", countryCode);
-					country = locale.getDisplayCountry();
-				}
-				bean.setCountry(country);
+				countryCode = geoIPService.geolocate(ipAddress).countryCode();
+				UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in country: " + countryCode);
+				bean.setCountryCode(countryCode);
 			}
 			
 			// Get the previous login record of the current user
@@ -75,11 +67,20 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 				String lastIpAddress = previousLoginRecord.getIpAddress();
 				if (lastIpAddress != null && !Objects.equals(userIPAddress, lastIpAddress)) {
 					// Check if the country has changed since the last login and if so send the user a warning message
-					String previousCountry = previousLoginRecord.getCountry();
+					String previousCountryCode = previousLoginRecord.getCountryCode();
 	
-					if (! Objects.equals(country, previousCountry)) {
+					if (! Objects.equals(countryCode, previousCountryCode)) {
+						String country = bean.getCountryName();
+						String previousCountry = previousLoginRecord.getCountryName();
 						SecurityUtil.log("User Logged in from Different Country",
-											String.format(COUNTRY_CHANGE_LOG_MESSAGE, userName, previousCountry, lastIpAddress, country, userIPAddress));
+											String.format(COUNTRY_CHANGE_LOG_MESSAGE,
+															userName,
+															(previousCountryCode == null) ? "??" : previousCountryCode,
+															(previousCountry == null) ? "Unknown" : previousCountry,
+															lastIpAddress,
+															(countryCode == null) ? "??" : countryCode,
+															(country == null) ? "Unknown" : country,
+															userIPAddress));
 						
 						// Run job to email user on country change
 						final Module module = CORE.getCustomer().getModule(User.MODULE_NAME);
