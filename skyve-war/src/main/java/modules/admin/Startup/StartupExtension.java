@@ -25,7 +25,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import jakarta.inject.Inject;
-import modules.admin.domain.Generic;
+import modules.admin.Country.CountryExtension;
 import modules.admin.domain.Startup;
 
 public class StartupExtension extends Startup {
@@ -148,16 +148,10 @@ public class StartupExtension extends Startup {
 									GeoIPCountryListType.blacklist);
 
 		// convert country codes from csv to list
+		List<CountryExtension> countries = getGeoIPCountries();
+		countries.clear();
 		if (UtilImpl.GEO_IP_COUNTRY_CODES != null) {
-			List<Generic> countryCodes = getGeoIPCountryCodes();
-			UtilImpl.GEO_IP_COUNTRY_CODES.forEach(cc -> {
-				Generic gCountry = Generic.newInstance();
-				gCountry.setBizId(cc);
-				gCountry.setText5001(cc);
-				// populate country name for this code
-				gCountry.setText5002(Util.countryNameFromCode(cc));
-				countryCodes.add(gCountry);
-			});
+			UtilImpl.GEO_IP_COUNTRY_CODES.forEach(cc -> countries.add(CountryExtension.fromCode(cc)));
 		}
 		setGeoIPKey(UtilImpl.GEO_IP_KEY);
 	}
@@ -353,18 +347,18 @@ public class StartupExtension extends Startup {
 		api.put(API_GEO_IP_KEY, geoIPKey);
 		UtilImpl.GEO_IP_KEY = geoIPKey;
 		
-		List<Generic> countryCodes = getGeoIPCountryCodes();
-		if (countryCodes.isEmpty()) {
+		List<CountryExtension> countries = getGeoIPCountries();
+		if (countries.isEmpty()) {
 			api.put(API_GEO_IP_COUNTRY_CODES, null);
 			UtilImpl.GEO_IP_COUNTRY_CODES = null;
 		}
 		else {
 			// convert the selected countries into a | separated string of the 2-letter country codes
-			int countryCodesSize = countryCodes.size();
-			StringBuilder selectedCodes = new StringBuilder(countryCodesSize * 3);
-			List<String> countryCodeList = new ArrayList<>(countryCodesSize);
-			for (Generic countryCode : countryCodes) {
-				String code = countryCode.getText5001();
+			int countriesSize = countries.size();
+			StringBuilder selectedCodes = new StringBuilder(countriesSize * 3);
+			List<String> countryCodeList = new ArrayList<>(countriesSize);
+			for (CountryExtension country : countries) {
+				String code = country.getCode();
 				countryCodeList.add(code);
 				selectedCodes.append(code).append('|');
 			}

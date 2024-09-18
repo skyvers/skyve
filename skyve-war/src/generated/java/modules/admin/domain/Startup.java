@@ -7,16 +7,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import modules.admin.Country.CountryExtension;
 import modules.admin.Startup.StartupExtension;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
@@ -31,7 +32,7 @@ import org.skyve.util.Util;
  * @depend - - - CaptchaType
  * @depend - - - GeoIPCountryListType
  * @depend - - - BackupType
- * @navhas n geoIPCountryCodes 0..n Generic
+ * @navhas n geoIPCountries 0..n Country
  * @stereotype "transient"
  */
 @XmlType
@@ -120,7 +121,7 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String geoIPCountryListTypePropertyName = "geoIPCountryListType";
 
 	/** @hidden */
-	public static final String geoIPCountryCodesPropertyName = "geoIPCountryCodes";
+	public static final String geoIPCountriesPropertyName = "geoIPCountries";
 
 	/** @hidden */
 	public static final String accountAllowUserSelfRegistrationPropertyName = "accountAllowUserSelfRegistration";
@@ -598,9 +599,9 @@ public abstract class Startup extends AbstractTransientBean {
 	private GeoIPCountryListType geoIPCountryListType;
 
 	/**
-	 * Country Codes
+	 * Counties
 	 **/
-	private List<Generic> geoIPCountryCodes = new ArrayList<>();
+	private List<CountryExtension> geoIPCountries = new ChangeTrackingArrayList<>("geoIPCountries", this);
 
 	/**
 	 * Allow User Self Registration
@@ -1098,67 +1099,68 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	@XmlElement
 	public void setGeoIPCountryListType(GeoIPCountryListType geoIPCountryListType) {
+		preset(geoIPCountryListTypePropertyName, geoIPCountryListType);
 		this.geoIPCountryListType = geoIPCountryListType;
 	}
 
 	/**
-	 * {@link #geoIPCountryCodes} accessor.
+	 * {@link #geoIPCountries} accessor.
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<Generic> getGeoIPCountryCodes() {
-		return geoIPCountryCodes;
+	public List<CountryExtension> getGeoIPCountries() {
+		return geoIPCountries;
 	}
 
 	/**
-	 * {@link #geoIPCountryCodes} accessor.
+	 * {@link #geoIPCountries} accessor.
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public Generic getGeoIPCountryCodesElementById(String bizId) {
-		return getElementById(geoIPCountryCodes, bizId);
+	public CountryExtension getGeoIPCountriesElementById(String bizId) {
+		return getElementById(geoIPCountries, bizId);
 	}
 
 	/**
-	 * {@link #geoIPCountryCodes} mutator.
+	 * {@link #geoIPCountries} mutator.
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setGeoIPCountryCodesElementById(String bizId, Generic element) {
-		setElementById(geoIPCountryCodes, element);
+	public void setGeoIPCountriesElementById(String bizId, CountryExtension element) {
+		setElementById(geoIPCountries, element);
 	}
 
 	/**
-	 * {@link #geoIPCountryCodes} add.
+	 * {@link #geoIPCountries} add.
 	 * @param element	The element to add.
 	 **/
-	public boolean addGeoIPCountryCodesElement(Generic element) {
-		return geoIPCountryCodes.add(element);
+	public boolean addGeoIPCountriesElement(CountryExtension element) {
+		return geoIPCountries.add(element);
 	}
 
 	/**
-	 * {@link #geoIPCountryCodes} add.
+	 * {@link #geoIPCountries} add.
 	 * @param index	The index in the list to add the element to.
 	 * @param element	The element to add.
 	 **/
-	public void addGeoIPCountryCodesElement(int index, Generic element) {
-		geoIPCountryCodes.add(index, element);
+	public void addGeoIPCountriesElement(int index, CountryExtension element) {
+		geoIPCountries.add(index, element);
 	}
 
 	/**
-	 * {@link #geoIPCountryCodes} remove.
+	 * {@link #geoIPCountries} remove.
 	 * @param element	The element to remove.
 	 **/
-	public boolean removeGeoIPCountryCodesElement(Generic element) {
-		return geoIPCountryCodes.remove(element);
+	public boolean removeGeoIPCountriesElement(CountryExtension element) {
+		return geoIPCountries.remove(element);
 	}
 
 	/**
-	 * {@link #geoIPCountryCodes} remove.
+	 * {@link #geoIPCountries} remove.
 	 * @param index	The index in the list to remove the element from.
 	 **/
-	public Generic removeGeoIPCountryCodesElement(int index) {
-		return geoIPCountryCodes.remove(index);
+	public CountryExtension removeGeoIPCountriesElement(int index) {
+		return geoIPCountries.remove(index);
 	}
 
 	/**

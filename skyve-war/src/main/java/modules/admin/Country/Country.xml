@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Country" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		This non-persistent document is used to encapsulate all the countries of the world and their ISO 2 letter country codes.
+		The bizId is used to hold the country code and the Bizlet can resolve these.
+	</documentation>
+	<singularAlias>Country</singularAlias>
+	<pluralAlias>Countries</pluralAlias>
+	<bizKey expression="{name}" />
+	<attributes>
+		<text name="name">
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

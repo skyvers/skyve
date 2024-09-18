@@ -1,38 +1,27 @@
 package modules.admin.Startup;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import modules.admin.Country.CountryExtension;
 import modules.admin.domain.Startup;
 
 public class StartupBizlet extends Bizlet<StartupExtension> {
-
 	public static final String MAP_LAYER_GMAP = "google.maps.MapTypeId.ROADMAP";
 	public static final String MAP_LAYER_OPEN_STREET_MAP = "[L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; <a href=\\\\\\\"https://www.openstreetmap.org/copyright\\\\\\\">OpenStreetMap</a> contributors'})]";
 
 	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, StartupExtension bean) throws Exception {
-		if (Startup.geoIPCountryCodesPropertyName.equals(attributeName)) {
-			// return a domain value for each country
-			return Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2)
-					.stream()
-					.map(code -> {
-						return new DomainValue(code, Util.countryNameFromCode(code));
-					})
-					.sorted(Comparator.comparing(DomainValue::getLocalisedDescription))
-					.collect(Collectors.toList());
+	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+		if (Startup.geoIPCountriesPropertyName.equals(attributeName)) {
+			return CountryExtension.getCountries();
 		}
 
-		return super.getDynamicDomainValues(attributeName, bean);
+		return super.getVariantDomainValues(attributeName);
 	}
 
 	@Override
