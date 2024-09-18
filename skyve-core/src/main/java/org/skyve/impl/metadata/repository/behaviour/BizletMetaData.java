@@ -7,7 +7,7 @@ import java.util.TreeMap;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
-import org.skyve.impl.metadata.repository.ConvertableMetaData;
+import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -25,7 +25,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 
 			name = "bizlet",
 			propOrder = {"documentation", "properties"})
-public class BizletMetaData implements ConvertableMetaData<BizletMetaData>, DecoratedMetaData {
+public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, DecoratedMetaData {
 	private static final long serialVersionUID = 4870898727945477449L;
 
 	private String documentation;

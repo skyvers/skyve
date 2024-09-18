@@ -9,7 +9,7 @@ import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-public class LongInteger extends ConvertableField {
+public class LongInteger extends ConvertibleField {
 	private static final long serialVersionUID = -8825125438350207039L;
 
 	private LongValidator validator;

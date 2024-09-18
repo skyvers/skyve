@@ -17,7 +17,7 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -262,8 +262,8 @@ public class JSONReader {
 																						propertyName);
 								if (target != null) {
 									Attribute attribute = target.getAttribute();
-									if (attribute instanceof ConvertableField) {
-										Converter<?> converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+									if (attribute instanceof ConvertibleField) {
+										Converter<?> converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
 										if (converter != null) {
 											value = converter.fromDisplayValue(valueString);
 										}

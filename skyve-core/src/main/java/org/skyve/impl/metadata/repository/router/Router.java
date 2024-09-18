@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.skyve.impl.metadata.repository.ConvertableMetaData;
+import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.Util;
@@ -21,7 +21,7 @@ import jakarta.xml.bind.annotation.XmlType;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE, propOrder = {"uxuis", "unsecuredUrlPrefixes"})
-public class Router implements ConvertableMetaData<Router> {
+public class Router implements ConvertibleMetaData<Router> {
 	private static final long serialVersionUID = 670690452538129424L;
 
 	private long lastModifiedMillis = Long.MAX_VALUE;

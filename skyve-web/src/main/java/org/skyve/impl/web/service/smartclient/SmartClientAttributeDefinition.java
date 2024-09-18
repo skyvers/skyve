@@ -31,7 +31,7 @@ import org.skyve.domain.types.converters.integer.SimplePercentage;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Date;
 import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
@@ -213,7 +213,7 @@ public class SmartClientAttributeDefinition {
 				try {
 					if (dateValidator != null) {
 						@SuppressWarnings("unchecked")
-						Converter<java.util.Date> converter = (Converter<java.util.Date>) ((ConvertableField) bindingAttribute).getConverterForCustomer(customer); 
+						Converter<java.util.Date> converter = (Converter<java.util.Date>) ((ConvertibleField) bindingAttribute).getConverterForCustomer(customer); 
 						StringBuilder sb = new StringBuilder(128);
 						sb.append('{');
 						java.util.Date min = dateValidator.getMin();
@@ -232,7 +232,7 @@ public class SmartClientAttributeDefinition {
 					}
 					else if (decimalValidator != null) {
 						@SuppressWarnings("unchecked")
-						Converter<Decimal> converter = (Converter<Decimal>) ((ConvertableField) bindingAttribute).getConverterForCustomer(customer); 
+						Converter<Decimal> converter = (Converter<Decimal>) ((ConvertibleField) bindingAttribute).getConverterForCustomer(customer); 
 						StringBuilder sb = new StringBuilder(128);
 						sb.append('{');
 						Decimal min = decimalValidator.getMin();
@@ -257,7 +257,7 @@ public class SmartClientAttributeDefinition {
 					}
 					else if (integerValidator != null) {
 						@SuppressWarnings("unchecked")
-						Converter<Integer> converter = (Converter<Integer>) ((ConvertableField) bindingAttribute).getConverterForCustomer(customer); 
+						Converter<Integer> converter = (Converter<Integer>) ((ConvertibleField) bindingAttribute).getConverterForCustomer(customer); 
 						StringBuilder sb = new StringBuilder(128);
 						sb.append('{');
 						Integer min = integerValidator.getMin();
@@ -276,7 +276,7 @@ public class SmartClientAttributeDefinition {
 					}
 					else if (longValidator != null) {
 						@SuppressWarnings("unchecked")
-						Converter<Long> converter = (Converter<Long>) ((ConvertableField) bindingAttribute).getConverterForCustomer(customer); 
+						Converter<Long> converter = (Converter<Long>) ((ConvertibleField) bindingAttribute).getConverterForCustomer(customer); 
 						StringBuilder sb = new StringBuilder(128);
 						sb.append('{');
 						Long min = longValidator.getMin();
@@ -304,8 +304,8 @@ public class SmartClientAttributeDefinition {
 				LengthField field = (LengthField) bindingAttribute;
 				length = Integer.valueOf(field.getLength());
 			}
-			else if (bindingAttribute instanceof ConvertableField) {
-				ConvertableField field = (ConvertableField) bindingAttribute;
+			else if (bindingAttribute instanceof ConvertibleField) {
+				ConvertibleField field = (ConvertibleField) bindingAttribute;
 				converter = field.getConverterForCustomer(customer);
 			}
 			else if (bindingAttribute instanceof Collection) {

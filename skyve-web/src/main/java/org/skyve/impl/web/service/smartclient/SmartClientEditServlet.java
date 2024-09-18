@@ -30,7 +30,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -863,8 +863,8 @@ public class SmartClientEditServlet extends HttpServlet {
 										type = attribute.getAttributeType().getImplementingType();
 									}
 
-				    	    		if (attribute instanceof ConvertableField) {
-										ConvertableField field = (ConvertableField) attribute;
+				    	    		if (attribute instanceof ConvertibleField) {
+										ConvertibleField field = (ConvertibleField) attribute;
 										converter = field.getConverterForCustomer(customer);
 									}
 				    	    		
