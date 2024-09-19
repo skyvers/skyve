@@ -334,6 +334,22 @@ public class Util {
 		return UtilImpl.SERVER_URL + UtilImpl.SKYVE_CONTEXT;
 	}
 
+	/**
+	 * This is the base URL for the Skyve app - set via the "url" object in the JSON config.
+	 * This is the url.server + url.context + '/'.
+	 * @return	The base URL (Base HREF)
+	 */
+	public static String getBaseUrl() {
+		StringBuilder result = new StringBuilder(128);
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append('/');
+		return result.toString();
+	}
+
+	/**
+	 * The home page URL for the Skyve app - set via the "url" object in the JSON config.
+	 * This is used as a default redirect after login.
+	 * @return	The home URL.
+	 */
 	public static String getHomeUrl() {
 		StringBuilder result = new StringBuilder(128);
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);

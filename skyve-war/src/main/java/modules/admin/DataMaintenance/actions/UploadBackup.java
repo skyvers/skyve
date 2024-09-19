@@ -24,22 +24,21 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 
 		// create the backup upload file
 		File backup = new File(String.format("%sbackup_%s%s%s",
-				Util.getBackupDirectory(),
-				CORE.getUser().getCustomerName(),
-				File.separator,
-				upload.getFileName()));
+												Util.getBackupDirectory(),
+												CORE.getUser().getCustomerName(),
+												File.separator,
+												upload.getFileName()));
 
 		// check that a backup with this filename doesn't already exist
-		if(backup.exists()) {
-			exception.addError(new Problem(
-					String.format("A backup with the name %s already exists.", upload.getFileName()), null));
+		if (backup.exists()) {
+			exception.addError(new Problem(String.format("A backup with the name %s already exists.", upload.getFileName()), null));
 			throw exception;
 		}
 
 		//check that the backup folder exists, and if not, create it
 		File backup_directory = new File(String.format("%sbackup_%s",
-				Util.getContentDirectory(),
-				CORE.getUser().getCustomerName()));
+														Util.getContentDirectory(),
+														CORE.getUser().getCustomerName()));
 		if (! backup_directory.exists()) {
 	        backup_directory.mkdir();
 		}
@@ -48,13 +47,13 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 		try (InputStream in = upload.getInputStream()) {
 			Files.copy(in, Paths.get(backup.getAbsolutePath()));
 		}
-		if(backup.exists()) {
+		if (backup.exists()) {
 			Util.LOGGER.info("Uploaded backup " + backup.getAbsolutePath());
 		}
 
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			ExternalBackup.getInstance().uploadBackup(backup.getAbsolutePath());
-			if (!backup.delete()) {
+			if (! backup.delete()) {
 				Util.LOGGER.warning("Backup " + backup.getAbsolutePath() + " was successfully uploaded externally but could not be deleted on disk.");
 			}
 		}

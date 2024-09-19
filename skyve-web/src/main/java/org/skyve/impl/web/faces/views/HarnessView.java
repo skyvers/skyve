@@ -104,7 +104,7 @@ public abstract class HarnessView extends LocalisableView {
 	
 	@SuppressWarnings("static-method")
 	public final String getBaseHref() {
-		return Util.getSkyveContextUrl() + '/';
+		return Util.getBaseUrl();
 	}
 
 	@SuppressWarnings("static-method")

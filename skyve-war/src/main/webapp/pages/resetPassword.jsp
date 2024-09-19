@@ -78,7 +78,7 @@
 		if (WebUtil.validateRecaptcha(captcha)) {
 			passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
 			if (passwordChangeErrorMessage == null) {
-				String redirectURL = response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp");
+				String redirectURL = response.encodeRedirectURL(Util.getBaseUrl() + "home.jsp");
 	
 				String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
 				if (customerName != null && !customerName.isBlank()) {

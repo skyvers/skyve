@@ -35,7 +35,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		// Set the user name to the logged in user
 		UserProxyExtension user = ModulesUtil.currentAdminUserProxy();
 		bean.setSailUser(user);
-		bean.setSailBaseUrl(Util.getSkyveContextUrl() + '/');
+		bean.setSailBaseUrl(Util.getBaseUrl());
 		bean.setSailTestStrategy(SailTestStrategy.None);
 
 		// Set module name to the first non-admin module found

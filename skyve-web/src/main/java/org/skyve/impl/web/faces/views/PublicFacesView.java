@@ -57,7 +57,7 @@ public class PublicFacesView extends FacesView {
 					if (userName == null) {
 						HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 						try {
-							response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/noPublicUser.jsp"));
+							response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "pages/noPublicUser.jsp"));
 						}
 						catch (IOException e) {
 							throw new IllegalStateException("Could not redirect to /pages/noPublicUser.jsp", e);
