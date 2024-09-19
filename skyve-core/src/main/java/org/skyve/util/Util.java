@@ -26,14 +26,17 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- *
+ * Skyve utility methods
  */
 public class Util {
 	/**
-	 * 
+	 * Skyve's Logger
 	 */
 	public static final Logger LOGGER = UtilImpl.LOGGER;
 
+	/**
+	 * UTF-8 charset identifier
+	 */
 	public static final String UTF8 = "UTF-8";
 
 	/**
@@ -44,22 +47,20 @@ public class Util {
 	}
 
 	/**
-	 * 
-	 * @param object
-	 * @return
+	 * Clone the object given by serializing and deserializing it.
+	 * @param object	The object to clone.
+	 * @return	The cloned object.
 	 */
-	public static final <T extends Serializable> T cloneBySerialization(T object) {
+	public static final @Nonnull <T extends Serializable> T cloneBySerialization(@Nonnull T object) {
 		return UtilImpl.cloneBySerialization(object);
 	}
 
 	/**
-	 * 
-	 * @param object
-	 * @return
-	 * @throws Exception
+	 * Clone the object given by serializing and deserializing it, setting any persistent Skyve beans transient (not persisted).
+	 * @param object	The object to clone.
+	 * @return	The cloned non-persisted object.
 	 */
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
-	throws Exception {
+	public static final @Nonnull <T extends Serializable> T cloneToTransientBySerialization(@Nonnull T object) {
 		return UtilImpl.cloneToTransientBySerialization(object);
 	}
 
@@ -68,7 +69,7 @@ public class Util {
 	 * 
 	 * @param bean The bean to load.
 	 */
-	public static void populateFully(Bean bean) {
+	public static void populateFully(@Nonnull Bean bean) {
 		UtilImpl.populateFully(bean);
 	}
 
@@ -81,7 +82,7 @@ public class Util {
 	 * @return if the bean, its collections or its aggregated beans have mutated or not
 	 */
 	@Deprecated
-	public static boolean hasChanged(Bean bean) {
+	public static boolean hasChanged(@Nonnull Bean bean) {
 		return UtilImpl.hasChanged(bean);
 	}
 
@@ -92,7 +93,7 @@ public class Util {
 	 * @param possibleProxy The possible proxy
 	 * @return the resolved proxy or possibleProxy
 	 */
-	public static <T> T deproxy(T possibleProxy) throws ClassCastException {
+	public static @Nonnull <T> T deproxy(@Nonnull T possibleProxy) throws ClassCastException {
 		return UtilImpl.deproxy(possibleProxy);
 	}
 
@@ -102,14 +103,14 @@ public class Util {
 	 * @param value
 	 * @return
 	 */
-	public static String processStringValue(String value) {
+	public static @Nullable String processStringValue(@Nullable String value) {
 		return UtilImpl.processStringValue(value);
 	}
 
 	/**
 	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
-	public static String i18n(String key, String... values) {
+	public static @Nullable String i18n(@Nullable String key, String... values) {
 		if (key == null) {
 			return null;
 		}
@@ -130,7 +131,7 @@ public class Util {
 	/**
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
-	public static String i18n(String key, Locale locale, String... values) {
+	public static @Nullable String i18n(@Nullable String key, @Nullable Locale locale, String... values) {
 		String result = key;
 
 		if (key != null) {
@@ -167,7 +168,7 @@ public class Util {
 				}
 			}
 			catch (@SuppressWarnings("unused") MissingResourceException e) {
-				LOGGER.warning("Could not find bundle \"resources.i18n\"");
+				UtilImpl.LOGGER.warning("Could not find bundle \"resources.i18n\"");
 			}
 		}
 
@@ -180,7 +181,7 @@ public class Util {
 		return isRTL((u == null) ? null : u.getLocale());
 	}
 
-	public static boolean isRTL(Locale locale) {
+	public static boolean isRTL(@Nullable Locale locale) {
 		return (locale != null) && (! ComponentOrientation.getOrientation(locale).isLeftToRight());
 	}
 
@@ -198,7 +199,12 @@ public class Util {
 												countryLocale.getDisplayCountry(userLocale));
 	}
 	
-	public static int UTF8Length(CharSequence sequence) {
+	/**
+	 * Determine the length in bytes of a UTF-8 CharSequence.
+	 * @param sequence	To determine the byte length of.
+	 * @return	The byte length.
+	 */
+	public static int UTF8Length(@Nonnull CharSequence sequence) {
 		int count = 0;
 		for (int i = 0, len = sequence.length(); i < len; i++) {
 			char ch = sequence.charAt(i);
@@ -220,7 +226,13 @@ public class Util {
 		return count;
 	}
 
-	public static int lastIndexOfRegEx(String string, String regex) {
+	/**
+	 * Get the lastIndexOf() for a regular expression.
+	 * @param string	The String to search
+	 * @param regex	The regex to search on.
+	 * @return	The index of the last occurrence of the regex match.
+	 */
+	public static int lastIndexOfRegEx(@Nonnull String string, @Nonnull String regex) {
 		int result = -1;
 
 		Pattern p = Pattern.compile(regex);
@@ -233,22 +245,19 @@ public class Util {
 	}
 
 	/**
-	 * 
-	 * @param object
-	 * @throws Exception
+	 * Set any Skyve Persistent Beans found in the object to transient (not persisted).
+	 * @param object	The object to set transient
 	 */
-	public static void setTransient(Object object) throws Exception {
+	public static void setTransient(@Nullable Object object) {
 		UtilImpl.setTransient(object);
 	}
 
 	/**
-	 * 
-	 * @param object
-	 * @param bizDataGroupId
-	 * @throws Exception
+	 * Set the data group of any Skyve beans found in the object
+	 * @param object	The object to set the data group for
+	 * @param bizDataGroupId	The data group to set (or clear if null)
 	 */
-	// set the data group of a bean and all its children
-	public static void setDataGroup(Object object, String bizDataGroupId) throws Exception {
+	public static void setDataGroup(@Nullable Object object, @Nullable String bizDataGroupId) {
 		UtilImpl.setDataGroup(object, bizDataGroupId);
 	}
 
@@ -264,28 +273,31 @@ public class Util {
 	 * @return The randomly constructed bean.
 	 * @throws Exception
 	 */
-	public static <T extends Bean> T constructRandomInstance(User user, Module module, Document document, int depth)
+	public static @Nonnull <T extends Bean> T constructRandomInstance(@Nonnull User user,
+																		@Nonnull Module module,
+																		@Nonnull Document document,
+																		int depth)
 	throws Exception {
 		return TestUtil.constructRandomInstance(user, module, document, depth);
 	}
 
-	public static String getContentDirectory() {
+	public static @Nonnull String getContentDirectory() {
 		return UtilImpl.CONTENT_DIRECTORY;
 	}
 
-	public static String getAddinsDirectory() {
+	public static @Nonnull String getAddinsDirectory() {
 		return (UtilImpl.ADDINS_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "addins/") : UtilImpl.ADDINS_DIRECTORY;
 	}
 	
-	public static String getBackupDirectory() {
+	public static @Nonnull String getBackupDirectory() {
 		return (UtilImpl.BACKUP_DIRECTORY == null) ? UtilImpl.CONTENT_DIRECTORY : UtilImpl.BACKUP_DIRECTORY;
 	}
 
-	public static String getCacheDirectory() {
+	public static @Nonnull String getCacheDirectory() {
 		return (UtilImpl.CACHE_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_CACHE/") : UtilImpl.CACHE_DIRECTORY;
 	}
 
-	public static String getThumbnnailDirectory() {
+	public static @Nonnull String getThumbnnailDirectory() {
 		return (UtilImpl.THUMBNAIL_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_THUMBNAILS/") : UtilImpl.THUMBNAIL_DIRECTORY;
 	}
 
@@ -339,7 +351,7 @@ public class Util {
 	 * This is the url.server + url.context + '/'.
 	 * @return	The base URL (Base HREF)
 	 */
-	public static String getBaseUrl() {
+	public static @Nonnull String getBaseUrl() {
 		StringBuilder result = new StringBuilder(128);
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append('/');
 		return result.toString();
@@ -350,29 +362,31 @@ public class Util {
 	 * This is used as a default redirect after login.
 	 * @return	The home URL.
 	 */
-	public static String getHomeUrl() {
+	public static @Nonnull String getHomeUrl() {
 		StringBuilder result = new StringBuilder(128);
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
 		return result.toString();
 	}
 
-	public static String getLoginUrl() {
+	public static @Nonnull String getLoginUrl() {
 		StringBuilder result = new StringBuilder(128);
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.AUTHENTICATION_LOGIN_URI);
 		return result.toString();
 	}
 
-	public static String getLoggedOutUrl() {
+	public static @Nonnull String getLoggedOutUrl() {
 		StringBuilder result = new StringBuilder(128);
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.AUTHENTICATION_LOGGED_OUT_URI);
 		return result.toString();
 	}
 
-	public static String getDocumentUrl(String bizModule, String bizDocument) {
+	public static @Nonnull String getDocumentUrl(@Nonnull String bizModule, @Nonnull String bizDocument) {
 		return getDocumentUrl(bizModule, bizDocument, null);
 	}
 
-	public static String getDocumentUrl(String bizModule, String bizDocument, String bizId) {
+	public static @Nonnull String getDocumentUrl(@Nonnull String bizModule,
+													@Nonnull String bizDocument,
+													@Nullable String bizId) {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
@@ -384,7 +398,7 @@ public class Util {
 		return result.toString();
 	}
 
-	public static String getDocumentUrl(Bean bean) {
+	public static @Nonnull String getDocumentUrl(@Nonnull Bean bean) {
 		return getDocumentUrl(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 	
@@ -398,7 +412,11 @@ public class Util {
 	 * @param anchorMarkup - the html markup value (usually text) of the anchor 
 	 * @return - the constructed URL as a String
 	 */
-	public static String getDocumentAnchorUrl(String bizModule, String bizDocument, String bizId, boolean targetNewWindow, String anchorMarkup) {
+	public static @Nonnull String getDocumentAnchorUrl(@Nonnull String bizModule,
+														@Nonnull String bizDocument,
+														@Nullable String bizId,
+														boolean targetNewWindow,
+														@Nonnull String anchorMarkup) {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append("<a href=\"").append(getDocumentUrl(bizModule, bizDocument, bizId));
@@ -413,7 +431,7 @@ public class Util {
 		return result.toString();
 	}
 
-	public static String getGridUrl(String bizModule, String queryName) {
+	public static @Nonnull String getGridUrl(@Nonnull String bizModule, @Nonnull String queryName) {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
@@ -422,7 +440,10 @@ public class Util {
 		return result.toString();
 	}
 	
-	public static String getContentUrl(String bizModule, String bizDocument, String binding, String contentId) {
+	public static @Nonnull String getContentUrl(@Nonnull String bizModule,
+													@Nonnull String bizDocument,
+													@Nonnull String binding,
+													@Nonnull String contentId) {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
@@ -433,7 +454,9 @@ public class Util {
 		return result.toString();
 	}
 	
-	public static String getResourceUrl(String bizModule, String bizDocument, String resourceFileName) {
+	public static @Nonnull String getResourceUrl(@Nullable String bizModule,
+													@Nullable String bizDocument,
+													@Nonnull String resourceFileName) {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
@@ -445,11 +468,11 @@ public class Util {
 		return result.toString();
 	}
 
-	public static String getResourceUrl(String resourceFileName) {
+	public static @Nonnull String getResourceUrl(@Nonnull String resourceFileName) {
 		return getResourceUrl(null, null, resourceFileName);
 	}
 	
-	public static String getResetPasswordUrl() {
+	public static @Nonnull String getResetPasswordUrl() {
 		StringBuilder result = new StringBuilder(128);
 		result.append(Util.getSkyveContextUrl())
 			  .append("/pages/resetPassword.jsp").append("?")
@@ -471,7 +494,12 @@ public class Util {
 	 * @param height - the height of the image in pixels
 	 * @return - the constructed URL as a String
      */
-    public static String getContentImageUrl(String bizModule, String bizDocument, String binding, String contentId, int width, int height) {
+    public static @Nonnull String getContentImageUrl(@Nonnull String bizModule,
+    													@Nonnull String bizDocument,
+    													@Nonnull String binding,
+    													@Nonnull String contentId,
+    													int width,
+    													int height) {
     	StringBuilder result = new StringBuilder(128);
     	
     	result.append("<img src=\"");
@@ -494,7 +522,12 @@ public class Util {
 	 * @param anchorMarkup - the html markup value (usually text) of the anchor 
 	 * @return - the constructed URL as a String
 	 */	
-    public static String getContentAnchorUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, String anchorMarkup) {
+    public static @Nonnull String getContentAnchorUrl(@Nonnull String bizModule,
+    													@Nonnull String bizDocument,
+    													@Nonnull String binding,
+    													@Nonnull String contentId,
+    													boolean targetNewWindow,
+    													@Nonnull String anchorMarkup) {
         String contentUrl = getContentUrl(bizModule, bizDocument, binding, contentId);
         StringBuilder result = new StringBuilder(128);
         
@@ -522,7 +555,18 @@ public class Util {
 	 * @param height - the height of the image in pixels
 	 * @return - the constructed URL as a String
 	 */
-    public static String getContentAnchorWithImageUrl(String bizModule, String bizDocument, String binding, String contentId, boolean targetNewWindow, int width, int height) {
-    	return getContentAnchorUrl(bizModule, bizDocument, binding, contentId, targetNewWindow, getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
+    public static @Nonnull String getContentAnchorWithImageUrl(@Nonnull String bizModule,
+    															@Nonnull String bizDocument,
+    															@Nonnull String binding,
+    															@Nonnull String contentId,
+    															boolean targetNewWindow,
+    															int width,
+    															int height) {
+    	return getContentAnchorUrl(bizModule,
+    								bizDocument,
+    								binding,
+    								contentId,
+    								targetNewWindow,
+    								getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
 }

@@ -420,8 +420,7 @@ public class UtilImpl {
 		// }		
 	}
 
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
-	throws Exception {
+	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
 				if (element instanceof AbstractPersistentBean) {
@@ -565,7 +564,7 @@ public class UtilImpl {
 		return possibleProxy;
 	}
 
-	public static void setTransient(Object object) throws Exception {
+	public static void setTransient(Object object) {
 		if (object instanceof List<?>) {
 			List<?> list = (List<?>) object;
 			for (Object element : list) {
@@ -605,7 +604,7 @@ public class UtilImpl {
 	}
 
 	// set the data group of a bean and all its children
-	public static void setDataGroup(Object object, String bizDataGroupId) throws Exception {
+	public static void setDataGroup(Object object, String bizDataGroupId) {
 		if (object instanceof List<?>) {
 			List<?> list = (List<?>) object;
 			for (Object element : list) {
