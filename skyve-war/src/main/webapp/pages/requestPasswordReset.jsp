@@ -143,7 +143,7 @@
 			            	<div class="field">
 			            		<%=Util.i18n("page.requestPasswordReset.complete.message", locale)%>
 			            	</div>
-			            	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+			            	<a href="<%=Util.getBaseUrl()%>" class="ui fluid large blue submit button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 			            </div>
 			        </div>
 		    	<% } else { %>
@@ -192,9 +192,9 @@
 			                
 			                <div style="margin-top: 5px;">
 			                	<% if (UtilImpl.CUSTOMER == null) { %>
-				                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%><%=(user == null) ? "" : ("?customer=" + user.getCustomerName())%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+				                	<a href="<%=Util.getBaseUrl()%><%=(user == null) ? "" : ("?customer=" + user.getCustomerName())%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 				                <% } else { %>
-				                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+				                	<a href="<%=Util.getBaseUrl()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
 				                <% } %>
 			                </div>
 		                </div>

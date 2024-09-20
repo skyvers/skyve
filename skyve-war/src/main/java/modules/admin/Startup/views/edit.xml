@@ -215,7 +215,7 @@
 					</item>
 				</row>
 	        </form>
-	        <listMembership binding="geoIPCountryCodes" candidatesHeading="Available Country Codes" membersHeading="Selected Country Codes" />
+	        <listMembership binding="geoIPCountries" candidatesHeading="Available Countries" membersHeading="Selected Countries" />
         </vbox>
     </vbox>
 

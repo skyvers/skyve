@@ -115,7 +115,7 @@
 			}
 			userName = repository.retrievePublicUserName(customerName);
 			if (userName == null) {
-				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/noPublicUser.jsp"));
+				response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "pages/noPublicUser.jsp"));
 				return;
 			}
 			userName = customerName + "/" + userName;
@@ -137,7 +137,7 @@
 						sb.append(request.getParameter(name));
 					}
 				}
-				response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "loggedIn.jsp" + sb.toString()));
+				response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "loggedIn.jsp" + sb.toString()));
 			}
 			return;
 		}
@@ -164,7 +164,7 @@
 		}
 
 		if ((user != null) && user.isPasswordChangeRequired()) {
-			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/changePassword.jsp"));
+			response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "pages/changePassword.jsp"));
 			return;
 		}
 		

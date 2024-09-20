@@ -11,7 +11,9 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.security.HIBPPasswordValidator;
+import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -266,10 +268,16 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	public void postSave(UserExtension bean) throws Exception {
 		// If password has changed...
 		if (Boolean.TRUE.equals(CORE.getStash().get("passwordChanged"))) {
+			// Remove any remember-me tokens
+			Persistence persistence = CORE.getPersistence();
+			new SkyveRememberMeTokenRepository().removeUserTokens(persistence, bean.getBizCustomer() + '/' + bean.getUserName());
+
+			// Remove any active user sessions
+			org.skyve.metadata.user.User user = persistence.getUser();
+			StateUtil.removeSessions(user.getId());
+
 			// Send email notification
 			try {
-				Persistence persistence = CORE.getPersistence();
-				org.skyve.metadata.user.User user = persistence.getUser();
 				Customer customer = user.getCustomer();
 				Module module = customer.getModule(ChangePassword.MODULE_NAME);
 				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");

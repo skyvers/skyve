@@ -20,18 +20,18 @@
 	
 	Principal p = request.getUserPrincipal();
 	if (p == null) { // not logged in
-		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+		response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "home.jsp"));
 		return;
 	}
 	// Get the user
 	HttpSession session = request.getSession(false);
 	if (session == null) {
-		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+		response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "home.jsp"));
 		return;
 	}
 	user = (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 	if (user == null) { // if the user is not established yet (but we've logged in...)
-		response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+		response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "home.jsp"));
 		return;
 	}
 	
@@ -72,8 +72,7 @@
 		
 		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, oldPasswordValue, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {
-			request.getSession().setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
-			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
+			response.sendRedirect(response.encodeRedirectURL(Util.getBaseUrl() + "home.jsp"));
 			return;
 		}
 	}

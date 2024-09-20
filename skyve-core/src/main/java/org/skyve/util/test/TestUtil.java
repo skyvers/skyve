@@ -53,6 +53,8 @@ import org.skyve.util.Util;
 
 import com.mifmif.common.regex.Generex;
 
+import jakarta.annotation.Nonnull;
+
 public class TestUtil {
 
 	private static final Random RANDOM = new Random();
@@ -91,11 +93,11 @@ public class TestUtil {
 	 * @return The randomly constructed bean.
 	 * @throws Exception
 	 */
-	public static <T extends Bean> T constructRandomInstance(User user,
-			Module module,
-			Document document,
-			int depth)
-			throws Exception {
+	public static @Nonnull <T extends Bean> T constructRandomInstance(@Nonnull User user,
+																		@Nonnull Module module,
+																		@Nonnull Document document,
+																		int depth)
+	throws Exception {
 		return TestUtil.constructRandomInstance(user, module, document, 1, depth);
 	}
 
@@ -242,12 +244,12 @@ public class TestUtil {
 	}
 
 	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
-	private static <T extends Bean> T constructRandomInstance(User user,
-			Module module,
-			Document document,
-			int currentDepth,
-			int maxDepth)
-			throws Exception {
+	private static @Nonnull <T extends Bean> T constructRandomInstance(@Nonnull User user,
+																		@Nonnull Module module,
+																		@Nonnull Document document,
+																		int currentDepth,
+																		int maxDepth)
+	throws Exception {
 		T result = document.newInstance(user);
 		Customer customer = user.getCustomer();
 		for (Attribute attribute : document.getAllAttributes(customer)) {
@@ -259,14 +261,16 @@ public class TestUtil {
 					if (currentDepth < maxDepth) {
 						AssociationImpl association = (AssociationImpl) attribute;
 						Module associationModule = module;
-						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName())
-								.getReferencedModuleName();
+						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
 						if (associationModuleRef != null) {
 							associationModule = customer.getModule(associationModuleRef);
 						}
 						Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
-						Bean value = TestUtil.constructRandomInstance(user, associationModule, associationDocument,
-								currentDepth + 1, maxDepth);
+						Bean value = TestUtil.constructRandomInstance(user,
+																		associationModule,
+																		associationDocument,
+																		currentDepth + 1,
+																		maxDepth);
 						BindUtil.setAssociation(result, name, value);
 					}
 					break;

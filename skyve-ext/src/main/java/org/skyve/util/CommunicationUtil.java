@@ -753,7 +753,7 @@ public class CommunicationUtil {
 			Bean bean = beans[0];
 			if (bean != null) {
 				result = result.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
-				result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
+				result = result.replace(SPECIAL_CONTEXT, Util.getBaseUrl());
 			}
 			result = Binder.formatMessage(result, beans);
 		}

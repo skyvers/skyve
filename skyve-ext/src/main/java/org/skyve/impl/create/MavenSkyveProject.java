@@ -405,21 +405,30 @@ public class MavenSkyveProject {
 		}
 	}
 
-	private List<File> getSkyveGeneratedTestFiles(Path basePath) {
-		final List<File> skyveGeneratedTestFiles = new ArrayList<>();
+    private List<File> getSkyveGeneratedTestFiles(Path basePath) {
+        final List<File> skyveGeneratedTestFiles = new ArrayList<>();
 
-		// If we are copying from a project, we should copy the entire modules directory
-		// as there will be an arbitrary number of modules.
-		// skyve-war should only provide the admin module.
-		if (copyFromProject) {
-			skyveGeneratedTestFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").toFile(), null, true));
-		}
-		else {
-			skyveGeneratedTestFiles.addAll(FileUtils.listFiles(basePath.resolve("modules").resolve(AppConstants.ADMIN_MODULE_NAME).toFile(), null, true));
-		}
+        // If we are copying from a project, we should copy the entire modules directory
+        // as there will be an arbitrary number of modules.
+        // skyve-war should only provide the admin module.
 
-		return skyveGeneratedTestFiles;
-	}
+        File dir;
+
+        if (copyFromProject) {
+            dir = basePath.resolve("modules")
+                          .toFile();
+        } else {
+            dir = basePath.resolve("modules")
+                          .resolve(AppConstants.ADMIN_MODULE_NAME)
+                          .toFile();
+        }
+
+        if (dir.isDirectory()) {
+            skyveGeneratedTestFiles.addAll(FileUtils.listFiles(dir, null, true));
+        }
+
+        return skyveGeneratedTestFiles;
+    }
 
 	private void copySkyveGeneratedTestFiles() throws IOException {
 		final Path relativeGeneratedTestPath = copyFromProject ? Paths.get("src").resolve("generated").resolve("java") : SKYVE_GENERATED_TEST_PATH;

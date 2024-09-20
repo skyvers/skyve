@@ -170,7 +170,7 @@
 			</description>
 			<length>15</length>
 		</text>
-		<enum name="geoIPCountryListType" audited="false" trackChanges="false">
+		<enum name="geoIPCountryListType">
 			<displayName>Country List Type</displayName>
 			<description>This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.</description>
 			<values>
@@ -178,15 +178,19 @@
 				<value code="whitelist" description="Whitelist" />
 			</values>
 		</enum>
-		<collection type="aggregation" name="geoIPCountryCodes" persistent="false" audited="false" trackChanges="false">
-			<displayName>Country Codes</displayName>
-			<domain>dynamic</domain>
-			<documentName>Generic</documentName>
+		<collection name="geoIPCountries" type="aggregation">
+			<displayName>Counties</displayName>
+			<!-- Descriptions can be different based on the user's locale -->
+			<domain>variant</domain>
+			<documentName>Country</documentName>
 			<minCardinality>0</minCardinality>
+			<ordering>
+				<order sort="ascending" by="name" />
+			</ordering>
 		</collection>
 
 		<!-- account settings -->
-		<boolean name="accountAllowUserSelfRegistration" persistent="false">
+		<boolean name="accountAllowUserSelfRegistration">
 			<displayName>admin.startup.accountAllowUserSelfRegistration.displayName</displayName>
 			<description>admin.startup.accountAllowUserSelfRegistration.description</description>
 			<defaultValue>false</defaultValue>
