@@ -70,7 +70,10 @@
 		passwordChangeErrorMessage = Util.i18n("page.resetPassword.link.error", locale);
 	}
 	// This is a postback, process it and move on
-	else if ((newPasswordValue != null) && (confirmPasswordValue != null) && (captcha != null)) {
+	else if ((newPasswordValue != null) && 
+				(confirmPasswordValue != null) && 
+				// Either no captcha used or the captcha has been completed
+				((siteKey == null) || (captcha != null))) {
 		// Remove warning flag after processing (if existing)
 		session.removeAttribute("breachedPasswordWarningShown");
 		session.removeAttribute("hashedPreviousPasswordPrefix");
@@ -257,10 +260,25 @@
 		                        <input type="password" name="<%=confirmPasswordFieldName%>" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" placeholder="<%=Util.i18n("page.changePassword.confirmPassword.label", locale)%>" />
 		                    </div>
 		                </div>
-		                <div class="field">
-							<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
-		                </div>
+						<% if (siteKey != null) { %>
+							<div class="field">
+								<!-- A table to brute force the captcha to centre as it is an iframe -->
+								<table>
+									<tr>
+										<td style="width:50%" />
+										<td>
+											<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
+										</td>
+										<td style="width:50%" />
+									</tr>
+								</table>
+							</div>
+			            <% } %>
 	                	<input type="submit" value="<%=Util.i18n("page.changePassword.submit.label", locale)%>" class="ui fluid large blue submit button" />
+
+		                <div style="margin-top: 5px;">
+		                	<a href="<%=Util.getBaseUrl()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.submit.label", locale)%></a>
+		                </div>
 	                </div>
 	                
 	                <div class="ui error message">
