@@ -1,7 +1,5 @@
 package modules.admin.ChangePassword.actions;
 
-import static org.mockito.Mockito.mock;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +7,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebContainer;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.domain.ChangePassword;
@@ -19,7 +18,7 @@ public class MakePasswordChangeTest extends AbstractH2Test {
 	@BeforeEach
 	@SuppressWarnings("static-method")
 	public void beforeEach() {
-		HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+		HttpServletRequest httpServletRequest = new MockHttpServletRequest(); // mock session too
 		WebContainer.setHttpServletRequestResponse(httpServletRequest, null);
 	}
 
