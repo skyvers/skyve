@@ -197,12 +197,12 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, String title, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, DataGrid grid) {
 		return component;
 	}
 
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, String title, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, DataRepeater repeater) {
 		return component;
 	}
 
@@ -300,7 +300,6 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
-									String title,
 									ListGrid listGrid,
 									boolean aggregateQuery) {
 		return component;
@@ -319,7 +318,6 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
-										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {
 		return component;

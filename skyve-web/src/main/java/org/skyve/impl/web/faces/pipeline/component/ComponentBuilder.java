@@ -200,7 +200,6 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent dataGrid(UIComponent component,
 											String dataWidgetVar,
 											boolean ordered,
-											String title,
 											DataGrid grid);
 
 	/*
@@ -212,7 +211,6 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 */
 	public abstract UIComponent dataRepeater(UIComponent component,
 												String dataWidgetVar,
-												String title,
 												DataRepeater repeater);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent component,
 														UIComponent current, 
@@ -249,7 +247,6 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String uxui,
 											ListModel<Bean> model,
 											Document owningDocument,
-											String title,
 											ListGrid listGrid,
 											boolean aggregateQuery);
 
@@ -273,7 +270,6 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												ListModel<Bean> model, 
 												List<FilterParameter> filterParameters,
 												List<Parameter> parameters,
-												String title,
 												boolean showColumnHeaders,
 												boolean showGrid);
 
