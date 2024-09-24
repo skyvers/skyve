@@ -32,7 +32,6 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
-									String title,
 									ListGrid grid,
 									boolean aggregateQuery) {
 		if (component != null) {
