@@ -636,21 +636,6 @@ public class SkyveContextListener implements ServletContextListener {
 		customisations.registerCustomExpressions();
 		customisations.registerCustomFormatters();
 
-		UtilImpl.SKYVE_GEOIP_SERVICE_CLASS = getString("factories", "geoIPServiceClass", factories, false);
-		if (UtilImpl.SKYVE_GEOIP_SERVICE_CLASS == null) {
-			GeoIPServiceStaticSingleton.setDefault();
-		}
-		else {
-			try {
-				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_GEOIP_SERVICE_CLASS);
-				GeoIPService geoip = (GeoIPService) loadedClass.getDeclaredConstructor().newInstance();
-				GeoIPServiceStaticSingleton.set(geoip);
-			}
-			catch (Exception e) {
-				throw new IllegalStateException("Could not create factories.geoIPServiceClass " + UtilImpl.SKYVE_GEOIP_SERVICE_CLASS, e);
-			}
-		}
-
 		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
 		UtilImpl.SMTP_PORT = getInt("smtp", "port", smtp);
@@ -795,6 +780,21 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
+		}
+		
+		UtilImpl.SKYVE_GEOIP_SERVICE_CLASS = getString("factories", "geoIPServiceClass", factories, false);
+		if (UtilImpl.SKYVE_GEOIP_SERVICE_CLASS == null) {
+			GeoIPServiceStaticSingleton.setDefault();
+		}
+		else {
+			try {
+				Class<?> loadedClass = Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_GEOIP_SERVICE_CLASS);
+				GeoIPService geoip = (GeoIPService) loadedClass.getDeclaredConstructor().newInstance();
+				GeoIPServiceStaticSingleton.set(geoip);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException("Could not create factories.geoIPServiceClass " + UtilImpl.SKYVE_GEOIP_SERVICE_CLASS, e);
+			}
 		}
 
 		Map<String, Object> bootstrap = getObject(null, "bootstrap", properties, false);
