@@ -26,6 +26,7 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.Reachability;
+import modules.test.domain.UniqueConstraintMultipleNavigable;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
 import util.AbstractH2TestDispose;
@@ -58,6 +59,7 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 	protected Document rd;
 	protected Document ucn;
 	protected Document ucnn;
+	protected Document ucmn;
 
 	protected Persistence p;
 
@@ -91,5 +93,6 @@ public abstract class AbstractSkyveTestDispose extends AbstractH2TestDispose {
 		rd = m.getDocument(c, Reachability.DOCUMENT_NAME);
 		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
 		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
+		ucmn = m.getDocument(c, UniqueConstraintMultipleNavigable.DOCUMENT_NAME);
 	}
 }

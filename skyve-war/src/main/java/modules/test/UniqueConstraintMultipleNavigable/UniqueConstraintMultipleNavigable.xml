@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UniqueConstraintMultipleNavigable" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			UniqueConstraint with an inverse to make sure UC progressing navigates to the same object twice.
+		]]>
+	</documentation>
+	<persistent name="TEST_UniqueConstraintMultipleNavigable" />
+	<singularAlias>Unique Constraint Multiple Navigable</singularAlias>
+	<pluralAlias>Unique Constraint Multiple Navigable</pluralAlias>
+	<bizKey expression="Unique Constraint Multiple Navigable" />
+	<attributes>
+		<text name="uniqueName" required="true">
+			<displayName>Unique Name</displayName>
+			<length>64</length>
+		</text>
+		<association name="aggAssociation" type="aggregation">
+			<displayName>Aggregated Association</displayName>
+			<documentName>UniqueConstraintMultipleNavigable</documentName>
+		</association>
+		<inverseOne name="invAggAssociation">
+			<displayName>Inverse</displayName>
+			<documentName>UniqueConstraintMultipleNavigable</documentName>
+			<referenceName>aggAssociation</referenceName>
+		</inverseOne>
+	</attributes>
+	<uniqueConstraints>
+		<constraint name="uniqueUniqueName" description="Testing name uniqueness cyclic navigation in UC checking in save" scope="global">
+			<message>Not unique</message>
+			<fieldReferences>
+				<ref>uniqueName</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>
