@@ -220,7 +220,7 @@ public class DDLDelegate {
 					(columnInfo != null) &&
 					((columnInfo.getColumnSize() == Integer.MAX_VALUE) ||
 						// Cater for H2 2.x TEXT fields.
-						(columnInfo.getColumnSize() == H2SpatialDialect.TEXT_MAX_LENGTH)) &&
+						(columnInfo.getColumnSize() == AbstractH2SpatialDialect.TEXT_MAX_LENGTH)) &&
 					(columnInfo.getDecimalDigits() == 0)) {
 				result = false;
 			}
