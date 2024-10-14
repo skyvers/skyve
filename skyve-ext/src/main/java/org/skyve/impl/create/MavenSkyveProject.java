@@ -322,7 +322,7 @@ public class MavenSkyveProject {
 		}
 		skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("resources").toFile(), null, true));
 		skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("schemas").toFile(), null, true));
-		skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("router").toFile(), new String[] {"java"}, true));
+		skyveAppFiles.addAll(FileUtils.listFiles(basePath.resolve("router").toFile(), null, true));
 		final File services = basePath.resolve("services").toFile();
 		if (services.exists()) {
 			skyveAppFiles.addAll(FileUtils.listFiles(services, null, true));
