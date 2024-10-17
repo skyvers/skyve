@@ -39,7 +39,7 @@
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
 		<ireport.version>4.7.0</ireport.version>
-		<groovy.version>2.3.2</groovy.version>
+		<groovy.version>2.4.21</groovy.version>
 		<jasperreports.version>6.20.5</jasperreports.version>
 		<java.version>17</java.version>
 		<javassist.version>3.20.0-GA</javassist.version>
