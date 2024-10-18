@@ -509,8 +509,9 @@ public class UtilImpl {
 	 * 
 	 * @param bean The bean to test.
 	 * @return if the bean, its collections or its aggregated beans have mutated or not
+	 * @deprecated Use AbstractBean.hasChanged().
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0.1", forRemoval = true)
 	public static boolean hasChanged(Bean bean) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
