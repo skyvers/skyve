@@ -74,6 +74,9 @@ This Skyve repository is intended for developers with existing experience with J
         - CustomerResourceServlet
         - RDBMSAuditInterceptor
     - Careful with singleton lazy instantiation - probably easier to lean on static initialisation
+        - SkyveContextListener is thread safe and can set up singleton states
+        - For truly lazy instantiation, use a static inner class for thead-safety
+            - FileLockRepo
     - Usually avoid synchronized keyword or use with double test with volatile keyword
         - InterceptorMetaDataImpl
     - Atomics
