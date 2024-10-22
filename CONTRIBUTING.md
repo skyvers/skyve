@@ -28,21 +28,76 @@ This Skyve repository is intended for developers with existing experience with J
 
 ## Coding Guidelines
 
-Keep dependencies to a minimum
-Keep performance in front of mind
-Keep thread-safety in front of mind
-Ensure startup time is low - aim for 200 millis for serverless cold starts.
-Do not hard code javaee/spring resources with annotations, use web.xml to remain configurable.
-Use json configuration as a single configuration point if possible.
-Aim for null-safety over Optional.
-Remain agnostic of DI - no DI in Skyve (except faces)
-Usually 1 exit from a function called result
-Watch boxing and unboxing - be explicit
-Use functional coding to simplify (dont overuse) - stream processing.
-Functional coding introduces more run overhead, invokedynamic jvm instruction, and work at the call site / capture point and class engineering at first run.
-Functional is good for parallelism and scale-out.
-Call getters once
-Don't use String.format() unless you are using the formatting features - 50 times slower than StringBuilder.
-skyve-core - enough to power metadata reading and interpretation and domain generation
-skyve-ext - Bring in other dependencies, caching, reporting, addins etc.
-skyve-web - The web container and faces code.
+- skyve-core - enough to power metadata reading and interpretation and domain generation
+- skyve-ext - Bring in other dependencies, caching, reporting, addins etc.
+- skyve-web - The web container and faces code.
+- Remember, every move you make is amplified when you make it in Skyve
+- Keep dependencies to a minimum
+    - Reduce attack surface
+    - Reduce technical debt
+    - Reduce dependency complexity (especially transitive dependencies)
+- Keep performance in front of mind
+    - Balance of memory and processor when choosing data structures and algorithms
+     - Reduce temp object creation
+        - Keeps GC looking sawtooth and predictable
+    - Normalise data structures in memory unless performance impact
+    - Minimise database access
+        - Use joins over multiple queries to reduce network access (to a point)
+        - Minimise Hibernate domain loading
+    - Look for better than linear log(N) and avoid powers of N.
+    - Increase flexibility of deployment
+        - Faster starts
+        - Raise usage obtained before scale out is required
+- Keep thread-safety in front of mind
+    - Order of preference when in a free thread model situation
+        - Use stateless objects
+        - Create stateful objects per thread assignment
+        - Use concurrency control mechanisms
+        - Use ThreadLocal
+    - Static loading and initialisation guaranteed thread-safe by JVM
+    - ConcurrentHashMap - High throughput with locked buckets
+        - MetaData
+        - Thumbnails
+        - SingletonCachedBizlets cache
+        - Accesses
+        - Session-scope repository delegates
+    - ConcurrentReadWriteLock - Many readers, 1 blocking writer
+        - LockableDynamicRepository
+        - WidgetId fragments
+        - Audit Logging
+    - CopyOnWriteArray(List/Set) - for small collections (listeners and such)
+        - GeoIPCountryCodes - Set
+        - Repository delegates - List
+    - ThreadLocal
+        - Persistence
+        - Request/Response
+        - CustomerResourceServlet
+        - RDBMSAuditInterceptor
+    - Careful with singleton lazy instantiation - probably easier to lean on static initialisation
+    - Usually avoid synchronized keyword or use with double test with volatile keyword
+        - InterceptorMetaDataImpl
+    - Atomics
+        - View Renderers for resource references
+        - Skyve’s Multi-threaded test runners
+        - Session count
+        - HealthServlet response
+- Ensure startup time is low - aim for 200 millis for serverless cold starts.
+- Use json configuration as a single configuration point if possible.
+- Do not hard code javaee/spring resources with annotations
+        - Use web.xml as a second point of container configuration to remain configurable and flexible.
+- Aim for null-safety over Optional.
+- Remain agnostic of DI - no DI in Skyve (except faces)
+- Usually 1 exit from a function called result
+- Always use braces with if statement (unless trace test)
+- Watch boxing and unboxing - be explicit
+    - Source of  NPEs or temp object creation
+- Functional coding
+    - Use to simplify (don’t overuse) - stream processing.
+    - Introduces more run overhead and start delays
+        - invokedynamic jvm instruction
+        - Can be lots of work at the call site / capture point
+        - Class engineering at first run.
+        - Usually the same as or better than anonymous inner classes
+    - Good for parallelism and scale-out.
+- Call getters once
+- Don't use String.format() unless you are using the formatting features - 50 times slower than StringBuilder.
