@@ -69,7 +69,7 @@
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 		<mockito.version>4.2.0</mockito.version>
 		<weld.version>5.1.2.Final</weld.version>
-		<spring-security.version>6.2.1</spring-security.version>
+		<spring-security.version>6.2.7</spring-security.version>
 		<spring.version>6.1.3</spring.version>
 		<!-- freemarker report versions -->
 		<flying-saucer.version>9.6.1</flying-saucer.version>
