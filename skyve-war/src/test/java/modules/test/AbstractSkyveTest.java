@@ -26,6 +26,7 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.Reachability;
+import modules.test.domain.UniqueConstraintMultipleNavigable;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
 import modules.test.domain.UniqueConstraintOptimisation;
@@ -64,6 +65,7 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 	protected Document ucno;
 	protected Document ucn;
 	protected Document ucnn;
+	protected Document ucmn;
 
 	protected Persistence p;
 
@@ -97,5 +99,6 @@ public abstract class AbstractSkyveTest extends AbstractH2TestTruncate {
 		ucno = m.getDocument(c, UniqueConstraintOptimisation.DOCUMENT_NAME);
 		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
 		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
+		ucmn = m.getDocument(c, UniqueConstraintMultipleNavigable.DOCUMENT_NAME);
 	}
 }

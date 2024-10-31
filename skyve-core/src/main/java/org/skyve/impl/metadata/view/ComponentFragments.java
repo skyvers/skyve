@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.view;
 
+import java.util.TreeMap;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -27,8 +28,10 @@ class ComponentFragments {
 	/**
 	 * A WeakHashMap of cloned fragments of the owner view.
 	 * They are garbage collected when the component key is garbage collected (ie the client view is replaced)
+	 * The clones are keyed by requested UIXUI and are distinct shared entries by view.getOverriddenUiXUI().
+	 * The default UX/UI is keyed by "" and are shard when appropriate.
 	 */
-	private WeakHashMap<Component, ViewImpl> fragments = new WeakHashMap<>();
+	private WeakHashMap<Component, TreeMap<String, ViewImpl>> fragments = new WeakHashMap<>();
 	
 	/**
 	 * Allow many reads but only 1 thread of execution to mutate the fragments map. 
@@ -51,30 +54,70 @@ class ComponentFragments {
 	ViewImpl get(CustomerImpl c, ModuleImpl m, DocumentImpl d, String uxui, Component component, boolean generate) {
 		ViewImpl result = null;
 
-		read.lock();
+		read.lock(); // take read lock
 		try {
-			result = fragments.get(component);
-			if (result == null) {
-				// Clone and mutate the view via the ComponentViewVisitor
-				ViewImpl view = UtilImpl.cloneBySerialization(owner);
-		
-				String widgetId = component.getWidgetId();
-				ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, view, uxui, component.getBinding(), component.getNames(), widgetId);
-				visitor.visit();
-				if (widgetId == null) {
-					result = view;
-				}
-				else {
-					result = new ViewImpl();
-					view.getContained().addAll(visitor.getContained());
-					result.resolve(uxui, c, m, d, generate);
-				}
-					
+			// Check the fragments to see if 1 exists, under read lock
+			TreeMap<String, ViewImpl> viewsByUxUi = fragments.get(component);
+			result = (viewsByUxUi == null) ? null : viewsByUxUi.get(uxui);
+			if (result == null) { // no fragment exists
+				// take the write lock
 				read.unlock();
 				write.lock();
 				try {
-					fragments.put(component, result);
-					read.lock(); // down grade to read before releasing write
+					try {
+						// Clone and mutate the view via the ComponentViewVisitor
+						ViewImpl view = UtilImpl.cloneBySerialization(owner);
+	
+						String widgetId = component.getWidgetId();
+						if (widgetId == null) { // full view clone
+							view.resolve(uxui, c, m, d, generate);
+							result = view;
+							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, result, uxui, component.getBinding(), component.getNames(), widgetId);
+							visitor.visit();
+						}
+						else { // partial vie clone for a widget Id
+							// Create a new temp view and add the relevant part as a child
+							result = new ViewImpl();
+							// Note that visit without resolving first works
+							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, view, uxui, component.getBinding(), component.getNames(), widgetId);
+							visitor.visit();
+							result.getContained().addAll(visitor.getContained());
+							// Now resolve the new view
+							result.resolve(uxui, c, m, d, generate);
+						}
+	
+						// Establish the UX/UI hashmap if required.
+						// NB Don't worry about double read for thread-safety as a wrong read will just discard the old map anyway 
+						if (viewsByUxUi == null) {
+							viewsByUxUi = new TreeMap<>();
+							fragments.put(component, viewsByUxUi);
+						}
+	
+						// Keep the vanilla view under the "" key
+						// Any non-overridden UX/UI view will reference the 1 vanilla view under ""
+						String viewUxUi = result.getOverriddenUxUiName();
+						if (viewUxUi == null) { // not overridden by UX/UI
+							// Do we have the vanilla view already
+							ViewImpl existingView = viewsByUxUi.get("");
+							if (existingView == null) { // no vanilla view
+								// Add the vanilla view
+								viewsByUxUi.put("", result);
+								// Add the overridden as the vanilla view
+								viewsByUxUi.put(uxui, result);
+							}
+							else { // we have the vanilla view
+								// Add the overridden as the vanilla view
+								viewsByUxUi.put(uxui, existingView);
+							}
+						}
+						else { // overridden by UX/UI
+							// Add the overridden view
+							viewsByUxUi.put(uxui, result);
+						}
+					}
+					finally {
+						read.lock(); // down grade to read before releasing write
+					}
 				}
 				finally {
 					write.unlock(); // unlock write, still holding read
@@ -84,6 +127,7 @@ class ComponentFragments {
 		finally {
 			read.unlock();
 		}
+		
 		return result;
 	}
 }

@@ -75,7 +75,7 @@ public class UtilImpl {
 
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "56";
-	public static final String SKYVE_VERSION = "9.2.0-SNAPSHOT";
+	public static final String SKYVE_VERSION = "9.3.0-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic130";
 
 	public static boolean XML_TRACE = false;
@@ -509,8 +509,9 @@ public class UtilImpl {
 	 * 
 	 * @param bean The bean to test.
 	 * @return if the bean, its collections or its aggregated beans have mutated or not
+	 * @deprecated Use AbstractBean.hasChanged().
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0.1", forRemoval = true)
 	public static boolean hasChanged(Bean bean) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();

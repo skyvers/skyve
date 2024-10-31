@@ -518,7 +518,7 @@ public class Binder {
 			return attribute;
 		}
 
-		public @Nullable Class<?> getType() {
+		public @Nonnull Class<?> getType() {
 			return type;
 		}
 	}

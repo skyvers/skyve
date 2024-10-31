@@ -60,18 +60,18 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 		boolean showSnap = (! FALSE.equals(grid.getShowSnap()));
 		String selectedRemoteCommand = null;
 
-		final Document docToUse;
-
-		// Only set one of "query" or "model", preferring query
+		// For a query the module and document name come from the driving document.
 		if (queryName != null) {
-			docToUse = drivingDocument;
-		} else {
-			finalModelName = modelName;
-			docToUse = drivingDocument;
+			finalModuleName = drivingDocument.getOwningModuleName();
+			finalDocumentName = drivingDocument.getName();
 		}
-
-		finalModuleName = docToUse.getOwningModuleName();
-		finalDocumentName = docToUse.getName();
+		// For a model, the module and document are the document that owns the model.
+		// This is set in modelDocumentName whether accessed from the menu  or embedded in an edit view.
+		else {
+			finalModelName = modelName;
+			finalModuleName = moduleName;
+			finalDocumentName = modelDocumentName;
+		}
 
 		if (managedBean != null) {
 			WebContext webContext = managedBean.getWebContext();

@@ -107,6 +107,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 									List<ComponentNameMap> names,
 									String widgetId) {
 		super(customer, module, document, view, currentUxUi);
+		setUseMetaData(false);
 		this.bindingPrefix = bindingPrefix;
 		this.names = new TreeMap<>();
 		for (ComponentNameMap name : names) {

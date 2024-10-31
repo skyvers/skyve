@@ -34,6 +34,7 @@
 		<document ref="UniqueConstraintOptimisation" />
 		<document ref="UniqueConstraintNonNullable" />
 		<document ref="UniqueConstraintNullable" />
+		<document ref="UniqueConstraintMultipleNavigable" />
 	</documents>
 	<menu />
 	<queries>

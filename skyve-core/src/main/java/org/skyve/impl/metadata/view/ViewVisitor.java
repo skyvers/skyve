@@ -89,6 +89,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 	protected DocumentImpl document;
 	protected ViewImpl view;
 	protected String currentUxUi; // for resolving components
+	// Use TargetMetaData to resolve default widgets in data grids/repeaters
+	// Note - we don't want to do this when adding binding prefixes to component fragments
+	protected boolean useMetaData = true;
 	
 	protected ViewVisitor(CustomerImpl customer,
 							ModuleImpl module,
@@ -104,6 +107,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	public final void visit() {
 		visitContainer(view, true, true);
+	}
+	
+	/**
+	 * Set whether to use TargetMetaData to resolve default widgets in data grids/repeaters.
+	 * @param useMetaData	The value to set.
+	 */
+	protected final void setUseMetaData(boolean useMetaData) {
+		this.useMetaData = useMetaData;
 	}
 	
 	public abstract void visitView();
@@ -867,7 +878,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 					else if (fullyQualifiedColumnBinding.endsWith(Bean.ORDINAL_NAME)) {
 						inputWidget = DocumentImpl.getBizOrdinalAttribute().getDefaultInputWidget();
 					}
-					else {
+					else if (useMetaData) {
 						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
 																				module, 
 																				document, 
@@ -876,6 +887,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 						if (attribute != null) {
 							inputWidget = attribute.getDefaultInputWidget();
 						}
+					}
+					else {
+						inputWidget = DocumentImpl.getBizKeyAttribute().getDefaultInputWidget();
 					}
 				}
 				

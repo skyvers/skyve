@@ -165,7 +165,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public boolean hasChanged() {
 		return UtilImpl.hasChanged(this);
 	}

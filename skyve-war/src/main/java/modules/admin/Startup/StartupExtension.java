@@ -19,6 +19,7 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.skyve.impl.backup.AzureBlobStorageBackup;
+import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.util.JSON;
@@ -344,8 +345,14 @@ public class StartupExtension extends Startup {
 		}
 
 		String geoIPKey = getGeoIPKey();
-		api.put(API_GEO_IP_KEY, geoIPKey);
-		UtilImpl.GEO_IP_KEY = geoIPKey;
+		if (geoIPKey != null
+				&& !StringUtils.equals(UtilImpl.GEO_IP_KEY, geoIPKey)) {
+			api.put(API_GEO_IP_KEY, geoIPKey);
+			UtilImpl.GEO_IP_KEY = geoIPKey;
+			if (UtilImpl.SKYVE_GEOIP_SERVICE_CLASS == null) {
+				GeoIPServiceStaticSingleton.setDefault();
+			}
+		}
 		
 		List<CountryExtension> countries = getGeoIPCountries();
 		if (countries.isEmpty()) {

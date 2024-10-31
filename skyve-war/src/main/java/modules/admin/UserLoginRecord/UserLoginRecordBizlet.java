@@ -48,7 +48,11 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 			String ipAddress = bean.getIpAddress();
 			if (ipAddress != null) {
 				countryCode = geoIPService.geolocate(ipAddress).countryCode();
-				UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in country: " + countryCode);
+				if(countryCode == null) {
+					UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress);
+				}else {
+					UtilImpl.LOGGER.info(userName + " has logged in from IP Address " + ipAddress + " in country: " + countryCode);
+				}
 				bean.setCountryCode(countryCode);
 			}
 			
