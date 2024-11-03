@@ -20,7 +20,7 @@ import org.skyve.impl.generate.jasperreports.DesignSpecification;
 import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
 import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
 import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.report.jasperreports.JasperReportUtil;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
@@ -466,8 +466,8 @@ public class ReportServlet extends HttpServlet {
 							final Attribute attribute = drivingDocument.getPolymorphicAttribute(customer, reportColumn.getName());
 							if (attribute != null) {
 								reportColumn.setAttributeType(attribute.getAttributeType());
-								if (attribute instanceof ConvertableField) {
-									Converter<?> converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+								if (attribute instanceof ConvertibleField) {
+									Converter<?> converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
 									if (converter != null) {
 										reportColumn.setFormatPattern(converter.getFormatPattern());
 									}

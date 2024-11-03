@@ -73,11 +73,24 @@ public class ViewImpl extends Container implements View {
 	private String refreshActionName;
 	private List<ViewParameter> parameters = new ArrayList<>();
 	private String documentation;
-	// map of modelName -> model metadata used to instantiate models on the server-side
-	private Map<String, ModelMetaData> inlineModels = new TreeMap<>();
 	private String overriddenCustomerName;
 	private String overriddenUxUiName;
 	private Map<String, String> properties = new TreeMap<>();
+
+	// map of modelName -> model metadata used to instantiate models on the server-side
+	private transient Map<String, ModelMetaData> inlineModels = new TreeMap<>();
+
+	// Cloned view structures or parts of structures that are used by components in other views
+	// that reference this view.
+	// Note that these are not required to be Serialized as ViewImpls are cloned by serialization to populate this
+	private transient ComponentFragments fragments = new ComponentFragments(this);
+	
+	// All components in this view (one level deep)
+	// This is populated in resolve() and is used to recursively determine accesses in getAccesses().
+	private transient Set<Component> components = new HashSet<>();
+	
+	// Accesses for this view only (not component fragments)
+	private transient Set<UserAccess> accesses = null;
 	
 	@Override
 	public String getRefreshConditionName() {
@@ -246,9 +259,6 @@ public class ViewImpl extends Container implements View {
 		return properties;
 	}
 
-	// Accesses for this view only (not component fragments)
-	private Set<UserAccess> accesses = null;
-	
 	/**
 	 * Get accesses for this view and any component fragments recursively.
 	 */
@@ -668,19 +678,15 @@ public class ViewImpl extends Container implements View {
 		}.visit();
 	}
 	
-	// Not required to be Serialized as ViewImpls are cloned by serialization to populate this
-	private transient ComponentFragments fragments = new ComponentFragments(this);
-	
-	// All components in this view (one level deep)
-	// This is populated in resolve() and is used to recursively determine accesses in getAccesses().
-	private Set<Component> components = new HashSet<>();
-	
 	/**
 	 * Reinstate transients after Deserialization
 	 * @return	this
 	 */
 	private Object readResolve() {
+		inlineModels = new TreeMap<>();
 		fragments = new ComponentFragments(this);
+		components = new HashSet<>();
+
 		return this;
 	}
 	

@@ -367,19 +367,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, String title, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, DataGrid grid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dataGrid(result, dataWidgetVar, ordered, title, grid);
+			result = builder.dataGrid(result, dataWidgetVar, ordered, grid);
 		}
 		return result;
 	}
 
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, String title, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, DataRepeater repeater) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dataRepeater(result, dataWidgetVar, title, repeater);
+			result = builder.dataRepeater(result, dataWidgetVar, repeater);
 		}
 		return result;
 	}
@@ -535,7 +535,6 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
-									String title,
 									ListGrid listGrid,
 									boolean aggregateQuery) {
 		UIComponent result = component;
@@ -547,7 +546,6 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										uxui,
 										model,
 										owningDocument,
-										title,
 										listGrid,
 										aggregateQuery);
 		}
@@ -573,7 +571,6 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
-										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {
 		UIComponent result = component;
@@ -585,7 +582,6 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											model,
 											filterParameters,
 											parameters,
-											title,
 											showColumnHeaders,
 											showGrid);
 		}

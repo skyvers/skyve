@@ -265,7 +265,7 @@
 						
 						<% if (show2FA) { %>
 							<div style="margin-top: 5px;">
-			                	<a href="<%=request.getContextPath()%><%=Util.getHomeUri()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.2FACode.return.label", locale)%></a>
+			                	<a href="<%=Util.getBaseUrl()%>" class="ui fluid basic large button"><%=Util.i18n("page.login.2FACode.return.label", locale)%></a>
 			                </div>
 		                <% } %>
 		            </div>

@@ -63,7 +63,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 
 	@SuppressWarnings("static-method")
 	public final String getBaseHref() {
-		return Util.getSkyveContextUrl() + '/';
+		return Util.getBaseUrl();
 	}
 
 	public String getWhitelistRegex() {

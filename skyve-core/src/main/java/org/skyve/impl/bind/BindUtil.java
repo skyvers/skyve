@@ -46,7 +46,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
 import org.skyve.impl.metadata.model.document.InverseOne;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.NullTolerantBeanComparator;
@@ -782,8 +782,8 @@ public final class BindUtil {
 			
 			if (attribute instanceof Field) {
 				Field field = (Field) attribute;
-				if (field instanceof ConvertableField) {
-					converter = ((ConvertableField) field).getConverterForCustomer(customer);
+				if (field instanceof ConvertibleField) {
+					converter = ((ConvertibleField) field).getConverterForCustomer(customer);
 				}
 				DomainType domainType = field.getDomainType();
 				if (domainType != null) {
@@ -2036,8 +2036,8 @@ public final class BindUtil {
 				// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
 				TargetMetaData propertyTarget = BindUtil.getMetaDataForBinding(customer, module, document, propName);
 				Attribute attribute = propertyTarget.getAttribute();
-				if (attribute instanceof ConvertableField) {
-					converter = ((ConvertableField) attribute).getConverterForCustomer(user.getCustomer());
+				if (attribute instanceof ConvertibleField) {
+					converter = ((ConvertibleField) attribute).getConverterForCustomer(user.getCustomer());
 				}
 				else if (attribute instanceof Collection) {
 					// ensure that collection elements are filled for the binding

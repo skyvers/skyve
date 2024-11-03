@@ -304,7 +304,7 @@ public class UserDashboardExtension extends UserDashboard {
 		}
 
 		StringBuilder link = new StringBuilder();
-		link.append(Util.getHomeUrl());
+		link.append(Util.getBaseUrl());
 		link.append("?a=e&m=").append(moduleName).append("&d=").append(documentName);
 		if (bean != null) {
 			link.append("&i=").append(bean.getBizId());

@@ -190,7 +190,7 @@ class Table {
 	
 	@SuppressWarnings("unchecked")
 	public static Table fromJSON(String json) throws Exception {
-		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(null, json);
+		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(json);
 
 		String agnosticIdentifier = (String) map.get("name");
 		String persistentIdentifier = agnosticIdentifier;

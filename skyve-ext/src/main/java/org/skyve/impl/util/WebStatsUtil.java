@@ -20,8 +20,6 @@ import org.skyve.persistence.SQL;
 import org.skyve.web.UserAgentType;
 
 public class WebStatsUtil {
-	
-	
 	private static final String YEAR_FORMAT = "yyyy";
 	private static final String MONTH_FORMAT = "M";
 	
@@ -38,7 +36,7 @@ public class WebStatsUtil {
 	 * @throws Exception
 	 */
 	public static void recordLogin(User user, String userIPAddress)
-			throws Exception {
+	throws Exception {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 		Document loginRecordDocument = module.getDocument(customer, AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME);
@@ -67,7 +65,8 @@ public class WebStatsUtil {
 		try {
 			Customer customer = user.getCustomer();
 			Module admin = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
-			String ADM_UserMonthlyHits = admin.getDocument(customer, "UserMonthlyHits").getPersistent().getPersistentIdentifier();
+			@SuppressWarnings("null")
+			String ADM_UserMonthlyHits = admin.getDocument(customer, AppConstants.USER_MONTHLY_HITS_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 
 			Date now = new Date();
 			Integer hitMonth = Integer.valueOf(CORE.getDateFormat(MONTH_FORMAT).format(now));

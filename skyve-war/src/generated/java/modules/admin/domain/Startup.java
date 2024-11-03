@@ -7,16 +7,17 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import modules.admin.Country.CountryExtension;
 import modules.admin.Startup.StartupExtension;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.ChangeTrackingArrayList;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
@@ -29,9 +30,9 @@ import org.skyve.util.Util;
  * 
  * @depend - - - MapType
  * @depend - - - CaptchaType
- * @depend - - - CountryListType
+ * @depend - - - GeoIPCountryListType
  * @depend - - - BackupType
- * @navhas n countryCodes 0..n Generic
+ * @navhas n geoIPCountries 0..n Country
  * @stereotype "transient"
  */
 @XmlType
@@ -114,13 +115,13 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String apiCloudflareTurnstileSecretKeyPropertyName = "apiCloudflareTurnstileSecretKey";
 
 	/** @hidden */
-	public static final String apiIpInfoTokenPropertyName = "apiIpInfoToken";
+	public static final String geoIPKeyPropertyName = "geoIPKey";
 
 	/** @hidden */
-	public static final String countryListTypePropertyName = "countryListType";
+	public static final String geoIPCountryListTypePropertyName = "geoIPCountryListType";
 
 	/** @hidden */
-	public static final String countryCodesPropertyName = "countryCodes";
+	public static final String geoIPCountriesPropertyName = "geoIPCountries";
 
 	/** @hidden */
 	public static final String accountAllowUserSelfRegistrationPropertyName = "accountAllowUserSelfRegistration";
@@ -294,7 +295,7 @@ public abstract class Startup extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-	public static enum CountryListType implements Enumeration {
+	public static enum GeoIPCountryListType implements Enumeration {
 		blacklist("blacklist", "Blacklist"),
 		whitelist("whitelist", "Whitelist");
 
@@ -305,9 +306,9 @@ public abstract class Startup extends AbstractTransientBean {
 		private DomainValue domainValue;
 
 		/** @hidden */
-		private static List<DomainValue> domainValues = Stream.of(values()).map(CountryListType::toDomainValue).collect(Collectors.toUnmodifiableList());
+		private static List<DomainValue> domainValues = Stream.of(values()).map(GeoIPCountryListType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
-		private CountryListType(String code, String description) {
+		private GeoIPCountryListType(String code, String description) {
 			this.code = code;
 			this.description = description;
 			this.domainValue = new DomainValue(code, description);
@@ -328,10 +329,10 @@ public abstract class Startup extends AbstractTransientBean {
 			return domainValue;
 		}
 
-		public static CountryListType fromCode(String code) {
-			CountryListType result = null;
+		public static GeoIPCountryListType fromCode(String code) {
+			GeoIPCountryListType result = null;
 
-			for (CountryListType value : values()) {
+			for (GeoIPCountryListType value : values()) {
 				if (value.code.equals(code)) {
 					result = value;
 					break;
@@ -341,10 +342,10 @@ public abstract class Startup extends AbstractTransientBean {
 			return result;
 		}
 
-		public static CountryListType fromLocalisedDescription(String description) {
-			CountryListType result = null;
+		public static GeoIPCountryListType fromLocalisedDescription(String description) {
+			GeoIPCountryListType result = null;
 
-			for (CountryListType value : values()) {
+			for (GeoIPCountryListType value : values()) {
 				if (value.toLocalisedDescription().equals(description)) {
 					result = value;
 					break;
@@ -584,23 +585,23 @@ public abstract class Startup extends AbstractTransientBean {
 	private String apiCloudflareTurnstileSecretKey;
 
 	/**
-	 * IPInfo Token
+	 * Geo IP Key/Token
 	 * <br/>
-	 * By supplying an IPinfo API token, you can allow/disallow countries for registration and password reset.
+	 * By supplying a Geo IP API token (default is ipinfo.io), you can allow/disallow countries for registration and password reset.
 	 **/
-	private String apiIpInfoToken;
+	private String geoIPKey;
 
 	/**
 	 * Country List Type
 	 * <br/>
 	 * This determines whether the countries selected should be allowed (whitelist) or denied (blacklist) from accessing the application.
 	 **/
-	private CountryListType countryListType;
+	private GeoIPCountryListType geoIPCountryListType;
 
 	/**
-	 * Country Codes
+	 * Counties
 	 **/
-	private List<Generic> countryCodes = new ArrayList<>();
+	private List<CountryExtension> geoIPCountries = new ChangeTrackingArrayList<>("geoIPCountries", this);
 
 	/**
 	 * Allow User Self Registration
@@ -1067,98 +1068,99 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #apiIpInfoToken} accessor.
+	 * {@link #geoIPKey} accessor.
 	 * @return	The value.
 	 **/
-	public String getApiIpInfoToken() {
-		return apiIpInfoToken;
+	public String getGeoIPKey() {
+		return geoIPKey;
 	}
 
 	/**
-	 * {@link #apiIpInfoToken} mutator.
-	 * @param apiIpInfoToken	The new value.
+	 * {@link #geoIPKey} mutator.
+	 * @param geoIPKey	The new value.
 	 **/
 	@XmlElement
-	public void setApiIpInfoToken(String apiIpInfoToken) {
-		preset(apiIpInfoTokenPropertyName, apiIpInfoToken);
-		this.apiIpInfoToken = apiIpInfoToken;
+	public void setGeoIPKey(String geoIPKey) {
+		preset(geoIPKeyPropertyName, geoIPKey);
+		this.geoIPKey = geoIPKey;
 	}
 
 	/**
-	 * {@link #countryListType} accessor.
+	 * {@link #geoIPCountryListType} accessor.
 	 * @return	The value.
 	 **/
-	public CountryListType getCountryListType() {
-		return countryListType;
+	public GeoIPCountryListType getGeoIPCountryListType() {
+		return geoIPCountryListType;
 	}
 
 	/**
-	 * {@link #countryListType} mutator.
-	 * @param countryListType	The new value.
+	 * {@link #geoIPCountryListType} mutator.
+	 * @param geoIPCountryListType	The new value.
 	 **/
 	@XmlElement
-	public void setCountryListType(CountryListType countryListType) {
-		this.countryListType = countryListType;
+	public void setGeoIPCountryListType(GeoIPCountryListType geoIPCountryListType) {
+		preset(geoIPCountryListTypePropertyName, geoIPCountryListType);
+		this.geoIPCountryListType = geoIPCountryListType;
 	}
 
 	/**
-	 * {@link #countryCodes} accessor.
+	 * {@link #geoIPCountries} accessor.
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<Generic> getCountryCodes() {
-		return countryCodes;
+	public List<CountryExtension> getGeoIPCountries() {
+		return geoIPCountries;
 	}
 
 	/**
-	 * {@link #countryCodes} accessor.
+	 * {@link #geoIPCountries} accessor.
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public Generic getCountryCodesElementById(String bizId) {
-		return getElementById(countryCodes, bizId);
+	public CountryExtension getGeoIPCountriesElementById(String bizId) {
+		return getElementById(geoIPCountries, bizId);
 	}
 
 	/**
-	 * {@link #countryCodes} mutator.
+	 * {@link #geoIPCountries} mutator.
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setCountryCodesElementById(String bizId, Generic element) {
-		setElementById(countryCodes, element);
+	public void setGeoIPCountriesElementById(String bizId, CountryExtension element) {
+		setElementById(geoIPCountries, element);
 	}
 
 	/**
-	 * {@link #countryCodes} add.
+	 * {@link #geoIPCountries} add.
 	 * @param element	The element to add.
 	 **/
-	public boolean addCountryCodesElement(Generic element) {
-		return countryCodes.add(element);
+	public boolean addGeoIPCountriesElement(CountryExtension element) {
+		return geoIPCountries.add(element);
 	}
 
 	/**
-	 * {@link #countryCodes} add.
+	 * {@link #geoIPCountries} add.
 	 * @param index	The index in the list to add the element to.
 	 * @param element	The element to add.
 	 **/
-	public void addCountryCodesElement(int index, Generic element) {
-		countryCodes.add(index, element);
+	public void addGeoIPCountriesElement(int index, CountryExtension element) {
+		geoIPCountries.add(index, element);
 	}
 
 	/**
-	 * {@link #countryCodes} remove.
+	 * {@link #geoIPCountries} remove.
 	 * @param element	The element to remove.
 	 **/
-	public boolean removeCountryCodesElement(Generic element) {
-		return countryCodes.remove(element);
+	public boolean removeGeoIPCountriesElement(CountryExtension element) {
+		return geoIPCountries.remove(element);
 	}
 
 	/**
-	 * {@link #countryCodes} remove.
+	 * {@link #geoIPCountries} remove.
 	 * @param index	The index in the list to remove the element from.
 	 **/
-	public Generic removeCountryCodesElement(int index) {
-		return countryCodes.remove(index);
+	public CountryExtension removeGeoIPCountriesElement(int index) {
+		return geoIPCountries.remove(index);
 	}
 
 	/**
@@ -1345,22 +1347,22 @@ public abstract class Startup extends AbstractTransientBean {
 	}
 
 	/**
-	 * True when an IPinfo token has been set
+	 * True when a Geo IP key/token has been set
 	 *
 	 * @return The condition
 	 */
 	@XmlTransient
-	public boolean isHasIpInfoToken() {
-		return (getApiIpInfoToken() != null);
+	public boolean isHasGeoIPKey() {
+		return (geoIPKey != null);
 	}
 
 	/**
-	 * {@link #isHasIpInfoToken} negation.
+	 * {@link #isHasGeoIPKey} negation.
 	 *
 	 * @return The negated condition
 	 */
-	public boolean isNotHasIpInfoToken() {
-		return (! isHasIpInfoToken());
+	public boolean isNotHasGeoIPKey() {
+		return (! isHasGeoIPKey());
 	}
 
 	/**

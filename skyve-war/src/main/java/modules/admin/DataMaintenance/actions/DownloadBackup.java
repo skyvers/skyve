@@ -22,19 +22,20 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 		final boolean backupExists;
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			backupExists = ExternalBackup.getInstance().exists(selectedBackupName);
-		} else {
+		}
+		else {
 			File backup = new File(String.format("%sbackup_%s%s%s",
-					Util.getBackupDirectory(),
-					CORE.getUser().getCustomerName(),
-					File.separator,
-					selectedBackupName));
+													Util.getBackupDirectory(),
+													CORE.getUser().getCustomerName(),
+													File.separator,
+													selectedBackupName));
 			backupExists = backup.exists();
 			if (! backup.exists()) {
 				Util.LOGGER.warning("Backup " + backup.getAbsolutePath() + " DNE");
 			}
 		}
 
-		if (!backupExists) {
+		if (! backupExists) {
 			throw new ValidationException(new Message("Backup " + selectedBackupName + " no longer exists"));
 		}
 	}
@@ -44,10 +45,10 @@ public class DownloadBackup extends DownloadAction<DataMaintenance> {
 	throws Exception {
 		String selectedBackupName = bean.getSelectedBackupName();
 		final File backup = new File(String.format("%sbackup_%s%s%s",
-				Util.getBackupDirectory(),
-				CORE.getUser().getCustomerName(),
-				File.separator,
-				selectedBackupName));
+													Util.getBackupDirectory(),
+													CORE.getUser().getCustomerName(),
+													File.separator,
+													selectedBackupName));
 
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			try (final FileOutputStream backupOutputStream = new FileOutputStream(backup)) {

@@ -502,6 +502,24 @@
 		<filter name="testReachabilityUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.test.domain.UniqueConstraintMultipleNavigable" table="TEST_UniqueConstraintMultipleNavigable" entity-name="testUniqueConstraintMultipleNavigable">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="uniqueName" length="64" />
+		<many-to-one name="aggAssociation" entity-name="testUniqueConstraintMultipleNavigable" column="aggAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_UniqueConstraintMultipleNavigable_aggAssociation"/>
+		<one-to-one name="invAggAssociation" entity-name="testUniqueConstraintMultipleNavigable" property-ref="aggAssociation" />
+		<filter name="testUniqueConstraintMultipleNavigableNoneFilter" condition="1=0"/>
+		<filter name="testUniqueConstraintMultipleNavigableCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testUniqueConstraintMultipleNavigableDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testUniqueConstraintMultipleNavigableUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.test.domain.UniqueConstraintNonNullable" table="TEST_UniqueConstraintNonNullable" entity-name="testUniqueConstraintNonNullable">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -723,6 +741,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testReachabilityUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintMultipleNavigableNoneFilter" />
+	<filter-def name="testUniqueConstraintMultipleNavigableCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintMultipleNavigableDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintMultipleNavigableUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testUniqueConstraintNonNullableNoneFilter" />

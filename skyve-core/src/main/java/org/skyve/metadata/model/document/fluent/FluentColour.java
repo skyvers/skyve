@@ -2,7 +2,7 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Colour;
 
-public class FluentColour extends FluentConvertableField<FluentColour> {
+public class FluentColour extends FluentConvertibleField<FluentColour> {
 	private Colour colour = null;
 	
 	public FluentColour() {

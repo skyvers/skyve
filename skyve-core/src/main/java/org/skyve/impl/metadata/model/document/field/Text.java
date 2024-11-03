@@ -10,7 +10,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"length", "format", "validator"})
-public class Text extends ConvertableField implements LengthField {
+public class Text extends ConvertibleField implements LengthField {
 	private static final long serialVersionUID = 7128775778521517080L;
 
 	private int length;

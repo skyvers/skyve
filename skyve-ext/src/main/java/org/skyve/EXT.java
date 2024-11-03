@@ -42,6 +42,7 @@ import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
+import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.QuartzJobScheduler;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -71,6 +72,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
 import org.skyve.tag.TagManager;
+import org.skyve.util.GeoIPService;
 import org.skyve.util.JSON;
 import org.skyve.util.Mail;
 import org.skyve.util.PushMessage;
@@ -137,6 +139,14 @@ public class EXT {
 	 */
 	public static @Nonnull AddInManager getAddInManager() {
 		return PF4JAddInManager.get();
+	}
+
+	/**
+	 * Get a geo-ip service
+	 * @ return A geo-ip service
+	 */
+	public static @Nonnull GeoIPService getGeoIPService() {
+		return GeoIPServiceStaticSingleton.get();
 	}
 
 	/**
@@ -607,7 +617,7 @@ public class EXT {
 	/**
 	 * Inject a bootstrap user according to the settings in the .json Bootstrap stanza
 	 * 
-	 * @param p	The Pdersistence to use.
+	 * @param p	The Persistence to use.
 	 * @throws Exception	When something unforeseen occurs.
 	 */
 	public static void bootstrap(@Nonnull Persistence p) throws Exception {

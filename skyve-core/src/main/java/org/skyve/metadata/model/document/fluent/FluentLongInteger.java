@@ -3,7 +3,7 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 
-public class FluentLongInteger extends FluentConvertableField<FluentLongInteger> {
+public class FluentLongInteger extends FluentConvertibleField<FluentLongInteger> {
 	private LongInteger longInteger = null;
 	
 	public FluentLongInteger() {

@@ -13,6 +13,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
+import org.skyve.util.GeoIPService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -69,5 +70,10 @@ public class SkyveCDIProducer implements Serializable {
 	@Produces
 	public static NumberGenerator getNumberGenerator() {
 		return new NumberGeneratorInjectable();
+	}
+
+	@Produces
+	public static GeoIPService getGeoIPService() {
+		return new GeoIPServiceInjectable();
 	}
 }

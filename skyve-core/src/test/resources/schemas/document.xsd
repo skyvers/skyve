@@ -210,7 +210,7 @@
 
   <xs:complexType name="text">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="length" type="xs:int" form="qualified"/>
           <xs:element ref="tns:format" minOccurs="0"/>
@@ -220,7 +220,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="convertableField">
+  <xs:complexType name="convertibleField">
     <xs:complexContent>
       <xs:extension base="tns:constrainableField">
         <xs:sequence>
@@ -296,7 +296,7 @@
 
   <xs:complexType name="date">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -324,7 +324,7 @@
 
   <xs:complexType name="time">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -334,7 +334,7 @@
 
   <xs:complexType name="dateTime">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -344,7 +344,7 @@
 
   <xs:complexType name="timestamp">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:dateValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -354,7 +354,7 @@
 
   <xs:complexType name="integer">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:integerValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -372,7 +372,7 @@
 
   <xs:complexType name="longInteger">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:longValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -390,7 +390,7 @@
 
   <xs:complexType name="decimal2">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:decimalValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -409,7 +409,7 @@
 
   <xs:complexType name="decimal5">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:decimalValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -419,7 +419,7 @@
 
   <xs:complexType name="decimal10">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence>
           <xs:element name="validator" type="tns:decimalValidator" form="qualified" minOccurs="0"/>
         </xs:sequence>
@@ -429,7 +429,7 @@
 
   <xs:complexType name="boolean">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
@@ -481,7 +481,7 @@
 
   <xs:complexType name="colour">
     <xs:complexContent>
-      <xs:extension base="tns:convertableField">
+      <xs:extension base="tns:convertibleField">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>

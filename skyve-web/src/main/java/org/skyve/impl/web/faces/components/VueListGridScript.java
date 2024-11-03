@@ -9,7 +9,7 @@ import java.util.StringJoiner;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.ConverterName;
@@ -316,8 +316,8 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		public String getConverterName() {
-			return Optional.ofNullable(targetMetaData.getAttribute()).filter(ConvertableField.class::isInstance)
-					.map(ConvertableField.class::cast).map(cf -> cf.getConverterForCustomer(customer))
+			return Optional.ofNullable(targetMetaData.getAttribute()).filter(ConvertibleField.class::isInstance)
+					.map(ConvertibleField.class::cast).map(cf -> cf.getConverterForCustomer(customer))
 					.map(ConverterName::valueOf).map(ConverterName::name).orElse(null);
 		}
 

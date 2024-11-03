@@ -149,7 +149,6 @@ public class ListGrid extends HtmlPanelGroup {
 														uxui,
 														model,
 														null,
-														null,
 														listGrid,
 														aggregateQuery);
 		result.add(grid);

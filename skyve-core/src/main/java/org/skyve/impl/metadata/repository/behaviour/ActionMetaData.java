@@ -9,7 +9,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.behaviour.IfStatement;
 import org.skyve.impl.metadata.behaviour.SetStatement;
-import org.skyve.impl.metadata.repository.ConvertableMetaData;
+import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
 import org.skyve.impl.util.UtilImpl;
@@ -32,7 +32,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, 
 			name = "action",
 			propOrder = {"name", "documentation", "statements", "properties"})
-public class ActionMetaData implements NamedMetaData, ConvertableMetaData<ActionMetaData>, DecoratedMetaData {
+public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<ActionMetaData>, DecoratedMetaData {
 	private static final long serialVersionUID = 226463757653299558L;
 
 	private String name;

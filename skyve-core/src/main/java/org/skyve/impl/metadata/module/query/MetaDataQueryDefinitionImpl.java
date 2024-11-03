@@ -18,7 +18,7 @@ import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -505,8 +505,8 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					}
 					else {
 						try {
-							Converter<?> converter = ((attribute instanceof ConvertableField) ? 
-														((ConvertableField) attribute).getConverterForCustomer(customer) : 
+							Converter<?> converter = ((attribute instanceof ConvertibleField) ? 
+														((ConvertibleField) attribute).getConverterForCustomer(customer) : 
 														null);
 							Class<?> type = String.class;
 							if (attribute != null) {

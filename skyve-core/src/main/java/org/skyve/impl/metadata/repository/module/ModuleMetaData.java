@@ -22,7 +22,7 @@ import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
-import org.skyve.impl.metadata.repository.ConvertableMetaData;
+import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.user.ActionPrivilege;
@@ -67,7 +67,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"roles",
 							"menu",
 							"queries"})
-public class ModuleMetaData extends NamedMetaData implements ConvertableMetaData<Module> {
+public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData<Module> {
 	private static final long serialVersionUID = -6257431975403255783L;
 
 	private String title;

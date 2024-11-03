@@ -79,6 +79,12 @@ public class DefaultCaching implements Caching {
 					createEHCache(UtilImpl.CSRF_TOKEN_CACHE);
 				}
 
+				// Create the Geo IP cache
+				if (UtilImpl.GEO_IP_CACHE != null) {
+					UtilImpl.LOGGER.info("Create the Geo IP cache with config " + UtilImpl.GEO_IP_CACHE);
+					createEHCache(UtilImpl.GEO_IP_CACHE);
+				}
+
 				// Create the sessions cache
 				if (UtilImpl.SESSION_CACHE != null) {
 					UtilImpl.LOGGER.info("Create the session cache with config " + UtilImpl.SESSION_CACHE);

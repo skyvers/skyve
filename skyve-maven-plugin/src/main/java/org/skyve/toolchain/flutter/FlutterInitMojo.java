@@ -133,7 +133,6 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
 
         Weld weld = new Weld();
         weld.addPackage(true, SkyveCDIProducer.class);
-//        weld.addPackage(true, WeldMarker.class); // class is in war project...
         weld.initialize();
 
         Class<BeforeShutdownImpl> bsi = BeforeShutdownImpl.class;

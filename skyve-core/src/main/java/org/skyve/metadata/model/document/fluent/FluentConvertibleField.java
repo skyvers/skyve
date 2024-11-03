@@ -1,15 +1,15 @@
 package org.skyve.metadata.model.document.fluent;
 
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.metadata.ConverterName;
 
-abstract class FluentConvertableField<T extends FluentConvertableField<T>> extends FluentConstrainableField<T> {
-	protected FluentConvertableField() {
+abstract class FluentConvertibleField<T extends FluentConvertibleField<T>> extends FluentConstrainableField<T> {
+	protected FluentConvertibleField() {
 		// nothing to see
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected T from(ConvertableField field) {
+	protected T from(ConvertibleField field) {
 		super.from(field);
 		converterName(field.getConverterName());
 		return (T) this;
@@ -22,5 +22,5 @@ abstract class FluentConvertableField<T extends FluentConvertableField<T>> exten
 	}
 
 	@Override
-	public abstract ConvertableField get();
+	public abstract ConvertibleField get();
 }

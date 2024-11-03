@@ -32,6 +32,7 @@
 		<document ref="Content" />
 		<document ref="ControlPanel" />
 		<document ref="CorruptArchiveError"/>
+		<document ref="Country" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="DocumentCreator" />
@@ -103,6 +104,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="CRUDU" />
+				<document name="Country" permission="_R__G" />
 				<document name="DynamicEntity" permission="CRUDD" />
 				<document name="DynamicRelation" permission="CRUDD" />
 				<document name="Generic" permission="CRUDG" />
@@ -153,6 +155,7 @@
 				<document name="CommunicationTemplate" permission="_R__C"/>
 				<document name="Configuration" permission="_R__C" />
 				<document name="Contact" permission="_RU_C" />
+				<document name="Country" permission="_R__G" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="DynamicEntity" permission="CRUDD" />
 				<document name="DynamicRelation" permission="CRUDD" />
@@ -213,6 +216,7 @@
 				</document>
 				<document name="CommunicationTemplate" permission="CRUDC"/>
 				<document name="Contact" permission="CRUDC" />
+				<document name="Country" permission="_R__G" />
 				<document name="Generic" permission="CRUDG"/>
 			</privileges>
 		</role>
@@ -226,6 +230,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_R__C" />
+				<document name="Country" permission="_R__G" />
 				<document name="Generic" permission="CRUDG"/>
 			</privileges>
 		</role>
@@ -253,6 +258,7 @@
 					<action name="GenerateTestData" />
 					<action name="DeleteTestData" />
 				</document>
+				<document name="Country" permission="_R__G" />
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
 					<action name="BackupSelected" />
@@ -330,6 +336,7 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
+				<document name="Country" permission="_R__G" />
 				<document name="Generic" permission="CRUDG"/>
 				<document name="Job" permission="CRUDC">
 					<action name="CancelJob" />
@@ -374,6 +381,7 @@
 				</document>
 				<document name="Contact" permission="CRUDC" />
 				<document name="Content" permission="_R__C" />
+				<document name="Country" permission="_R__G" />
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="DownloadFolder" permission="CRUDC" />
@@ -430,6 +438,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_R__C" />
+				<document name="Country" permission="_R__G" />
 				<document name="DocumentNumber" permission="_R__C" />
 				<document name="DynamicEntity" permission="_R__D" />
 				<document name="DynamicRelation" permission="_R__D" />
@@ -692,6 +701,9 @@
 				<column binding="userName" />
 				<column binding="loginDateTime" sortOrder="descending" />
 				<column binding="failed" />
+				<column binding="ipAddress" />
+				<column binding="countryCode" />
+				<column binding="countryName" editable="false" filterable="false" sortable="false" />
 			</columns>
 		</query>
 		

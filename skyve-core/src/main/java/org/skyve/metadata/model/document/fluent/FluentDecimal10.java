@@ -3,7 +3,7 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 
-public class FluentDecimal10 extends FluentConvertableField<FluentDecimal10> {
+public class FluentDecimal10 extends FluentConvertibleField<FluentDecimal10> {
 	private Decimal10 decimal = null;
 	
 	public FluentDecimal10() {

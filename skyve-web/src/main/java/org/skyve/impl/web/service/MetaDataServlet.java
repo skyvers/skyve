@@ -16,7 +16,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Date;
 import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
@@ -3143,8 +3143,8 @@ public class MetaDataServlet extends HttpServlet {
 								result.append("\"defaultValue\":\"").append(OWASP.escapeJsonString(defaultValue)).append("\",");
 							}
 
-							if (field instanceof ConvertableField) {
-								ConverterName converterName = ((ConvertableField) field).getConverterName();
+							if (field instanceof ConvertibleField) {
+								ConverterName converterName = ((ConvertibleField) field).getConverterName();
 								if (converterName != null) {
 									result.append("\"converterName\":\"").append(converterName).append("\",");
 								}

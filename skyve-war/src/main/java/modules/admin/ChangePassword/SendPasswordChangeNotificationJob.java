@@ -2,8 +2,8 @@ package modules.admin.ChangePassword;
 
 import java.util.List;
 
+import org.skyve.EXT;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.Job;
 import org.skyve.util.CommunicationUtil;
 import org.skyve.util.CommunicationUtil.ResponseMode;
@@ -34,7 +34,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 			+ "You recently changed your password. To help keep you safe, here are some details:<br/>"
 			+ "Date/Time: {" + User.passwordLastChangedPropertyName + "}<br/>"
 			+ "IP Address: {" + User.passwordLastChangedIPPropertyName + "}<br/>"
-			+ "Region: {" + User.passwordLastChangedRegionPropertyName + "}<br/>"
+			+ "Country: {" + User.passwordLastChangedCountryCodePropertyName + "} - {" + User.passwordLastChangedCountryNamePropertyName + "}<br/>"
 			+ "<br/>"
 			+ "If this was you, then you can safely ignore this email.<br/>"
 			+ "If you are not sure if this was you, please contact us <a href=\"mailto: {"
@@ -92,7 +92,7 @@ public class SendPasswordChangeNotificationJob extends Job {
 		// Send
 		try {
 			// If GeoIP is configured...
-			if (UtilImpl.IP_INFO_TOKEN != null) {
+			if (EXT.getGeoIPService().isBlocking()) {
 				// Send GeoIP template
 				CommunicationUtil.sendFailSafeSystemCommunication(EMAIL_DESCRIPTION_GEOIP_ENABLED,
 						contact.getEmail1(),

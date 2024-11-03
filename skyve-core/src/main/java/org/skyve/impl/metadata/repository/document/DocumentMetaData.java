@@ -23,7 +23,7 @@ import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
 import org.skyve.impl.metadata.model.document.field.Boolean;
 import org.skyve.impl.metadata.model.document.field.Colour;
 import org.skyve.impl.metadata.model.document.field.Content;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Date;
 import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
@@ -50,7 +50,7 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
-import org.skyve.impl.metadata.repository.ConvertableMetaData;
+import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -101,7 +101,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"attributes", 
 							"conditions", 
 							"uniqueConstraints"})
-public class DocumentMetaData extends NamedMetaData implements ConvertableMetaData<Document> {
+public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaData<Document> {
 	private static final long serialVersionUID = 222166383815547958L;
 
 	private Extends inherits;
@@ -519,15 +519,15 @@ public class DocumentMetaData extends NamedMetaData implements ConvertableMetaDa
 						field.setDynamic(true);
 					}
 					
-					if (attribute instanceof ConvertableField) {
-						ConvertableField convertableField = (ConvertableField) attribute;
-						ConverterName converterName = convertableField.getConverterName();
+					if (attribute instanceof ConvertibleField) {
+						ConvertibleField convertibleField = (ConvertibleField) attribute;
+						ConverterName converterName = convertibleField.getConverterName();
 						if (converterName != null) {
 							converter = converterName.getConverter();
 							if (! type.equals(converter.getAttributeType())) {
 								throw new MetaDataException(metaDataName + " : The converter " + converterName + " of field " + attribute.getName() + " is not a converter for type " + type);
 							}
-							convertableField.setConverter(converter);
+							convertibleField.setConverter(converter);
 						}
 					}
 

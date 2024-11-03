@@ -35,7 +35,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
-import org.skyve.impl.metadata.model.document.field.ConvertableField;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.snapshot.CompoundFilterOperator;
@@ -733,8 +733,8 @@ public class SmartClientListServlet extends HttpServlet {
 							continue;
 						}
 					}
-					if (attribute instanceof ConvertableField) {
-						ConvertableField field = (ConvertableField) attribute;
+					if (attribute instanceof ConvertibleField) {
+						ConvertibleField field = (ConvertibleField) attribute;
 						converter = field.getConverterForCustomer(customer);
 					}
 					else if (attribute instanceof Association) {
@@ -942,8 +942,8 @@ public class SmartClientListServlet extends HttpServlet {
 									 continue;
 								}
 							}
-	    					if (attribute instanceof ConvertableField) {
-	    						ConvertableField field = (ConvertableField) attribute;
+	    					if (attribute instanceof ConvertibleField) {
+	    						ConvertibleField field = (ConvertibleField) attribute;
 	    						converter = field.getConverterForCustomer(customer);
 	    					}
 	    					else if (attribute instanceof Association) {

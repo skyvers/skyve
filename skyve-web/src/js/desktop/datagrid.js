@@ -1,8 +1,5 @@
 isc.ClassFactory.defineClass("BizGrid", "VLayout");
 isc.BizGrid.addProperties({
-	// the title
-	title: null,
-
 	// the main grid
 	grid: null,
 
@@ -46,21 +43,7 @@ isc.BizGrid.addProperties({
 
 isc.BizGrid.addMethods({
 	initWidget: function(config) {
-		if (config.title) {
-			this.isGroup = true;
-			this.groupTitle = '&nbsp;&nbsp;' + config.title + '&nbsp;&nbsp;';
-			this.groupLabelStyleName = 'bizhubBorderLabel';
-			this.groupBorderCSS = '1px solid #bfbfbf';
-			this.margin = 1;
-			this.padding = 10;
-			this.groupLabelBackgroundColor = 'transparent';
-		}
-
-		this.Super("initWidget", config);
-		// NB style isnt applied unless I use the setter here - makes no sense
-		if (config.title) {
-			this.setStyleName('bizhubRoundedBorder');
-		}
+		this.Super("initWidget", arguments);
 
 		var me = this;
 

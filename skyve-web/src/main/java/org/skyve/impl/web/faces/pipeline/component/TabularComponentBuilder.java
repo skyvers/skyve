@@ -621,7 +621,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private int columnPriority;
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, String title, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
@@ -640,7 +640,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		final DataTable dataTable = dataTable(grid.getBinding(),
 												dataWidgetVar,
-												title,
 												grid.getInvisibleConditionName(),
 												((! Boolean.TRUE.equals(grid.getInline())) &&
 														(! Boolean.FALSE.equals(grid.getShowZoom())) &&
@@ -670,7 +669,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Any bound columns are editable inline.
 	 */
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, String title, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, DataRepeater repeater) {
 		if (component != null) {
 			return component;
 		}
@@ -679,7 +678,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		DataTable result = dataTable(repeater.getBinding(),
 										dataWidgetVar,
-										title,
 										repeater.getInvisibleConditionName(),
 										false,
 										null,
@@ -1360,7 +1358,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String uxui,
 									ListModel<Bean> model,
 									Document owningDocument,
-									String title,
 									ListGrid grid,
 									boolean aggregateQuery) {
 		if (component != null) {
@@ -1537,10 +1534,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		result.setValueExpression("value", ef.createValueExpression(elc, modelExpression.toString(), SkyveLazyDataModel.class));
 
-		if (title != null) {
-			addListGridHeader(title, result);
-		}
-
 		boolean showFilter = (! Boolean.FALSE.equals(grid.getShowFilter()));
 		if (showFilter) {
 			result.setFilterDelay(500);
@@ -1605,13 +1598,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		MethodExpression me = ef.createMethodExpression(elc, expression, null, new Class[0]);
 		ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
         table.addClientBehavior("rowSelect", ajax);
-	}
-
-	protected void addListGridHeader(String title,
-									UIComponent componentToAddTo) {
-		UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-        heading.setValue(title);
-		componentToAddTo.getFacets().put("header", heading);
 	}
 
 	protected void addListGridDataColumns(ListModel<? extends Bean> model,
@@ -1999,7 +1985,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										ListModel<Bean> model,
 										List<FilterParameter> filterParameters,
 										List<Parameter> parameters,
-										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {
 		if (component != null) {
@@ -2076,9 +2061,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), SkyveLazyDataModel.class));
 
-		if (title != null) {
-			addListGridHeader(title, result);
-		}
         List<UIComponent> children = result.getChildren();
         addListGridDataColumns(model, children, false, result.getWidgetVar(), uxui);
 
@@ -4534,7 +4516,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	private DataTable dataTable(String binding,
 									String dataWidgetVar,
-									String title,
 									String invisible,
 									boolean clickToZoom,
 									String[] clickToZoomDisabledConditionNames,
@@ -4545,7 +4526,6 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
 		setId(result, widgetId);
 		setInvisible(result, invisible, null);
-		addGridHeader(title, result);
 
 		result.setVar(dataWidgetVar);
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class, false, Sanitisation.none));
@@ -4604,26 +4584,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected DataList dataList(String binding, String dataWidgetVar, String title, String invisible, String widgetId) {
+	protected DataList dataList(String binding, String dataWidgetVar, String invisible, String widgetId) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result, widgetId);
 		setInvisible(result, invisible, null);
-		addGridHeader(title, result);
 
 		result.setVar(dataWidgetVar);
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class, false, Sanitisation.none));
 
 		return result;
-	}
-
-	private void addGridHeader(String title,
-								UIComponent dataTableOrList) {
-		if (title != null) {
-			UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-			text.setValue(title);
-			setId(text, null);
-			dataTableOrList.getFacets().put("header", text);
-		}
 	}
 
 	protected AccordionPanel accordionPanel(String invisible, String widgetId) {

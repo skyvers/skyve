@@ -198,7 +198,8 @@ public class RecoverArchiveJob extends CancellableJob {
     private int revertSoftDeletes(CorruptArchiveError error) {
 
         Document doc = getDocument(error.getArchiveTypeModule(), error.getArchiveTypeDocument());
-        String tableName = doc.getPersistent()
+        @SuppressWarnings("null")
+		String tableName = doc.getPersistent()
                               .getPersistentIdentifier();
 
         String sql = undoSoftDeleteSQL(tableName);

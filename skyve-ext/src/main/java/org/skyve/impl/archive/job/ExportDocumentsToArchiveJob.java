@@ -175,7 +175,8 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
 
         public int deleteExportedDocuments() {
 
-            String table = document.getPersistent()
+            @SuppressWarnings("null")
+			String table = document.getPersistent()
                                    .getPersistentIdentifier();
 
             Instant cutoff = now().minus(Duration.ofDays(config.retainDeletedDocumentsDays()));
@@ -335,7 +336,8 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         }
 
         public String createUpdateStatement() {
-            String table = document.getPersistent()
+            @SuppressWarnings("null")
+			String table = document.getPersistent()
                                    .getPersistentIdentifier();
 
             String sql = new StringJoiner("\n").add("update " + table)

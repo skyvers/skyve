@@ -29,6 +29,7 @@ public final class AppConstants {
 	public static final String TAGGED_DOCUMENT_NAME = "Tagged";
 	public static final String USER_DOCUMENT_NAME = "User";
 	public static final String USER_LOGIN_RECORD_DOCUMENT_NAME = "UserLoginRecord";
+	public static final String USER_MONTHLY_HITS_DOCUMENT_NAME = "UserMonthlyHits";
 	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
 
 	// Attributes
@@ -88,10 +89,6 @@ public final class AppConstants {
 	public static final String TEMPLATE_NAME_ATTRIBUTE_NAME = "templateName";
 	public static final String USER_ATTRIBUTE_NAME = "user";
 	public static final String USER_NAME_ATTRIBUTE_NAME = "userName";
-	
-	// Enumerations
-	public static final String COUNTRY_LIST_TYPE_BLACKLIST_ENUMERATION_CODE = "blacklist";
-	public static final String COUNTRY_LIST_TYPE_WHITELIST_ENUMERATION_CODE = "whitelist";
 
 	// Actions
 	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";

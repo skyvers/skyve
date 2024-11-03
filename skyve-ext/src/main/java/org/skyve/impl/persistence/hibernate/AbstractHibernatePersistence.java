@@ -735,7 +735,12 @@ t.printStackTrace();
 				}
 			}
 			finally {
-				uniqueHashes.clear();
+				try {
+					uniqueBeansChecked.clear();
+				}
+				finally {
+					uniqueHashes.clear();
+				}
 			}				
 		}
 	}
@@ -763,31 +768,41 @@ t.printStackTrace();
 						et.rollback();
 					}
 					else {
-						try {
-							// remove all inserted unique hashes if we were told to (can only do if we have an em)
-							if (removeUniqueHashes) {
-								try {
-									final Persistent persistent = new Persistent();
-									persistent.setName(UniquenessEntity.TABLE_NAME);
-									final String persistentIdentifier = persistent.getPersistentIdentifier();
-									for (String hash : uniqueHashes) {
-										StringBuilder query = new StringBuilder(64);
-										query.append("delete from ").append(persistentIdentifier).append(" where ");
-										query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
-										newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
-									}
-								}
-								finally {
-									uniqueHashes.clear();
+						// Remove all inserted unique hashes if we were told to (can only do if we have an em)
+						// If we cannot, rollback, and continue closing resources
+						if (removeUniqueHashes) {
+							try {
+								final Persistent persistent = new Persistent();
+								persistent.setName(UniquenessEntity.TABLE_NAME);
+								final String persistentIdentifier = persistent.getPersistentIdentifier();
+								for (String hash : uniqueHashes) {
+									StringBuilder query = new StringBuilder(64);
+									query.append("delete from ").append(persistentIdentifier).append(" where ");
+									query.append(UniquenessEntity.HASH_COLUMN_NAME).append(" = :").append(UniquenessEntity.HASH_COLUMN_NAME);
+									newSQL(query.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
 								}
 							}
+							// Note if we can't remove the hashes here that could screw every subsequent
+							// persistence operation on the server if we were to commit, so rollback and chuck.
+							catch (Exception e) {
+								// Set this for dynamic persistence treatment below
+								rollbackOnly = true;
+
+								UtilImpl.LOGGER.severe("Cannot remove unique hashes (stack trace underneath) - attempting a rollback....");
+								e.printStackTrace();
+
+								// try rollback
+								et.rollback();
+								// keep throwing
+								throw e;
+							}
 						}
-						finally {
-							// FROM THE HIBERNATE_REFERENCE DOCS Page 190
-							// Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-							// These methods are deprecated, as beginning and ending a transaction has the same effect.
-							et.commit();
-						}
+
+						// Commit only if no error above
+						// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+						// Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+						// These methods are deprecated, as beginning and ending a transaction has the same effect.
+						et.commit();
 					}
 				}
 			}
@@ -815,9 +830,19 @@ t.printStackTrace();
 					e.printStackTrace();
 				}
 				finally {
-					if (close) {
-						close();
-						threadLocalPersistence.remove();
+					try {
+						try {
+							uniqueBeansChecked.clear();
+						}
+						finally {
+							uniqueHashes.clear();
+						}
+					}
+					finally {
+						if (close) {
+							close();
+							threadLocalPersistence.remove();
+						}
 					}
 				}
 			}
@@ -1576,6 +1601,10 @@ t.printStackTrace();
 	// This set of hashes is inserted in ADM_Uniqueness (temporarily) to allow database locking between transactions.
 	private Set<String> uniqueHashes = new TreeSet<>();
 	
+	// A set of unique beans (bizID unique) from when a transaction begins until it commits or rolls back.
+	// This ensures we don't run unique constraint checking on the same bean in vararg save() calls.
+	private Set<Bean> uniqueBeansChecked = new TreeSet<>();
+	
 	/**
 	 * Check the unique constraints for a document bean.
 	 * 
@@ -1592,7 +1621,9 @@ if (document.isDynamic()) return;
 		final String documentName = document.getName();
 		final String entityName = getDocumentEntityName(owningModuleName, documentName);
 		final boolean persisted = isPersisted(bean);
-		
+		// Don't check for insert uniqueness if we've already checked this instance
+		final boolean insertUniquenessRequiredButNotChecked = (! persisted) && uniqueBeansChecked.add(bean);
+
 		try {
 			for (UniqueConstraint constraint : document.getAllUniqueConstraints(customer)) {
 				DocumentScope scope = constraint.getScope();
@@ -1607,7 +1638,7 @@ if (document.isDynamic()) return;
 				// At this point the normal read lock unique constraint check will find the freshly inserted duplicate.
 				// Note that these rows are deleted just before commit of the transaction to release the locks
 				// and nothing is actually ever committed to this table.
-				if (! persisted) {
+				if (insertUniquenessRequiredButNotChecked) {
 					StringBuilder uniqueKey = new StringBuilder(128);
 					uniqueKey.append(document.getOwningModuleName()).append('|').append(document.getName()).append('|');
 					if (DocumentScope.customer.equals(scope)) {
