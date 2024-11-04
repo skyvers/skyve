@@ -3,12 +3,15 @@ package org.skyve.impl.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -19,6 +22,7 @@ import org.omnifaces.cdi.push.Socket;
 import org.omnifaces.cdi.push.SocketEndpoint;
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.cache.ArchivedDocumentCacheConfig;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.CacheExpiryPolicy;
 import org.skyve.cache.Caching;
@@ -42,6 +46,8 @@ import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.TwoFactorAuthConfigurationSingleton;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.MapType;
 import org.skyve.impl.util.VariableExpander;
 import org.skyve.impl.web.faces.SkyveSocketEndpoint;
@@ -377,7 +383,9 @@ public class SkyveContextListener implements ServletContextListener {
 				testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
 			}
 		}
-		
+
+        configureArchiveProperties(properties);
+
 		// Thumb nail settings
 		Map<String, Object> thumbnail = getObject(null, "thumbnail", properties, false);
 		if (thumbnail != null) {
@@ -813,7 +821,57 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
 	}
-	
+
+    private static void configureArchiveProperties(Map<String, Object> properties) {
+        String archKey = "archive";
+
+        Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
+        if (archiveProps == null) {
+            return;
+        }
+
+        Integer runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
+        Integer batchSize = getNumber(archKey, "exportBatchSize", archiveProps, false).intValue();
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
+
+        List<ArchiveConfig.ArchiveDocConfig> docConfigs = new ArrayList<>();
+        for (Map<String, Object> docProp : docProps) {
+
+            String module = getString(null, "module", docProp, true);
+            String document = getString(null, "document", docProp, true);
+            String directory = getString(null, "directory", docProp, true);
+            int retainDeletedDocumentsDays = getInt(null, "retainDeletedDocumentsDays", docProp);
+
+            docConfigs.add(new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays));
+        }
+
+        // Setup the archive doc cache, with some defaults
+        ArchivedDocumentCacheConfig cacheConfig = ArchivedDocumentCacheConfig.DEFAULT;
+
+        Map<String, Object> cacheProps = getObject(archKey, "cache", archiveProps, false);
+        if (cacheProps != null) {
+
+            final String cacheKey = archKey + ".cache";
+
+            long heapSizeEntries = Optional.ofNullable(getNumber(cacheKey, "heapSizeEntries", cacheProps, false))
+                                           .map(Number::longValue)
+                                           .orElse(100l);
+            long expiryInMinutes = Optional.ofNullable(getNumber(cacheKey, "expiryTimeMinutes", cacheProps, false))
+                                           .map(Number::longValue)
+                                           .orElse(10l);
+
+            cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, expiryInMinutes);
+        }
+
+        UtilImpl.ARCHIVE_CONFIG = new ArchiveConfig(runtime, batchSize, Collections.unmodifiableList(docConfigs), cacheConfig);
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(ArchivedDocumentCacheConfig.DEFAULT);
+    }
+
 	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
 		for (String key : overrides.keySet()) {
 			Object override = overrides.get(key);

@@ -16,6 +16,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -301,6 +302,10 @@ public class Util {
 		return (UtilImpl.THUMBNAIL_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_THUMBNAILS/") : UtilImpl.THUMBNAIL_DIRECTORY;
 	}
 
+    public static ArchiveConfig getArchiveConfig() {
+        return UtilImpl.ARCHIVE_CONFIG;
+    }
+
 	public static String getModuleDirectory() {
 		return UtilImpl.MODULE_DIRECTORY;
 	}
@@ -569,4 +574,5 @@ public class Util {
     								targetNewWindow,
     								getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
+
 }

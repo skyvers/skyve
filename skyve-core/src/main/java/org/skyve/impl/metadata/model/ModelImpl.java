@@ -277,7 +277,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	public void setAbstract(boolean abstractClass) {
 		this.abstractClass = abstractClass;
 	}
-
+	
     @Override
     public String toString() {
 

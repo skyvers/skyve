@@ -20,6 +20,7 @@
 		<job name="jAvailableDiskSpaceAlarm" displayName="Available Disk Space Alarm" className="modules.admin.Configuration.AvailableDiskSpaceAlarmJob"/>
 		<job name="jDifferentCountryLoginNotification" displayName="Different Country Login Notification" className="modules.admin.UserLoginRecord.jobs.DifferentCountryLoginNotificationJob"/>
 		<job name="jPasswordChangeNotification" displayName="Password change notification" className="modules.admin.ChangePassword.SendPasswordChangeNotificationJob"/>
+		<job name="ArchiveJob" displayName="Archive Job" className="org.skyve.impl.archive.job.ArchiveJob" />
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -30,6 +31,7 @@
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="Content" />
 		<document ref="ControlPanel" />
+		<document ref="CorruptArchiveError"/>
 		<document ref="Country" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
@@ -129,6 +131,9 @@
 					<action name="TruncateAuditLog"/>
 				</document>
 			</privileges>
+			<accesses>
+				<modelAggregateAccess document="Audit" model="ArchivedAuditListModel" />
+			</accesses>
 		</role>
 		<role name="BasicUser">
 			<documentation>
@@ -234,7 +239,9 @@
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
-				</document>			
+				</document>
+				<document name="CorruptArchiveError" permission="CRUDC">
+				</document>
 				<document name="ControlPanel" permission="_____">
 					<action name="CacheStats" />
 					<action name="EvictFromCache" />
@@ -548,7 +555,7 @@
 			<uxui name="desktop" />
 			<role name="BasicUser" />
 		</list>
-		<list document="Audit" name="admin.adminMenu.audits.list.displayName">
+		<list document="Audit" name="admin.adminMenu.audits.list.displayName" model="ArchivedAuditListModel">
 			<uxui name="desktop" />
 			<uxui name="external" />
 			<uxui name="tablet" />
