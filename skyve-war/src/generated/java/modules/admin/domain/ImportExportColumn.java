@@ -133,6 +133,8 @@ public class ImportExportColumn extends AbstractPersistentBean implements ChildB
 
 	/**
 	 * Binding Name
+	 * <br/>
+	 * This is used for the binding name in Primefaces using a complete textField
 	 **/
 	private String bindingName;
 

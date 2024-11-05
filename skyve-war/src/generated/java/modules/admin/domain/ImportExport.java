@@ -87,6 +87,9 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String loadTypePropertyName = "loadType";
 
+	/** @hidden */
+	public static final String bindingNamePropertyName = "bindingName";
+
 	/**
 	 * Mode
 	 **/
@@ -386,6 +389,13 @@ public abstract class ImportExport extends AbstractPersistentBean {
 <i>With this option, new records will always be created</i></p>
 	 **/
 	private LoadType loadType = LoadType.createFind;
+
+	/**
+	 * Binding Name
+	 * <br/>
+	 * This is used to allow the complete functionality to work for the bindingName attribute of the ImportExportColumn in the inline datagrid
+	 **/
+	private String bindingName;
 
 	@Override
 	@XmlTransient
@@ -734,6 +744,23 @@ public abstract class ImportExport extends AbstractPersistentBean {
 	public void setLoadType(LoadType loadType) {
 		preset(loadTypePropertyName, loadType);
 		this.loadType = loadType;
+	}
+
+	/**
+	 * {@link #bindingName} accessor.
+	 * @return	The value.
+	 **/
+	public String getBindingName() {
+		return bindingName;
+	}
+
+	/**
+	 * {@link #bindingName} mutator.
+	 * @param bindingName	The new value.
+	 **/
+	@XmlElement
+	public void setBindingName(String bindingName) {
+		this.bindingName = bindingName;
 	}
 
 	/**
