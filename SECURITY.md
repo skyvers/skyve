@@ -6,13 +6,14 @@ The following Skyve versions are currently being supported with security updates
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 9.x.x   | :white_check_mark: |
 | 8.x.x   | :white_check_mark: |
 | 7.x.x   | :white_check_mark: |
-| 6.0.x   | :white_check_mark: |
+| 6.0.x   | :x:                |
 | 5.0.x   | :x:                |
 | < 5.0   | :x:                |
 
-_Note: only customers covered by a support agreement will receive patches for major versions less than the current major version (8.x.x)._
+_Note: only customers covered by a support agreement will receive patches for major versions less than the current major version (9.x.x)._
 
 ## Reporting a Vulnerability
 
