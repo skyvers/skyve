@@ -985,7 +985,7 @@ t.printStackTrace();
 	private void setMandatories(Document document, final PersistentBean beanToSave, Map<PersistentBean, PersistentBean> beansToMerge) {
 		final Customer customer = user.getCustomer();
 
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
@@ -1068,7 +1068,7 @@ t.printStackTrace();
 	}
 
 	private static void firePreSaveEvents(final Customer customer, Document document, final Bean beanToSave) {
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
@@ -1119,7 +1119,7 @@ t.printStackTrace();
 	}
 	
 	private void validatePreMerge(final Customer customer, Document document, final Bean beanToSave) {
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
@@ -1455,7 +1455,7 @@ t.printStackTrace();
 	public void postMerge(Document document, final PersistentBean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
@@ -1504,7 +1504,7 @@ t.printStackTrace();
 	private void prepareMergedBean(Document document, final PersistentBean mergedBean, final PersistentBean unmergedBean, Map<PersistentBean, PersistentBean> otherMergedBeans) {
 		Customer customer = user.getCustomer();
 
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
@@ -1906,7 +1906,7 @@ if (document.isDynamic()) return;
 					}
 					
 					// Find any other static beans referenced by dynamic relations
-					new BeanVisitor(false, true, false) {
+					new BeanVisitor(true, false) {
 						@Override
 						protected boolean accept(String binding,
 													Document visitedDocument,

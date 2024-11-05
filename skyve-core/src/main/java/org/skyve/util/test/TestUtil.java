@@ -732,12 +732,8 @@ public class TestUtil {
 	private static String randomText(Module module, Document document, Attribute attribute) throws IOException {
 		String customerName = null;
 		User user = CORE.getUser();
-		if (user != null) {
-			Customer customer = CORE.getCustomer();
-			if (customer != null) {
-				customerName = customer.getName();
-			}
-		}
+		Customer customer = user.getCustomer();
+		customerName = customer.getName();
 		return randomText(customerName, module, document, attribute);
 	}
 
@@ -791,7 +787,7 @@ public class TestUtil {
 						fileToLoad),
 						customerName,
 						(module == null) ? null : module.getName());
-				if ((file != null) && file.exists()) {
+				if (file.exists()) {
 					try (InputStream inputStream = new FileInputStream(file)) {
 						values = readFromInputStream(inputStream);
 						DATA_CACHE.put(key, values);

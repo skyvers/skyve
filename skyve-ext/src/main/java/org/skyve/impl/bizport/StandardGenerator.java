@@ -29,6 +29,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
+import org.skyve.util.NullableBeanVisitor;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -76,14 +77,14 @@ public final class StandardGenerator {
 	 * @param workbook	The workbook to generate the structure into.
 	 */
 	public void generateStructure(@Nonnull final BizPortWorkbook workbook) {
-		new BeanVisitor(true, false, false) {
+		new NullableBeanVisitor(false, false) {
 			// processBean can be null as we are visiting ALL
 			@Override
-			protected boolean accept(String binding,
-										Document processDocument,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean processBean) throws Exception {
+			protected boolean acceptNulls(String binding,
+											Document processDocument,
+											Document owningDocument,
+											Relation owningRelation,
+											Bean processBean) throws Exception {
 				UtilImpl.LOGGER.info("B = " + binding);
 
 				// stop recursive processing if we have matched an exclusion
@@ -171,7 +172,7 @@ public final class StandardGenerator {
 								@Nonnull final Iterable<? extends Bean> beans) {
 		// Recursively walks the topBean's object graph populating the relevant 
 		// sheets in the workbook.
-		BeanVisitor excelBeanVisitor = new BeanVisitor(false, false, false) {
+		BeanVisitor excelBeanVisitor = new BeanVisitor(false, false) {
 			// the top-most bean to process
 			private Bean topBean;
 

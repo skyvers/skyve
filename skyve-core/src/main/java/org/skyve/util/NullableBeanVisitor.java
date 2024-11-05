@@ -9,14 +9,16 @@ import jakarta.annotation.Nullable;
 
 /**
  * This class is used to visit a bean graph defined by its relations.
+ * It will also visit through null relations by following the document metadata.
  */
-public abstract class BeanVisitor extends BeanVisitorImpl {
+public abstract class NullableBeanVisitor extends BeanVisitorImpl {
 	/**
 	 * Convenience constructor that enabled instance cyclic detection.
-	 * See {{@link #BeanVisitor(boolean, boolean, boolean)}
+	 * See {{@link #NullableBeanVisitor(boolean, boolean, boolean)}
 	 */
-	public BeanVisitor(boolean visitInverses, boolean vectorCyclicDetection) {
+	public NullableBeanVisitor(boolean visitInverses, boolean vectorCyclicDetection) {
 		super(visitInverses, vectorCyclicDetection);
+		visitNulls();
 	}
 
 	/**
@@ -36,42 +38,44 @@ public abstract class BeanVisitor extends BeanVisitorImpl {
 	 * 
 	 * This visit method is thread-safe - the same instance can be used in multiple threads.
 	 */
-	public BeanVisitor(boolean visitInverses,
-					   boolean vectorCyclicDetection,
-					   boolean acceptVisited) {
+	public NullableBeanVisitor(boolean visitInverses, boolean vectorCyclicDetection, boolean acceptVisited) {
 		super(visitInverses, vectorCyclicDetection, acceptVisited);
+		visitNulls();
 	}
-	
+
+	/**
+	 * Delegates to acceptNullable() in this implementation.
+	 */
+	@Override
+	final boolean accept(String binding,
+							Document document,
+							Document owningDocument,
+							Relation owningRelation,
+							Bean bean)
+	throws Exception {
+		return acceptNulls(binding, document, owningDocument, owningRelation, bean);
+	}
+
 	/**
 	 * Accept the reference.
+	 * This class visits a bean's relations including relations that are not defined.
+	 * In this method call, the bean can be null, which will visit all bindings defined in the document.
+	 * If a related instance is null then the document metadata is used for traversal.
 	 * 
 	 * @param binding	The visited binding.
 	 * @param document	
 	 * @param owningDocument The owning document that got us here (by recursion).
 	 * @param owningRelation The owning document's relation that got us here (by recursion).
 	 * 							This is null when top level bean or parent binding.
-	 * @param bean	The visited bean.
+	 * @param bean	The visited bean. This can be null.
 	 * @return <code>false</code> to terminate, <code>true</code> to continue.
 	 * @throws Exception
 	 */
 	@Override
-	protected abstract boolean accept(@Nonnull String binding,
-										@Nonnull Document document,
-										@Nullable Document owningDocument,
-										@Nullable Relation owningRelation,
-										@Nonnull Bean bean) 
+	protected abstract boolean acceptNulls(@Nonnull String binding,
+											@Nonnull Document document,
+											@Nullable Document owningDocument,
+											@Nullable Relation owningRelation,
+											@Nullable Bean bean) 
 	throws Exception;
-
-	/**
-	 * Unused in this implementation.
-	 */
-	@Override
-	final boolean acceptNulls(@Nonnull String binding,
-								@Nonnull Document document,
-								@Nullable Document owningDocument,
-								@Nullable Relation owningRelation,
-								@Nullable Bean bean) 
-	throws Exception {
-		return false;
-	}
 }

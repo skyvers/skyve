@@ -371,11 +371,7 @@ public abstract class ExpressionEvaluator {
 															@Nonnull Customer customer,
 															@Nonnull Module module,
 															@Nonnull Document document) {
-		List<String> result = DEFAULT_EVALUATOR.completeWithoutPrefixOrSuffix(fragment, customer, module, document);
-		if (result == null) {
-			throw new IllegalStateException("Complete Binding of " + fragment + " yields null");
-		}
-		return result;
+		return DEFAULT_EVALUATOR.completeWithoutPrefixOrSuffix(fragment, customer, module, document);
 	}
 	
 	/**
@@ -474,9 +470,6 @@ public abstract class ExpressionEvaluator {
 	
 							// Check binding expressions
 							List<String> completions = DEFAULT_EVALUATOR.completeWithoutPrefixOrSuffix(fragmentWithoutPrefix, customer, module, document);
-							if (completions == null) {
-								throw new IllegalStateException("Complete Expression of " + fragment + " yields null");
-							}
 							result.addAll(completions);
 						}
 						else {
@@ -487,9 +480,6 @@ public abstract class ExpressionEvaluator {
 															fragment.substring(colonIndex + 1, fragment.length()).trim() :
 															"";
 								result = eval.completeWithoutPrefixOrSuffix(fragmentWithoutPrefix, customer, module, document);
-								if (result == null) {
-									throw new IllegalStateException("Complete Expression of " + fragment + " yields null");
-								}
 							}
 						}
 						break;
@@ -560,9 +550,6 @@ public abstract class ExpressionEvaluator {
 				String result = CORE.getUser().getId();
 				if (formatName != null) {
 					return CORE.format(formatName, result);
-				}
-				if (format) {
-					return (result == null) ? "" : result;
 				}
 				return result;
 			}

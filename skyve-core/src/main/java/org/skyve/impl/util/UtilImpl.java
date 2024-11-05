@@ -459,7 +459,7 @@ public class UtilImpl {
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
 		// Ensure that everything is loaded
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 					Document documentAccepted,
@@ -480,7 +480,7 @@ public class UtilImpl {
 
 		private ChangedBeanVisitor() {
 			// Check inverses for the cascade attribute
-			super(false, true, false);
+			super(true, false);
 		}
 
 		@Override

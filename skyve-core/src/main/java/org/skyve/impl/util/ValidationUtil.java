@@ -395,7 +395,7 @@ public class ValidationUtil {
 																								masterBean.getBizDocument());
 
 		// find this object within the beanBeingSaved
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 							Document document,

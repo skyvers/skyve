@@ -224,7 +224,7 @@ public class UserExtension extends User {
 		private String bizUserId;
 
 		public UpdateBizUserVisitor(String bizUserId) {
-			super(false, false, false);
+			super(false, false);
 			this.bizUserId = bizUserId;
 		}
 
