@@ -91,7 +91,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		// Do this even if bean is transient as there might be some persistent part in the graph somewhere
 		delete(c, d, bean, true);
 
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding,
 										Document visitedDocument,
@@ -298,7 +298,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 		final Map<String, Bean> bizIdsToDelete = new TreeMap<>();
 		
 		// Call Bizlet.preDelete() on anything that will cascade delete
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding,
 										Document visitedDocument,

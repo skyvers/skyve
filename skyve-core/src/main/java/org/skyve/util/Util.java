@@ -193,7 +193,7 @@ public class Util {
 	 */
 	public static @Nullable String countryNameFromCode(@Nonnull String twoLetterCountryCode) {
 		User user = CORE.getUser();
-		Locale userLocale = (user == null) ? null : user.getLocale();
+		Locale userLocale = user.getLocale();
 		Locale countryLocale = new Locale("", twoLetterCountryCode);
 		return UtilImpl.processStringValue((userLocale == null) ?
 												countryLocale.getDisplayCountry() :

@@ -13,6 +13,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
+import org.skyve.util.NullableBeanVisitor;
 import org.skyve.util.Util;
 
 import modules.admin.domain.ImportExport;
@@ -37,13 +38,13 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 		final Set<String> actualBindings = new TreeSet<>();
 
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding,
-					Document document,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean bean) throws Exception {
+										Document document,
+										Document owningDocument,
+										Relation owningRelation,
+										Bean bean) throws Exception {
 				System.out.println("B = " + binding);
 				actualBindings.add(binding);
 				return true;
@@ -92,13 +93,13 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 		final Set<String> actualBindings = new TreeSet<>();
 
-		new BeanVisitor(true, false, false) {
+		new NullableBeanVisitor(false, false) {
 			@Override
-			protected boolean accept(String binding,
-					Document document,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean bean) throws Exception {
+			protected boolean acceptNulls(String binding,
+											Document document,
+											Document owningDocument,
+											Relation owningRelation,
+											Bean bean) throws Exception {
 				System.out.println("B = " + binding);
 				actualBindings.add(binding);
 				return true;
@@ -131,7 +132,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 		final Set<String> actualBindings = new TreeSet<>();
 
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding,
 					Document document,
@@ -177,7 +178,7 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 		final Set<String> actualBindings = new TreeSet<>();
 
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
 					Document document,
@@ -210,13 +211,13 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 		final Set<String> actualBindings = new TreeSet<>();
 
-		new BeanVisitor(false, true, false) {
+		new BeanVisitor(true, false) {
 			@Override
 			protected boolean accept(String binding,
-					Document document,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean bean) throws Exception {
+										Document document,
+										Document owningDocument,
+										Relation owningRelation,
+										Bean bean) throws Exception {
 				System.out.println("B = " + binding);
 				actualBindings.add(binding);
 				return true;
@@ -248,13 +249,13 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 		
 		final Set<String> actualBindings = new TreeSet<>();
 
-		new BeanVisitor(false, false, false) {
+		new BeanVisitor(false, false) {
 			@Override
 			protected boolean accept(String binding,
-					Document document,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean bean) throws Exception {
+										Document document,
+										Document owningDocument,
+										Relation owningRelation,
+										Bean bean) throws Exception {
 				System.out.println("B = " + binding);
 				actualBindings.add(binding);
 				return true;
@@ -300,13 +301,13 @@ public class BeanVisitorTests extends AbstractSkyveTest {
 
 		final Set<String> actualBindings = new TreeSet<>();
 
-		new BeanVisitor(false, false, true) {
+		new BeanVisitor(false, true) {
 			@Override
 			protected boolean accept(String binding,
-					Document document,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean bean) throws Exception {
+										Document document,
+										Document owningDocument,
+										Relation owningRelation,
+										Bean bean) throws Exception {
 				System.out.println("BV = " + binding);
 				actualBindings.add(binding);
 				return true;
