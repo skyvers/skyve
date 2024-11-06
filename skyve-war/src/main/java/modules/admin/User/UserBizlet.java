@@ -106,7 +106,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			if (newPassword != null) {
 				if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
 					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
-						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
+						webContext.growl(MessageSeverity.warn, Util.nullSafeI18n("warning.breachedPassword"));
 					}
 				}
 			}
@@ -246,14 +246,12 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			// Set password last changed date/time, IP & region (if configured)
 			bean.setPasswordLastChanged(new DateTime());
 			HttpServletRequest request = EXT.getHttpServletRequest();
-			if (request != null) {
-				String ipAddress = SecurityUtil.getSourceIpAddress(request);
-				bean.setPasswordLastChangedIP(ipAddress);
-				if (ipAddress != null) {
-					String countryCode = EXT.getGeoIPService().geolocate(ipAddress).countryCode();
-					if (countryCode != null) {
-						bean.setPasswordLastChangedCountryCode(countryCode);
-					}
+			String ipAddress = SecurityUtil.getSourceIpAddress(request);
+			bean.setPasswordLastChangedIP(ipAddress);
+			if (ipAddress != null) {
+				String countryCode = EXT.getGeoIPService().geolocate(ipAddress).countryCode();
+				if (countryCode != null) {
+					bean.setPasswordLastChangedCountryCode(countryCode);
 				}
 			}
 			// Set switch in stash (see postSave)

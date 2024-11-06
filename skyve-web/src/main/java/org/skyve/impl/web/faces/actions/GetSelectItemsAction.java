@@ -80,7 +80,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
         List<SelectItem> result = null;
         
-        if ((targetDocument != null) && (targetAttribute != null)) {
+        if (targetAttribute != null) {
             DomainType domainType = targetAttribute.getDomainType();
             Bean owningBean = bean;
             if (bean != null) {
@@ -123,37 +123,35 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
         	for (DomainValue domainValue : domainValues) {
             	String code = domainValue.getCode();
             	Object value = code;
-            	if (code != null) {
-	            	if (targetAttribute instanceof Enumeration) {
-	            		if ((type == null) && (converter == null)) {
-	            			Enumeration e = (Enumeration) targetAttribute;
-	            			e = e.getTarget();
-	    					if (e.isDynamic()) {
-	    						type = String.class;
-	    						converter = new DynamicEnumerationConverter(e);
-	    					}
-	    					else {
-	    						type = e.getEnum();
-	    					}
-	            		}
-            			value = Binder.fromSerialised(converter, type, code);
+            	if (targetAttribute instanceof Enumeration) {
+            		if ((type == null) && (converter == null)) {
+            			Enumeration e = (Enumeration) targetAttribute;
+            			e = e.getTarget();
+    					if (e.isDynamic()) {
+    						type = String.class;
+    						converter = new DynamicEnumerationConverter(e);
+    					}
+    					else {
+    						type = e.getEnum();
+    					}
             		}
-	            	else if (targetAttribute instanceof AssociationImpl) {
-                   		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
-                   		Persistence p = CORE.getPersistence();
-                   		Customer c = p.getUser().getCustomer();
-                   		Module m = c.getModule(targetDocument.getOwningModuleName());
-                   		Document d = m.getDocument(c, targetAssociation.getDocumentName());
-                   	 	value = WebUtil.findReferencedBean(d, code, p, bean, webContext);
-	            	}
-	            	else {
-	            		if (type == null) {
-	            			type = targetAttribute.getAttributeType().getImplementingType();
-	            		}
-	            		if (! type.equals(String.class)) {
-	            			value = Binder.fromSerialised(type, code);
-	            		}
-	            	}
+        			value = Binder.fromSerialised(converter, type, code);
+        		}
+            	else if (targetAttribute instanceof AssociationImpl) {
+               		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
+               		Persistence p = CORE.getPersistence();
+               		Customer c = p.getUser().getCustomer();
+               		Module m = c.getModule(targetDocument.getOwningModuleName());
+               		Document d = m.getDocument(c, targetAssociation.getDocumentName());
+               	 	value = WebUtil.findReferencedBean(d, code, p, bean, webContext);
+            	}
+            	else {
+            		if (type == null) {
+            			type = targetAttribute.getAttributeType().getImplementingType();
+            		}
+            		if (! type.equals(String.class)) {
+            			value = Binder.fromSerialised(type, code);
+            		}
             	}
             	result.add(new SelectItem(value, domainValue.getLocalisedDescription()));
             }

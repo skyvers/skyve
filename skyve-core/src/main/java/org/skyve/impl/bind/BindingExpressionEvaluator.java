@@ -8,11 +8,17 @@ public class BindingExpressionEvaluator extends MetaDataExpressionEvaluator {
 	
 	@Override
 	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+		if (bean == null) {
+			return null;
+		}
 		return BindUtil.get(bean, expression);
 	}
 
 	@Override
 	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+		if (bean == null) {
+			throw new IllegalArgumentException("bean cannot be null");
+		}
 		return BindUtil.getDisplay(CORE.getCustomer(), bean, expression);
 	}
 	

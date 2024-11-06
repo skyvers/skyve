@@ -8,7 +8,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
@@ -389,16 +388,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 			Document targetDocument = currentTarget.getDocument(); 
 			Attribute targetAttribute = currentTarget.getAttribute();
 			if (ultimateBinding.endsWith(Bean.BIZ_KEY)) {
-				if (targetDocument != null) {
-					currentWidgetLabel = targetDocument.getLocalisedSingularAlias();
-					currentWidgetHelp = targetDocument.getLocalisedDescription();
-				}
-				else {
-					Text bizKeyAttribute = DocumentImpl.getBizKeyAttribute();
-					currentWidgetLabel = bizKeyAttribute.getLocalisedDisplayName();
-					currentWidgetRequired = bizKeyAttribute.getRequiredBool();
-					currentWidgetHelp = bizKeyAttribute.getLocalisedDescription();
-				}
+				currentWidgetLabel = targetDocument.getLocalisedSingularAlias();
+				currentWidgetHelp = targetDocument.getLocalisedDescription();
 			}
 			else if (ultimateBinding.endsWith(Bean.ORDINAL_NAME)) {
 				org.skyve.impl.metadata.model.document.field.Integer bizOrdinalAttribute = DocumentImpl.getBizOrdinalAttribute();
@@ -407,7 +398,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 				currentWidgetHelp = bizOrdinalAttribute.getLocalisedDescription();
 			}
 			
-			if ((targetDocument != null) && (targetAttribute != null)) {
+			if (targetAttribute != null) {
 				currentWidgetLabel = targetAttribute.getLocalisedDisplayName();
 				currentWidgetRequired = targetAttribute.isRequired() ? Boolean.TRUE : Boolean.FALSE;
 				currentWidgetHelp = targetAttribute.getLocalisedDescription();

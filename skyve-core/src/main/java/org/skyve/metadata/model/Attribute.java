@@ -17,6 +17,7 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -58,14 +59,14 @@ public interface Attribute extends NamedMetaData {
 		/**
 		 * @param implementingType	The java class that implements the Skyve type.
 		 */
-		private AttributeType(Class<?> implementingType) {
+		private AttributeType(@Nonnull Class<?> implementingType) {
 			this.implementingType = implementingType;
 		}
 
 		/**
 		 * @return	the java class that implements the Skyve type.
 		 */
-		public Class<?> getImplementingType() {
+		public @Nonnull Class<?> getImplementingType() {
 			return implementingType;
 		}
 	}

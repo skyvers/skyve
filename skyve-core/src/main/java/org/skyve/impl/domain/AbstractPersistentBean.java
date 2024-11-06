@@ -97,7 +97,7 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	public String toString() {
 		return super.toString() + '#' + bizId;
 	}
-	
+
 	@Override
 	public String getBizCustomer() {
 		return bizCustomer;
@@ -160,6 +160,8 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	 * @return A string containing the bizKey and the bizId of the record.
 	 */
 	public String getBizKeyBizIdString() {
-		return String.format("%s (%s)", bizKey, bizId);
+		StringBuilder result = new StringBuilder(bizKey.length() + 39);
+		result.append(bizKey).append(" (").append(bizId).append(')');
+		return result.toString();
 	}
 }

@@ -331,7 +331,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 		// Sort state
 		result.append('"').append(SC_SORT_STATE).append("\":");
 		Map<String, SortDirection> sorts = snapshot.getSorts();
-		if ((sorts == null) || sorts.isEmpty()) {
+		if (sorts.isEmpty()) {
 			result.append("null,");
 		}
 		else {

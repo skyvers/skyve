@@ -114,7 +114,7 @@ public interface Module extends NamedMetaData, PersistentMetaData {
 	public @Nonnull String getTitle();
 	
 	public default @Nonnull String getLocalisedTitle() {
-		return Util.i18n(getTitle());
+		return Util.nullSafeI18n(getTitle());
 	}
 	
 	/**

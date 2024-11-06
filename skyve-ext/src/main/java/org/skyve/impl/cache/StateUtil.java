@@ -45,10 +45,8 @@ public class StateUtil {
 
 	public static void cacheConversation(@Nonnull AbstractWebContext webContext)
 	throws Exception {
-		if (webContext != null) {
-			// Note that EHCache puts are thread-safe
-			getConversations().put(webContext.getKey(), SerializationHelper.serialize(webContext));
-		}
+		// Note that EHCache puts are thread-safe
+		getConversations().put(webContext.getKey(), SerializationHelper.serialize(webContext));
 	}
 	
 	public static @Nullable AbstractWebContext getCachedConversation(@Nullable String webId,

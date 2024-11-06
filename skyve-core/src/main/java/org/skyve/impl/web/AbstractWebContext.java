@@ -94,6 +94,9 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 
 	@Override
 	public final Bean getCurrentBean() {
+		if (currentBean == null) {
+			throw new IllegalStateException("currentBean should not be null when requested");
+		}
 		return currentBean;
 	}
 	

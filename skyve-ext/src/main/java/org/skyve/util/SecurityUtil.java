@@ -105,11 +105,7 @@ public class SecurityUtil {
 					Util.LOGGER.severe("Failed to get HTTP request/response");
 				} else {
 					HttpServletRequest request = requestResponse.getRequest();
-					if (request == null) {
-						Util.LOGGER.severe("Failed to get HTTP request");
-					} else {
-						sl.setSourceIP(SecurityUtil.getSourceIpAddress(request));
-					}
+					sl.setSourceIP(SecurityUtil.getSourceIpAddress(request));
 				}
 
 				// Username

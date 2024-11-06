@@ -272,9 +272,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 				SmartClientEditServlet.produceErrorResponse(t, Operation.fetch, false, pw);
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}

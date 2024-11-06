@@ -736,7 +736,7 @@ public final class POISheet implements BizPortSheet {
 				else {
 					addErrorAtCurrentRow(problems,
 											column,
-											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "String"));
+											Util.nullSafeI18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "String"));
 				}
 				break;
 			case BOOLEAN:
@@ -746,7 +746,7 @@ public final class POISheet implements BizPortSheet {
 				else {
 					addErrorAtCurrentRow(problems,
 											column,
-											Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Boolean"));
+											Util.nullSafeI18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Boolean"));
 				}
 				break;
 			case NUMERIC:
@@ -768,7 +768,7 @@ public final class POISheet implements BizPortSheet {
 						else {
 							addErrorAtCurrentRow(problems,
 													column,
-													Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Date"));
+													Util.nullSafeI18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Date"));
 						}
 					}
 				}
@@ -794,7 +794,7 @@ public final class POISheet implements BizPortSheet {
 					else {
 						addErrorAtCurrentRow(problems,
 												column,
-												Util.i18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Numeric"));
+												Util.nullSafeI18n(INVALID_CELL_TYPE_MESSAGE_KEY, (attributeType == null) ? "unkown" : attributeType.toString(), "Numeric"));
 					}
 				}
 				break;

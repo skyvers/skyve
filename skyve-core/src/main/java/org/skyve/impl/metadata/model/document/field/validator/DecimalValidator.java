@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.model.document.field.validator;
 
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.XMLMetaData;
@@ -61,7 +61,7 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 	public final String constructPrecisionMessage(String localisedDisplayName) {
 		String result = getLocalisedValidationMessage();
 		if (result == null) {
-			result = Util.i18n(BeanValidator.VALIDATION_PRECISION_KEY, localisedDisplayName, precision.toString());
+			result = Util.nullSafeI18n(BeanValidator.VALIDATION_PRECISION_KEY, localisedDisplayName, precision.toString());
 		}
 		return result;
 	}

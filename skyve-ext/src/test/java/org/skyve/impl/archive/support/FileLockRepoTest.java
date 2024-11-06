@@ -17,11 +17,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.junit.Ignore;
 import org.junit.Test;
 
+@SuppressWarnings("boxing")
 public class FileLockRepoTest {
 
     private FileLockRepo repo = FileLockRepo.getInstance();
 
-    @Test
+	@Test
     public void testBasics() throws IOException {
 
         File f = new File("a");

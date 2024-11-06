@@ -20,7 +20,7 @@ public class I18NExpressionEvaluator extends ExpressionEvaluator {
 
 	@Override
 	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
-		return Util.i18n(expression);
+		return Util.nullSafeI18n(expression);
 	}
 	
 	@Override

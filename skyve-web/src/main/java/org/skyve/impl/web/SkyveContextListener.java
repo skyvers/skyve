@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -992,15 +992,13 @@ public class SkyveContextListener implements ServletContextListener {
 					// Ensure the content manager is destroyed so that resources and files locks are relinquished
 					@SuppressWarnings("resource")
 					AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
-					if (cm != null) { // can be null if it wasn't initialised correctly.
-						try {
-							cm.close();
-							cm.shutdown();
-						}
-						catch (Exception e) {
-							UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
-							e.printStackTrace();
-						}
+					try {
+						cm.close();
+						cm.shutdown();
+					}
+					catch (Exception e) {
+						UtilImpl.LOGGER.info("Could not close or shutdown of the content manager - this is probably OK although resources may be left hanging or locked");
+						e.printStackTrace();
 					}
 				}
 			}

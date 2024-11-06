@@ -41,25 +41,25 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 				}
 			}
 		} catch (@SuppressWarnings("unused") Exception e) {
-			throw new ValidationException(new Message(Util.i18n("admin.dataMaintenance.actions.restore.cannotDetectRunningJobsException")));
+			throw new ValidationException(new Message(Util.nullSafeI18n("admin.dataMaintenance.actions.restore.cannotDetectRunningJobsException")));
 		}
 
 		if (restoreAlreadyRunning) {
-			throw new ValidationException(new Message(Util.i18n("admin.dataMaintenance.actions.restore.jobAlreadyRunningException")));
+			throw new ValidationException(new Message(Util.nullSafeI18n("admin.dataMaintenance.actions.restore.jobAlreadyRunningException")));
 		}
 		
 		if(bean.getContentRestoreOption()==null) {
 			Document d = m.getDocument(c, DataMaintenance.DOCUMENT_NAME);
 			@SuppressWarnings("null")
 			String desc = d.getAttribute(DataMaintenance.contentRestoreOptionPropertyName).getLocalisedDisplayName();
-			String msg = Util.i18n("admin.dataMaintenance.actions.restore.selectContentRestoreOptionException", desc);
+			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectContentRestoreOptionException", desc);
 			throw new ValidationException(DataMaintenance.contentRestoreOptionPropertyName, msg);
 		}
 		if(bean.getRestoreIndexingOption()==null) {
 			Document d = m.getDocument(c, DataMaintenance.DOCUMENT_NAME);
 			@SuppressWarnings("null")
 			String desc = d.getAttribute(DataMaintenance.restoreIndexingOptionPropertyName).getLocalisedDisplayName();
-			String msg = Util.i18n("admin.dataMaintenance.actions.restore.selectRestoreIndexingOptionException", desc); 
+			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectRestoreIndexingOptionException", desc); 
 			throw new ValidationException(DataMaintenance.restoreIndexingOptionPropertyName, msg);
 		}
 		
@@ -67,12 +67,12 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 			Document d = m.getDocument(c, DataMaintenance.DOCUMENT_NAME);
 			@SuppressWarnings("null")
 			String desc = d.getAttribute(DataMaintenance.restorePreProcessPropertyName).getLocalisedDisplayName();
-			String msg = Util.i18n("admin.dataMaintenance.actions.restore.selectPreProcessException", desc); 
+			String msg = Util.nullSafeI18n("admin.dataMaintenance.actions.restore.selectPreProcessException", desc); 
 			throw new ValidationException(new Message(DataMaintenance.restorePreProcessPropertyName, msg));
 		}
 		
 		EXT.getJobScheduler().runOneShotJob(job, bean, u);
-		webContext.growl(MessageSeverity.info, Util.i18n("admin.dataMaintenance.actions.restore.restoreJobCommenced"));
+		webContext.growl(MessageSeverity.info, Util.nullSafeI18n("admin.dataMaintenance.actions.restore.restoreJobCommenced"));
 
 		return new ServerSideActionResult<>(bean);
 	}

@@ -319,7 +319,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 		result.put("_title", BindUtil.formatMessage(view.getLocalisedTitle(), bean));
 
 		// put the view changed/dirty flag in
-		result.put("_changed", Boolean.valueOf(webContextToReference.getCurrentBean().hasChanged()));
+		Bean currentBean = webContextToReference.getCurrentBean();
+		Boolean changed = Boolean.valueOf(currentBean.hasChanged());
+		result.put("_changed", changed);
 
 		// put web context growls and messages in
 		List<Map<String, String>> messages = webContextToReference.getGrowls();
@@ -416,7 +418,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				Attribute attribute = null;
 				try {
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-					attribute = (target != null) ? target.getAttribute() : null;
+					attribute = target.getAttribute();
 				}
 				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// not an attribute

@@ -126,9 +126,7 @@ public class ChartServlet extends HttpServlet {
 				pw.print(emptyResponse());
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}
@@ -257,7 +255,7 @@ public class ChartServlet extends HttpServlet {
 		}
 
 		@SuppressWarnings("unchecked")
-		Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(null, request.getParameter(BUILDER_NAME));
+		Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(request.getParameter(BUILDER_NAME));
 
 		String categoryBinding = (String) json.get("categoryBinding");
 		String categoryBucketSimpleName = (String) json.get("categoryBucket");

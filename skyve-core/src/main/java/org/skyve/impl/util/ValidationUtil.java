@@ -112,7 +112,7 @@ public class ValidationUtil {
 		Object attributeValue = getAttributeValue(bean, binding);
 		if (attribute.isRequired()) {
 			if (attributeValue == null) {
-				e.getMessages().add(new Message(binding, Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, localisedDisplayName)));
+				e.getMessages().add(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, localisedDisplayName)));
 			}
 		}
 
@@ -137,8 +137,8 @@ public class ValidationUtil {
 					if ((collectionValue == null) || (collectionValue.size() < min)) {
 						e.getMessages().add(new Message(binding, 
 															(min == 1) ?
-																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
-																Util.i18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, String.valueOf(min), localisedDisplayName)));
+																Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
+																Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MIN_CARDINALITY_PLURAL_KEY, String.valueOf(min), localisedDisplayName)));
 					}
 				}
 			}
@@ -149,8 +149,8 @@ public class ValidationUtil {
 				if ((collectionValue != null) && (collectionValue.size() > max)) {
 					e.getMessages().add(new Message(binding, 
 														(max == 1) ?
-															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
-															Util.i18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_PLURAL_KEY, String.valueOf(max), localisedDisplayName)));
+															Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_SINGULAR_KEY, localisedDisplayName) :
+															Util.nullSafeI18n(BeanValidator.VALIDATION_COLLECTION_MAX_CARDINALITY_PLURAL_KEY, String.valueOf(max), localisedDisplayName)));
 				}
 			}
 		}
@@ -161,7 +161,7 @@ public class ValidationUtil {
 				String stringValue = (String) attributeValue;
 				if (stringValue.length() > fieldLength) {
 					e.getMessages().add(new Message(binding,
-														Util.i18n(BeanValidator.VALIDATION_LENGTH_KEY, localisedDisplayName, String.valueOf(fieldLength))));
+														Util.nullSafeI18n(BeanValidator.VALIDATION_LENGTH_KEY, localisedDisplayName, String.valueOf(fieldLength))));
 				}
 				TextFormat format = text.getFormat();
 				if (format != null) {
@@ -312,7 +312,9 @@ public class ValidationUtil {
 			}
 			catch (@SuppressWarnings("unused") Exception e1) {
 				e.getMessages().add(new Message(binding, 
-													Util.i18n(BeanValidator.VALIDATION_FORMAT_KEY, localisedDisplayName, (value == null) ? "" : value.toString(), format.getMask())));
+													Util.nullSafeI18n(BeanValidator.VALIDATION_FORMAT_KEY,
+																		localisedDisplayName, (value == null) ? "" : value.toString(),
+																		format.getMask())));
 			}
 		}
 	}
@@ -325,7 +327,7 @@ public class ValidationUtil {
 		catch (Exception e) {
 			e.printStackTrace();
 			UtilImpl.LOGGER.warning("Validation Failed for bean " + bean);
-			throw new ValidationException(new Message(binding, Util.i18n(BeanValidator.VALIDATION_ACCESS_KEY)));
+			throw new ValidationException(new Message(binding, Util.nullSafeI18n(BeanValidator.VALIDATION_ACCESS_KEY)));
 		}
 
 		return result;

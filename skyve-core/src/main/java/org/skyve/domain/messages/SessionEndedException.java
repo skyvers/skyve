@@ -6,6 +6,9 @@ import java.util.Locale;
 
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.validation.constraints.NotNull;
+
 /**
  * 
  */
@@ -16,13 +19,13 @@ public class SessionEndedException extends DomainException implements MessageExc
 
 	private List<Message> messages = null;
 
-	public SessionEndedException(Locale httpRequestLocale) {
-		super(Util.i18n(MESSAGE_KEY, httpRequestLocale), false);
+	public SessionEndedException(@NotNull Locale httpRequestLocale) {
+		super(Util.nullSafeI18n(MESSAGE_KEY, httpRequestLocale), false);
 		messages = Collections.singletonList(new Message(getMessage()));
 	}
 
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

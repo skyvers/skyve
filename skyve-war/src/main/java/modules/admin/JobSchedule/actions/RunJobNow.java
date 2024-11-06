@@ -23,7 +23,7 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 		// validate that a job is selected
 		if (bean.getJobName() == null) {
 			throw new ValidationException(JobSchedule.jobNamePropertyName,
-					Util.i18n("admin.jobSchedule.jobName.displayName") + " is required");
+					Util.nullSafeI18n("admin.jobSchedule.jobName.displayName") + " is required");
 		}
 
 		Persistence persistence = CORE.getPersistence();

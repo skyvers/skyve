@@ -122,9 +122,7 @@ public class MapServlet extends HttpServlet {
 				pw.print(emptyResponse());
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}

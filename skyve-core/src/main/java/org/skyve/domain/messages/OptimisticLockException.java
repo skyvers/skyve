@@ -38,10 +38,12 @@ public class OptimisticLockException extends DomainException implements MessageE
 		}
 
 		if (operationType == OperationType.update) {
-			messages = Collections.singletonList(new Message(Util.i18n(UPDATE_MESSAGE_KEY, persistentLock.getUsername(), timeStampDisplay)));
+			String message = Util.nullSafeI18n(UPDATE_MESSAGE_KEY, persistentLock.getUsername(), timeStampDisplay);
+			messages = Collections.singletonList(new Message(message));
 		}
 		else if (operationType == OperationType.delete) {
-			messages = Collections.singletonList(new Message(Util.i18n(DELETE_MESSAGE_KEY, persistentLock.getUsername(), timeStampDisplay)));
+			String message = Util.nullSafeI18n(DELETE_MESSAGE_KEY, persistentLock.getUsername(), timeStampDisplay);
+			messages = Collections.singletonList(new Message(message));
 		}
 	}
 

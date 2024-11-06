@@ -502,9 +502,11 @@ public class EXT {
 	 * Note that this is not a CDI provider as it is auto-closeable.
 	 * 
 	 * @return A content manger.
+	 * @throws DomainException	If a content manager cannot be created.
 	 */
 	@SuppressWarnings("resource")
-	public static @Nonnull ContentManager newContentManager() {
+	public static @Nonnull ContentManager newContentManager()
+	throws DomainException {
 		final ContentManager result = (AbstractContentManager.IMPLEMENTATION_CLASS == null) ?
 										PF4JAddInManager.get().getExtension(ContentManager.class) :
 										AbstractContentManager.get();
@@ -693,7 +695,7 @@ public class EXT {
 	}
 
 	/**
-	 * Get the {@link HttpServletRequest} for the current thread.
+	 * Get the {@link HttpServletResponse} for the current thread.
 	 * <br/>
 	 * This method will throw IllegalStateException if there is no request (eg called from a job or other background task).
 	 * 

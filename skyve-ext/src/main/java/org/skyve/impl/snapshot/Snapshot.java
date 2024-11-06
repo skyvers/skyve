@@ -59,7 +59,6 @@ public class Snapshot {
 		sorts.put(column, direction);
 	}
 	
-	
 	public @Nullable String getGroup() {
 		return group;
 	}

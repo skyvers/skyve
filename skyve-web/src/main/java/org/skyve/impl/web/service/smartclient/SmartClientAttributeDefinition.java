@@ -109,12 +109,7 @@ public class SmartClientAttributeDefinition {
 			bindingAttribute = target.getAttribute();
 
 			if (binding.endsWith(Bean.BIZ_KEY)) {
-				if (bindingDocument != null) {
-					title = bindingDocument.getLocalisedSingularAlias();
-				}
-				else {
-					title = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
-				}
+				title = bindingDocument.getLocalisedSingularAlias();
 				align = HorizontalAlignment.left;
 			}
 			else if (binding.endsWith(Bean.ORDINAL_NAME)) {
@@ -218,11 +213,11 @@ public class SmartClientAttributeDefinition {
 						sb.append('{');
 						java.util.Date min = dateValidator.getMin();
 						if (min != null) {
-							sb.append("min:isc.DateUtil.parseSchemaDate('").append(Binder.convert(java.util.Date.class, min)).append("'),");
+							sb.append("min:isc.DateUtil.parseSchemaDate('").append(Binder.nullSafeConvert(java.util.Date.class, min)).append("'),");
 						}
 						java.util.Date max = dateValidator.getMax();
 						if (max != null) {
-							sb.append("max:isc.DateUtil.parseSchemaDate('").append(Binder.convert(java.util.Date.class, max)).append("'),");
+							sb.append("max:isc.DateUtil.parseSchemaDate('").append(Binder.nullSafeConvert(java.util.Date.class, max)).append("'),");
 						}
 						sb.append("type:'dateRange',errorMessage:'");
 						sb.append(OWASP.escapeJsString(dateValidator.constructMessage(user, title, converter)));

@@ -476,7 +476,7 @@ public class StandardLoader {
 			if (foreignKeyBean == null) {
 				sheet.addErrorAtCurrentRow(problems, 
 											foreignKeyColumn, 
-											Util.i18n(REFERENCED_ROW_DNE_MESSAGE_KEY, associationBinding, foreignKeySheet.getTitle(), foreignKeySheet.getTitle()));
+											Util.nullSafeI18n(REFERENCED_ROW_DNE_MESSAGE_KEY, associationBinding, foreignKeySheet.getTitle(), foreignKeySheet.getTitle()));
 				continue;
 			}
 

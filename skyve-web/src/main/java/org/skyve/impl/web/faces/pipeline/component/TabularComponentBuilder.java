@@ -1463,7 +1463,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							if (owningDocument != null) {
 								Module m = customer.getModule(owningDocument.getOwningModuleName());
 								TargetMetaData target = BindUtil.getMetaDataForBinding(customer, m, owningDocument, binding);
-								targetAttribute = (target != null) ? target.getAttribute() : null;
+								targetAttribute = target.getAttribute();
 							}
 						}
 						catch (@SuppressWarnings("unused") MetaDataException e) {
@@ -1501,7 +1501,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 						Attribute targetAttribute = null;
 						try {
 							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
-							targetAttribute = (target != null) ? target.getAttribute() : null;
+							targetAttribute = target.getAttribute();
 						}
 						catch (@SuppressWarnings("unused") MetaDataException e) {
 							// binding is not an attribute
@@ -1772,10 +1772,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (alignment == null) {
 				alignment = customisations.determineDefaultTextAlignment(uxui, attributeType);
 			} 
-			
-			if (alignment != null) {	
-				style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
-			} 
+			style.append("text-align:").append(alignment.toAlignmentString()).append(" !important;");
 			
 			if (style.length() > 0) {
 				column.setStyle(style.toString());
@@ -4698,10 +4695,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// So we use the requiredMessage to perform the check ourselves based on clientValidation attribute
 		if (required) {
 			if (title == null) {
-				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, "Value"));
+				result.setRequiredMessage(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, "Value"));
 			}
 			else {
-				result.setRequiredMessage(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title));
+				result.setRequiredMessage(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title));
 			}
 		}
 		setDisabled(result, disabled, formDisabled);
