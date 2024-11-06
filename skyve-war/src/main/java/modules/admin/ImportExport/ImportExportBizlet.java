@@ -8,7 +8,6 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -18,14 +17,12 @@ import org.skyve.web.WebContext;
 
 import modules.admin.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.ImportExport.actions.UploadSimpleImportDataFile;
-import modules.admin.ImportExportColumn.ImportExportColumnBizlet;
 import modules.admin.domain.ImportExport;
 import modules.admin.domain.ImportExport.LoadType;
 import modules.admin.domain.ImportExport.Mode;
 import modules.admin.domain.ImportExportColumn;
 
 public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
-	
 
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
@@ -155,49 +152,6 @@ public class ImportExportBizlet extends Bizlet<ImportExportExtension> {
 		}
 
 		super.preSave(bean);
-	}
-
-	@Override
-	public List<String> complete(String attributeName, String value, ImportExportExtension bean) throws Exception {
-		if (ImportExportColumn.bindingNamePropertyName.equals(attributeName)) {
-			List<String> bindingsList = new ArrayList<>();
-
-			if (bindingsList.isEmpty()) {
-
-				Persistence pers = CORE.getPersistence();
-				User user = pers.getUser();
-				Customer customer = user.getCustomer();
-				Module module = customer.getModule(bean.getModuleName());
-				Document document = module.getDocument(customer, bean.getDocumentName());
-
-				for (Attribute a : document.getAllAttributes(customer)) {
-
-					// exclude unimplemented types - some of these can be handled later
-					if (!AttributeType.collection.equals(a.getAttributeType())
-							&& !AttributeType.content.equals(a.getAttributeType())
-							&& !AttributeType.image.equals(a.getAttributeType())
-							&& !AttributeType.geometry.equals(a.getAttributeType())
-							&& !AttributeType.inverseMany.equals(a.getAttributeType())
-							&& !AttributeType.inverseOne.equals(a.getAttributeType())) {
-
-						// also exclude non persistent fields
-						if (a.isPersistent()) {
-							if(AttributeType.association.equals(a.getAttributeType())) {
-//								bindings.add(new DomainValue(a.getName() + Bean.BIZ_KEY, a.getDisplayName()));
-								bindingsList.add(a.getName());
-							} else {
-								bindingsList.add(a.getName());
-							}
-						}
-					}
-				}
-
-				bindingsList.add(ImportExportColumnBizlet.EXPRESSION);
-			}
-
-			return bindingsList;
-		}
-		return super.complete(attributeName, value, bean);
 	}
 
 }

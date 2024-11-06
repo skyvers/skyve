@@ -12,9 +12,9 @@
 		</row>
 		<row>
 			<item>
-				<textField binding="bindingName" complete="constrain">
+				<combo binding="bindingName">
 					<onChangedHandlers><rerender/></onChangedHandlers>
-				</textField>
+				</combo>
 			</item>
 		</row>
 		<row>

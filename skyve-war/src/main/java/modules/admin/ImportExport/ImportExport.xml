@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <document name="ImportExport" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
-	xmlns:v="http://www.skyve.org/xml/view"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<persistent name="ADM_ImportExport" />
 	<singularAlias>Import Export</singularAlias>
@@ -82,16 +81,6 @@
 				<value code="createAll" name="createAll" description="admin.importExport.loadType.createAll.description" />
 			</values>
 		</enum>
-		<text name="bindingName" audited="false" persistent="false" trackChanges="false">
-			<documentation><![CDATA[This is used to allow the complete functionality to work for the bindingName attribute of the ImportExportColumn in the inline datagrid]]></documentation>
-			<displayName>admin.importExportColumn.bindingName.displayName</displayName>
-			<defaultWidget>
-				<v:textField binding="bindingName" complete="constrain">
-					<v:onChangedHandlers><v:rerender/></v:onChangedHandlers>
-				</v:textField>
-			</defaultWidget>
-			<length>200</length>
-		</text>
 	</attributes>
 	<conditions>
 		<condition name="showExport">
