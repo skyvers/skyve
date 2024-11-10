@@ -302,7 +302,7 @@ public class FacesView extends HarnessView {
 
 	// The edited bean
 	public Bean getBean() {
-        return ((webContext == null) ? null : webContext.getCurrentBean());
+        return ((webContext == null) ? null : webContext.getNullableCurrentBean());
     }
 	public void setBean(Bean bean)
 	throws Exception {

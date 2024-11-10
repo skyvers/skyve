@@ -9,6 +9,8 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nullable;
+
 public abstract class AbstractWebContext implements Serializable, WebContext {
 	private static final long serialVersionUID = 876761059493617411L;
 	
@@ -97,6 +99,10 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 		if (currentBean == null) {
 			throw new IllegalStateException("currentBean should not be null when requested");
 		}
+		return currentBean;
+	}
+	
+	public final @Nullable Bean getNullableCurrentBean() {
 		return currentBean;
 	}
 	

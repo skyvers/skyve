@@ -212,7 +212,7 @@ public class SmartClientEditServlet extends HttpServlet {
 					String bizId = OWASP.sanitise(Sanitisation.text, (String) parameters.get(Bean.DOCUMENT_ID));
 					
 					// the bean in the web context - the conversation context
-			    	Bean contextBean = webContext.getCurrentBean();
+			    	Bean contextBean = webContext.getNullableCurrentBean();
 	
 			    	// the bean pointed to by the form binding
 			    	Bean formBean = null;
