@@ -715,21 +715,19 @@ public class DocumentFilterImpl implements DocumentFilter {
 				Document document = owningQuery.drivingDocument;
 				Module module = customer.getModule(document.getOwningModuleName());
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				if (target != null) {
-					Attribute attribute = target.getAttribute();
-					if (attribute != null) {
-						AttributeType type = attribute.getAttributeType();
-						return AttributeType.bool.equals(type) ||
-								AttributeType.date.equals(type) ||
-								AttributeType.dateTime.equals(type) ||
-								AttributeType.decimal10.equals(type) ||
-								AttributeType.decimal2.equals(type) ||
-								AttributeType.decimal5.equals(type) ||
-								AttributeType.integer.equals(type) ||
-								AttributeType.longInteger.equals(type) ||
-								AttributeType.time.equals(type) ||
-								AttributeType.timestamp.equals(type);
-					}
+				Attribute attribute = target.getAttribute();
+				if (attribute != null) {
+					AttributeType type = attribute.getAttributeType();
+					return AttributeType.bool.equals(type) ||
+							AttributeType.date.equals(type) ||
+							AttributeType.dateTime.equals(type) ||
+							AttributeType.decimal10.equals(type) ||
+							AttributeType.decimal2.equals(type) ||
+							AttributeType.decimal5.equals(type) ||
+							AttributeType.integer.equals(type) ||
+							AttributeType.longInteger.equals(type) ||
+							AttributeType.time.equals(type) ||
+							AttributeType.timestamp.equals(type);
 				}
 			}
 		}

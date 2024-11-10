@@ -243,55 +243,54 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, drivingModule, drivingDocument, key);
 			boolean contains = false;
-			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					DomainType domainType = attribute.getDomainType();
-					if (domainType == DomainType.variant) {
-						value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(drivingDocument, attribute, value.toString());
-					}
-					else {
-						AttributeType type = attribute.getAttributeType();
-						// Use "like" if its textual and not a constant domain type
-						if (AttributeType.colour.equals(type) ||
-								AttributeType.markup.equals(type) ||
-								AttributeType.memo.equals(type) ||
-								AttributeType.text.equals(type)) {
-							if (domainType == null) {
-								contains = true;
-							}
-						}
-						// if we have a binding to an association use "like" and 
-						// make it to the bizKey since we have no relational stuff in the PF filter line.
-						else if (AttributeType.association.equals(type)) {
-							contains = true;
-							key = BindUtil.createCompoundBinding(key, Bean.BIZ_KEY);
-						}
-						else if (value instanceof String) {
-							Converter<?> converter = null;
-							if (attribute instanceof ConvertibleField) {
-								converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
-							}
-							Class<?> implementingType = type.getImplementingType();
-							if (! String.class.equals(implementingType)) {
-								try {
-									value = BindUtil.fromString(customer, converter, implementingType, (String) value);
-								}
-								catch (@SuppressWarnings("unused") Exception e) {
-									UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 
-															"] for filter parameter [" + key + "] to the required type, so just ignore...");
-									continue;
-								}
-							}
-						}
-					}
+			Attribute attribute = target.getAttribute();
+			if (attribute != null) {
+				DomainType domainType = attribute.getDomainType();
+				if (domainType == DomainType.variant) {
+					value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(drivingDocument, attribute, value.toString());
 				}
-				// implicit field probably - if biz key implicit field then add as contains
-				// NB All other implicit fields should be exactly equal
-				else if (key.endsWith(Bean.BIZ_KEY)) {
-					contains = true;
+				else {
+					AttributeType type = attribute.getAttributeType();
+					// Use "like" if its textual and not a constant domain type
+					if (AttributeType.colour.equals(type) ||
+							AttributeType.markup.equals(type) ||
+							AttributeType.memo.equals(type) ||
+							AttributeType.text.equals(type)) {
+						if (domainType == null) {
+							contains = true;
+						}
+					}
+					// if we have a binding to an association use "like" and 
+					// make it to the bizKey since we have no relational stuff in the PF filter line.
+					else if (AttributeType.association.equals(type)) {
+						contains = true;
+						key = BindUtil.createCompoundBinding(key, Bean.BIZ_KEY);
+					}
+					else if (value instanceof String) {
+						Converter<?> converter = null;
+						if (attribute instanceof ConvertibleField) {
+							converter = ((ConvertibleField) attribute).getConverterForCustomer(customer);
+						}
+						Class<?> implementingType = type.getImplementingType();
+						if (! String.class.equals(implementingType)) {
+							try {
+								value = BindUtil.fromString(customer, converter, implementingType, (String) value);
+							}
+							catch (@SuppressWarnings("unused") Exception e) {
+								UtilImpl.LOGGER.info("Could not coerce the String value [" + value + 
+														"] for filter parameter [" + key + "] to the required type, so just ignore...");
+								continue;
+							}
+						}
+					}
 				}
 			}
+			// implicit field probably - if biz key implicit field then add as contains
+			// NB All other implicit fields should be exactly equal
+			else if (key.endsWith(Bean.BIZ_KEY)) {
+				contains = true;
+			}
+
 			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("    FILTER %s %s %s", key, contains ? "contains" : "=", value));
 			if (contains) {
 				modelFilter.addContains(key, (String) value);

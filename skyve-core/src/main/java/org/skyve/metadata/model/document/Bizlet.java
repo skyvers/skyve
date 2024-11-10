@@ -11,6 +11,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A bizlet allows callbacks to be made at pertinent times in the Skyve server processing.
  * 
@@ -46,14 +48,14 @@ public class Bizlet<T extends Bean> implements MetaData {
 	public static class DomainValue implements Serializable {
 		private static final long serialVersionUID = -7737192861504224293L;
 
-		private String code;
-		private String description;
+		@Nonnull private String code;
+		@Nonnull private String description;
 		
 		/**
 		 * 
 		 * @param codeAndDescription
 		 */
-		public DomainValue(String codeAndDescription) {
+		public DomainValue(@Nonnull String codeAndDescription) {
 			this(codeAndDescription, codeAndDescription);
 		}
 		
@@ -62,7 +64,7 @@ public class Bizlet<T extends Bean> implements MetaData {
 		 * @param code
 		 * @param description
 		 */
-		public DomainValue(String code, String description) {
+		public DomainValue(@Nonnull String code, @Nonnull String description) {
 			this.code = code;
 			this.description = description;
 		}
@@ -71,7 +73,7 @@ public class Bizlet<T extends Bean> implements MetaData {
 		 * 
 		 * @return
 		 */
-		public String getCode() {
+		public @Nonnull String getCode() {
 			return code;
 		}
 		
@@ -79,13 +81,15 @@ public class Bizlet<T extends Bean> implements MetaData {
 		 * 
 		 * @return
 		 */
-		public String getLocalisedDescription() {
-			return Util.i18n(description);
+		public @Nonnull String getLocalisedDescription() {
+			return Util.nullSafeI18n(description);
 		}
 		
 		@Override
-		public String toString() {
-			return super.toString() + '(' + code + "->" + description + ')';
+		public @Nonnull String toString() {
+			StringBuilder result = new StringBuilder(128);
+			result.append(super.toString()).append('(').append(code).append("->").append(description).append(')');
+			return result.toString();
 		}
 	}
 	

@@ -259,9 +259,7 @@ public class MetaDataServlet extends HttpServlet {
 				pw.print(emptyResponse(documentName));
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}
@@ -3101,7 +3099,7 @@ public class MetaDataServlet extends HttpServlet {
 											String code = value.getCode();
 											result.append('"').append(OWASP.escapeJsonString(code)).append("\":\"");
 											String description = value.getLocalisedDescription();
-											result.append(OWASP.escapeJsonString((description == null) ? code : description)).append("\",");
+											result.append(OWASP.escapeJsonString(description)).append("\",");
 										}
 										result.setLength(result.length() - 1); // remove last comma
 									}

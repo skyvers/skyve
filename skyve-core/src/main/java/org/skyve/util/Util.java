@@ -111,14 +111,21 @@ public class Util {
 	/**
 	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
+	public static @Nonnull String nullSafeI18n(@Nonnull String key, String... values) {
+		// NB Don't attempt to get a user unless persistence has been initialised
+		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
+		return nullSafeI18n(key, (u == null) ? null : u.getLocale(), values);
+	}
+	
+	/**
+	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
+	 * Only returns null if the key is null.
+	 */
 	public static @Nullable String i18n(@Nullable String key, String... values) {
 		if (key == null) {
 			return null;
 		}
-		
-		// NB Don't attempt to get a user unless persistence has been initialised
-		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
-		return i18n(key, (u == null) ? null : u.getLocale(), values);
+		return nullSafeI18n(key, values);
 	}
 	
 	// language code -> (key -> string)
@@ -132,48 +139,57 @@ public class Util {
 	/**
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
-	public static @Nullable String i18n(@Nullable String key, @Nullable Locale locale, String... values) {
-		String result = key;
+	public static @Nonnull String nullSafeI18n(@Nonnull String key, @Nullable Locale locale, String... values) {
+		String result = null;
 
-		if (key != null) {
-			try {
-				Locale l = (locale == null) ? Locale.ENGLISH : locale;
-				String lang = l.getLanguage();
-				Map<String, String> properties = I18N_PROPERTIES.get(lang);
-				if (properties == null) {
-					synchronized (I18N_PROPERTIES) {
-						properties = I18N_PROPERTIES.get(lang);
-						if (properties == null) {
-							ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l, Thread.currentThread().getContextClassLoader());
-							properties = new TreeMap<>();
-							for (String bundleKey : bundle.keySet()) {
-								properties.put(bundleKey, bundle.getString(bundleKey));
-							}
-							ResourceBundle.clearCache(Thread.currentThread().getContextClassLoader());
-							I18N_PROPERTIES.put(lang, properties);
+		try {
+			Locale l = (locale == null) ? Locale.ENGLISH : locale;
+			String lang = l.getLanguage();
+			Map<String, String> properties = I18N_PROPERTIES.get(lang);
+			if (properties == null) {
+				synchronized (I18N_PROPERTIES) {
+					properties = I18N_PROPERTIES.get(lang);
+					if (properties == null) {
+						ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", l, Thread.currentThread().getContextClassLoader());
+						properties = new TreeMap<>();
+						for (String bundleKey : bundle.keySet()) {
+							properties.put(bundleKey, bundle.getString(bundleKey));
 						}
+						ResourceBundle.clearCache(Thread.currentThread().getContextClassLoader());
+						I18N_PROPERTIES.put(lang, properties);
 					}
-				}
-				result = properties.get(key);
-				if (result == null) {
-					if ((lang != null) && (! lang.equals(Locale.ENGLISH.getLanguage()))) {
-						result = i18n(key, Locale.ENGLISH, values);
-					}
-					if (result == null) {
-						result = key;
-					}
-				}
-	
-				if ((values != null) && (values.length > 0)) {
-					result = MessageFormat.format(result, (Object[]) values);
 				}
 			}
-			catch (@SuppressWarnings("unused") MissingResourceException e) {
-				UtilImpl.LOGGER.warning("Could not find bundle \"resources.i18n\"");
+			result = properties.get(key);
+			if (result == null) {
+				if ((lang != null) && (! lang.equals(Locale.ENGLISH.getLanguage()))) {
+					result = nullSafeI18n(key, Locale.ENGLISH, values);
+				}
+				if (result == null) {
+					result = key;
+				}
+			}
+
+			if ((values != null) && (values.length > 0)) {
+				result = MessageFormat.format(result, (Object[]) values);
 			}
 		}
+		catch (@SuppressWarnings("unused") MissingResourceException e) {
+			UtilImpl.LOGGER.warning("Could not find bundle \"resources.i18n\"");
+		}
 
-		return result;
+		return (result == null) ? key : result;
+	}
+	
+	/**
+	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
+	 * Only returns null if the key is null.
+	 */
+	public static @Nullable String i18n(@Nullable String key, @Nullable Locale locale, String... values) {
+		if (key == null) {
+			return null;
+		}
+		return nullSafeI18n(key, locale, values);
 	}
 
 	public static boolean isRTL() {
@@ -574,5 +590,4 @@ public class Util {
     								targetNewWindow,
     								getContentImageUrl(bizModule, bizDocument, binding, contentId, width, height));
     }
-
 }

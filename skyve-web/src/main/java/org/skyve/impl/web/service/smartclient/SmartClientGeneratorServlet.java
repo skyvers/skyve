@@ -239,9 +239,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				}
 			}
 			finally {
-				if (persistence != null) {
-					persistence.commit(true);
-				}
+				persistence.commit(true);
 			}
 		}
 	}

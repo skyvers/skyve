@@ -18,7 +18,7 @@ public class ChangePasswordBizlet extends Bizlet<ChangePassword> {
 			if (newPassword != null) {
 				if (UtilImpl.CHECK_FOR_BREACHED_PASSWORD) {
 					if (HIBPPasswordValidator.isPasswordPwned(newPassword)) {
-						webContext.growl(MessageSeverity.warn, Util.i18n("warning.breachedPassword"));
+						webContext.growl(MessageSeverity.warn, Util.nullSafeI18n("warning.breachedPassword"));
 					}
 				}
 			}

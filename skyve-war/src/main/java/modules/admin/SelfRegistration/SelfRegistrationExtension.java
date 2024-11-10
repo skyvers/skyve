@@ -129,14 +129,14 @@ public class SelfRegistrationExtension extends SelfRegistration {
 					String emailBinding = Binder.createCompoundBinding(SelfRegistration.userPropertyName, User.contactPropertyName,
 							Contact.email1PropertyName);
 					Message message = new Message(emailBinding,
-							Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY,
+							Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY,
 									Binder.formatMessage("{disp:" + emailBinding + "}", this)));
 					ve.getMessages().add(message);
 				}
 
 				if (StringUtils.isEmpty(getConfirmEmail())) {
 					Message message = new Message(SelfRegistration.confirmEmailPropertyName,
-							Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY,
+							Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY,
 									Binder.formatMessage("{disp:" + SelfRegistration.confirmEmailPropertyName + "}", this)));
 					ve.getMessages().add(message);
 				}

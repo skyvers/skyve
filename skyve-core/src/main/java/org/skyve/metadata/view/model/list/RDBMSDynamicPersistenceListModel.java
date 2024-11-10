@@ -422,7 +422,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 				Document relatedDocument = info.relatedDocument;
 				Module relatedModule = customer.getModule(relatedDocument.getOwningModuleName());
 				Attribute a = info.relatedDocument.getPolymorphicAttribute(customer, simpleBinding);
-				processProjectionThroughReferences(info, projection, simpleBinding, BindUtil.isDynamic(customer, relatedModule, relatedDocument, a), a instanceof Relation, a);
+				if (a != null) {
+					processProjectionThroughReferences(info, projection, simpleBinding, BindUtil.isDynamic(customer, relatedModule, relatedDocument, a), a instanceof Relation, a);
+				}
 			}
 		}
 	}
@@ -621,6 +623,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param c	The customer
 	 * @return	The Persistent configuration
 	 */
+	@SuppressWarnings("null")
 	public static @Nonnull Persistent getDynamicEntityPersistent(@Nonnull Customer c) {
 		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME).getPersistent();
 	}
@@ -630,6 +633,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param c	The customer
 	 * @return	The Persistent configuration
 	 */
+	@SuppressWarnings("null")
 	public static @Nonnull Persistent getDynamicRelationPersistent(@Nonnull Customer c) {
 		return c.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(c, AppConstants.DYNAMIC_RELATION_DOCUMENT_NAME).getPersistent();
 	}

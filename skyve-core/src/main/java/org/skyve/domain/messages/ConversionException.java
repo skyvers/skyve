@@ -58,6 +58,8 @@ import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 public class ConversionException extends DomainException implements MessageException {
 	private static final long serialVersionUID = 6752293620540676434L;
 
@@ -145,14 +147,14 @@ public class ConversionException extends DomainException implements MessageExcep
 	
 	private List<Message> messages = null;
 	
-	public ConversionException(String i18nKey, String... i18nValues) {
+	public ConversionException(@Nonnull String i18nKey, String... i18nValues) {
 		super("Conversion failed for converter :- " + i18nKey, false);
-		messages = Collections.singletonList(new Message(Util.i18n(i18nKey, i18nValues)));
+		messages = Collections.singletonList(new Message(Util.nullSafeI18n(i18nKey, i18nValues)));
 	}
 
-	public ConversionException(String i18nKey, Throwable t) {
+	public ConversionException(@Nonnull String i18nKey, @Nonnull Throwable t) {
 		super("Conversion failed for converter :- " + i18nKey, t, false);
-		messages = Collections.singletonList(new Message(Util.i18n(i18nKey)));
+		messages = Collections.singletonList(new Message(Util.nullSafeI18n(i18nKey)));
 	}
 
 	@Override

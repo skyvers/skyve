@@ -8,8 +8,10 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebContainer;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import modules.admin.domain.ChangePassword;
 import util.AbstractH2Test;
 
@@ -19,7 +21,8 @@ public class MakePasswordChangeTest extends AbstractH2Test {
 	@SuppressWarnings("static-method")
 	public void beforeEach() {
 		HttpServletRequest httpServletRequest = new MockHttpServletRequest(); // mock session too
-		WebContainer.setHttpServletRequestResponse(httpServletRequest, null);
+		HttpServletResponse httpServletResponse = new MockHttpServletResponse();
+		WebContainer.setHttpServletRequestResponse(httpServletRequest, httpServletResponse);
 	}
 
 	@Test

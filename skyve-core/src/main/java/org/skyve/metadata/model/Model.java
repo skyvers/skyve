@@ -46,7 +46,7 @@ public interface Model extends NamedMetaData {
 	 * @param customer	The given customer
 	 * @return	All the attributes.
 	 */
-	@Nonnull List<? extends Attribute> getAllAttributes(Customer customer);
+	@Nonnull List<? extends Attribute> getAllAttributes(@Nonnull Customer customer);
 
 	/**
 	 * 

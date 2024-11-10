@@ -276,35 +276,33 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 
     		// Determine the parameter name to use
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, name);
-			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					if (attribute instanceof Enumeration) {
-						Enumeration e = (Enumeration) attribute;
-						e = e.getTarget();
-						if (e.isDynamic()) {
-							type = String.class;
-							converter = new DynamicEnumerationConverter(e);
-						}
-						else {
-							type = e.getEnum();
-						}
+			Attribute attribute = target.getAttribute();
+			if (attribute != null) {
+				if (attribute instanceof Enumeration) {
+					Enumeration e = (Enumeration) attribute;
+					e = e.getTarget();
+					if (e.isDynamic()) {
+						type = String.class;
+						converter = new DynamicEnumerationConverter(e);
 					}
-					else if (attribute instanceof Field) {
-						type = attribute.getAttributeType().getImplementingType();
-					}
-					else if (attribute instanceof Association) {
-						newName = name + '.' + Bean.DOCUMENT_ID;
-					}
-					
-					if (attribute instanceof ConvertibleField) {
-						ConvertibleField field = (ConvertibleField) attribute;
-						converter = field.getConverterForCustomer(c);
+					else {
+						type = e.getEnum();
 					}
 				}
-    			else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+				else if (attribute instanceof Field) {
+					type = attribute.getAttributeType().getImplementingType();
+				}
+				else if (attribute instanceof Association) {
 					newName = name + '.' + Bean.DOCUMENT_ID;
-    			}
+				}
+				
+				if (attribute instanceof ConvertibleField) {
+					ConvertibleField field = (ConvertibleField) attribute;
+					converter = field.getConverterForCustomer(c);
+				}
+			}
+			else if (ChildBean.PARENT_NAME.equals(name) || name.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+				newName = name + '.' + Bean.DOCUMENT_ID;
 			}
 
 			if (type != null) {
@@ -312,7 +310,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 				Class<?> valueType = newValue.getClass();
 				if (! type.isAssignableFrom(valueType)) {
 					// try converting it
-					Object convertedNewValue = BindUtil.convert(type, newValue);
+					Object convertedNewValue = BindUtil.nullSafeConvert(type, newValue);
 					// if the conversion did not produce a new value - try a String conversion
 					if (convertedNewValue == newValue) {
 						newValue = BindUtil.fromString(c, converter, type, newValue.toString());
@@ -352,12 +350,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 				Document targetDocument = target.getDocument();
 				Attribute targetAttribute = target.getAttribute();
 				if (binding.endsWith(Bean.BIZ_KEY)) {
-					if (targetDocument != null) {
-						result = targetDocument.getLocalisedSingularAlias();
-					}
-					else {
-						result = DocumentImpl.getBizKeyAttribute().getLocalisedDisplayName();
-					}
+					result = targetDocument.getLocalisedSingularAlias();
 				}
 				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
 					result = DocumentImpl.getBizOrdinalAttribute().getLocalisedDisplayName();

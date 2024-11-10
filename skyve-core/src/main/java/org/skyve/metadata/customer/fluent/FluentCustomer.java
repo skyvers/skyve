@@ -145,7 +145,7 @@ public class FluentCustomer {
 		return this;
 	}
 	
-	public @Nonnull FluentCustomerFeatureRole findTextSearchModuleRole(@Nonnull String moduleName, @Nonnull String name) {
+	public @Nullable FluentCustomerFeatureRole findTextSearchModuleRole(@Nonnull String moduleName, @Nonnull String name) {
 		CustomerFeatureRoleMetaData result = customer.getTextSearchRoles().stream().filter(r -> moduleName.equals(r.getModuleName()) && name.equals(r.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentCustomerFeatureRole(result);
@@ -153,7 +153,7 @@ public class FluentCustomer {
 		return null;
 	}
 
-	public @Nonnull FluentCustomerFeatureRole findTextSearchCustomerRole(@Nonnull String name) {
+	public @Nullable FluentCustomerFeatureRole findTextSearchCustomerRole(@Nonnull String name) {
 		CustomerFeatureRoleMetaData result = customer.getTextSearchRoles().stream().filter(r -> (r.getModuleName() == null) && name.equals(r.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentCustomerFeatureRole(result);

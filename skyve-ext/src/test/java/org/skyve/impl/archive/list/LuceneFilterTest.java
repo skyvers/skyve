@@ -56,6 +56,7 @@ import com.google.common.util.concurrent.AtomicDouble;
  * a positive score to documents otherwise we will get zero results; typically
  * I've used addNotNull().
  */
+@SuppressWarnings({"boxing", "static-method"})
 public class LuceneFilterTest {
 
     private static final String DECIMAL_FIELD = "our_decimal";

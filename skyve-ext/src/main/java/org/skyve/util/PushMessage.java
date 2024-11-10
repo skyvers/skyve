@@ -12,6 +12,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
 import jakarta.websocket.Session;
 
 public class PushMessage {
@@ -29,7 +30,7 @@ public class PushMessage {
 	/** 
 	 * For the current user
 	 */
-	public PushMessage user() {
+	public @Nonnull PushMessage user() {
 		userIds.add(CORE.getUser().getId());
 		return this;
 	}
@@ -37,32 +38,32 @@ public class PushMessage {
 	/**
 	 * For another user
 	 */
-	public PushMessage user(String userId) {
+	public @Nonnull PushMessage user(@Nonnull String userId) {
 		userIds.add(userId);
 		return this;
 	}
 	
-	public PushMessage user(User user) {
+	public @Nonnull PushMessage user(@Nonnull User user) {
 		userIds.add(user.getId());
 		return this;
 	}
 	
-	public Set<String> getUserIds() {
+	public @Nonnull Set<String> getUserIds() {
 		return userIds;
 	}
 	
-	public List<Map<String, Object>> getItems() {
+	public @Nonnull List<Map<String, Object>> getItems() {
 		return items;
 	}
 
 	/**
 	 *  Put up a growl
 	 */
-	public PushMessage growl(MessageSeverity severity, String message) {
+	public @Nonnull PushMessage growl(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		Map<String, Object> item = new TreeMap<>();
 		item.put(ITEM_TYPE, "g");
 		item.put(ITEM_SEVERITY, severity.toString());
-		item.put(ITEM_MESSAGE, Util.i18n(message));
+		item.put(ITEM_MESSAGE, Util.nullSafeI18n(message));
 		items.add(item);
 		return this;
 	}
@@ -70,11 +71,11 @@ public class PushMessage {
 	/**
 	 *  Put up a message
 	 */
-	public PushMessage message(MessageSeverity severity, String message) {
+	public @Nonnull PushMessage message(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		Map<String, Object> item = new TreeMap<>();
 		item.put(ITEM_TYPE, "m");
 		item.put(ITEM_SEVERITY, severity.toString());
-		item.put(ITEM_MESSAGE, Util.i18n(message));
+		item.put(ITEM_MESSAGE, Util.nullSafeI18n(message));
 		items.add(item);
 		return this;
 	}
@@ -82,7 +83,7 @@ public class PushMessage {
 	/**
 	 *  Rerender the current view with no client validation
 	 */
-	public PushMessage rerender() {
+	public @Nonnull PushMessage rerender() {
 		Map<String, Object> item = new TreeMap<>();
 		item.put(ITEM_TYPE, "r");
 		items.add(item);
@@ -93,7 +94,8 @@ public class PushMessage {
 	 * Execute some javascript function
 	 * @return
 	 */
-	public PushMessage execute(String javascriptWindowFunctionName, Map<String, Object> argumentJSON) {
+	public @Nonnull PushMessage execute(@Nonnull String javascriptWindowFunctionName,
+											@Nonnull Map<String, Object> argumentJSON) {
 		Map<String, Object> item = new TreeMap<>();
 		item.put(ITEM_TYPE, "j");
 		item.put(ITEM_METHOD, javascriptWindowFunctionName);

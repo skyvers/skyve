@@ -48,8 +48,10 @@ public abstract class AbstractPersistence implements Persistence {
 
 	/**
 	 * Construct a Persistence implementation based on Skyve system configuration.
+	 * @throws IllegalArgumentException When the persistence class name obtained through configuration can't be loaded.
 	 */
-	public static @Nonnull AbstractPersistence newInstance() {
+	public static @Nonnull AbstractPersistence newInstance()
+	throws IllegalArgumentException {
 		AbstractPersistence result = null;
 		
 		try {

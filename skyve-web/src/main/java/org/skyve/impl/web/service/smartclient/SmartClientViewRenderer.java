@@ -3247,10 +3247,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 
 		if (! config) {
 			toAppendTo.append("{name:'bizTagged',title:'");
-			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.tag"), false, true));
+			toAppendTo.append(OWASP.escapeJsString(Util.nullSafeI18n("ui.tag"), false, true));
 			toAppendTo.append("',type:'boolean',validOperators:['equals']},");
 			toAppendTo.append("{name:'bizFlagComment',title:'");
-			toAppendTo.append(OWASP.escapeJsString(Util.i18n("ui.flag"), false, true));
+			toAppendTo.append(OWASP.escapeJsString(Util.nullSafeI18n("ui.flag"), false, true));
 			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
 		}
 		

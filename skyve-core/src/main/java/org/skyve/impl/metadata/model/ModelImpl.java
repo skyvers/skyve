@@ -86,7 +86,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
 	@Override
-	public @Nonnull List<? extends Attribute> getAllAttributes(@Nonnull Customer customer) {
+	public @Nonnull List<? extends Attribute> getAllAttributes(Customer customer) {
 		List<Attribute> result = new ArrayList<>(attributes);
 		Extends currentInherits = inherits;
 		if (currentInherits != null) {

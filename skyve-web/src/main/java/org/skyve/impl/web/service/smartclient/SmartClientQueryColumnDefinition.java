@@ -243,7 +243,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 
 		if (required) {
         	result.append(",bizRequired:true,requiredMessage:'");
-        	result.append(OWASP.escapeJsString(Util.i18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
+        	result.append(OWASP.escapeJsString(Util.nullSafeI18n(BeanValidator.VALIDATION_REQUIRED_KEY, title))).append('\'');
 		}
 		if (! canFilter) {
 			result.append(",canFilter:false");

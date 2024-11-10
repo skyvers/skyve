@@ -100,17 +100,21 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				}
 				else {
 					if (node == null) {
-						TargetMetaData target = null;
 						try {
-							target = Binder.getMetaDataForBinding(c, am, ad, binding);
-							Reference reference = (Reference) target.getAttribute();
-							if (reference == null) {
-								throw new MetaDataException("Can't create a new Audit node as binding " + binding + 
-																" does not point to a reference.");
+							if ((am != null) && (ad != null)) {
+								TargetMetaData target = Binder.getMetaDataForBinding(c, am, ad, binding);
+								Reference reference = (Reference) target.getAttribute();
+								if (reference == null) {
+									throw new MetaDataException("Can't create a new Audit node as binding " + binding + 
+																	" does not point to a reference.");
+								}
+								Module targetModule = c.getModule(target.getDocument().getOwningModuleName());
+								Document referenceDocument = targetModule.getDocument(c, reference.getDocumentName());
+								bindingToNodes.put(binding, createNode(c, reference, referenceDocument, compareValues, true));
 							}
-							Module targetModule = c.getModule(target.getDocument().getOwningModuleName());
-							Document referenceDocument = (am == null) ? null : targetModule.getDocument(c, reference.getDocumentName());
-							bindingToNodes.put(binding, createNode(c, reference, referenceDocument, compareValues, true));
+							else {
+								bindingToNodes.put(binding, createNode(c, null, null, compareValues, true));
+							}
 						}
 						catch (@SuppressWarnings("unused") MetaDataException e) {
 							bindingToNodes.put(binding, createNode(c, null, null, compareValues, true));
@@ -197,7 +201,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 				Module nodeModule = c.getModule(nodeDocument.getOwningModuleName());
 				try {
 					TargetMetaData tmd = Binder.getMetaDataForBinding(c, nodeModule, nodeDocument, name);
-					attribute = (tmd == null) ? null : tmd.getAttribute();
+					attribute = tmd.getAttribute();
 				}
 				catch (@SuppressWarnings("unused") MetaDataException e) {
 					// nothing to do here - The document no longer has the given attribute
@@ -262,7 +266,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 					Module nodeModule = c.getModule(nodeDocument.getOwningModuleName());
 					try {
 						TargetMetaData tmd = Binder.getMetaDataForBinding(c, nodeModule, nodeDocument, propertyName);
-						attribute = (tmd == null) ? null : tmd.getAttribute();
+						attribute = tmd.getAttribute();
 					}
 					catch (@SuppressWarnings("unused") MetaDataException e) {
 						// nothing to do here - The document no longer has the given attribute

@@ -474,14 +474,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		result = true;
 	    		// no '.' or '[' or ']' allowed in JSON identifiers
 	    		sb.append('"').append(BindUtil.sanitiseBinding(binding)).append("\":\"");
-	    		String message = m.getText();
-	    		if (message == null) {
-	    			sb.append("An error has occurred");
-	    		}
-	    		else {
-		    		sb.append(OWASP.escapeJsString(m.getText()));
-	    		}
-	    		sb.append("\",");
+	    		sb.append(OWASP.escapeJsString(m.getText())).append("\",");
 	    	}
     	}
     	
@@ -605,7 +598,7 @@ public class SmartClientEditServlet extends HttpServlet {
     			Module contextModule = customer.getModule(contextBean.getBizModule());
     			Document contextDocument = contextModule.getDocument(customer, contextBean.getBizDocument());
     			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, contextModule, contextDocument, formBinding);
-        		Attribute targetRelation = (target == null) ? null : target.getAttribute();
+        		Attribute targetRelation = target.getAttribute();
 
             	// check for create privilege if the collection is persistent and the collection document is persistent
             	if ((targetRelation != null) && targetRelation.isPersistent() && // collection is persistent
@@ -822,58 +815,56 @@ public class SmartClientEditServlet extends HttpServlet {
 																				processModule, 
 																				processDocument, 
 																				parameterBinding);
-		    			if (target != null) {
-		    				Attribute attribute = target.getAttribute();
-		    				if (attribute != null) {
-			    				if ((attribute instanceof Association) && (parameterValue instanceof String)) {
-			    					// find the existing bean with retrieve
-			    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
-																											attribute.getName());
-			    					Bean parameterBean = persistence.retrieve(referenceDocument, 
-																				(String) parameterValue);
-			    					// NB parameterBean can be null if it wasn't found in the retrieve above
-			    					if (parameterBean != null) {
-				    					if (! user.canReadBean(parameterBean.getBizId(), 
-				    											parameterBean.getBizModule(), 
-				    											parameterBean.getBizDocument(), 
-				    											parameterBean.getBizCustomer(), 
-				    											parameterBean.getBizDataGroupId(),
-				    											parameterBean.getBizUserId())) {
-				    						throw new SecurityException("this data", user.getName());
-				    					}
+	    				Attribute attribute = target.getAttribute();
+	    				if (attribute != null) {
+		    				if ((attribute instanceof Association) && (parameterValue instanceof String)) {
+		    					// find the existing bean with retrieve
+		    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
+																										attribute.getName());
+		    					Bean parameterBean = persistence.retrieve(referenceDocument, 
+																			(String) parameterValue);
+		    					// NB parameterBean can be null if it wasn't found in the retrieve above
+		    					if (parameterBean != null) {
+			    					if (! user.canReadBean(parameterBean.getBizId(), 
+			    											parameterBean.getBizModule(), 
+			    											parameterBean.getBizDocument(), 
+			    											parameterBean.getBizCustomer(), 
+			    											parameterBean.getBizDataGroupId(),
+			    											parameterBean.getBizUserId())) {
+			    						throw new SecurityException("this data", user.getName());
 			    					}
-			    					parameterValue = parameterBean;
-			    				}
-			    				else {
-				    				// Determine the type and converter of the parameter
-				    				Converter<?> converter = null;
-				    	    		Class<?> type = String.class;
-
-				    	    		if (attribute instanceof Enumeration) {
-				    					Enumeration e = (Enumeration) attribute;
-				    					e = e.getTarget();
-				    					if (e.isDynamic()) {
-				    						converter = new DynamicEnumerationConverter(e);
-				    					}
-				    					else {
-				    						type = e.getEnum();
-				    					}
-									}
-									else if (attribute instanceof Field) {
-										type = attribute.getAttributeType().getImplementingType();
-									}
-
-				    	    		if (attribute instanceof ConvertibleField) {
-										ConvertibleField field = (ConvertibleField) attribute;
-										converter = field.getConverterForCustomer(customer);
-									}
-				    	    		
-				    	    		if (type != null) {
-				    	    			parameterValue = BindUtil.fromString(customer, converter, type, parameterValue.toString());
-				    	    		}
-			    				}
+		    					}
+		    					parameterValue = parameterBean;
 		    				}
-		    			}
+		    				else {
+			    				// Determine the type and converter of the parameter
+			    				Converter<?> converter = null;
+			    	    		Class<?> type = String.class;
+
+			    	    		if (attribute instanceof Enumeration) {
+			    					Enumeration e = (Enumeration) attribute;
+			    					e = e.getTarget();
+			    					if (e.isDynamic()) {
+			    						converter = new DynamicEnumerationConverter(e);
+			    					}
+			    					else {
+			    						type = e.getEnum();
+			    					}
+								}
+								else if (attribute instanceof Field) {
+									type = attribute.getAttributeType().getImplementingType();
+								}
+
+			    	    		if (attribute instanceof ConvertibleField) {
+									ConvertibleField field = (ConvertibleField) attribute;
+									converter = field.getConverterForCustomer(customer);
+								}
+			    	    		
+			    	    		if (type != null) {
+			    	    			parameterValue = BindUtil.fromString(customer, converter, type, parameterValue.toString());
+			    	    		}
+		    				}
+	    				}
 	    			}
 	    			
 	    			// For the new parameters on the target edit view, set the value of the boundTo

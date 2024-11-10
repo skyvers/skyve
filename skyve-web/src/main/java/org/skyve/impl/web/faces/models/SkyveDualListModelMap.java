@@ -90,7 +90,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 			Attribute targetAttribute = targetMetaData.getAttribute();
 			Document targetDocument = targetMetaData.getDocument();
 
-			if ((targetDocument != null) && (targetAttribute != null)) {
+			if (targetAttribute != null) {
 				// Find the owning bean (if we have a compound binding)
 				Bean owningBean = bean;
 				int lastDotIndex = binding.lastIndexOf('.');

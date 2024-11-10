@@ -492,7 +492,7 @@ public class WebUtil {
 
 						try (ResultSet rs = s.executeQuery()) {
 							if (!rs.isBeforeFirst()) {
-								return Util.i18n("exception.passwordResetLinkInvalid");
+								return Util.nullSafeI18n("exception.passwordResetLinkInvalid");
 							}
 							while (rs.next()) {
 								customerName = rs.getString(1);
@@ -515,7 +515,7 @@ public class WebUtil {
 									org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
 									errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
 								} else {
-									return Util.i18n("exception.passwordResetTokenExpired");
+									return Util.nullSafeI18n("exception.passwordResetTokenExpired");
 								}
 							}
 						}
